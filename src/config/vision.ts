@@ -185,4 +185,6 @@ export const BADDIE_BODY_TYPES = {
 
 export type BaddieBodyType = keyof typeof BADDIE_BODY_TYPES;
 
+export const HYPER_REALISTIC_OVERLAY = "hyper-detailed skin texture, visible pores, natural skin imperfections, subtle dewy skin, realistic highlights, high-fidelity textures, 8k raw photo, shot on iPhone 16 Pro Max, unedited candid aesthetic, slight digital noise, natural depth of field, authentic lighting, absolutely no airbrushing, ultra-realistic skin-to-camera distance.";
+
 
