@@ -100,10 +100,10 @@ export default function PersonaAuditPage() {
         })));
     }
 
-    const mappedUrls = new Set(assets.map(a => a.content_url));
+    const mappedUrls = new Set(assets?.map(a => a?.content_url).filter(Boolean) || []);
     const orphansList = allFiles
       .filter(f => !personaId || f.name.toLowerCase().includes(slug.toLowerCase()) || f.name.toLowerCase().includes(personaId.toLowerCase()))
-      .filter(f => !mappedUrls.has(f.url));
+      .filter(f => f?.url && !mappedUrls.has(f.url));
 
     // DEDUPLICATE URLS
     const uniqueOrphans = Array.from(new Map(orphansList.map(item => [item.url, item])).values());
@@ -443,10 +443,10 @@ export default function PersonaAuditPage() {
                     className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all ${selectedPersona?.id === p.id ? 'bg-[#00f0ff]/10 border border-[#00f0ff]/20' : 'hover:bg-white/5 border border-transparent opacity-60 hover:opacity-100'}`}
                   >
                     <div className="relative w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0 bg-zinc-900">
-                      {p.seed_image_url.toLowerCase().endsWith('.mp4') ? (
+                      {p.seed_image_url?.toLowerCase().endsWith('.mp4') ? (
                         <video src={proxyImg(p.seed_image_url)} autoPlay loop muted playsInline className="w-full h-full object-cover" />
                       ) : (
-                        <img src={proxyImg(p.seed_image_url)} className="w-full h-full object-cover" />
+                        <img src={p.seed_image_url ? proxyImg(p.seed_image_url) : ''} className="w-full h-full object-cover bg-black" />
                       )}
                       {!p.is_active && <div className="absolute inset-0 bg-black/80 flex items-center justify-center"><Eye size={10} className="text-white/40" /></div>}
                     </div>
@@ -731,10 +731,10 @@ function OrphanCard({ url, name, onMapFeed, onMapVault, onSetSeed, isSyncing, on
   return (
     <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative group rounded-[2.5rem] overflow-hidden border border-white/10 bg-zinc-950 shadow-2xl">
       <div className="aspect-[4/5] relative overflow-hidden bg-black/40 cursor-pointer" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-        {url.toLowerCase().endsWith('.mp4') ? (
+        {url?.toLowerCase().endsWith('.mp4') ? (
           <video src={proxyImg(url)} autoPlay loop muted playsInline className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
         ) : (
-          <img src={proxyImg(url)} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity group-hover:scale-110 transition-all duration-1000" />
+          <img src={url ? proxyImg(url) : ''} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity group-hover:scale-110 transition-all duration-1000 bg-black" />
         )}
 
         <AnimatePresence>
@@ -785,10 +785,10 @@ function AssetCard({ asset, isSyncing, onMove, onSetSeed, isActiveSeed, onDelete
   return (
     <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative group rounded-[2.5rem] overflow-hidden border border-white/10 bg-zinc-900 shadow-2xl">
       <div className="aspect-[4/5] relative overflow-hidden bg-black/40 cursor-pointer" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-        {asset.content_type === 'video' ? (
-          <video src={proxyImg(asset.content_url)} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+        {asset?.content_type === 'video' ? (
+          <video src={proxyImg(asset?.content_url || '')} autoPlay loop muted playsInline className="w-full h-full object-cover" />
         ) : (
-          <img src={proxyImg(asset.content_url)} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000" />
+          <img src={asset?.content_url ? proxyImg(asset.content_url) : ''} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000 bg-black" />
         )}
         
         <AnimatePresence>
