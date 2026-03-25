@@ -136,7 +136,7 @@ export async function POST(req: Request) {
 
             if (heroUrl && !vault_only) await supabase.from('posts').insert([{ persona_id: pid, content_type: 'image', content_url: heroUrl, is_vault: false, caption: '' }]);
 
-            const vaultCats = ['VAULT_BACKVIEW_OILED', 'VAULT_CLEAVAGE_LACE', 'VAULT_WET_GLISTEN'];
+            const vaultCats = ['VAULT_IPHONE_THONG_BACKSIDE', 'VAULT_CLEAVAGE_LACE', 'VAULT_WET_GLISTEN'];
             for (let i = 0; i < 3; i++) {
                 const s = VISION_LIBRARY[vaultCats[i]];
                 const isPhotoshoot = photoshoot_mode === true;
@@ -227,7 +227,7 @@ export async function POST(req: Request) {
     }]); // Fire and forget
     if (heroUrl) await supabase.from('posts').insert([{ persona_id: pid, content_type: 'image', content_url: heroUrl, is_vault: false, caption: '' }]);
 
-    const vaultCats = ['VAULT_BACKVIEW_OILED', 'VAULT_CLEAVAGE_LACE', 'VAULT_WET_GLISTEN'];
+    const vaultCats = ['VAULT_IPHONE_THONG_BACKSIDE', 'VAULT_CLEAVAGE_LACE', 'VAULT_WET_GLISTEN'];
     for (let i = 0; i < 3; i++) {
         const s = VISION_LIBRARY[vaultCats[i]];
         const isPhotoshoot = photoshoot_mode === true;

@@ -126,6 +126,14 @@ export const VISION_LIBRARY = {
     lighting: "Soft frontal lighting from the mirror's perspective, even skin tones.",
     default_clothing: "Fashion Nova 'Baddie' bodysuit, spandex material, sleek and shiny.",
     aesthetic: "Perfectly symmetrical, high-status 'ad' quality mirror shot."
+  },
+  VAULT_IPHONE_THONG_BACKSIDE: {
+    tier: 'deep_vault',
+    pose: "Standing with back to a full-length mirror, torso twisted 45 degrees, phone held for a mirror selfie capturing the full backside, hips angled to emphasize width. High-cut thong bodysuit.",
+    camera: "iPhone 15 Pro, raw sensor noise, slight mirror smudge, realistic digital grain, sharp focus on reflection.",
+    lighting: "Warm, overhead bathroom or bedroom lighting, soft downward shadows emphasizing muscle and curve definition.",
+    default_clothing: "Suggestive thong bodysuit, ribbed spandex material.",
+    aesthetic: "Raw, unedited personal mirror selfie, voyeuristic, high-status 'IG Baddie' proportions."
   }
 } as const;
 
