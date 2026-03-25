@@ -1,0 +1,33 @@
+
+> mi-amor-app@0.1.0 build
+> next build
+
+Gû¦ Next.js 16.2.0 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+G£ô Compiled successfully in 4.9s
+  Skipping validation of types
+  Finished TypeScript config validation in 13ms ...
+  Collecting page data using 10 workers ...
+  Generating static pages using 10 workers (0/8) ...
+  Generating static pages using 10 workers (2/8) 
+  Generating static pages using 10 workers (4/8) 
+  Generating static pages using 10 workers (6/8) 
+G£ô Generating static pages using 10 workers (8/8) in 1046ms
+  Finalizing page optimization ...
+
+Route (app)
+Göî Gùï /
+Gö£ Gùï /_not-found
+Gö£ Gùï /admin/profiles
+Gö£ ¦Æ /api/chat
+Gö£ ¦Æ /api/contact
+Gö£ Gùï /chat
+Göö ¦Æ /chat/[id]
+
+
+Gùï  (Static)   prerendered as static content
+¦Æ  (Dynamic)  server-rendered on demand
+
+
