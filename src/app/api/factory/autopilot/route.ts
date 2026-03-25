@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { BraveSearch } from '@/lib/tools/braveSearch';
 import { CONTENT_ROTATION } from '../studio/route';
 import { visionPolishCaption } from '@/lib/visionPolisher';
-const { BADDIE_BODY_TYPES, HYPER_REALISTIC_OVERLAY } = require('@/config/vision');
+const { BADDIE_BODY_TYPES, HYPER_REALISTIC_OVERLAY, getTechnicalOptics } = require('@/config/vision');
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -112,7 +112,8 @@ async function makeImage(persona: any, shotType: string, fashionTrend: string, i
   const seed = persona.id.split('').reduce((a: number, c: string) => a + c.charCodeAt(0), 0) * 1337;
 
   const bodyStyle = BADDIE_BODY_TYPES[persona.body_type] || BADDIE_BODY_TYPES.SLIM_THICK;
-  const promptText = `${refDNA}, ${persona.name}. ${fashion}. ${bodyStyle.prompt}. ${shotDir}. ${setting}. ${HYPER_REALISTIC_OVERLAY}. Shot on ${camera}. Photorealistic, gorgeous. --no watermark --no text`;
+  const optics = getTechnicalOptics();
+  const promptText = `${refDNA}, ${persona.name}. ${fashion}. ${bodyStyle.prompt}. ${optics}. ${shotDir}. ${setting}. ${HYPER_REALISTIC_OVERLAY}. Shot on ${camera}. Photorealistic, gorgeous. --no watermark --no text`;
   
   // 💎 NEURAL TELEMETRY: Log Autopilot Generation Strike
   supabase.from('neural_telemetry').insert([{

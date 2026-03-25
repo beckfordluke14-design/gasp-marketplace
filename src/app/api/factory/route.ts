@@ -68,7 +68,7 @@ export async function POST(req: Request) {
         manual_profile_url = '', forced_name = ''
     } = body;
 
-    const { SYNDICATE_DNA, VISION_LIBRARY, BADDIE_BODY_TYPES, HYPER_REALISTIC_OVERLAY } = require('@/config/vision');
+    const { SYNDICATE_DNA, VISION_LIBRARY, BADDIE_BODY_TYPES, HYPER_REALISTIC_OVERLAY, getTechnicalOptics } = require('@/config/vision');
 
     // 🏁 SYNDICATE MASS GENESIS
     if (vision_prompt) {
@@ -86,7 +86,8 @@ export async function POST(req: Request) {
             
             const style = VISION_LIBRARY[p.hero_visual_style] || VISION_LIBRARY.IPHONE_16_FITTING_ROOM;
             const bodyStyle = BADDIE_BODY_TYPES[p.body_type] || BADDIE_BODY_TYPES.SLIM_THICK;
-            const heroPrompt = `${finalName}, ${p.race}. ${p.vibe}. Body Type: ${bodyStyle.prompt}. Pose: ${style.pose}. Camera: ${style.camera}. Lighting: ${style.lighting}. Aesthetic: ${style.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
+            const optics = getTechnicalOptics();
+            const heroPrompt = `${finalName}, ${p.race}. ${p.vibe}. Body Type: ${bodyStyle.prompt}. ${optics}. Pose: ${style.pose}. Camera: ${style.camera}. Lighting: ${style.lighting}. Aesthetic: ${style.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
             
             let heroUrl = null;
             if (!vault_only) {
@@ -138,7 +139,8 @@ export async function POST(req: Request) {
             const vaultCats = ['VAULT_BACKVIEW_OILED', 'VAULT_CLEAVAGE_LACE', 'VAULT_WET_GLISTEN'];
             for (let i = 0; i < 3; i++) {
                 const s = VISION_LIBRARY[vaultCats[i]];
-                const vp = `${p.name}, ${p.race}. ${bodyStyle.prompt}. Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
+                const vo = getTechnicalOptics();
+                const vp = `${p.name}, ${p.race}. ${bodyStyle.prompt}. ${vo}. Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
                 let vu = null;
                 const vgr = await fetch('https://api.x.ai/v1/images/generations', {
                     method: 'POST',
@@ -173,7 +175,8 @@ export async function POST(req: Request) {
     
     const style = VISION_LIBRARY.IPHONE_16_FITTING_ROOM;
     const bodyStyle = BADDIE_BODY_TYPES[p.body_type] || BADDIE_BODY_TYPES.SLIM_THICK;
-    const heroPrompt = `${finalName}, ${p.race}. ${p.image_prompt}. Body Type: ${bodyStyle.prompt}. Pose: ${style.pose}. Camera: ${style.camera}. Lighting: ${style.lighting}. Aesthetic: ${style.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
+    const optics = getTechnicalOptics();
+    const heroPrompt = `${finalName}, ${p.race}. ${p.image_prompt}. Body Type: ${bodyStyle.prompt}. ${optics}. Pose: ${style.pose}. Camera: ${style.camera}. Lighting: ${style.lighting}. Aesthetic: ${style.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
     
     let heroUrl = manual_profile_url || null;
     if (!heroUrl) {
@@ -225,7 +228,8 @@ export async function POST(req: Request) {
     const vaultCats = ['VAULT_BACKVIEW_OILED', 'VAULT_CLEAVAGE_LACE', 'VAULT_WET_GLISTEN'];
     for (let i = 0; i < 3; i++) {
         const s = VISION_LIBRARY[vaultCats[i]];
-        const vp = `${p.name}, ${p.race}. ${bodyStyle.prompt}. Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
+        const vo = getTechnicalOptics();
+        const vp = `${p.name}, ${p.race}. ${bodyStyle.prompt}. ${vo}. Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
         let vu = null;
         const vgr = await fetch('https://api.x.ai/v1/images/generations', {
             method: 'POST',

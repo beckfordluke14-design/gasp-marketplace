@@ -187,4 +187,39 @@ export type BaddieBodyType = keyof typeof BADDIE_BODY_TYPES;
 
 export const HYPER_REALISTIC_OVERLAY = "hyper-detailed skin texture, visible pores, natural skin imperfections, subtle dewy skin, realistic highlights, high-fidelity textures, 8k raw photo, shot on iPhone 16 Pro Max, unedited candid aesthetic, slight digital noise, natural depth of field, authentic lighting, absolutely no airbrushing, ultra-realistic skin-to-camera distance.";
 
+export const TECHNICAL_OPTICS_LIBRARY = {
+  CAMERAS: [
+    "shot on Hasselblad X2D 100C, medium format detail, insane color depth",
+    "shot on Leica M11 with Noctilux 50mm f/0.95 lens, creamy bokeh, shallow depth of field, street photography aesthetic",
+    "shot on Sony A7R IV with G Master lens, sharp modern mirrorless look, high-resolution textures",
+    "shot on Canon EOS-1D X Mark III, professional high-speed action photography aesthetic",
+    "shot on iPhone 16 Pro Max, raw smartphone sensor noise, mobile candid realism"
+  ],
+  FILM_STOCKS: [
+    "shot on Kodak Portra 400, warm skin tones, golden hour film grain, nostalgic colors",
+    "shot on CineStill 800T, cinematic tungsten-balanced look, red halation around light sources, moody nighttime aesthetic",
+    "shot on Fuji Velvia 50, high color saturation, vivid landscapes, fine grain structure",
+    "shot on Ilford HP5 Plus 400, gritty high-contrast monochrome, classic black and white film photography"
+  ],
+  CONTEXTS: [
+    "Getty Images editorial photography, unposed candid news-style shot, high-status realism",
+    "Magnum Photos style, raw emotional photojournalism, masterful composition",
+    "Behance photography portfolio, curated artistic aesthetic, professional creative look",
+    "behind-the-scenes BTS photo, on set candid feel, unpolished production realism",
+    "motion picture screengrab, cinematic 2.39:1 anamorphic aspect ratio, movie frame aesthetic"
+  ],
+  PROCESSING: [
+    "ungraded, unretouched, straight from sensor, natural flaws and authentic colors",
+    "color graded in DaVinci Resolve, professional movie color science",
+    "scanned 120mm film negative, medium-format high-res scan, slight dust specs for ultimate realism",
+    "raw EXIF data appearance, unprocessed photographic proof"
+  ]
+} as const;
+
+export function getTechnicalOptics() {
+  const lib = TECHNICAL_OPTICS_LIBRARY;
+  const pick = (arr: readonly string[]) => arr[Math.floor(Math.random() * arr.length)];
+  return `${pick(lib.CAMERAS)}. ${pick(lib.FILM_STOCKS)}. ${pick(lib.CONTEXTS)}. ${pick(lib.PROCESSING)}.`;
+}
+
 
