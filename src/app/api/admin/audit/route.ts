@@ -64,6 +64,13 @@ export async function POST(req: Request) {
                 if (error) throw error;
                 return NextResponse.json({ success: true });
             }
+            case 'delete-post-hard': {
+                const { id } = payload;
+                if (!id) throw new Error('ID Missing.');
+                const { error } = await supabase.from('posts').delete().eq('id', id);
+                if (error) throw error;
+                return NextResponse.json({ success: true });
+            }
             case 'delete-post': {
                 const { id, persona_id, content_url, content_type, is_vault } = payload;
                 console.log(`[Neural Admin Sync] Feed-Masking Initiated for Node: ${id}`);

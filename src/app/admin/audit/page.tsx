@@ -38,7 +38,7 @@ interface PersonaAsset {
   content_type: string;
   caption: string;
   is_vault: boolean;
-  is_featured: boolean;
+  is_burner: boolean;
   created_at: string;
 }
 
@@ -153,6 +153,24 @@ export default function PersonaAuditPage() {
     } catch(e: any) { alert('Brain Sync Error: ' + e.message); }
     setSyncing(null);
   };
+
+  const deletePostHard = async (id: string) => {
+    if (!confirm('PERMANENT WIPE: This will remove the record and reference from the DB. Proceed?')) return;
+    setSyncing(id);
+    try {
+        const res = await fetch('/api/admin/audit', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'delete-post-hard', payload: { id } })
+        });
+        const data = await res.json();
+        if (data.success) {
+            setAssets(prev => prev.filter(a => a.id !== id));
+            alert('Node Purged.');
+        } else alert('Purge Failed: ' + data.error);
+    } catch(e: any) { alert('Neural Error: ' + e.message); }
+    setSyncing(null);
+  };
+
 
   const deletePersona = async (personaId: string) => {
     if (!confirm(`WARNING: You are about to PERMANENTLY TERMINATE persona '${personaId}'. This will delete ALL their posts, media mappings, and profile data from the database. This CANNOT be undone. Proceed?`)) return;
@@ -372,18 +390,21 @@ export default function PersonaAuditPage() {
     setSyncing(null);
   };
 
-  const setAsSeed = async (asset: PersonaAsset) => {
+  const setAsSeed = async (asset: PersonaAsset | { url: string }) => {
     if (!selectedPersona) return;
-    setSyncing(asset.id);
+    const url = 'id' in asset ? asset.content_url : asset.url;
+    const id = 'id' in asset ? asset.id : url;
+    setSyncing(id);
     try {
         const res = await fetch('/api/admin/audit', {
             method: 'POST',
-            body: JSON.stringify({ action: 'set-seed', payload: { id: selectedPersona.id, url: asset.content_url } })
+            body: JSON.stringify({ action: 'set-seed', payload: { id: selectedPersona.id, url } })
         });
         const data = await res.json();
         if (data.success) {
-            setSelectedPersona({ ...selectedPersona, seed_image_url: asset.content_url });
-            setPersonas(prev => prev.map(p => p.id === selectedPersona.id ? { ...p, seed_image_url: asset.content_url } : p));
+            setSelectedPersona({ ...selectedPersona, seed_image_url: url });
+            setPersonas(prev => prev.map(p => p.id === selectedPersona.id ? { ...p, seed_image_url: url } : p));
+            alert('Identity Seed Crowned: ' + selectedPersona.name);
         } else alert('Identity Seed Failed: ' + data.error);
     } catch(e:any){ alert('Seed Error: ' + e.message); }
     setSyncing(null);
@@ -648,7 +669,7 @@ export default function PersonaAuditPage() {
                    </div>
                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 auto-rows-max no-scrollbar pb-60">
                         {publicAssets.map(asset => (
-                          <AssetCard key={asset.id} asset={asset} isSyncing={syncing === asset.id} onMove={() => toggleVault(asset)} onSetSeed={() => setAsSeed(asset)} isActiveSeed={asset.content_url === selectedPersona.seed_image_url} onDelete={() => deleteAsset(asset)} onReassign={(newId) => reassignAsset(asset, newId)} />
+                          <AssetCard key={asset.id} asset={asset} isSyncing={syncing === asset.id} onMove={() => toggleVault(asset)} onSetSeed={() => setAsSeed(asset)} isActiveSeed={asset.content_url === (selectedPersona?.seed_image_url || '')} onDelete={() => deletePostHard(asset.id)} onReassign={(newId) => reassignAsset(asset, newId)} />
                         ))}
                         {publicAssets.length === 0 && <EmptyState label="No public feed items." color="green" icon={<Unlock size={20}/>}/>}
                    </div>
@@ -664,7 +685,7 @@ export default function PersonaAuditPage() {
                    </div>
                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 auto-rows-max no-scrollbar pb-60">
                         {vaultAssets.map(asset => (
-                          <AssetCard key={asset.id} asset={asset} isSyncing={syncing === asset.id} onMove={() => toggleVault(asset)} onSetSeed={() => setAsSeed(asset)} isActiveSeed={asset.content_url === selectedPersona.seed_image_url} onDelete={() => deleteAsset(asset)} onReassign={(newId) => reassignAsset(asset, newId)} />
+                          <AssetCard key={asset.id} asset={asset} isSyncing={syncing === asset.id} onMove={() => toggleVault(asset)} onSetSeed={() => setAsSeed(asset)} isActiveSeed={asset.content_url === (selectedPersona?.seed_image_url || '')} onDelete={() => deletePostHard(asset.id)} onReassign={(newId) => reassignAsset(asset, newId)} />
                         ))}
                         {vaultAssets.length === 0 && <EmptyState label="Vault is empty." color="pink" icon={<Lock size={20}/>}/>}
                    </div>
@@ -782,33 +803,44 @@ function AssetCard({ asset, isSyncing, onMove, onSetSeed, isActiveSeed, onDelete
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showReassign, setShowReassign] = useState(false);
 
+  const isVPS = asset.content_url.includes('asset.gasp.fun');
+
   return (
-    <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative group rounded-[2.5rem] overflow-hidden border border-white/10 bg-zinc-900 shadow-2xl">
+    <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} 
+      className={`relative group rounded-[2.5rem] overflow-hidden border ${isActiveSeed ? 'border-[#00f0ff] ring-2 ring-[#00f0ff]/40 shadow-[0_0_40px_rgba(0,240,255,0.2)]' : 'border-white/10'} bg-zinc-900 shadow-2xl transition-all duration-500`}
+    >
       <div className="aspect-[4/5] relative overflow-hidden bg-black/40 cursor-pointer" onClick={() => setIsMenuOpen(!isMenuOpen)}>
         {asset?.content_type === 'video' ? (
           <video src={proxyImg(asset?.content_url || '')} autoPlay loop muted playsInline className="w-full h-full object-cover" />
         ) : (
           <img src={asset?.content_url ? proxyImg(asset.content_url) : ''} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000 bg-black" />
         )}
-        
+
+        {/* CROWN STRIKE (Avatar Status) */}
+        {isActiveSeed && (
+            <div className="absolute top-4 right-4 p-2 bg-[#00f0ff] rounded-full text-black shadow-xl animate-pulse z-40">
+                <Star size={12} fill="currentColor" />
+            </div>
+        )}
+
         <AnimatePresence>
           {(isMenuOpen || true) && (
             <div className={`absolute inset-0 bg-black/80 backdrop-blur-xl p-6 flex flex-col justify-center gap-3 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 lg:group-hover:opacity-100'}`}>
+               
+               <button onClick={(e) => { e.stopPropagation(); onSetSeed(); setIsMenuOpen(false); }} className={`w-full py-4 ${isActiveSeed ? 'bg-[#00f0ff] text-black' : 'bg-white/5 text-white'} rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest hover:bg-[#00f0ff] hover:text-black transition-all flex items-center justify-center gap-2`}>
+                   <Star size={14} fill={isActiveSeed ? "currentColor" : "none"} />
+                   {isActiveSeed ? 'CURRENT AVATAR' : 'SET AS AVATAR'}
+               </button>
+
                <div className="grid grid-cols-2 gap-3">
-                  <button onClick={(e) => { e.stopPropagation(); onMove(); setIsMenuOpen(false); }} className={`py-4 ${asset.is_vault ? 'bg-white text-black' : 'bg-[#ff00ff] text-white'} rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all`}>
-                    {asset.is_vault ? 'Promote' : 'Lock Vault'}
+                  <button onClick={(e) => { e.stopPropagation(); onMove(); setIsMenuOpen(false); }} className={`py-4 ${asset.is_vault ? 'bg-white text-black' : 'bg-[#ff00ff] text-white'} rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg`}>
+                    {asset.is_vault ? 'PROMOTE' : 'LOCK VAULT'}
                   </button>
                   <button onClick={(e) => { e.stopPropagation(); onDelete(); setIsMenuOpen(false); }} className="py-4 bg-red-500/20 text-red-500 border border-red-500/20 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">
-                    Burn
+                    BURN NODE
                   </button>
                </div>
                
-               {!isActiveSeed && (
-                 <button onClick={(e) => { e.stopPropagation(); onSetSeed(); setIsMenuOpen(false); }} className="w-full py-4 bg-[#00f0ff] text-black rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 transition-all">
-                    Set as Seed Image
-                 </button>
-               )}
-
                <button onClick={(e) => { e.stopPropagation(); setShowReassign(true); }} className="w-full py-3 bg-white/5 border border-white/10 text-white/40 rounded-xl text-[8px] font-black uppercase tracking-[0.2em] hover:text-white transition-all">
                   Neural Transfer (ID Split)
                </button>
@@ -820,7 +852,7 @@ function AssetCard({ asset, isSyncing, onMove, onSetSeed, isActiveSeed, onDelete
           <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl z-[60] p-6 flex flex-col" onClick={e => e.stopPropagation()}>
              <div className="flex items-center justify-between mb-6">
                 <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">Neural Transfer</span>
-                <button onClick={() => setShowReassign(false)} className="p-2 bg-white/5 rounded-full"><X size={16}/></button>
+                <button onClick={() => setShowReassign(false)} className="p-2 bg-white/5 rounded-full text-white/40 hover:text-white"><X size={16}/></button>
              </div>
              <p className="text-[8px] text-white/40 uppercase mb-4 leading-relaxed tracking-widest">Enter Target Persona ID Slug:</p>
              <input 
@@ -833,7 +865,7 @@ function AssetCard({ asset, isSyncing, onMove, onSetSeed, isActiveSeed, onDelete
                  }
                }}
                placeholder="amara-goddess"
-               className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold outline-none focus:border-[#00f0ff] uppercase"
+               className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold outline-none focus:border-[#00f0ff] uppercase text-white"
              />
              <p className="mt-auto text-[7px] text-white/20 uppercase tracking-[0.3em] text-center mb-4 italic">Press Enter to Migrate Asset</p>
           </div>
@@ -841,13 +873,14 @@ function AssetCard({ asset, isSyncing, onMove, onSetSeed, isActiveSeed, onDelete
 
         {/* STATUS STAMPS */}
         <div className="absolute top-4 left-4 flex flex-col gap-1.5 pointer-events-none">
-           <div className={`px-2.5 py-1 rounded-full ${asset.is_vault ? 'bg-[#ff00ff]' : 'bg-green-500'} text-black text-[7px] font-black uppercase tracking-widest shadow-lg`}>
-              {asset.is_vault ? 'VAULT' : 'FEED'}
+           <div className={`px-3 py-1 rounded-full ${isVPS ? 'bg-[#00f0ff] text-black shadow-[0_0_20px_rgba(0,240,255,0.4)]' : 'bg-white/10 text-white opacity-40'} text-[7px] font-black uppercase tracking-widest border border-white/10`}>
+              {isVPS ? '⚡ VPS EDGE' : '☁️ CLOUD'}
            </div>
-           {isActiveSeed && (
-             <div className="px-2.5 py-1 rounded-full bg-[#ffea00] text-black text-[7px] font-black uppercase tracking-widest shadow-lg flex items-center gap-1">
-                <Star size={6} fill="currentColor" /> SEED
-             </div>
+           <div className={`px-3 py-1 rounded-full ${asset.is_vault ? 'bg-[#ff00ff]' : 'bg-green-500'} text-black text-[7px] font-black uppercase tracking-widest shadow-lg`}>
+              {asset.is_vault ? 'VAULT' : 'PUBLIC'}
+           </div>
+           {asset.is_burner && (
+             <div className="px-3 py-1 rounded-full bg-[#ffea00] text-black text-[7px] font-black uppercase tracking-widest shadow-lg">HERO</div>
            )}
         </div>
       </div>
@@ -855,9 +888,9 @@ function AssetCard({ asset, isSyncing, onMove, onSetSeed, isActiveSeed, onDelete
       <div className="p-5 bg-zinc-900 border-t border-white/5">
         <div className="flex items-center gap-2 opacity-20 mb-2">
            {asset.content_type === 'video' ? <Video size={12} /> : <ImageIcon size={12} />}
-           <span className="text-[8px] font-black uppercase tracking-[0.2em]">{new Date(asset.created_at).toLocaleDateString()}</span>
+           <span className="text-[8px] font-black uppercase tracking-[0.2em]">{new Date(asset.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date(asset.created_at).toLocaleDateString()}</span>
         </div>
-        <p className="text-[11px] text-white/60 lowercase italic truncate leading-none">{asset.caption || '...'}</p>
+        <p className="text-[11px] text-white/60 lowercase italic truncate leading-none">{asset.caption || 'No description...'}</p>
       </div>
 
       {isSyncing && (
