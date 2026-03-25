@@ -134,6 +134,22 @@ export const VISION_LIBRARY = {
     lighting: "Warm, overhead bathroom or bedroom lighting, soft downward shadows emphasizing muscle and curve definition.",
     default_clothing: "Suggestive thong bodysuit, ribbed spandex material.",
     aesthetic: "Raw, unedited personal mirror selfie, voyeuristic, high-status 'IG Baddie' proportions."
+  },
+  VAULT_HOT_FRONTAL_INTIMATE: {
+    tier: 'deep_vault',
+    pose: "Seated on the edge of a bed or leaning against a vanity, legs slightly apart, hands tracing the high-cut hip line of a thong bodysuit. Direct, soul-piercing gaze.",
+    camera: "iPhone 16 Pro, raw sensor noise, shallow depth of field, sharp focus on the midsection and face.",
+    lighting: "Soft, warm bedroom lighting, amber shadows cascading over the curves of the stomach and hips.",
+    default_clothing: "Intricate lace thong bodysuit or sheer spandex set.",
+    aesthetic: "Intimate, high-status 'hot' content, raw and suggestive yet creatively composed."
+  },
+  VAULT_SIDE_ANATOMIC_CURVE: {
+    tier: 'deep_vault',
+    pose: "Standing profile view, weight shifted to one leg to exaggerate the S-curve, hips pushed back, chest forward, one hand on the thigh or hip. Capturing the full side silhouette.",
+    camera: "Leica M11 style, high contrast, sharp rendering of the hip-to-waist flare, cinematic grain.",
+    lighting: "Strong side-lighting or rim lighting to carve out the physical silhouette and proportion flare.",
+    default_clothing: "Ultra-tight spandex or bodycon fabrics emphasizing the side-profile curve.",
+    aesthetic: "Anatomically focused, showcasing the 'Extreme Pear' or 'Slim Thick' flare creatively."
   }
 } as const;
 
