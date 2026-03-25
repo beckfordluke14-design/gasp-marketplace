@@ -222,4 +222,59 @@ export function getTechnicalOptics() {
   return `${pick(lib.CAMERAS)}. ${pick(lib.FILM_STOCKS)}. ${pick(lib.CONTEXTS)}. ${pick(lib.PROCESSING)}.`;
 }
 
+export const PHOTOSHOOT_LIBRARY = {
+  IJEWERE: {
+    label: "The Ijewere Edit (Painterly & Composed)",
+    prompt: "shot on Hasselblad H6D-100c medium format digital camera, 80mm lens. soft diffused natural light mixed with subtle studio fill, painting-like luminescence across the skin. beautifully composed and dignified, showcasing unique textures and non-traditional beauty. Rich earth tones, soft elegant contrast, deep natural vibrancy."
+  },
+  MITCHELL: {
+    label: "The Mitchell Edit (Candid & Elevated Documentary)",
+    prompt: "shot on 35mm film using a Mamiya 7 II with Kodak Portra 400 film. gorgeous golden hour sunlight, soft natural outdoor light, gentle warm shadows. relaxed empowering and deeply human composition. nostalgic warm film tones, authentic organic film grain, slight halation around highlights, rich true-to-life skin tones."
+  },
+  ADDY: {
+    label: "The Addy Edit (Striking & Intimate)",
+    prompt: "shot on Pentax 67 medium format film camera, 105mm f/2.4 lens. striking and direct studio strobes, sharp shadows carving out features. empowering portraiture, soul-piercing eye contact. high dynamic range, deep rich blacks, vibrant perfectly calibrated skin tones."
+  },
+  HORSEMAN: {
+    label: "The Horseman Edit (Tender & Voyeuristic)",
+    prompt: "premium 35mm point-and-shoot, Leica M6 with Kodak Gold 200 film. intimate available light, sun-drenched bedroom windows, soft glow of bedside lamp. voyeuristic but tender composition, capturing 'in-between' human moments, intimate and personal. vibrant but natural tones, soft analog warmth, slight edge vignette."
+  },
+  LEMONS: {
+    label: "The Lemons Edit (Community & Bold Identity)",
+    prompt: "Canon EOS R5 with RF 85mm f/1.2 lens, hyper-crisp modern portraiture. soft flattering studio glow mixed with sharp accents catching shimmering details (lip gloss, jewelry). proud defiant stances. dreamy pastel hues mixed with deep grounding tones, flawless editorial polish."
+  },
+  COHEN: {
+    label: "The Cohen Edit (Cinematic Surrealism)",
+    prompt: "Arriflex 35mm motion picture camera with vintage Panavision lenses. hyper-glamorous artificial cinematic continuous lighting, dramatic neon rims, stylized Hollywood studio light. meticulously staged tableaux, center-weighted, uncanny and commanding. technicolor saturation, rich cinematic contrast, velvety shadows, nostalgic retro-film aesthetic."
+  },
+  HAWKESWORTH: {
+    label: "The Hawkesworth Edit (Poetic & Delicate)",
+    prompt: "medium format film shot on Pentax 67. soft overcast daylight, naturalistic flat and forgiving lighting, quiet observation. honest delicate and distinctly human composition, subjects in transit or vast landscapes. muted delicate tones, soft pastels, organic film grain, unretouched raw feel."
+  },
+  COMTE: {
+    label: "The Comte Edit (Razor-Sharp & Dimensional)",
+    prompt: "Phase One XF IQ4 150MP, hard direct off-axis strobe flash, synthetic lighting, razor-sharp deep black drop-shadows. low angle dynamic energetic movement, off-kilter framing, chaotic aggressive fashion energy. deep dimensional contrast, boldly toned highly saturated primary colors, high-gloss '90s editorial grade."
+  },
+  BRIDGLAND: {
+    label: "The Bridgland Edit (Hypnotic & '90s Iconography)",
+    prompt: "35mm film with wide-angle 24mm lens, energetic distortion. overpowering straight-on flash, vivid colored gels. surrealist off-beat in-your-face composition, bold poses, '90s streetwear iconography. hyper-vivid balshie color palette, slightly cartoonish but edgy."
+  },
+  OSBORNE: {
+    label: "The Osborne Edit (Lo-Fi & Glitch)",
+    prompt: "1999 Sony Handycam MiniDV tape transfer style, disposable drugstore camera aesthetic. harsh on-camera flash fighting natural ambient low-light, blown-out foregrounds. voyeuristic candid and kinetic, imperfect DIY spontaneous framing. lo-fi glitch aesthetic, heavy digital noise, light leaks, chromatic aberration, washed-out color bleed."
+  },
+  PAVAROTTI: {
+    label: "The Pavarotti Edit (Sumptuous & Regal)",
+    prompt: "Mamiya RZ67 medium format camera on Kodak Portra 400. sculptural masterful studio lighting painting with shadows. striking bold and regal composition, majestic posing. sumptuous painterly color grading, ultra-rich luminous skin tones, hyper-pigmented clothing, perfect shadow detail."
+  }
+} as const;
+
+export type PhotoshootEdit = keyof typeof PHOTOSHOOT_LIBRARY;
+
+export function getRandomPhotoshootEdit() {
+  const lib = PHOTOSHOOT_LIBRARY;
+  const keys = Object.keys(lib) as PhotoshootEdit[];
+  return lib[keys[Math.floor(Math.random() * keys.length)]].prompt;
+}
+
 
