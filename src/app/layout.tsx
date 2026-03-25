@@ -39,9 +39,9 @@ export const metadata: Metadata = {
     siteName: "GASP",
     images: [
       {
-        url: `${SITE_URL}/og-image.jpg`,
-        width: 1200,
-        height: 630,
+        url: `${SITE_URL}/og-image.png`,
+        width: 1024,
+        height: 1024,
         alt: "GASP — AI Creator Platform",
       }
     ],
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "GASP | AI Creator Companions",
     description: "The most immersive AI creator platform. Unlock elite AI personas today.",
-    images: [`${SITE_URL}/og-image.jpg`],
+    images: [`${SITE_URL}/og-image.png`],
     creator: "@gaspfun",
   },
   appleWebApp: {
