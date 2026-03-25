@@ -160,4 +160,29 @@ export const SYNDICATE_DNA = {
 export type VisualCategory = keyof typeof VISION_LIBRARY;
 export type DnaTemplate = keyof typeof SYNDICATE_DNA;
 
+export const BADDIE_BODY_TYPES = {
+  EXTREME_PEAR: {
+    label: "Extreme Pear / Bottom-Heavy",
+    description: "Extreme hip-to-waist ratio. The upper body (shoulders, bust, and waist) is significantly narrower than the lower body. High concentration in hips and glutes.",
+    prompt: "extreme pear shape, highly bottom-heavy figure, slender upper body, very narrow snatched waist, flat stomach, very wide hips, exaggerated hip-to-waist ratio, extremely thick thighs, prominent curves, heavy lower half."
+  },
+  SLIM_THICK: {
+    label: "Slim Thick / Athletic Curve",
+    description: "Slender, low-body-fat upper body and midsection, paired with highly prominent glutes and athletic thick thighs.",
+    prompt: "slim thick body type, fitness model curves, very slim waist, toned core, petite upper body, prominent glutes, athletic and thick thighs, focused lower body curves, muscular legs."
+  },
+  VOLUPTUOUS_HOURGLASS: {
+    label: "Voluptuous Hourglass",
+    description: "Substantial volume in both upper and lower body, balanced by a cinched waistline. Pronounced S-curve.",
+    prompt: "voluptuous hourglass figure, intensely curvy, full bust, broad shoulders, defined cinched waist, wide hips, thick lower body, lush curves, dramatic S-curve silhouette."
+  },
+  FULL_FIGURED_CURVY: {
+    label: "Full-Figured Curvy",
+    description: "Plus-size hourglass variation. Broad hips and bust with softer, proportional build across the entire frame.",
+    prompt: "full-figured beautiful woman, plus-size curvy body type, soft hourglass proportions, broad hips, full bust, soft curves, heavy-set but proportional build, curvy midsection."
+  }
+} as const;
+
+export type BaddieBodyType = keyof typeof BADDIE_BODY_TYPES;
+
 

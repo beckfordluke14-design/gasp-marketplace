@@ -68,13 +68,13 @@ export async function POST(req: Request) {
         manual_profile_url = '', forced_name = ''
     } = body;
 
-    const { SYNDICATE_DNA, VISION_LIBRARY } = require('@/config/vision');
+    const { SYNDICATE_DNA, VISION_LIBRARY, BADDIE_BODY_TYPES } = require('@/config/vision');
 
     // 🏁 SYNDICATE MASS GENESIS
     if (vision_prompt) {
         const batchTarget = Math.min(Math.max(1, batch_size), 20);
         const personas = await brainstorm(
-            `GASP Syndicate Architect. VISION: ${vision_prompt}. MISSION: Create ${batchTarget} personas with realistic occupations. Respond in JSON array.`,
+            `GASP Syndicate Architect. VISION: ${vision_prompt}. MISSION: Create ${batchTarget} personas with realistic occupations. Choose one body_type from: ${Object.keys(BADDIE_BODY_TYPES).join(', ')}. Respond in JSON array.`,
             `Create ${batchTarget} unique AI personas based on: ${vision_prompt}. Include name, age, city, country, race, occupation, hair, body_type, system_prompt, hero_visual_style.`
         );
         
@@ -85,7 +85,8 @@ export async function POST(req: Request) {
             const pid = finalName.toLowerCase().replace(/\s+/g, '-') + '-' + Math.floor(Math.random() * 9000 + 1000);
             
             const style = VISION_LIBRARY[p.hero_visual_style] || VISION_LIBRARY.IPHONE_16_FITTING_ROOM;
-            const heroPrompt = `${finalName}, ${p.race}. ${p.vibe}. Pose: ${style.pose}. Camera: ${style.camera}. Lighting: ${style.lighting}. Aesthetic: ${style.aesthetic}. Instagram Vertical Portrait, hyper realistic, super realism, prominent suggestive features. 8k Raw photo.`;
+            const bodyStyle = BADDIE_BODY_TYPES[p.body_type] || BADDIE_BODY_TYPES.SLIM_THICK;
+            const heroPrompt = `${finalName}, ${p.race}. ${p.vibe}. Body Type: ${bodyStyle.prompt}. Pose: ${style.pose}. Camera: ${style.camera}. Lighting: ${style.lighting}. Aesthetic: ${style.aesthetic}. Instagram Vertical Portrait, hyper realistic, super realism, prominent suggestive features. 8k Raw photo.`;
             
             let heroUrl = null;
             if (!vault_only) {
@@ -112,18 +113,32 @@ export async function POST(req: Request) {
                 city: p.city || 'Miami', 
                 country: p.country || 'USA', 
                 race: p.race || 'Latina',
+                body_type: p.body_type || 'SLIM_THICK',
                 system_prompt: `${p.system_prompt || 'Syndicate node.'} Occupation: ${p.occupation || 'Elite'}.`,
                 seed_image_url: heroUrl, 
                 is_active: true
             }], { onConflict: 'id' });
             if (pErr) throw pErr;
 
+            // 💎 NEURAL TELEMETRY: Log Birth Data
+            supabase.from('neural_telemetry').insert([{
+                event_type: 'neural_birth',
+                persona_id: pid,
+                user_id: 'factory_mass_gen',
+                vibe_at_time: p.vibe,
+                metadata: {
+                    body_type: p.body_type || 'SLIM_THICK',
+                    body_detail: bodyStyle.prompt,
+                    prompt: heroPrompt
+                }
+            }]); // Fire and forget
+
             if (heroUrl && !vault_only) await supabase.from('posts').insert([{ persona_id: pid, content_type: 'image', content_url: heroUrl, is_vault: false, caption: '' }]);
 
             const vaultCats = ['VAULT_BACKVIEW_OILED', 'VAULT_CLEAVAGE_LACE', 'VAULT_WET_GLISTEN'];
             for (let i = 0; i < 3; i++) {
                 const s = VISION_LIBRARY[vaultCats[i]];
-                const vp = `${p.name}, ${p.race}. Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. Instagram Vertical Portrait, hyper realistic, super realism, prominent suggestive features. 8k Raw photo.`;
+                const vp = `${p.name}, ${p.race}. ${bodyStyle.prompt}. Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. Instagram Vertical Portrait, hyper realistic, super realism, prominent suggestive features. 8k Raw photo.`;
                 let vu = null;
                 const vgr = await fetch('https://api.x.ai/v1/images/generations', {
                     method: 'POST',
@@ -148,7 +163,7 @@ export async function POST(req: Request) {
 
     // 🏁 SINGLE BIRTH PRECISION
     const p = await brainstorm(
-        `Create a persona. Vibe: ${vibe_hint}. Name: ${forced_name || 'Random'}. Return JSON: { name, age, city, country, race, occupation, system_prompt, intro_text, image_prompt }`,
+        `Create a persona. Vibe: ${vibe_hint}. Name: ${forced_name || 'Random'}. Body Types: ${Object.keys(BADDIE_BODY_TYPES).join(', ')}. Return JSON: { name, age, city, country, race, occupation, body_type, system_prompt, intro_text, image_prompt }`,
         `Create one AI persona identity for: ${vibe_hint}`
     );
     
@@ -157,7 +172,8 @@ export async function POST(req: Request) {
     const pid = finalName.toLowerCase().replace(/\s+/g, '-') + '-' + Math.floor(Math.random() * 9000 + 1000);
     
     const style = VISION_LIBRARY.IPHONE_16_FITTING_ROOM;
-    const heroPrompt = `${finalName}, ${p.race}. ${p.image_prompt}. Pose: ${style.pose}. Camera: ${style.camera}. Lighting: ${style.lighting}. Aesthetic: ${style.aesthetic}. Instagram Vertical Portrait, hyper realistic, super realism, prominent suggestive features. 8k Raw photo.`;
+    const bodyStyle = BADDIE_BODY_TYPES[p.body_type] || BADDIE_BODY_TYPES.SLIM_THICK;
+    const heroPrompt = `${finalName}, ${p.race}. ${p.image_prompt}. Body Type: ${bodyStyle.prompt}. Pose: ${style.pose}. Camera: ${style.camera}. Lighting: ${style.lighting}. Aesthetic: ${style.aesthetic}. Instagram Vertical Portrait, hyper realistic, super realism, prominent suggestive features. 8k Raw photo.`;
     
     let heroUrl = manual_profile_url || null;
     if (!heroUrl) {
@@ -185,17 +201,31 @@ export async function POST(req: Request) {
         city: p.city || 'Miami', 
         country: p.country || 'USA', 
         race: p.race || 'Latina',
+        body_type: p.body_type || 'SLIM_THICK',
         system_prompt: `${p.system_prompt || 'Syndicate node active.'} Occupation: ${p.occupation || 'Elite'}.`, 
         seed_image_url: heroUrl, 
         is_active: true
     }], { onConflict: 'id' });
     if (singleErr) throw singleErr;
+
+    // 💎 NEURAL TELEMETRY: Log Single Birth
+    supabase.from('neural_telemetry').insert([{
+        event_type: 'neural_birth_individual',
+        persona_id: pid,
+        user_id: 'factory_single_gen',
+        vibe_at_time: vibe_hint,
+        metadata: {
+            body_type: p.body_type || 'SLIM_THICK',
+            body_detail: bodyStyle.prompt,
+            prompt: heroPrompt
+        }
+    }]); // Fire and forget
     if (heroUrl) await supabase.from('posts').insert([{ persona_id: pid, content_type: 'image', content_url: heroUrl, is_vault: false, caption: '' }]);
 
     const vaultCats = ['VAULT_BACKVIEW_OILED', 'VAULT_CLEAVAGE_LACE', 'VAULT_WET_GLISTEN'];
     for (let i = 0; i < 3; i++) {
         const s = VISION_LIBRARY[vaultCats[i]];
-        const vp = `${p.name}, ${p.race}. Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. Instagram Vertical Portrait, hyper realistic, super realism, prominent suggestive features. 8k Raw photo.`;
+        const vp = `${p.name}, ${p.race}. ${bodyStyle.prompt}. Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. Instagram Vertical Portrait, hyper realistic, super realism, prominent suggestive features. 8k Raw photo.`;
         let vu = null;
         const vgr = await fetch('https://api.x.ai/v1/images/generations', {
             method: 'POST',

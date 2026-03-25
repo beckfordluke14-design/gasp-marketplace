@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { BraveSearch } from '@/lib/tools/braveSearch';
 import { CONTENT_ROTATION } from '../studio/route';
 import { visionPolishCaption } from '@/lib/visionPolisher';
+const { BADDIE_BODY_TYPES } = require('@/config/vision');
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -110,7 +111,23 @@ async function makeImage(persona: any, shotType: string, fashionTrend: string, i
   const camera = cameras[Math.floor(Math.random() * cameras.length)];
   const seed = persona.id.split('').reduce((a: number, c: string) => a + c.charCodeAt(0), 0) * 1337;
 
-  const promptText = `${refDNA}, ${persona.name}. ${fashion}. ${shotDir}. ${setting}. Shot on ${camera}. Photorealistic, gorgeous. --no watermark --no text`;
+  const bodyStyle = BADDIE_BODY_TYPES[persona.body_type] || BADDIE_BODY_TYPES.SLIM_THICK;
+  const promptText = `${refDNA}, ${persona.name}. ${fashion}. ${bodyStyle.prompt}. ${shotDir}. ${setting}. Shot on ${camera}. Photorealistic, gorgeous. --no watermark --no text`;
+  
+  // 💎 NEURAL TELEMETRY: Log Autopilot Generation Strike
+  supabase.from('neural_telemetry').insert([{
+    event_type: 'autopilot_gen',
+    persona_id: persona.id,
+    user_id: 'autopilot_engine',
+    vibe_at_time: persona.vibe || 'social',
+    metadata: {
+        body_type: persona.body_type || 'SLIM_THICK',
+        body_detail: bodyStyle.prompt,
+        prompt: promptText,
+        is_vault: isVault
+    }
+  }]);
+
   const encoded = encodeURIComponent(promptText);
   const url = `https://image.pollinations.ai/prompt/${encoded}?width=1080&height=1920&nologo=true&seed=${seed}&model=flux`;
 
