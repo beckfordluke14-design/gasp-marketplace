@@ -1,0 +1,25 @@
+/**
+ * 🏁 NEURAL STABILIZATION (v1.0) - SITE RESTORATION
+ * 
+ * Reverting to direct, proven routing for established models
+ * while the Proxy-Bridge is calibrated.
+ */
+export function proxyImg(url: string | null | undefined): string {
+  if (!url) return '/gasp_white.png';
+  
+  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vvcwjlcequbkhlpmwzlc.supabase.co';
+  
+  let finalUrl = url.trim();
+
+  // 1. Full URLs: Return as is (Direct Loading)
+  if (finalUrl.startsWith('http')) return finalUrl;
+
+  // 2. Relative Paths (Legacy Hub Sync)
+  if (!finalUrl.startsWith('/')) {
+      // Direct load from working public bucket
+      return `${baseUrl}/storage/v1/object/public/posts/${finalUrl}`;
+  }
+
+  return finalUrl;
+}
+

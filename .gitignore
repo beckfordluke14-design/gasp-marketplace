@@ -1,0 +1,31 @@
+# Ignore all helper scripts to prevent Secret Scanning blocks
+/*.js
+/*.py
+/*.ps1
+/scripts/*.js
+/scripts/*.py
+/tmp
+/brain
+/assets
+node_modules
+.next
+.env*
+*.png
+*.jpg
+*.webp
+*.mp4
+*.zip
+
+# Allow only the essential app source code
+!/src/**
+!/public/**
+!package.json
+!package-lock.json
+!next.config.ts
+!tsconfig.json
+!postcss.config.mjs
+!tailwind.config.ts
+!railway.json
+!.gitignore
+!.railwayignore
+

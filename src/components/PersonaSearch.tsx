@@ -1,0 +1,127 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { Search, X, Zap, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import PersonaAvatar from './persona/PersonaAvatar';
+import { createClient } from '@supabase/supabase-js';
+import { initialPersonas, proxyImg } from '@/lib/profiles';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+export default function PersonaSearch() {
+  const router = useRouter();
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<any[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [allPersonas, setAllPersonas] = useState<any[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    async function fetchAll() {
+      const { data: dbPersonas } = await supabase.from('personas').select('*').eq('is_active', true);
+      const combined = [
+        ...(dbPersonas || []).map(p => ({ id: p.id, name: p.name, city: p.city, race: p.race, image: p.seed_image_url || '/v1.png' })),
+        ...initialPersonas.map(p => ({ id: p.id, name: p.name, city: p.city, race: (p as any).race, image: (p as any).image || '/v1.png' }))
+      ];
+      // Unique by ID
+      const unique = combined.filter((p, i, self) => i === self.findIndex(t => t.id === p.id));
+      setAllPersonas(unique);
+    }
+    fetchAll();
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (query.length > 0) {
+      const filtered = allPersonas.filter(p => 
+        p.name.toLowerCase().includes(query.toLowerCase()) || 
+        (p.city && p.city.toLowerCase().includes(query.toLowerCase())) ||
+        (p.race && p.race.toLowerCase().includes(query.toLowerCase()))
+      ).slice(0, 5);
+      setResults(filtered);
+      setIsOpen(true);
+    } else {
+      setResults([]);
+      setIsOpen(false);
+    }
+  }, [query, allPersonas]);
+
+  const handleSelect = (pId: string) => {
+    setQuery('');
+    setIsOpen(false);
+    router.push(`/?persona=${pId}`);
+  };
+
+  return (
+    <div ref={searchRef} className="relative w-full max-w-full md:max-w-2xl mx-auto">
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-3 md:left-4 flex items-center pointer-events-none">
+          <Search size={14} className="text-white/20 group-focus-within:text-[#ff00ff] transition-colors" />
+        </div>
+        <input 
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="SEARCH..."
+          className="w-full h-9 md:h-11 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl pl-10 md:pl-12 pr-4 text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] text-white placeholder:text-white/20 focus:outline-none focus:border-[#ff00ff]/40 focus:bg-white/10 transition-all text-center md:text-left"
+        />
+        {query && (
+          <button 
+            onClick={() => setQuery('')}
+            className="absolute inset-y-0 right-4 flex items-center text-white/20 hover:text-white"
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {isOpen && results.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute top-full left-0 right-0 mt-2 bg-black/95 backdrop-blur-3xl border border-white/10 rounded-[2rem] overflow-hidden z-[500] shadow-[0_20px_60px_rgba(0,0,0,0.8)]"
+          >
+            <div className="p-2 space-y-1">
+              {results.map((p) => (
+                <button 
+                  key={p.id}
+                  onClick={() => handleSelect(p.id)}
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-all group text-left"
+                >
+                  <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 shrink-0 relative">
+                    <PersonaAvatar src={p.image} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-white group-hover:text-[#ff00ff] transition-colors">{p.name}</h4>
+                    <p className="text-[8px] font-bold uppercase text-white/30 tracking-tighter">{p.city}</p>
+                  </div>
+                  <ChevronRight size={14} className="text-white/20 group-hover:text-[#ff00ff] group-hover:translate-x-1 transition-all" />
+                </button>
+              ))}
+            </div>
+            <div className="bg-[#ff00ff]/5 p-3 border-t border-white/5 flex items-center justify-between">
+                <span className="text-[7px] font-black uppercase text-[#ff00ff] tracking-widest">Found in the Cloud</span>
+                <Zap size={10} className="text-[#ff00ff] animate-pulse" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+

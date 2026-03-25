@@ -1,0 +1,38 @@
+/**
+ * 🏁 NEURAL IMAGE BRIDGE (v5.1) - THE HARD-PROXY
+ * 
+ * Bypasses ALL browser-level ORB, CORS, and 404 syndromes by routing every asset
+ * through a secure, server-side fetch bridge.
+ */
+export function proxyImg(url: string | null | undefined): string {
+  if (!url) return '/gasp_white.png';
+  
+  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vvcwjlcequbkhlpmwzlc.supabase.co';
+  
+  let finalUrl = url.trim();
+
+  // 1. If it's already a local or proxy URL, return as is
+  if (finalUrl.startsWith('/api/proxy-img')) return finalUrl;
+  if (finalUrl.startsWith('/') && !finalUrl.includes('.supabase.co')) {
+      // It's a relative path in our own project root (like /v1.png)
+      return finalUrl;
+  }
+
+  // 2. Normalize full Supabase URLs first
+  if (finalUrl.includes('.supabase.co/storage/v1/object/public/')) {
+      const parts = finalUrl.split('/public/');
+      if (parts.length === 2) {
+          finalUrl = `${baseUrl}/storage/v1/object/public/${parts[1]}`;
+      }
+  }
+
+  // 3. Handle Relative Supabase paths (e.g. personas/kira/hero.jpg)
+  if (!finalUrl.startsWith('http')) {
+      // Precompute the proven bucket path
+      finalUrl = `${baseUrl}/storage/v1/object/public/posts/${finalUrl}`;
+  }
+
+  // 4. Wrap EVERYTHING in our Hardened Proxy Bridge
+  return `/api/proxy-img?url=${encodeURIComponent(finalUrl)}`;
+}
+
