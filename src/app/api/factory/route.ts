@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     const { 
         vision_prompt, vibe_hint = 'urban', agency_id = 'independent', 
         batch_size = 10, vault_only = false, video_mode = 'none',
-        manual_profile_url = '', forced_name = ''
+        manual_profile_url = '', forced_name = '', photoshoot_mode = false
     } = body;
 
     const { SYNDICATE_DNA, VISION_LIBRARY, BADDIE_BODY_TYPES, HYPER_REALISTIC_OVERLAY, getTechnicalOptics, getRandomPhotoshootEdit } = require('@/config/vision');
@@ -139,8 +139,10 @@ export async function POST(req: Request) {
             const vaultCats = ['VAULT_BACKVIEW_OILED', 'VAULT_CLEAVAGE_LACE', 'VAULT_WET_GLISTEN'];
             for (let i = 0; i < 3; i++) {
                 const s = VISION_LIBRARY[vaultCats[i]];
-                const vo = getRandomPhotoshootEdit(); // Vault items get the Photoshoot treatment
-                const vp = `${p.name}, ${p.race}. ${bodyStyle.prompt}. ${vo}. Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
+                const isPhotoshoot = photoshoot_mode === true;
+                const vo = isPhotoshoot ? getRandomPhotoshootEdit() : getTechnicalOptics();
+                const personalVibe = !isPhotoshoot ? "iPhone mirror selfie, raw personal vibe, candid, suggestive thong bodysuit, backside focus, thick thighs emphasis, grainy mobile photo quality." : "";
+                const vp = `${p.name}, ${p.race}. ${bodyStyle.prompt}. ${vo}. ${personalVibe} Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
                 let vu = null;
                 const vgr = await fetch('https://api.x.ai/v1/images/generations', {
                     method: 'POST',
@@ -228,8 +230,10 @@ export async function POST(req: Request) {
     const vaultCats = ['VAULT_BACKVIEW_OILED', 'VAULT_CLEAVAGE_LACE', 'VAULT_WET_GLISTEN'];
     for (let i = 0; i < 3; i++) {
         const s = VISION_LIBRARY[vaultCats[i]];
-        const vo = getRandomPhotoshootEdit();
-        const vp = `${p.name}, ${p.race}. ${bodyStyle.prompt}. ${vo}. Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
+        const isPhotoshoot = photoshoot_mode === true;
+        const vo = isPhotoshoot ? getRandomPhotoshootEdit() : getTechnicalOptics();
+        const personalVibe = !isPhotoshoot ? "iPhone mirror selfie, raw personal vibe, candid, suggestive thong bodysuit, backside focus, thick thighs emphasis, grainy mobile photo quality." : "";
+        const vp = `${p.name}, ${p.race}. ${bodyStyle.prompt}. ${vo}. ${personalVibe} Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
         let vu = null;
         const vgr = await fetch('https://api.x.ai/v1/images/generations', {
             method: 'POST',
