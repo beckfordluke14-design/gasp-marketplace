@@ -446,14 +446,29 @@ export default function PostStudio() {
                     exit={{ opacity: 0, scale: 0.9 }}
                     className="group relative bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden hover:border-white/30 transition-all"
                   >
-                    {/* Image */}
-                    <div className="relative aspect-[3/4] bg-black">
-                      <img
-                        src={proxyImg(post.content_url)}
-                        alt="Asset"
-                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                        loading="lazy"
-                      />
+                      {/* Media wrapper */}
+                      <div className="relative aspect-[3/4] bg-black">
+                        {/* Media — auto-detects video (mp4/mov/webm) */}
+                        {(() => {
+                          const isVid = /\.mp4|\.mov|\.webm/i.test(post.content_url || '');
+                          return isVid ? (
+                            <>
+                              <video
+                                src={post.content_url}
+                                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                autoPlay muted loop playsInline
+                              />
+                              <div className="absolute top-1 right-1 px-1 py-0.5 bg-black/60 rounded text-[6px] font-black text-white uppercase tracking-widest z-10">▶ Vid</div>
+                            </>
+                          ) : (
+                            <img
+                              src={proxyImg(post.content_url)}
+                              alt="Asset"
+                              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                              loading="lazy"
+                            />
+                          );
+                        })()}
 
                       {/* Status badges */}
                       <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
@@ -711,12 +726,27 @@ export default function PostStudio() {
                       {linkedPosts.map(lp => (
                         <div key={lp.id} className="group relative bg-white/[0.02] border border-white/10 rounded-xl overflow-hidden hover:border-white/30 transition-all">
                           <div className="relative aspect-[3/4] bg-black">
-                            <img
-                              src={proxyImg(lp.content_url)}
-                              alt=""
-                              className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
-                              loading="lazy"
-                            />
+                             {/* Media — video or image */}
+                             {(() => {
+                               const isVid = /\.mp4|\.mov|\.webm/i.test(lp.content_url || '');
+                               return isVid ? (
+                                 <>
+                                   <video
+                                     src={lp.content_url}
+                                     className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+                                     autoPlay muted loop playsInline
+                                   />
+                                   <div className="absolute top-1 right-1 px-1 py-0.5 bg-black/60 rounded text-[6px] font-black text-white uppercase tracking-widest">▶ Vid</div>
+                                 </>
+                               ) : (
+                                 <img
+                                   src={proxyImg(lp.content_url)}
+                                   alt=""
+                                   className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+                                   loading="lazy"
+                                 />
+                               );
+                             })()}
                             {/* Status badges */}
                             <div className="absolute top-1 left-1 flex flex-col gap-0.5 z-10">
                               {lp.is_vault  && <span className="px-1.5 py-0.5 bg-[#ff00ff] text-white text-[6px] font-black uppercase tracking-widest rounded-full">V</span>}

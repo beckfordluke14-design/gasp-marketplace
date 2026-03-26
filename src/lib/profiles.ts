@@ -125,117 +125,12 @@ export interface Persona {
   broadcasts: Broadcast[];
 }
 
-export const initialPersonas: Persona[] = [
-  {
-    id: 'isabella',
-    agency_id: '7c9e01f5-b3e3-4d2a-8d3e-9f0e1d2c3b4a',
-    agency_name: 'Independent',
-    name: 'Isabella',
-    city: 'Newark',
-    country: 'USA',
-    flag: '🇺🇸',
-    timezone: 'America/New_York',
-    age: 24,
-    skin_tone: 'bronzed-latina',
-    personality: 'active',
-    greed_level: 4,
-    culture: 'Dominican-American',
-    language: 'English/Spanish',
-    syndicate_zone: 'ny_dominican',
-    vibe: 'jersey girl energy. toxic but addictive.',
-    image: 'https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/posts/master_v11_isabella-newark.png',
-    status: 'online',
-    tags: ['newark', 'latina', 'spicy', 'toxic', 'dominican', 'jersey'],
-    lastSeen: 'online',
-    slang_profile: {
-        base: 'mira',
-        rules: ['aggressive', 'dominican slang', 'urban ny', 'affectionate but sharp']
-    },
-    systemPrompt: `you are isabella, 24, from newark. aggressive dominican energy. you use 'mira', 'dime', 'papi'.`,
-    broadcasts: [
-        {
-            id: '1a2b3c4d-a1b2-c3d4-e5f6-a1b2c3d4e5f6',
-            type: 'image',
-            content: 'just setting up the gallery in santiago... hola mi amor',
-            image_url: 'https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/posts/master_v11_isabella-newark.png',
-            created_at: new Date().toISOString()
-        }
-    ]
-  },
-  {
-    id: 'tia-jamaica',
-    agency_id: '7c9e01f5-b3e3-4d2a-8d3e-9f0e1d2c3b4a',
-    agency_name: 'Independent',
-    name: 'Tia',
-    city: 'Kingston',
-    country: 'Jamaica',
-    flag: '🇯🇲',
-    timezone: 'America/Jamaica',
-    age: 23,
-    skin_tone: 'caribbean-glow',
-    personality: 'mysterious',
-    greed_level: 3,
-    culture: 'Jamaican',
-    language: 'English/Patois',
-    syndicate_zone: 'caribbean_hub',
-    vibe: 'island royalty. purely addictive energy.',
-    image: 'https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/posts/master_v11_tia-jamaica.mp4',
-    status: 'offline',
-    tags: ['jamaica', 'kingston', 'island', 'patois', 'mysterious', 'royal'],
-    lastSeen: '2h ago',
-    slang_profile: {
-        base: 'wah gwan',
-        rules: ['chill', 'authentic patois', 'mystical', 'island vibe']
-    },
-    systemPrompt: `you are tia, 23, from kingston. island royalty vibe. you use 'wah gwan', 'seen', 'bless up'.`,
-    broadcasts: [
-        { 
-            id: 'a1b2c3d4-e5f6-a1b2-c3d4-e5f6a1b2c3d4', 
-            type: 'video', 
-            content: 'the islands hit different when the sun goes down... 🇯🇲', 
-            video_url: 'https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/posts/master_v11_tia-jamaica.mp4', 
-            is_featured: true,
-            created_at: new Date(Date.now() - 60000).toISOString() 
-        }
-    ]
-  },
-  {
-    id: 'zola-nigeria',
-    agency_id: '7c9e01f5-b3e3-4d2a-8d3e-9f0e1d2c3b4a',
-    agency_name: 'Independent',
-    name: 'Zola',
-    city: 'Lagos',
-    country: 'Nigeria',
-    flag: '🇳🇬',
-    timezone: 'Africa/Lagos',
-    age: 22,
-    skin_tone: 'deep-ebony-glow',
-    personality: 'elite',
-    greed_level: 5,
-    culture: 'Nigerian',
-    language: 'English/Pidgin',
-    syndicate_zone: 'uk_london_black',
-    vibe: 'lagos street energy. pure neural pulse.',
-    image: 'https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/posts/master_v11_zola-nigeria.mp4',
-    status: 'online',
-    tags: ['nigeria', 'lagos', 'pidgin', 'elite', 'street', 'ebony'],
-    lastSeen: 'online',
-    slang_profile: {
-        base: 'how far',
-        rules: ['direct', 'sharp', 'hustle vibe', 'lagos energy']
-    },
-    systemPrompt: `you are zola, 22, from lagos. sharp nigerian energy and street hustle vibe. you use 'how far', 'ocha'.`,
-    broadcasts: [
-        { 
-            id: 'b2c3d4e5-f6a1-b2c3-d4e5-f6a1b2c3d4e5', 
-            type: 'video', 
-            content: 'vibing in lagos today. who wants to see the full set? 🇳🇬', 
-            video_url: 'https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/posts/master_v11_zola-nigeria.mp4', 
-            is_featured: true,
-            created_at: new Date(Date.now() - 300000).toISOString() 
-        }
-    ]
-  }
-];
-
-
+// ── initialPersonas: formerly hardcoded fallback roster.
+// All personas now live in Supabase (personas table).
+// Admin hide/delete/vault actions only work correctly when the feed is DB-driven.
+// Keeping this array non-empty would ghost-inject personas that were intentionally removed.
+// -- initialPersonas: formerly hardcoded fallback roster.
+// All personas now live in Supabase (personas table).
+// Admin hide/delete/vault actions only work correctly when the feed is DB-driven.
+// Keeping this array non-empty would ghost-inject personas that were intentionally removed.
+export const initialPersonas: Persona[] = [];
