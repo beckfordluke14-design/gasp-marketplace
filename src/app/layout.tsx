@@ -78,7 +78,10 @@ export default function RootLayout({
     <html lang="en" className="dark h-full antialiased scroll-smooth">
       <head>
         <link rel="preconnect" href="https://asset.gasp.fun" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://asset.gasp.fun" />
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="16x16" />
+        <style dangerouslySetInnerHTML={{ __html: `
+          #debug-marker { display: block !important; background: red; color: white; position: fixed; top: 0; left: 0; z-index: 99999; padding: 10px; font-weight: bold; }
+        ` }} />
       </head>
       <body className={`${inter.variable} ${outfit.variable} ${syncopate.variable} font-sans bg-black text-white antialiased selection:bg-[#ff00ff] selection:text-black overflow-x-hidden hide-scrollbar text-base`}>
         <GoogleAnalytics />

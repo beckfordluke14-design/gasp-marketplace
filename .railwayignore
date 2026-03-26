@@ -28,6 +28,8 @@ supabase-backups
 # Essential Build Resources
 !post-build.js
 !final-sync.js
+!postcss.config.mjs
+!eslint.config.mjs
 !src
 !public
 !package.json

@@ -22,6 +22,8 @@ trigger-*.js
 !src/
 !public/
 !post-build.js
+!postcss.config.mjs
+!eslint.config.mjs
 !package.json
 !package-lock.json
 !tsconfig.json
