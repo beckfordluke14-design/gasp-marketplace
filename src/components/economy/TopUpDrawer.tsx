@@ -2,7 +2,7 @@
 
 import { X, Zap, Trophy, ShieldCheck, Loader2, ArrowRight } from 'lucide-react';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import SovereignCheckout from './SovereignCheckout';
 
@@ -27,19 +27,28 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
     setSelectedPkgId(`custom_${amount}`);
   };
 
+  // 🧬 RECOVERY HUB: Check for unsaved stakes
+  const [activeStake, setActiveStake] = useState<any>(null);
+  useEffect(() => {
+    const stored = localStorage.getItem('gasp_active_stake');
+    if (stored) {
+        try { setActiveStake(JSON.parse(stored)); } catch { }
+    }
+  }, []);
+
   if (isSuccess) {
     return (
-      <div className="fixed inset-y-0 right-0 w-full md:w-[420px] bg-black/95 backdrop-blur-3xl border-l border-white/10 z-[300] flex flex-col items-center justify-center p-8 text-center font-outfit">
-        <div className="w-20 h-20 rounded-full bg-[#00f0ff]/20 flex items-center justify-center mb-6 border border-[#00f0ff]/40 shadow-[0_0_50px_rgba(0,240,255,0.2)]">
-          <Zap size={40} className="text-[#00f0ff] animate-pulse" />
+      <div className="fixed inset-y-0 right-0 w-full md:w-[420px] bg-black/95 backdrop-blur-3xl border-l border-white/10 z-[300] flex flex-col items-center justify-center p-10 text-center font-outfit">
+        <div className="w-24 h-24 rounded-full bg-[#00f0ff]/20 flex items-center justify-center mb-8 border border-[#00f0ff]/40 shadow-[0_0_60px_rgba(0,240,255,0.3)]">
+          <Zap size={48} className="text-[#00f0ff] animate-pulse" />
         </div>
-        <h3 className="text-2xl font-syncopate font-black uppercase italic text-white mb-2">Stake Confirmed</h3>
-        <p className="text-xs text-white/40 uppercase tracking-[0.3em] font-black leading-relaxed">
+        <h3 className="text-3xl font-syncopate font-black uppercase italic text-white mb-4">Stake Confirmed</h3>
+        <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-black leading-relaxed px-6">
           The Blockchain Node has verified your settlement. Credits + 15% Bonus injected into your identity node. 🧬🛡️
         </p>
         <button 
           onClick={onClose}
-          className="mt-12 w-full h-14 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
+          className="mt-16 w-full h-16 rounded-2xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
         >
           Return to Console
         </button>
@@ -48,7 +57,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   }
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full md:w-[420px] bg-black/95 backdrop-blur-3xl border-l border-white/10 z-[300] shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col pointer-events-auto font-outfit">
+    <div className="fixed inset-y-0 right-0 w-full md:w-[480px] bg-[#050505]/95 backdrop-blur-3xl border-l border-white/10 z-[300] shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col pointer-events-auto font-outfit transition-all duration-500">
       
       {/* Header */}
       <div className="p-8 border-b border-white/5 flex items-center justify-between bg-black/40">
@@ -77,46 +86,61 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
           <SovereignCheckout 
             userId={userId}
             packageId={selectedPkgId}
-            onSuccess={() => setIsSuccess(true)}
+            onSuccess={() => { setIsSuccess(true); setActiveStake(null); }}
             onCancel={() => setSelectedPkgId(null)}
           />
         ) : (
-          <div className="p-8 space-y-8 animate-in fade-in duration-500">
+          <div className="p-5 md:p-8 space-y-6 md:space-y-8 animate-in fade-in duration-500">
+            {/* 🧬 RECOVERY HUB INDICATOR */}
+            {activeStake && activeStake.packageId && (
+               <button 
+                 onClick={() => setSelectedPkgId(activeStake.packageId)}
+                 className="w-full p-6 rounded-[2rem] bg-[#ffea00]/10 border border-[#ffea00]/30 flex items-center justify-between group hover:bg-[#ffea00]/20 transition-all animate-pulse"
+               >
+                  <div className="flex flex-col items-start gap-1">
+                     <span className="text-[10px] font-black uppercase text-[#ffea00] tracking-widest italic group-hover:scale-110 transition-transform">Pending Stake Detected</span>
+                     <span className="text-[8px] text-[#ffea00]/60 uppercase font-black tracking-widest">Resume your Sovereign Bridge Session</span>
+                  </div>
+                  <ArrowRight size={20} className="text-[#ffea00]" />
+               </button>
+            )}
             {/* 🧬 MERCHANT STATUS */}
-            <div className="p-5 rounded-2xl bg-[#00f0ff]/5 border border-[#00f0ff]/20 flex items-center justify-between">
+            <div className="p-4 md:p-5 rounded-2xl bg-[#00f0ff]/5 border border-[#00f0ff]/20 flex items-center justify-between">
                <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                     <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                     <span className="text-[8px] font-black uppercase tracking-widest text-[#00f0ff]">P2P Ledger Logic v2.0 Active</span>
+                     <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
+                     <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-[#00f0ff]">P2P Ledger Logic v2.0 Active</span>
                   </div>
-                  <p className="text-[10px] text-white/40 font-bold italic mt-1">Bank-Free Sovereign Settlement Enabled.</p>
+                  <p className="text-[9px] md:text-[10px] text-white/40 font-bold italic mt-1">Bank-Free Sovereign Settlement Enabled.</p>
                </div>
                <ShieldCheck size={16} className="text-[#00f0ff]/30" />
             </div>
 
             {/* 🪙 CUSTOM WHALE STAKE */}
             <div className="space-y-4">
-               <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-[#00f0ff] italic">Custom Whale Stake</h4>
-               <div className="relative group">
-                  <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                     <span className="text-lg font-black text-[#00f0ff]">$</span>
+               <h4 className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] text-[#00f0ff] italic">Custom Whale Stake</h4>
+               <div className="flex flex-col gap-3 group">
+                  <div className="relative flex-1">
+                     <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                        <span className="text-lg font-black text-[#00f0ff]">$</span>
+                     </div>
+                     <input 
+                       type="number"
+                       value={customAmount}
+                       onChange={(e) => setCustomAmount(e.target.value)}
+                       placeholder="Enter USD Amount (e.g. 5000)"
+                       className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 text-xl font-black text-white focus:outline-none focus:border-[#00f0ff]/40 transition-all placeholder:text-white/10"
+                     />
                   </div>
-                  <input 
-                    type="number"
-                    value={customAmount}
-                    onChange={(e) => setCustomAmount(e.target.value)}
-                    placeholder="Enter USD Amount (e.g. 5000)"
-                    className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-32 text-xl font-black text-white focus:outline-none focus:border-[#00f0ff]/40 transition-all"
-                  />
                   <button 
                     onClick={handleCustomStake}
-                    className="absolute inset-y-2 right-2 px-6 rounded-xl bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(0,240,255,0.2)]"
+                    className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(0,240,255,0.2)]"
                   >
                      Stake Now
                   </button>
                </div>
                <p className="text-[7px] text-white/20 uppercase tracking-[0.2em] font-black ml-1">
-                  Custom amounts automatically qualify for the 1.15x Multiplier. 🛡️
+                  Custom amounts qualify for the 1.15x Multiplier. 🛡️
                </p>
             </div>
 

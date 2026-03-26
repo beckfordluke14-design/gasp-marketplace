@@ -8,9 +8,8 @@ import CoinBalance from './economy/CoinBalance';
 import TopUpDrawer from './economy/TopUpDrawer';
 import PersonaSearch from './PersonaSearch';
 
-export default function Header() {
+export default function Header({ onOpenTopUp }: { onOpenTopUp: () => void }) {
   const router = useRouter();
-  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [guestId, setGuestId] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -89,16 +88,26 @@ export default function Header() {
                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-red-500">Live Club Activity</span>
                 </div>
 
-                {/* COIN BALANCE WIDGET */}
-                <CoinBalance onOpenTopUp={() => setIsTopUpOpen(true)} />
+                {/* 🏎️💨 REVENUE PILLAR: THE GLOBAL ACTION */}
+                <button 
+                  onClick={() => onOpenTopUp()}
+                  className="flex items-center gap-2 px-4 md:px-6 py-2 md:py-2.5 bg-[#00f0ff] text-black text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] rounded-full hover:scale-110 active:scale-95 transition-all shadow-[0_0_20px_rgba(0,240,255,0.4)] font-syncopate italic"
+                >
+                   <Zap size={14} fill="black" className="animate-pulse" />
+                   GET CREDITS
+                </button>
 
-                <div className="flex items-center gap-6 text-white/40">
+                {/* COIN BALANCE WIDGET */}
+                <div onClick={() => onOpenTopUp()} className="cursor-pointer hover:opacity-80 transition-all">
+                  <CoinBalance onOpenTopUp={() => onOpenTopUp()} />
+                </div>
+
+                <div className="hidden md:flex items-center gap-6 text-white/40">
                     {isAdmin && (
                        <div 
                          onClick={() => {
                             const next = !showAdmin;
                             setShowAdmin(next);
-                            // Pulse the news to other components
                             window.dispatchEvent(new CustomEvent('gasp_admin_toggle', { detail: next }));
                          }}
                          className={`p-2 rounded-xl transition-all cursor-pointer ${showAdmin ? 'bg-[#ffea00]/10 text-[#ffea00] shadow-[0_0_15px_#ffea0044]' : 'hover:text-white'}`}
@@ -106,12 +115,10 @@ export default function Header() {
                           <Star size={20} fill={showAdmin ? 'currentColor' : 'none'} />
                        </div>
                     )}
-                    <Bell size={20} className="hover:text-[#ff00ff] cursor-pointer transition-colors" onClick={() => router.push('/')} />
-                    <Settings size={20} className="hover:text-[#ff00ff] cursor-pointer transition-colors" onClick={() => router.push('/')} />
                 </div>
                 
-                <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all cursor-pointer shadow-2xl group" onClick={() => setIsTopUpOpen(true)}>
-                  <Wallet size={20} className="text-white/60 group-hover:text-[#00f0ff] transition-colors" />
+                <div className="md:w-10 md:h-10 rounded-2xl md:bg-white/5 md:border md:border-white/10 flex items-center justify-center hover:bg-white/10 transition-all cursor-pointer group" onClick={() => onOpenTopUp()}>
+                  <Wallet size={20} className="text-white/40 group-hover:text-[#00f0ff] transition-colors" />
                 </div>
             </div>
         </header>
@@ -123,13 +130,6 @@ export default function Header() {
             </div>
         </div>
 
-        {/* TOP-UP DRAWER */}
-        {isTopUpOpen && (
-            <TopUpDrawer 
-                userId={guestId}
-                onClose={() => setIsTopUpOpen(false)} 
-            />
-        )}
     </div>
   );
 }

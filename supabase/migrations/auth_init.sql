@@ -25,12 +25,22 @@ CREATE POLICY "Users can update own profile"
 ON public.profiles FOR UPDATE
 USING (auth.uid() = id);
 
--- Function to handle new user signup
+-- Function to handle new user signup (The Genesis Sync)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, credit_balance, role)
-  VALUES (new.id, 50, 'user');
+  -- 1. Create Public Profile (Email Node)
+  INSERT INTO public.profiles (id, credit_balance, role, total_spent_usd)
+  VALUES (new.id, 50, 'user', 0);
+
+  -- 2. Create Premium Wallet Hub
+  INSERT INTO public.wallets (user_id, credit_balance)
+  VALUES (new.id, 50);
+
+  -- 3. Sync to Global Users Table
+  INSERT INTO public.users (id, credit_balance)
+  VALUES (new.id, 50);
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

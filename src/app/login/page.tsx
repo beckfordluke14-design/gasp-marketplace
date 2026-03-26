@@ -14,8 +14,6 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
 
-  const [agreed, setAgreed] = useState(false);
-
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
@@ -26,10 +24,6 @@ function LoginForm() {
 
   const handleIdentitySync = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!agreed) {
-        setError('[PROTOCOL_ERR]: YOU MUST AGREE TO THE SYNC TERMS');
-        return;
-    }
     setIsLoading(true);
     setError(null);
 
@@ -54,11 +48,6 @@ function LoginForm() {
   };
 
   const handleOAuth = async () => {
-    if (!agreed) {
-        setError('[PROTOCOL_ERR]: YOU MUST AGREE TO THE SYNC TERMS');
-        return;
-    }
-    
     setIsLoading(true);
     // 🧬 THE AUDIT TRAIL: Hit consent API before Authentication
     try {
@@ -94,26 +83,9 @@ function LoginForm() {
           </div>
 
           <div className="space-y-6">
-             {/* MANDATORY TERMS CHECKBOX */}
-             <div 
-               onClick={() => setAgreed(!agreed)}
-               className="group flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl cursor-pointer hover:bg-white/[0.08] transition-all mb-4"
-             >
-                <div className={`w-8 h-8 rounded-xl border-2 shrink-0 flex items-center justify-center transition-all ${agreed ? 'bg-[#00f0ff] border-[#00f0ff]' : 'border-white/10'}`}>
-                   {agreed && <CheckCircle size={16} className="text-black" />}
-                </div>
-                <div className="flex-1">
-                   <p className="text-[9px] font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-colors leading-[1.6]">
-                      I verify I am <span className="text-[#00f0ff]">18+</span> and acknowledge all media/creators are <span className="text-white">Synthetic Assets</span>. 
-                      I agree to the <Link href="/terms" target="_blank" className="text-[#00f0ff] hover:underline underline-offset-4">Pulse Protocol & Terms</Link> via AllTheseFlows LLC.
-                   </p>
-                </div>
-             </div>
-
              <button 
                onClick={handleOAuth}
-               disabled={!agreed}
-               className={`w-full h-14 rounded-2xl flex items-center justify-center gap-4 transition-all group active:scale-95 ${agreed ? 'bg-white/5 border border-white/10 hover:bg-white/10' : 'opacity-30 cursor-not-allowed border-dashed border-white/10'}`}
+               className="w-full h-14 rounded-2xl flex items-center justify-center gap-4 transition-all group active:scale-95 bg-white/5 border border-white/10 hover:bg-white/10"
              >
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5 grayscale group-hover:grayscale-0 transition-all" />
                 <span className="text-white text-[11px] font-black uppercase tracking-widest italic group-hover:text-[#ff00ff]">Sign in with Google</span>
@@ -157,20 +129,16 @@ function LoginForm() {
 
                 <button 
                   type="submit"
-                  disabled={isLoading || !agreed}
-                  className={`w-full h-14 rounded-2xl font-syncopate font-black uppercase tracking-widest text-xs transition-all active:scale-95 disabled:opacity-30 ${agreed ? 'bg-white text-black hover:bg-[#ff00ff]' : 'bg-white/5 text-white/20 border border-dashed border-white/10'}`}
+                  disabled={isLoading}
+                  className="w-full h-14 rounded-2xl font-syncopate font-black uppercase tracking-widest text-xs transition-all active:scale-95 disabled:opacity-30 bg-white text-black hover:bg-[#ff00ff]"
                 >
                    {isLoading ? 'Synchronizing...' : 'Enter Hub'}
                 </button>
              </form>
 
-             <div className="pt-4 flex flex-col items-center gap-3">
-                <div className="flex items-center gap-2 opacity-50">
-                   <CheckCircle size={12} className="text-[#00f0ff]" />
-                   <span className="text-[10px] font-black uppercase text-white tracking-widest">Elite access verified</span>
-                </div>
-                <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.2em] italic text-center leading-relaxed">
-                   Sync your identity to establish connection
+             <div className="pt-2">
+                <p className="text-white/20 text-[8px] font-black uppercase tracking-[0.2em] italic text-center leading-relaxed px-4">
+                   By entering, you acknowledge all personas are AI-generative for entertainment. 18+ required.
                 </p>
              </div>
           </div>

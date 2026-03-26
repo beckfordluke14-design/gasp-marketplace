@@ -12,9 +12,8 @@ interface SovereignCheckoutProps {
 }
 
 /**
- * ⛽ SOVEREIGN GASP NODE v4.0 (Memecoin Optimized)
- * Objective: No-Confusion / Stable + Native 1-Click Settlement.
- * Channel: Solana (USDC & SOL).
+ * ⛽ SOVEREIGN GASP NODE v5.0 (Elite Desk Edition)
+ * Objective: Side-by-Side Desktop Checkout + Session Persistence.
  */
 export default function SovereignCheckout({ userId, packageId, onSuccess, onCancel }: SovereignCheckoutProps) {
   const [network, setNetwork] = useState<'solana' | 'base'>('solana');
@@ -38,9 +37,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
   const cryptoBonus = Math.floor(pkg.credits * 0.15);
   const totalCredits = pkg.credits + cryptoBonus;
 
-  // 📡 LIVE PRICE ORACLE (SOL/ETH -> USD)
   const [nativePrice, setNativePrice] = useState<number | null>(null);
-  
   useEffect(() => {
     async function fetchPrice() {
         try {
@@ -61,9 +58,8 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
   const solanaPayLink = `solana:${MERCHANT_WALLETS.solana}?amount=${pkg.priceUsd}&spl-token=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&label=Gasp%20Stake&memo=${userId}`;
   const nativeSolLink = `solana:${MERCHANT_WALLETS.solana}?amount=${nativeEquivalent}&label=Gasp%20Stake&memo=${userId}`;
   const evmPayLink = `ethereum:${MERCHANT_WALLETS.base}?amount=${pkg.priceUsd}&label=Gasp%20Stake`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(network === 'solana' ? solanaPayLink : evmPayLink)}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(network === 'solana' ? solanaPayLink : evmPayLink)}`;
 
-  // 🧬 BITREFILL-STYLE AUTO-POLLER
   const handleVerify = async (silent = false) => {
     if (!silent) setIsVerifying(true);
     if (!silent) setVerificationError(null);
@@ -72,9 +68,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
         const res = await fetch('/api/economy/verify-tx', {
             method: 'POST',
             body: JSON.stringify({
-                userId,
-                packageId,
-                network,
+                userId, packageId, network,
                 senderWallet: senderWallet || 'AUTO_POLL',
                 amountUsd: pkg.priceUsd,
                 nativeAmount: nativeEquivalent
@@ -84,6 +78,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
         const data = await res.json();
         if (data.success) {
             setStatus('confirmed');
+            localStorage.removeItem('gasp_active_stake');
             onSuccess(totalCredits);
             return true;
         } else if (!silent) {
@@ -97,155 +92,127 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
     return false;
   };
 
-  // 📡 ACTIVE WATCHER LOOP
   useEffect(() => {
+    // 🧬 PERSIST: Store for session recovery
+    localStorage.setItem('gasp_active_stake', JSON.stringify({ packageId, userId, timestamp: Date.now() }));
+    
     if (status === 'confirmed') return;
     const pollInterval = setInterval(() => { handleVerify(true); }, 8000);
     return () => clearInterval(pollInterval);
   }, [status, network, senderWallet]);
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 font-outfit overflow-x-hidden">
+    <div className="p-5 md:p-10 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 font-outfit overflow-x-hidden">
        
-       {/* Header */}
-       <div className="space-y-2 text-left">
-          <div className="flex items-center gap-2">
-             <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-             <span className="text-[9px] font-black uppercase tracking-[0.4em] text-[#00f0ff]">
-                {status === 'confirmed' ? 'Stake Verified' : 'Live Oracle Active'}
-             </span>
-          </div>
-          <h2 className="text-3xl font-syncopate font-black uppercase italic text-white tracking-tighter">
-             Sovereign <br /> <span className="text-[#00f0ff]">Bridge</span>
-          </h2>
-       </div>
-
-       {/* Summary */}
-       <div className="p-5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-          <div className="flex flex-col gap-1 text-left">
-             <span className="text-[10px] uppercase font-black text-white/40 tracking-widest">{pkg.label}</span>
-             <span className="text-2xl font-syncopate font-bold text-white italic uppercase">{totalCredits.toLocaleString()}c</span>
-          </div>
-          <div className="text-right">
-             <div className="flex flex-col items-end">
-                <span className="text-xl font-black text-[#00f0ff] italic">${pkg.priceUsd}</span>
-                <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1">
-                   ≈ {nativeEquivalent} {network === 'solana' ? 'SOL' : 'ETH'}
-                </span>
-             </div>
+       <div className="flex items-center justify-between">
+          <div className="space-y-1 text-left">
+              <div className="flex items-center gap-2">
+                 <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
+                 <span className="text-[9px] font-black uppercase tracking-[0.4em] text-[#00f0ff]">
+                    {status === 'confirmed' ? 'Stake Verified' : 'Session Recovery Active'}
+                 </span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-syncopate font-black uppercase italic text-white tracking-tighter">
+                 Sovereign Bridge
+              </h2>
           </div>
        </div>
 
-       {/* Actions */}
-       <div className="space-y-4">
-          <div className="bg-white/5 rounded-2xl p-1.5 flex items-center gap-1 border border-white/10 mb-2">
-             <button 
-               onClick={() => setNetwork('solana')}
-               className={`flex-1 h-9 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${network === 'solana' ? 'bg-[#9945FF] text-white' : 'text-white/40'}`}
-             >
-                Solana (Recommended)
-             </button>
-             <button 
-               onClick={() => setNetwork('base')}
-               className={`flex-1 h-9 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${network === 'base' ? 'bg-[#0052FF] text-white' : 'text-white/40'}`}
-             >
-                Base L2
-             </button>
-          </div>
-
-          <a 
-            href={network === 'solana' ? solanaPayLink : evmPayLink}
-            className="w-full h-16 rounded-2xl bg-white text-black flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all text-[10px] font-black uppercase tracking-widest"
-          >
-             <Zap size={18} fill="black" />
-             One-Click Stake (USDC)
-          </a>
-
-          <a 
-            href={network === 'solana' ? nativeSolLink : undefined}
-            className={`w-full h-16 rounded-2xl flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(153,69,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all text-[10px] font-black uppercase tracking-widest ${network === 'solana' ? 'bg-[#9945FF] text-white' : 'bg-white/10 text-white/40 cursor-not-allowed'}`}
-          >
-             <Zap size={18} fill={network === 'solana' ? 'white' : 'transparent'} />
-             Pay in {network === 'solana' ? 'SOL' : 'ETH'} ≈ {nativeEquivalent}
-          </a>
-
-          <div className="flex items-center gap-4 text-white/10">
-             <div className="h-px flex-1 bg-current" />
-             <span className="text-[8px] font-black uppercase italic">Or Send via Node ID</span>
-             <div className="h-px flex-1 bg-current" />
-          </div>
-
-          <div className="flex flex-col md:flex-row items-center gap-8 p-6 rounded-3xl bg-white/[0.02] border border-white/5">
-             <div className="shrink-0 w-36 h-36 bg-white p-2 rounded-2xl">
-                <img src={qrCodeUrl} alt="QR" className="w-full h-full" />
-             </div>
-             <div className="flex-1 space-y-4 text-center md:text-left">
-                <p className="text-[9px] font-black uppercase tracking-widest text-[#00f0ff] leading-relaxed">
-                   Step 1: Scan QR or Send <span className="text-white">{nativeEquivalent} {network === 'solana' ? 'SOL' : 'ETH'}</span> / <span className="text-white">${pkg.priceUsd} USDC</span>.
-                </p>
-                <div 
-                   onClick={() => {
-                     navigator.clipboard.writeText(MERCHANT_WALLETS[network]);
-                     alert('Merchant Node ID Copied! 🛡️💨');
-                   }}
-                   className="p-3 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between group cursor-pointer hover:border-[#00f0ff]/40 transition-all font-mono"
-                >
-                   <code className="text-[9px] text-white/50 break-all select-all group-hover:text-white">
-                      {MERCHANT_WALLETS[network]}
-                   </code>
-                   <Copy size={12} className="text-white/20 shrink-0 ml-2" />
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+          
+          {/* LEFT: THE QR NODE */}
+          <div className="space-y-6">
+             <div className="p-8 rounded-[2.5rem] bg-white/[0.03] border border-white/10 flex flex-col items-center gap-8 shadow-[0_30px_100px_rgba(0,0,0,1)]">
+                <div className="shrink-0 w-full aspect-square max-w-[240px] bg-white p-3 rounded-3xl shadow-[0_0_50px_rgba(255,255,255,0.2)]">
+                   <img src={qrCodeUrl} alt="QR" className="w-full h-full" />
                 </div>
-                <p className="text-[9px] font-black uppercase tracking-widest text-[#00f0ff] leading-relaxed">
-                   Step 2: Node watches for payment...
+                
+                <div className="w-full space-y-4">
+                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00f0ff] text-center">
+                      Step 1: Scan Merchant Node
+                   </p>
+                   <div 
+                      onClick={() => {
+                        navigator.clipboard.writeText(MERCHANT_WALLETS[network]);
+                        alert('Node ID Copied! 🛡️');
+                      }}
+                      className="p-4 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between group cursor-pointer hover:border-[#00f0ff]/40 transition-all font-mono"
+                   >
+                      <code className="text-[9px] text-white/40 break-all truncate group-hover:text-white">
+                         {MERCHANT_WALLETS[network]}
+                      </code>
+                      <Copy size={14} className="text-white/20 shrink-0 ml-2" />
+                   </div>
+                </div>
+             </div>
+             
+             <div className="hidden md:block p-4 rounded-2xl bg-white/[0.01] border border-white/5 text-center">
+                <p className="text-[9px] text-white/20 font-black uppercase tracking-widest italic leading-relaxed">
+                   Node monitoring for <span className="text-white">{nativeEquivalent} {network === 'solana' ? 'SOL' : 'ETH'}</span>
                 </p>
              </div>
           </div>
-       </div>
 
-       {/* Input */}
-       <div className="space-y-4 pt-4 border-t border-white/5 text-left text-left">
-           <p className="text-[9px] font-black uppercase tracking-widest text-white/40 leading-relaxed">
-              Manual Fail-Safe: Paste <span className="text-white">YOUR Account ID</span> if auto-scan fails.
-           </p>
-           <div className="flex gap-2">
-              <input 
-                type="text"
-                value={senderWallet}
-                onChange={(e) => setSenderWallet(e.target.value)}
-                placeholder="Your Wallet (Optional)..."
-                className="flex-1 h-12 bg-black/40 border border-white/10 rounded-2xl px-5 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-[#9945FF] transition-all"
-              />
-              <button 
-                onClick={() => {
-                   navigator.clipboard.writeText(MERCHANT_WALLETS.solana);
-                   alert('Solana Merchant Node ID Copied! 🛡️💨');
-                }}
-                className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all"
-              >
-                 <Copy size={16} className="text-white/40" />
-              </button>
-           </div>
-       </div>
+          {/* RIGHT: THE SETTLEMENT HUB */}
+          <div className="space-y-6">
+             <div className="p-6 rounded-[2rem] bg-white/5 border border-white/10 flex flex-col gap-6">
+                <div className="flex items-center justify-between">
+                   <div className="flex flex-col gap-1">
+                      <span className="text-[10px] uppercase font-black text-white/40 tracking-widest">{pkg.label}</span>
+                      <span className="text-2xl font-syncopate font-bold text-white italic uppercase tracking-tighter">
+                         {totalCredits.toLocaleString()}c
+                      </span>
+                   </div>
+                   <div className="text-right">
+                      <span className="text-3xl font-black text-[#00f0ff] italic leading-none">${pkg.priceUsd}</span>
+                   </div>
+                </div>
 
-       <div className="space-y-4">
-          {verificationError && (
-             <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-left">
-                <p className="text-[9px] font-black text-red-400 uppercase tracking-widest leading-relaxed">{verificationError}</p>
+                <div className="flex flex-col gap-3">
+                   <div className="bg-black/20 p-1.5 rounded-2xl flex items-center gap-1.5 border border-white/5">
+                      <button onClick={() => setNetwork('solana')} className={`flex-1 h-10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${network === 'solana' ? 'bg-[#9945FF] text-white' : 'text-white/30'}`}>Solana</button>
+                      <button onClick={() => setNetwork('base')} className={`flex-1 h-10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${network === 'base' ? 'bg-[#0052FF] text-white' : 'text-white/30'}`}>Base L2</button>
+                   </div>
+                   
+                   <a href={network === 'solana' ? solanaPayLink : evmPayLink} className="w-full h-16 rounded-2xl bg-white text-black flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all text-[10px] font-black uppercase tracking-[0.2em]">
+                      <Zap size={20} fill="black" /> One-Click Stake
+                   </a>
+
+                   <a href={network === 'solana' ? nativeSolLink : undefined} className={`w-full h-16 rounded-2xl flex items-center justify-center gap-3 transition-all text-[10px] font-black uppercase tracking-[0.2em] ${network === 'solana' ? 'bg-[#9945FF] text-white shadow-lg h-16' : 'bg-white/5 text-white/10 cursor-not-allowed'}`}>
+                      Pay in {network === 'solana' ? 'SOL' : 'ETH'}
+                   </a>
+                </div>
              </div>
-          )}
 
-          <button 
-            onClick={() => handleVerify(false)}
-            disabled={isVerifying || status === 'confirmed'}
-            className={`w-full h-14 rounded-2xl bg-[#9945FF] text-white text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(153,69,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale`}
-          >
-             {isVerifying ? <Loader2 size={20} className="animate-spin" /> : <ShieldCheck size={20} />}
-             {isVerifying ? 'Scanning Ledger...' : (status === 'confirmed' ? 'Stake Verified' : 'Manual Scan Override')}
-          </button>
+             <div className="space-y-4">
+                <input 
+                  type="text" 
+                  value={senderWallet} 
+                  onChange={(e) => setSenderWallet(e.target.value)} 
+                  placeholder="Your Wallet ID (Optional Manual Link)..." 
+                  className="w-full h-12 bg-black/40 border border-white/10 rounded-2xl px-5 text-sm font-bold text-white placeholder:text-white/10 focus:border-[#00f0ff]" 
+                />
+                
+                <button 
+                  onClick={() => handleVerify(false)} 
+                  disabled={isVerifying || status === 'confirmed'}
+                  className="w-full h-16 rounded-2xl bg-[#00f0ff] text-black text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(0,240,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                >
+                   {isVerifying ? <Loader2 size={24} className="animate-spin" /> : <ShieldCheck size={24} />}
+                   {isVerifying ? 'Scanning Ledger...' : 'Manual Scan Override'}
+                </button>
 
-          <button onClick={onCancel} className="w-full text-[9px] font-black uppercase tracking-widest text-white/20 hover:text-white transition-colors pt-4">
-             Return to Tier Selector
-          </button>
+                {verificationError && (
+                   <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+                      <p className="text-[10px] font-black text-red-400 uppercase tracking-widest text-center">{verificationError}</p>
+                   </div>
+                )}
+                
+                <button onClick={onCancel} className="w-full text-[9px] font-black uppercase tracking-widest text-white/20 hover:text-white transition-colors pt-4">
+                   Cancel & Return to Tiers
+                </button>
+             </div>
+          </div>
        </div>
 
     </div>

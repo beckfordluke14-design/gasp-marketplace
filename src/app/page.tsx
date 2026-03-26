@@ -12,30 +12,19 @@ import Header from '@/components/Header';
 import ChatDock from '@/components/ChatDock';
 import GhostActivityTicker from '@/components/GhostActivityTicker';
 import PersonaAvatar from '@/components/persona/PersonaAvatar';
+import TopUpDrawer from '@/components/economy/TopUpDrawer';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
 import { trackEvent } from '@/lib/telemetry';
 import { createClient } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, Smartphone, X, Zap } from 'lucide-react';
+import { Eye, EyeOff, X, Zap } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
-// SYSTEM: PERSISTENT VIBE PULSES
 const GASP_PULSES = [
-  "just arrived.",
-  "at the penthouse.",
-  "looking for something fun.",
-  "dm for the vibe.",
-  "in medallo.",
-  "missed you.",
-  "active 💎",
-  "drip too hard.",
-  "need a vacation.",
-  "don't touch the hair.",
-  "klk with the vibe.",
-  "streets is watching.",
-  "feeling elite today.",
-  "who else u talkin to?",
-  "shadowbanned probably."
+  "just arrived.", "at the penthouse.", "looking for something fun.",
+  "dm for the vibe.", "in medallo.", "missed you.", "active 💎",
+  "drip too hard.", "need a vacation.", "don't touch the hair.",
+  "klk with the vibe.", "streets is watching.", "feeling elite today."
 ];
 
 const supabase = createClient(
@@ -45,8 +34,8 @@ const supabase = createClient(
 
 function MarketplaceMain() {
   const [mounted, setMounted] = useState(false);
+  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [selectedPersonaId, setSelectedPersonaId] = useState(initialPersonas[0]?.id ?? '');
-  const [lastActivePersonaId, setLastActivePersonaId] = useState<string>('');
   const [openChatIds, setOpenChatIds] = useState<string[]>([]);
   const [minimizedIds, setMinimizedIds] = useState<string[]>([]);
   const [showFloatingAvatars, setShowFloatingAvatars] = useState(true);
@@ -57,10 +46,7 @@ function MarketplaceMain() {
   const [followNotify, setFollowNotify] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
+  useEffect(() => { setMounted(true); }, []);
 
   const allPersonas = [
     ...(dbPersonas || []).map(p => {
@@ -71,186 +57,34 @@ function MarketplaceMain() {
             name: p.name,
             city: p.city,
             image: proxyImg((p.seed_image_url && p.seed_image_url !== '') ? p.seed_image_url : (p.image && p.image !== '') ? p.image : fallback.image),
-            personality: p.personality,
-            systemPrompt: p.system_prompt,
-            slang_profile: { base: p.accent_profile || fallback.slang_profile?.base || 'ny_dominican' },
-            agency_name: fallback.agency_name || 'Independent',
-            status: fallback.status || 'online',
-            country: p.country || fallback.country,
-            flag: p.flag || fallback.flag,
-            vibe: p.vibe || fallback.vibe,
-            age: p.age || fallback.age || 22,
             is_active: p.is_active,
-            vault: p.vault || fallback.vault || []
         };
     }),
     ...initialPersonas
-  ].filter((p, index, self) => 
-    index === self.findIndex((t) => t.id === p.id)
-  ).filter(p => p.is_active === true)  // 🛡️ RETIREMENT GATE: Only explicitly active nodes.
-   .filter(p => p.image && p.image.startsWith('http')); // 🛡️ ZERO BLACK BOX: Strip personas with no valid image URL.
-  
+  ].filter((p, index, self) => index === self.findIndex((t) => t.id === p.id))
+   .filter(p => p.is_active !== false)
+   .filter(p => p.image && p.image.startsWith('http'));
+
   const refinedPersonas = allPersonas.map(p => ({
     ...p,
-    vibe: (p.vibe && typeof p.vibe === 'string' && !p.vibe.includes(',')) ? p.vibe : GASP_PULSES[(Math.floor(Date.now() / 3600000) + (p.id || '').length) % GASP_PULSES.length]
-  }));
-
-  const stories = allPersonas.map(p => ({
-    id: p.id,
-    name: p.name,
-    image: p.image || '/v1.png',
-    hasStory: true // Force-Active Bypassing Missing Table
+    vibe: GASP_PULSES[(Math.floor(Date.now() / 3600000) + (p.id || '').length) % GASP_PULSES.length]
   }));
 
   useEffect(() => {
     const storedGuest = localStorage.getItem('gasp_guest_id');
-    if (storedGuest) {
-      setGuestId(storedGuest);
-    } else {
+    if (storedGuest) setGuestId(storedGuest);
+    else {
       const newGuest = `guest-${Math.random().toString(36).substring(2, 11)}`;
       setGuestId(newGuest);
       localStorage.setItem('gasp_guest_id', newGuest);
     }
-    
-    // 💎 TELEMETRY: The Billion-Dollar Handshake
-    trackEvent('app_load');
-
-    // 🧬 NEURAL PULSE: Organic Presence Simulation (Sign-In/Sign-Off Vibe)
-    const activeRosterIds = allPersonas.filter(p => p.is_active !== false).map(p => p.id);
-    if (activeFloatingIds.length === 0 && activeRosterIds.length > 0) {
-       setActiveFloatingIds(activeRosterIds.sort(() => 0.5 - Math.random()).slice(0, 3));
-    }
-
-    const interval = setInterval(() => {
-       const freshRosterIds = allPersonas.filter(p => p.is_active !== false).map(p => p.id);
-       if (freshRosterIds.length === 0) return;
-
-       setActiveFloatingIds(prev => {
-          let next = [...prev];
-          
-          // 🤖 Organically decide the next state: Sign-In, Sign-Off, or Swap
-          const action = Math.random();
-          
-          if (action > 0.7 && next.length < 5) {
-             // 🟢 SIGNING IN: A new persona enters the chat
-             const avail = freshRosterIds.filter(id => !next.includes(id));
-             if (avail.length > 0) next.push(avail[Math.floor(Math.random() * avail.length)]);
-          } else if (action < 0.3 && next.length > 2) {
-             // 🔴 SIGNING OFFLINE: A persona leaves the session
-             next.splice(Math.floor(Math.random() * next.length), 1);
-          } else {
-             // 🔄 SWAPPING: One model signs off, another signs on instantly
-             next.shift();
-             const avail = freshRosterIds.filter(id => !next.includes(id));
-             if (avail.length > 0) next.push(avail[Math.floor(Math.random() * avail.length)]);
-          }
-          return next;
-       });
-    }, 6000 + Math.random() * 8000); // Organic Pulse: Fluctuates every 6-14s
-
-    return () => { clearInterval(interval); };
-  }, [allPersonas.length]); // Re-bind when roster manifests
-
-  // Deep Link: ?persona=valeria&msg=hi
-  useEffect(() => {
-    const pId = searchParams.get('persona');
-    const msg = searchParams.get('msg');
-    
-    if (pId) {
-        const p = refinedPersonas.find(p => p.id.toLowerCase() === pId.toLowerCase());
-        if (p && !openChatIds.includes(p.id)) {
-            handleSelectPersona(p.id, msg || undefined);
-            
-            // Organic Reciprocal Follow Delay: 3-5 minutes later
-            const organicDelay = Math.floor(Math.random() * 120000) + 180000;
-            setTimeout(() => {
-               setFollowNotify(p.name);
-               setTimeout(() => setFollowNotify(null), 10000); 
-            }, organicDelay);
-        }
-    }
-  }, [searchParams, refinedPersonas.length]);
-
-  useEffect(() => {
-    if (!guestId) return;
-    const fetchUnread = async () => {
-        const { data } = await supabase.from('chat_messages').select('persona_id, id, role, created_at, is_read').eq('user_id', guestId);
-        if (data) {
-            const counts: Record<string, number> = {};
-            data.filter(m => m.role === 'assistant' && !m.is_read).forEach(msg => {
-                counts[msg.persona_id] = (counts[msg.persona_id] || 0) + 1;
-            });
-            setUnreadCounts(counts);
-        }
-    };
-    fetchUnread();
-    const interval = setInterval(fetchUnread, 15000);
-    return () => clearInterval(interval);
-  }, [guestId, openChatIds]);
-
-  useEffect(() => {
-    async function fetchDb() {
-        // 1. Fetch explicitly ACTIVE personas (is_active = true)
-        const { data: pData } = await supabase.from('personas').select('*').eq('is_active', true);
-        
-        // 2. A persona is LIVE only if it has ≥1 post that:
-        //    - Has a real content_url (actual media)
-        //    - Has NOT been soft-deleted by the admin Hide button
-        //    The admin 'Hide' action writes caption = 'DELETED_NODE_SYNC_V15' (see /api/admin/audit route.ts)
-        //    This is the single source of truth for hidden posts.
-        const { data: postRefData } = await supabase
-            .from('posts')
-            .select('persona_id')
-            .not('content_url', 'is', null)                      // must have real media
-            .neq('caption', 'DELETED_NODE_SYNC_V15');             // not hidden by admin Hide button
-            
-        if (pData) {
-            const livePersonaIds = new Set((postRefData || []).map(p => p.persona_id));
-            const livePersonas = pData.filter(p => livePersonaIds.has(p.id));
-            setDbPersonas(livePersonas);
-        }
-    }
-    fetchDb();
-    const refreshInterval = setInterval(fetchDb, 15000);
-    return () => clearInterval(refreshInterval);
   }, []);
 
-  const handleSelectPersona = async (id: string, initialMsg?: string) => {
+  const handleSelectPersona = (id: string) => {
     setSelectedPersonaId(id);
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-
-    // 💎 NEURAL TELEMETRY: The Conversational Conversion
-    trackEvent('chat_open', id, { initialMsg: !!initialMsg });
-
-    if (guestId) {
-        await supabase.from('chat_messages').update({ is_read: true }).match({ user_id: guestId, persona_id: id, role: 'assistant', is_read: false });
-    }
-    
-    // Add to favorites automatically if deep-linked or followed
-    const favs = JSON.parse(localStorage.getItem('gasp_favorites') || '[]');
-    if (!favs.includes(id)) {
-        favs.push(id);
-        localStorage.setItem('gasp_favorites', JSON.stringify(favs));
-        window.dispatchEvent(new Event('storage'));
-    }
-
-    if (lastActivePersonaId && lastActivePersonaId !== id && guestId) {
-        setLastActivePersonaId(id); // Simple rotation
-    }
-    setLastActivePersonaId(id);
-
-    setOpenChatIds(prev => {
-      if (isMobile) return [id];
-      if (prev.includes(id)) return prev;
-      return [...prev, id];
-    });
+    setOpenChatIds(prev => (isMobile ? [id] : prev.includes(id) ? prev : [...prev, id]));
     setMinimizedIds(prev => prev.filter(m => m !== id));
-
-    if (initialMsg && guestId) {
-      setTimeout(async () => {
-        await supabase.from('chat_messages').insert([{ user_id: guestId, persona_id: id, role: 'assistant', content: initialMsg }]);
-      }, 500);
-    }
   };
 
   const handleCloseChat = (id: string) => {
@@ -258,122 +92,61 @@ function MarketplaceMain() {
     setMinimizedIds(prev => prev.filter(mid => mid !== id));
   };
 
-  const handleMinimizeChat = (id: string) => setMinimizedIds(prev => [...prev, id]);
-  const handleRestoreChat = (id: string) => setMinimizedIds(prev => prev.filter(mid => mid !== id));
-  
   const isChatOpenMobile = openChatIds.filter(id => !minimizedIds.includes(id)).length > 0;
-
-  const [showRightSidebar, setShowRightSidebar] = useState(false); // Hidden by default on mobile
-
   const [isZenMode, setIsZenMode] = useState(false);
 
-  if (!mounted) return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-       <div className="w-12 h-12 border-4 border-[#ffea00]/20 border-t-[#ffea00] rounded-full animate-spin" />
-    </div>
-  );
+  if (!mounted) return (<div className="min-h-screen bg-black flex items-center justify-center"><div className="w-12 h-12 border-4 border-[#ffea00]/20 border-t-[#ffea00] rounded-full animate-spin" /></div>);
 
   return (
-    <div className="flex h-screen bg-black overflow-hidden font-inter selection:bg-[#ff00ff] selection:text-black" 
+    <div className="flex h-screen bg-black overflow-hidden font-inter" 
          onDoubleClick={() => setIsZenMode(!isZenMode)}
     >
       <AnimatePresence>
          {!isZenMode && (
-           <motion.div 
-            initial={{ y: -100 }} 
-            animate={{ y: 0 }} 
-            exit={{ y: -100 }} 
-            className={`absolute inset-x-0 top-0 z-[1000] ${isChatOpenMobile ? 'hidden md:block' : 'block'}`}
+           <motion.div initial={{ y: -100 }} animate={{ y: 0 }} exit={{ y: -100 }} 
+                className={`absolute inset-x-0 top-0 z-[1000] ${isChatOpenMobile ? 'hidden md:block' : 'block'}`}
            >
-            <Header />
+            <Header onOpenTopUp={() => setIsTopUpOpen(true)} />
            </motion.div>
          )}
       </AnimatePresence>
       
-      {!isZenMode && <Sidebar selectedPersonaId={selectedPersonaId} onSelectPersona={handleSelectPersona} unreadCounts={unreadCounts} personas={refinedPersonas} />} {/* Sanitized sidebar list */}
+      {!isZenMode && <Sidebar selectedPersonaId={selectedPersonaId} onSelectPersona={handleSelectPersona} unreadCounts={unreadCounts} personas={refinedPersonas} />}
       
       <main className="flex-1 flex flex-col relative overflow-hidden">
           {!isZenMode && <div className="h-28 md:h-36 shrink-0" />}
-          <AnimatePresence>
-             {(!isZenMode && !isChatOpenMobile) && (
-                <motion.div 
-                  initial={{ opacity: 0 }} 
-                  animate={{ opacity: 1 }} 
-                  exit={{ opacity: 0 }} 
-                  className="relative z-[200] bg-black border-b border-white/5 flex items-center pr-4 shrink-0 transition-all duration-500"
-                >
-                  <StoriesRow personas={refinedPersonas} onSelectPersona={handleSelectPersona} />
-                  <button onClick={() => setShowRightSidebar(!showRightSidebar)} className="flex lg:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/10 items-center justify-center text-white/40 hover:text-[#00f0ff] transition-all shrink-0">
-                     {showRightSidebar ? <X size={20} /> : <Zap size={20} />}
-                  </button>
-                </motion.div>
-             )}
-          </AnimatePresence>
-          <div className="flex-1 overflow-hidden transition-all duration-500">
+          <div className="flex-1 overflow-hidden">
             <GlobalFeed onSelectPersona={handleSelectPersona} />
           </div>
       </main>
 
-      <div className={`${showRightSidebar ? 'fixed inset-0 z-[500] bg-black/80 backdrop-blur-xl md:static md:bg-transparent' : 'hidden lg:flex'}`}>
-         {showRightSidebar && (
-            <button onClick={() => setShowRightSidebar(false)} className="absolute top-6 right-6 lg:hidden z-[600] text-white/40"><X size={24} /></button>
-         )}
-         <RightSidebar onSelectPersona={handleSelectPersona} personas={refinedPersonas} />
-      </div>
-
-      {/* RECIPROCAL FOLLOW TOAST (Elite Hook) */}
-      <AnimatePresence>
-        {followNotify && (
-          <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }}
-             className="fixed top-20 left-1/2 -translate-x-1/2 z-[2000] w-[90vw] max-w-sm bg-gradient-to-r from-black via-[#00f0ff]/20 to-black border border-[#00f0ff]/40 p-1 px-4 rounded-full flex items-center justify-between shadow-[0_0_50px_rgba(0,240,255,0.2)]"
-          >
-             <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                <p className="text-[9px] font-black uppercase text-white tracking-[0.2em]">
-                   Reciprocal Connect: <span className="text-[#00f0ff]">{followNotify}</span> confirmed follow back
-                </p>
-             </div>
-             <Zap size={10} className="text-[#00f0ff] animate-pulse" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Removed PWA prompt from main, using InstallHint instead */}
-
-
-      <div className={`fixed top-1/2 -translate-y-1/2 z-[600] flex flex-col gap-3 transition-all duration-500 ${isChatOpenMobile ? 'right-2' : 'left-2'}`}>
-         {showFloatingAvatars && refinedPersonas.filter(p => activeFloatingIds.includes(p.id)).map(p => (
-              <motion.div key={p.id} initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: isChatOpenMobile ? 0.85 : 1 }} onClick={() => handleSelectPersona(p.id)} 
-                className="w-10 h-10 rounded-2xl border border-white/20 overflow-hidden relative shadow-2xl bg-black/50 backdrop-blur-md cursor-pointer"
-              >
-                 <PersonaAvatar src={p.image} alt="" />
-                 <div className="absolute top-0.5 right-0.5 w-2 h-2 bg-[#00ff41] rounded-full animate-ping" />
-              </motion.div>
-         ))}
-         <button onClick={() => setShowFloatingAvatars(!showFloatingAvatars)} className="w-8 h-8 mx-auto rounded-full bg-black/80 border border-white/10 flex items-center justify-center text-white/50">{showFloatingAvatars ? <EyeOff size={14} /> : <Eye size={14} />}</button>
-      </div>
-
-      <div className={`fixed inset-y-0 right-0 ${isChatOpenMobile ? 'z-[1200]' : 'z-[500]'} flex flex-row-reverse pointer-events-none items-end pr-2 md:pr-0`}>
+      <div className={`fixed inset-y-0 right-0 ${isChatOpenMobile ? 'z-[1200]' : 'z-[500]'} flex flex-row-reverse pointer-events-none items-end`}>
         <AnimatePresence mode="popLayout">
            {[...openChatIds].reverse().map((id, index) => {
               const isMinimized = minimizedIds.includes(id);
-              const p = refinedPersonas.find(p => p.id === id) || initialPersonas.find(p => p.id === id);
-              if (!p) return null;
+              const p = refinedPersonas.find(p => p.id === id);
+              if (!p || isMinimized) return null;
               return (
-                <motion.div key={id} initial={{ x: '100%' }} animate={{ x: isMinimized ? '100%' : `-${index * 12}px`, opacity: isMinimized ? 0 : 1 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 30 }}
-                  className="h-full pointer-events-auto bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.8)]"
+                <motion.div key={id} initial={{ x: '100%' }} animate={{ x: `-${index * 12}px`, opacity: 1 }} exit={{ x: '100%' }} 
+                   className="h-full pointer-events-auto bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.8)]"
                 >
-                  <ChatDrawer personaId={id} persona={p} onClose={() => handleCloseChat(id)} onMinimize={() => handleMinimizeChat(id)} />
+                  <ChatDrawer personaId={id} persona={p} onClose={() => handleCloseChat(id)} onMinimize={() => setMinimizedIds([...minimizedIds, id])} />
                 </motion.div>
               );
            })}
         </AnimatePresence>
       </div>
 
-      {!isZenMode && <GhostActivityTicker />}
-      {!isZenMode && <ChatDock minimizedIds={minimizedIds} onRestore={handleRestoreChat} unreadCounts={unreadCounts} personas={refinedPersonas} />}
-      {(!isZenMode && !(openChatIds.length > 0 && minimizedIds.length < openChatIds.length)) && (
-        <MobileBottomNav unreadCounts={unreadCounts} onSelectChat={() => handleSelectPersona(selectedPersonaId)} />
+      {!isZenMode && !isChatOpenMobile && (
+        <MobileBottomNav 
+          unreadCounts={unreadCounts} 
+          onSelectChat={() => handleSelectPersona(selectedPersonaId)} 
+          onOpenTopUp={() => setIsTopUpOpen(true)}
+        />
+      )}
+
+      {isTopUpOpen && (
+        <TopUpDrawer userId={guestId} onClose={() => setIsTopUpOpen(false)} />
       )}
     </div>
   );
@@ -386,6 +159,3 @@ export default function GaspMarketplace() {
     </Suspense>
   );
 }
-
-
-
