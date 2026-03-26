@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
 import Image from 'next/image';
@@ -7,6 +8,21 @@ import PersonaAvatar from './persona/PersonaAvatar';
 import { Zap, Heart } from 'lucide-react';
 
 export default function RightSidebar({ onSelectPersona, personas }: { onSelectPersona: (id: string) => void, personas: any[] }) {
+  const [following, setFollowing] = useState<string[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('gasp_following');
+    if (stored) {
+      try { setFollowing(JSON.parse(stored)); } catch (e) { setFollowing([]); }
+    }
+    const handleStorage = () => {
+      const updated = localStorage.getItem('gasp_following');
+      if (updated) setFollowing(JSON.parse(updated));
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   // Simulated status variation for the gallery
   const galleryItems = personas.map((p, idx) => ({
     ...p,
@@ -55,7 +71,10 @@ export default function RightSidebar({ onSelectPersona, personas }: { onSelectPe
                  </div>
                  <div className="flex items-center justify-between">
                     <span className="text-[7px] font-black text-white/40 uppercase tracking-widest leading-none">{persona.city}</span>
-                    {persona.isOnline && <Heart size={8} className="text-[#ff00ff] fill-current opacity-80" />}
+                    <Heart 
+                      size={8} 
+                      className={`transition-all ${following.includes(persona.id) ? 'text-[#ff00ff] fill-[#ff00ff] opacity-100 drop-shadow-[0_0_5px_#ff00ff]' : 'text-white/20 opacity-60'}`} 
+                    />
                  </div>
               </div>
 

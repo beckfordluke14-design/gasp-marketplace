@@ -278,7 +278,6 @@ function GlobalFeedItem({ persona, broadcast, onSelectPersona, onDeletePost, onT
                          {broadcast.content}
                       </h2>
                    )}
-                        <span className="text-[10px] font-black uppercase text-white/40 tracking-widest font-mono">NODE_{displayName.slice(0, 8)} • {displayAge} • {displayCity}</span>
                         <h3 className="text-4xl md:text-7xl font-syncopate font-bold uppercase italic tracking-tighter text-white drop-shadow-2xl leading-none">{displayName}</h3>
                         <p className="max-w-md text-lg md:text-2xl font-outfit text-white/90 lowercase italic leading-tight drop-shadow-xl">{broadcast.content}</p>
                      </div>
