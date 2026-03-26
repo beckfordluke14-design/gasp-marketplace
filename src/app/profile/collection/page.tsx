@@ -7,9 +7,11 @@ import { ShoppingBag, Star, Zap, Play, CheckCircle2, RefreshCcw } from 'lucide-r
 import { useUser } from '@/components/providers/UserProvider';
 import Image from 'next/image';
 
+export const dynamic = 'force-dynamic';
+
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 );
 
 /**

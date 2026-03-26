@@ -7,9 +7,11 @@ import { Star, Search, Trash2, Zap, ArrowLeft, Loader2, Sparkles, Filter } from 
 import { initialPersonas } from '@/lib/profiles';
 import Header from '@/components/Header';
 
+export const dynamic = 'force-dynamic';
+
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 );
 
 /**

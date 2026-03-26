@@ -6,9 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Play, CheckCircle2, XCircle, RefreshCcw, Zap, Activity, Clock, Database, ChevronRight, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 
+export const dynamic = 'force-dynamic';
+
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 );
 
 /**

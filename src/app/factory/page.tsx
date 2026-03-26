@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect } from 'react';
 import { Plus, Zap, Activity, Trash2, Clock, MapPin, UserPlus, Mic, Film, ImageIcon, Lock, Music, Disc, RefreshCcw, LayoutDashboard, Settings } from 'lucide-react';
 import Image from 'next/image';

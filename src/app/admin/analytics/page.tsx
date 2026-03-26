@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Users, Zap, MessageSquare, Lock, Activity, RefreshCcw, ShieldCheck, ChevronRight } from 'lucide-react';
 import Header from '@/components/Header';
 
+export const dynamic = 'force-dynamic';
+
 export default function NeuralAnalytics() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);

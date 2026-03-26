@@ -7,9 +7,11 @@ import { proxyImg } from '@/lib/profiles';
 import { LayoutGrid, Zap, Lock, Eye, Trash2 } from 'lucide-react';
 import Header from '@/components/Header';
 
+export const dynamic = 'force-dynamic';
+
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 );
 
 interface PersonaSummary {
