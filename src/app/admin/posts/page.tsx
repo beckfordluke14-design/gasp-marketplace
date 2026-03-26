@@ -37,7 +37,7 @@ interface PersonaPost {
   personas?: { name: string; age?: number; city?: string };
 }
 
-type FilterMode = 'all' | 'vault' | 'hero' | 'feed';
+type FilterMode = 'all' | 'vault' | 'hero' | 'feed' | 'orphaned';
 
 interface EditDraft {
   caption: string;
@@ -129,6 +129,17 @@ export default function PostStudio() {
     const data = await callAudit('update-post', { id: post.id, is_featured: next });
     if (data.success) {
       setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_burner: next } : p));
+      flash(post.id);
+    }
+    setSyncing(null);
+  };
+
+  // ── One-click push a vault post to the public feed
+  const pushToFeed = async (post: PersonaPost) => {
+    setSyncing(post.id);
+    const data = await callAudit('update-post', { id: post.id, is_vault: false });
+    if (data.success) {
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_vault: false } : p));
       flash(post.id);
     }
     setSyncing(null);
@@ -247,29 +258,35 @@ export default function PostStudio() {
   };
 
   // ── Filtering — HERO posts appear in feed too (is_burner is additive)
+  // Orphaned = persona has ONLY vault posts (no feed presence)
+  const feedPersonaIds  = new Set(posts.filter(p => !p.is_vault).map(p => p.persona_id));
+  const vaultPersonaIds = new Set(posts.filter(p =>  p.is_vault).map(p => p.persona_id));
+  const orphanedPersonaIds = new Set(
+    [...vaultPersonaIds].filter(id => !feedPersonaIds.has(id))
+  );
+
   const filtered = posts.filter(p => {
-    const name = p.personas?.name || p.persona_id || '';
+    const name    = p.personas?.name || p.persona_id || '';
     const caption = p.caption || '';
-    const s = search.toLowerCase();
-    const matchSearch = !s ||
-      name.toLowerCase().includes(s) ||
-      caption.toLowerCase().includes(s) ||
-      (p.content_url || '').toLowerCase().includes(s);
+    const s       = search.toLowerCase();
+    const matchSearch  = !s || name.toLowerCase().includes(s) || caption.toLowerCase().includes(s) || (p.content_url || '').toLowerCase().includes(s);
     const matchPersona = personaFilter === 'all' || p.persona_id === personaFilter;
     const matchMode =
-      filterMode === 'all'   ? true :
-      filterMode === 'vault' ? !!p.is_vault :
-      filterMode === 'hero'  ? !!p.is_burner :
+      filterMode === 'all'      ? true :
+      filterMode === 'vault'    ? !!p.is_vault :
+      filterMode === 'hero'     ? !!p.is_burner :
+      filterMode === 'orphaned' ? (!!p.is_vault && orphanedPersonaIds.has(p.persona_id)) :
       // Feed = not vault (hero is still in feed, just tagged)
       !p.is_vault;
     return matchSearch && matchPersona && matchMode;
   });
 
-  const filterTabs: { label: string; value: FilterMode }[] = [
-    { label: `All (${posts.length})`,                                             value: 'all' },
-    { label: `Feed (${posts.filter(p => !p.is_vault).length})`,                   value: 'feed' },
-    { label: `Vault (${posts.filter(p => p.is_vault).length})`,                   value: 'vault' },
-    { label: `Hero (${posts.filter(p => p.is_burner).length})`,                   value: 'hero' },
+  const filterTabs: { label: string; value: FilterMode; alert?: boolean }[] = [
+    { label: `All (${posts.length})`,                                                              value: 'all' },
+    { label: `Feed (${posts.filter(p => !p.is_vault).length})`,                                   value: 'feed' },
+    { label: `Vault (${posts.filter(p => p.is_vault).length})`,                                   value: 'vault' },
+    { label: `Hero (${posts.filter(p => p.is_burner).length})`,                                   value: 'hero' },
+    { label: `Orphaned (${orphanedPersonaIds.size})`,                                              value: 'orphaned', alert: orphanedPersonaIds.size > 0 },
   ];
 
   return (
@@ -324,12 +341,13 @@ export default function PostStudio() {
             <button
               key={tab.value}
               onClick={() => setFilterMode(tab.value)}
-              className={`px-3 sm:px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${
+              className={`relative px-3 sm:px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${
                 filterMode === tab.value
-                  ? 'bg-white/10 border border-white/20 text-white'
-                  : 'text-white/20 hover:text-white/60'
+                  ? tab.alert ? 'bg-orange-500/20 border border-orange-500/40 text-orange-400' : 'bg-white/10 border border-white/20 text-white'
+                  : tab.alert ? 'text-orange-400/60 hover:text-orange-400' : 'text-white/20 hover:text-white/60'
               }`}
             >
+              {tab.alert && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-orange-500 rounded-full animate-pulse" />}
               {tab.label}
             </button>
           ))}
@@ -349,6 +367,17 @@ export default function PostStudio() {
             <p className="text-[11px] font-black uppercase tracking-widest">No posts match this filter</p>
           </div>
         ) : (
+          <>
+            {/* Orphaned mode banner */}
+            {filterMode === 'orphaned' && orphanedPersonaIds.size > 0 && (
+              <div className="mb-4 flex items-start gap-3 px-4 py-3 rounded-2xl bg-orange-500/10 border border-orange-500/20">
+                <span className="text-orange-400 text-lg mt-0.5">⚠️</span>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-orange-400">{orphanedPersonaIds.size} persona{orphanedPersonaIds.size > 1 ? 's' : ''} invisible to feed</p>
+                  <p className="text-[9px] text-white/30 mt-0.5">These personas only have vault posts — click <strong className="text-white/50">→ Feed</strong> on any card to make it their hero image.</p>
+                </div>
+              </div>
+            )}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
             <AnimatePresence mode="popLayout">
               {filtered.map(post => {
@@ -391,6 +420,15 @@ export default function PostStudio() {
 
                       {/* Hover overlay */}
                       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto z-10 p-2">
+                        {/* Orphaned: prominent push-to-feed CTA */}
+                        {filterMode === 'orphaned' && post.is_vault && (
+                          <button
+                            onClick={() => pushToFeed(post)}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-[#00f0ff] text-black rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,240,255,0.4)]"
+                          >
+                            <ArrowLeftRight size={12} /> → Feed
+                          </button>
+                        )}
                         <button
                           onClick={() => openEdit(post)}
                           className="flex items-center gap-1.5 px-4 py-2 bg-white text-black rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-[#00f0ff] transition-all"
@@ -398,13 +436,13 @@ export default function PostStudio() {
                           <Pencil size={12} /> Edit
                         </button>
                         <div className="flex items-center gap-1.5">
-                          <button onClick={() => toggleVault(post)} title="Toggle Vault" className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all ${post.is_vault ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/30'}`}>
+                          <button onClick={() => toggleVault(post)} title={post.is_vault ? 'Move to Feed' : 'Move to Vault'} className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all ${post.is_vault ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/30'}`}>
                             <Lock size={13} />
                           </button>
                           <button onClick={() => toggleHero(post)} title="Toggle Hero (stays in feed)" className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all ${post.is_burner ? 'bg-[#ffea00] text-black' : 'bg-white/10 text-white/50 hover:bg-[#ffea00]/30'}`}>
                             <Star size={13} />
                           </button>
-                          <button onClick={() => softHide(post.id)} title="Hide from Feed" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 text-white/50 hover:bg-orange-500/20 hover:text-orange-400 flex items-center justify-center transition-all">
+                          <button onClick={() => softHide(post.id)} title="Hide (soft delete)" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 text-white/50 hover:bg-orange-500/20 hover:text-orange-400 flex items-center justify-center transition-all">
                             <EyeOff size={13} />
                           </button>
                           <button onClick={() => hardDelete(post.id)} title="Permanent Delete" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 text-white/50 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center transition-all">
@@ -430,6 +468,7 @@ export default function PostStudio() {
               })}
             </AnimatePresence>
           </div>
+          </>
         )}
       </div>
 

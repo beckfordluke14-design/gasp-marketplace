@@ -202,7 +202,10 @@ export async function POST(req: Request) {
             
             // Forced Discovery: 1st AND 2nd message for guests always includes voice
             const forceVoiceForDiscovery = isGuest && userMsgCount <= 2;
-            const sendVoice = shouldForceVoice || forceVoiceForDiscovery || Math.random() < 0.9;
+            // Mood-gated: respects persona's daily voiceNoteFrequency (10%-80% based on mood)
+            // shouldSendVoiceNote also weights SHORT responses higher (feels more natural)
+            const moodAllowsVoice = shouldSendVoiceNote(finalPersonaId, streamA_Native.length);
+            const sendVoice = shouldForceVoice || forceVoiceForDiscovery || moodAllowsVoice;
 
             if (sendVoice) {
               try {

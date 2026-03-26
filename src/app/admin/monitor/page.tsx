@@ -22,6 +22,7 @@ export default function FactoryMonitor() {
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
+  const [publishedJobs, setPublishedJobs] = useState<Record<string, 'publishing' | 'done'>>({});
 
   async function fetchJobs() {
     console.log('🛰️ [Monitor] Fetching Video Factories Heartbeat...');
@@ -52,6 +53,39 @@ export default function FactoryMonitor() {
      } finally {
         setIsSyncing(false);
      }
+  }
+
+  // ONE-CLICK PUBLISH: Create a post from a completed video job
+  async function publishAsPost(job: any) {
+    if (publishedJobs[job.id]) return;
+    setPublishedJobs(prev => ({ ...prev, [job.id]: 'publishing' }));
+    try {
+      const res = await fetch('/api/admin/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-post',
+          payload: {
+            persona_id:   job.persona_id,
+            content_url:  job.media_url,
+            content_type: 'video',
+            is_vault:     job.target_bin === 'vault',
+            is_featured:  false,
+            caption:      '',
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPublishedJobs(prev => ({ ...prev, [job.id]: 'done' }));
+      } else {
+        alert('Publish failed: ' + data.error);
+        setPublishedJobs(prev => { const n = { ...prev }; delete n[job.id]; return n; });
+      }
+    } catch (err: any) {
+      alert(err.message);
+      setPublishedJobs(prev => { const n = { ...prev }; delete n[job.id]; return n; });
+    }
   }
 
   // 2. Lifecycle: Auto-Poll for Status and Sync every 15s
@@ -172,13 +206,39 @@ export default function FactoryMonitor() {
                         )}
                      </div>
 
-                     <div className="flex items-center justify-between text-white/20">
-                        <div className="flex items-center gap-2">
-                           <Clock size={12} />
-                           <p className="text-[9px] font-bold uppercase tracking-[0.1em]">{new Date(job.created_at).toLocaleString()}</p>
-                        </div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] group-hover:text-[#00f0ff] transition-all">Persona: {job.persona_id}</p>
-                     </div>
+                      {/* Bottom row: timestamp + publish CTA */}
+                      <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-2 text-white/20">
+                            <Clock size={12} />
+                            <p className="text-[9px] font-bold uppercase tracking-[0.1em]">{new Date(job.created_at).toLocaleString()}</p>
+                         </div>
+
+                         {/* ONE-CLICK PUBLISH — only for completed jobs with media */}
+                         {job.status === 'completed' && job.media_url ? (
+                           publishedJobs[job.id] === 'done' ? (
+                             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 text-green-400">
+                               <CheckCircle2 size={14} />
+                               <span className="text-[9px] font-black uppercase tracking-widest">Published</span>
+                             </div>
+                           ) : (
+                             <motion.button
+                               whileHover={{ scale: 1.05 }}
+                               whileTap={{ scale: 0.95 }}
+                               onClick={() => publishAsPost(job)}
+                               disabled={publishedJobs[job.id] === 'publishing'}
+                               className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#00f0ff] text-black font-black uppercase tracking-widest text-[9px] shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:shadow-[0_0_30px_rgba(0,240,255,0.6)] transition-all disabled:opacity-50"
+                             >
+                               {publishedJobs[job.id] === 'publishing' ? (
+                                 <><RefreshCcw size={12} className="animate-spin" /> Pushing...</>
+                               ) : (
+                                 <><Play size={12} fill="currentColor" /> Publish to Feed</>
+                               )}
+                             </motion.button>
+                           )
+                         ) : (
+                           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Persona: {job.persona_id}</p>
+                         )}
+                      </div>
                   </motion.div>
                ))}
             </AnimatePresence>

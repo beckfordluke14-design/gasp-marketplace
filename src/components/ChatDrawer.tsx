@@ -209,19 +209,24 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     setShowVoiceTip(false);
   };
 
-  const playNotification = () => {
+  // Notification: plays the static chime ONLY when there's no real-time ElevenLabs voice note.
+  // When voice note IS present, ElevenLabs audio IS the notification — no overlap.
+  const playNotification = (messageHasVoice: boolean) => {
+    if (messageHasVoice) return;
     try {
-        const audio = new Audio('https://gasp-marketplace.vercel.app/notification.mp3'); // Fallback to public asset
-        audio.volume = 0.4;
-        audio.play().catch(() => {});
+      const audio = new Audio('https://gasp-marketplace.vercel.app/notification.mp3');
+      audio.volume = 0.4;
+      audio.play().catch(() => {});
     } catch (e) {}
   };
 
   useEffect(() => {
-     if (dbMessages.length > 0 || messages.length > 0) {
-        const lastMsg = messages[messages.length - 1] || dbMessages[dbMessages.length - 1];
-        if (lastMsg?.role === 'assistant') playNotification();
-     }
+    if (dbMessages.length > 0 || messages.length > 0) {
+      const lastMsg = messages[messages.length - 1] || dbMessages[dbMessages.length - 1];
+      if (lastMsg?.role === 'assistant') {
+        playNotification(!!lastMsg.media_url);
+      }
+    }
   }, [dbMessages.length, messages.length]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -358,6 +363,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
         {[...dbMessages, ...messages].filter(m => !m.content.startsWith('[SYSTEM]')).map((msg: any) => (
           <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`max-w-[85%] px-5 py-3 rounded-[1.6rem] text-xs md:text-sm leading-relaxed shadow-xl relative ${msg.role === 'user' ? 'bg-[#ff00ff] text-black font-bold rounded-tr-none' : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'}`}>
+               {/* Voice note: renders above text. ElevenLabs speaks the actual AI response */}
                {msg.media_url && msg.role === 'assistant' && <VoiceNoteBubble audioUrl={msg.media_url} personaImage={persona.image} personaName={persona.name} translation={msg.audio_translation} onUnlockTranslation={async () => {
                   const { data } = await supabase.rpc('process_spend', { p_user_id: guestId, p_amount: 10, p_type: 'voice_translation', p_persona_id: personaId });
                   if (data?.success) setWalletBalance(prev => prev !== null ? prev - 10 : prev);
@@ -382,7 +388,8 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                   />
                )}
                {msg.image_url && msg.role === 'user' && <div className="relative w-40 aspect-square rounded-xl overflow-hidden mb-3"><Image src={msg.image_url} alt="" fill unoptimized className="object-cover" /></div>}
-               {!(msg.role === 'assistant' && msg.media_url) && msg.content}
+               {/* Always show the text — voice note is a supplement, not a replacement */}
+               {msg.content}
             </div>
             {msg.role === 'user' && msg.status && <div className="mt-1 flex items-center gap-1 opacity-40"><span className="text-[8px] font-black uppercase tracking-tighter">{msg.status}</span>{msg.status === 'read' ? <CheckCheck size={10} className="text-[#00f0ff]" /> : <Check size={10} />}</div>}
           </div>
