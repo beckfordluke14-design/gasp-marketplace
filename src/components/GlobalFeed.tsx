@@ -476,7 +476,13 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
                  created_at: p.created_at || new Date().toISOString() 
                }
            };
-        }).filter((i: any) => i !== null && i.persona?.id);
+        }).filter((i: any) => 
+            i !== null && 
+            i.persona?.id && 
+            i.persona?.name && 
+            i.persona?.is_active !== false && 
+            !i.broadcast.content?.startsWith('DELETED')
+        );
     } catch(e) { 
         console.error('Feed Fetch Failure:', e); 
     }
