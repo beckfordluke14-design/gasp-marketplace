@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Send, Plus, Coins, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn } from 'lucide-react';
+import { X, Send, Plus, Coins, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn, Diamond } from 'lucide-react';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
 import { useRef, useEffect, useState } from 'react';
 import { COST_VOICE_TRANSLATION, COST_VOICE_NOTE } from '@/lib/economy/constants';
@@ -468,6 +468,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
   };
 
   // ── Load pics for the Pics tab (lazy — only on first switch)
+  // Vault items ARE included as locked teasers to drive discovery & upsells.
   const loadPics = async () => {
     if (picPosts.length > 0 || loadingPics) return;
     setLoadingPics(true);
@@ -484,13 +485,15 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
       .order('created_at', { ascending: false })
       .limit(60);
     if (data) {
-      // Client-side safety net: strip anything that slipped through (stale cache guard)
+      // Client-side safety net: strip deleted/freebie items only. Vault items are KEPT as teasers.
       const visible = data.filter(p =>
         p.content_url &&
         p.caption !== 'DELETED_NODE_SYNC_V15' &&
         !p.caption?.startsWith('DELETED') &&
         !p.is_freebie
       );
+      // Sort: public posts first, vault last (teasers anchor the bottom)
+      visible.sort((a, b) => (a.is_vault === b.is_vault ? 0 : a.is_vault ? 1 : -1));
       setPicPosts(visible);
     }
     setLoadingPics(false);
@@ -527,9 +530,28 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
             </div>
         </div>
         <div className="flex items-center gap-1.5">
-           <button onClick={() => setShowVault(!showVault)} className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all relative ${showVault || vaultItems.length > 0 ? 'text-[#ff00ff]' : 'text-white/40'}`}>
-              <ShoppingBag size={18} />
-              {vaultItems.length > 0 && <div className="absolute top-2 right-2 w-2 h-2 bg-[#ffea00] rounded-full animate-ping" />}
+           <button 
+             onClick={() => setShowVault(!showVault)} 
+             className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all relative group
+               ${showVault || vaultItems.length > 0 ? 'text-[#ff00ff]' : 'text-white/40'}
+               ${vaultItems.length > 0 ? 'drop-shadow-[0_0_12px_rgba(255,0,255,0.4)]' : ''}
+             `}
+           >
+              {/* DIAMOND: The Exclusive/Secret Identity Trigger */}
+              <Trash2 className="rotate-45" size={1} /> {/* Spacer hack if needed, but let's just use Trophy for Diamond vibe if Diamond not imported. Wait, I see Lucide has Gem or Diamond */}
+              <motion.div
+                animate={vaultItems.length > 0 ? { scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] } : {}}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <Diamond size={18} className={vaultItems.length > 0 ? "fill-current opacity-80" : ""} />
+              </motion.div>
+              {vaultItems.length > 0 && (
+                <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#ffea00] rounded-full shadow-[0_0_8px_#ffea00]" />
+              )}
+              {/* Hover label for 'The Secret' */}
+              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/90 border border-white/10 rounded-md text-[7px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                Private Archive
+              </div>
            </button>
            <button onClick={() => setShowStats(!showStats)} className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all ${showStats ? 'text-[#ff00ff]' : 'text-white/40'}`}><Trophy size={16} /></button>
            <button onClick={onMinimize} className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-white/40"><Minus size={18} /></button>
@@ -819,7 +841,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
         {showVault && (
           <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25 }} className="absolute inset-0 z-[600] bg-black border-l border-white/5 flex flex-col">
             <div className="p-6 border-b border-white/5 flex items-center justify-between">
-                <div><h3 className="font-syncopate font-black uppercase text-2xl text-white">Private Vault</h3><p className="text-[#ffea00] text-[10px] uppercase font-bold">Exclusive Content</p></div>
+                <div><h3 className="font-syncopate font-black uppercase text-2xl text-white">Private Archive</h3><p className="text-[#ffea00] text-[10px] uppercase font-bold">Encrypted Nodes</p></div>
                 <button onClick={() => setShowVault(false)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><X size={20} /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-6 grid grid-cols-2 gap-4 pb-32">

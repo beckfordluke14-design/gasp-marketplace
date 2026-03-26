@@ -166,7 +166,8 @@ export async function POST(req: Request) {
     
     const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\nZONE DICTIONARY (${zoneKey}):\n${JSON.stringify(zoneDictionary)}\n\nMEMORY: ${memoryContext}\n\nAUTHENTICITY DIRECTIVE: YOU MUST ONLY USE NATIVE PHRASES FROM THE DICTIONARY FOR STREAM A. DO NOT GENERATE ENGLISH AUDIO.\n\nJSON SCHEMA: { "text_message": "...", "audio_script": "...", "translation": "...", "moment_key": "...", "new_nickname_detected": "string|null" }`;
 
-    const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    // ── Grok Brain Call with 503-resilient single retry ──
+    const callGrok = () => fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -175,14 +176,21 @@ export async function POST(req: Request) {
             'X-Title': 'GASP Syndicate Circuit'
         },
         body: JSON.stringify({
-            model: 'x-ai/grok-4.1-fast', // The High-Intensity Baddie Brain (Optimized Tier)
+            model: 'x-ai/grok-4.1-fast',
             messages: [
                 { role: 'system', content: brainPrompt },
-                ...messages.slice(-5) // Keep context tight for the director
+                ...messages.slice(-5)
             ],
             response_format: { type: "json_object" }
         })
     });
+
+    let orResponse = await callGrok();
+    if (orResponse.status === 503) {
+        console.warn('[Brain API] Grok 503 — retrying in 1s...');
+        await new Promise(r => setTimeout(r, 1000));
+        orResponse = await callGrok();
+    }
 
     if (!orResponse.ok) {
         const errData = await orResponse.text();

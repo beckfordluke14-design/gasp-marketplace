@@ -77,13 +77,15 @@ const MULTI_FILLERS: Record<string, string[]> = {
 export function processVocalText(text: string, personaId: string, location: string, timeHour: number, age: number = 22, language: string = 'en'): string {
     let cleanText = text.trim();
     
-    // 1. NEURAL TAG EXTRACTION: Pull [tag] out to the front if it exists
-    let activeTag = "";
-    const tagMatch = cleanText.match(/^\[([a-z0-9_\s]{2,20})\]/i);
-    if (tagMatch) {
-        activeTag = tagMatch[0]; // e.g. "[chuckles]"
-        cleanText = cleanText.replace(activeTag, '').trim();
-    }
+    // 1a. GLOBAL BRACKET PURGE: Strip ALL [stage directions] from the text.
+    //     ElevenLabs should PERFORM the emotion via voice settings, not SPEAK the word.
+    //     This prevents "chuckles", "smiling", "sighs" from being literally pronounced.
+    cleanText = cleanText.replace(/\[[^\]]{1,40}\]/g, '').trim();
+
+    // 1b. LATE NIGHT WHISPER TAG: detect intent from original text BEFORE purge
+    let whisperMode = false;
+    const tagMatch = text.match(/^\[(whispering|whisper|soft|quiet)[^\]]*\]/i);
+    if (tagMatch) whisperMode = true;
 
     let newText = cleanText.toLowerCase();
     const langKey = language.toLowerCase().substring(0, 2); // 'es', 'pt', 'en'
@@ -125,14 +127,13 @@ export function processVocalText(text: string, personaId: string, location: stri
     // Ensure "..." exists but only once
     newText = newText.startsWith('...') ? newText : `... ${newText}`;
 
-    // Late Night "Whisper" Override (1AM-5AM) - applies [whispering] if no other tag exists
-    if (timeHour >= 1 && timeHour <= 5 && !activeTag) {
-        activeTag = "[whispering]";
+    // Late Night "Whisper" Override (1AM-5AM) - All brackets purged; whisper via word spacing only
+    if ((timeHour >= 1 && timeHour <= 5) || whisperMode) {
         newText = newText.split(' ').join(' ... ');
     }
 
-    // FINAL ASSEMBLY: Tag MUST be outside the ellipses for ElevenLabs to hit it first
-    return activeTag ? `${activeTag} ${newText}` : newText;
+    // FINAL ASSEMBLY: No brackets emitted — ElevenLabs renders emotion purely through voice settings + text tone
+    return newText;
 }
 
 
