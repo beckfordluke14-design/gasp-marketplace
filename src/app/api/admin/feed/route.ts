@@ -17,9 +17,10 @@ export async function GET(req: Request) {
     // ✅ Show ONLY public posts (no vaults) from ACTIVE personas
     const { data: dbPosts, error } = await supabase
         .from('posts')
-        .select('*, personas!inner(id, name, city, seed_image_url, is_active)')
+        .select('*, personas!inner(id, name, city, age, seed_image_url, is_active)')
         .eq('personas.is_active', true)
         .eq('is_vault', false)
+        .neq('is_freebie', true)                          // freebies are chat gifts, not public feed
         .not('content_url', 'is', null)
         .not('caption', 'eq', 'DELETED_NODE_SYNC_V15')
         .order('created_at', { ascending: false })

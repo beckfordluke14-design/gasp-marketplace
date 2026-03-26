@@ -302,7 +302,8 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
   const [editingPersona, setEditingPersona] = useState<Persona | null>(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const loaderRef = useRef(null);
+  const loaderRef = useRef<HTMLDivElement>(null);
+  const isFetching = useRef(false); // ref-based guard so it never goes stale in closures
 
   useEffect(() => {
      if (typeof window !== 'undefined') {
@@ -424,11 +425,12 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
   };
 
   const fetchFeed = async (pageNumber = 0) => {
-    if (loading && pageNumber > 0) return;
+    if (isFetching.current) return; // ref-based guard: never stale, never blocks incorrectly
+    isFetching.current = true;
     setLoading(true);
 
-    let dbPosts = [];
-    let mergedItems = [];
+    let dbPosts: any[] = [];
+    let mergedItems: any[] = [];
     
     try {
         const controller = new AbortController();
@@ -511,6 +513,7 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
         });
     });
     setLoading(false);
+    isFetching.current = false;
   };
 
   useEffect(() => {
@@ -538,18 +541,18 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && !loading && hasMore && items.length > 0) {
+        if (entries[0].isIntersecting && !isFetching.current && hasMore && items.length > 0) {
             setPage(prev => {
                 const next = prev + 1;
                 fetchFeed(next);
                 return next;
             });
         }
-    }, { threshold: 0.0, rootMargin: '1000px' }); // 🧬 AGGRESSIVE ENDLESS SCROLL
+    }, { threshold: 0.0, rootMargin: '800px' });
 
     if (loaderRef.current) observer.observe(loaderRef.current);
     return () => observer.disconnect();
-  }, [loading, hasMore, items.length]);
+  }, [hasMore, items.length, fetchFeed]);
 
   return (
     <div className="flex-1 h-screen overflow-y-auto scroll-smooth no-scrollbar relative w-full touch-pan-y">
