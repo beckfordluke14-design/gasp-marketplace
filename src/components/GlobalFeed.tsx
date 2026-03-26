@@ -9,7 +9,7 @@ import { createClient } from '@supabase/supabase-js';
 import { useState, useEffect, useRef } from 'react';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
 import BrandingOverlay from '@/components/ui/BrandingOverlay';
-import { getAllAliases, type PostAlias } from '@/lib/postAliases';
+// postAliases removed — identity reads directly from personas table (DB is source of truth)
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
@@ -70,18 +70,10 @@ function BrainEditor({ persona, isOpen, onClose, onSave }: { persona: Persona, i
 function GlobalFeedItem({ persona, broadcast, onSelectPersona, onDeletePost, onToggleFeatured, onUpdatePost, isFeatured, onEditBrain, index }: { persona: Persona; broadcast: Broadcast; onSelectPersona: (id: string, initialMsg?: string) => void; onDeletePost?: (id: string) => void; onToggleFeatured?: (id: string, state: boolean) => void; onUpdatePost?: (id: string, caption: string) => void; isFeatured?: boolean; onEditBrain?: (persona: Persona) => void; index: number }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedCaption, setEditedCaption] = useState(broadcast.content || '');
-  // 🧬 ALIAS LAYER: per-post display overrides
-  const [aliases, setAliases] = useState<Record<string, PostAlias>>({});
-  useEffect(() => {
-    setAliases(getAllAliases());
-    const onStorage = (e: StorageEvent) => { if (e.key === 'gasp_post_aliases') setAliases(getAllAliases()); };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
-  const alias = aliases[broadcast.id] || {};
-  const displayName = alias.displayName || getPersonaName(persona);
-  const displayAge  = alias.displayAge  || String(persona.age || '22');
-  const displayCity = alias.displayCity || persona.city || '';
+  // Identity reads directly from persona (which the Post Studio writes to personas table)
+  const displayName = getPersonaName(persona);
+  const displayAge  = String(persona.age || '22');
+  const displayCity = persona.city || '';
 
   const handleSave = () => {
     if (onUpdatePost) onUpdatePost(broadcast.id, editedCaption);
@@ -525,11 +517,16 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
     fetchFeed(0);
     let debounceTimer: any;
     
-    const channel = supabase.channel('public:posts')
+    const channel = supabase.channel('public:posts-and-personas')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => { 
           // ⚡ NEURAL DEBOUNCE: Don't hammer the DB during mass generation events
           clearTimeout(debounceTimer);
           debounceTimer = setTimeout(() => fetchFeed(0), 3000); 
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'personas' }, () => {
+          // 🔄 Identity sync: persona name/age/city changed in Post Studio — refresh feed
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => fetchFeed(0), 1000);
       })
       .subscribe();
       

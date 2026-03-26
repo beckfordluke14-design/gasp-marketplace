@@ -128,6 +128,21 @@ export async function POST(req: Request) {
                 if (error) throw error;
                 return NextResponse.json({ success: true });
             }
+            case 'update-persona': {
+                // Writes identity fields to the personas table so chat + story sync automatically.
+                const { id, name, age, city, system_prompt } = payload;
+                if (!id) throw new Error('Persona ID Missing.');
+                const fields: Record<string, any> = {};
+                if (name        !== undefined) fields.name          = name;
+                if (age         !== undefined) fields.age           = parseInt(age, 10) || age;
+                if (city        !== undefined) fields.city          = city;
+                if (system_prompt !== undefined) fields.system_prompt = system_prompt;
+                if (Object.keys(fields).length === 0) return NextResponse.json({ success: true });
+                console.log(`[Neural Admin] Identity update for persona ${id}:`, fields);
+                const { error } = await supabase.from('personas').update(fields).eq('id', id);
+                if (error) throw error;
+                return NextResponse.json({ success: true });
+            }
             case 'toggle-featured': {
                 const { id, is_featured } = payload;
                 const { error } = await supabase.from('posts').update({ is_burner: is_featured }).eq('id', id);

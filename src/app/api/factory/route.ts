@@ -74,8 +74,8 @@ export async function POST(req: Request) {
     if (vision_prompt) {
         const batchTarget = Math.min(Math.max(1, batch_size), 20);
         const personas = await brainstorm(
-            `GASP Syndicate Architect. VISION: ${vision_prompt}. MISSION: Create ${batchTarget} personas with realistic occupations. Choose one body_type from: ${Object.keys(BADDIE_BODY_TYPES).join(', ')}. Respond in JSON array.`,
-            `Create ${batchTarget} unique AI personas based on: ${vision_prompt}. Include name, age, city, country, race, occupation, hair, body_type, system_prompt, hero_visual_style.`
+            `GASP Syndicate Architect. VISION: ${vision_prompt}. MISSION: Create ${batchTarget} personas with realistic occupations. Choose one body_type from: ${Object.keys(BADDIE_BODY_TYPES).join(', ')}. Include 5-8 descriptive searchable tags (e.g. latina, thick, curly, miami). Respond in JSON array.`,
+            `Create ${batchTarget} unique AI personas based on: ${vision_prompt}. Include name, age, city, country, race, occupation, hair, body_type, tags, system_prompt, hero_visual_style.`
         );
         
         const results = [];
@@ -115,7 +115,8 @@ export async function POST(req: Request) {
                 country: p.country || 'USA', 
                 race: p.race || 'Latina',
                 body_type: p.body_type || 'SLIM_THICK',
-                system_prompt: `${p.system_prompt || 'Syndicate node.'} Occupation: ${p.occupation || 'Elite'}.`,
+                tags: p.tags || [p.race, p.body_type, p.city].filter(Boolean),
+                system_prompt: `${p.system_prompt || 'Syndicate node.'} Occupation: ${p.occupation || 'Elite'}.`, 
                 seed_image_url: heroUrl, 
                 is_active: true
             }], { onConflict: 'id' });
@@ -167,8 +168,8 @@ export async function POST(req: Request) {
 
     // 🏁 SINGLE BIRTH PRECISION
     const p = await brainstorm(
-        `Create a persona. Vibe: ${vibe_hint}. Name: ${forced_name || 'Random'}. Body Types: ${Object.keys(BADDIE_BODY_TYPES).join(', ')}. Return JSON: { name, age, city, country, race, occupation, body_type, system_prompt, intro_text, image_prompt }`,
-        `Create one AI persona identity for: ${vibe_hint}`
+        `Create a persona. Vibe: ${vibe_hint}. Name: ${forced_name || 'Random'}. Body Types: ${Object.keys(BADDIE_BODY_TYPES).join(', ')}. Return JSON: { name, age, city, country, race, occupation, body_type, tags, system_prompt, intro_text, image_prompt }`,
+        `Create one AI persona identity for: ${vibe_hint}. Include 5-8 descriptive searchable tags.`
     );
     
     // 🧬 NEURAL DEFENSE: Zero-Crash ID Generation
@@ -207,6 +208,7 @@ export async function POST(req: Request) {
         country: p.country || 'USA', 
         race: p.race || 'Latina',
         body_type: p.body_type || 'SLIM_THICK',
+        tags: p.tags || [p.race, p.body_type, p.city].filter(Boolean),
         system_prompt: `${p.system_prompt || 'Syndicate node active.'} Occupation: ${p.occupation || 'Elite'}.`, 
         seed_image_url: heroUrl, 
         is_active: true

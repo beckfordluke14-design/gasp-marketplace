@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { proxyImg } from '@/lib/profiles';
 import { createClient } from '@supabase/supabase-js';
-import { getAlias, setAlias, clearAlias, type PostAlias } from '@/lib/postAliases';
 import NextLink from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -45,9 +44,10 @@ interface EditDraft {
   content_url: string;
   is_vault: boolean;
   is_burner: boolean;
-  displayName: string;
-  displayAge: string;
-  displayCity: string;
+  // Identity fields — write directly to personas table
+  name: string;
+  age: string;
+  city: string;
 }
 
 export default function PostStudio() {
@@ -152,16 +152,15 @@ export default function PostStudio() {
 
   // ── Open edit modal + fetch sibling posts
   const openEdit = async (post: PersonaPost) => {
-    const alias = getAlias(post.id);
     setEditPost(post);
     setDraft({
       caption:     post.caption || '',
       content_url: post.content_url || '',
       is_vault:    post.is_vault,
       is_burner:   post.is_burner,
-      displayName: alias.displayName || post.personas?.name || '',
-      displayAge:  alias.displayAge  || String(post.personas?.age  || ''),
-      displayCity: alias.displayCity || post.personas?.city || '',
+      name: post.personas?.name || '',
+      age:  String(post.personas?.age  || ''),
+      city: post.personas?.city || '',
     });
 
     // Load sibling posts from same persona
@@ -183,6 +182,7 @@ export default function PostStudio() {
     if (!editPost || !draft) return;
     setSaving(true);
 
+    // 1. Save post DB fields
     await callAudit('update-post', {
       id:          editPost.id,
       caption:     draft.caption,
@@ -191,27 +191,39 @@ export default function PostStudio() {
       is_featured: draft.is_burner,
     });
 
+    // 2. Write identity fields directly to personas table — single source of truth
+    //    Chat API, story bar, and feed all read from here automatically.
     const originalName = editPost.personas?.name || '';
     const originalAge  = String(editPost.personas?.age || '');
     const originalCity = editPost.personas?.city || '';
 
-    const newAlias: PostAlias = {};
-    if (draft.displayName && draft.displayName !== originalName) newAlias.displayName = draft.displayName;
-    if (draft.displayAge  && draft.displayAge  !== originalAge)  newAlias.displayAge  = draft.displayAge;
-    if (draft.displayCity && draft.displayCity !== originalCity) newAlias.displayCity = draft.displayCity;
+    const identityChanged = (
+      (draft.name && draft.name !== originalName) ||
+      (draft.age  && draft.age  !== originalAge)  ||
+      (draft.city && draft.city !== originalCity)
+    );
 
-    if (Object.keys(newAlias).length > 0) {
-      setAlias(editPost.id, newAlias);
-    } else {
-      clearAlias(editPost.id);
+    if (identityChanged) {
+      const personaUpdate: Record<string, string> = {};
+      if (draft.name && draft.name !== originalName) personaUpdate.name = draft.name;
+      if (draft.age  && draft.age  !== originalAge)  personaUpdate.age  = draft.age;
+      if (draft.city && draft.city !== originalCity) personaUpdate.city = draft.city;
+      await callAudit('update-persona', { id: editPost.persona_id, ...personaUpdate });
     }
 
+    // 3. Update local React state immediately (no flicker)
     setPosts(prev => prev.map(p => p.id === editPost.id ? {
       ...p,
       caption:     draft.caption,
       content_url: draft.content_url,
       is_vault:    draft.is_vault,
       is_burner:   draft.is_burner,
+      personas: p.personas ? {
+        ...p.personas,
+        name: draft.name || p.personas.name,
+        age:  draft.age ? Number(draft.age) : p.personas.age,
+        city: draft.city || p.personas.city,
+      } : p.personas,
     } : p));
 
     setSaving(false);
@@ -340,11 +352,9 @@ export default function PostStudio() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
             <AnimatePresence mode="popLayout">
               {filtered.map(post => {
-                const alias = getAlias(post.id);
-                const showName = alias.displayName || post.personas?.name || post.persona_id;
-                const showAge  = alias.displayAge  || String(post.personas?.age  || '');
-                const showCity = alias.displayCity || post.personas?.city || '';
-                const hasAlias = !!(alias.displayName || alias.displayAge || alias.displayCity);
+                const showName = post.personas?.name || post.persona_id;
+                const showAge  = String(post.personas?.age  || '');
+                const showCity = post.personas?.city || '';
 
                 return (
                   <motion.div
@@ -368,7 +378,6 @@ export default function PostStudio() {
                       <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
                         {post.is_vault   && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full">Vault</span>}
                         {post.is_burner  && <span className="px-2 py-0.5 bg-[#ffea00] text-black text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full">Hero</span>}
-                        {hasAlias        && <span className="px-2 py-0.5 bg-[#00f0ff]/20 border border-[#00f0ff]/40 text-[#00f0ff] text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full">Alias</span>}
                       </div>
 
                       {/* Saved flash */}
@@ -512,31 +521,33 @@ export default function PostStudio() {
                   </p>
                 </div>
 
-                {/* ── Alias Fields ── */}
+                {/* ── Identity Fields (DB + Chat + Story sync) ── */}
                 <div className="space-y-4">
                   <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#00f0ff]/60 flex items-center gap-2">
-                    <span className="w-4 h-px bg-[#00f0ff]/20" /> Display Aliases <span className="text-white/20 normal-case tracking-normal font-normal">(per-post overrides, applied site-wide)</span> <span className="flex-1 h-px bg-[#00f0ff]/10" />
+                    <span className="w-4 h-px bg-[#00f0ff]/20" /> Identity Fields
+                    <span className="text-white/20 normal-case tracking-normal font-normal">→ syncs to chat · story · feed</span>
+                    <span className="flex-1 h-px bg-[#00f0ff]/10" />
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <label className="block space-y-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><User size={10} />Display Name</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><User size={10} />Name</span>
                       <input
                         type="text"
-                        value={draft.displayName}
-                        onChange={e => setDraft(d => d ? { ...d, displayName: e.target.value } : d)}
-                        placeholder={editPost.personas?.name || 'Name override'}
+                        value={draft.name}
+                        onChange={e => setDraft(d => d ? { ...d, name: e.target.value } : d)}
+                        placeholder={editPost.personas?.name || 'Persona name'}
                         className="w-full bg-[#00f0ff]/5 border border-[#00f0ff]/10 rounded-xl px-3 sm:px-4 py-3 text-sm text-white focus:border-[#00f0ff]/50 outline-none transition-all"
                       />
                       <p className="text-[8px] text-white/20">DB: {editPost.personas?.name || '—'}</p>
                     </label>
 
                     <label className="block space-y-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><Hash size={10} />Display Age</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><Hash size={10} />Age</span>
                       <input
                         type="text"
-                        value={draft.displayAge}
-                        onChange={e => setDraft(d => d ? { ...d, displayAge: e.target.value } : d)}
+                        value={draft.age}
+                        onChange={e => setDraft(d => d ? { ...d, age: e.target.value } : d)}
                         placeholder={String(editPost.personas?.age || '22')}
                         className="w-full bg-[#00f0ff]/5 border border-[#00f0ff]/10 rounded-xl px-3 sm:px-4 py-3 text-sm text-white focus:border-[#00f0ff]/50 outline-none transition-all"
                       />
@@ -544,12 +555,12 @@ export default function PostStudio() {
                     </label>
 
                     <label className="block space-y-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><MapPin size={10} />Display City</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><MapPin size={10} />City</span>
                       <input
                         type="text"
-                        value={draft.displayCity}
-                        onChange={e => setDraft(d => d ? { ...d, displayCity: e.target.value } : d)}
-                        placeholder={editPost.personas?.city || 'City override'}
+                        value={draft.city}
+                        onChange={e => setDraft(d => d ? { ...d, city: e.target.value } : d)}
+                        placeholder={editPost.personas?.city || 'City'}
                         className="w-full bg-[#00f0ff]/5 border border-[#00f0ff]/10 rounded-xl px-3 sm:px-4 py-3 text-sm text-white focus:border-[#00f0ff]/50 outline-none transition-all"
                       />
                       <p className="text-[8px] text-white/20">DB: {editPost.personas?.city || '—'}</p>
@@ -557,7 +568,7 @@ export default function PostStudio() {
                   </div>
 
                   <p className="text-[9px] text-[#00f0ff]/40 bg-[#00f0ff]/5 border border-[#00f0ff]/10 rounded-xl px-3 sm:px-4 py-3 leading-relaxed">
-                    ⚡ Aliases override what&apos;s shown <strong>on this post only</strong>. The personas table is not touched. Leave blank to use the DB value.
+                    ⚡ Changes write to the <strong>personas table</strong> — the persona knows their new name in chat, story shows it, feed reflects it. Leave blank to keep existing DB value.
                   </p>
                 </div>
 

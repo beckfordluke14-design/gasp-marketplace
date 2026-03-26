@@ -25,8 +25,8 @@ export default function PersonaSearch() {
     async function fetchAll() {
       const { data: dbPersonas } = await supabase.from('personas').select('*').eq('is_active', true);
       const combined = [
-        ...(dbPersonas || []).map(p => ({ id: p.id, name: p.name, city: p.city, race: p.race, image: p.seed_image_url || '/v1.png' })),
-        ...initialPersonas.map(p => ({ id: p.id, name: p.name, city: p.city, race: (p as any).race, image: (p as any).image || '/v1.png' }))
+        ...(dbPersonas || []).map(p => ({ id: p.id, name: p.name, city: p.city, race: p.race, tags: p.tags, image: p.seed_image_url || '/v1.png' })),
+        ...initialPersonas.map(p => ({ id: p.id, name: p.name, city: p.city, race: (p as any).race, tags: p.tags, image: (p as any).image || '/v1.png' }))
       ];
       // Unique by ID
       const unique = combined.filter((p, i, self) => i === self.findIndex(t => t.id === p.id));
@@ -48,8 +48,9 @@ export default function PersonaSearch() {
       const filtered = allPersonas.filter(p => 
         p.name.toLowerCase().includes(query.toLowerCase()) || 
         (p.city && p.city.toLowerCase().includes(query.toLowerCase())) ||
-        (p.race && p.race.toLowerCase().includes(query.toLowerCase()))
-      ).slice(0, 5);
+        (p.race && p.race.toLowerCase().includes(query.toLowerCase())) ||
+        (p.tags && p.tags.some((t: string) => t.toLowerCase().includes(query.toLowerCase())))
+      ).slice(0, 10); // increased limit to 10 for tag-based discovery
       setResults(filtered);
       setIsOpen(true);
     } else {

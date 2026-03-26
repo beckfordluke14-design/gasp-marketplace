@@ -110,6 +110,7 @@ export interface Persona {
   syndicate_zone: string;
   vibe: string;
   occupation?: string;
+  tags?: string[];
   image: string;
   seed_image_url?: string;
   is_active?: boolean;
@@ -144,6 +145,7 @@ export const initialPersonas: Persona[] = [
     vibe: 'jersey girl energy. toxic but addictive.',
     image: 'https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/posts/master_v11_isabella-newark.png',
     status: 'online',
+    tags: ['newark', 'latina', 'spicy', 'toxic', 'dominican', 'jersey'],
     lastSeen: 'online',
     slang_profile: {
         base: 'mira',
@@ -179,6 +181,7 @@ export const initialPersonas: Persona[] = [
     vibe: 'island royalty. purely addictive energy.',
     image: 'https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/posts/master_v11_tia-jamaica.mp4',
     status: 'offline',
+    tags: ['jamaica', 'kingston', 'island', 'patois', 'mysterious', 'royal'],
     lastSeen: '2h ago',
     slang_profile: {
         base: 'wah gwan',
@@ -215,6 +218,7 @@ export const initialPersonas: Persona[] = [
     vibe: 'lagos street energy. pure neural pulse.',
     image: 'https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/posts/master_v11_zola-nigeria.mp4',
     status: 'online',
+    tags: ['nigeria', 'lagos', 'pidgin', 'elite', 'street', 'ebony'],
     lastSeen: 'online',
     slang_profile: {
         base: 'how far',
