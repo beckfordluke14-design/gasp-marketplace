@@ -2,175 +2,247 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldAlert, Zap, Star, Trash2, LayoutDashboard, Baby, Activity, ArrowRight } from 'lucide-react';
+import {
+  ShieldAlert, Zap, Star, Trash2, LayoutDashboard, Baby, Activity,
+  ArrowRight, Film, Users, BarChart2, ClipboardList, Camera, FileCheck
+} from 'lucide-react';
 import Header from '@/components/Header';
 
 /**
- * GASP SYNDICATE: COMMAND HUB (V10.2)
- * Objective: Centralized Administrative Oversight & Billboard Management.
+ * GASP SYNDICATE: COMMAND HUB (V11)
+ * All tools visible. Complete administrative oversight.
  */
-export default function AdminHub() {
-    const [isAdmin, setIsAdmin] = useState(false);
 
-    useEffect(() => {
-        setIsAdmin(document.cookie.includes('admin_gasp_override=granted'));
-    }, []);
-
-    const toggleAdmin = () => {
-        if (isAdmin) {
-            document.cookie = "admin_gasp_override=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-            setIsAdmin(false);
-        } else {
-            document.cookie = "admin_gasp_override=granted; path=/; max-age=31536000;";
-            setIsAdmin(true);
-        }
-    };
-
-    return (
-        <main className="min-h-screen bg-[#050505] text-white font-outfit pb-20 overflow-hidden">
-            <Header />
-
-            <div className="container max-w-5xl mx-auto py-24 px-6 relative">
-                {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#ff00ff]/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#00f0ff]/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
-
-                <div className="space-y-16 relative z-10">
-                    {/* Header Section */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#ff00ff] shadow-2xl">
-                                <ShieldAlert size={24} />
-                            </div>
-                            <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/30 italic">
-                                Syndicate Control Matrix v10.2
-                            </h2>
-                        </div>
-                        <h1 className="text-5xl md:text-8xl font-syncopate font-bold uppercase italic tracking-tighter leading-none">
-                            Command <span className="text-[#ff00ff]">Hub</span>
-                        </h1>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {/* 1. BILLBOARD MANAGER */}
-                        <motion.div 
-                            whileHover={{ y: -5 }}
-                            onClick={() => window.location.href = '/admin/billboard'}
-                            className="p-8 rounded-[3rem] bg-gradient-to-br from-[#ffea00]/10 to-[#ffea00]/5 border border-[#ffea00]/20 backdrop-blur-3xl space-y-8 flex flex-col justify-between cursor-pointer group"
-                        >
-                            <div className="space-y-4">
-                                <div className="w-10 h-10 rounded-xl bg-[#ffea00]/20 flex items-center justify-center text-[#ffea00]">
-                                    <Star size={20} fill="#ffea00" />
-                                </div>
-                                <h3 className="text-xl font-black uppercase italic tracking-tighter">Billboard Manager</h3>
-                                <p className="text-[10px] text-white/30 uppercase tracking-widest leading-relaxed">
-                                    Strategic Oversight: View all posts in a grid and pin the Top 5 most lethal assets to the homepage.
-                                </p>
-                            </div>
-                            
-                            <div className="flex items-center justify-between text-[#ffea00]">
-                                <span className="text-[10px] font-black uppercase tracking-widest">Crate Billboard</span>
-                                <Star size={16} className="group-hover:scale-125 transition-transform" />
-                            </div>
-                        </motion.div>
-
-                        {/* 2. COMMAND MODE */}
-                        <motion.div 
-                            whileHover={{ y: -5 }}
-                            className="p-8 rounded-[3rem] bg-white/[0.03] border border-white/10 backdrop-blur-3xl space-y-8 flex flex-col justify-between"
-                        >
-                            <div className="space-y-4">
-                                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white/40">
-                                    <LayoutDashboard size={20} />
-                                </div>
-                                <h3 className="text-xl font-black uppercase italic tracking-tighter">Command Mode</h3>
-                                <p className="text-[10px] text-white/30 uppercase tracking-widest leading-relaxed">
-                                    Toggle global administrative visibility. Unlocks Stars and Purge tools on the Live Feed.
-                                </p>
-                            </div>
-                            
-                            <button 
-                                onClick={toggleAdmin}
-                                className={`w-full py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${isAdmin ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-white text-black shadow-xl'} hover:scale-105 active:scale-95`}
-                            >
-                                {isAdmin ? 'DEACTIVATE MATRIX' : 'ACTIVATE COMMAND'}
-                            </button>
-                        </motion.div>
-
-                        {/* 2. BIRTH STATION */}
-                        <motion.div 
-                            whileHover={{ y: -5 }}
-                            onClick={() => window.location.href = '/admin/birth'}
-                            className="p-8 rounded-[3rem] bg-white/[0.03] border border-white/10 backdrop-blur-3xl space-y-8 flex flex-col justify-between cursor-pointer group"
-                        >
-                            <div className="space-y-4">
-                                <div className="w-10 h-10 rounded-xl bg-[#00f0ff]/10 flex items-center justify-center text-[#00f0ff]">
-                                    <Baby size={20} />
-                                </div>
-                                <h3 className="text-xl font-black uppercase italic tracking-tighter">Birth Station</h3>
-                                <p className="text-[10px] text-white/30 uppercase tracking-widest leading-relaxed">
-                                    Initiate Neural Genesis. Mass-produce personas or birth single identities with precision slang.
-                                </p>
-                            </div>
-                            
-                            <div className="flex items-center justify-between text-[#00f0ff]">
-                                <span className="text-[10px] font-black uppercase tracking-widest">Enter Node</span>
-                                <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
-                            </div>
-                        </motion.div>
-
-                        {/* 3. FACTORY MONITOR */}
-                        <motion.div 
-                            whileHover={{ y: -5 }}
-                            onClick={() => window.location.href = '/admin/monitor'}
-                            className="p-8 rounded-[3rem] bg-white/[0.03] border border-white/10 backdrop-blur-3xl space-y-8 flex flex-col justify-between cursor-pointer group"
-                        >
-                            <div className="space-y-4">
-                                <div className="w-10 h-10 rounded-xl bg-[#ff00ff]/10 flex items-center justify-center text-[#ff00ff]">
-                                    <Activity size={20} />
-                                </div>
-                                <h3 className="text-xl font-black uppercase italic tracking-tighter">Live Monitor</h3>
-                                <p className="text-[10px] text-white/30 uppercase tracking-widest leading-relaxed">
-                                    Real-time xAI Video Pipeline health. View successful renders and troubleshoot failures.
-                                </p>
-                            </div>
-                            
-                            <div className="flex items-center justify-between text-[#ff00ff]">
-                                <span className="text-[10px] font-black uppercase tracking-widest">Observe Hub</span>
-                                <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
-                            </div>
-                        </motion.div>
-                    </div>
-
-                    {/* Billboard Context */}
-                    <div className="p-10 rounded-[4rem] bg-gradient-to-br from-[#ff00ff]/10 to-[#00f0ff]/10 border border-white/10 space-y-8 relative overflow-hidden group">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[200px] text-white/[0.01] font-black pointer-events-none uppercase italic tracking-tighter select-none">SYNDICATE</div>
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
-                            <div className="space-y-4 max-w-xl">
-                                <div className="flex items-center gap-3 text-[#ffea00]">
-                                    <Star size={24} fill="#ffea00" />
-                                    <h3 className="text-2xl font-black uppercase italic tracking-tighter text-white">The Billboard Protocol</h3>
-                                </div>
-                                <p className="text-sm text-white/50 leading-relaxed font-medium">
-                                    Once **Command Mode** is active, navigate to your Global Feed. Every post will now feature a **Gold Star** on the right edge. Tapping this star instantly pins that post to the Top 5 spots of the site. Use this to rotate high-conversion assets into the primary viewing window.
-                                </p>
-                            </div>
-                            <div className="flex flex-col items-center gap-4 p-8 bg-black/40 rounded-[2.5rem] border border-white/10 backdrop-blur-3xl">
-                                <div className="flex gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-red-500" />
-                                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                                    <div className="w-3 h-3 rounded-full bg-green-500" />
-                                </div>
-                                <Trash2 className="text-white/10 group-hover:text-red-500 transition-colors" size={40} />
-                                <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">Legacy Purge Active</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    );
+interface Tool {
+  label: string;
+  description: string;
+  href?: string;
+  action?: () => void;
+  icon: React.ReactNode;
+  color: string;
+  cta: string;
+  ctaIcon?: React.ReactNode;
+  glow?: string;
 }
 
+export default function AdminHub() {
+  const [isAdmin, setIsAdmin] = useState(false);
 
+  useEffect(() => {
+    setIsAdmin(document.cookie.includes('admin_gasp_override=granted'));
+  }, []);
 
+  const toggleAdmin = () => {
+    if (isAdmin) {
+      document.cookie = 'admin_gasp_override=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+      setIsAdmin(false);
+    } else {
+      document.cookie = 'admin_gasp_override=granted; path=/; max-age=31536000;';
+      setIsAdmin(true);
+    }
+  };
+
+  const tools: Tool[] = [
+    {
+      label: 'Post Studio',
+      description: 'Manage every post: toggle vault/hero, edit captions, aliases, and manage linked sibling assets from a single view.',
+      href: '/admin/posts',
+      icon: <Film size={20} />,
+      color: 'text-[#00f0ff]',
+      glow: 'from-[#00f0ff]/10 to-[#00f0ff]/5 border-[#00f0ff]/20',
+      cta: 'Open Studio',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
+      label: 'Billboard Manager',
+      description: 'Strategic oversight: view all posts in a grid and pin the Top 5 most lethal assets to the homepage.',
+      href: '/admin/billboard',
+      icon: <Star size={20} fill="#ffea00" />,
+      color: 'text-[#ffea00]',
+      glow: 'from-[#ffea00]/10 to-[#ffea00]/5 border-[#ffea00]/20',
+      cta: 'Curate Billboard',
+      ctaIcon: <Star size={14} />,
+    },
+    {
+      label: 'Birth Station',
+      description: 'Initiate Neural Genesis. Mass-produce personas or birth single identities with precision slang.',
+      href: '/admin/birth',
+      icon: <Baby size={20} />,
+      color: 'text-[#ff6fff]',
+      glow: 'from-[#ff6fff]/10 to-[#ff6fff]/5 border-[#ff6fff]/20',
+      cta: 'Enter Node',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
+      label: 'Roster Gallery',
+      description: 'Visual roster of all active personas. Inspect seed images, identity metadata, and deployment status.',
+      href: '/admin/roster-gallery',
+      icon: <Camera size={20} />,
+      color: 'text-[#ff00ff]',
+      glow: 'from-[#ff00ff]/10 to-[#ff00ff]/5 border-[#ff00ff]/20',
+      cta: 'View Roster',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
+      label: 'Profiles',
+      description: 'Manage persona identity nodes — name, age, city, is_active status, and seed image.',
+      href: '/admin/profiles',
+      icon: <Users size={20} />,
+      color: 'text-emerald-400',
+      glow: 'from-emerald-400/10 to-emerald-400/5 border-emerald-400/20',
+      cta: 'Manage Personas',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
+      label: 'Live Monitor',
+      description: 'Real-time xAI Video Pipeline health. View successful renders and troubleshoot failures.',
+      href: '/admin/monitor',
+      icon: <Activity size={20} />,
+      color: 'text-[#ff00ff]',
+      glow: 'from-[#ff00ff]/10 to-[#ff00ff]/5 border-[#ff00ff]/20',
+      cta: 'Observe Hub',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
+      label: 'Analytics',
+      description: 'Feed engagement, follow metrics, vault conversion rates, and content performance dashboards.',
+      href: '/admin/analytics',
+      icon: <BarChart2 size={20} />,
+      color: 'text-orange-400',
+      glow: 'from-orange-400/10 to-orange-400/5 border-orange-400/20',
+      cta: 'Open Analytics',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
+      label: 'Audit Log',
+      description: 'Full admin action history. Track every vault toggle, hero assignment, and identity mutation.',
+      href: '/admin/audit',
+      icon: <ClipboardList size={20} />,
+      color: 'text-white/40',
+      glow: 'from-white/5 to-white/3 border-white/10',
+      cta: 'View Log',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
+      label: 'Compliance',
+      description: 'Content moderation controls, tombstoned nodes, and DELETED_NODE tracking.',
+      href: '/admin/compliance',
+      icon: <FileCheck size={20} />,
+      color: 'text-red-400',
+      glow: 'from-red-400/10 to-red-400/5 border-red-400/20',
+      cta: 'Review',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+  ];
+
+  return (
+    <main className="min-h-screen bg-[#050505] text-white font-outfit pb-20 overflow-hidden">
+      <Header />
+
+      <div className="container max-w-6xl mx-auto py-20 sm:py-24 px-4 sm:px-6 relative">
+        {/* Background Decor */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#ff00ff]/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#00f0ff]/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
+        <div className="space-y-10 sm:space-y-16 relative z-10">
+          {/* Header Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#ff00ff] shadow-2xl">
+                <ShieldAlert size={24} />
+              </div>
+              <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/30 italic">
+                Syndicate Control Matrix v11
+              </h2>
+            </div>
+            <h1 className="text-4xl sm:text-6xl md:text-8xl font-syncopate font-bold uppercase italic tracking-tighter leading-none">
+              Command <span className="text-[#ff00ff]">Hub</span>
+            </h1>
+            <p className="text-sm text-white/30 max-w-lg">
+              Full administrative access to every system. Select a tool to begin.
+            </p>
+          </div>
+
+          {/* ── COMMAND MODE strip ── */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/10">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/40 shrink-0">
+                <LayoutDashboard size={18} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black uppercase italic tracking-tighter">Command Mode</h3>
+                <p className="text-[9px] text-white/30 uppercase tracking-widest">
+                  Toggle global admin visibility. Unlocks Stars + Purge tools on the live feed.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={toggleAdmin}
+              className={`shrink-0 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${isAdmin ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-white text-black shadow-xl'} hover:scale-105 active:scale-95`}
+            >
+              {isAdmin ? '⚡ DEACTIVATE' : 'ACTIVATE'}
+            </button>
+          </div>
+
+          {/* ── Tools Grid ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {tools.map((tool, i) => (
+              <motion.div
+                key={tool.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
+                whileHover={{ y: -4 }}
+                onClick={() => tool.href ? (window.location.href = tool.href) : tool.action?.()}
+                className={`p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br ${tool.glow} backdrop-blur-3xl border space-y-5 flex flex-col justify-between cursor-pointer group transition-all hover:shadow-2xl min-h-[180px]`}
+              >
+                <div className="space-y-3">
+                  <div className={`w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center ${tool.color}`}>
+                    {tool.icon}
+                  </div>
+                  <h3 className="text-base font-black uppercase italic tracking-tighter">{tool.label}</h3>
+                  <p className="text-[10px] text-white/30 uppercase tracking-widest leading-relaxed">
+                    {tool.description}
+                  </p>
+                </div>
+
+                <div className={`flex items-center justify-between ${tool.color}`}>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{tool.cta}</span>
+                  <div className="group-hover:translate-x-1 transition-transform">{tool.ctaIcon}</div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Billboard Protocol */}
+          <div className="p-6 sm:p-10 rounded-[3rem] bg-gradient-to-br from-[#ff00ff]/10 to-[#00f0ff]/10 border border-white/10 space-y-6 relative overflow-hidden group">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[200px] text-white/[0.01] font-black pointer-events-none uppercase italic tracking-tighter select-none">SYNDICATE</div>
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+              <div className="space-y-3 max-w-xl">
+                <div className="flex items-center gap-3 text-[#ffea00]">
+                  <Star size={20} fill="#ffea00" />
+                  <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">The Billboard Protocol</h3>
+                </div>
+                <p className="text-sm text-white/50 leading-relaxed">
+                  With <strong className="text-white">Command Mode</strong> active, every feed post shows a Gold Star. Tap it to pin that post into the Top 5 homepage slots. Rotate high-conversion assets in and out with a single tap.
+                </p>
+                <p className="text-xs text-white/30 leading-relaxed">
+                  <strong className="text-white/50">Hero tag</strong> is <em>additive</em> — it marks a post for featured placement but does <strong className="text-white/50">not</strong> remove it from the feed. Only Vault hides a post from the public.
+                </p>
+              </div>
+              <div className="flex flex-col items-center gap-3 p-6 bg-black/40 rounded-[2rem] border border-white/10 backdrop-blur-3xl shrink-0">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                  <div className="w-3 h-3 rounded-full bg-green-500" />
+                </div>
+                <Zap className="text-[#ffea00] group-hover:scale-110 transition-transform" size={36} />
+                <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">Neural Command Active</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
