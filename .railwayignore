@@ -12,7 +12,6 @@ brain
 *.zip
 *.ps1
 *.py
-*.js
 out
 build
 dist
@@ -20,20 +19,21 @@ Caddy_Setup.ps1
 Caddyfile
 .history
 .ssh
-scripts
 logs
 docs
 tests
 public/assets
 supabase-backups
-# Only allow essential source code to minimize upload latency
-lib
-src
-public
-package.json
-next.config.js
-tsconfig.json
-tailwind.config.js
-postcss.config.js
-railway.json
 
+# Essential Build Resources
+!scripts/post-build.js
+!final-sync.js
+!src
+!public
+!package.json
+!next.config.ts
+!tsconfig.json
+!tailwind.config.ts
+!postcss.config.js
+!railway.json
+!nixpacks.toml
