@@ -13,16 +13,19 @@ interface BrandingOverlayProps {
 const BrandingOverlay: React.FC<BrandingOverlayProps> = ({ personaName, className = "" }) => {
   return (
     <div className={`absolute inset-0 pointer-events-none z-20 overflow-hidden ${className}`}>
-        {/* High-Lux Vertical Branding (Right Center) - GASP V9.5 */}
-        <div className="absolute top-1/2 -translate-y-1/2 right-6 flex flex-col items-center opacity-60 group-hover:opacity-100 transition-opacity duration-500 [writing-mode:vertical-rl] rotate-180">
-            <span className="text-sm md:text-lg font-syncopate font-bold uppercase italic tracking-[0.4em] text-white/80 drop-shadow-[0_0_15px_rgba(255,0,255,0.4)]">
-                {personaName ? `${personaName} | ` : ''}Found on <span className="text-[#ff00ff]">GASP.FUN</span> 📡
-            </span>
-            <div className="h-24 w-0.5 bg-gradient-to-t from-transparent via-[#ff00ff]/50 to-transparent mt-4" />
+        {/* Horizon-Sync Horizontal Branding (Center to Right) - GASP V10 */}
+        <div className="absolute top-1/2 -translate-y-1/2 left-1/2 right-0 flex items-center opacity-70 transition-opacity duration-500">
+            <div className="flex items-center gap-4 w-full">
+                {/* Visual Anchor Line */}
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-[#ff00ff]/0 via-[#ff00ff]/40 to-[#ff00ff]/0" />
+                <span className="whitespace-nowrap text-[10px] md:text-sm font-syncopate font-black uppercase italic tracking-[0.6em] text-white/90 drop-shadow-[0_0_15px_rgba(255,0,255,0.6)] pr-8">
+                    FOUND ON <span className="text-[#ff00ff]">GASP.FUN</span>
+                </span>
+            </div>
         </div>
 
         {/* Minimalist Corner Glyph */}
-        <div className="absolute bottom-10 left-10 border-l border-b border-[#00f0ff]/20 w-8 h-8 rounded-bl-xl" />
+        <div className="absolute bottom-10 left-10 border-l border-b border-[#00f0ff]/20 w-8 h-8 rounded-bl-xl z-50 pointer-events-none" />
     </div>
   );
 };
