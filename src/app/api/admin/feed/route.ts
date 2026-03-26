@@ -20,13 +20,13 @@ export async function GET(req: Request) {
         .select('*, personas!inner(id, name, city, age, seed_image_url, is_active)')
         .eq('personas.is_active', true)
         .eq('is_vault', false)
-        .neq('is_freebie', true)                          // freebies are chat gifts, not public feed
         .not('content_url', 'is', null)
         .not('caption', 'eq', 'DELETED_NODE_SYNC_V15')   // soft-hidden / duplicate-marked posts
         .not('caption', 'like', 'DELETED%')               // any tombstone variant
         .order('is_burner', { ascending: false })          // hero posts float to top
         .order('created_at', { ascending: false })
         .range(page * PAGE_COUNT, (page + 1) * PAGE_COUNT - 1);
+
 
     if (error) throw error;
 
