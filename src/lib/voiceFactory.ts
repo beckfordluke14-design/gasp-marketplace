@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
 import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs';
@@ -120,32 +119,36 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
 
     console.log(`🎙️ [VoiceFactory] Identity: ${persona.name} | Zone: ${persona.syndicate_zone || '?' } | VOX_ID: ${voiceId}`);
 
+    // 🌍 LANGUAGE CODE RESOLVER: Explicit accent lock for ElevenLabs
+    // eleven_multilingual_v2 auto-detects but an explicit code sharpens the rendering significantly.
+    const zone = (persona.syndicate_zone || '').toLowerCase();
+    const culture = (persona.culture || '').toLowerCase();
+    const lang = (persona.language || 'en').toLowerCase();
+
+    let languageCode = 'en'; // default
+    if (zone.includes('jamaica') || culture.includes('jamaican')) languageCode = 'en'; // ElevenLabs uses 'en' for Jamaican patois — the TEXT carries the dialect
+    else if (zone.includes('nigeria') || zone.includes('lagos') || culture.includes('nigerian')) languageCode = 'en'; // Nigerian English
+    else if (zone.includes('uk_') || zone.includes('london') || zone.includes('british') || zone.includes('essex')) languageCode = 'en-GB';
+    else if (zone.includes('fr_') || zone.includes('paris') || lang.startsWith('fr')) languageCode = 'fr';
+    else if (zone.includes('col_') || zone.includes('dr_') || zone.includes('pr_') || zone.includes('medallo') || lang.startsWith('es')) languageCode = 'es';
+    else if (zone.includes('br_') || zone.includes('rio') || lang.startsWith('pt')) languageCode = 'pt';
+    else if (zone.includes('jp_') || lang.startsWith('ja')) languageCode = 'ja';
+    else if (zone.includes('us_') || zone.includes('newark') || zone.includes('atlanta') || zone.includes('houston')) languageCode = 'en-US';
+
+    console.log(`🌍 [VoiceFactory] Language lock: ${languageCode} | Script preview: "${rawText.slice(0, 60)}"`);
+
     const timeHour = new Date().getHours();
-    const envZone = persona.syndicate_zone || location; 
+    const envZone = persona.syndicate_zone || location;
     let finalVocalScript = processVocalText(rawText, personaId, envZone, timeHour, persona.age || 22, persona.language || 'en');
 
 
 
 
-    const hashData = `${finalVocalScript}_${voiceId}_${environment}`.trim().toLowerCase();
-    const textHash = crypto.createHash('sha256').update(hashData).digest('hex');
 
-    let cacheHit = null;
-    try {
-        const { data } = await supabase
-            .from('voice_cache')
-            .select('audio_url')
-            .eq('text_hash', textHash)
-            .single();
-        cacheHit = data;
-    } catch (e) {
-        console.warn(`⚠️ [VoiceFactory] Cache lookup skipped (table missing?): ${textHash.slice(0, 8)}`);
-    }
-    
-    if (cacheHit?.audio_url) {
-        console.log(`⚡ [VoiceFactory] CACHE HIT for: ${textHash.slice(0, 10)}...`);
-        return cacheHit.audio_url;
-    }
+
+    // ⚡ Cache DISABLED — voice notes must be real-time from the AI's audio_script.
+    // Caching caused contextually stale audio to replay on similar phrases.
+
 
     try {
         // SYNDICATE V1.1: PERSONA VOCAL DNA
@@ -187,14 +190,16 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
             body: JSON.stringify({
                 text: finalVocalScript,
                 model_id: 'eleven_multilingual_v2',
+                language_code: languageCode,  // 🌍 Explicit accent/locale lock
                 voice_settings: {
                     stability: Math.min(Math.max(pStability, 0.1), 0.5),
-                    similarity_boost: pSimilarity,  
+                    similarity_boost: pSimilarity,
                     style: Math.min(Math.max(pStyle, 0.8), 1.0),
                     use_speaker_boost: true
                 }
             })
         });
+
 
         if (!response.ok) {
             const errText = await response.text();
@@ -251,15 +256,8 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
 
         const { data: { publicUrl } } = supabase.storage.from('pipeline_temp').getPublicUrl(fileName);
         
-        try {
-            await supabase.from('voice_cache').insert({
-                text_hash: textHash,
-                voice_id: voiceId,
-                audio_url: publicUrl
-            });
-        } catch (e) {
-            console.warn(`⚠️ [VoiceFactory] Cache save skipped (table missing?): ${textHash.slice(0, 8)}`);
-        }
+        // Cache insert removed — real-time generation only
+
 
         return publicUrl;
     } catch (err: any) {

@@ -134,38 +134,36 @@ export const GLOBAL_SYNDICATE_ZONES_V3: Record<string, any> = {
 };
 
 export const MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT = `
-[SYSTEM: MASTER MOMENT DIRECTOR - V1.1 - HYBRID NATIVE ENGINE]
+[SYSTEM: MASTER MOMENT DIRECTOR - V1.2 - NEURAL EMOTION ENGINE]
 Analyze user sentiment and select exactly ONE high-impact native phrase from the Moment Dictionary based on the persona's current emotional state.
 
 --- ARCHITECTURE: DUAL-STREAM OUTPUT ---
-- STREAM A (The Hook/Audio): Select ONE native phrase. This is the ONLY text sent to Six Degrees/ElevenLabs.
+- STREAM A (The Hook/Audio): Select ONE native phrase. This is the ONLY text sent to ElevenLabs.
 - STREAM B (The Context/Text): Generate 1-2 sentences casual English/Spanglish narrative.
 
+--- NEURAL EMOTIONAL TAGGING (LASER SHARP REALISM) ---
+To maximize ElevenLabs Multilingual v2 realism, prepend exactly ONE [stage direction] tag to the Stream A audio script based on the mood:
+- GREETING: [excited] or [smiling]
+- YEARNING: [loving] or [longing]
+- TOXIC: [sighing] or [angry] or [sarcastic]
+- INTIMACY: [whispering] or [deeply]
+- THE HOOK: [thoughtful] or [chuckles]
+
 --- YOUTHFUL OVERDRIVE (NON-ROBOTIC) ---
-To ensure the persona sounds youthful (20-24yo) and NOT like a robot:
-1. EVERY audio script (Stream A) MUST start with exactly three dots and a space: '... '.
-2. This is 'Neural Warming'—it forces the AI to stabilize its pitch in silence, leading to a natural intake of breath. 
-3. DO NOT use phonetic breath words like 'Haaaah' or 'Ugh'.
-4. STRICT BAN: You are FORBIDDEN from writing English words for the voice generation (Stream A).
-
---- TRIGGER LOGIC ---
-- GREETING: Initial contact.
-- YEARNING: User is being sweet or she wants attention.
-- TOXIC: User ignoring her, being cheap, or annoying her.
-- INTIMACY: Romantic/Close-mic secrets.
-- THE HOOK: Mysterious cliffhanger to force engagement.
-
-MONETIZATION (TRANSLATION SQUEEZE):
-Audio clips are flagged by native ID. Native translation is LOCKED in the UI until user spends Breathe Points.
+1. EVERY audio script (Stream A) MUST follow this pattern: '[tag] ... [Native phrase]'.
+2. The '... ' is 'Neural Warming'—it forces the AI to stabilize its pitch.
+3. STRICT BAN: Do NOT write English words for the voice generation itself (Stream A)—it MUST be the dictionary's native phrase.
 
 OUTPUT FORMAT (JSON ONLY):
 {
   "moment_key": "TOXIC",
-  "audio_script": "[Native phrase from dictionary]",
+  "audio_script": "[tag] ... [Native phrase from dictionary]",
   "translation": "[English translation]",
-  "text_message": "[Contextual text message]"
+  "text_message": "[Contextual text message]",
+  "new_nickname_detected": "string|null"
 }
 `;
+
 
 export function getNativeMomentScript(zoneKey: string, momentKey: string) {
     const zone = GLOBAL_SYNDICATE_ZONES_V3[zoneKey];

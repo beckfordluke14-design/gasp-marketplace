@@ -681,43 +681,58 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
        {chatTab === 'chat' ? <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar p-6 md:p-8 space-y-6 md:space-y-8 pb-64">
         {[...dbMessages, ...messages].filter(m => !m.content.startsWith('[SYSTEM]')).map((msg: any) => (
           <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-            <div className={`max-w-[85%] px-5 py-3 rounded-[1.6rem] text-xs md:text-sm leading-relaxed shadow-xl relative ${msg.role === 'user' ? 'bg-[#ff00ff] text-black font-bold rounded-tr-none' : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'}`}>
-               {/* Voice note: renders above text. ElevenLabs speaks the actual AI response */}
-               {msg.media_url && msg.role === 'assistant' && <VoiceNoteBubble audioUrl={msg.media_url} personaImage={persona.image} personaName={persona.name} translation={msg.audio_translation} onUnlockTranslation={async () => {
+            {/* Voice note bubble — standalone, NOT inside the text bubble */}
+            {msg.media_url && msg.role === 'assistant' && (
+              <VoiceNoteBubble
+                audioUrl={msg.media_url}
+                personaImage={persona.image}
+                personaName={persona.name}
+                translation={msg.audio_translation}
+                onUnlockTranslation={async () => {
                   const { data } = await supabase.rpc('process_spend', { p_user_id: guestId, p_amount: 10, p_type: 'voice_translation', p_persona_id: personaId });
                   if (data?.success) setWalletBalance(prev => prev !== null ? prev - 10 : prev);
                   return data?.success;
-               }} />}
-               {/* Freebie gift image — free, tappable, opens lightbox */}
-               {(msg.freebie_url || (msg.type === 'freebie' && msg.image_url)) && msg.role === 'assistant' && (
-                 <FreebieImageBubble
-                   imageUrl={msg.freebie_url || msg.image_url}
-                   personaImage={persona.image}
-                   personaName={persona.name}
-                 />
-               )}
-               {/* Vault image — paid unlock */}
-               {msg.image_url && msg.role === 'assistant' && msg.type !== 'freebie' && (
-                  <ChatVaultItem 
-                    mediaId={msg.id} 
+                }}
+              />
+            )}
+            {/* Text bubble — only shown if there is NO voice note for this message */}
+            {(!msg.media_url || msg.role === 'user') && (
+              <div className={`max-w-[85%] px-5 py-3 rounded-[1.6rem] text-xs md:text-sm leading-relaxed shadow-xl relative ${msg.role === 'user' ? 'bg-[#ff00ff] text-black font-bold rounded-tr-none' : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'}`}>
+                {/* Freebie gift image */}
+                {(msg.freebie_url || (msg.type === 'freebie' && msg.image_url)) && msg.role === 'assistant' && (
+                  <FreebieImageBubble
+                    imageUrl={msg.freebie_url || msg.image_url}
+                    personaImage={persona.image}
+                    personaName={persona.name}
+                  />
+                )}
+                {/* Vault image — paid unlock */}
+                {msg.image_url && msg.role === 'assistant' && msg.type !== 'freebie' && (
+                  <ChatVaultItem
+                    mediaId={msg.id}
                     isUnlocked={vaultItems.some(v => v.content_url === msg.image_url && v.is_unlocked)}
                     mediaUrl={msg.image_url}
                     caption={msg.content}
                     onUnlockRequest={() => {
-                        const item = vaultItems.find(v => v.content_url === msg.image_url);
-                        if (item) {
-                            unlockVaultItem(item);
-                        } else {
-                            unlockVaultItem({ id: msg.id, content_url: msg.image_url });
-                        }
+                      const item = vaultItems.find(v => v.content_url === msg.image_url);
+                      unlockVaultItem(item || { id: msg.id, content_url: msg.image_url });
                     }}
                   />
-               )}
-               {msg.image_url && msg.role === 'user' && <div className="relative w-40 aspect-square rounded-xl overflow-hidden mb-3"><Image src={msg.image_url} alt="" fill unoptimized className="object-cover" /></div>}
-               {/* Always show the text — voice note is a supplement, not a replacement */}
-               {msg.content}
-            </div>
-            {msg.role === 'user' && msg.status && <div className="mt-1 flex items-center gap-1 opacity-40"><span className="text-[8px] font-black uppercase tracking-tighter">{msg.status}</span>{msg.status === 'read' ? <CheckCheck size={10} className="text-[#00f0ff]" /> : <Check size={10} />}</div>}
+                )}
+                {msg.image_url && msg.role === 'user' && (
+                  <div className="relative w-40 aspect-square rounded-xl overflow-hidden mb-3">
+                    <Image src={msg.image_url} alt="" fill unoptimized className="object-cover" />
+                  </div>
+                )}
+                {msg.content}
+              </div>
+            )}
+            {msg.role === 'user' && msg.status && (
+              <div className="mt-1 flex items-center gap-1 opacity-40">
+                <span className="text-[8px] font-black uppercase tracking-tighter">{msg.status}</span>
+                {msg.status === 'read' ? <CheckCheck size={10} className="text-[#00f0ff]" /> : <Check size={10} />}
+              </div>
+            )}
           </div>
         ))}
         {(isDelivered || isPersonaReading || isTyping || isUploading) && (

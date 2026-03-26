@@ -9,7 +9,7 @@ interface CenterPanelProps {
 }
 
 export default function CenterPanel({ selectedPersonaId }: CenterPanelProps) {
-  const selectedPersona = initialPersonas.find(p => p.id === selectedPersonaId) || initialPersonas[0];
+  const selectedPersona = initialPersonas.find(p => p.id === selectedPersonaId) || initialPersonas[0] || {} as any;
   const broadcasts = selectedPersona.broadcasts || [];
 
   return (

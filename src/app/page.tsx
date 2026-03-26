@@ -45,7 +45,7 @@ const supabase = createClient(
 
 function MarketplaceMain() {
   const [mounted, setMounted] = useState(false);
-  const [selectedPersonaId, setSelectedPersonaId] = useState(initialPersonas[0].id);
+  const [selectedPersonaId, setSelectedPersonaId] = useState(initialPersonas[0]?.id ?? '');
   const [lastActivePersonaId, setLastActivePersonaId] = useState<string>('');
   const [openChatIds, setOpenChatIds] = useState<string[]>([]);
   const [minimizedIds, setMinimizedIds] = useState<string[]>([]);

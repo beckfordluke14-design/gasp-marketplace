@@ -28,8 +28,13 @@ export default function AdminProfiles() {
         ethnicity: '',
         hair_style: '',
         body_type: 'curvy',
-        visual_description: ''
+        visual_description: '',
+        syndicate_zone: 'us_houston_black',
+        skin_tone: 'ebony',
+        culture: 'american_black',
+        language: 'en-US'
     });
+
 
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
@@ -107,14 +112,27 @@ export default function AdminProfiles() {
                         <div className="flex flex-col gap-1.5">
                             <label className="text-[10px] uppercase font-black tracking-[0.2em] text-white/30 px-1">Detailed Visual Characteristics (Mental Map)</label>
                             <textarea 
-                                rows={6}
+                                rows={4}
                                 value={formData.visual_description}
                                 onChange={e => setFormData({...formData, visual_description: e.target.value})}
                                 placeholder="Almond eyes, caramel skin, beauty mark on left cheek, likes to wear oversized hoodies..."
                                 className="bg-black/40 border border-white/10 rounded-xl px-4 py-4 outline-none focus:border-neon-blue transition-all text-xs leading-relaxed italic placeholder:text-white/10"
                             />
                         </div>
+
+                        {/* Syndicate Identity Locks */}
+                        <div className="pt-4 space-y-4 border-t border-white/5">
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input label="Culture" value={formData.culture} onChange={(v: string) => setFormData({...formData, culture: v})} placeholder="Dominican" />
+                                <Input label="Skin Tone" value={formData.skin_tone} onChange={(v: string) => setFormData({...formData, skin_tone: v})} placeholder="Bronze" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input label="Syndicate Zone" value={formData.syndicate_zone} onChange={(v: string) => setFormData({...formData, syndicate_zone: v})} placeholder="dr_santiago_afro" />
+                                <Input label="Lang Code (Voice)" value={formData.language} onChange={(v: string) => setFormData({...formData, language: v})} placeholder="es" />
+                            </div>
+                        </div>
                     </div>
+
 
                     {/* Column 3: LLM / AI Config */}
                     <div className="space-y-8 bg-neon-pink/5 p-8 rounded-[2rem] border border-neon-pink/10 backdrop-blur-md shadow-2xl">

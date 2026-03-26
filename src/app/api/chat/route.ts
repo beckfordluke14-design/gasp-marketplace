@@ -74,9 +74,31 @@ export async function POST(req: Request) {
 
     // SYNDICATE PHASE 2: MEMORY INJECTION
     const { data: profile } = await supabase.from('profiles').select('nickname, is_known, bio').eq('id', finalUserId).maybeSingle();
-    const nickname = profile?.nickname || "stranger";
-    const isKnown = profile?.is_known || false;
-    const memoryContext = `[MEMORY]: Known: ${isKnown}. Nickname: ${nickname}. ${isKnown ? `Refer to them as ${nickname}.` : "You don't know them yet. Be flirty but try to get to know them. Ask what you should call them if they haven't told you."}`;
+    let nickname = profile?.nickname || null;
+    let isKnown = profile?.is_known || false;
+
+    // 🧠 IN-SESSION NAME SCAN: Check last 10 messages for the user's name even before DB persists
+    if (!isKnown) {
+      const recentUserMsgs = messages.filter((m: any) => m.role === 'user').slice(-10);
+      const namePatterns = [
+        /(?:my name is|i'm|i am|call me|it's|its)\s+([A-Z][a-z]{1,15})/i,
+        /^([A-Z][a-z]{1,15})(?:,|\s+here|\s+lol|\s+btw|$)/i,
+      ];
+      for (const msg of recentUserMsgs) {
+        for (const pattern of namePatterns) {
+          const match = msg.content?.match(pattern);
+          if (match?.[1]) {
+            nickname = match[1].charAt(0).toUpperCase() + match[1].slice(1).toLowerCase();
+            isKnown = true;
+            break;
+          }
+        }
+        if (isKnown) break;
+      }
+    }
+
+    const memoryContext = `[MEMORY]: Known: ${isKnown}. ${isKnown && nickname ? `User's name is ${nickname}. ALWAYS call them ${nickname} in your response. Do NOT ask their name again.` : "You don't know their name yet. Be flirty. If conversation allows, naturally ask what to call them. Do NOT repeat the question if you already asked."}`;
+
 
     // SYNDICATE PHASE 3: META-AWARENESS (Jealousy & Feed Context)
     const { data: stats } = await (supabase as any).from('user_persona_stats')

@@ -75,10 +75,20 @@ const MULTI_FILLERS: Record<string, string[]> = {
 
 
 export function processVocalText(text: string, personaId: string, location: string, timeHour: number, age: number = 22, language: string = 'en'): string {
-    let newText = text.toLowerCase();
+    let cleanText = text.trim();
+    
+    // 1. NEURAL TAG EXTRACTION: Pull [tag] out to the front if it exists
+    let activeTag = "";
+    const tagMatch = cleanText.match(/^\[([a-z0-9_\s]{2,20})\]/i);
+    if (tagMatch) {
+        activeTag = tagMatch[0]; // e.g. "[chuckles]"
+        cleanText = cleanText.replace(activeTag, '').trim();
+    }
+
+    let newText = cleanText.toLowerCase();
     const langKey = language.toLowerCase().substring(0, 2); // 'es', 'pt', 'en'
     
-    // 1. Dynamic Intensity Scaling
+    // 2. Dynamic Intensity Scaling
     const idSum = personaId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
     let accentIntensity = age < 25 
         ? 0.4 + ((idSum % 4) / 10) 
@@ -87,7 +97,7 @@ export function processVocalText(text: string, personaId: string, location: stri
     const locKey = Object.keys(REGIONS).find(k => location.toLowerCase().includes(k)) || 'us_urban';
     const dictionary = REGIONS[locKey] || {};
     
-    // 2. Regional Slang Injection
+    // 3. Regional Slang Injection
     for (const [formal, slang] of Object.entries(dictionary)) {
         if (Math.random() < accentIntensity) {
             const regex = new RegExp(`\\b${formal}\\b`, 'gi');
@@ -95,7 +105,7 @@ export function processVocalText(text: string, personaId: string, location: stri
         }
     }
 
-    // 3. Multi-Lingual Mature Refinement (25+)
+    // 4. Multi-Lingual Mature Refinement (25+)
     if (age >= 25) {
         const matureMap = MULTI_MATURE[langKey] || MULTI_MATURE['en'];
         for (const [slang, mature] of Object.entries(matureMap)) {
@@ -103,7 +113,7 @@ export function processVocalText(text: string, personaId: string, location: stri
             newText = newText.replace(regex, mature);
         }
 
-        // Inject soft feminine prosody in native language
+        // Inject soft feminine prosody
         if (Math.random() > 0.75) {
             const fillers = MULTI_FILLERS[langKey] || MULTI_FILLERS['en'];
             const filler = fillers[idSum % fillers.length];
@@ -111,16 +121,20 @@ export function processVocalText(text: string, personaId: string, location: stri
         }
     }
 
-    // 4. Neural Warming & Ambient Triggers
-    newText = `... ${newText}`;
+    // 5. Neural Warming & Ambient Triggers
+    // Ensure "..." exists but only once
+    newText = newText.startsWith('...') ? newText : `... ${newText}`;
 
-    // Late Night "Whisper" Override (1AM-5AM)
-    if (timeHour >= 1 && timeHour <= 5) {
-        newText = `... (whispers) ${newText.split(' ').join(' ... ')}`;
+    // Late Night "Whisper" Override (1AM-5AM) - applies [whispering] if no other tag exists
+    if (timeHour >= 1 && timeHour <= 5 && !activeTag) {
+        activeTag = "[whispering]";
+        newText = newText.split(' ').join(' ... ');
     }
 
-    return newText;
+    // FINAL ASSEMBLY: Tag MUST be outside the ellipses for ElevenLabs to hit it first
+    return activeTag ? `${activeTag} ${newText}` : newText;
 }
+
 
 
 
