@@ -189,8 +189,21 @@ function MarketplaceMain() {
 
   useEffect(() => {
     async function fetchDb() {
-        const { data } = await supabase.from('personas').select('*'); // Fetch ALL to handle retirement overrides
-        if (data) setDbPersonas(data);
+        // 1. Fetch explicitly ACTIVE personas
+        const { data: pData } = await supabase.from('personas').select('*').eq('is_active', true);
+        
+        // 2. Fetch IDs of personas that have at least one NON-DELETED post
+        // This prevents 'Ghost Personas' (active persona with 0 visible items) from appearing in the Sidebar.
+        const { data: postRefData } = await supabase
+            .from('posts')
+            .select('persona_id')
+            .not('caption', 'ilike', 'DELETED%');
+            
+        if (pData) {
+            const activePostPersonaIds = new Set((postRefData || []).map(p => p.persona_id));
+            const livePersonas = pData.filter(p => activePostPersonaIds.has(p.id));
+            setDbPersonas(livePersonas);
+        }
     }
     fetchDb();
     const refreshInterval = setInterval(fetchDb, 15000); // 15-second Pulse

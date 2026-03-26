@@ -478,8 +478,8 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
       .eq('persona_id', personaId)
       .not('content_url', 'is', null)
       // Hidden states: tombstoned by soft-delete / duplicate action
-      .not('caption', 'eq', 'DELETED_NODE_SYNC_V15')
-      .not('caption', 'like', 'DELETED%')
+      // Global Sanctuary Gate: Strictly exclude retired/deleted nodes
+      .not('caption', 'ilike', 'DELETED%')
       // Freebies are private chat gifts — keep them out of the gallery
       .neq('is_freebie', true)
       .order('created_at', { ascending: false })

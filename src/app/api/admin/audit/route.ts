@@ -195,7 +195,7 @@ export async function POST(req: Request) {
                 return NextResponse.json({ success: true });
             }
             case 'update-post': {
-                const { id, caption, persona_id, content_url, content_type, is_vault, is_featured, is_freebie } = payload;
+                const { id, caption, persona_id, content_url, content_type, is_vault, is_featured, is_freebie, is_gallery } = payload;
                 console.log(`[Neural Command]: Hard-Etching Post Update for ID: ${id}`);
                 
                 // 🛡️ SYNC PERSONA: Ensure persona exists for JOIN compatibility
