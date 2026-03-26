@@ -40,15 +40,15 @@ export async function POST(req: Request) {
     if (!pkg) throw new Error(`Invalid Package ID: ${packageId}`);
 
     // 2. ATOMIC SYNC: Credit Wallet
-    const { data: wallet } = await supabase.from('wallets').select('id, balance').eq('user_id', userId).single();
+    const { data: wallet } = await supabase.from('wallets').select('id, credit_balance').eq('user_id', userId).single();
 
     if (wallet) {
         await supabase.from('wallets').update({
-            balance: wallet.balance + pkg.credits,
+            credit_balance: wallet.credit_balance + pkg.credits,
             updated_at: new Date().toISOString()
         }).eq('id', wallet.id);
     } else {
-        await supabase.from('wallets').insert({ user_id: userId, balance: pkg.credits });
+        await supabase.from('wallets').insert({ user_id: userId, credit_balance: pkg.credits });
     }
 
     // 3. 🧬 THE AIRDROP LEDGER: Log $GASPAI Stake (1:1 Reserved Model)

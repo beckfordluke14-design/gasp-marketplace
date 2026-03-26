@@ -10,7 +10,11 @@ RENAME COLUMN breathe_balance TO credit_balance;
 ALTER TABLE public.profiles 
 RENAME COLUMN breathe_points TO credit_balance;
 
--- 3. Rename columns in the media_vault table
+-- 3. Rename columns in the wallets table (Transaction sync)
+ALTER TABLE public.wallets 
+RENAME COLUMN balance TO credit_balance;
+
+-- 4. Rename columns in the media_vault table
 ALTER TABLE public.media_vault 
 RENAME COLUMN price_points TO price_credits;
 

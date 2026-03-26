@@ -13,22 +13,26 @@ export interface CreditPackage {
   label: string;
   bonus?: string;
   isPopular?: boolean;
+  helioPayLink?: string; // 🧬 SECURE DEEP-LINK
 }
 
 // GASP CREDIT MATRIX: USD -> CREDITS
+// Objectives: TGE Stake Reservation + Institutional Yield
 export const CREDIT_PACKAGES: CreditPackage[] = [
   { 
     id: 'tier_impulse', 
     priceUsd: 4.99,  
     credits: 50,   
-    label: 'The Impulse' 
+    label: 'The Impulse',
+    helioPayLink: 'https://hel.io/sh/REPLACE_WITH_IMPULSE_LINK'
   },
   { 
     id: 'tier_taste',   
     priceUsd: 9.99,  
     credits: 110,  
     label: 'The Taste', 
-    bonus: '+10%' 
+    bonus: '+10%',
+    helioPayLink: 'https://hel.io/sh/REPLACE_WITH_TASTE_LINK'
   },
   { 
     id: 'tier_weekend', 
@@ -36,14 +40,16 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
     credits: 300,  
     label: 'The Weekend', 
     isPopular: true, 
-    bonus: '+20%' 
+    bonus: '+20%',
+    helioPayLink: 'https://hel.io/sh/REPLACE_WITH_WEEKEND_LINK'
   },
   { 
     id: 'tier_whale',   
     priceUsd: 99.99, 
     credits: 1500, 
     label: 'The Whale', 
-    bonus: '+50%' 
+    bonus: '+50%',
+    helioPayLink: 'https://hel.io/sh/REPLACE_WITH_WHALE_LINK'
   }
 ];
 

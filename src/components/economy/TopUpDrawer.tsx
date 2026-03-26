@@ -66,8 +66,15 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
       });
       window.location.href = `${baseUrl}?${params.toString()}`;
     } else {
-      // 🧬 CRYPTO BRIDGE FLOW v1.8
-      alert(`[CRYPTO PULSE]: Send $${pkg.priceUsd} in USDC (SOLANA or BASE Network) to: ${CRYPTO_WALLET_ADDRESS}. Your $GASPAI Stake (with 15% Bonus) will be credited instantly upon 1 Network Confirmation. 🛡️`);
+      // 🧬 HELIO CRYPTO BRIDGE v1.8
+      // Objective: Zero-Touch USDC Settlement
+      const helioUrl = pkg.helioPayLink || 'https://hel.io/sh/REPLACE_ME';
+      const params = new URLSearchParams({
+          customAction: 'gasp_stake',
+          customer_id: userId, // 🧬 METADATA TUNNEL
+          package_id: pkgId
+      });
+      window.location.href = `${helioUrl}?${params.toString()}`;
       setLoadingPkg(null);
     }
   }
