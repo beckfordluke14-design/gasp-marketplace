@@ -38,7 +38,7 @@ interface PersonaPost {
   personas?: { name: string; age?: number; city?: string };
 }
 
-type FilterMode = 'all' | 'vault' | 'hero' | 'feed' | 'orphaned';
+type FilterMode = 'all' | 'vault' | 'hero' | 'feed' | 'orphaned' | 'hidden';
 
 interface EditDraft {
   caption: string;
@@ -386,23 +386,33 @@ export default function PostStudio() {
     const s       = search.toLowerCase();
     const matchSearch  = !s || name.toLowerCase().includes(s) || caption.toLowerCase().includes(s) || (p.content_url || '').toLowerCase().includes(s);
     const matchPersona = personaFilter === 'all' || p.persona_id === personaFilter;
+    const isHidden = (p.caption || '').startsWith('DELETED_NODE_SYNC_V15') || (p.caption || '').startsWith('DELETED');
+    
+    // 🛡️ Global Exclusion: Hidden items shouldn't show in ANY major feed except their own
+    if (filterMode !== 'hidden' && isHidden) return false;
+
     const matchMode =
-      filterMode === 'all'      ? true :
-      filterMode === 'vault'    ? !!p.is_vault :
-      filterMode === 'hero'     ? !!p.is_burner :
-      filterMode === 'orphaned' ? (!!p.is_vault && orphanedPersonaIds.has(p.persona_id)) :
-      // Feed = not vault (hero is still in feed, just tagged)
-      !p.is_vault;
+      filterMode === 'all'      ? !isHidden :
+      filterMode === 'vault'    ? (!!p.is_vault && !isHidden) :
+      filterMode === 'hero'     ? (!!p.is_burner && !isHidden) :
+      filterMode === 'orphaned' ? (!!p.is_vault && orphanedPersonaIds.has(p.persona_id) && !isHidden) :
+      filterMode === 'hidden'   ? isHidden :
+      // Feed = not vault
+      (!p.is_vault && !isHidden);
+
     return matchSearch && matchPersona && matchMode;
   });
+
 
   const filterTabs: { label: string; value: FilterMode; alert?: boolean }[] = [
     { label: `All (${posts.length})`,                                                              value: 'all' },
     { label: `Feed (${posts.filter(p => !p.is_vault).length})`,                                   value: 'feed' },
-    { label: `Vault (${posts.filter(p => p.is_vault).length})`,                                   value: 'vault' },
-    { label: `Hero (${posts.filter(p => p.is_burner).length})`,                                   value: 'hero' },
+    { label: `Vault (${posts.filter(p => p.is_vault && !p.caption?.startsWith('DELETED')).length})`,    value: 'vault' },
+    { label: `Hero (${posts.filter(p => p.is_burner && !p.caption?.startsWith('DELETED')).length})`,    value: 'hero' },
     { label: `Orphaned (${orphanedPersonaIds.size})`,                                              value: 'orphaned', alert: orphanedPersonaIds.size > 0 },
+    { label: `Hidden (${posts.filter(p => p.caption?.startsWith('DELETED')).length})`,              value: 'hidden', alert: posts.some(p => p.caption?.startsWith('DELETED')) },
   ];
+
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-outfit pb-24 overflow-x-hidden">
@@ -580,14 +590,13 @@ export default function PostStudio() {
                              }
                           }}
                           onPointerUp={(e) => clearTimeout((e.target as any)._lp)}
-                          onClick={(e) => {
-                             if (selectionMode) {
-                               e.stopPropagation();
-                               toggleSelection(post.id);
-                             }
-                          }}
-                          className={`absolute inset-0 bg-black/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 z-20 px-2 ${selectionMode ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none group-hover:pointer-events-auto'}`}
+                          className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-all flex flex-col items-center justify-center gap-2 z-20 px-2 ${
+                            selectionMode 
+                              ? 'opacity-100 pointer-events-auto cursor-pointer' 
+                              : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'
+                          }`}
                         >
+
 
                           {selectionMode ? (
                              <div className="text-center">

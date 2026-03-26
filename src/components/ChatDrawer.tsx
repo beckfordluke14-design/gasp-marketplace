@@ -603,16 +603,17 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                   className="relative aspect-square bg-black overflow-hidden group"
                 >
                   <img
-                    src={proxyImg(pic.content_url)}
+                    src={pic.is_vault ? "/locked-vault.webp" : proxyImg(pic.content_url)}
                     alt=""
+                    onContextMenu={e => pic.is_vault && e.preventDefault()}
                     className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
-                      pic.is_vault ? 'blur-md' : ''
+                      pic.is_vault ? 'blur-2xl opacity-40 grayscale overflow-hidden' : ''
                     }`}
                     loading="lazy"
                   />
                   {/* Vault badge */}
                   {pic.is_vault && (
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                       <div className="w-8 h-8 rounded-full bg-[#ff00ff]/30 border border-[#ff00ff]/60 flex items-center justify-center backdrop-blur-sm">
                         <Lock size={14} className="text-[#ff00ff]" />
                       </div>
@@ -661,15 +662,26 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
             </div>
 
             {/* Image */}
-            <motion.img
-              src={proxyImg(expandedPic)}
-              alt=""
-              animate={{ scale: picZoomed ? 2 : 1 }}
-              transition={{ type: 'spring', damping: 20 }}
-              onClick={e => { e.stopPropagation(); setPicZoomed(z => !z); }}
-              className="max-w-full max-h-[90vh] object-contain rounded-xl cursor-zoom-in"
-              style={{ cursor: picZoomed ? 'zoom-out' : 'zoom-in' }}
-            />
+            <div className="relative w-full h-[80vh] flex items-center justify-center overflow-hidden">
+              <motion.img
+                src={proxyImg(expandedPic)}
+                alt=""
+                drag={picZoomed}
+                dragConstraints={{ left: -400, right: 400, top: -600, bottom: 600 }}
+                dragElastic={0.05}
+                dragMomentum={true}
+                animate={{ 
+                  scale: picZoomed ? 2.5 : 1,
+                  x: picZoomed ? undefined : 0, 
+                  y: picZoomed ? undefined : 0 
+                }}
+                transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+                onClick={e => { e.stopPropagation(); setPicZoomed(z => !z); }}
+                className="max-w-[90%] max-h-full object-contain rounded-xl shadow-2xl transition-all"
+                style={{ cursor: picZoomed ? 'grab' : 'zoom-in' }}
+                whileTap={{ cursor: picZoomed ? 'grabbing' : undefined }}
+              />
+            </div>
 
             <p className="absolute bottom-6 text-[9px] text-white/30 uppercase tracking-widest">
               {picZoomed ? 'tap to zoom out' : 'tap image to zoom · tap outside to close'}
@@ -706,12 +718,12 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                     personaName={persona.name}
                   />
                 )}
-                {/* Vault image — paid unlock */}
+                 {/* Vault image — paid unlock */}
                 {msg.image_url && msg.role === 'assistant' && msg.type !== 'freebie' && (
                   <ChatVaultItem
                     mediaId={msg.id}
                     isUnlocked={vaultItems.some(v => v.content_url === msg.image_url && v.is_unlocked)}
-                    mediaUrl={msg.image_url}
+                    mediaUrl={vaultItems.some(v => v.content_url === msg.image_url && v.is_unlocked) ? msg.image_url : undefined}
                     caption={msg.content}
                     onUnlockRequest={() => {
                       const item = vaultItems.find(v => v.content_url === msg.image_url);
@@ -719,6 +731,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                     }}
                   />
                 )}
+
                 {msg.image_url && msg.role === 'user' && (
                   <div className="relative w-40 aspect-square rounded-xl overflow-hidden mb-3">
                     <Image src={msg.image_url} alt="" fill unoptimized className="object-cover" />

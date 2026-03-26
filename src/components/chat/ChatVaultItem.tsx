@@ -31,16 +31,12 @@ export default function ChatVaultItem({
                         key="locked"
                         initial={{ opacity: 1 }}
                         exit={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }}
-                        className="absolute inset-0 z-10"
+                        className="absolute inset-0 z-10 bg-black flex flex-col items-center justify-center p-6 text-center"
                     >
-                        <Image 
-                            src={mediaUrl || "/v6.png"} 
-                            alt="" 
-                            fill 
-                            unoptimized
-                            className="object-cover blur-[50px] scale-125 grayscale opacity-40" 
-                        />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-black/40 backdrop-blur-sm">
+                        {/* The base Image is PURGED from the DOM here to prevent any local extraction before payment. */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-950 opacity-80" />
+                        
+                        <div className="relative z-10 flex flex-col items-center">
                             <motion.div 
                                 animate={{ scale: [1, 1.1, 1] }} 
                                 transition={{ repeat: Infinity, duration: 2 }}
