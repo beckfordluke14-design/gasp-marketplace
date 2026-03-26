@@ -130,15 +130,16 @@ export async function POST(req: Request) {
             }
             case 'update-persona': {
                 // Writes identity fields to the personas table so chat + story sync automatically.
-                const { id, name, age, city, system_prompt } = payload;
+                const { id, name, age, city, system_prompt, seed_image_url } = payload;
                 if (!id) throw new Error('Persona ID Missing.');
                 const fields: Record<string, any> = {};
-                if (name        !== undefined) fields.name          = name;
-                if (age         !== undefined) fields.age           = parseInt(age, 10) || age;
-                if (city        !== undefined) fields.city          = city;
-                if (system_prompt !== undefined) fields.system_prompt = system_prompt;
+                if (name           !== undefined) fields.name           = name;
+                if (age            !== undefined) fields.age            = parseInt(age, 10) || age;
+                if (city           !== undefined) fields.city           = city;
+                if (system_prompt  !== undefined) fields.system_prompt  = system_prompt;
+                if (seed_image_url !== undefined) fields.seed_image_url = seed_image_url; // hero image sync
                 if (Object.keys(fields).length === 0) return NextResponse.json({ success: true });
-                console.log(`[Neural Admin] Identity update for persona ${id}:`, fields);
+                console.log(`[Neural Admin] Identity update for persona ${id}:`, Object.keys(fields));
                 const { error } = await supabase.from('personas').update(fields).eq('id', id);
                 if (error) throw error;
                 return NextResponse.json({ success: true });

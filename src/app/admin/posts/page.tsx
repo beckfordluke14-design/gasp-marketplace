@@ -123,13 +123,18 @@ export default function PostStudio() {
     setSyncing(null);
   };
 
-  // ── Hero toggle: hero is ADDITIVE — does NOT remove from feed, does NOT touch vault
+  // ── Hero toggle: sets post as hero AND promotes its image as the persona's canonical photo
   const toggleHero = async (post: PersonaPost) => {
     setSyncing(post.id);
     const next = !post.is_burner;
     const data = await callAudit('update-post', { id: post.id, is_featured: next });
     if (data.success) {
       setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_burner: next } : p));
+      // When SETTING hero: promote this post's image as the persona's canonical photo
+      // Chat avatars, sidebar, and story bar all read seed_image_url from the personas table
+      if (next && post.content_url) {
+        await callAudit('update-persona', { id: post.persona_id, seed_image_url: post.content_url });
+      }
       flash(post.id);
     }
     setSyncing(null);
@@ -283,6 +288,10 @@ export default function PostStudio() {
   const toggleLinkedHero = async (post: PersonaPost) => {
     const next = !post.is_burner;
     await callAudit('update-post', { id: post.id, is_featured: next });
+    // When SETTING hero from the modal: also promote this image as the canonical persona photo
+    if (next && post.content_url) {
+      await callAudit('update-persona', { id: post.persona_id, seed_image_url: post.content_url });
+    }
     setLinkedPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_burner: next } : p));
     setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_burner: next } : p));
   };
@@ -449,41 +458,51 @@ export default function PostStudio() {
                         </div>
                       )}
 
-                      {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto z-10 p-2">
+                      {/* Hover overlay — 3×2 grid so nothing clips */}
+                      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto z-10 px-2">
                         {/* Orphaned: prominent push-to-feed CTA */}
                         {filterMode === 'orphaned' && post.is_vault && (
                           <button
                             onClick={() => pushToFeed(post)}
-                            className="flex items-center gap-1.5 px-4 py-2 bg-[#00f0ff] text-black rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,240,255,0.4)]"
+                            className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-[#00f0ff] text-black rounded-lg text-[8px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_16px_rgba(0,240,255,0.4)]"
                           >
-                            <ArrowLeftRight size={12} /> → Feed
+                            <ArrowLeftRight size={10} /> → Feed
                           </button>
                         )}
+
+                        {/* Edit — full width pill */}
                         <button
                           onClick={() => openEdit(post)}
-                          className="flex items-center gap-1.5 px-4 py-2 bg-white text-black rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-[#00f0ff] transition-all"
+                          className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-white text-black rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#00f0ff] transition-all"
                         >
-                          <Pencil size={12} /> Edit
+                          <Pencil size={11} /> Edit
                         </button>
-                        <div className="flex items-center gap-1.5">
-                          <button onClick={() => toggleVault(post)} title={post.is_vault ? 'Move to Feed' : 'Move to Vault'} className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all ${post.is_vault ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/30'}`}>
-                            <Lock size={13} />
+
+                        {/* 3×2 action grid */}
+                        <div className="grid grid-cols-3 gap-1.5 w-full">
+                          <button onClick={() => toggleVault(post)} title={post.is_vault ? 'Move to Feed' : 'Move to Vault'}
+                            className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_vault ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
+                            <Lock size={11} />
                           </button>
-                          <button onClick={() => toggleHero(post)} title="Toggle Hero (stays in feed)" className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all ${post.is_burner ? 'bg-[#ffea00] text-black' : 'bg-white/10 text-white/50 hover:bg-[#ffea00]/30'}`}>
-                            <Star size={13} />
+                          <button onClick={() => toggleHero(post)} title="Set as Hero (updates persona photo)"
+                            className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_burner ? 'bg-[#ffea00] text-black' : 'bg-white/10 text-white/50 hover:bg-[#ffea00]/40'}`}>
+                            <Star size={11} />
                           </button>
-                          <button onClick={() => toggleFreebie(post)} title={post.is_freebie ? 'Remove Freebie tag' : 'Mark as Freebie Gift'} className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all ${post.is_freebie ? 'bg-[#ff00ff] text-white shadow-[0_0_12px_rgba(255,0,255,0.5)]' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/30'}`}>
-                            <Gift size={13} />
+                          <button onClick={() => toggleFreebie(post)} title={post.is_freebie ? 'Remove Freebie' : 'Mark as Gift'}
+                            className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_freebie ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
+                            <Gift size={11} />
                           </button>
-                          <button onClick={() => markDuplicate(post.id)} title="Mark as Duplicate (hides from feed instantly)" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 text-white/50 hover:bg-orange-500/30 hover:text-orange-300 flex items-center justify-center transition-all">
-                            <Copy size={13} />
+                          <button onClick={() => markDuplicate(post.id)} title="Hide Duplicate"
+                            className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/30 hover:text-orange-300 flex items-center justify-center transition-all">
+                            <Copy size={11} />
                           </button>
-                          <button onClick={() => softHide(post.id)} title="Hide (soft delete)" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 text-white/50 hover:bg-orange-500/20 hover:text-orange-400 flex items-center justify-center transition-all">
-                            <EyeOff size={13} />
+                          <button onClick={() => softHide(post.id)} title="Hide from Feed"
+                            className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/20 hover:text-orange-400 flex items-center justify-center transition-all">
+                            <EyeOff size={11} />
                           </button>
-                          <button onClick={() => hardDelete(post.id)} title="Permanent Delete" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 text-white/50 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center transition-all">
-                            <Trash2 size={13} />
+                          <button onClick={() => hardDelete(post.id)} title="Permanent Delete"
+                            className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-red-500/30 hover:text-red-400 flex items-center justify-center transition-all">
+                            <Trash2 size={11} />
                           </button>
                         </div>
                       </div>
