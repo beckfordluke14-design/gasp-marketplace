@@ -151,7 +151,7 @@ export async function POST(req: Request) {
                 return NextResponse.json({ success: true });
             }
             case 'update-post': {
-                const { id, caption, persona_id, content_url, content_type, is_vault, is_featured } = payload;
+                const { id, caption, persona_id, content_url, content_type, is_vault, is_featured, is_freebie } = payload;
                 console.log(`[Neural Command]: Hard-Etching Post Update for ID: ${id}`);
                 
                 // 🛡️ SYNC PERSONA: Ensure persona exists for JOIN compatibility
@@ -174,7 +174,9 @@ export async function POST(req: Request) {
                 if (content_type!== undefined) updateFields.content_type = content_type;
                 if (is_vault    !== undefined) updateFields.is_vault     = is_vault;
                 if (is_featured !== undefined) updateFields.is_burner    = is_featured;
+                if (is_freebie  !== undefined) updateFields.is_freebie   = is_freebie;
                 updateFields.scheduled_for = new Date().toISOString();
+
 
                 const { error } = await supabase.from('posts').upsert([{ id, ...updateFields }]);
                 if (error) throw error;
@@ -199,8 +201,10 @@ export async function POST(req: Request) {
                     content_type: content_type || 'video',
                     is_vault:    is_vault    ?? false,
                     is_burner:   is_featured ?? false,
+                    is_freebie:  payload.is_freebie ?? false,
                     caption:     caption     || '',
                     scheduled_for: new Date().toISOString(),
+
                 }]);
                 if (error) throw error;
                 return NextResponse.json({ success: true });

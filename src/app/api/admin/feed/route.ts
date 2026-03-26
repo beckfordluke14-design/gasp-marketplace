@@ -20,6 +20,7 @@ export async function GET(req: Request) {
         .select('*, personas!inner(id, name, city, age, seed_image_url, is_active)')
         .eq('personas.is_active', true)
         .eq('is_vault', false)
+        .eq('is_freebie', false)
         .not('content_url', 'is', null)
         .not('caption', 'eq', 'DELETED_NODE_SYNC_V15')   // soft-hidden / duplicate-marked posts
         .not('caption', 'like', 'DELETED%')               // any tombstone variant

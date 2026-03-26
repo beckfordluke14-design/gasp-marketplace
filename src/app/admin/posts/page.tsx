@@ -45,7 +45,9 @@ interface EditDraft {
   content_url: string;
   is_vault: boolean;
   is_burner: boolean;
+  is_freebie: boolean;
   // Identity fields — write directly to personas table
+
   name: string;
   age: string;
   city: string;
@@ -202,7 +204,9 @@ export default function PostStudio() {
       content_url: post.content_url || '',
       is_vault:    post.is_vault,
       is_burner:   post.is_burner,
+      is_freebie:  post.is_freebie || false,
       name: post.personas?.name || '',
+
       age:  String(post.personas?.age  || ''),
       city: post.personas?.city || '',
     });
@@ -233,7 +237,9 @@ export default function PostStudio() {
       content_url: draft.content_url,
       is_vault:    draft.is_vault,
       is_featured: draft.is_burner,
+      is_freebie:  draft.is_freebie,
     });
+
 
     // 2. Write identity fields directly to personas table — single source of truth
     //    Chat API, story bar, and feed all read from here automatically.
@@ -262,7 +268,9 @@ export default function PostStudio() {
       content_url: draft.content_url,
       is_vault:    draft.is_vault,
       is_burner:   draft.is_burner,
+      is_freebie:  draft.is_freebie,
       personas: p.personas ? {
+
         ...p.personas,
         name: draft.name || p.personas.name,
         age:  draft.age ? Number(draft.age) : p.personas.age,
@@ -581,11 +589,13 @@ export default function PostStudio() {
                 {/* Preview */}
                 <div className="relative aspect-video bg-black rounded-xl sm:rounded-2xl overflow-hidden border border-white/5">
                   <img src={proxyImg(draft.content_url || editPost.content_url)} alt="" className="w-full h-full object-cover opacity-70" />
-                  <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 flex gap-2">
-                    {draft.is_vault  && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[8px] font-black uppercase tracking-widest rounded-full">Vault</span>}
+                   <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 flex gap-2">
+                    {draft.is_freebie && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[8px] font-black uppercase tracking-widest rounded-full flex items-center gap-1"><Gift size={8} /> Gift</span>}
+                    {!draft.is_freebie && draft.is_vault  && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[8px] font-black uppercase tracking-widest rounded-full">Vault</span>}
                     {draft.is_burner && <span className="px-2 py-0.5 bg-[#ffea00] text-black text-[8px] font-black uppercase tracking-widest rounded-full">Hero</span>}
                   </div>
                 </div>
+
 
                 {/* ── DB Fields ── */}
                 <div className="space-y-4">
@@ -615,21 +625,28 @@ export default function PostStudio() {
                     />
                   </label>
 
-                  {/* Vault / Hero toggles — independent, no mutual exclusion on hero */}
-                  <div className="flex items-center gap-3">
+                  {/* Vault / Hero / Gift toggles — mutual exclusion for Vault/Gift */}
+                  <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
                     <button
-                      onClick={() => setDraft(d => d ? { ...d, is_vault: !d.is_vault } : d)}
-                      className={`flex-1 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${draft.is_vault ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border border-white/10 text-white/40 hover:border-[#ff00ff]/30'}`}
+                      onClick={() => setDraft(d => d ? { ...d, is_vault: !d.is_vault, is_freebie: !d.is_vault ? false : d.is_freebie } : d)}
+                      className={`w-full sm:flex-1 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${draft.is_vault ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border border-white/10 text-white/40 hover:border-[#ff00ff]/30'}`}
                     >
                       <Lock size={13} /> {draft.is_vault ? 'Vault ✓' : 'Set Vault'}
                     </button>
                     <button
                       onClick={() => setDraft(d => d ? { ...d, is_burner: !d.is_burner } : d)}
-                      className={`flex-1 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${draft.is_burner ? 'bg-[#ffea00]/20 border border-[#ffea00]/40 text-[#ffea00]' : 'bg-white/5 border border-white/10 text-white/40 hover:border-[#ffea00]/30'}`}
+                      className={`w-full sm:flex-1 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${draft.is_burner ? 'bg-[#ffea00]/20 border border-[#ffea00]/40 text-[#ffea00]' : 'bg-white/5 border border-white/10 text-white/40 hover:border-[#ffea00]/30'}`}
                     >
                       <Star size={13} /> {draft.is_burner ? 'Hero ✓' : 'Set Hero'}
                     </button>
+                    <button
+                      onClick={() => setDraft(d => d ? { ...d, is_freebie: !d.is_freebie, is_vault: !d.is_freebie ? false : d.is_vault } : d)}
+                      className={`w-full sm:flex-1 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${draft.is_freebie ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border border-white/10 text-white/40 hover:border-[#ff00ff]/30'}`}
+                    >
+                      <Gift size={13} /> {draft.is_freebie ? 'Gift ✓' : 'Set Gift'}
+                    </button>
                   </div>
+
                   <p className="text-[9px] text-white/20 leading-relaxed">
                     ⭐ Hero tag is <strong className="text-white/40">additive</strong> — it stays in the feed. Only Vault removes posts from public feed.
                   </p>
