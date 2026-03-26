@@ -448,9 +448,9 @@ export default function PostStudio() {
                   >
                       {/* Media wrapper */}
                       <div className="relative aspect-[3/4] bg-black">
-                        {/* Media — auto-detects video (mp4/mov/webm) */}
+                        {/* Media — detect by content_type OR url extension */}
                         {(() => {
-                          const isVid = /\.mp4|\.mov|\.webm/i.test(post.content_url || '');
+                          const isVid = post.content_type === 'video' || /\.mp4|\.mov|\.webm/i.test(post.content_url || '');
                           return isVid ? (
                             <>
                               <video
@@ -470,71 +470,62 @@ export default function PostStudio() {
                           );
                         })()}
 
-                      {/* Status badges */}
-                      <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                        {post.is_freebie && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full flex items-center gap-1"><Gift size={8} /> Gift</span>}
-                        {!post.is_freebie && post.is_vault && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full">Vault</span>}
-                        {post.is_burner  && <span className="px-2 py-0.5 bg-[#ffea00] text-black text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full">Hero</span>}
-                      </div>
-
-                      {/* Saved flash */}
-                      {savedFlash === post.id && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
-                          <div className="flex items-center gap-2 text-[#00f0ff]">
-                            <Check size={20} /><span className="text-[10px] font-black uppercase tracking-widest">Saved</span>
-                          </div>
+                        {/* Status badges */}
+                        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                          {post.is_freebie && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full flex items-center gap-1"><Gift size={8} /> Gift</span>}
+                          {!post.is_freebie && post.is_vault && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full">Vault</span>}
+                          {post.is_burner  && <span className="px-2 py-0.5 bg-[#ffea00] text-black text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full">Hero</span>}
                         </div>
-                      )}
 
-                      {/* Hover overlay — 3×2 grid so nothing clips */}
-                      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto z-10 px-2">
-                        {/* Orphaned: prominent push-to-feed CTA */}
-                        {filterMode === 'orphaned' && post.is_vault && (
-                          <button
-                            onClick={() => pushToFeed(post)}
-                            className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-[#00f0ff] text-black rounded-lg text-[8px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_16px_rgba(0,240,255,0.4)]"
-                          >
-                            <ArrowLeftRight size={10} /> → Feed
-                          </button>
+                        {/* Saved flash */}
+                        {savedFlash === post.id && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
+                            <div className="flex items-center gap-2 text-[#00f0ff]">
+                              <Check size={20} /><span className="text-[10px] font-black uppercase tracking-widest">Saved</span>
+                            </div>
+                          </div>
                         )}
 
-                        {/* Edit — full width pill */}
-                        <button
-                          onClick={() => openEdit(post)}
-                          className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-white text-black rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#00f0ff] transition-all"
-                        >
-                          <Pencil size={11} /> Edit
-                        </button>
-
-                        {/* 3×2 action grid */}
-                        <div className="grid grid-cols-3 gap-1.5 w-full">
-                          <button onClick={() => toggleVault(post)} title={post.is_vault ? 'Move to Feed' : 'Move to Vault'}
-                            className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_vault ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
-                            <Lock size={11} />
+                        {/* Hover overlay — 3×2 action grid */}
+                        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto z-10 px-2">
+                          {filterMode === 'orphaned' && post.is_vault && (
+                            <button onClick={() => pushToFeed(post)}
+                              className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-[#00f0ff] text-black rounded-lg text-[8px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_16px_rgba(0,240,255,0.4)]">
+                              <ArrowLeftRight size={10} /> → Feed
+                            </button>
+                          )}
+                          <button onClick={() => openEdit(post)}
+                            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-white text-black rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#00f0ff] transition-all">
+                            <Pencil size={11} /> Edit
                           </button>
-                          <button onClick={() => toggleHero(post)} title="Set as Hero (updates persona photo)"
-                            className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_burner ? 'bg-[#ffea00] text-black' : 'bg-white/10 text-white/50 hover:bg-[#ffea00]/40'}`}>
-                            <Star size={11} />
-                          </button>
-                          <button onClick={() => toggleFreebie(post)} title={post.is_freebie ? 'Remove Freebie' : 'Mark as Gift'}
-                            className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_freebie ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
-                            <Gift size={11} />
-                          </button>
-                          <button onClick={() => markDuplicate(post.id)} title="Hide Duplicate"
-                            className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/30 hover:text-orange-300 flex items-center justify-center transition-all">
-                            <Copy size={11} />
-                          </button>
-                          <button onClick={() => softHide(post.id)} title="Hide from Feed"
-                            className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/20 hover:text-orange-400 flex items-center justify-center transition-all">
-                            <EyeOff size={11} />
-                          </button>
-                          <button onClick={() => hardDelete(post.id)} title="Permanent Delete"
-                            className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-red-500/30 hover:text-red-400 flex items-center justify-center transition-all">
-                            <Trash2 size={11} />
-                          </button>
+                          <div className="grid grid-cols-3 gap-1.5 w-full">
+                            <button onClick={() => toggleVault(post)} title={post.is_vault ? 'Move to Feed' : 'Move to Vault'}
+                              className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_vault ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
+                              <Lock size={11} />
+                            </button>
+                            <button onClick={() => toggleHero(post)} title="Set as Hero"
+                              className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_burner ? 'bg-[#ffea00] text-black' : 'bg-white/10 text-white/50 hover:bg-[#ffea00]/40'}`}>
+                              <Star size={11} />
+                            </button>
+                            <button onClick={() => toggleFreebie(post)} title={post.is_freebie ? 'Remove Freebie' : 'Mark as Gift'}
+                              className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_freebie ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
+                              <Gift size={11} />
+                            </button>
+                            <button onClick={() => markDuplicate(post.id)} title="Hide Duplicate"
+                              className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/30 hover:text-orange-300 flex items-center justify-center transition-all">
+                              <Copy size={11} />
+                            </button>
+                            <button onClick={() => softHide(post.id)} title="Hide from Feed"
+                              className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/20 hover:text-orange-400 flex items-center justify-center transition-all">
+                              <EyeOff size={11} />
+                            </button>
+                            <button onClick={() => hardDelete(post.id)} title="Permanent Delete"
+                              className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-red-500/30 hover:text-red-400 flex items-center justify-center transition-all">
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
                     {/* Card footer */}
                     <div className="p-2 sm:p-3 space-y-0.5">
