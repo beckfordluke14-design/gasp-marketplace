@@ -51,10 +51,9 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
         .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false });
 
-      // Build per-persona bubbles: ONLY real DB stories (no fallback profile pic ghosts)
+      // Build per-persona bubbles
       const bubbles: StoryBubble[] = personas
-        // 🛡️ FIX 1: Strip empty profiles — must have a real image to appear in the row
-        .filter(p => p.image && !p.image.includes('/v1.png') && p.image.startsWith('http'))
+        .filter(p => p.image)
         .map(p => {
           const pStories = (dbStories || []).filter((s: any) => s.persona_id === p.id);
           // Only include personas that have actual DB stories OR show them neutrally as fallback
@@ -142,6 +141,9 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                   src={bubble.personaImage}
                   alt={bubble.personaName}
                 />
+                
+                {/* 🧬 GREEN STATUS PULSE */}
+                <div className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#00ff00] border border-black shadow-[0_0_8px_#00ff00] animate-pulse" />
               </div>
             </div>
             {/* Name */}

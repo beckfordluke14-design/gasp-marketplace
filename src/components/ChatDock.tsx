@@ -45,8 +45,8 @@ export default function ChatDock({ minimizedIds, unreadCounts, onRestore, person
               `}>
                 <PersonaAvatar src={p.image} alt={p.name} />
                 
-                {/* Status Indicator */}
-                <div className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#00f0ff] border-2 border-black" />
+                {/* Status Indicator (GREEN GLOW) */}
+                <div className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_8px_#00ff00] animate-pulse" />
 
                 {/* Notification Badge (Spontaneous New Message Indicator) */}
                 {unread > 0 && (

@@ -32,6 +32,8 @@ const supabase = createClient(
 
 import { useUser } from '@/components/providers/UserProvider';
 
+import NeuralDiscoveryBubbles from '@/components/NeuralDiscoveryBubbles';
+
 function MarketplaceMain() {
   const { profile } = useUser();
   const [mounted, setMounted] = useState(false);
@@ -67,7 +69,7 @@ function MarketplaceMain() {
     }),
     ...initialPersonas
   ].filter((p, index, self) => index === self.findIndex((t) => t.id === p.id))
-   .filter(p => p.image && p.image.startsWith('http'));
+   .filter(p => p.image);
 
   const refinedPersonas = allPersonas.map(p => ({
     ...p,
@@ -111,24 +113,29 @@ function MarketplaceMain() {
     <div className="flex h-[100dvh] bg-black overflow-hidden font-inter" 
          onDoubleClick={handleZenToggle}
     >
-      <AnimatePresence>
-         {!isZenMode && (
-           <motion.div initial={{ y: -100 }} animate={{ y: 0 }} exit={{ y: -100 }} 
-                className={`fixed inset-x-0 top-0 z-[1000] ${isChatOpenMobile ? 'hidden md:block' : 'block'}`}
-           >
-            <Header onOpenTopUp={() => setIsTopUpOpen(true)} />
-           </motion.div>
-         )}
-      </AnimatePresence>
-      
-      {/* 🧬 LEFT SIDEBAR: PERSISTENT ON DESKTOP */}
+      {/* 🧭 FAR-LEFT DISCOVERY STRIP (Rotating Bubbles) */}
+      {!isZenMode && !isChatOpenMobile && (
+        <NeuralDiscoveryBubbles personas={refinedPersonas} onSelectPersona={handleSelectPersona} />
+      )}
+
+      {/* 🧬 MAIN SIDEBAR: PERSISTENT ON DESKTOP */}
       {!isZenMode && (
         <div className={`${isChatOpenMobile ? 'hidden lg:block' : 'block'}`}>
            <Sidebar selectedPersonaId={selectedPersonaId} onSelectPersona={handleSelectPersona} unreadCounts={{}} personas={refinedPersonas} />
         </div>
       )}
-      
-      <main className="flex-1 flex flex-col relative overflow-hidden bg-black">
+
+      <main className="flex-1 flex flex-col relative overflow-hidden bg-black border-r border-white/5">
+          <AnimatePresence>
+             {!isZenMode && (
+               <motion.div initial={{ y: -100 }} animate={{ y: 0 }} exit={{ y: -100 }} 
+                    className={`fixed inset-x-0 top-0 z-[1000] ${isChatOpenMobile ? 'hidden md:block' : 'block'}`}
+               >
+                <Header onOpenTopUp={() => setIsTopUpOpen(true)} />
+               </motion.div>
+             )}
+          </AnimatePresence>
+
           {!isZenMode && <div className="h-24 md:h-32 shrink-0" />}
           
           {/* 💎 STORIES ROW: THE IDENTITY BUBBLES */}
@@ -138,10 +145,22 @@ function MarketplaceMain() {
             </div>
           )}
 
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden relative">
             <GlobalFeed onSelectPersona={handleSelectPersona} />
+
+            {/* 🕴️ GHOST PULSE TICKER: SOCIAL PROOF */}
+            {!isZenMode && !isChatOpenMobile && (
+              <div className="absolute bottom-6 left-6 z-[800]">
+                 <GhostActivityTicker />
+              </div>
+            )}
           </div>
       </main>
+
+      {/* 🏙️ RIGHT DISCOVERY GALLERY */}
+      {!isZenMode && !isChatOpenMobile && (
+         <RightSidebar onSelectPersona={handleSelectPersona} personas={refinedPersonas} />
+      )}
 
       {/* 🔮 CHAT HUB: BOOSTED Z-INDEX */}
       <div className={`fixed inset-y-0 right-0 ${isChatOpenMobile ? 'z-[2000]' : 'z-[500]'} flex flex-row-reverse pointer-events-none items-end`}>
@@ -161,8 +180,12 @@ function MarketplaceMain() {
         </AnimatePresence>
       </div>
 
+      {!isZenMode && minimizedIds.length > 0 && (
+         <ChatDock minimizedIds={minimizedIds} unreadCounts={{}} onRestore={(id) => setMinimizedIds(prev => prev.filter(mid => mid !== id))} personas={refinedPersonas} />
+      )}
+
       {!isZenMode && !isChatOpenMobile && (
-        <MobileBottomNav  unreadCounts={{}} onSelectChat={() => handleSelectPersona(selectedPersonaId)} onOpenTopUp={() => setIsTopUpOpen(true)} />
+        <MobileBottomNav unreadCounts={{}} onSelectChat={() => handleSelectPersona(selectedPersonaId)} onOpenTopUp={() => setIsTopUpOpen(true)} />
       )}
 
       {isTopUpOpen && <TopUpDrawer userId={guestId} onClose={() => setIsTopUpOpen(false)} />}

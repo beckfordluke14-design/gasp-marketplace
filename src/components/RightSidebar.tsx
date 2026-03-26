@@ -67,7 +67,7 @@ export default function RightSidebar({ onSelectPersona, personas }: { onSelectPe
                     <span className="text-[11px] font-bold uppercase text-white italic tracking-tighter truncate">
                        {persona.name} {persona.age}
                     </span>
-                    <div className={`w-1.5 h-1.5 rounded-full ${persona.isOnline ? 'bg-[#00f0ff] shadow-[0_0_5px_#00f0ff]' : 'bg-white/20'}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${persona.isOnline ? 'bg-[#00ff00] shadow-[0_0_8px_#00ff00] animate-pulse' : 'bg-white/10'}`} />
                  </div>
                  <div className="flex items-center justify-between">
                     <span className="text-[7px] font-black text-white/40 uppercase tracking-widest leading-none">{persona.city}</span>

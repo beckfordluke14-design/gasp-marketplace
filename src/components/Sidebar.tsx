@@ -88,16 +88,16 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
       >
         {isFollowing && (
             <div className="absolute top-2 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-               <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
-               <span className="text-[6px] font-black text-[#00f0ff] uppercase tracking-tighter italic">Following</span>
+               <div className="w-1 h-1 rounded-full bg-[#00ff00] animate-pulse shadow-[0_0_8px_#00ff00]" />
+               <span className="text-[6px] font-black text-[#00ff00] uppercase tracking-tighter italic">Following</span>
             </div>
         )}
 
         <div className="relative shrink-0">
-          <div className={`w-12 h-12 rounded-full overflow-hidden border transition-all ${unread > 0 ? 'border-[#ff00ff] shadow-[0_0_15px_rgba(255,0,255,0.4)]' : 'border-white/10 group-hover:border-white/30'}`}>
+          <div className="w-12 h-12 rounded-full overflow-hidden border transition-all ${unread > 0 ? 'border-[#ff00ff] shadow-[0_0_15px_rgba(255,0,255,0.4)]' : 'border-white/10 group-hover:border-white/30'}">
             <PersonaAvatar src={persona.image} alt={persona.name} className={`object-cover transition-all ${unread > 0 || isSelected ? 'grayscale-0' : 'grayscale group-hover:grayscale-0'}`} />
           </div>
-          <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-black transition-all ${persona.status === 'online' ? 'bg-[#00f0ff] shadow-[0_0_8px_#00f0ff]' : 'bg-white/20'}`} />
+          <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-black transition-all ${persona.status === 'online' ? 'bg-[#00ff00] shadow-[0_0_10px_#00ff00] animate-pulse' : 'bg-white/10'}`} />
         </div>
 
         <div className="flex-1 min-w-0 pt-0.5">
@@ -124,14 +124,14 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
             <div className="mb-8 px-4">
                 <div className="px-2 mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <MessageSquare size={10} className="text-[#00f0ff]" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00f0ff] italic">Missed Connections</span>
+                        <MessageSquare size={10} className="text-[#00ff00]" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00ff00] italic">Missed Connections</span>
                     </div>
                 </div>
                 <div className="flex flex-col">
                     {personas.filter(p => unreadCounts[p.id] > 0).map(p => (
                         <motion.div key={p.id} onClick={() => onSelectPersona(p.id)} whileHover={{ x: 4 }} className="flex items-center gap-3 p-3 rounded-2xl bg-[#00f0ff]/5 border border-[#00f0ff]/10 mb-2 cursor-pointer group">
-                             <div className="w-10 h-10 rounded-full overflow-hidden border border-[#00f0ff]/40 shrink-0">
+                             <div className="w-10 h-10 rounded-full overflow-hidden border border-[#00ff00]/40 shrink-0">
                                 <PersonaAvatar src={p.image} alt={p.name} />
                              </div>
                              <div className="flex-1 min-w-0">
@@ -174,23 +174,23 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
       <div className="p-6 border-t border-white/5 bg-black z-10 flex flex-col gap-5">
           
           {/* ══════════════════════════════════════════════════
-              SYNDICATE CREDIT LEDGER (1:1 TGE Reservation)
+              SYNDICATE STAKE LEDGER (1:1 TGE Reservation)
               ══════════════════════════════════════════════════ */}
           <div className="bg-white/5 border border-white/10 rounded-[2rem] p-5 space-y-4 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#00f0ff]/5 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#00ff00]/5 to-transparent pointer-events-none" />
             
             <div className="flex items-center justify-between relative z-10 border-b border-white/5 pb-3">
                <div className="flex flex-col">
-                  <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30 italic">Total Credits Logged</span>
+                  <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30 italic">LIFETIME RESERVATION</span>
                   <div className="flex items-center gap-2 mt-1">
-                     <Coins size={10} className="text-[#ffea00]" />
+                     <span className="text-[#00ff00] font-black text-[12px] italic">⚡️</span>
                      <span className="text-[12px] font-syncopate font-black italic text-white leading-none">
-                        {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[8px] text-[#ffea00] not-italic">SYNDICATE CREDITS</span>
+                        {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[8px] text-[#00ff00] not-italic">$GASPAI STAKE</span>
                      </span>
                   </div>
                </div>
-               <div className="px-2 py-0.5 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20">
-                  <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest italic">1:1 TGE Reservation</span>
+               <div className="px-2 py-0.5 rounded-full bg-[#00ff00]/10 border border-[#00ff00]/20">
+                  <span className="text-[7px] font-black text-[#00ff00] uppercase tracking-widest italic">VERIFIED 1:1 STAKE</span>
                </div>
             </div>
 
