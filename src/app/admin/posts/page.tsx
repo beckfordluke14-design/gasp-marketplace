@@ -6,7 +6,7 @@ import {
   Pencil, Trash2, Star, Lock, Search,
   RefreshCw, EyeOff, Check, X,
   ChevronDown, Image as ImageIcon, ShieldAlert, User, MapPin, Hash, Link2,
-  Package, ExternalLink, ArrowLeftRight, Gift, Copy
+  Package, ExternalLink, ArrowLeftRight, Gift, Copy, UserCheck, UserPlus, Sparkles, FolderHeart
 } from 'lucide-react';
 import { proxyImg } from '@/lib/profiles';
 import { createClient } from '@supabase/supabase-js';
@@ -33,12 +33,13 @@ interface PersonaPost {
   is_vault: boolean;
   is_burner: boolean;
   is_freebie?: boolean;
+  is_gallery?: boolean;
   caption: string;
   created_at: string;
   personas?: { name: string; age?: number; city?: string };
 }
 
-type FilterMode = 'all' | 'vault' | 'hero' | 'feed' | 'orphaned' | 'hidden';
+type FilterMode = 'all' | 'vault' | 'hero' | 'feed' | 'orphaned' | 'hidden' | 'gallery';
 
 interface EditDraft {
   caption: string;
@@ -46,6 +47,7 @@ interface EditDraft {
   is_vault: boolean;
   is_burner: boolean;
   is_freebie: boolean;
+  is_gallery: boolean;
   // Identity fields — write directly to personas table
 
   name: string;
@@ -74,6 +76,11 @@ export default function PostStudio() {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set());
   const longPressTimer = useState<any>(null)[0]; // Ref-like but simple
+
+  // ── Identity Convergence State ──
+  const [showSoloModal, setShowSoloModal]   = useState<PersonaPost | null>(null);
+  const [soloDraft, setSoloDraft]           = useState({ name: '', age: '22', city: '', vibe: 'mysterious' });
+  const [mergingPost, setMergingPost]       = useState<PersonaPost | null>(null);
 
 
   useEffect(() => { setMounted(true); }, []);
@@ -178,6 +185,17 @@ export default function PostStudio() {
     setSyncing(null);
   };
 
+  const toggleGallery = async (post: PersonaPost) => {
+    setSyncing(post.id);
+    const next = !post.is_gallery;
+    const data = await callAudit('toggle-gallery', { id: post.id, is_gallery: next });
+    if (data.success) {
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_gallery: next } : p));
+      flash(post.id);
+    }
+    setSyncing(null);
+  };
+
   const softHide = async (postId: string) => {
     if (!confirm('Hide this post from the public feed?')) return;
     setSyncing(postId);
@@ -211,6 +229,7 @@ export default function PostStudio() {
       is_vault:    post.is_vault,
       is_burner:   post.is_burner,
       is_freebie:  post.is_freebie || false,
+      is_gallery:  post.is_gallery || false,
       name: post.personas?.name || '',
 
       age:  String(post.personas?.age  || ''),
@@ -244,6 +263,7 @@ export default function PostStudio() {
       is_vault:    draft.is_vault,
       is_featured: draft.is_burner,
       is_freebie:  draft.is_freebie,
+      is_gallery:  draft.is_gallery,
     });
 
 
@@ -275,6 +295,7 @@ export default function PostStudio() {
       is_vault:    draft.is_vault,
       is_burner:   draft.is_burner,
       is_freebie:  draft.is_freebie,
+      is_gallery:  draft.is_gallery,
       personas: p.personas ? {
 
         ...p.personas,
@@ -395,10 +416,11 @@ export default function PostStudio() {
       filterMode === 'all'      ? !isHidden :
       filterMode === 'vault'    ? (!!p.is_vault && !isHidden) :
       filterMode === 'hero'     ? (!!p.is_burner && !isHidden) :
+      filterMode === 'gallery'  ? (!!p.is_gallery && !isHidden) :
       filterMode === 'orphaned' ? (!!p.is_vault && orphanedPersonaIds.has(p.persona_id) && !isHidden) :
       filterMode === 'hidden'   ? isHidden :
-      // Feed = not vault
-      (!p.is_vault && !isHidden);
+      // Feed = not vault and not gallery
+      (!p.is_vault && !p.is_gallery && !isHidden);
 
     return matchSearch && matchPersona && matchMode;
   });
@@ -408,6 +430,7 @@ export default function PostStudio() {
     { label: `All (${posts.length})`,                                                              value: 'all' },
     { label: `Feed (${posts.filter(p => !p.is_vault).length})`,                                   value: 'feed' },
     { label: `Vault (${posts.filter(p => p.is_vault && !p.caption?.startsWith('DELETED')).length})`,    value: 'vault' },
+    { label: `Gallery (${posts.filter(p => p.is_gallery && !p.caption?.startsWith('DELETED')).length})`, value: 'gallery' },
     { label: `Hero (${posts.filter(p => p.is_burner && !p.caption?.startsWith('DELETED')).length})`,    value: 'hero' },
     { label: `Orphaned (${orphanedPersonaIds.size})`,                                              value: 'orphaned', alert: orphanedPersonaIds.size > 0 },
     { label: `Hidden (${posts.filter(p => p.caption?.startsWith('DELETED')).length})`,              value: 'hidden', alert: posts.some(p => p.caption?.startsWith('DELETED')) },
@@ -453,6 +476,25 @@ export default function PostStudio() {
                 className="bg-transparent outline-none text-[11px] font-black uppercase tracking-widest placeholder:text-white/10 w-full min-w-0"
               />
             </div>
+
+            <button
+              onClick={async () => {
+                const source = prompt('Source Persona ID (to be DELETED):');
+                if (!source) return;
+                const target = prompt(`Target Persona ID (to absorb all of ${source}'s data):`);
+                if (!target) return;
+                if (!confirm(`CRITICAL: This will migrate media/stats from ${source} to ${target} and PERMANENTLY DELETE ${source}. Proceed?`)) return;
+                setLoading(true);
+                const res = await callAudit('merge-persona', { sourceId: source, targetId: target });
+                if (res.success) { alert('Merge Complete.'); fetchPosts(); }
+                else alert(res.error || 'Merge failed.');
+                setLoading(false);
+              }}
+              title="Consolidate Personas"
+              className="w-9 h-9 shrink-0 bg-[#ff00ff]/10 border border-[#ff00ff]/20 rounded-xl flex items-center justify-center text-[#ff00ff] hover:bg-[#ff00ff] hover:text-black transition-all"
+            >
+              <ArrowLeftRight size={13} />
+            </button>
 
             <button onClick={fetchPosts} className="w-9 h-9 shrink-0 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all">
               <RefreshCw size={13} className={loading ? 'animate-spin text-[#00f0ff]' : 'text-white/40'} />
@@ -635,6 +677,23 @@ export default function PostStudio() {
                                   className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/20 hover:text-orange-400 flex items-center justify-center transition-all">
                                   <EyeOff size={11} />
                                 </button>
+                                <button onClick={() => toggleGallery(post)} title={post.is_gallery ? 'Remove from Gallery' : 'Move to Gallery'}
+                                  className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_gallery ? 'bg-[#00f0ff] text-black' : 'bg-white/10 text-white/50 hover:bg-[#00f0ff]/40'}`}>
+                                  <FolderHeart size={11} />
+                                </button>
+                                <button onClick={() => setShowSoloModal(post)} title="Go Solo: Create New Persona"
+                                  className="h-8 rounded-lg bg-white/5 text-white/40 hover:bg-[#00f0ff]/20 hover:text-white flex items-center justify-center transition-all">
+                                  <Sparkles size={11} />
+                                </button>
+                                <button onClick={() => { 
+                                    const targetId = prompt('Merge post into which Persona ID?');
+                                    if (targetId) {
+                                        callAudit('update-post', { id: post.id, persona_id: targetId }).then(() => fetchPosts());
+                                    }
+                                 }} title="Reassign to Persona"
+                                  className="h-8 rounded-lg bg-white/5 text-white/40 hover:bg-[#ff00ff]/20 hover:text-white flex items-center justify-center transition-all">
+                                  <UserPlus size={11} />
+                                </button>
                                 <button onClick={() => hardDelete(post.id)} title="Permanent Delete"
                                   className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-red-500/30 hover:text-red-400 flex items-center justify-center transition-all">
                                   <Trash2 size={11} />
@@ -772,6 +831,7 @@ export default function PostStudio() {
                    <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 flex gap-2">
                     {draft.is_freebie && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[8px] font-black uppercase tracking-widest rounded-full flex items-center gap-1"><Gift size={8} /> Gift</span>}
                     {!draft.is_freebie && draft.is_vault  && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[8px] font-black uppercase tracking-widest rounded-full">Vault</span>}
+                    {draft.is_gallery && <span className="px-2 py-0.5 bg-[#00f0ff] text-black text-[8px] font-black uppercase tracking-widest rounded-full">Gallery</span>}
                     {draft.is_burner && <span className="px-2 py-0.5 bg-[#ffea00] text-black text-[8px] font-black uppercase tracking-widest rounded-full">Hero</span>}
                   </div>
                 </div>
@@ -805,30 +865,36 @@ export default function PostStudio() {
                     />
                   </label>
 
-                  {/* Vault / Hero / Gift toggles — mutual exclusion for Vault/Gift */}
-                  <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
+                  {/* Vault / Hero / Gift / Gallery toggles */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                     <button
-                      onClick={() => setDraft(d => d ? { ...d, is_vault: !d.is_vault, is_freebie: !d.is_vault ? false : d.is_freebie } : d)}
-                      className={`w-full sm:flex-1 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${draft.is_vault ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border border-white/10 text-white/40 hover:border-[#ff00ff]/30'}`}
+                      onClick={() => setDraft(d => d ? { ...d, is_vault: !d.is_vault, is_freebie: !d.is_vault ? false : d.is_freebie, is_gallery: !d.is_vault ? false : d.is_gallery } : d)}
+                      className={`py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${draft.is_vault ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border border-white/10 text-white/40'}`}
                     >
                       <Lock size={13} /> {draft.is_vault ? 'Vault ✓' : 'Set Vault'}
                     </button>
                     <button
                       onClick={() => setDraft(d => d ? { ...d, is_burner: !d.is_burner } : d)}
-                      className={`w-full sm:flex-1 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${draft.is_burner ? 'bg-[#ffea00]/20 border border-[#ffea00]/40 text-[#ffea00]' : 'bg-white/5 border border-white/10 text-white/40 hover:border-[#ffea00]/30'}`}
+                      className={`py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${draft.is_burner ? 'bg-[#ffea00]/20 border border-[#ffea00]/40 text-[#ffea00]' : 'bg-white/5 border border-white/10 text-white/40'}`}
                     >
                       <Star size={13} /> {draft.is_burner ? 'Hero ✓' : 'Set Hero'}
                     </button>
                     <button
                       onClick={() => setDraft(d => d ? { ...d, is_freebie: !d.is_freebie, is_vault: !d.is_freebie ? false : d.is_vault } : d)}
-                      className={`w-full sm:flex-1 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${draft.is_freebie ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border border-white/10 text-white/40 hover:border-[#ff00ff]/30'}`}
+                      className={`py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${draft.is_freebie ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border border-white/10 text-white/40'}`}
                     >
                       <Gift size={13} /> {draft.is_freebie ? 'Gift ✓' : 'Set Gift'}
+                    </button>
+                    <button
+                      onClick={() => setDraft(d => d ? { ...d, is_gallery: !d.is_gallery, is_vault: !d.is_gallery ? false : d.is_vault } : d)}
+                      className={`py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${draft.is_gallery ? 'bg-[#00f0ff]/20 border border-[#00f0ff]/40 text-[#00f0ff]' : 'bg-white/5 border border-white/10 text-white/40'}`}
+                    >
+                      <FolderHeart size={13} /> {draft.is_gallery ? 'Gallery ✓' : 'Set Gallery'}
                     </button>
                   </div>
 
                   <p className="text-[9px] text-white/20 leading-relaxed">
-                    ⭐ Hero tag is <strong className="text-white/40">additive</strong> — it stays in the feed. Only Vault removes posts from public feed.
+                    ⭐ Hero tag is <strong className="text-white/40">additive</strong>. Vault and Gallery are <strong className="text-white/40">exclusive</strong> — they remove posts from the global feed.
                   </p>
                 </div>
 
@@ -957,6 +1023,13 @@ export default function PostStudio() {
                                 >
                                   <Star size={10} />
                                 </button>
+                                <button
+                                  onClick={() => { setShowSoloModal(lp); closeEdit(); }}
+                                  title="Go Solo: Birth Identity"
+                                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-[#00f0ff] text-white flex items-center justify-center transition-all"
+                                >
+                                  <Sparkles size={10} />
+                                </button>
                                 {/* Hard delete this linked post from the modal */}
                                 <button
                                   onClick={() => deleteLinkedPost(lp)}
@@ -1002,6 +1075,103 @@ export default function PostStudio() {
                 </div>
               </div>
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Solo Activation Modal ── */}
+      <AnimatePresence>
+        {showSoloModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[1200] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-4"
+            onClick={() => setShowSoloModal(null)}
+          >
+             <motion.div
+               initial={{ scale: 0.9, y: 20 }}
+               animate={{ scale: 1, y: 0 }}
+               exit={{ scale: 0.9, y: 20 }}
+               className="w-full max-w-lg bg-[#0e0e0e] border border-[#00f0ff]/20 rounded-[2.5rem] p-8 space-y-8 shadow-[0_30px_100px_rgba(0,0,0,1)]"
+               onClick={e => e.stopPropagation()}
+             >
+                <div className="flex items-center gap-4">
+                   <div className="w-16 h-16 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/20 flex items-center justify-center text-[#00f0ff]">
+                      <Sparkles size={32} />
+                   </div>
+                   <div>
+                      <h3 className="text-2xl font-syncopate font-black italic uppercase tracking-tighter text-white">Neural Birth</h3>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">Consolidating node into solo identity</p>
+                   </div>
+                </div>
+
+                <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,240,255,0.1)]">
+                   <img src={proxyImg(showSoloModal.content_url)} alt="" className="w-full h-full object-cover opacity-60" />
+                   <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black to-transparent">
+                        <div className="flex items-center gap-2">
+                           <MapPin size={10} className="text-[#00f0ff]" />
+                           <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">{soloDraft.city || 'LOCATION PENDING'}</span>
+                        </div>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Assigned Name</label>
+                      <input 
+                        type="text" 
+                        value={soloDraft.name} 
+                        onChange={e => setSoloDraft(s => ({ ...s, name: e.target.value }))}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-black uppercase tracking-widest outline-none focus:border-[#00f0ff]/40 transition-all h-14"
+                        placeholder="VALENTINA"
+                        autoFocus
+                      />
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Identity Age</label>
+                      <input 
+                        type="text" 
+                        value={soloDraft.age} 
+                        onChange={e => setSoloDraft(s => ({ ...s, age: e.target.value }))}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-black uppercase tracking-widest outline-none focus:border-[#00f0ff]/40 transition-all h-14"
+                        placeholder="22"
+                      />
+                   </div>
+                   <div className="col-span-2 space-y-2">
+                      <label className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Home Region (City)</label>
+                      <input 
+                        type="text" 
+                        value={soloDraft.city} 
+                        onChange={e => setSoloDraft(s => ({ ...s, city: e.target.value }))}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-black uppercase tracking-widest outline-none focus:border-[#00f0ff]/40 transition-all h-14"
+                        placeholder="RIO DE JANEIRO"
+                      />
+                   </div>
+                </div>
+
+                <div className="pt-4 space-y-4">
+                   <button 
+                     onClick={async () => {
+                        if (!soloDraft.name) return alert('Name Required.');
+                        setSaving(true);
+                        const res = await callAudit('solo-persona', { postId: showSoloModal.id, ...soloDraft });
+                        if (res.success) {
+                           setPosts(prev => prev.filter(p => p.id !== showSoloModal.id));
+                           setShowSoloModal(null);
+                           setSoloDraft({ name: '', age: '22', city: '', vibe: 'mysterious' });
+                           alert(`Neural Activation Complete: ${soloDraft.name} has been instantiated.`);
+                        } else alert(res.error || 'Activation Failed.');
+                        setSaving(false);
+                     }}
+                     disabled={saving || !soloDraft.name}
+                     className="w-full h-16 bg-white text-black rounded-3xl font-syncopate font-black italic uppercase hover:bg-[#00f0ff] transition-all shadow-2xl disabled:opacity-50 flex items-center justify-center gap-3"
+                   >
+                     {saving ? <RefreshCw className="animate-spin" /> : <><UserPlus size={22} /> Activate Solo Node</>}
+                   </button>
+                   <button onClick={() => setShowSoloModal(null)} className="w-full text-[10px] font-black uppercase text-white/20 hover:text-white transition-colors">Abort Discovery Birth</button>
+                </div>
+             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

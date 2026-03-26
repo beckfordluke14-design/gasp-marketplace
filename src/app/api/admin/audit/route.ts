@@ -144,6 +144,50 @@ export async function POST(req: Request) {
                 if (error) throw error;
                 return NextResponse.json({ success: true });
             }
+            case 'toggle-gallery': {
+                const { id, is_gallery } = payload;
+                const { error } = await supabase.from('posts').update({ is_gallery }).eq('id', id);
+                if (error) throw error;
+                return NextResponse.json({ success: true });
+            }
+            case 'merge-persona': {
+                const { sourceId, targetId } = payload;
+                if (!sourceId || !targetId) throw new Error('Merge Identity Targets Missing.');
+                const { data, error } = await supabase.rpc('merge_personas', { 
+                    p_source_id: sourceId, 
+                    p_target_id: targetId 
+                });
+                if (error) throw error;
+                return NextResponse.json(data);
+            }
+            case 'solo-persona': {
+                const { postId, name, age, city, vibe } = payload;
+                if (!postId || !name) throw new Error('Solo Target/Name Missing.');
+                
+                // 1. Fetch source post
+                const { data: post, error: fError } = await supabase.from('posts').select('*').eq('id', postId).single();
+                if (fError || !post) throw new Error('Post Node Recover Failure.');
+
+                const newId = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+                
+                // 2. Birth new persona
+                const { error: pError } = await supabase.from('personas').insert([{
+                    id: newId,
+                    name,
+                    age: parseInt(age, 10) || 22,
+                    city: city || 'Unknown',
+                    vibe: vibe || 'mysterious',
+                    is_active: true,
+                    seed_image_url: post.content_url
+                }]);
+                if (pError) throw pError;
+
+                // 3. Reassign the trigger post to the new owner
+                const { error: updError } = await supabase.from('posts').update({ persona_id: newId }).eq('id', postId);
+                if (updError) throw updError;
+
+                return NextResponse.json({ success: true, newPersonaId: newId });
+            }
             case 'toggle-featured': {
                 const { id, is_featured } = payload;
                 const { error } = await supabase.from('posts').update({ is_burner: is_featured }).eq('id', id);
@@ -175,6 +219,7 @@ export async function POST(req: Request) {
                 if (is_vault    !== undefined) updateFields.is_vault     = is_vault;
                 if (is_featured !== undefined) updateFields.is_burner    = is_featured;
                 if (is_freebie  !== undefined) updateFields.is_freebie   = is_freebie;
+                if (is_gallery  !== undefined) updateFields.is_gallery   = is_gallery;
                 updateFields.scheduled_for = new Date().toISOString();
 
 
@@ -221,6 +266,7 @@ export async function POST(req: Request) {
                     is_vault:    is_vault    ?? false,
                     is_burner:   is_featured ?? false,
                     is_freebie:  payload.is_freebie ?? false,
+                    is_gallery:  payload.is_gallery ?? false,
                     caption:     caption     || '',
                     scheduled_for: new Date().toISOString(),
 

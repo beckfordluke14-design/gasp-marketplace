@@ -474,7 +474,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     setLoadingPics(true);
     const { data } = await supabase
       .from('posts')
-      .select('id, content_url, caption, is_vault, is_burner, is_freebie')
+      .select('id, content_url, caption, is_vault, is_burner, is_freebie, is_gallery')
       .eq('persona_id', personaId)
       .not('content_url', 'is', null)
       // Hidden states: tombstoned by soft-delete / duplicate action
@@ -483,17 +483,22 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
       // Freebies are private chat gifts — keep them out of the gallery
       .neq('is_freebie', true)
       .order('created_at', { ascending: false })
-      .limit(60);
+      .limit(80);
     if (data) {
-      // Client-side safety net: strip deleted/freebie items only. Vault items are KEPT as teasers.
+      // Client-side safety net: strip deleted/freebie items only. 
+      // Vault items are kept as locked teasers. Gallery items are kept as public portfolio assets.
       const visible = data.filter(p =>
         p.content_url &&
         p.caption !== 'DELETED_NODE_SYNC_V15' &&
         !p.caption?.startsWith('DELETED') &&
         !p.is_freebie
       );
-      // Sort: public posts first, vault last (teasers anchor the bottom)
-      visible.sort((a, b) => (a.is_vault === b.is_vault ? 0 : a.is_vault ? 1 : -1));
+      // Sort: Priority (Gallery > Feed > Vault teasers)
+      visible.sort((a, b) => {
+          if (a.is_gallery !== b.is_gallery) return a.is_gallery ? -1 : 1;
+          if (a.is_vault !== b.is_vault) return a.is_vault ? 1 : -1;
+          return 0;
+      });
       setPicPosts(visible);
     }
     setLoadingPics(false);
@@ -621,24 +626,37 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
               {picPosts.map(pic => (
                 <button
                   key={pic.id}
-                  onClick={() => { setExpandedPic(pic.content_url); setPicZoomed(false); }}
+                  onClick={() => { 
+                    if (pic.is_vault && !pic.is_gallery) {
+                        setShowVault(true);
+                        return;
+                    }
+                    setExpandedPic(pic.content_url); 
+                    setPicZoomed(false); 
+                  }}
                   className="relative aspect-square bg-black overflow-hidden group"
                 >
                   <img
-                    src={pic.is_vault ? "/locked-vault.webp" : proxyImg(pic.content_url)}
+                    src={(pic.is_vault && !pic.is_gallery) ? "/locked-vault.webp" : proxyImg(pic.content_url)}
                     alt=""
-                    onContextMenu={e => pic.is_vault && e.preventDefault()}
+                    onContextMenu={e => (pic.is_vault && !pic.is_gallery) && e.preventDefault()}
                     className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
-                      pic.is_vault ? 'blur-2xl opacity-40 grayscale overflow-hidden' : ''
+                      (pic.is_vault && !pic.is_gallery) ? 'blur-2xl opacity-40 grayscale overflow-hidden' : ''
                     }`}
                     loading="lazy"
                   />
-                  {/* Vault badge */}
-                  {pic.is_vault && (
+                  {/* Vault badge: Only if NOT in gallery mode */}
+                  {pic.is_vault && !pic.is_gallery && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                       <div className="w-8 h-8 rounded-full bg-[#ff00ff]/30 border border-[#ff00ff]/60 flex items-center justify-center backdrop-blur-sm">
                         <Lock size={14} className="text-[#ff00ff]" />
                       </div>
+                    </div>
+                  )}
+                  {/* Gallery badge (Subtle portfolio hint) */}
+                  {pic.is_gallery && (
+                    <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-[#00f0ff]/20 border border-[#00f0ff]/40 rounded-full backdrop-blur-md">
+                        <span className="text-[6px] font-black text-[#00f0ff] uppercase tracking-tighter">PORTFOLIO</span>
                     </div>
                   )}
                   {/* Like button — always visible bottom-right */}

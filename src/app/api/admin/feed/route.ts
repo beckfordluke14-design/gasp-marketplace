@@ -21,9 +21,10 @@ export async function GET(req: Request) {
         .eq('personas.is_active', true)
         .eq('is_vault', false)
         .eq('is_freebie', false)
+        .eq('is_gallery', false)
         .not('content_url', 'is', null)
-        .not('caption', 'eq', 'DELETED_NODE_SYNC_V15')   // soft-hidden / duplicate-marked posts
-        .not('caption', 'like', 'DELETED%')               // any tombstone variant
+        .not('caption', 'eq', 'DELETED_NODE_SYNC_V15')
+        .not('caption', 'like', 'DELETED%')
         .order('is_burner', { ascending: false })          // hero posts float to top
         .order('created_at', { ascending: false })
         .range(page * PAGE_COUNT, (page + 1) * PAGE_COUNT - 1);
