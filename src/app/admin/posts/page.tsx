@@ -6,7 +6,7 @@ import {
   Pencil, Trash2, Star, Lock, Search,
   RefreshCw, EyeOff, Check, X,
   ChevronDown, Image as ImageIcon, ShieldAlert, User, MapPin, Hash, Link2,
-  Package, ExternalLink, ArrowLeftRight
+  Package, ExternalLink, ArrowLeftRight, Gift
 } from 'lucide-react';
 import { proxyImg } from '@/lib/profiles';
 import { createClient } from '@supabase/supabase-js';
@@ -32,6 +32,7 @@ interface PersonaPost {
   content_type: string;
   is_vault: boolean;
   is_burner: boolean;
+  is_freebie?: boolean;
   caption: string;
   created_at: string;
   personas?: { name: string; age?: number; city?: string };
@@ -140,6 +141,17 @@ export default function PostStudio() {
     const data = await callAudit('update-post', { id: post.id, is_vault: false });
     if (data.success) {
       setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_vault: false } : p));
+      flash(post.id);
+    }
+    setSyncing(null);
+  };
+
+  const toggleFreebie = async (post: PersonaPost) => {
+    setSyncing(post.id);
+    const next = !post.is_freebie;
+    const data = await callAudit('mark-freebie', { id: post.id, is_freebie: next });
+    if (data.success) {
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_freebie: next, is_vault: next ? false : p.is_vault } : p));
       flash(post.id);
     }
     setSyncing(null);
@@ -405,7 +417,8 @@ export default function PostStudio() {
 
                       {/* Status badges */}
                       <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                        {post.is_vault   && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full">Vault</span>}
+                        {post.is_freebie && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full flex items-center gap-1"><Gift size={8} /> Gift</span>}
+                        {!post.is_freebie && post.is_vault && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full">Vault</span>}
                         {post.is_burner  && <span className="px-2 py-0.5 bg-[#ffea00] text-black text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full">Hero</span>}
                       </div>
 
@@ -441,6 +454,9 @@ export default function PostStudio() {
                           </button>
                           <button onClick={() => toggleHero(post)} title="Toggle Hero (stays in feed)" className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all ${post.is_burner ? 'bg-[#ffea00] text-black' : 'bg-white/10 text-white/50 hover:bg-[#ffea00]/30'}`}>
                             <Star size={13} />
+                          </button>
+                          <button onClick={() => toggleFreebie(post)} title={post.is_freebie ? 'Remove Freebie tag' : 'Mark as Freebie Gift'} className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all ${post.is_freebie ? 'bg-[#ff00ff] text-white shadow-[0_0_12px_rgba(255,0,255,0.5)]' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/30'}`}>
+                            <Gift size={13} />
                           </button>
                           <button onClick={() => softHide(post.id)} title="Hide (soft delete)" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 text-white/50 hover:bg-orange-500/20 hover:text-orange-400 flex items-center justify-center transition-all">
                             <EyeOff size={13} />

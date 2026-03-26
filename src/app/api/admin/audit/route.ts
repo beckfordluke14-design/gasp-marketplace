@@ -179,6 +179,31 @@ export async function POST(req: Request) {
                 if (error) throw error;
                 return NextResponse.json({ success: true });
             }
+            case 'mark-freebie': {
+                // Marks a post as a freebie gift: removes from for-sale vault, available for chat drops
+                const { id, is_freebie } = payload;
+                if (!id) throw new Error('Post ID Missing.');
+                const { error } = await supabase.from('posts')
+                    .update({ is_freebie: is_freebie ?? true, is_vault: false })
+                    .eq('id', id);
+                if (error) throw error;
+                return NextResponse.json({ success: true });
+            }
+            case 'create-post': {
+                const { persona_id, content_url, content_type, is_vault, is_featured, caption } = payload;
+                if (!persona_id || !content_url) throw new Error('persona_id and content_url required.');
+                const { error } = await supabase.from('posts').insert([{
+                    persona_id,
+                    content_url,
+                    content_type: content_type || 'video',
+                    is_vault:    is_vault    ?? false,
+                    is_burner:   is_featured ?? false,
+                    caption:     caption     || '',
+                    scheduled_for: new Date().toISOString(),
+                }]);
+                if (error) throw error;
+                return NextResponse.json({ success: true });
+            }
             default:
                 throw new Error('Neural Command Not Recognized.');
         }

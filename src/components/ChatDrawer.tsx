@@ -14,6 +14,7 @@ import { useChat } from '@ai-sdk/react';
 import { useUser } from './providers/UserProvider';
 import PersonaAvatar from './persona/PersonaAvatar';
 import ChatVaultItem from './chat/ChatVaultItem';
+import FreebieImageBubble from './chat/FreebieImageBubble';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
 
 const supabase = createClient(
@@ -53,6 +54,9 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
   const [localInput, setLocalInput] = useState('');
   const [activeGift, setActiveGift] = useState<any>(null);
   const [isFollowing, setIsFollowing] = useState(false);
+  // Freebie system
+  const [freebieItems, setFreebieItems] = useState<any[]>([]); // available freebies for this persona
+  const [sentFreebieIds, setSentFreebieIds] = useState<Set<string>>(new Set()); // already sent to this user
   const router = useRouter();
   const { user } = useUser();
 
@@ -114,6 +118,11 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
       const unlockedIds = (uData || []).map(u => u.post_id);
       setVaultItems(vData.map(v => ({ ...v, is_unlocked: unlockedIds.includes(v.id) })));
     }
+    // Load available freebies + which ones this user already received
+    const { data: fData } = await supabase.from('posts').select('*').eq('persona_id', personaId).eq('is_freebie', true);
+    const { data: fdData } = await supabase.from('user_freebie_drops').select('post_id').eq('user_id', guestId);
+    if (fData) setFreebieItems(fData);
+    if (fdData) setSentFreebieIds(new Set(fdData.map((d: any) => d.post_id)));
   };
 
   useEffect(() => {
@@ -209,6 +218,57 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     setShowVoiceTip(false);
   };
 
+  // ── DROP A FREEBIE: dedup-safe, tracks every send per user
+  const dropFreebie = async (trigger: 'gift' | 'bond_milestone' | 'welcome' | 'mood') => {
+    // Find freebies this user hasn't received yet
+    const unsent = freebieItems.filter(f => !sentFreebieIds.has(f.id));
+    if (unsent.length === 0) return; // all freebies already sent — don't repeat
+
+    const pick = unsent[Math.floor(Math.random() * unsent.length)];
+
+    // Record in DB first (unique constraint prevents double-send even on race)
+    const { error: dropErr } = await supabase.from('user_freebie_drops').insert([{
+      user_id: guestId,
+      persona_id: personaId,
+      post_id: pick.id,
+      trigger,
+    }]).select();
+    if (dropErr) return; // unique constraint fired = already sent, abort
+
+    // Mark locally so UI updates instantly
+    setSentFreebieIds(prev => new Set([...prev, pick.id]));
+
+    // Persona messages that accompany the gift drop
+    const giftLines: Record<string, string[]> = {
+      gift:           ['here, for you \u{1F495}', 'since you showed up \u{1F381}', "don't tell anyone \u{1F92B}"],
+      bond_milestone: ['you earned this fr \u{1F497}', 'we been vibing, take this \u{2728}', 'lil something for you \u{1F380}'],
+      welcome:        ['hey stranger \u{1F440} first time? here', 'welcome to my world \u{1F339}'],
+      mood:           ['felt like being nice today \u{1F97A}', 'idk why but... here \u{1F496}'],
+    };
+    const lines = giftLines[trigger] || giftLines.mood;
+    const caption = lines[Math.floor(Math.random() * lines.length)];
+
+    // Push into the local message stream
+    const freebieMsg = {
+      id: 'freebie-' + Date.now(),
+      role: 'assistant',
+      content: caption,
+      freebie_url: pick.content_url,
+      created_at: Date.now(),
+    };
+    setMessages((prev: any) => [...prev, freebieMsg]);
+
+    // Persist to chat_messages so it survives reload
+    await supabase.from('chat_messages').insert([{
+      user_id: guestId,
+      persona_id: personaId,
+      role: 'assistant',
+      content: caption,
+      image_url: pick.content_url,
+      type: 'freebie',
+    }]);
+  };
+
   // Notification: plays the static chime ONLY when there's no real-time ElevenLabs voice note.
   // When voice note IS present, ElevenLabs audio IS the notification — no overlap.
   const playNotification = (messageHasVoice: boolean) => {
@@ -251,6 +311,8 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
      setTimeout(() => setActiveGift(null), 2500);
      setBondScore(prev => prev + g.bond);
      await executeNeuralSend(`sent ${g.icon} ${g.name.toLowerCase()}`);
+     // Gift trigger: drop a freebie if any unsent ones exist (thanks for the gift vibe)
+     setTimeout(() => dropFreebie('gift'), 3000);
   };
 
    // THE ECONOMY ENGINE: V9.9 PREMIUM SETTLEMENT
@@ -369,7 +431,16 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                   if (data?.success) setWalletBalance(prev => prev !== null ? prev - 10 : prev);
                   return data?.success;
                }} />}
-               {msg.image_url && msg.role === 'assistant' && (
+               {/* Freebie gift image — free, tappable, opens lightbox */}
+               {(msg.freebie_url || (msg.type === 'freebie' && msg.image_url)) && msg.role === 'assistant' && (
+                 <FreebieImageBubble
+                   imageUrl={msg.freebie_url || msg.image_url}
+                   personaImage={persona.image}
+                   personaName={persona.name}
+                 />
+               )}
+               {/* Vault image — paid unlock */}
+               {msg.image_url && msg.role === 'assistant' && msg.type !== 'freebie' && (
                   <ChatVaultItem 
                     mediaId={msg.id} 
                     isUnlocked={vaultItems.some(v => v.content_url === msg.image_url && v.is_unlocked)}
@@ -380,8 +451,6 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                         if (item) {
                             unlockVaultItem(item);
                         } else {
-                            // Fallback: This image was dynamically generated in chat but not in vault table yet
-                            // For simplicity, we trigger the unlock logic with a mock item
                             unlockVaultItem({ id: msg.id, content_url: msg.image_url });
                         }
                     }}
