@@ -62,3 +62,12 @@ body {
   box-shadow: 0 0 30px rgba(0, 112, 255, 0.2);
 }
 
+/* Voice note recording bar animation */
+@keyframes voiceBar {
+  from { transform: scaleY(0.3); opacity: 0.4; }
+  to   { transform: scaleY(1.0); opacity: 1.0; }
+}
+
+/* Utility: hide scrollbar across all browsers */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

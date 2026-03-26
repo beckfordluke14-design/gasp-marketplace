@@ -177,7 +177,8 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
         const decoder = new TextDecoder();
         let assistantContent = '';
         const assistantId = 'ai-' + Date.now();
-        setMessages((prev: any) => [...prev, { id: assistantId, role: 'assistant', content: '', created_at: Date.now() }]);
+        // Seed in-memory placeholder — _streamDone:false protects it from dedup until stream is done
+        setMessages((prev: any) => [...prev, { id: assistantId, role: 'assistant', content: '', voice_pending: false, _streamDone: false, created_at: Date.now() }]);
 
         while (true) {
             const { done, value } = await reader!.read();
@@ -186,24 +187,40 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
             const lines = chunk.split('\n');
             for (const line of lines) {
                 if (line.startsWith('0:')) {
+                    // Text content — captured but only shown if no voice is coming
                     try { assistantContent += JSON.parse(line.slice(2)); } catch { assistantContent += line.slice(2); }
                 } else if (line.startsWith('2:')) {
-                    // 🎙️ MEDIA SYNC (Voice Note / Dynamic Image)
                     try {
                         const media = JSON.parse(line.slice(2));
-                        if (media.type === 'voice_note' && media.audioUrl) {
-                            setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { 
-                                ...m, 
-                                media_url: media.audioUrl,
-                                audio_translation: media.translation,
-                                translation_locked: true
-                            } : m));
+                        if (media.type === 'voice_note') {
+                            if (!media.audioUrl) {
+                                // 🎙️ NULL SIGNAL: Voice generation has started on the server
+                                // Switch to mic recording animation — hide text
+                                setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { 
+                                    ...m, voice_pending: true 
+                                } : m));
+                            } else {
+                                // 🎙️ VOICE READY: Real URL arrived — replace animation with player
+                                setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { 
+                                    ...m, 
+                                    voice_pending: false,
+                                    media_url: media.audioUrl,
+                                    audio_translation: media.translation,
+                                    translation_locked: true
+                                } : m));
+                            }
                         }
                     } catch (err) { console.error('Media sync failure:', err); }
                 }
             }
+            // Only update text content — render logic decides whether to show it
             setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { ...m, content: assistantContent } : m));
         }
+
+        // 🛡️ STREAM COMPLETE: allow dedup to run once DB Realtime delivers the canonical copy
+        setIsTyping(false);
+        setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { ...m, _streamDone: true } : m));
+
     } catch (e) { console.error(e); } finally { setIsTyping(false); setIsPersonaReading(false); }
   };
 
@@ -277,14 +294,35 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     }]);
   };
 
-  // Notification: plays the static chime ONLY when there's no real-time ElevenLabs voice note.
-  // When voice note IS present, ElevenLabs audio IS the notification — no overlap.
+  // 🔔 NOTIFICATION CHIME: Synthesized via Web Audio API — no external file needed.
+  // Two-tone "message pop": soft 880Hz + 1100Hz harmonic, each with exponential decay.
+  // Voice note messages skip the chime — ElevenLabs audio IS the notification.
   const playNotification = (messageHasVoice: boolean) => {
     if (messageHasVoice) return;
     try {
-      const audio = new Audio('https://gasp-marketplace.vercel.app/notification.mp3');
-      audio.volume = 0.4;
-      audio.play().catch(() => {});
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      const playTone = (freq: number, startTime: number, volume: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startTime);
+        // Soft attack then exponential release
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(volume, startTime + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.18);
+        osc.start(startTime);
+        osc.stop(startTime + 0.2);
+      };
+
+      // First pop: 880Hz at t=0 | Second harmonic: 1100Hz at t=80ms (slight rise = "message" feel)
+      playTone(880,  ctx.currentTime,       0.25);
+      playTone(1100, ctx.currentTime + 0.08, 0.15);
+
+      // Close context after chime finishes
+      setTimeout(() => ctx.close().catch(() => {}), 400);
     } catch (e) {}
   };
 
@@ -731,9 +769,49 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
       </AnimatePresence>
 
        {chatTab === 'chat' ? <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar p-6 md:p-8 space-y-6 md:space-y-8 pb-64">
-        {[...dbMessages, ...messages].filter(m => !m.content.startsWith('[SYSTEM]')).map((msg: any) => (
+         {(() => {
+          // 🛡️ DEDUP: Only purge stream messages once done AND DB has committed them
+          const dbContentSet = new Set(dbMessages.filter((m: any) => m.role === 'assistant').map((m: any) => m.content));
+          const dedupedMessages = messages.filter((m: any) => {
+            if (m.role !== 'assistant') return true;
+            if (!m._streamDone) return true;           // protect mid-stream
+            if (!m.content) return true;
+            return !dbContentSet.has(m.content);
+          });
+          return [...dbMessages, ...dedupedMessages].filter((m: any) => !m.content?.startsWith('[SYSTEM]'));
+        })().map((msg: any) => (
           <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-            {/* Voice note bubble — standalone, NOT inside the text bubble */}
+            
+            {/* ── STATE 1: VOICE PENDING — mic recording animation ── */}
+            {msg.voice_pending && !msg.media_url && msg.role === 'assistant' && (
+              <div className="flex items-center gap-2 bg-white/[0.06] border border-white/10 rounded-[1.4rem] px-4 py-3 min-w-[180px] shadow-lg backdrop-blur-md">
+                {/* Pulsing mic icon */}
+                <div className="w-8 h-8 rounded-full bg-[#ff00ff]/20 border border-[#ff00ff]/40 flex items-center justify-center shrink-0 animate-pulse shadow-[0_0_12px_rgba(255,0,255,0.3)]">
+                  <svg width="12" height="16" viewBox="0 0 12 16" fill="none">
+                    <rect x="3.5" y="0" width="5" height="9" rx="2.5" fill="#ff00ff"/>
+                    <path d="M1 8C1 11.31 3.24 14 6 14C8.76 14 11 11.31 11 8" stroke="#ff00ff" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="6" y1="14" x2="6" y2="16" stroke="#ff00ff" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                {/* Animated recording bars */}
+                <div className="flex items-end gap-[3px] h-6">
+                  {[0.4, 0.7, 1.0, 0.6, 0.85, 0.5, 0.9, 0.65, 0.75, 0.45].map((h, i) => (
+                    <div
+                      key={i}
+                      className="w-[3px] rounded-full bg-[#ff00ff]"
+                      style={{
+                        height: `${h * 100}%`,
+                        animation: `voiceBar 0.8s ease-in-out ${i * 0.08}s infinite alternate`,
+                        opacity: 0.7 + h * 0.3,
+                      }}
+                    />
+                  ))}
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-widest text-[#ff00ff]/60 ml-1">recording...</span>
+              </div>
+            )}
+
+            {/* ── STATE 2: VOICE READY — player only, no text ── */}
             {msg.media_url && msg.role === 'assistant' && (
               <VoiceNoteBubble
                 audioUrl={msg.media_url}
@@ -747,8 +825,9 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                 }}
               />
             )}
-            {/* Text bubble — only shown if there is NO voice note for this message */}
-            {(!msg.media_url || msg.role === 'user') && (
+
+            {/* ── STATE 3: TEXT BUBBLE — only when no voice involved ── */}
+            {!msg.media_url && !msg.voice_pending && msg.content && (msg.role === 'user' || msg.role === 'assistant') && (
               <div className={`max-w-[85%] px-5 py-3 rounded-[1.6rem] text-xs md:text-sm leading-relaxed shadow-xl relative ${msg.role === 'user' ? 'bg-[#ff00ff] text-black font-bold rounded-tr-none' : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'}`}>
                 {/* Freebie gift image */}
                 {(msg.freebie_url || (msg.type === 'freebie' && msg.image_url)) && msg.role === 'assistant' && (
@@ -771,7 +850,6 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                     }}
                   />
                 )}
-
                 {msg.image_url && msg.role === 'user' && (
                   <div className="relative w-40 aspect-square rounded-xl overflow-hidden mb-3">
                     <Image src={msg.image_url} alt="" fill unoptimized className="object-cover" />
