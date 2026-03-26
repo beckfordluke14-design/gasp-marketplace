@@ -4,7 +4,7 @@
 -- 1. Users table (balance)
 CREATE TABLE IF NOT EXISTS public.users (
   id UUID PRIMARY KEY, -- Linked to auth.users but simpler as public representation
-  breathe_balance INTEGER DEFAULT 0
+  credit_balance INTEGER DEFAULT 0
 );
 
 -- 2. AI Personas
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS public.media_vault (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   persona_id UUID REFERENCES public.personas(id) ON DELETE CASCADE,
   media_url TEXT NOT NULL,
-  price_points INTEGER NOT NULL,
+  price_credits INTEGER NOT NULL,
   tier TEXT NOT NULL CHECK (tier IN ('retail', 'whale', 'photo')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -59,18 +59,18 @@ DECLARE
   target_persona_id UUID;
 BEGIN
   -- 1. Check current balance
-  SELECT breathe_balance INTO current_balance 
+  SELECT credit_balance INTO current_balance 
   FROM public.users 
   WHERE id = p_user_id 
   FOR UPDATE; -- Lock the row
 
   IF current_balance IS NULL OR current_balance < p_cost THEN
-    RETURN jsonb_build_object('success', false, 'error', 'Insufficient Breathe Points');
+    RETURN jsonb_build_object('success', false, 'error', 'Insufficient Credits');
   END IF;
 
-  -- 2. Deduct points
+  -- 2. Deduct credits
   UPDATE public.users 
-  SET breathe_balance = breathe_balance - p_cost
+  SET credit_balance = credit_balance - p_cost
   WHERE id = p_user_id;
 
   -- 3. Mark as unlocked

@@ -1,7 +1,7 @@
 'use client';
 
 import { X, Zap, Trophy, ShieldCheck, Loader2, ArrowRight } from 'lucide-react';
-import { COIN_PACKAGES } from '@/lib/economy/constants';
+import { COIN_PACKAGES, CREDIT_PACKAGES } from '@/lib/economy/constants';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -11,7 +11,7 @@ interface TopUpDrawerProps {
 }
 
 /**
- * $GASPAI HYBRID STAKE HUB v1.7
+ * $GASPAI HYBRID STAKE HUB v1.8
  * Objective: Maximize revenue via CCBill (Card) + Crypto (USDC) with 1:1 TGE Stake logic.
  */
 export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
@@ -32,7 +32,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
    */
   async function handlePurchase(pkgId: string) {
     if (loadingPkg) return;
-    const pkg = COIN_PACKAGES.find(p => p.id === pkgId);
+    const pkg = CREDIT_PACKAGES.find(p => p.id === pkgId);
     if (!pkg) return;
 
     setLoadingPkg(pkgId);
@@ -66,7 +66,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
       });
       window.location.href = `${baseUrl}?${params.toString()}`;
     } else {
-      // 🧬 CRYPTO BRIDGE FLOW v1.7
+      // 🧬 CRYPTO BRIDGE FLOW v1.8
       alert(`[CRYPTO PULSE]: Send $${pkg.priceUsd} in USDC (SOLANA or BASE Network) to: ${CRYPTO_WALLET_ADDRESS}. Your $GASPAI Stake (with 15% Bonus) will be credited instantly upon 1 Network Confirmation. 🛡️`);
       setLoadingPkg(null);
     }
@@ -121,7 +121,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                      <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                     <span className="text-[8px] font-black uppercase tracking-widest text-[#00f0ff]">Gasp Merchant Node v1.7 Active</span>
+                     <span className="text-[8px] font-black uppercase tracking-widest text-[#00f0ff]">Gasp Merchant Node v1.8 Active</span>
                   </div>
                   <ShieldCheck size={12} className="text-white/20" />
                </div>
@@ -147,7 +147,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
         <div className="space-y-4">
            <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white/40 italic">Select Your Tier</h4>
            <div className="grid gap-4">
-              {COIN_PACKAGES.map((pkg) => (
+              {CREDIT_PACKAGES.map((pkg) => (
                 <button
                   key={pkg.id}
                   disabled={!!loadingPkg}
@@ -170,7 +170,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     )}
                     <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">{pkg.label}</span>
                     <span className="text-3xl font-syncopate font-bold text-white mt-1 italic leading-none">
-                        {(paymentMethod === 'crypto' ? Math.floor(pkg.coins * 1.15) : pkg.coins).toLocaleString()}
+                        {(paymentMethod === 'crypto' ? Math.floor(pkg.credits * 1.15) : pkg.credits).toLocaleString()}
                         <span className="text-[10px] uppercase font-black text-white/20 tracking-widest not-italic ml-2">credits</span>
                     </span>
                     <div className="mt-4 px-2.5 py-1 rounded-md bg-white/10 border border-white/10">

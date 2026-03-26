@@ -336,7 +336,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     });
     
     if (!data?.success) { 
-        alert(`Insufficient $GASPAI Stake! This exclusive content requires ${cost}c.`); 
+        alert(`Insufficient Syndicate Credits! This exclusive content requires ${cost}c.`); 
         return; 
     }
     

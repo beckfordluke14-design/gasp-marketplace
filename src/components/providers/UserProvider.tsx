@@ -12,6 +12,7 @@ interface UserContextType {
     nickname?: string;
     is_known?: boolean;
     last_active_at?: string;
+    credit_balance?: number;
   } | null;
   loading: boolean;
   refreshProfile: () => Promise<void>;

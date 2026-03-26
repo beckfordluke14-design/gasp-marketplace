@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Zap, Shield, Lock, Star, ChevronRight, Crown, Heart } from 'lucide-react';
 import Header from '@/components/Header';
-import { COIN_PACKAGES, ELITE_SUBSCRIPTION_COST, COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK, COST_VOICE_NOTE, COST_PRIORITY_TIP } from '@/lib/economy/constants';
+import { CREDIT_PACKAGES, ELITE_SUBSCRIPTION_COST, COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK, COST_VOICE_NOTE, COST_PRIORITY_TIP } from '@/lib/economy/constants';
 
 // CCBill Placeholder link — replace with real CCBill form URL when account is approved
 const CCBILL_CHECKOUT_URL = 'https://ccbill.com'; // TODO: Replace with real CCBill form URL
@@ -81,10 +81,10 @@ export default function CreditsPage() {
           </div>
         </motion.div>
 
-        {/* COIN PACKAGES */}
+        {/* CREDIT PACKAGES */}
         <div className="space-y-3">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mb-4">Credit Packages</p>
-          {COIN_PACKAGES.map((pkg, i) => (
+          {CREDIT_PACKAGES.map((pkg, i) => (
             <motion.div
               key={pkg.id}
               initial={{ opacity: 0, x: -20 }}
@@ -110,7 +110,7 @@ export default function CreditsPage() {
                   <div>
                     <p className={`text-sm font-black uppercase italic tracking-tight ${pkg.isPopular ? 'text-white' : 'text-white/80'}`}>{pkg.label}</p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className={`text-[10px] font-black ${pkg.isPopular ? 'text-[#ff00ff]' : 'text-[#00f0ff]'}`}>{pkg.coins} credits</span>
+                      <span className={`text-[10px] font-black ${pkg.isPopular ? 'text-[#ff00ff]' : 'text-[#00f0ff]'}`}>{pkg.credits} credits</span>
                       {pkg.bonus && (
                         <span className="text-[9px] text-[#ffea00] font-black">{pkg.bonus} bonus</span>
                       )}

@@ -3,7 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
-  breathe_points INTEGER DEFAULT 50, -- Initial sign-up bonus
+  credit_balance INTEGER DEFAULT 50, -- Initial sign-up bonus
   is_elite BOOLEAN DEFAULT FALSE,
   role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')),
   last_active_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -29,7 +29,7 @@ USING (auth.uid() = id);
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, breathe_points, role)
+  INSERT INTO public.profiles (id, credit_balance, role)
   VALUES (new.id, 50, 'user');
   RETURN NEW;
 END;

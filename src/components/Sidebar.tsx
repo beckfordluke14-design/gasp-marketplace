@@ -42,7 +42,7 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
     return { label: 'Bronze Sync 🟠', color: '#cd7f32', priority: '1x', shadow: 'none', icon: <Zap size={12} /> };
   };
 
-  const rank = getSyncRank(profile?.pulse_points || 0);
+  const rank = getSyncRank(profile?.credit_balance || 0);
 
   useEffect(() => {
     const stored = localStorage.getItem('gasp_following');
@@ -172,25 +172,25 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
       </div>
 
       <div className="p-6 border-t border-white/5 bg-black z-10 flex flex-col gap-5">
-         
-         {/* ══════════════════════════════════════════════════
-             $GASPAI GENESIS AIRDROP (TGE Reservation Ledger)
-             ══════════════════════════════════════════════════ */}
-         <div className="bg-white/5 border border-white/10 rounded-[2rem] p-5 space-y-4 relative overflow-hidden group">
+          
+          {/* ══════════════════════════════════════════════════
+              SYNDICATE CREDIT LEDGER (1:1 TGE Reservation)
+              ══════════════════════════════════════════════════ */}
+          <div className="bg-white/5 border border-white/10 rounded-[2rem] p-5 space-y-4 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-tr from-[#00f0ff]/5 to-transparent pointer-events-none" />
             
             <div className="flex items-center justify-between relative z-10 border-b border-white/5 pb-3">
                <div className="flex flex-col">
-                  <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30 italic">Lifetime Reservation</span>
+                  <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30 italic">Total Credits Logged</span>
                   <div className="flex items-center gap-2 mt-1">
                      <Coins size={10} className="text-[#ffea00]" />
                      <span className="text-[12px] font-syncopate font-black italic text-white leading-none">
-                        {profile?.pulse_points?.toLocaleString() || '0'} <span className="text-[8px] text-[#ffea00] not-italic">$GASPAI STAKE</span>
+                        {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[8px] text-[#ffea00] not-italic">SYNDICATE CREDITS</span>
                      </span>
                   </div>
                </div>
-               <div className="px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20">
-                  <span className="text-[7px] font-black text-green-500 uppercase tracking-widest">Verfied 1:1 Stake</span>
+               <div className="px-2 py-0.5 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20">
+                  <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest italic">1:1 TGE Reservation</span>
                </div>
             </div>
 
@@ -207,41 +207,46 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
 
             <Link href="/docs/whitepaper" className="block p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] transition-all group/btn">
                <div className="flex items-center justify-between">
-                  <span className="text-[8px] font-black uppercase tracking-widest text-white/40 group-hover/btn:text-[#ff00ff]">Verify Snapshot Logic</span>
-                  <ArrowRight size={10} className="text-white/20 group-hover/btn:text-[#ff00ff] -rotate-45" />
+                  <div className="flex items-center gap-3">
+                     <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover/btn:bg-[#ffea00]/10 transition-colors">
+                        <ArrowRight size={14} className="text-white/20 group-hover/btn:text-[#ffea00]" />
+                     </div>
+                     <span className="text-[8px] font-black uppercase tracking-widest text-white/40 group-hover/btn:text-white transition-colors">Review Whitepaper</span>
+                  </div>
+                  <div className="h-1 w-1 rounded-full bg-white/10 group-hover/btn:bg-[#ffea00] animate-pulse" />
                </div>
             </Link>
+          </div>
 
-            <div className="flex items-center justify-between relative z-10">
-               <div className="flex items-center gap-2">
-                  <Zap size={14} className="text-[#00f0ff] animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff] italic">Genesis Rank</span>
-               </div>
-            </div>
+          <div className="space-y-3 relative z-10">
+             <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                   <Zap size={14} className="text-[#00f0ff] animate-pulse" />
+                   <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff] italic">Genesis Rank</span>
+                </div>
+             </div>
+             <p className="text-[8px] font-black uppercase text-white/40 tracking-[0.2em] italic">Current Standing</p>
+             <h3 className="text-[14px] font-black uppercase italic tracking-tighter text-white" style={{ textShadow: rank.shadow }}>
+                {rank.label}
+             </h3>
+             <div className="flex items-center gap-2 mt-2">
+                <div className="px-2 py-1 rounded-lg bg-white/5 border border-white/10">
+                   <span className="text-[8px] font-black text-white/60 uppercase">{rank.priority} Allocation Multiplier</span>
+                </div>
+             </div>
+             
+             {/* Progress to next Tier */}
+             <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mt-2">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min((profile?.credit_balance || 0) / 10000 * 100, 100)}%` }}
+                  className="h-full bg-gradient-to-r from-[#00f0ff] to-[#ffea00]" 
+                />
+             </div>
+          </div>
 
-            <div className="space-y-1 relative z-10">
-               <p className="text-[8px] font-black uppercase text-white/40 tracking-[0.2em] italic">Current Standing</p>
-               <h3 className="text-[14px] font-black uppercase italic tracking-tighter text-white" style={{ textShadow: rank.shadow }}>
-                  {rank.label}
-               </h3>
-               <div className="flex items-center gap-2 mt-2">
-                  <div className="px-2 py-1 rounded-lg bg-white/5 border border-white/10">
-                     <span className="text-[8px] font-black text-white/60 uppercase">{rank.priority} Allocation Multiplier</span>
-                  </div>
-               </div>
-            </div>
-
-            {/* Progress to next Tier */}
-            <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden relative z-10">
-               <motion.div 
-                 initial={{ width: 0 }}
-                 animate={{ width: `${Math.min((profile?.pulse_points || 0) / 10000 * 100, 100)}%` }}
-                 className="h-full bg-gradient-to-r from-[#00f0ff] to-[#ffea00]" 
-               />
-            </div>
-
-            {/* 🧬 THE WHALE MAGNET: GENESIS LEADERBOARD */}
-            <div className="pt-4 border-t border-white/5 space-y-3 relative z-10">
+          {/* 🧬 THE WHALE MAGNET: GENESIS LEADERBOARD */}
+          <div className="pt-4 border-t border-white/5 space-y-3 relative z-10">
                <div className="flex items-center justify-between">
                   <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30 italic">Genesis Leaders</span>
                   <span className="text-[7px] font-black uppercase tracking-widest text-[#00f0ff] hover:underline cursor-pointer">Live Audit →</span>
@@ -252,21 +257,21 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
                         <span className="text-[#ffea00] font-black">#1</span>
                         <span className="text-white/60 font-bold">Whale_Alpha</span>
                      </div>
-                     <span className="text-white font-black italic">15,400 $GASPAI</span>
+                     <span className="text-white font-black italic">15,400 Credits</span>
                   </div>
                   <div className="flex items-center justify-between text-[9px]">
                      <div className="flex items-center gap-2">
                         <span className="text-[#00f0ff] font-black text-opacity-70">#2</span>
                         <span className="text-white/40 font-bold">CryptoGoddess</span>
                      </div>
-                     <span className="text-white/40 font-black italic">12,180 $GASPAI</span>
+                     <span className="text-white/40 font-black italic">12,180 Credits</span>
                   </div>
                </div>
             </div>
 
             <div className="flex items-center justify-between pt-1 relative z-10 border-t border-white/5 mt-3 pt-3">
                <p className="text-[7px] font-black uppercase text-white/20 tracking-widest italic leading-relaxed">
-                  Gasp Reserve Protocol v1.7 • 1:1 USD-to-Token Stake Model. <Link href="/docs/whitepaper" className="text-[#00f0ff] hover:underline underline-offset-2">$GASPAI Ledger Active</Link> 💎
+                  Gasp Reserve Protocol v1.7 • 1:1 USD-to-Token Stake Model. <Link href="/docs/whitepaper" className="text-[#00f0ff] hover:underline underline-offset-2">Credits Ledger Active</Link> 💎
                </p>
                <div className="flex flex-col items-end gap-1">
                   <div className="flex items-center gap-1">
@@ -276,44 +281,43 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
                   <span className="text-[5px] text-white/10 uppercase tracking-widest font-mono">HASH: 0x8F...7G2P</span>
                </div>
             </div>
-         </div>
 
-         {/* STAKE CTA */}
-         <div className="space-y-3">
-            <button className="w-full h-14 bg-[#ffea00] text-black rounded-3xl flex items-center justify-center gap-3 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(255,234,0,0.25)] active:scale-95">
-               <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
-                  <Coins size={14} className="text-black" />
-               </div>
-               <span className="text-[10px] font-black uppercase tracking-widest italic font-syncopate">STAKE FOR $GASPAI →</span>
-            </button>
-            <div className="flex items-center justify-center gap-2">
-               <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-               <span className="text-[7px] font-black uppercase tracking-[0.2em] text-[#00f0ff] italic">USDC Preferred: +15% Stake Bonus Active 💎</span>
-            </div>
-         </div>
+          {/* STAKE CTA */}
+          <div className="space-y-3">
+             <button className="w-full h-14 bg-[#ffea00] text-black rounded-3xl flex items-center justify-center gap-3 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(255,234,0,0.25)] active:scale-95">
+                <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
+                   <Zap size={14} className="text-black" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest italic font-syncopate">ACQUIRE CREDITS →</span>
+             </button>
+             <div className="flex items-center justify-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
+                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-[#00f0ff] italic">USDC Preferred: +15% Stake Bonus Active 💎</span>
+             </div>
+          </div>
 
-         <div className="flex flex-col gap-2 pt-2 border-t border-white/5 opacity-50">
-            <div className="flex items-center justify-between">
-               <div className="flex gap-4">
-                  <a href="/terms" className="text-[8px] text-white/20 hover:text-white uppercase font-black italic">Terms</a>
-                  <a href="/contact" className="text-[8px] text-[#ff00ff]/60 hover:text-[#ff00ff] uppercase font-black italic">TGE Support</a>
-               </div>
-               <div className="flex items-center gap-1">
-                  <div className="w-1 h-1 rounded-full bg-[#ff00ff] animate-pulse" />
-                  <span className="text-[6px] font-black text-[#ff00ff] uppercase tracking-widest italic">Neural Synapse v1.7 Locked</span>
-               </div>
-            </div>
-            <span className="text-[7px] text-white/10 uppercase tracking-widest italic font-black flex items-center justify-between">
-               <div className="flex items-center gap-4">
-                  <span>Managed by AllTheseFlows LLC • Node v1.7</span>
-                  <span className="text-white/30 border-l border-white/5 pl-4">Authored by ATF Founder 🧬</span>
-               </div>
-               <span className="text-[#00f0ff] animate-pulse uppercase tracking-[0.2em] px-2 py-0.5 rounded-full bg-[#00f0ff]/5 border border-[#00f0ff]/20">
-                  Guardian Node: BASE Network ONLY 🛡️
-               </span>
-            </span>
-         </div>
-      </div>
+          <div className="flex flex-col gap-2 pt-2 border-t border-white/5 opacity-50">
+             <div className="flex items-center justify-between">
+                <div className="flex gap-4">
+                   <a href="/terms" className="text-[8px] text-white/20 hover:text-white uppercase font-black italic">Terms</a>
+                   <a href="/contact" className="text-[8px] text-[#ff00ff]/60 hover:text-[#ff00ff] uppercase font-black italic">TGE Support</a>
+                </div>
+                <div className="flex items-center gap-1">
+                   <div className="w-1 h-1 rounded-full bg-[#ff00ff] animate-pulse" />
+                   <span className="text-[6px] font-black text-[#ff00ff] uppercase tracking-widest italic">Neural Synapse v1.8 Locked</span>
+                </div>
+             </div>
+             <span className="text-[7px] text-white/10 uppercase tracking-widest italic font-black flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                   <span>Managed by AllTheseFlows LLC • Node v1.8</span>
+                   <span className="text-white/30 border-l border-white/5 pl-4">Authored by ATF Founder 🧬</span>
+                </div>
+                <span className="text-[#00f0ff] animate-pulse uppercase tracking-[0.2em] px-2 py-0.5 rounded-full bg-[#00f0ff]/5 border border-[#00f0ff]/20">
+                   Guardian Node: BASE Network ONLY 🛡️
+                </span>
+             </span>
+          </div>
+       </div>
     </aside>
   );
 }

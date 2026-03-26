@@ -66,7 +66,7 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
              <span className="text-[12px] md:text-[14px] font-black tracking-tighter text-white">
                 {balance !== null ? balance.toLocaleString() : '---'}
              </span>
-             <span className="hidden md:block text-[8px] font-black uppercase tracking-[0.2em] text-[#00f0ff]">Breathe Points</span>
+             <span className="hidden md:block text-[8px] font-black uppercase tracking-[0.2em] text-[#00f0ff]">credits active</span>
           </div>
         </button>
        

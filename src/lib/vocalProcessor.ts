@@ -20,7 +20,7 @@ const REGIONS: Record<string, Record<string, string>> = {
         'baby': 'babe',
         'what are you doing': 'what you on',
         'crazy': 'wild',
-        'money': 'coins',
+        'money': 'credits',
         'seriously': 'facts',
         'friend': 'bestie',
         'look': 'listen'
@@ -36,7 +36,7 @@ const REGIONS: Record<string, Record<string, string>> = {
     'uk_london_black': { // London / Lagos
         'hello': 'how far',
         'baby': 'bruv',
-        'money': 'coins',
+        'money': 'credits',
         'trouble': 'wahala',
         'understand': 'you get me'
     },

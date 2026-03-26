@@ -90,7 +90,7 @@ export default function BurnerMessage({ id, thumbnailUrl, fullUrl, price, onUnlo
               className="w-full py-4 bg-[#ff00ff] text-black font-black text-[11px] uppercase tracking-widest rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_40px_rgba(255,0,255,0.6)]"
            >
               <Zap size={16} fill="black" className="animate-pulse" />
-              view once: {price} coins
+              view once: {price} credits
            </button>
         </div>
       )}

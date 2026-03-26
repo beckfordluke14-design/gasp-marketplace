@@ -54,7 +54,7 @@ export default function WhitepaperPage() {
                </div>
                <h3 className="text-2xl font-black uppercase italic">Whale Tier Priority</h3>
                <p className="text-white/40 text-[14px] leading-secondary font-bold">
-                  Accumulated 'Aura' (Pulse Points) determines your Airdrop Multiplier. Diamond whales receive a 10x multiplier on their reservation, securing the highest yield in the $GASPAI ecosystem.
+                  Accumulated 'Aura' (Syndicate Credits) determines your Airdrop Multiplier. Diamond whales receive a 10x multiplier on their reservation, securing the highest yield in the $GASPAI ecosystem.
                </p>
             </div>
          </div>

@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     // 2. Resolve Media URL early if unlocked
     const { data: media, error: mediaError } = await supabase
       .from('media_vault')
-      .select('price_points, media_url')
+      .select('price_credits, media_url')
       .eq('id', mediaId)
       .single();
 
@@ -52,11 +52,11 @@ export async function POST(req: Request) {
     }
 
     // 3. TRANSACTION STAGE: Call the Atomic Unlock RPC
-    console.log(`💸 [Economy] Deducting ${media.price_points} points for media ${mediaId}...`);
+    console.log(`💸 [Economy] Deducting ${media.price_credits} credits for media ${mediaId}...`);
     const { data: rpcResult, error: rpcError } = await supabase.rpc('unlock_media', {
       p_user_id: userId,
       p_media_id: mediaId,
-      p_cost: media.price_points
+      p_cost: media.price_credits
     });
 
     if (rpcError) {
@@ -70,9 +70,9 @@ export async function POST(req: Request) {
 
       // 🧬 PULSE PROTOCOL: Track Spent-to-Earn (Future Airdrop)
       try {
-        const { data: profile } = await supabase.from('profiles').select('pulse_points').eq('id', userId).single();
+        const { data: profile } = await supabase.from('profiles').select('credit_balance').eq('id', userId).single();
         await supabase.from('profiles').update({
-          pulse_points: (profile?.pulse_points || 0) + media.price_points,
+          credit_balance: (profile?.credit_balance || 0) + media.price_credits,
           updated_at: new Date().toISOString()
         }).eq('id', userId);
       } catch (e) {
