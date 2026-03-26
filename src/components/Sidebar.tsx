@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { initialPersonas, proxyImg } from '@/lib/profiles';
+import { initialPersonas, proxyImg, getPersonaName } from '@/lib/profiles';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
@@ -103,7 +103,7 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
         <div className="flex-1 min-w-0 pt-0.5">
            <div className="flex items-center justify-between gap-2 mb-1">
               <span className={`text-[12px] font-black uppercase italic tracking-tighter transition-colors ${unread > 0 ? 'text-[#ff00ff]' : 'text-white'}`}>
-                {persona.name}
+                {getPersonaName(persona)}
               </span>
            </div>
            <p className="text-[9px] text-white/30 truncate leading-relaxed">

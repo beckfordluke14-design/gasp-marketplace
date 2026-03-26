@@ -44,6 +44,28 @@ export async function POST(req: Request) {
                 }
                 return NextResponse.json({ success: true });
             }
+            case 'global-rename': {
+                const { id, oldName, newName } = payload;
+                if (!id || !newName) throw new Error('Identity Target Missing.');
+                
+                // 1. Update Persona Node
+                const { error: pError } = await supabase.from('personas').update({ name: newName }).eq('id', id);
+                if (pError) throw pError;
+
+                // 2. Cascade to post captions (Neural Sweep)
+                if (oldName) {
+                    const { data: posts } = await supabase.from('posts').select('id, caption').eq('persona_id', id);
+                    if (posts) {
+                        for (const post of posts) {
+                            if (post.caption && post.caption.includes(oldName)) {
+                                const newCaption = post.caption.replace(new RegExp(oldName, 'gi'), newName);
+                                await supabase.from('posts').update({ caption: newCaption }).eq('id', post.id);
+                            }
+                        }
+                    }
+                }
+                return NextResponse.json({ success: true });
+            }
             case 'rename': {
                 const { id, name } = payload;
                 const { error } = await supabase.from('personas').update({ name }).eq('id', id);

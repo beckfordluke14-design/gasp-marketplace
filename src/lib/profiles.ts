@@ -61,6 +61,18 @@ export interface Broadcast {
  * Reverting to direct, proven routing for established models
  * while the Proxy-Bridge is calibrated.
  */
+/**
+ * 👑 GLOBAL ALIAS RESOLVER: The "Display Sovereign"
+ * Decouples the frontend display name from the backend Logic-ID.
+ */
+export function getPersonaName(p: any): string {
+    if (!p) return "Unknown Baddie";
+    // Priority: Display Name -> ID-based Title Case -> Fallback
+    if (p.name && p.name !== '') return p.name;
+    if (p.id) return p.id.split('-')[0].charAt(0).toUpperCase() + p.id.split('-')[0].slice(1);
+    return "Archive Node";
+}
+
 export function proxyImg(url: string | null | undefined): string {
   if (!url) return '/gasp_white.png';
   

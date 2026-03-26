@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { initialPersonas, proxyImg } from '@/lib/profiles';
+import { initialPersonas, proxyImg, getPersonaName } from '@/lib/profiles';
 import { createClient } from '@supabase/supabase-js';
 import { X, Lock, Volume2, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
@@ -64,7 +64,7 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
         }];
         return {
           personaId: p.id,
-          personaName: p.name,
+          personaName: getPersonaName(p),
           personaImage: p.image || '/v1.png',
           stories: finalStories,
           hasUnviewed: finalStories.some(s => !viewedIds.has(s.id)),
@@ -75,6 +75,7 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
     }
     if (personas.length > 0) fetchStories();
   }, [personas, viewedIds]);
+
 
   // Auto-progress through story
   useEffect(() => {
@@ -184,7 +185,10 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => onSelectPersona(activeStory.bubble.personaId)}
+                  onClick={() => {
+                    onSelectPersona(activeStory.bubble.personaId);
+                    setActiveStory(null);
+                  }}
                   className="px-3 py-1.5 bg-[#ff00ff]/20 border border-[#ff00ff]/40 rounded-full text-[9px] font-black text-[#ff00ff] uppercase tracking-wider"
                 >
                   Message
@@ -255,7 +259,7 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                       <p className="text-white/40 text-[10px] uppercase tracking-widest">unlock for 40 credits</p>
                     </div>
                     <button
-                      onClick={(e) => { e.stopPropagation(); onSelectPersona(activeStory.bubble.personaId); }}
+                      onClick={(e) => { e.stopPropagation(); onSelectPersona(activeStory.bubble.personaId); setActiveStory(null); }}
                       className="px-8 py-4 bg-[#ff00ff] text-black rounded-2xl font-black uppercase tracking-wider text-sm relative z-50"
                     >
                       Unlock Story — 40 Credits
@@ -289,12 +293,17 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
             {/* Bottom CTA */}
             <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
               <button
-                onClick={(e) => { e.stopPropagation(); onSelectPersona(activeStory.bubble.personaId); }}
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  onSelectPersona(activeStory.bubble.personaId); 
+                  setActiveStory(null);
+                }}
                 className="w-full py-4 bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl text-white font-black uppercase tracking-widest text-xs"
               >
                 💬 Chat with {activeStory.bubble.personaName}
               </button>
             </div>
+
           </motion.div>
         )}
       </AnimatePresence>

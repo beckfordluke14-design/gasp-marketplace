@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { initialPersonas, proxyImg, type Persona, type Broadcast } from '@/lib/profiles';
+import { initialPersonas, proxyImg, getPersonaName, type Persona, type Broadcast } from '@/lib/profiles';
 import { MessageSquare, Zap, Lock, Heart, Trash2, Star, Brain, X, Save, Pencil, Check } from 'lucide-react';
 import { trackEvent } from '@/lib/telemetry';
 import { useUser } from '@/components/providers/UserProvider';
@@ -256,7 +256,7 @@ function GlobalFeedItem({ persona, broadcast, onSelectPersona, onDeletePost, onT
                   <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-10 duration-1000">
                      <div className="flex flex-col gap-2 pointer-events-auto">
                         <div className="flex items-center gap-3">
-                      <span className="text-[14px] md:text-[18px] font-black uppercase italic tracking-tighter text-white/90 drop-shadow-2xl">{persona.name}</span>
+                      <span className="text-[14px] md:text-[18px] font-black uppercase italic tracking-tighter text-white/90 drop-shadow-2xl">{getPersonaName(persona)}</span>
                       <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] shadow-[0_0_10px_#00f0ff]" />
                    </div>
                    
@@ -273,8 +273,8 @@ function GlobalFeedItem({ persona, broadcast, onSelectPersona, onDeletePost, onT
                          {broadcast.content}
                       </h2>
                    )}
-                        <span className="text-[10px] font-black uppercase text-white/40 tracking-widest font-mono">NODE_{persona.name.slice(0, 8)} • {persona.age || '22'} • {persona.city}</span>
-                        <h3 className="text-4xl md:text-7xl font-syncopate font-bold uppercase italic tracking-tighter text-white drop-shadow-2xl leading-none">{persona.name}</h3>
+                        <span className="text-[10px] font-black uppercase text-white/40 tracking-widest font-mono">NODE_{getPersonaName(persona).slice(0, 8)} • {persona.age || '22'} • {persona.city}</span>
+                        <h3 className="text-4xl md:text-7xl font-syncopate font-bold uppercase italic tracking-tighter text-white drop-shadow-2xl leading-none">{getPersonaName(persona)}</h3>
                         <p className="max-w-md text-lg md:text-2xl font-outfit text-white/90 lowercase italic leading-tight drop-shadow-xl">{broadcast.content}</p>
                      </div>
                      <div className="flex items-center gap-4 md:gap-6 pointer-events-auto">

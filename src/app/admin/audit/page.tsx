@@ -194,24 +194,93 @@ export default function PersonaAuditPage() {
     setLoading(false);
   };
 
-  const renamePersona = async (personaId: string, currentName: string) => {
+  const toggleVaultStatus = async (postId: string, current: boolean) => {
+    try {
+        const res = await fetch('/api/admin/audit', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'toggle-vault', payload: { id: postId, is_vault: !current } })
+        });
+        const data = await res.json();
+        if (data.success) {
+            setAssets(prev => prev.map(a => a.id === postId ? { ...a, is_vault: !current } : a));
+        }
+    } catch(e: any) { console.error('Vault Sync Failed:', e.message); }
+  };
+
+  const toggleHeroStatus = async (postId: string, current: boolean) => {
+    try {
+        const res = await fetch('/api/admin/audit', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'toggle-featured', payload: { id: postId, is_featured: !current } })
+        });
+        const data = await res.json();
+        if (data.success) {
+            setAssets(prev => prev.map(a => a.id === postId ? { ...a, is_burner: !current } : a));
+        }
+    } catch(e: any) { console.error('Hero Sync Failed:', e.message); }
+  };
+
+  const hidePost = async (postId: string) => {
+    if (!confirm('🚨 Neural Tombstone: Hide this post from feed?')) return;
+    try {
+        const res = await fetch('/api/admin/audit', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'delete-post', payload: { id: postId } })
+        });
+        const data = await res.json();
+        if (data.success) {
+            setAssets(prev => prev.filter(a => a.id !== postId));
+            alert('Post Masked Successfully.');
+        }
+    } catch(e: any) { console.error('Hide Failed:', e.message); }
+  };
+
+  const deletePostHard = async (postId: string) => {
+    if (!confirm('⚠️ CRITICAL DELETE: Permanently erase from DB? This cannot be undone.')) return;
+    try {
+        const res = await fetch('/api/admin/audit', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'delete-post-hard', payload: { id: postId } })
+        });
+        const data = await res.json();
+        if (data.success) {
+            setAssets(prev => prev.filter(a => a.id !== postId));
+        }
+    } catch(e: any) { console.error('Hard Delete Failed:', e.message); }
+  };
+
+  const updateCaption = async (postId: string, newCaption: string) => {
+    try {
+        const res = await fetch('/api/admin/audit', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'update-post', payload: { id: postId, caption: newCaption } })
+        });
+        if (!res.ok) throw new Error('Update Failed');
+    } catch(e: any) { alert('Caption Sync Error: ' + e.message); }
+  };
+
+  const globalRenamePersona = async (personaId: string, currentName: string) => {
     if (!selectedPersona) return;
-    const newName = prompt('Enter New Identity Label:', currentName);
+    const newName = prompt('🚨 GLOBAL IDENTITY RE-INK: Enter new name to cascade through entire system (DB + Captions):', currentName);
     if (!newName || newName === currentName) return;
+    
     setSyncing(personaId);
     try {
         const res = await fetch('/api/admin/audit', {
             method: 'POST',
-            body: JSON.stringify({ action: 'rename', payload: { id: personaId, name: newName } })
+            body: JSON.stringify({ action: 'global-rename', payload: { id: personaId, oldName: currentName, newName } })
         });
         const data = await res.json();
         if (data.success) {
             setSelectedPersona({ ...selectedPersona, name: newName });
             setPersonas(prev => prev.map(p => p.id === personaId ? { ...p, name: newName } : p));
+            alert(`SUCCESS: Identity re-inked to ${newName} across entire system.`);
+            fetchAssets(personaId); // Reload to see new captions
         } else alert('Rename Synapse Failed: ' + data.error);
     } catch(e: any) { alert('Rename Error: ' + e.message); }
     setSyncing(null);
   };
+
 
   async function fetchAssets(personaId: string) {
     setLoading(true);
@@ -417,6 +486,23 @@ export default function PersonaAuditPage() {
   return (
     <div className="min-h-screen bg-[#050505] text-white font-outfit selection:bg-[#ff00ff] selection:text-black">
       <Header />
+
+      {/* 🏁 MASTER PATHWAY: POST STUDIO LINK */}
+      <div className="max-w-7xl mx-auto px-6 py-8 flex items-center justify-between">
+         <div className="flex items-center gap-6">
+            <h1 className="text-5xl font-syncopate font-black italic tracking-tighter uppercase text-white">Auditor</h1>
+            <div className="h-4 w-px bg-white/10 hidden sm:block" />
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 hidden sm:block">Global Node Manager</p>
+         </div>
+         
+         <a 
+          href="/admin/posts"
+          className="flex items-center gap-3 px-8 py-3 bg-[#00f0ff]/10 border border-[#00f0ff]/20 rounded-2xl text-[#00f0ff] text-[10px] font-black uppercase tracking-widest hover:bg-[#00f0ff]/20 hover:scale-105 transition-all shadow-[0_0_30px_rgba(0,240,255,0.1)]"
+         >
+           <LayoutGrid size={16} />
+           Post Studio (Master Editor)
+         </a>
+      </div>
       
       {/* MOBILE TABS HEADER */}
       {selectedPersona && (
@@ -593,9 +679,9 @@ export default function PersonaAuditPage() {
                   <div className="group/name relative">
                     <h2 className="text-3xl font-syncopate font-black italic tracking-tighter text-white uppercase group-hover/name:text-[#00f0ff] transition-colors">{selectedPersona.name}</h2>
                     <button 
-                      onClick={() => renamePersona(selectedPersona.id, selectedPersona.name)}
-                      className="absolute -top-1 -right-8 p-2 bg-white/5 rounded-full text-white/20 hover:text-white hover:bg-white/10 opacity-0 group-hover/name:opacity-100 transition-all"
-                      title="Rename Identity"
+                      onClick={() => globalRenamePersona(selectedPersona.id, selectedPersona.name)}
+                      className="absolute -top-1 -right-8 p-2 bg-white/5 rounded-full text-white/20 hover:text-white hover:bg-[#00f0ff] hover:text-black opacity-0 group-hover/name:opacity-100 transition-all shadow-xl"
+                      title="GLOBAL IDENTITY RE-INK"
                     >
                        <Pencil size={12} />
                     </button>
