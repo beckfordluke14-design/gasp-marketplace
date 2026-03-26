@@ -11,10 +11,10 @@ import {
 } from 'lucide-react';
 import { proxyImg } from '@/lib/profiles';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface PersonaPost {
     id: string;
@@ -31,14 +31,18 @@ interface PersonaPost {
 }
 
 export default function PostStudio() {
+    const [mounted, setMounted] = useState(false);
     const [posts, setPosts] = useState<PersonaPost[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [syncing, setSyncing] = useState<string | null>(null);
 
     useEffect(() => {
+        setMounted(true);
         fetchPosts();
     }, []);
+
+    if (!mounted) return null;
 
     const fetchPosts = async () => {
         setLoading(true);
