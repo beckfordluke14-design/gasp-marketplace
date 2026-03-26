@@ -154,22 +154,6 @@ export default function PersonaAuditPage() {
     setSyncing(null);
   };
 
-  const deletePostHard = async (id: string) => {
-    if (!confirm('PERMANENT WIPE: This will remove the record and reference from the DB. Proceed?')) return;
-    setSyncing(id);
-    try {
-        const res = await fetch('/api/admin/audit', {
-            method: 'POST',
-            body: JSON.stringify({ action: 'delete-post-hard', payload: { id } })
-        });
-        const data = await res.json();
-        if (data.success) {
-            setAssets(prev => prev.filter(a => a.id !== id));
-            alert('Node Purged.');
-        } else alert('Purge Failed: ' + data.error);
-    } catch(e: any) { alert('Neural Error: ' + e.message); }
-    setSyncing(null);
-  };
 
 
   const deletePersona = async (personaId: string) => {
