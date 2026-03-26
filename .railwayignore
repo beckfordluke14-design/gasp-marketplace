@@ -26,7 +26,7 @@ public/assets
 supabase-backups
 
 # Essential Build Resources
-!scripts/post-build.js
+!post-build.js
 !final-sync.js
 !src
 !public
