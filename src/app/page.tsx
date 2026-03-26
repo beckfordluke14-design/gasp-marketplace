@@ -54,7 +54,6 @@ function MarketplaceMain() {
   const [guestId, setGuestId] = useState<string>('');
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [dbPersonas, setDbPersonas] = useState<any[]>([]);
-  const [showPwaPrompt, setShowPwaPrompt] = useState(false);
   const [followNotify, setFollowNotify] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
@@ -115,12 +114,6 @@ function MarketplaceMain() {
     // 💎 TELEMETRY: The Billion-Dollar Handshake
     trackEvent('app_load');
 
-    // PWA Prompt: Show after 20s if not installed
-    const timer = setTimeout(() => {
-      const isStandalone = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
-      if (!isStandalone) setShowPwaPrompt(true);
-    }, 20000);
-
     // 🧬 NEURAL PULSE: Organic Presence Simulation (Sign-In/Sign-Off Vibe)
     const activeRosterIds = allPersonas.filter(p => p.is_active !== false).map(p => p.id);
     if (activeFloatingIds.length === 0 && activeRosterIds.length > 0) {
@@ -154,7 +147,7 @@ function MarketplaceMain() {
        });
     }, 6000 + Math.random() * 8000); // Organic Pulse: Fluctuates every 6-14s
 
-    return () => { clearTimeout(timer); clearInterval(interval); };
+    return () => { clearInterval(interval); };
   }, [allPersonas.length]); // Re-bind when roster manifests
 
   // Deep Link: ?persona=valeria&msg=hi
@@ -282,13 +275,14 @@ function MarketplaceMain() {
       {!isZenMode && <Sidebar selectedPersonaId={selectedPersonaId} onSelectPersona={handleSelectPersona} unreadCounts={unreadCounts} personas={refinedPersonas} />}
       
       <main className="flex-1 flex flex-col relative overflow-hidden">
+          {!isZenMode && <div className="h-28 md:h-36 shrink-0" />}
           <AnimatePresence>
              {(!isZenMode && !isChatOpenMobile) && (
                 <motion.div 
-                  initial={{ opacity: 0, y: -50 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  exit={{ opacity: 0, y: -50 }} 
-                  className="absolute top-28 md:top-36 left-0 right-0 z-[200] bg-gradient-to-b from-black via-black/95 to-transparent pb-2 border-b border-white/5 flex items-center pr-4"
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }} 
+                  exit={{ opacity: 0 }} 
+                  className="relative z-[200] bg-black border-b border-white/5 flex items-center pr-4 shrink-0 transition-all duration-500"
                 >
                   <StoriesRow personas={refinedPersonas} onSelectPersona={handleSelectPersona} />
                   <button onClick={() => setShowRightSidebar(!showRightSidebar)} className="flex lg:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/10 items-center justify-center text-white/40 hover:text-[#00f0ff] transition-all shrink-0">
@@ -297,7 +291,7 @@ function MarketplaceMain() {
                 </motion.div>
              )}
           </AnimatePresence>
-          <div className={`${isZenMode ? 'pt-0' : 'pt-44'} flex-1 h-screen overflow-hidden transition-all duration-500`}>
+          <div className="flex-1 overflow-hidden transition-all duration-500">
             <GlobalFeed onSelectPersona={handleSelectPersona} />
           </div>
       </main>
@@ -326,25 +320,8 @@ function MarketplaceMain() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-         {showPwaPrompt && (
-           <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
-             className="fixed bottom-24 md:bottom-12 right-4 left-4 md:left-auto md:w-80 bg-[#00f0ff] p-5 rounded-[2rem] z-[1000] shadow-[0_20px_60px_rgba(0,240,255,0.4)] flex flex-col gap-4 cursor-pointer"
-             onClick={() => setShowPwaPrompt(false)}
-           >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center shrink-0">
-                   <Smartphone size={24} className="text-[#00f0ff]" />
-                </div>
-                <div>
-                   <h4 className="text-black font-syncopate font-black uppercase text-[10px]">Install Gasp.fun</h4>
-                   <p className="text-black/60 text-[9px] font-black uppercase tracking-wider leading-tight">Add to Home Screen for priority access</p>
-                </div>
-                <button className="ml-auto text-black/20 hover:text-black" onClick={(e) => { e.stopPropagation(); setShowPwaPrompt(false); }}><X size={16}/></button>
-              </div>
-           </motion.div>
-         )}
-      </AnimatePresence>
+      {/* Removed PWA prompt from main, using InstallHint instead */}
+
 
       <div className={`fixed top-1/2 -translate-y-1/2 z-[600] flex flex-col gap-3 transition-all duration-500 ${isChatOpenMobile ? 'right-2' : 'left-2'}`}>
          {showFloatingAvatars && refinedPersonas.filter(p => activeFloatingIds.includes(p.id)).map(p => (

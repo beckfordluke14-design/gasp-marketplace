@@ -7,7 +7,12 @@ import { Session, User } from '@supabase/supabase-js';
 interface UserContextType {
   user: User | null;
   session: Session | null;
-  profile: any | null;
+  profile: {
+    id: string;
+    nickname?: string;
+    is_known?: boolean;
+    last_active_at?: string;
+  } | null;
   loading: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -71,11 +76,23 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       }, 1000 * 60 * 5); // 5 mins
     }
 
-    const { data: { subscription } } = getSupabase().auth.onAuthStateChange(async (_event: string, newSession: any) => {
+    const { data: { subscription } } = getSupabase().auth.onAuthStateChange(async (event: string, newSession: any) => {
       setSession(newSession);
-      setUser(newSession?.user || null);
-      if (newSession?.user) {
-        await fetchProfile(newSession.user.id);
+      const newUser = newSession?.user || null;
+      setUser(newUser);
+      
+      if (newUser) {
+        // ✨ GUEST MIGRATION: The Handshake 
+        const guestId = localStorage.getItem('gasp_guest_id');
+        if (guestId && !guestId.includes(newUser.id)) {
+           console.log('[Neural Bridge]: Migrating guest data...', guestId, '->', newUser.id);
+           const { data: migResult } = await getSupabase().rpc('migrate_guest_data', { p_guest_id: guestId, p_user_id: newUser.id });
+           if (migResult?.success) {
+              console.log('[Neural Bridge]: Migration Complete.');
+              localStorage.removeItem('gasp_guest_id');
+           }
+        }
+        await fetchProfile(newUser.id);
       } else {
         setProfile(null);
       }

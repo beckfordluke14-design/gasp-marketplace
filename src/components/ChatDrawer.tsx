@@ -209,6 +209,21 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     setShowVoiceTip(false);
   };
 
+  const playNotification = () => {
+    try {
+        const audio = new Audio('https://gasp-marketplace.vercel.app/notification.mp3'); // Fallback to public asset
+        audio.volume = 0.4;
+        audio.play().catch(() => {});
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+     if (dbMessages.length > 0 || messages.length > 0) {
+        const lastMsg = messages[messages.length - 1] || dbMessages[dbMessages.length - 1];
+        if (lastMsg?.role === 'assistant') playNotification();
+     }
+  }, [dbMessages.length, messages.length]);
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || isUploading) return;
@@ -255,7 +270,9 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     
     setWalletBalance(prev => prev !== null ? prev - cost : prev);
     setVaultItems(prev => prev.map(v => v.id === item.id ? { ...v, is_unlocked: true } : v));
-    alert('Identity Access Decrypted! View it in your collection.');
+    
+    // AI Awareness auto-pings the brain
+    await executeNeuralSend(`[SYSTEM]: Decrypted your vault item: ${item.caption || "Secret Visual"}. Say something flirty about it.`);
   };
 
   const toggleFollow = async () => {
@@ -338,7 +355,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
       )}
 
        <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar p-6 md:p-8 space-y-6 md:space-y-8 pb-64">
-        {[...dbMessages, ...messages].map((msg: any) => (
+        {[...dbMessages, ...messages].filter(m => !m.content.startsWith('[SYSTEM]')).map((msg: any) => (
           <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`max-w-[85%] px-5 py-3 rounded-[1.6rem] text-xs md:text-sm leading-relaxed shadow-xl relative ${msg.role === 'user' ? 'bg-[#ff00ff] text-black font-bold rounded-tr-none' : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'}`}>
                {msg.media_url && msg.role === 'assistant' && <VoiceNoteBubble audioUrl={msg.media_url} personaImage={persona.image} personaName={persona.name} translation={msg.audio_translation} onUnlockTranslation={async () => {
@@ -365,7 +382,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                   />
                )}
                {msg.image_url && msg.role === 'user' && <div className="relative w-40 aspect-square rounded-xl overflow-hidden mb-3"><Image src={msg.image_url} alt="" fill unoptimized className="object-cover" /></div>}
-               {msg.content}
+               {!(msg.role === 'assistant' && msg.media_url) && msg.content}
             </div>
             {msg.role === 'user' && msg.status && <div className="mt-1 flex items-center gap-1 opacity-40"><span className="text-[8px] font-black uppercase tracking-tighter">{msg.status}</span>{msg.status === 'read' ? <CheckCheck size={10} className="text-[#00f0ff]" /> : <Check size={10} />}</div>}
           </div>
@@ -384,21 +401,30 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
 
       <div className="absolute bottom-0 inset-x-0 p-4 md:p-8 pt-4 bg-gradient-to-t from-black via-black/90 to-transparent pb-10 z-[400]">
         {showSignUpWall ? (
-            <div onClick={() => router.push(`/login?p=${personaId}`)} className="mt-6 bg-[#ffea00] py-4 px-6 rounded-[2rem] flex flex-col items-center justify-center text-center gap-1.5 shadow-xl cursor-pointer active:scale-95 transition-all">
-                <h3 className="text-black font-syncopate font-black uppercase text-[10px]">Energy Depleted</h3>
-                <p className="text-black/50 font-black uppercase text-[8px] flex items-center gap-2">Connect Hub = <span className="text-black">50 Bonus Pts</span></p>
+            <div onClick={() => router.push(`/login?p=${personaId}`)} className="mt-6 bg-[#ffea00] py-4 px-6 rounded-[2rem] flex flex-col items-center justify-center text-center gap-2 shadow-xl cursor-pointer active:scale-95 transition-all border-2 border-black/10">
+                <h3 className="text-black font-syncopate font-black uppercase text-[12px]">Guest Credits Depleted</h3>
+                <p className="text-black/70 font-black uppercase text-[9px] tracking-widest flex items-center gap-2">SIGN UP NOW to Continue the Conversation</p>
+                <div className="mt-1 px-3 py-1 bg-black text-[#ffea00] rounded-full text-[8px] font-black uppercase">50 Bonus Pts on Join</div>
             </div>
         ) : (
             <>
                <AnimatePresence>
                 {activeGift && <motion.div key={activeGift.id} initial={{ scale: 0.5, y: 100, opacity: 0 }} animate={{ scale: [1, 1.5, 1], y: -400, opacity: [0, 1, 0] }} transition={{ duration: 2 }} className="absolute left-1/2 -translate-x-1/2 bottom-32 text-[120px] z-[1000]">{activeGift.icon}</motion.div>}
                  {showGifts && (
-                  <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="absolute bottom-28 left-4 right-4 bg-black/80 backdrop-blur-3xl border border-[#ff00ff]/30 rounded-3xl p-4 grid grid-cols-3 gap-3 z-[500]">
-                     {[{ name: 'Red Bull', icon: '⚡', price: 25 }, { name: 'Tequila Shot', icon: '🥃', price: 50 }, { name: 'Luxury Rose', icon: '🌹', price: 100 }, { name: 'Drip Coffee', icon: '☕', price: 20 }].map(g => (
-                       <button key={g.name} onClick={() => sendGift(g as any)} className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white/5 hover:bg-[#ff00ff]/10 border border-white/5 transition-all group">
-                          <span className="text-2xl group-hover:scale-125 transition-transform">{g.icon}</span>
-                          <span className="text-[9px] font-black uppercase text-white/50">{g.price}c</span>
-                          <span className="text-[7px] font-black uppercase text-[#ff00ff] opacity-0 group-hover:opacity-100 transition-opacity">Select</span>
+                  <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="absolute bottom-28 left-4 right-4 bg-black/80 backdrop-blur-3xl border border-[#ff00ff]/30 rounded-3xl p-4 grid grid-cols-4 gap-2 z-[500] max-h-[300px] overflow-y-auto no-scrollbar shadow-[0_0_50px_rgba(255,0,255,0.2)]">
+                     {[
+                        { name: 'Red Bull', icon: '⚡', price: 25, bond: 5 }, 
+                        { name: 'Tequila', icon: '🥃', price: 50, bond: 10 }, 
+                        { name: 'Rose', icon: '🌹', price: 100, bond: 25 }, 
+                        { name: 'Coffee', icon: '☕', price: 20, bond: 2 },
+                        { name: 'Diamond', icon: '💎', price: 500, bond: 150 },
+                        { name: 'Champagne', icon: '🍾', price: 250, bond: 60 },
+                        { name: 'Chocolate', icon: '🍫', price: 30, bond: 8 },
+                        { name: 'Handbag', icon: '👜', price: 400, bond: 120 }
+                     ].map(g => (
+                       <button key={g.name} onClick={() => sendGift(g as any)} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-[#ff00ff]/10 border border-white/5 transition-all group">
+                          <span className="text-xl group-hover:scale-125 transition-transform">{g.icon}</span>
+                          <span className="text-[8px] font-black uppercase text-white/50">{g.price}c</span>
                        </button>
                      ))}
                   </motion.div>
@@ -415,7 +441,13 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                     </div>
                     <button type="button" onClick={() => setShowGifts(!showGifts)} className={`w-9 h-9 rounded-2xl flex items-center justify-center transition-all ${showGifts ? 'bg-[#ff00ff] text-black' : 'bg-white/5 text-white/40 hover:text-[#ff00ff]'}`}><HeartPulse size={18} /></button>
                   </div>
-                   <input type="text" value={localInput} onChange={(e) => setLocalInput(e.target.value)} placeholder="send mssg..." className="flex-1 bg-transparent outline-none text-xs text-white ml-2" />
+                   <input 
+                      type="text" 
+                      value={localInput} 
+                      onChange={(e) => setLocalInput(e.target.value)} 
+                      placeholder={voiceRequested ? "script her message..." : "send mssg..."} 
+                      className={`flex-1 bg-transparent outline-none text-xs ml-2 transition-all ${voiceRequested ? 'text-[#ff00ff] placeholder:text-[#ff00ff]/40' : 'text-white'}`} 
+                   />
                    <button type="submit" disabled={!localInput.trim()} className="p-3 rounded-2xl bg-[#ff00ff] text-black shadow-[0_0_20px_#ff00ff44]"><Send size={16} /></button>
                </form>
             </>

@@ -119,6 +119,33 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
       <div className="h-20 shrink-0" />
 
       <div className="flex-1 overflow-y-auto no-scrollbar py-6">
+        {/* MISSED MESSAGES PRIORITY */}
+        {Object.keys(unreadCounts).some(id => unreadCounts[id] > 0) && (
+            <div className="mb-8 px-4">
+                <div className="px-2 mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <MessageSquare size={10} className="text-[#00f0ff]" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00f0ff] italic">Missed Connections</span>
+                    </div>
+                </div>
+                <div className="flex flex-col">
+                    {personas.filter(p => unreadCounts[p.id] > 0).map(p => (
+                        <motion.div key={p.id} onClick={() => onSelectPersona(p.id)} whileHover={{ x: 4 }} className="flex items-center gap-3 p-3 rounded-2xl bg-[#00f0ff]/5 border border-[#00f0ff]/10 mb-2 cursor-pointer group">
+                             <div className="w-10 h-10 rounded-full overflow-hidden border border-[#00f0ff]/40 shrink-0">
+                                <PersonaAvatar src={p.image} alt={p.name} />
+                             </div>
+                             <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-black uppercase text-white truncate">{p.name}</p>
+                                <p className="text-[8px] font-bold text-[#00f0ff] uppercase tracking-widest">{unreadCounts[p.id]} new messages</p>
+                             </div>
+                             <ArrowRight size={12} className="text-[#00f0ff] opacity-40 group-hover:opacity-100" />
+                        </motion.div>
+                    ))}
+                </div>
+                <div className="h-px w-full bg-white/5 mt-4" />
+            </div>
+        )}
+
         {followedPersonas.length > 0 && (
             <div className="mb-8">
                 <div className="px-6 mb-4">

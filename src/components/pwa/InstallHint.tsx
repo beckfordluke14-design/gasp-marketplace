@@ -8,16 +8,24 @@ export default function InstallHint() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    const isDismissed = localStorage.getItem('gasp_pwa_dismissed') === 'true';
+    if (isDismissed) return;
+
     // Detect if we are on a mobile device and NOT already in standalone mode
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
     
     if (isIOS && !isStandalone) {
       // Show hint after a small delay to let the initial layout settle
-      const timer = setTimeout(() => setIsVisible(true), 3000);
+      const timer = setTimeout(() => setIsVisible(true), 15000); // 15s instead of 3s
       return () => clearTimeout(timer);
     }
   }, []);
+
+  const handleDismiss = () => {
+    setIsVisible(false);
+    localStorage.setItem('gasp_pwa_dismissed', 'true');
+  };
 
   if (!isVisible) return null;
 
@@ -40,7 +48,7 @@ export default function InstallHint() {
                 <p className="text-[11px] font-black uppercase tracking-widest text-white">Full Immersion Required</p>
               </div>
             </div>
-            <button onClick={() => setIsVisible(false)} className="p-2 text-white/20 hover:text-white transition-colors">
+            <button onClick={handleDismiss} className="p-2 text-white/20 hover:text-white transition-colors">
                <X size={16} />
             </button>
           </div>

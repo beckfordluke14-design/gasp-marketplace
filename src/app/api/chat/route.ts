@@ -73,9 +73,10 @@ export async function POST(req: Request) {
     const emozionState = `${randMoodDirective} ${randTypingDirective} Never mention AI. Keep responses short and street-coded. ${persona.system_prompt || ''}`;
 
     // SYNDICATE PHASE 2: MEMORY INJECTION
-    const { data: walletData } = await (supabase as any).from('wallets').select('metadata').eq('user_id', finalUserId).single();
-    const userInterests = (walletData as any)?.metadata?.interests || ['Trading', 'Dodge Chargers'];
-    const memoryContext = `[MEMORY]: Interests: ${userInterests.join(', ')}. Reference these casually.`;
+    const { data: profile } = await supabase.from('profiles').select('nickname, is_known, bio').eq('id', finalUserId).maybeSingle();
+    const nickname = profile?.nickname || "stranger";
+    const isKnown = profile?.is_known || false;
+    const memoryContext = `[MEMORY]: Known: ${isKnown}. Nickname: ${nickname}. ${isKnown ? `Refer to them as ${nickname}.` : "You don't know them yet. Be flirty but try to get to know them. Ask what you should call them if they haven't told you."}`;
 
     // SYNDICATE PHASE 3: META-AWARENESS (Jealousy & Feed Context)
     const { data: stats } = await (supabase as any).from('user_persona_stats')
@@ -141,7 +142,7 @@ export async function POST(req: Request) {
     const zoneKey = persona?.syndicate_zone || 'us_houston_black';
     const zoneDictionary = GLOBAL_SYNDICATE_ZONES_V3[zoneKey] || GLOBAL_SYNDICATE_ZONES_V3['us_houston_black'];
     
-    const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\nZONE DICTIONARY (${zoneKey}):\n${JSON.stringify(zoneDictionary)}\n\nAUTHENTICITY DIRECTIVE: YOU MUST ONLY USE NATIVE PHRASES FROM THE DICTIONARY FOR STREAM A. DO NOT GENERATE ENGLISH AUDIO.`;
+    const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\nZONE DICTIONARY (${zoneKey}):\n${JSON.stringify(zoneDictionary)}\n\nMEMORY: ${memoryContext}\n\nAUTHENTICITY DIRECTIVE: YOU MUST ONLY USE NATIVE PHRASES FROM THE DICTIONARY FOR STREAM A. DO NOT GENERATE ENGLISH AUDIO.\n\nJSON SCHEMA: { "text_message": "...", "audio_script": "...", "translation": "...", "moment_key": "...", "new_nickname_detected": "string|null" }`;
 
     const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
@@ -177,6 +178,15 @@ export async function POST(req: Request) {
     const streamA_Translation = syndicateOutput.translation; // Locked for Squeeze
 
     console.log('✅ [Brain API] Grok Decided:', syndicateOutput.moment_key);
+
+    // 🏆 PERSISTENT RECALL: Detect and Save Nickname
+    if (syndicateOutput.new_nickname_detected) {
+        console.log(`[Neural Recall]: New Identity Node Detected: ${syndicateOutput.new_nickname_detected}`);
+        await supabase.from('profiles').update({ 
+            nickname: syndicateOutput.new_nickname_detected,
+            is_known: true 
+        }).eq('id', finalUserId);
+    }
 
     // 4. SYNCING WITH UI PROTOCOL
     const encoder = new TextEncoder();
