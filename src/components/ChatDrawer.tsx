@@ -65,6 +65,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
   const [picZoomed, setPicZoomed] = useState(false);
   const [likedPicIds, setLikedPicIds] = useState<Set<string>>(new Set());
   const [chatTabNotif, setChatTabNotif] = useState(false);
+  const [showStory, setShowStory] = useState(false);
   const router = useRouter();
   const { user } = useUser();
 
@@ -89,7 +90,20 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     setIsFollowing(storedFollows.includes(personaId));
     const h = new Date().getHours();
     setActiveChatters(Math.floor(Math.random() * 20) + ((h > 20 || h < 4) ? 80 : 30));
-  }, [user]);
+  }, [user, personaId]);
+
+  const handleFollowToggle = () => {
+    const stored = localStorage.getItem('gasp_following') || '[]';
+    let following = JSON.parse(stored);
+    if (isFollowing) {
+       following = following.filter((id: string) => id !== personaId);
+    } else {
+       following.push(personaId);
+    }
+    localStorage.setItem('gasp_following', JSON.stringify(following));
+    setIsFollowing(!isFollowing);
+    window.dispatchEvent(new Event('storage')); // 🧬 Sync all discovery nodes
+  };
 
   const loadData = async () => {
     if (!guestId || !personaId) return;
@@ -231,31 +245,54 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
 
   return (
     <div className="relative h-full mt-0 md:h-[calc(100dvh-8.5rem)] md:mt-[8.5rem] w-full md:w-[480px] bg-[#050505]/95 backdrop-blur-3xl border-l border-white/5 z-[300] shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col pointer-events-auto transition-all duration-500 md:rounded-l-[2rem] overflow-hidden">
-      <div className="p-4 md:p-8 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
-        <div className="flex items-center gap-3">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden relative border border-white/10 bg-white/5">
-               <PersonaAvatar src={persona.image} />
-            </div>
-            <div>
-               <div className="flex items-center gap-2">
-                 <h3 className="text-sm md:text-xl font-syncopate font-bold uppercase italic text-white leading-none tracking-tight">{persona.name.toLowerCase()}</h3>
-                 <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#00f0ff]/10 border border-[#00f0ff]/20 rounded-full">
-                    <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
-                    <span className="text-[7px] md:text-[8px] font-black text-[#00f0ff] uppercase tracking-widest">{activeChatters} Active</span>
-                 </div>
+      <div className="p-4 md:p-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0 relative z-[200]">
+        <div className="flex items-center gap-4">
+            {/* 🧬 NEURAL PULSE: STORY NODE */}
+            <div 
+              onClick={() => setShowStory(true)}
+              className="relative cursor-pointer group"
+            >
+               <motion.div 
+                 animate={{ rotate: 360 }}
+                 transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
+                 className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#ff00ff] via-[#00f0ff] to-[#ffea00] p-[1px] opacity-100 blur-[1px]"
+               />
+               <div className="w-12 h-12 rounded-full overflow-hidden border border-black relative z-10 bg-black shadow-2xl">
+                  <PersonaAvatar src={persona.image} alt={persona.name} />
                </div>
-               <div className="flex items-center gap-3 mt-1.5">
-                  <p className="text-[9px] text-[#ffea00] font-black uppercase tracking-widest flex items-center gap-1.5"><Coins size={9} />{walletBalance?.toLocaleString() || '---'}</p>
-                  <div className={`w-1 h-1 rounded-full ${persona.status === 'online' ? 'bg-green-500' : 'bg-white/20'}`} />
-                  <span className="text-[8px] text-white/40 uppercase tracking-widest">{persona.city}</span>
+               {/* 🟢 GREEN STATUS PULSE */}
+               <div className="absolute top-0 right-0 w-3 h-3 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] animate-pulse z-20" />
+            </div>
+
+            <div>
+               <div className="flex items-center gap-2 leading-none">
+                 <h3 className="text-[13px] md:text-lg font-black uppercase italic text-white tracking-tighter">{persona.name.toLowerCase()}</h3>
+               </div>
+               <div className="flex items-center gap-3 mt-1.5 opacity-60">
+                  <span className="text-[8px] text-white uppercase tracking-widest">{persona.city}</span>
+                  <div className="w-1 h-[1px] bg-white/20" />
+                  <span className="text-[8px] text-[#00ff00] font-black uppercase tracking-widest italic leading-none">Locked Hub</span>
                </div>
             </div>
         </div>
-        <div className="flex items-center gap-1.5">
-           <button onClick={() => setShowVault(!showVault)} className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all relative ${showVault || vaultItems.length > 0 ? 'text-[#ff00ff]' : 'text-white/40'}`}><Diamond size={18} /></button>
-           <button onClick={() => setShowStats(!showStats)} className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all ${showStats ? 'text-[#ff00ff]' : 'text-white/40'}`}><Trophy size={16} /></button>
-           <button onClick={onMinimize} className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-white/40"><Minus size={18} /></button>
-           <button onClick={onClose} className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-white/40 hover:text-[#ff00ff]"><X size={18} /></button>
+
+        <div className="flex items-center gap-4">
+           {/* 🤝 CONNECTION BOX (FOLLOW) */}
+           <button 
+             onClick={handleFollowToggle}
+             className={`h-9 px-5 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all ${
+               isFollowing 
+                 ? 'bg-white/5 text-white/40 border border-white/10 opacity-60' 
+                 : 'bg-[#ffea00] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(255,234,0,0.3)]'
+             }`}
+           >
+              {isFollowing ? 'CONNECTED' : '+ CONNECT'}
+           </button>
+
+           <div className="flex items-center gap-2 border-l border-white/10 pl-4">
+              <button onClick={onMinimize} className="w-8 h-8 rounded-full flex items-center justify-center text-white/20 hover:text-white transition-all"><Minus size={18} /></button>
+              <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-white/20 hover:text-[#ff00ff] transition-all"><X size={18} /></button>
+           </div>
         </div>
       </div>
 
@@ -344,6 +381,41 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                    <button onClick={() => setConfirmingItem(null)} className="w-full h-10 text-[9px] font-black text-white/20 uppercase">Cancel</button>
                 </div>
              </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🧬 STORY MODAL OVERLAY */}
+      <AnimatePresence>
+        {showStory && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }} 
+            animate={{ opacity: 1, scale: 1 }} 
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="absolute inset-0 z-[1000] bg-black"
+          >
+             <PersonaAvatar src={persona.image} alt={persona.name} className="w-full h-full object-cover opacity-60" />
+             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
+             
+             <div className="absolute top-12 inset-x-8 h-1 bg-white/10 rounded-full overflow-hidden">
+                <motion.div initial={{ width: 0 }} animate={{ width: '100%' }} transition={{ duration: 5 }} className="h-full bg-white shadow-[0_0_10px_#fff]" onAnimationComplete={() => setShowStory(false)} />
+             </div>
+
+             <div className="absolute bottom-20 inset-x-8 text-center space-y-4">
+                <h2 className="text-3xl font-syncopate font-black italic text-white uppercase tracking-tighter leading-none">{persona.name}'s Pulse</h2>
+                <div className="flex items-center justify-center gap-2">
+                   <div className="w-1.5 h-1.5 rounded-full bg-[#00ff00] shadow-[0_0_8px_#00ff00]" />
+                   <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em] italic">Active in {persona.city || 'the vault'}</span>
+                </div>
+                <p className="text-sm text-white font-medium italic leading-relaxed px-4 opacity-80">"Vibing in the shadows tonight. Who's ready to see the full set? $GASPAI logic active."</p>
+             </div>
+
+             <button 
+               onClick={() => setShowStory(false)}
+               className="absolute top-16 right-8 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all"
+             >
+                <X size={20} />
+             </button>
           </motion.div>
         )}
       </AnimatePresence>

@@ -136,15 +136,6 @@ function MarketplaceMain() {
              )}
           </AnimatePresence>
 
-          {!isZenMode && <div className="h-24 md:h-32 shrink-0" />}
-          
-          {/* 💎 STORIES ROW: THE IDENTITY BUBBLES */}
-          {!isZenMode && (
-            <div className="shrink-0 bg-black/20 border-b border-white/5 pb-2">
-               <StoriesRow personas={refinedPersonas} onSelectPersona={handleSelectPersona} />
-            </div>
-          )}
-
           <div className="flex-1 overflow-hidden relative">
             <GlobalFeed onSelectPersona={handleSelectPersona} />
 

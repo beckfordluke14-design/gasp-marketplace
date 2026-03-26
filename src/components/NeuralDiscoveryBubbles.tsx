@@ -38,29 +38,44 @@ export default function NeuralDiscoveryBubbles({ personas, onSelectPersona }: Ne
     <motion.div 
       initial={false}
       animate={{ width: isVisible ? (typeof window !== 'undefined' && window.innerWidth < 768 ? 48 : 80) : 32 }}
-      className="flex flex-col items-center py-8 border-r border-white/5 bg-black/40 backdrop-blur-xl shrink-0 overflow-hidden relative transition-all"
+      className="flex flex-col items-center py-8 border-r border-white/5 bg-black/5 backdrop-blur-3xl shrink-0 overflow-hidden relative transition-all"
     >
-       <AnimatePresence mode="popLayout">
-          {isVisible && activePersonas.map((p, idx) => (
-             <motion.div
-               key={p.id}
-               initial={{ x: -20, opacity: 0, scale: 0.8 }}
-               animate={{ x: 0, opacity: 1, scale: 1 }}
-               exit={{ x: -40, opacity: 0, scale: 0.5 }}
-               transition={{ delay: idx * 0.1, type: 'spring', damping: 20 }}
-               className="pointer-events-auto group relative cursor-pointer mb-6"
-               onClick={() => onSelectPersona(p.id)}
-             >
-                {/* THE BUBBLE NODE */}
-                <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 bg-black shadow-2xl transition-all group-hover:border-[#00ff00]/50 group-hover:scale-110">
-                   <PersonaAvatar src={p.image} alt={p.name} />
-                </div>
+       <div className="flex-1 flex flex-col items-center gap-8 py-4">
+         <AnimatePresence mode="popLayout">
+            {isVisible && activePersonas.map((p, idx) => {
+               // SYNDICATE V10: Story/Discovery Pulse
+               const hasUnviewed = Math.random() > 0.4; // Simulated story check
+               return (
+                 <motion.div
+                   key={p.id}
+                   initial={{ x: -20, opacity: 0, scale: 0.8 }}
+                   animate={{ x: 0, opacity: 1, scale: 1 }}
+                   exit={{ x: -40, opacity: 0, scale: 0.5 }}
+                   transition={{ delay: idx * 0.1, type: 'spring', damping: 20 }}
+                   className="pointer-events-auto group relative cursor-pointer"
+                   onClick={() => onSelectPersona(p.id)}
+                 >
+                    {/* 🧬 STORY GLOW RING */}
+                    {hasUnviewed && (
+                      <motion.div 
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+                        className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-[#ff00ff] via-[#00f0ff] to-[#ffea00] p-[1px] opacity-100 blur-[2px] shadow-[0_0_15px_rgba(255,0,255,0.4)]"
+                      />
+                    )}
 
-                {/* 🛰️ ONLINE DOT INDICATOR (GREEN GLOW) */}
-                <div className="absolute top-0 right-0 w-3 h-3 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] animate-pulse" />
-             </motion.div>
-          ))}
-       </AnimatePresence>
+                    {/* THE BUBBLE NODE (NO BORDER) */}
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-black shadow-[0_10px_30px_rgba(0,0,0,1)] relative z-10 transition-all group-hover:scale-110">
+                       <PersonaAvatar src={p.image} alt={p.name} />
+                    </div>
+
+                    {/* 🛰️ ONLINE DOT INDICATOR (GREEN GLOW) */}
+                    <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] animate-pulse z-20" />
+                 </motion.div>
+               );
+            })}
+         </AnimatePresence>
+       </div>
 
        {/* 👁️ THE SOVEREIGN TOGGLE */}
        <button 
