@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Send, Plus, Coins, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart } from 'lucide-react';
+import { X, Send, Plus, Coins, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn } from 'lucide-react';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
 import { useRef, useEffect, useState } from 'react';
 import { COST_VOICE_TRANSLATION, COST_VOICE_NOTE } from '@/lib/economy/constants';
@@ -55,8 +55,16 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
   const [activeGift, setActiveGift] = useState<any>(null);
   const [isFollowing, setIsFollowing] = useState(false);
   // Freebie system
-  const [freebieItems, setFreebieItems] = useState<any[]>([]); // available freebies for this persona
-  const [sentFreebieIds, setSentFreebieIds] = useState<Set<string>>(new Set()); // already sent to this user
+  const [freebieItems, setFreebieItems] = useState<any[]>([]);
+  const [sentFreebieIds, setSentFreebieIds] = useState<Set<string>>(new Set());
+  // Pics tab
+  const [chatTab, setChatTab] = useState<'chat' | 'pics'>('chat');
+  const [picPosts, setPicPosts] = useState<any[]>([]);
+  const [loadingPics, setLoadingPics] = useState(false);
+  const [expandedPic, setExpandedPic] = useState<string | null>(null);
+  const [picZoomed, setPicZoomed] = useState(false);
+  const [likedPicIds, setLikedPicIds] = useState<Set<string>>(new Set());
+  const [chatTabNotif, setChatTabNotif] = useState(false); // dot on Chat tab after pic reaction
   const router = useRouter();
   const { user } = useUser();
 
@@ -370,6 +378,111 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     window.dispatchEvent(new Event('storage'));
   };
 
+  // Tracks last used index per locale so lines never repeat back-to-back
+  const lastPicReactionIdx = useRef<Record<string, number>>({});
+
+  const getPicLikeReaction = (): string => {
+    const city = (persona.city || '').toLowerCase();
+
+    let locale = 'en';
+    if (/lagos|abuja|nigeria|benin|warri|delta/.test(city))                              locale = 'ng';
+    else if (/kingston|jamaica|trinidad|barbados|kingstown/.test(city))                  locale = 'jm';
+    else if (/havana|cuba|santo|dominican|medell|bogot|lima|san juan|santiago/.test(city)) locale = 'es';
+    else if (/são paulo|rio|recife|brazil|brasil|porto|salvador|fortal/.test(city))     locale = 'pt';
+    else if (/london|manchester|birmingham|leeds|glasgow|bristol|uk/.test(city))          locale = 'uk';
+    else if (/los angeles|nashville|austin|denver|phoenix|dallas|atlanta/.test(city))    locale = 'basic';
+
+    const pool: Record<string, string[]> = {
+      ng: [
+        `anh anh \u{1F440} you dey look my pics like work lol`,
+        `ehn! caught you o \u{1F602} no pretend say you weren't`,
+        `see me see wahala \u{1F928} you like am, just say it na`,
+      ],
+      jm: [
+        `yow mi catch yuh a scroll thru \u{1F440} u good?? lol`,
+        `stakkah!! mi nuh mind though \u{1F618}`,
+        `so u really out here doing research huh \u{1F928} say less`,
+      ],
+      es: [
+        `oye te cach\u00e9 mirando \u{1F440} no te hagas lol`,
+        `jajaja sab\u00eda que te iba a gustar \u{1F60F}`,
+        `ay papi stalker mode activado \u{1F928}\u{1F602}`,
+      ],
+      pt: [
+        `oi oi \u{1F440} te peguei olhando hein lol`,
+        `kkkk gostou n\u00e9, n\u00e3o precisa esconder \u{1F60F}`,
+        `to\u00e9 \u{1F928} pesquisando eu assim n\u00e3o? lol`,
+      ],
+      uk: [
+        `oi babes caught you having a proper scroll \u{1F440} cheeky`,
+        `mate you're bare obsessed with my pics innit \u{1F928}`,
+        `aww you actually like it?? don't be shy hun \u{1F60F}`,
+      ],
+      basic: [
+        `omg i literally saw you go through my whole page \u{1F440} lol`,
+        `lowkey obsessed?? i don't blame you tho \u{1F60F}`,
+        `wait did you just like my pic?? i'm screaming \u{1F928}\u{1F602}`,
+      ],
+      en: [
+        `oooo i see you going thru my pics \u{1F440} caught lol`,
+        `you liked that huh \u{1F60F} i see you doing your research`,
+        `\u{1F928} lurking on my page.. no shame at all lol`,
+      ],
+    };
+
+    const lines = pool[locale];
+    const last = lastPicReactionIdx.current[locale] ?? -1;
+    // Pick any index except the last used
+    let idx: number;
+    do { idx = Math.floor(Math.random() * lines.length); } while (lines.length > 1 && idx === last);
+    lastPicReactionIdx.current[locale] = idx;
+    return lines[idx];
+  };
+
+  // ── Handle pic like: heart fills, delayed reaction in Chat
+  const handlePicLike = (picId: string) => {
+    if (likedPicIds.has(picId)) return; // already liked
+    setLikedPicIds(prev => new Set([...prev, picId]));
+
+    // Random delay 8–25 seconds before persona reacts
+    const delay = (8 + Math.random() * 17) * 1000;
+    setTimeout(() => {
+      const reaction = getPicLikeReaction();
+      const reactionMsg = {
+        id: `piclike-${Date.now()}`,
+        role: 'assistant',
+        content: reaction,
+        created_at: Date.now(),
+      };
+      setMessages((prev: any) => [...prev, reactionMsg]);
+      setChatTabNotif(true); // dot on Chat tab
+      // Persist to chat_messages
+      supabase.from('chat_messages').insert([{
+        user_id: guestId,
+        persona_id: personaId,
+        role: 'assistant',
+        content: reaction,
+        type: 'pic_reaction',
+      }]).then(() => {});
+    }, delay);
+  };
+
+  // ── Load pics for the Pics tab (lazy — only on first switch)
+  const loadPics = async () => {
+    if (picPosts.length > 0 || loadingPics) return;
+    setLoadingPics(true);
+    const { data } = await supabase
+      .from('posts')
+      .select('id, content_url, caption, is_vault')
+      .eq('persona_id', personaId)
+      .not('content_url', 'is', null)
+      .not('caption', 'eq', 'DELETED_NODE_SYNC_V15')
+      .order('created_at', { ascending: false })
+      .limit(60);
+    if (data) setPicPosts(data);
+    setLoadingPics(false);
+  };
+
   if (!persona) return null;
 
   return (
@@ -421,7 +534,138 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
         </div>
       )}
 
-       <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar p-6 md:p-8 space-y-6 md:space-y-8 pb-64">
+      {/* ── TAB STRIP ── */}
+      <div className="flex items-center border-b border-white/5 bg-black/20 shrink-0">
+        <button
+          onClick={() => { setChatTab('chat'); setChatTabNotif(false); }}
+          className={`flex-1 relative py-3 text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 ${
+            chatTab === 'chat'
+              ? 'text-white border-b-2 border-[#00f0ff]'
+              : 'text-white/30 hover:text-white/60'
+          }`}
+        >
+          <Send size={11} /> Chat
+          {chatTabNotif && chatTab !== 'chat' && (
+            <span className="absolute top-2 right-[calc(50%-18px)] w-2 h-2 bg-[#ff00ff] rounded-full animate-pulse" />
+          )}
+        </button>
+        <button
+          onClick={() => { setChatTab('pics'); loadPics(); }}
+          className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 ${
+            chatTab === 'pics'
+              ? 'text-white border-b-2 border-[#ff00ff]'
+              : 'text-white/30 hover:text-white/60'
+          }`}
+        >
+          <Images size={11} /> Pics
+          {picPosts.length > 0 && (
+            <span className="px-1.5 py-0.5 bg-[#ff00ff]/20 text-[#ff00ff] text-[7px] font-black rounded-full">
+              {picPosts.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* ── PICS PANEL ── */}
+      {chatTab === 'pics' && (
+        <div className="flex-1 overflow-y-auto no-scrollbar">
+          {loadingPics ? (
+            <div className="flex items-center justify-center h-40 text-white/20">
+              <div className="flex gap-1">
+                <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce" />
+                <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce delay-150" />
+                <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce delay-300" />
+              </div>
+            </div>
+          ) : picPosts.length === 0 ? (
+            <div className="flex items-center justify-center h-40">
+              <p className="text-[10px] text-white/20 uppercase tracking-widest">No posts yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-0.5 p-0.5">
+              {picPosts.map(pic => (
+                <button
+                  key={pic.id}
+                  onClick={() => { setExpandedPic(pic.content_url); setPicZoomed(false); }}
+                  className="relative aspect-square bg-black overflow-hidden group"
+                >
+                  <img
+                    src={proxyImg(pic.content_url)}
+                    alt=""
+                    className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+                      pic.is_vault ? 'blur-md' : ''
+                    }`}
+                    loading="lazy"
+                  />
+                  {/* Vault badge */}
+                  {pic.is_vault && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-[#ff00ff]/30 border border-[#ff00ff]/60 flex items-center justify-center backdrop-blur-sm">
+                        <Lock size={14} className="text-[#ff00ff]" />
+                      </div>
+                    </div>
+                  )}
+                  {/* Like button — always visible bottom-right */}
+                  <button
+                    onClick={e => { e.stopPropagation(); handlePicLike(pic.id); }}
+                    className={`absolute bottom-1.5 right-1.5 w-7 h-7 rounded-full flex items-center justify-center transition-all backdrop-blur-sm z-10 ${
+                      likedPicIds.has(pic.id)
+                        ? 'bg-red-500/80 text-white scale-110'
+                        : 'bg-black/40 text-white/50 hover:text-red-400 hover:bg-black/60'
+                    }`}
+                  >
+                    <Heart size={12} fill={likedPicIds.has(pic.id) ? 'currentColor' : 'none'} />
+                  </button>
+                  {/* Tap hint on hover */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
+                    <ZoomIn size={20} className="text-white drop-shadow-lg" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── LIGHTBOX ── */}
+      <AnimatePresence>
+        {expandedPic && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[9999] bg-black/97 flex flex-col items-center justify-center"
+            onClick={() => { if (picZoomed) { setPicZoomed(false); } else { setExpandedPic(null); } }}
+          >
+            {/* Close hint */}
+            <div className="absolute top-4 right-4 z-10">
+              <button
+                onClick={e => { e.stopPropagation(); setExpandedPic(null); setPicZoomed(false); }}
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Image */}
+            <motion.img
+              src={proxyImg(expandedPic)}
+              alt=""
+              animate={{ scale: picZoomed ? 2 : 1 }}
+              transition={{ type: 'spring', damping: 20 }}
+              onClick={e => { e.stopPropagation(); setPicZoomed(z => !z); }}
+              className="max-w-full max-h-[90vh] object-contain rounded-xl cursor-zoom-in"
+              style={{ cursor: picZoomed ? 'zoom-out' : 'zoom-in' }}
+            />
+
+            <p className="absolute bottom-6 text-[9px] text-white/30 uppercase tracking-widest">
+              {picZoomed ? 'tap to zoom out' : 'tap image to zoom · tap outside to close'}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+       {chatTab === 'chat' ? <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar p-6 md:p-8 space-y-6 md:space-y-8 pb-64">
         {[...dbMessages, ...messages].filter(m => !m.content.startsWith('[SYSTEM]')).map((msg: any) => (
           <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`max-w-[85%] px-5 py-3 rounded-[1.6rem] text-xs md:text-sm leading-relaxed shadow-xl relative ${msg.role === 'user' ? 'bg-[#ff00ff] text-black font-bold rounded-tr-none' : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'}`}>
@@ -473,7 +717,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
            </div>
         )}
         <div className="h-4 w-full" />
-      </div>
+      </div> : null}
 
       <div className="absolute bottom-0 inset-x-0 p-4 md:p-8 pt-4 bg-gradient-to-t from-black via-black/90 to-transparent pb-10 z-[400]">
         {showSignUpWall ? (

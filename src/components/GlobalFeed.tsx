@@ -6,7 +6,7 @@ import { MessageSquare, Zap, Lock, Heart, Trash2, Star, Brain, X, Save, Pencil, 
 import { trackEvent } from '@/lib/telemetry';
 import { useUser } from '@/components/providers/UserProvider';
 import { createClient } from '@supabase/supabase-js';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
 import BrandingOverlay from '@/components/ui/BrandingOverlay';
 // postAliases removed — identity reads directly from personas table (DB is source of truth)
@@ -303,7 +303,9 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef<HTMLDivElement>(null);
-  const isFetching = useRef(false); // ref-based guard so it never goes stale in closures
+  const containerRef = useRef<HTMLDivElement>(null); // the actual scroll container
+  const isFetching = useRef(false);
+  const pageRef = useRef(0); // ref copy of page so fetchFeed never reads stale state
 
   useEffect(() => {
      if (typeof window !== 'undefined') {
@@ -424,8 +426,8 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
       } catch(e) { console.error(e); }
   };
 
-  const fetchFeed = async (pageNumber = 0) => {
-    if (isFetching.current) return; // ref-based guard: never stale, never blocks incorrectly
+  const fetchFeed = useCallback(async (pageNumber = 0) => {
+    if (isFetching.current) return;
     isFetching.current = true;
     setLoading(true);
 
@@ -434,7 +436,7 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
     
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s Pulse Timeout
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
 
         const feedRes = await fetch(`/api/admin/feed?page=${pageNumber}`, { 
             signal: controller.signal,
@@ -446,27 +448,20 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
         if (!feedRes.ok) throw new Error('Network response was not ok');
         const data = await feedRes.json();
         dbPosts = data?.posts || [];
-        const tombstones = data?.tombstones || [];
         
         if (dbPosts.length < 20) setHasMore(false);
-        const deadIds = new Set(tombstones);
 
         mergedItems = dbPosts.map((p: any) => {
-           if (!p) return null;
-           // Filter posts with no usable media URL
-           if (!p.content_url) return null;
+           if (!p || !p.content_url) return null;
            const pDataRaw = (Array.isArray(p.personas) ? p.personas[0] : p.personas) || {};
            const fallback = (initialPersonas.find(i => i.id === p.persona_id) || {}) as any;
-           
            const finalPersona = { 
              ...fallback, 
              ...pDataRaw, 
              id: p.persona_id || pDataRaw.id || fallback.id,
              image: pDataRaw.seed_image_url || pDataRaw.image || fallback.image
            };
-
            if (!finalPersona.name) return null;
-
            return {
                persona: finalPersona,
                broadcast: { 
@@ -483,18 +478,17 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
            };
         }).filter((i: any) => i !== null && i.persona?.id);
     } catch(e) { 
-        console.error('Feed Fetch Failure (Live Only):', e); 
+        console.error('Feed Fetch Failure:', e); 
     }
+
     const initialItems = pageNumber === 0 
         ? initialPersonas.flatMap(p => (p.broadcasts || []).map(b => ({ persona: p, broadcast: { ...b, created_at: b.created_at || new Date().toISOString(), is_featured: b.is_featured || false } })))
         : [];
     
     setItems(prev => {
         const combined = pageNumber === 0 ? [...initialItems, ...mergedItems] : [...prev, ...mergedItems];
-        
         const localStarred = JSON.parse(localStorage.getItem('gasp_starred_ids') || '[]');
         const starredSet = new Set(localStarred);
-
         const registry = new Map();
         combined.forEach(item => {
            if (!registry.has(item.broadcast.id) || item.broadcast.id.includes('-')) {
@@ -507,14 +501,12 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
         return unique.sort((a, b) => {
             if (a.broadcast.is_featured && !b.broadcast.is_featured) return -1;
             if (!a.broadcast.is_featured && b.broadcast.is_featured) return 1;
-            const dateA = new Date(a.broadcast.created_at).getTime() || 0;
-            const dateB = new Date(b.broadcast.created_at).getTime() || 0;
-            return dateB - dateA;
+            return new Date(b.broadcast.created_at).getTime() - new Date(a.broadcast.created_at).getTime();
         });
     });
     setLoading(false);
     isFetching.current = false;
-  };
+  }, []); // stable — reads nothing from render scope except refs
 
   useEffect(() => {
     fetchFeed(0);
@@ -540,22 +532,27 @@ export default function GlobalFeed({ onSelectPersona }: GlobalFeedProps) {
   }, []);
 
   useEffect(() => {
+    // KEY FIX: root must be the scroll container div, not the window/viewport.
+    // Without root, IntersectionObserver checks against the viewport — but the
+    // feed is inside an overflow-y-auto div, so the loader is never 'visible'
+    // to the viewport even when the user scrolls to the bottom.
     const observer = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && !isFetching.current && hasMore && items.length > 0) {
-            setPage(prev => {
-                const next = prev + 1;
-                fetchFeed(next);
-                return next;
-            });
+            pageRef.current += 1;
+            fetchFeed(pageRef.current);
         }
-    }, { threshold: 0.0, rootMargin: '800px' });
+    }, {
+        root: containerRef.current, // ← the actual scrollable div
+        threshold: 0.0,
+        rootMargin: '400px',        // load next page 400px before hitting bottom
+    });
 
     if (loaderRef.current) observer.observe(loaderRef.current);
     return () => observer.disconnect();
   }, [hasMore, items.length, fetchFeed]);
 
   return (
-    <div className="flex-1 h-screen overflow-y-auto scroll-smooth no-scrollbar relative w-full touch-pan-y">
+    <div ref={containerRef} className="flex-1 h-screen overflow-y-auto scroll-smooth no-scrollbar relative w-full touch-pan-y">
       {items.length > 0 ? (
         items.map((item, index) => (
           <GlobalFeedItem 
