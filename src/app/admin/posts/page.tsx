@@ -221,6 +221,33 @@ export default function PostStudio() {
     setSyncing(null);
   };
 
+  // ── Restore a hidden post: clears tombstone + promotes to Hero in the public feed
+  const restoreAsHero = async (post: PersonaPost) => {
+    setSyncing(post.id);
+    // 1. Clear the DELETED_NODE_SYNC_V15 tombstone, promote to hero, push to feed
+    const data = await callAudit('update-post', {
+      id: post.id,
+      caption: '',       // clear the tombstone
+      is_burner: true,   // hero status
+      is_vault: false,   // move to public feed
+      is_featured: true,
+    });
+    if (data.success) {
+      // 2. Promote the post's image as the persona's seed photo
+      if (post.content_url) {
+        await callAudit('update-persona', { id: post.persona_id, seed_image_url: post.content_url });
+      }
+      // 3. Update local state: remove from hidden list (it's now a feed post)
+      setPosts(prev => prev.map(p =>
+        p.id === post.id
+          ? { ...p, caption: '', is_burner: true, is_vault: false }
+          : p
+      ));
+      flash(post.id);
+    }
+    setSyncing(null);
+  };
+
   // ── Open edit modal + fetch sibling posts
   const openEdit = async (post: PersonaPost) => {
     setEditPost(post);
@@ -651,6 +678,15 @@ export default function PostStudio() {
                                 <button onClick={() => pushToFeed(post)}
                                   className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-[#00f0ff] text-black rounded-lg text-[8px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_16px_rgba(0,240,255,0.4)]">
                                   <ArrowLeftRight size={10} /> → Feed
+                                </button>
+                              )}
+                              {filterMode === 'hidden' && (
+                                <button
+                                  onClick={() => restoreAsHero(post)}
+                                  disabled={syncing === post.id}
+                                  className="w-full flex items-center justify-center gap-1.5 px-2 py-2 bg-green-500 text-black rounded-lg text-[8px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_16px_rgba(0,255,100,0.4)] disabled:opacity-50"
+                                >
+                                  <Star size={10} /> Send to Feed as Hero
                                 </button>
                               )}
                               <button onClick={() => openEdit(post)}

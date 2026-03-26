@@ -51,25 +51,30 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
         .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false });
 
-      // Build per-persona bubbles: DB stories + fallback to profile image
-      const bubbles: StoryBubble[] = personas.map(p => {
-        const pStories = (dbStories || []).filter((s: any) => s.persona_id === p.id);
-        // Always give them at least one "story" using their profile pic
-        const finalStories = pStories.length > 0 ? pStories : [{
-          id: `fallback_${p.id}`,
-          asset_url: p.image || '/v1.png',
-          type: 'image',
-          category: 'CHILL',
-          is_premium: false,
-        }];
-        return {
-          personaId: p.id,
-          personaName: getPersonaName(p),
-          personaImage: p.image || '/v1.png',
-          stories: finalStories,
-          hasUnviewed: finalStories.some(s => !viewedIds.has(s.id)),
-        };
-      });
+      // Build per-persona bubbles: ONLY real DB stories (no fallback profile pic ghosts)
+      const bubbles: StoryBubble[] = personas
+        // 🛡️ FIX 1: Strip empty profiles — must have a real image to appear in the row
+        .filter(p => p.image && !p.image.includes('/v1.png') && p.image.startsWith('http'))
+        .map(p => {
+          const pStories = (dbStories || []).filter((s: any) => s.persona_id === p.id);
+          // Only include personas that have actual DB stories OR show them neutrally as fallback
+          const hasDatabaseStories = pStories.length > 0;
+          const finalStories = hasDatabaseStories ? pStories : [{
+            id: `fallback_${p.id}`,
+            asset_url: p.image,
+            type: 'image',
+            category: 'CHILL',
+            is_premium: false,
+          }];
+          return {
+            personaId: p.id,
+            personaName: getPersonaName(p),
+            personaImage: p.image,
+            stories: finalStories,
+            // 🛡️ FIX 2: Only glow pink if there are REAL unviewed DB stories — not fallback placeholders
+            hasUnviewed: hasDatabaseStories && pStories.some(s => !viewedIds.has(s.id)),
+          };
+        });
 
       setStoryData(bubbles);
     }

@@ -87,7 +87,8 @@ function MarketplaceMain() {
     ...initialPersonas
   ].filter((p, index, self) => 
     index === self.findIndex((t) => t.id === p.id)
-  ).filter(p => p.is_active === true); // 🛡️ GLOBAL RETIREMENT GATE: Strict visibility. Only explicitly active nodes enter the UI.
+  ).filter(p => p.is_active === true)  // 🛡️ RETIREMENT GATE: Only explicitly active nodes.
+   .filter(p => p.image && p.image.startsWith('http')); // 🛡️ ZERO BLACK BOX: Strip personas with no valid image URL.
   
   const refinedPersonas = allPersonas.map(p => ({
     ...p,
@@ -189,24 +190,28 @@ function MarketplaceMain() {
 
   useEffect(() => {
     async function fetchDb() {
-        // 1. Fetch explicitly ACTIVE personas
+        // 1. Fetch explicitly ACTIVE personas (is_active = true)
         const { data: pData } = await supabase.from('personas').select('*').eq('is_active', true);
         
-        // 2. Fetch IDs of personas that have at least one NON-DELETED post
-        // This prevents 'Ghost Personas' (active persona with 0 visible items) from appearing in the Sidebar.
+        // 2. A persona is LIVE only if it has ≥1 post that:
+        //    - Has a real content_url (actual media)
+        //    - Has NOT been soft-deleted by the admin Hide button
+        //    The admin 'Hide' action writes caption = 'DELETED_NODE_SYNC_V15' (see /api/admin/audit route.ts)
+        //    This is the single source of truth for hidden posts.
         const { data: postRefData } = await supabase
             .from('posts')
             .select('persona_id')
-            .not('caption', 'ilike', 'DELETED%');
+            .not('content_url', 'is', null)                      // must have real media
+            .neq('caption', 'DELETED_NODE_SYNC_V15');             // not hidden by admin Hide button
             
         if (pData) {
-            const activePostPersonaIds = new Set((postRefData || []).map(p => p.persona_id));
-            const livePersonas = pData.filter(p => activePostPersonaIds.has(p.id));
+            const livePersonaIds = new Set((postRefData || []).map(p => p.persona_id));
+            const livePersonas = pData.filter(p => livePersonaIds.has(p.id));
             setDbPersonas(livePersonas);
         }
     }
     fetchDb();
-    const refreshInterval = setInterval(fetchDb, 15000); // 15-second Pulse
+    const refreshInterval = setInterval(fetchDb, 15000);
     return () => clearInterval(refreshInterval);
   }, []);
 
