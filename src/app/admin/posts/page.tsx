@@ -6,7 +6,7 @@ import {
   Pencil, Trash2, Star, Lock, Search,
   RefreshCw, EyeOff, Check, X,
   ChevronDown, Image as ImageIcon, ShieldAlert, User, MapPin, Hash, Link2,
-  Package, ExternalLink, ArrowLeftRight, Gift
+  Package, ExternalLink, ArrowLeftRight, Gift, Copy
 } from 'lucide-react';
 import { proxyImg } from '@/lib/profiles';
 import { createClient } from '@supabase/supabase-js';
@@ -165,6 +165,14 @@ export default function PostStudio() {
     setSyncing(null);
   };
 
+  // ── Mark as duplicate: instantly hides from feed in real time
+  const markDuplicate = async (postId: string) => {
+    setSyncing(postId);
+    const data = await callAudit('delete-post', { id: postId });
+    if (data.success) setPosts(prev => prev.filter(p => p.id !== postId));
+    setSyncing(null);
+  };
+
   const hardDelete = async (postId: string) => {
     if (!confirm('⚠️ PERMANENT DELETE — remove this post from the database entirely?')) return;
     setSyncing(postId);
@@ -252,6 +260,16 @@ export default function PostStudio() {
     setSaving(false);
     flash(editPost.id);
     closeEdit();
+  };
+
+  // ── Hard delete a linked post directly from the modal
+  const deleteLinkedPost = async (lp: PersonaPost) => {
+    if (!confirm('⚠️ Hard delete this post from the database?')) return;
+    const data = await callAudit('delete-post-hard', { id: lp.id });
+    if (data.success) {
+      setLinkedPosts(prev => prev.filter(p => p.id !== lp.id));
+      setPosts(prev => prev.filter(p => p.id !== lp.id));
+    }
   };
 
   // ── Toggle vault on a linked post directly from the modal
@@ -457,6 +475,9 @@ export default function PostStudio() {
                           </button>
                           <button onClick={() => toggleFreebie(post)} title={post.is_freebie ? 'Remove Freebie tag' : 'Mark as Freebie Gift'} className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all ${post.is_freebie ? 'bg-[#ff00ff] text-white shadow-[0_0_12px_rgba(255,0,255,0.5)]' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/30'}`}>
                             <Gift size={13} />
+                          </button>
+                          <button onClick={() => markDuplicate(post.id)} title="Mark as Duplicate (hides from feed instantly)" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 text-white/50 hover:bg-orange-500/30 hover:text-orange-300 flex items-center justify-center transition-all">
+                            <Copy size={13} />
                           </button>
                           <button onClick={() => softHide(post.id)} title="Hide (soft delete)" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 text-white/50 hover:bg-orange-500/20 hover:text-orange-400 flex items-center justify-center transition-all">
                             <EyeOff size={13} />
@@ -685,6 +706,14 @@ export default function PostStudio() {
                                   className={`w-7 h-7 rounded-full flex items-center justify-center transition-all text-white text-[8px] font-black ${lp.is_burner ? 'bg-[#ffea00] text-black' : 'bg-white/10 hover:bg-[#ffea00]/40'}`}
                                 >
                                   <Star size={10} />
+                                </button>
+                                {/* Hard delete this linked post from the modal */}
+                                <button
+                                  onClick={() => deleteLinkedPost(lp)}
+                                  title="Delete this post permanently"
+                                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-red-500/50 text-white/50 hover:text-white flex items-center justify-center transition-all"
+                                >
+                                  <Trash2 size={10} />
                                 </button>
                               </div>
                               <button
