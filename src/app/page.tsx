@@ -62,11 +62,6 @@ function MarketplaceMain() {
     setMounted(true);
   }, []);
 
-  if (!mounted) return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-       <div className="w-12 h-12 border-4 border-[#ffea00]/20 border-t-[#ffea00] rounded-full animate-spin" />
-    </div>
-  );
 
   const allPersonas = [
     ...(dbPersonas || []).map(p => {
@@ -260,6 +255,12 @@ function MarketplaceMain() {
   const [showRightSidebar, setShowRightSidebar] = useState(false); // Hidden by default on mobile
 
   const [isZenMode, setIsZenMode] = useState(false);
+
+  if (!mounted) return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+       <div className="w-12 h-12 border-4 border-[#ffea00]/20 border-t-[#ffea00] rounded-full animate-spin" />
+    </div>
+  );
 
   return (
     <div className="flex h-screen bg-black overflow-hidden font-inter selection:bg-[#ff00ff] selection:text-black" 
