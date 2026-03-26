@@ -213,15 +213,18 @@ export default function PostStudio() {
 
   // ── Filtering ───────────────────────────────────
   const filtered = posts.filter(p => {
-    const name = p.personas?.name || p.persona_id;
-    const matchSearch =
-      name.toLowerCase().includes(search.toLowerCase()) ||
-      (p.caption || '').toLowerCase().includes(search.toLowerCase());
+    const name = p.personas?.name || p.persona_id || '';
+    const caption = p.caption || '';
+    const s = search.toLowerCase();
+    const matchSearch = !s ||
+      name.toLowerCase().includes(s) ||
+      caption.toLowerCase().includes(s) ||
+      (p.content_url || '').toLowerCase().includes(s);
     const matchPersona = personaFilter === 'all' || p.persona_id === personaFilter;
     const matchMode =
       filterMode === 'all'   ? true :
-      filterMode === 'vault' ? p.is_vault :
-      filterMode === 'hero'  ? p.is_burner :
+      filterMode === 'vault' ? !!p.is_vault :
+      filterMode === 'hero'  ? !!p.is_burner :
       (!p.is_vault && !p.is_burner);
     return matchSearch && matchPersona && matchMode;
   });
