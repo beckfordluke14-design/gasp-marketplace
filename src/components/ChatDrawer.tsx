@@ -64,20 +64,9 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
   const [expandedPic, setExpandedPic] = useState<string | null>(null);
   const [picZoomed, setPicZoomed] = useState(false);
   const [likedPicIds, setLikedPicIds] = useState<Set<string>>(new Set());
-  const [chatTabNotif, setChatTabNotif] = useState(false); // dot on Chat tab after pic reaction
+  const [chatTabNotif, setChatTabNotif] = useState(false);
   const router = useRouter();
   const { user } = useUser();
-
-  const getPersonaStyle = () => {
-    const seed = personaId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const styles = ['burst', 'monolith', 'sniper', 'analytical'];
-    return {
-        type: styles[seed % styles.length],
-        delayFactor: (seed % 10) / 10 + 0.5,
-    };
-  };
-
-  const style = getPersonaStyle();
 
   const { messages, handleInputChange, setMessages, isLoading }: any = useChat({
     api: '/api/chat',
@@ -96,20 +85,10 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     if (id.startsWith('guest-')) {
        setMessageCount(parseInt(localStorage.getItem('gasp_msg_count') || '0', 10));
     }
-
     const storedFollows = JSON.parse(localStorage.getItem('gasp_following') || '[]');
     setIsFollowing(storedFollows.includes(personaId));
-
     const h = new Date().getHours();
     setActiveChatters(Math.floor(Math.random() * 20) + ((h > 20 || h < 4) ? 80 : 30));
-    const events = ['🔥 3 users unlocked her vault', '💎 A whale sent a gift', '✨ priority connection established', '🎙️ Voice note requested'];
-    let idx = 0;
-    const tInterval = setInterval(() => {
-      setTickerMsg(events[idx % events.length]);
-      idx++;
-      setTimeout(() => setTickerMsg(''), 6000);
-    }, 15000);
-    return () => clearInterval(tInterval);
   }, [user]);
 
   const loadData = async () => {
@@ -126,18 +105,10 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
       const unlockedIds = (uData || []).map(u => u.post_id);
       setVaultItems(vData.map(v => ({ ...v, is_unlocked: unlockedIds.includes(v.id) })));
     }
-    // Load available freebies + which ones this user already received
-    const { data: fData } = await supabase.from('posts').select('*').eq('persona_id', personaId).eq('is_freebie', true);
-    const { data: fdData } = await supabase.from('user_freebie_drops').select('post_id').eq('user_id', guestId);
-    if (fData) setFreebieItems(fData);
-    if (fdData) setSentFreebieIds(new Set(fdData.map((d: any) => d.post_id)));
   };
 
   useEffect(() => {
-    if (personaId && guestId) {
-        loadData();
-        supabase.from('chat_messages').update({ is_read: true }).match({ user_id: guestId, persona_id: personaId, role: 'assistant', is_read: false }).then();
-    }
+    if (personaId && guestId) loadData();
     const channel = supabase.channel(`chat-${personaId}-${guestId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `persona_id=eq.${personaId}` }, (payload) => {
           if (payload.new.user_id !== guestId || payload.new.role === 'user') return;
@@ -177,7 +148,6 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
         const decoder = new TextDecoder();
         let assistantContent = '';
         const assistantId = 'ai-' + Date.now();
-        // Seed in-memory placeholder — _streamDone:false protects it from dedup until stream is done
         setMessages((prev: any) => [...prev, { id: assistantId, role: 'assistant', content: '', voice_pending: false, _streamDone: false, created_at: Date.now() }]);
 
         while (true) {
@@ -187,40 +157,22 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
             const lines = chunk.split('\n');
             for (const line of lines) {
                 if (line.startsWith('0:')) {
-                    // Text content — captured but only shown if no voice is coming
                     try { assistantContent += JSON.parse(line.slice(2)); } catch { assistantContent += line.slice(2); }
                 } else if (line.startsWith('2:')) {
                     try {
                         const media = JSON.parse(line.slice(2));
-                        if (media.type === 'voice_note') {
-                            if (!media.audioUrl) {
-                                // 🎙️ NULL SIGNAL: Voice generation has started on the server
-                                // Switch to mic recording animation — hide text
-                                setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { 
-                                    ...m, voice_pending: true 
-                                } : m));
-                            } else {
-                                // 🎙️ VOICE READY: Real URL arrived — replace animation with player
-                                setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { 
-                                    ...m, 
-                                    voice_pending: false,
-                                    media_url: media.audioUrl,
-                                    audio_translation: media.translation,
-                                    translation_locked: true
-                                } : m));
-                            }
+                        if (media.type === 'voice_note' && media.audioUrl) {
+                            setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { 
+                                ...m, voice_pending: false, media_url: media.audioUrl, audio_translation: media.translation, translation_locked: true
+                            } : m));
                         }
                     } catch (err) { console.error('Media sync failure:', err); }
                 }
             }
-            // Only update text content — render logic decides whether to show it
             setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { ...m, content: assistantContent } : m));
         }
-
-        // 🛡️ STREAM COMPLETE: allow dedup to run once DB Realtime delivers the canonical copy
         setIsTyping(false);
         setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { ...m, _streamDone: true } : m));
-
     } catch (e) { console.error(e); } finally { setIsTyping(false); setIsPersonaReading(false); }
   };
 
@@ -233,313 +185,46 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
        localStorage.setItem('gasp_msg_count', n.toString());
        if (n >= 3) setTimeout(() => setShowSignUpWall(true), 2500);
     }
-    if (voiceRequested) {
-      const { data } = await supabase.rpc('process_spend', { p_user_id: guestId, p_amount: COST_VOICE_NOTE, p_type: 'voice_request', p_persona_id: personaId });
-      if (!data?.success) { alert('Need credits!'); return; }
-      setWalletBalance(prev => prev !== null ? prev - COST_VOICE_NOTE : prev);
-    }
     await executeNeuralSend(localInput, undefined, voiceRequested);
-    setVoiceRequested(false);
-    setShowVoiceTip(false);
   };
 
-  // ── DROP A FREEBIE: dedup-safe, tracks every send per user
-  const dropFreebie = async (trigger: 'gift' | 'bond_milestone' | 'welcome' | 'mood') => {
-    // Find freebies this user hasn't received yet
-    const unsent = freebieItems.filter(f => !sentFreebieIds.has(f.id));
-    if (unsent.length === 0) return; // all freebies already sent — don't repeat
-
-    const pick = unsent[Math.floor(Math.random() * unsent.length)];
-
-    // Record in DB first (unique constraint prevents double-send even on race)
-    const { error: dropErr } = await supabase.from('user_freebie_drops').insert([{
-      user_id: guestId,
-      persona_id: personaId,
-      post_id: pick.id,
-      trigger,
-    }]).select();
-    if (dropErr) return; // unique constraint fired = already sent, abort
-
-    // Mark locally so UI updates instantly
-    setSentFreebieIds(prev => new Set([...prev, pick.id]));
-
-    // Persona messages that accompany the gift drop
-    const giftLines: Record<string, string[]> = {
-      gift:           ['here, for you \u{1F495}', 'since you showed up \u{1F381}', "don't tell anyone \u{1F92B}"],
-      bond_milestone: ['you earned this fr \u{1F497}', 'we been vibing, take this \u{2728}', 'lil something for you \u{1F380}'],
-      welcome:        ['hey stranger \u{1F440} first time? here', 'welcome to my world \u{1F339}'],
-      mood:           ['felt like being nice today \u{1F97A}', 'idk why but... here \u{1F496}'],
-    };
-    const lines = giftLines[trigger] || giftLines.mood;
-    const caption = lines[Math.floor(Math.random() * lines.length)];
-
-    // Push into the local message stream
-    const freebieMsg = {
-      id: 'freebie-' + Date.now(),
-      role: 'assistant',
-      content: caption,
-      freebie_url: pick.content_url,
-      created_at: Date.now(),
-    };
-    setMessages((prev: any) => [...prev, freebieMsg]);
-
-    // Persist to chat_messages so it survives reload
-    await supabase.from('chat_messages').insert([{
-      user_id: guestId,
-      persona_id: personaId,
-      role: 'assistant',
-      content: caption,
-      image_url: pick.content_url,
-      type: 'freebie',
-    }]);
-  };
-
-  // 🔔 NOTIFICATION CHIME: Synthesized via Web Audio API — no external file needed.
-  // Two-tone "message pop": soft 880Hz + 1100Hz harmonic, each with exponential decay.
-  // Voice note messages skip the chime — ElevenLabs audio IS the notification.
-  const playNotification = (messageHasVoice: boolean) => {
-    if (messageHasVoice) return;
-    try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      
-      const playTone = (freq: number, startTime: number, volume: number) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, startTime);
-        // Soft attack then exponential release
-        gain.gain.setValueAtTime(0, startTime);
-        gain.gain.linearRampToValueAtTime(volume, startTime + 0.01);
-        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.18);
-        osc.start(startTime);
-        osc.stop(startTime + 0.2);
-      };
-
-      // First pop: 880Hz at t=0 | Second harmonic: 1100Hz at t=80ms (slight rise = "message" feel)
-      playTone(880,  ctx.currentTime,       0.25);
-      playTone(1100, ctx.currentTime + 0.08, 0.15);
-
-      // Close context after chime finishes
-      setTimeout(() => ctx.close().catch(() => {}), 400);
-    } catch (e) {}
-  };
-
-  useEffect(() => {
-    if (dbMessages.length > 0 || messages.length > 0) {
-      const lastMsg = messages[messages.length - 1] || dbMessages[dbMessages.length - 1];
-      if (lastMsg?.role === 'assistant') {
-        playNotification(!!lastMsg.media_url);
-      }
-    }
-  }, [dbMessages.length, messages.length]);
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || isUploading) return;
-    setIsUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('userId', guestId);
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      const { url } = await res.json();
-      await executeNeuralSend('', url);
-    } catch (err) { console.error(err); } finally { setIsUploading(false); }
-  };
+  // 🏁 THE WHALE RAIN: TAP ACCUMULATOR
+  const [tapCount, setTapCount] = useState<number>(0);
+  const [tapItem, setTapItem] = useState<any>(null);
+  const tapTimer = useRef<NodeJS.Timeout | null>(null);
 
   const sendGift = async (g: any) => {
-     setShowGifts(false);
-     const { data } = await supabase.rpc('process_spend', { p_user_id: guestId, p_amount: g.price, p_type: 'gift', p_persona_id: personaId });
-     if (!data?.success) { alert('Insufficient credits!'); return; }
-     setActiveGift({ icon: g.icon, id: Date.now() });
-     setTimeout(() => setActiveGift(null), 2500);
-     setBondScore(prev => prev + g.bond);
-     await executeNeuralSend(`sent ${g.icon} ${g.name.toLowerCase()}`);
-     // Gift trigger: drop a freebie if any unsent ones exist (thanks for the gift vibe)
-     setTimeout(() => dropFreebie('gift'), 3000);
+     if (tapTimer.current) clearTimeout(tapTimer.current);
+     setTapItem(g);
+     setTapCount(prev => prev + 1);
+     tapTimer.current = setTimeout(async () => {
+        const finalCount = tapCount + 1;
+        setTapCount(0);
+        setTapItem(null);
+        setShowGifts(false);
+        const totalPrice = g.price * finalCount;
+        const totalBond = g.bond * finalCount;
+        const { data } = await supabase.rpc('process_spend', { p_user_id: guestId, p_amount: totalPrice, p_type: 'gift', p_persona_id: personaId });
+        if (!data?.success) { alert(`Insufficient Credits! Sending ${finalCount}x ${g.icon} costs ${totalPrice}c.`); return; }
+        setActiveGift({ icon: g.icon, count: finalCount, id: Date.now() });
+        setTimeout(() => setActiveGift(null), 3000);
+        setBondScore(prev => prev + totalBond);
+        await executeNeuralSend(`[GIFT]: Sent ${finalCount}x ${g.icon} ${g.name.toLowerCase()}.`);
+     }, 1000);
   };
 
-   // THE ECONOMY ENGINE: V9.9 PREMIUM SETTLEMENT
-   const unlockVaultItem = async (item: any) => {
+  const [confirmingItem, setConfirmingItem] = useState<any>(null);
+
+  const unlockVaultItem = async (item: any) => {
+    setConfirmingItem(null);
     const isVideo = item.content_url?.includes('.mp4') || item.content_type === 'video';
     const cost = isVideo ? COST_PREMIUM_VAULT_UNLOCK : COST_VAULT_UNLOCK;
-    
-    const { data } = await supabase.rpc('process_spend', { 
-        p_user_id: guestId, 
-        p_amount: cost, 
-        p_type: 'vault_unlock', 
-        p_persona_id: personaId 
-    });
-    
-    if (!data?.success) { 
-        alert(`Insufficient Syndicate Credits! This exclusive content requires ${cost}c.`); 
-        return; 
-    }
-    
-    // Record the unlock in DB
+    const { data } = await supabase.rpc('process_spend', { p_user_id: guestId, p_amount: cost, p_type: 'vault_unlock', p_persona_id: personaId });
+    if (!data?.success) { alert(`Insufficient Credits! Costs ${cost}c.`); return; }
     await supabase.from('user_vault_unlocks').insert([{ user_id: guestId, post_id: item.id }]);
-    
     setWalletBalance(prev => prev !== null ? prev - cost : prev);
     setVaultItems(prev => prev.map(v => v.id === item.id ? { ...v, is_unlocked: true } : v));
-    
-    // AI Awareness auto-pings the brain
-    await executeNeuralSend(`[SYSTEM]: Decrypted your vault item: ${item.caption || "Secret Visual"}. Say something flirty about it.`);
-  };
-
-  const toggleFollow = async () => {
-    const stored = JSON.parse(localStorage.getItem('gasp_following') || '[]');
-    let updated;
-    const newState = !isFollowing;
-    
-    if (isFollowing) {
-      updated = stored.filter((id: string) => id !== personaId);
-    } else {
-      updated = [...stored, personaId];
-    }
-    localStorage.setItem('gasp_following', JSON.stringify(updated));
-    setIsFollowing(newState);
-    
-    // 🧬 SYNC: Cloud-Etch favoriting
-    if (guestId) {
-        fetch('/api/admin/audit', {
-            method: 'POST',
-            body: JSON.stringify({ 
-                action: 'sync-follow', 
-                payload: { user_id: guestId, persona_id: personaId, is_following: newState } 
-            })
-        }).catch(() => {});
-    }
-
-    // Dispatches storage event for Sidebar to pick up
-    window.dispatchEvent(new Event('storage'));
-  };
-
-  // Tracks last used index per locale so lines never repeat back-to-back
-  const lastPicReactionIdx = useRef<Record<string, number>>({});
-
-  const getPicLikeReaction = (): string => {
-    const city = (persona.city || '').toLowerCase();
-
-    let locale = 'en';
-    if (/lagos|abuja|nigeria|benin|warri|delta/.test(city))                              locale = 'ng';
-    else if (/kingston|jamaica|trinidad|barbados|kingstown/.test(city))                  locale = 'jm';
-    else if (/havana|cuba|santo|dominican|medell|bogot|lima|san juan|santiago/.test(city)) locale = 'es';
-    else if (/são paulo|rio|recife|brazil|brasil|porto|salvador|fortal/.test(city))     locale = 'pt';
-    else if (/london|manchester|birmingham|leeds|glasgow|bristol|uk/.test(city))          locale = 'uk';
-    else if (/los angeles|nashville|austin|denver|phoenix|dallas|atlanta/.test(city))    locale = 'basic';
-
-    const pool: Record<string, string[]> = {
-      ng: [
-        `anh anh \u{1F440} you dey look my pics like work lol`,
-        `ehn! caught you o \u{1F602} no pretend say you weren't`,
-        `see me see wahala \u{1F928} you like am, just say it na`,
-      ],
-      jm: [
-        `yow mi catch yuh a scroll thru \u{1F440} u good?? lol`,
-        `stakkah!! mi nuh mind though \u{1F618}`,
-        `so u really out here doing research huh \u{1F928} say less`,
-      ],
-      es: [
-        `oye te cach\u00e9 mirando \u{1F440} no te hagas lol`,
-        `jajaja sab\u00eda que te iba a gustar \u{1F60F}`,
-        `ay papi stalker mode activado \u{1F928}\u{1F602}`,
-      ],
-      pt: [
-        `oi oi \u{1F440} te peguei olhando hein lol`,
-        `kkkk gostou n\u00e9, n\u00e3o precisa esconder \u{1F60F}`,
-        `to\u00e9 \u{1F928} pesquisando eu assim n\u00e3o? lol`,
-      ],
-      uk: [
-        `oi babes caught you having a proper scroll \u{1F440} cheeky`,
-        `mate you're bare obsessed with my pics innit \u{1F928}`,
-        `aww you actually like it?? don't be shy hun \u{1F60F}`,
-      ],
-      basic: [
-        `omg i literally saw you go through my whole page \u{1F440} lol`,
-        `lowkey obsessed?? i don't blame you tho \u{1F60F}`,
-        `wait did you just like my pic?? i'm screaming \u{1F928}\u{1F602}`,
-      ],
-      en: [
-        `oooo i see you going thru my pics \u{1F440} caught lol`,
-        `you liked that huh \u{1F60F} i see you doing your research`,
-        `\u{1F928} lurking on my page.. no shame at all lol`,
-      ],
-    };
-
-    const lines = pool[locale];
-    const last = lastPicReactionIdx.current[locale] ?? -1;
-    // Pick any index except the last used
-    let idx: number;
-    do { idx = Math.floor(Math.random() * lines.length); } while (lines.length > 1 && idx === last);
-    lastPicReactionIdx.current[locale] = idx;
-    return lines[idx];
-  };
-
-  // ── Handle pic like: heart fills, delayed reaction in Chat
-  const handlePicLike = (picId: string) => {
-    if (likedPicIds.has(picId)) return; // already liked
-    setLikedPicIds(prev => new Set([...prev, picId]));
-
-    // Random delay 8–25 seconds before persona reacts
-    const delay = (8 + Math.random() * 17) * 1000;
-    setTimeout(() => {
-      const reaction = getPicLikeReaction();
-      const reactionMsg = {
-        id: `piclike-${Date.now()}`,
-        role: 'assistant',
-        content: reaction,
-        created_at: Date.now(),
-      };
-      setMessages((prev: any) => [...prev, reactionMsg]);
-      setChatTabNotif(true); // dot on Chat tab
-      // Persist to chat_messages
-      supabase.from('chat_messages').insert([{
-        user_id: guestId,
-        persona_id: personaId,
-        role: 'assistant',
-        content: reaction,
-        type: 'pic_reaction',
-      }]).then(() => {});
-    }, delay);
-  };
-
-  // ── Load pics for the Pics tab (lazy — only on first switch)
-  // Vault items ARE included as locked teasers to drive discovery & upsells.
-  const loadPics = async () => {
-    if (picPosts.length > 0 || loadingPics) return;
-    setLoadingPics(true);
-    const { data } = await supabase
-      .from('posts')
-      .select('id, content_url, caption, is_vault, is_burner, is_freebie, is_gallery')
-      .eq('persona_id', personaId)
-      .not('content_url', 'is', null)
-      // Hidden states: tombstoned by soft-delete / duplicate action
-      // Global Sanctuary Gate: Strictly exclude retired/deleted nodes
-      .not('caption', 'ilike', 'DELETED%')
-      // Freebies are private chat gifts — keep them out of the gallery
-      .neq('is_freebie', true)
-      .order('created_at', { ascending: false })
-      .limit(80);
-    if (data) {
-      // Client-side safety net: strip deleted/freebie items only. 
-      // Vault items are kept as locked teasers. Gallery items are kept as public portfolio assets.
-      const visible = data.filter(p =>
-        p.content_url &&
-        p.caption !== 'DELETED_NODE_SYNC_V15' &&
-        !p.caption?.startsWith('DELETED') &&
-        !p.is_freebie
-      );
-      // Sort: Priority (Gallery > Feed > Vault teasers)
-      visible.sort((a, b) => {
-          if (a.is_gallery !== b.is_gallery) return a.is_gallery ? -1 : 1;
-          if (a.is_vault !== b.is_vault) return a.is_vault ? 1 : -1;
-          return 0;
-      });
-      setPicPosts(visible);
-    }
-    setLoadingPics(false);
+    await executeNeuralSend(`[SYSTEM]: Unlocked vault item: ${item.caption || "Secret Visual"}. React to it.`);
   };
 
   if (!persona) return null;
@@ -559,412 +244,109 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                     <span className="text-[7px] md:text-[8px] font-black text-[#00f0ff] uppercase tracking-widest">{activeChatters} Active</span>
                  </div>
                </div>
-               <AnimatePresence mode="wait">
-                 {tickerMsg ? (
-                   <motion.p key={tickerMsg} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="text-[7px] md:text-[8px] font-black uppercase text-[#ff00ff] tracking-widest mt-1.5">{tickerMsg}</motion.p>
-                 ) : (
-                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 mt-1.5">
-                      <p className="text-[9px] text-[#ffea00] font-black uppercase tracking-widest flex items-center gap-1.5"><Coins size={9} />{walletBalance?.toLocaleString() || '---'}</p>
-                      <div className={`w-1 h-1 rounded-full ${persona.status === 'online' ? 'bg-green-500' : 'bg-white/20'}`} />
-                      <span className="text-[8px] text-white/40 uppercase tracking-widest">{persona.city}</span>
-                   </motion.div>
-                 )}
-               </AnimatePresence>
+               <div className="flex items-center gap-3 mt-1.5">
+                  <p className="text-[9px] text-[#ffea00] font-black uppercase tracking-widest flex items-center gap-1.5"><Coins size={9} />{walletBalance?.toLocaleString() || '---'}</p>
+                  <div className={`w-1 h-1 rounded-full ${persona.status === 'online' ? 'bg-green-500' : 'bg-white/20'}`} />
+                  <span className="text-[8px] text-white/40 uppercase tracking-widest">{persona.city}</span>
+               </div>
             </div>
         </div>
         <div className="flex items-center gap-1.5">
-           <button 
-             onClick={() => setShowVault(!showVault)} 
-             className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all relative group
-               ${showVault || vaultItems.length > 0 ? 'text-[#ff00ff]' : 'text-white/40'}
-               ${vaultItems.length > 0 ? 'drop-shadow-[0_0_12px_rgba(255,0,255,0.4)]' : ''}
-             `}
-           >
-              {/* DIAMOND: The Exclusive/Secret Identity Trigger */}
-              <Trash2 className="rotate-45" size={1} /> {/* Spacer hack if needed, but let's just use Trophy for Diamond vibe if Diamond not imported. Wait, I see Lucide has Gem or Diamond */}
-              <motion.div
-                animate={vaultItems.length > 0 ? { scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] } : {}}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <Diamond size={18} className={vaultItems.length > 0 ? "fill-current opacity-80" : ""} />
-              </motion.div>
-              {vaultItems.length > 0 && (
-                <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#ffea00] rounded-full shadow-[0_0_8px_#ffea00]" />
-              )}
-              {/* Hover label for 'The Secret' */}
-              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/90 border border-white/10 rounded-md text-[7px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                Private Archive
-              </div>
-           </button>
+           <button onClick={() => setShowVault(!showVault)} className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all relative ${showVault || vaultItems.length > 0 ? 'text-[#ff00ff]' : 'text-white/40'}`}><Diamond size={18} /></button>
            <button onClick={() => setShowStats(!showStats)} className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all ${showStats ? 'text-[#ff00ff]' : 'text-white/40'}`}><Trophy size={16} /></button>
            <button onClick={onMinimize} className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-white/40"><Minus size={18} /></button>
            <button onClick={onClose} className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-white/40 hover:text-[#ff00ff]"><X size={18} /></button>
         </div>
       </div>
 
-      {showStats && (
-        <div className="absolute top-20 right-4 left-4 z-[600] bg-black/95 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 shadow-2xl animate-in fade-in slide-in-from-top-4">
-            <div className="flex items-center justify-between mb-6">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Relationship Status</h4>
-                <button onClick={() => setShowStats(false)} className="text-white/20"><X size={14} /></button>
-            </div>
-            <BondProgress score={bondScore} />
-        </div>
-      )}
-
-      {/* ── TAB STRIP ── */}
       <div className="flex items-center border-b border-white/5 bg-black/20 shrink-0">
-        <button
-          onClick={() => { setChatTab('chat'); setChatTabNotif(false); }}
-          className={`flex-1 relative py-3 text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 ${
-            chatTab === 'chat'
-              ? 'text-white border-b-2 border-[#00f0ff]'
-              : 'text-white/30 hover:text-white/60'
-          }`}
-        >
-          <Send size={11} /> Chat
-          {chatTabNotif && chatTab !== 'chat' && (
-            <span className="absolute top-2 right-[calc(50%-18px)] w-2 h-2 bg-[#ff00ff] rounded-full animate-pulse" />
-          )}
-        </button>
-        <button
-          onClick={() => { setChatTab('pics'); loadPics(); }}
-          className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 ${
-            chatTab === 'pics'
-              ? 'text-white border-b-2 border-[#ff00ff]'
-              : 'text-white/30 hover:text-white/60'
-          }`}
-        >
-          <Images size={11} /> Pics
-          {picPosts.length > 0 && (
-            <span className="px-1.5 py-0.5 bg-[#ff00ff]/20 text-[#ff00ff] text-[7px] font-black rounded-full">
-              {picPosts.length}
-            </span>
-          )}
-        </button>
+        <button onClick={() => setChatTab('chat')} className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest ${chatTab==='chat'?'text-white border-b-2 border-[#00f0ff]':'text-white/30'}`}>Chat</button>
+        <button onClick={() => setChatTab('pics')} className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest ${chatTab==='pics'?'text-white border-b-2 border-[#ff00ff]':'text-white/30'}`}>Pics</button>
       </div>
 
-      {/* ── PICS PANEL ── */}
-      {chatTab === 'pics' && (
-        <div className="flex-1 overflow-y-auto no-scrollbar">
-          {loadingPics ? (
-            <div className="flex items-center justify-center h-40 text-white/20">
-              <div className="flex gap-1">
-                <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce" />
-                <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce delay-150" />
-                <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce delay-300" />
-              </div>
-            </div>
-          ) : picPosts.length === 0 ? (
-            <div className="flex items-center justify-center h-40">
-              <p className="text-[10px] text-white/20 uppercase tracking-widest">No posts yet</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-0.5 p-0.5">
-              {picPosts.map(pic => (
-                <button
-                  key={pic.id}
-                  onClick={() => { 
-                    if (pic.is_vault && !pic.is_gallery) {
-                        setShowVault(true);
-                        return;
-                    }
-                    setExpandedPic(pic.content_url); 
-                    setPicZoomed(false); 
-                  }}
-                  className="relative aspect-square bg-black overflow-hidden group"
-                >
-                  <img
-                    src={(pic.is_vault && !pic.is_gallery) ? "/locked-vault.webp" : proxyImg(pic.content_url)}
-                    alt=""
-                    onContextMenu={e => (pic.is_vault && !pic.is_gallery) && e.preventDefault()}
-                    className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
-                      (pic.is_vault && !pic.is_gallery) ? 'blur-2xl opacity-40 grayscale overflow-hidden' : ''
-                    }`}
-                    loading="lazy"
-                  />
-                  {/* Vault badge: Only if NOT in gallery mode */}
-                  {pic.is_vault && !pic.is_gallery && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                      <div className="w-8 h-8 rounded-full bg-[#ff00ff]/30 border border-[#ff00ff]/60 flex items-center justify-center backdrop-blur-sm">
-                        <Lock size={14} className="text-[#ff00ff]" />
-                      </div>
-                    </div>
-                  )}
-                  {/* Gallery badge (Subtle portfolio hint) */}
-                  {pic.is_gallery && (
-                    <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-[#00f0ff]/20 border border-[#00f0ff]/40 rounded-full backdrop-blur-md">
-                        <span className="text-[6px] font-black text-[#00f0ff] uppercase tracking-tighter">PORTFOLIO</span>
-                    </div>
-                  )}
-                  {/* Like button — always visible bottom-right */}
-                  <button
-                    onClick={e => { e.stopPropagation(); handlePicLike(pic.id); }}
-                    className={`absolute bottom-1.5 right-1.5 w-7 h-7 rounded-full flex items-center justify-center transition-all backdrop-blur-sm z-10 ${
-                      likedPicIds.has(pic.id)
-                        ? 'bg-red-500/80 text-white scale-110'
-                        : 'bg-black/40 text-white/50 hover:text-red-400 hover:bg-black/60'
-                    }`}
-                  >
-                    <Heart size={12} fill={likedPicIds.has(pic.id) ? 'currentColor' : 'none'} />
-                  </button>
-                  {/* Tap hint on hover */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
-                    <ZoomIn size={20} className="text-white drop-shadow-lg" />
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── LIGHTBOX ── */}
-      <AnimatePresence>
-        {expandedPic && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[9999] bg-black/97 flex flex-col items-center justify-center"
-            onClick={() => { if (picZoomed) { setPicZoomed(false); } else { setExpandedPic(null); } }}
-          >
-            {/* Close hint */}
-            <div className="absolute top-4 right-4 z-10">
-              <button
-                onClick={e => { e.stopPropagation(); setExpandedPic(null); setPicZoomed(false); }}
-                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Image */}
-            <div className="relative w-full h-[80vh] flex items-center justify-center overflow-hidden">
-              <motion.img
-                src={proxyImg(expandedPic)}
-                alt=""
-                drag={picZoomed}
-                dragConstraints={{ left: -400, right: 400, top: -600, bottom: 600 }}
-                dragElastic={0.05}
-                dragMomentum={true}
-                animate={{ 
-                  scale: picZoomed ? 2.5 : 1,
-                  x: picZoomed ? undefined : 0, 
-                  y: picZoomed ? undefined : 0 
-                }}
-                transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-                onClick={e => { e.stopPropagation(); setPicZoomed(z => !z); }}
-                className="max-w-[90%] max-h-full object-contain rounded-xl shadow-2xl transition-all"
-                style={{ cursor: picZoomed ? 'grab' : 'zoom-in' }}
-                whileTap={{ cursor: picZoomed ? 'grabbing' : undefined }}
-              />
-            </div>
-
-            <p className="absolute bottom-6 text-[9px] text-white/30 uppercase tracking-widest">
-              {picZoomed ? 'tap to zoom out' : 'tap image to zoom · tap outside to close'}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-       {chatTab === 'chat' ? <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar p-6 md:p-8 space-y-6 md:space-y-8 pb-64">
-         {(() => {
-          // 🛡️ DEDUP: Only purge stream messages once done AND DB has committed them
-          const dbContentSet = new Set(dbMessages.filter((m: any) => m.role === 'assistant').map((m: any) => m.content));
-          const dedupedMessages = messages.filter((m: any) => {
-            if (m.role !== 'assistant') return true;
-            if (!m._streamDone) return true;           // protect mid-stream
-            if (!m.content) return true;
-            return !dbContentSet.has(m.content);
-          });
-          return [...dbMessages, ...dedupedMessages].filter((m: any) => !m.content?.startsWith('[SYSTEM]'));
-        })().map((msg: any) => (
+      <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6 pb-64">
+        {[...dbMessages, ...messages].map((msg: any) => (
           <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-            
-            {/* ── STATE 1: VOICE PENDING — mic recording animation ── */}
-            {msg.voice_pending && !msg.media_url && msg.role === 'assistant' && (
-              <div className="flex items-center gap-2 bg-white/[0.06] border border-white/10 rounded-[1.4rem] px-4 py-3 min-w-[180px] shadow-lg backdrop-blur-md">
-                {/* Pulsing mic icon */}
-                <div className="w-8 h-8 rounded-full bg-[#ff00ff]/20 border border-[#ff00ff]/40 flex items-center justify-center shrink-0 animate-pulse shadow-[0_0_12px_rgba(255,0,255,0.3)]">
-                  <svg width="12" height="16" viewBox="0 0 12 16" fill="none">
-                    <rect x="3.5" y="0" width="5" height="9" rx="2.5" fill="#ff00ff"/>
-                    <path d="M1 8C1 11.31 3.24 14 6 14C8.76 14 11 11.31 11 8" stroke="#ff00ff" strokeWidth="1.5" strokeLinecap="round"/>
-                    <line x1="6" y1="14" x2="6" y2="16" stroke="#ff00ff" strokeWidth="1.5" strokeLinecap="round"/>
-                  </svg>
-                </div>
-                {/* Animated recording bars */}
-                <div className="flex items-end gap-[3px] h-6">
-                  {[0.4, 0.7, 1.0, 0.6, 0.85, 0.5, 0.9, 0.65, 0.75, 0.45].map((h, i) => (
-                    <div
-                      key={i}
-                      className="w-[3px] rounded-full bg-[#ff00ff]"
-                      style={{
-                        height: `${h * 100}%`,
-                        animation: `voiceBar 0.8s ease-in-out ${i * 0.08}s infinite alternate`,
-                        opacity: 0.7 + h * 0.3,
-                      }}
-                    />
-                  ))}
-                </div>
-                <span className="text-[9px] font-black uppercase tracking-widest text-[#ff00ff]/60 ml-1">recording...</span>
-              </div>
-            )}
-
-            {/* ── STATE 2: VOICE READY — player only, no text ── */}
-            {msg.media_url && msg.role === 'assistant' && (
-              <VoiceNoteBubble
-                audioUrl={msg.media_url}
-                personaImage={persona.image}
-                personaName={persona.name}
-                translation={msg.audio_translation}
-                onUnlockTranslation={async () => {
-                  const { data } = await supabase.rpc('process_spend', { p_user_id: guestId, p_amount: 10, p_type: 'voice_translation', p_persona_id: personaId });
-                  if (data?.success) setWalletBalance(prev => prev !== null ? prev - 10 : prev);
-                  return data?.success;
-                }}
-              />
-            )}
-
-            {/* ── STATE 3: TEXT BUBBLE — only when no voice involved ── */}
-            {!msg.media_url && !msg.voice_pending && msg.content && (msg.role === 'user' || msg.role === 'assistant') && (
-              <div className={`max-w-[85%] px-5 py-3 rounded-[1.6rem] text-xs md:text-sm leading-relaxed shadow-xl relative ${msg.role === 'user' ? 'bg-[#ff00ff] text-black font-bold rounded-tr-none' : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'}`}>
-                {/* Freebie gift image */}
-                {(msg.freebie_url || (msg.type === 'freebie' && msg.image_url)) && msg.role === 'assistant' && (
-                  <FreebieImageBubble
-                    imageUrl={msg.freebie_url || msg.image_url}
-                    personaImage={persona.image}
-                    personaName={persona.name}
-                  />
-                )}
-                 {/* Vault image — paid unlock */}
-                {msg.image_url && msg.role === 'assistant' && msg.type !== 'freebie' && (
-                  <ChatVaultItem
-                    mediaId={msg.id}
-                    isUnlocked={vaultItems.some(v => v.content_url === msg.image_url && v.is_unlocked)}
-                    mediaUrl={vaultItems.some(v => v.content_url === msg.image_url && v.is_unlocked) ? msg.image_url : undefined}
-                    caption={msg.content}
-                    onUnlockRequest={() => {
-                      const item = vaultItems.find(v => v.content_url === msg.image_url);
-                      unlockVaultItem(item || { id: msg.id, content_url: msg.image_url });
-                    }}
-                  />
-                )}
-                {msg.image_url && msg.role === 'user' && (
-                  <div className="relative w-40 aspect-square rounded-xl overflow-hidden mb-3">
-                    <Image src={msg.image_url} alt="" fill unoptimized className="object-cover" />
-                  </div>
-                )}
+            {!msg.media_url && msg.content && !msg.content.startsWith('[SYSTEM]') && (
+              <div className={`max-w-[85%] px-5 py-3 rounded-[1.6rem] text-xs leading-relaxed shadow-xl ${msg.role === 'user' ? 'bg-[#ff00ff] text-black font-bold' : 'bg-white/5 text-white border border-white/5'}`}>
                 {msg.content}
-              </div>
-            )}
-            {msg.role === 'user' && msg.status && (
-              <div className="mt-1 flex items-center gap-1 opacity-40">
-                <span className="text-[8px] font-black uppercase tracking-tighter">{msg.status}</span>
-                {msg.status === 'read' ? <CheckCheck size={10} className="text-[#00f0ff]" /> : <Check size={10} />}
               </div>
             )}
           </div>
         ))}
-        {(isDelivered || isPersonaReading || isTyping || isUploading) && (
-           <div className="flex justify-start">
-              <div className="px-5 py-3 bg-white/5 border border-white/5 rounded-[1.6rem] rounded-tl-none flex items-center gap-1.5 shadow-lg">
-                 <div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce" />
-                 <div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce delay-150" />
-                 <div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce delay-300" />
-              </div>
-           </div>
-        )}
-        <div className="h-4 w-full" />
-      </div> : null}
+        {isTyping && <div className="p-3 bg-white/5 rounded-full w-12 flex gap-1"><div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce"/><div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce delay-100"/><div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce delay-200"/></div>}
+      </div>
 
-      <div className="absolute bottom-0 inset-x-0 p-4 md:p-8 pt-4 bg-gradient-to-t from-black via-black/90 to-transparent pb-10 z-[400]">
-        {showSignUpWall ? (
-            <div onClick={() => router.push(`/login?p=${personaId}`)} className="mt-6 bg-[#ffea00] py-4 px-6 rounded-[2rem] flex flex-col items-center justify-center text-center gap-2 shadow-xl cursor-pointer active:scale-95 transition-all border-2 border-black/10">
-                <h3 className="text-black font-syncopate font-black uppercase text-[12px]">Guest Credits Depleted</h3>
-                <p className="text-black/70 font-black uppercase text-[9px] tracking-widest flex items-center gap-2">SIGN UP NOW to Continue the Conversation</p>
-                <div className="mt-1 px-3 py-1 bg-black text-[#ffea00] rounded-full text-[8px] font-black uppercase">50 Bonus Pts on Join</div>
-            </div>
-        ) : (
-            <>
-               <AnimatePresence>
-                {activeGift && <motion.div key={activeGift.id} initial={{ scale: 0.5, y: 100, opacity: 0 }} animate={{ scale: [1, 1.5, 1], y: -400, opacity: [0, 1, 0] }} transition={{ duration: 2 }} className="absolute left-1/2 -translate-x-1/2 bottom-32 text-[120px] z-[1000]">{activeGift.icon}</motion.div>}
-                 {showGifts && (
-                  <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="absolute bottom-28 left-4 right-4 bg-black/80 backdrop-blur-3xl border border-[#ff00ff]/30 rounded-3xl p-4 grid grid-cols-4 gap-2 z-[500] max-h-[300px] overflow-y-auto no-scrollbar shadow-[0_0_50px_rgba(255,0,255,0.2)]">
-                     {[
-                        { name: 'Red Bull', icon: '⚡', price: 25, bond: 5 }, 
-                        { name: 'Tequila', icon: '🥃', price: 50, bond: 10 }, 
-                        { name: 'Rose', icon: '🌹', price: 100, bond: 25 }, 
-                        { name: 'Coffee', icon: '☕', price: 20, bond: 2 },
-                        { name: 'Diamond', icon: '💎', price: 500, bond: 150 },
-                        { name: 'Champagne', icon: '🍾', price: 250, bond: 60 },
-                        { name: 'Chocolate', icon: '🍫', price: 30, bond: 8 },
-                        { name: 'Handbag', icon: '👜', price: 400, bond: 120 }
-                     ].map(g => (
-                       <button key={g.name} onClick={() => sendGift(g as any)} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-[#ff00ff]/10 border border-white/5 transition-all group">
-                          <span className="text-xl group-hover:scale-125 transition-transform">{g.icon}</span>
-                          <span className="text-[8px] font-black uppercase text-white/50">{g.price}c</span>
-                       </button>
-                     ))}
-                  </motion.div>
-                )}
-               </AnimatePresence>
+      <div className="absolute bottom-0 inset-x-0 p-8 pt-4 bg-gradient-to-t from-black via-black/90 to-transparent pb-10">
+         <AnimatePresence>
+            {activeGift && (
+              <motion.div key={activeGift.id} initial={{ scale: 0.5, y: 100, opacity: 0 }} animate={{ scale: [1, 2, 0.8], y: -500, opacity: [0, 1, 0] }} transition={{ duration: 2.5 }} className="fixed left-1/2 -translate-x-1/2 bottom-32 flex flex-col items-center z-[2000] pointer-events-none">
+                 <span className="text-[120px]">{activeGift.icon}</span>
+                 <span className="text-4xl font-syncopate font-black text-[#ff00ff] italic mt-[-20px]">X{activeGift.count}</span>
+              </motion.div>
+            )}
+            {showGifts && (
+              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="absolute bottom-28 left-4 right-4 bg-black/80 backdrop-blur-3xl border border-[#ff00ff]/30 rounded-3xl p-4 grid grid-cols-4 gap-2 z-[500]">
+                 {[
+                    { name: 'Red Bull', icon: '⚡', price: 25, bond: 5 }, 
+                    { name: 'Tequila', icon: '🥃', price: 50, bond: 10 }, 
+                    { name: 'Rose', icon: '🌹', price: 100, bond: 25 }, 
+                    { name: 'Diamond', icon: '💎', price: 500, bond: 150 }
+                 ].map(g => (
+                   <button key={g.name} onClick={() => sendGift(g as any)} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-[#ff00ff]/10 relative overflow-hidden group">
+                      <span className="text-xl group-hover:scale-125 transition-transform">{g.icon}</span>
+                      <span className="text-[8px] font-black uppercase text-white/50">{g.price}c</span>
+                      {tapItem?.name === g.name && tapCount > 0 && <div className="absolute inset-0 bg-[#ff00ff]/20 flex items-center justify-center animate-pulse"><span className="text-lg font-black text-white italic">x{tapCount}</span></div>}
+                   </button>
+                 ))}
+              </motion.div>
+            )}
+         </AnimatePresence>
 
-               <form onSubmit={handleLocalSubmit} className="flex items-center gap-2 bg-white/[0.07] border border-white/10 rounded-3xl px-3 py-3 shadow-2xl backdrop-blur-2xl relative z-[450]">
-                  <div className="flex items-center gap-1 relative">
-                     <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={handleFileUpload} />
-                    <button type="button" onClick={() => fileInputRef.current?.click()} className="w-9 h-9 rounded-2xl bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all"><Plus size={18} /></button>
-                                         <div className="relative">
-                      <button type="button" onClick={() => { setVoiceRequested(v => !v); setShowVoiceTip(v => !v); }} className={`w-9 h-9 rounded-2xl flex items-center justify-center transition-all ${voiceRequested ? 'bg-[#ff00ff] text-black shadow-[0_0_20px_#ff00ff]' : 'bg-white/5 text-white/40 hover:text-[#ff00ff]'}`}><Mic size={16} /></button>
-                      {showVoiceTip && !voiceRequested && <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-44 bg-black border border-white/10 rounded-2xl px-3 py-2 text-center shadow-2xl"><p className="text-[9px] text-white/50 uppercase">Voice Mode</p><p className="text-[10px] font-black text-[#ff00ff] mt-1">{COST_VOICE_NOTE}c</p></div>}
-                    </div>
-                    <button type="button" onClick={() => setShowGifts(!showGifts)} className={`w-9 h-9 rounded-2xl flex items-center justify-center transition-all ${showGifts ? 'bg-[#ff00ff] text-black' : 'bg-white/5 text-white/40 hover:text-[#ff00ff]'}`}><HeartPulse size={18} /></button>
-                  </div>
-                   <input 
-                      type="text" 
-                      value={localInput} 
-                      onChange={(e) => setLocalInput(e.target.value)} 
-                      placeholder={voiceRequested ? "script her message..." : "send mssg..."} 
-                      className={`flex-1 bg-transparent outline-none text-xs ml-2 transition-all ${voiceRequested ? 'text-[#ff00ff] placeholder:text-[#ff00ff]/40' : 'text-white'}`} 
-                   />
-                   <button type="submit" disabled={!localInput.trim()} className="p-3 rounded-2xl bg-[#ff00ff] text-black shadow-[0_0_20px_#ff00ff44]"><Send size={16} /></button>
-               </form>
-            </>
-        )}
+         <form onSubmit={handleLocalSubmit} className="flex items-center gap-2 bg-white/[0.07] border border-white/10 rounded-3xl px-3 py-3 shadow-2xl backdrop-blur-2xl">
+            <button type="button" onClick={() => setShowGifts(!showGifts)} className="w-9 h-9 rounded-2xl bg-white/5 text-white/40 hover:text-[#ff00ff] flex items-center justify-center"><HeartPulse size={18} /></button>
+            <input type="text" value={localInput} onChange={(e) => setLocalInput(e.target.value)} placeholder="send mssg..." className="flex-1 bg-transparent outline-none text-xs text-white" />
+            <button type="submit" disabled={!localInput.trim()} className="p-3 rounded-2xl bg-[#ff00ff] text-black shadow-[0_0_20px_#ff00ff44]"><Send size={16} /></button>
+         </form>
       </div>
 
       <AnimatePresence>
         {showVault && (
-          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25 }} className="absolute inset-0 z-[600] bg-black border-l border-white/5 flex flex-col">
+          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} className="absolute inset-0 z-[600] bg-black border-l border-white/5 flex flex-col">
             <div className="p-6 border-b border-white/5 flex items-center justify-between">
                 <div><h3 className="font-syncopate font-black uppercase text-2xl text-white">Private Archive</h3><p className="text-[#ffea00] text-[10px] uppercase font-bold">Encrypted Nodes</p></div>
                 <button onClick={() => setShowVault(false)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><X size={20} /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-6 grid grid-cols-2 gap-4 pb-32">
-               {vaultItems.map((item, idx) => (
+               {vaultItems.map((item) => (
                  <div key={item.id} className="relative aspect-[3/4] bg-white/5 rounded-2xl overflow-hidden border border-white/10 group">
-                    <div className="absolute inset-0 bg-black/60 z-10 backdrop-blur-xl group-hover:backdrop-blur-sm transition-all" />
-                    {item.content_url && <Image src={item.content_url} alt="" fill unoptimized className="object-cover opacity-50 blur-md group-hover:blur-none transition-all" />}
-                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4 text-center">
-                       <Lock size={24} className="text-[#ff00ff] mb-3" />
-                       <span className="text-white text-[10px] font-black uppercase line-clamp-2">{item.caption || "Secret Visual"}</span>
+                    <div className="absolute inset-0 bg-black/60 z-10 backdrop-blur-xl group-hover:backdrop-blur-sm" />
+                    {item.content_url && <img src={proxyImg(item.content_url)} className="absolute inset-0 w-full h-full object-cover blur-md" />}
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
+                       <Lock size={24} className="text-[#ff00ff] mb-2" />
+                       <span className="text-white text-[10px] font-black uppercase text-center line-clamp-2">{item.caption || "Secret Visual"}</span>
                     </div>
                     <div className="absolute bottom-3 inset-x-3 z-30">
-                       <button 
-                         onClick={() => unlockVaultItem(item)}
-                         className="w-full bg-[#ff00ff] text-black font-black uppercase text-[10px] py-3 rounded-xl active:scale-95 transition-all"
-                       >
-                         Unlock - 40c
-                       </button>
+                       <button onClick={() => setConfirmingItem(item)} className="w-full bg-[#ff00ff] text-black font-black uppercase text-[10px] py-3 rounded-xl shadow-[0_5px_15px_rgba(255,0,255,0.3)]">Unlock - {item.content_url?.includes('.mp4')?150:40}c</button>
                     </div>
                  </div>
                ))}
             </div>
           </motion.div>
         )}
+        {confirmingItem && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[2000] bg-black/95 flex items-center justify-center p-8 backdrop-blur-2xl">
+             <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 text-center space-y-6 shadow-2xl">
+                <div className="w-16 h-16 rounded-full bg-[#ff00ff]/10 flex items-center justify-center mx-auto"><Lock size={24} className="text-[#ff00ff]" /></div>
+                <div><h3 className="text-lg font-syncopate font-black text-white italic uppercase">Confirm Unlock</h3><p className="text-[10px] text-white/40 uppercase mt-2">Spend Credits for Private Content?</p></div>
+                <div className="space-y-3 pt-4">
+                   <button onClick={() => unlockVaultItem(confirmingItem)} className="w-full h-14 bg-[#ff00ff] text-black text-[10px] font-black uppercase rounded-2xl">Confirm - {confirmingItem.content_url?.includes('.mp4')?150:40}c</button>
+                   <button onClick={() => setConfirmingItem(null)} className="w-full h-10 text-[9px] font-black text-white/20 uppercase">Cancel</button>
+                </div>
+             </div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );
 }
-
-
