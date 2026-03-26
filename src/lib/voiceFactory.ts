@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import { tmpdir } from 'os';
 import { processVocalText } from './vocalProcessor';
+import { initialPersonas } from './profiles';
 
 // Use system ffmpeg (installed via Nix on Railway, or local install)
 // Falls back gracefully if not found
@@ -39,28 +40,92 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placehold
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
+// ✅ VERIFIED LIVE VOICES — Fetched 2026-03-26 from ElevenLabs account
+// sk_ef0b63a002fb35eab0fe44f5f3fc3a15e047483477da53a4
 const VOICE_MAP: Record<string, string> = {
-    'isabella': 'pNInz6Md8nq34In6h3On',   // Mimi (Young Latina - DR)
-    'tia-jamaica': 'Lcf7jDbcExg5U9O9DGsi', // Gigi (Kingston)
-    'zola-nigeria': 'pFZP5JQG7iQjIQuC4Bku', // Lily (Lagos)
-    'valeria': 'Lcf7jDbcExg5U9O9DGsi',    // Gigi (Bubbly - Medallo)
-    'elena': 'jsCqckC6m8ndm9Vvts9d',      // Freya (Elite - Medallo)
-    'bianca': 'ThT5KcBe7VKqW9v7at9m',     // Nicole (Loud - Santiago)
-    'valentina': '21m00Tcm4llv9mq9jdQH',  // Rachel (Zen - Tulum)
-    'ana': 'piTKPrawv66x3aX0Fk7e',        // Nicole (Sarcastic - Arg)
-    'sofia-gasp': 'Lcf7jDbcExg5U9O9DGsi', // Gigi (Carioca - Rio)
-    'kaelani-x': 'pFZP5JQG7iQjIQuC4Bku',  // Lily (London brethy - UK)
-    'default': 'Xb7hHocWTS28t3E0N998'     // Alice (Standard)
+    // === LATINAS (Warm, Bright American) ===
+    'isabella':     'cgSgspJ2msm6clMCkdW9', // Jessica - Playful, Bright, Warm (DR vibe)
+    'valeria':      'cgSgspJ2msm6clMCkdW9', // Jessica - Playful, Bright, Warm (Medallo)
+    'valentina':    'hpp4J3VqNfWAUOO0d1Us', // Bella  - Professional, Bright, Warm (Tulum)
+    'bianca':       'FGY2WhTYpPnrIDTdsKH5', // Laura  - Enthusiast, Quirky Attitude (Santiago)
+    'ana':          'FGY2WhTYpPnrIDTdsKH5', // Laura  - Enthusiast, Quirky Attitude (Arg sarcastic)
+    'sofia-gasp':   'hpp4J3VqNfWAUOO0d1Us', // Bella  - Warm (Rio)
+
+    // === CARIBBEAN / UK (British Accent = Closest to Island/UK vibes) ===
+    'tia-jamaica':  'pFZP5JQG7iQjIQuC4Bku', // Lily   - Velvety Actress (Kingston)
+    'kaelani-x':    'Xb7hH8MSUJpSbSDYk0k2', // Alice  - Clear, Engaging (UK/London)
+    'elena':        'XrExE9yKIg1WjnnlVkGX', // Matilda - Knowledgable, Elite (Medallo)
+
+    // === AFRICAN (British accent used for global/Lagos vibes) ===
+    'zola-nigeria': 'pFZP5JQG7iQjIQuC4Bku', // Lily   - Velvety (Lagos)
+
+    // === FALLBACK (catches all DB personas by ID prefix/match) ===
+    'default':      'EXAVITQu4vr4xnSDxMaL'  // Sarah  - Mature, Confident (universal)
 };
 
 export async function generatePersonaVoice(personaId: string, rawText: string, location: string = 'newark', environment: string = 'late_night') {
     if (!ELEVENLABS_API_KEY) throw new Error('ElevenLabs Key Missing');
 
-    console.log(`🎙️ [VoiceFactory] Pre-Processing speech for ${personaId} in ${environment}...`);
+    console.log(`🎙️ [VoiceFactory] Resolving identity for ${personaId}...`);
     
-    const voiceId = VOICE_MAP[personaId] || VOICE_MAP.default;
+    // 🧬 NEURAL IDENTITY RESOLVER: Fetch persona context for metadata-aware voice mapping
+    const { data: dbPersona } = await supabase.from('personas').select('*').eq('id', personaId).maybeSingle();
+    const persona = dbPersona || initialPersonas.find(p => p.id === personaId) || { id: personaId, name: personaId };
+
+    // ElevenLabs Voice Pool Mapping Logic
+    // 🏆 Sarah (Universal/White Mature) | Laura (Sassy/Latina) | Alice (UK/Clear) | Matilda (Elite) | Jessica (Bubbly/Latina) | Bella (Professional/White) | Lily (Velvety/Black)
+    const VOX = {
+        BLACK: 'pFZP5JQG7iQjIQuC4Bku',    // Lily - Velvety Actress (Great for Soulful/Island/Black vibes)
+        LATINA: 'cgSgspJ2msm6clMCkdW9',   // Jessica - Playful, Bright (Bubbly Latina)
+        LATINA_SASSY: 'FGY2WhTYpPnrIDTdsKH5', // Laura - Quirky Attitude (Sassy Caribbean/Latina)
+        WHITE_ELITE: 'XrExE9yKIg1WjnnlVkGX',  // Matilda - Knowledgeable (White/Elite Professional)
+        WHITE_MATURE: 'EXAVITQu4vr4xnSDxMaL', // Sarah - Mature, Confident
+        BRITISH: 'Xb7hH8MSUJpSbSDYk0k2',      // Alice - Clear, Engaging
+        NEUTRAL: 'hpp4J3VqNfWAUOO0d1Us'       // Bella - Professional, Warm
+    };
+
+    let voiceId = VOICE_MAP[personaId] || VOICE_MAP[personaId.toLowerCase()];
+
+    if (!voiceId) {
+        const zone = (persona.syndicate_zone || '').toLowerCase();
+        const skin = (persona.skin_tone || '').toLowerCase();
+        const culture = (persona.culture || '').toLowerCase();
+        const personality = (persona.personality || '').toLowerCase();
+
+        // 1. Black / Afro / Island / Caribbean Mapping
+        if (zone.includes('black') || zone.includes('afro') || zone.includes('nigeria') || zone.includes('jamaica') || zone.includes('atlanta') || zone.includes('houston') || 
+            skin.includes('ebony') || skin.includes('deep') || skin.includes('moch') || skin.includes('dark') || 
+            culture.includes('black') || culture.includes('nigerian') || culture.includes('jamaican')) {
+            voiceId = VOX.BLACK;
+        } 
+        // 2. Latina / Caribbean Sassy Mapping
+        else if (zone.includes('col_') || zone.includes('dr_') || zone.includes('pr_') || zone.includes('dominican') || skin.includes('latina') || skin.includes('bronze')) {
+            voiceId = personality === 'sassy' || personality === 'active' ? VOX.LATINA_SASSY : VOX.LATINA;
+        }
+        // 3. UK / London Specific (if not caught by Black)
+        else if (zone.includes('uk_london') || zone.includes('british')) {
+            voiceId = VOX.BRITISH;
+        }
+        // 4. White / Elite / Professional
+        else if (zone.includes('nyc_white') || zone.includes('la_white') || zone.includes('paris') || zone.includes('essex') || skin.includes('fair') || skin.includes('pale') || personality === 'elite') {
+            voiceId = VOX.WHITE_ELITE;
+        }
+        // Fallback: Use deterministic hash as safety
+        else {
+            const idSum = personaId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+            const pool = [VOX.NEUTRAL, VOX.WHITE_MATURE, VOX.LATINA, VOX.BLACK];
+            voiceId = pool[idSum % pool.length];
+        }
+    }
+
+    console.log(`🎙️ [VoiceFactory] Identity: ${persona.name} | Zone: ${persona.syndicate_zone || '?' } | VOX_ID: ${voiceId}`);
+
     const timeHour = new Date().getHours();
-    let finalVocalScript = processVocalText(rawText, personaId, location, timeHour);
+    const envZone = persona.syndicate_zone || location; 
+    let finalVocalScript = processVocalText(rawText, personaId, envZone, timeHour, persona.age || 22, persona.language || 'en');
+
+
+
 
     const hashData = `${finalVocalScript}_${voiceId}_${environment}`.trim().toLowerCase();
     const textHash = crypto.createHash('sha256').update(hashData).digest('hex');
@@ -84,10 +149,10 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
 
     try {
         // SYNDICATE V1.1: PERSONA VOCAL DNA
-        const idSum = personaId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-        let pStability = 0.15 + ((idSum % 10) / 100); 
-        let pStyle = 0.85 + ((idSum % 15) / 100);     
-        let pSimilarity = 0.75 + ((idSum % 20) / 100); 
+        const idSumForDna = personaId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+        let pStability = 0.15 + ((idSumForDna % 10) / 100); 
+        let pStyle = 0.85 + ((idSumForDna % 15) / 100);     
+        let pSimilarity = 0.75 + ((idSumForDna % 20) / 100); 
 
         // SYNDICATE PHASE 2: TEMPORAL CONTEXT ENGINE
         const hour = new Date().getHours();

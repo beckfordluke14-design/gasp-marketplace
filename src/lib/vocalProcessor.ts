@@ -4,64 +4,124 @@
  * with performance tags for ElevenLabs Multilingual v2.
  */
 
-// REGIONAL SLANG DICTIONARY
+// 🧬 SYNDICATE ZONE DICTIONARY: Phonetic Slang & Accent Drivers
+// ElevenLabs Multilingual v2 adopts the accent of the TEXT.
 const REGIONS: Record<string, Record<string, string>> = {
-    'newark': {
+    'ny_dominican': { // Spanish Newark / NYC
+        'hello': 'klk mi amor',
         'what are you doing': 'what you on',
-        'money': 'coins',
-        'flows': 'coins',
-        'crazy': 'loco',
         'baby': 'papi',
-        'i don\'t know': 'ion even know',
-        'hello': 'klk'
+        'look': 'mira',
+        'tell me': 'dime',
+        'crazy': 'loco'
+    },
+    'us_urban': { // American Newark / Atlanta / Jersey / Houston
+        'hello': 'yo',
+        'baby': 'babe',
+        'what are you doing': 'what you on',
+        'crazy': 'wild',
+        'money': 'coins',
+        'seriously': 'facts',
+        'friend': 'bestie',
+        'look': 'listen'
+    },
+    'caribbean_hub': { // Jamaica
+        'hello': 'wah gwan',
+        'yes': 'seen',
+        'baby': 'mi love',
+        'friend': 'bredrin',
+        'cool': 'stunt',
+        'crazy': 'mad'
+    },
+    'uk_london_black': { // London / Lagos
+        'hello': 'how far',
+        'baby': 'bruv',
+        'money': 'coins',
+        'trouble': 'wahala',
+        'understand': 'you get me'
+    },
+    'col_medallo': { // Medellin
+        'baby': 'papacito',
+        'my love': 'mi amor',
+        'well': 'pues',
+        'money': 'plata',
+        'cool': 'bacán'
     },
     'london': {
         'going to': 'gonna',
         'friend': 'mate',
-        'crazy': 'mental',
         'yes': 'yeah bruv',
-        'money': 'coins',
-        'tired': 'long day innit'
-    },
-    'medellin': {
-        'baby': 'papi',
-        'my love': 'mi amor',
-        'well': 'pues',
-        'money': 'coins',
-        'crazy': 'loco'
+        'money': 'quid'
     }
-    }
+};
 
-// PERFORMANCE TAG INJECTION: Neural Silence triggering (Anti-Robotic)
-const TAGS = ['... ', '... -- ', '... ... ', '... '];
 
-export function processVocalText(text: string, personaId: string, location: string, timeHour: number): string {
+// 🎭 PERFORMANCE TAGS: Force human-like stutters and inhales
+const NEURAL_BREATHS = ['... (inhales) ', '... (sighs) ', '... (chuckles) ', '... '];
+
+
+// 🎀 MULTI-LINGUAL MATURE REFINEMENTS (Ages 25+)
+const MULTI_MATURE: Record<string, Record<string, string>> = {
+    'en': { 'no cap': 'honestly', 'facts': 'certainly', 'wild': 'interesting', 'lit': 'lovely' },
+    'es': { 'loco': 'increíble', 'bueno': 'fenomenal', 'mira': 'fíjate', 'dime': 'escúchame' },
+    'pt': { 'bacán': 'lindo', 'papai': 'querido', 'cara': 'você', 'tá': 'está' }
+};
+
+const MULTI_FILLERS: Record<string, string[]> = {
+    'en': ['... sweetheart', '... darling', '... babe', '... love'],
+    'es': ['... mi amor', '... cariño', '... mi vida', '... corazón'],
+    'pt': ['... querido', '... meu bem', '... amorzinho', '... vida']
+};
+
+
+export function processVocalText(text: string, personaId: string, location: string, timeHour: number, age: number = 22, language: string = 'en'): string {
     let newText = text.toLowerCase();
+    const langKey = language.toLowerCase().substring(0, 2); // 'es', 'pt', 'en'
     
-    // 1. Accent Intensity (Dynamic Slang Overdrive)
+    // 1. Dynamic Intensity Scaling
     const idSum = personaId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-    const accentIntensity = 0.3 + ((idSum % 4) / 10); // 0.3 to 0.6 replacement probability
+    let accentIntensity = age < 25 
+        ? 0.4 + ((idSum % 4) / 10) 
+        : 0.15 + ((idSum % 3) / 10);
     
-    const locKey = Object.keys(REGIONS).find(k => location.toLowerCase().includes(k)) || 'newark';
+    const locKey = Object.keys(REGIONS).find(k => location.toLowerCase().includes(k)) || 'us_urban';
     const dictionary = REGIONS[locKey] || {};
     
+    // 2. Regional Slang Injection
     for (const [formal, slang] of Object.entries(dictionary)) {
-        if (Math.random() < accentIntensity) { // Apply based on persona's unique intensity
+        if (Math.random() < accentIntensity) {
             const regex = new RegExp(`\\b${formal}\\b`, 'gi');
             newText = newText.replace(regex, slang);
         }
     }
 
-    // 2. Neural Warming (Google-Style Stability)
-    // Mandatory leading silence to trigger natural breath
+    // 3. Multi-Lingual Mature Refinement (25+)
+    if (age >= 25) {
+        const matureMap = MULTI_MATURE[langKey] || MULTI_MATURE['en'];
+        for (const [slang, mature] of Object.entries(matureMap)) {
+            const regex = new RegExp(`\\b${slang}\\b`, 'gi');
+            newText = newText.replace(regex, mature);
+        }
+
+        // Inject soft feminine prosody in native language
+        if (Math.random() > 0.75) {
+            const fillers = MULTI_FILLERS[langKey] || MULTI_FILLERS['en'];
+            const filler = fillers[idSum % fillers.length];
+            newText = `${newText} ${filler}`;
+        }
+    }
+
+    // 4. Neural Warming & Ambient Triggers
     newText = `... ${newText}`;
 
-    // 3. Late Night "Whisper" Override (1AM-5AM)
+    // Late Night "Whisper" Override (1AM-5AM)
     if (timeHour >= 1 && timeHour <= 5) {
         newText = `... (whispers) ${newText.split(' ').join(' ... ')}`;
     }
 
     return newText;
 }
+
+
 
 
