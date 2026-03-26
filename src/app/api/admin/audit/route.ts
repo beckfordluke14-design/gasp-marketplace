@@ -94,22 +94,13 @@ export async function POST(req: Request) {
                 return NextResponse.json({ success: true });
             }
             case 'delete-post': {
-                const { id, persona_id, content_url, content_type, is_vault } = payload;
-                console.log(`[Neural Admin Sync] Feed-Masking Initiated for Node: ${id}`);
-                
-                // 🛡️ HARD ETCH: Use upsert to handle hardcoded posts not yet in DB
-                const { error } = await supabase.from('posts').upsert([{ 
-                    id, 
-                    persona_id: persona_id || 'master-unknown',
-                    content_url: content_url || 'deleted',
-                    content_type: content_type || 'image',
-                    caption: 'DELETED_NODE_SYNC_V15',
-                    is_vault: is_vault || false,
-                    is_burner: false,
-                    scheduled_for: new Date().toISOString()
-                }]);
+                const { id } = payload;
+                console.log(`[Neural Admin] Soft-hiding post: ${id}`);
+                // Soft hide: mark post as hidden so feed queries filter it out
+                const { error } = await supabase.from('posts')
+                    .update({ is_burner: false, is_vault: false, caption: 'DELETED_NODE_SYNC_V15' })
+                    .eq('id', id);
                 if (error) throw error;
-                
                 return NextResponse.json({ success: true });
             }
             case 'reassign-asset': {
@@ -159,16 +150,17 @@ export async function POST(req: Request) {
                     if (pError) console.error('[Persona Sync Error]:', pError.message);
                 }
 
-                const { error } = await supabase.from('posts').upsert([{ 
-                    id, 
-                    caption, 
-                    persona_id, 
-                    content_url, 
-                    content_type: content_type || 'image',
-                    is_vault: is_vault || false,
-                    is_burner: is_featured || false,
-                    scheduled_for: new Date().toISOString()
-                }]);
+                // Build update object — only include defined fields
+                const updateFields: Record<string, any> = {};
+                if (caption     !== undefined) updateFields.caption      = caption;
+                if (persona_id  !== undefined) updateFields.persona_id   = persona_id;
+                if (content_url !== undefined) updateFields.content_url  = content_url;
+                if (content_type!== undefined) updateFields.content_type = content_type;
+                if (is_vault    !== undefined) updateFields.is_vault     = is_vault;
+                if (is_featured !== undefined) updateFields.is_burner    = is_featured;
+                updateFields.scheduled_for = new Date().toISOString();
+
+                const { error } = await supabase.from('posts').upsert([{ id, ...updateFields }]);
                 if (error) throw error;
                 return NextResponse.json({ success: true });
             }

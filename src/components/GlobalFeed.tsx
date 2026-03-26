@@ -9,6 +9,7 @@ import { createClient } from '@supabase/supabase-js';
 import { useState, useEffect, useRef } from 'react';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
 import BrandingOverlay from '@/components/ui/BrandingOverlay';
+import { getAllAliases, type PostAlias } from '@/lib/postAliases';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
@@ -69,6 +70,18 @@ function BrainEditor({ persona, isOpen, onClose, onSave }: { persona: Persona, i
 function GlobalFeedItem({ persona, broadcast, onSelectPersona, onDeletePost, onToggleFeatured, onUpdatePost, isFeatured, onEditBrain, index }: { persona: Persona; broadcast: Broadcast; onSelectPersona: (id: string, initialMsg?: string) => void; onDeletePost?: (id: string) => void; onToggleFeatured?: (id: string, state: boolean) => void; onUpdatePost?: (id: string, caption: string) => void; isFeatured?: boolean; onEditBrain?: (persona: Persona) => void; index: number }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedCaption, setEditedCaption] = useState(broadcast.content || '');
+  // 🧬 ALIAS LAYER: per-post display overrides
+  const [aliases, setAliases] = useState<Record<string, PostAlias>>({});
+  useEffect(() => {
+    setAliases(getAllAliases());
+    const onStorage = (e: StorageEvent) => { if (e.key === 'gasp_post_aliases') setAliases(getAllAliases()); };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+  const alias = aliases[broadcast.id] || {};
+  const displayName = alias.displayName || getPersonaName(persona);
+  const displayAge  = alias.displayAge  || String(persona.age || '22');
+  const displayCity = alias.displayCity || persona.city || '';
 
   const handleSave = () => {
     if (onUpdatePost) onUpdatePost(broadcast.id, editedCaption);
@@ -256,7 +269,7 @@ function GlobalFeedItem({ persona, broadcast, onSelectPersona, onDeletePost, onT
                   <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-10 duration-1000">
                      <div className="flex flex-col gap-2 pointer-events-auto">
                         <div className="flex items-center gap-3">
-                      <span className="text-[14px] md:text-[18px] font-black uppercase italic tracking-tighter text-white/90 drop-shadow-2xl">{getPersonaName(persona)}</span>
+                      <span className="text-[14px] md:text-[18px] font-black uppercase italic tracking-tighter text-white/90 drop-shadow-2xl">{displayName}</span>
                       <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] shadow-[0_0_10px_#00f0ff]" />
                    </div>
                    
@@ -273,8 +286,8 @@ function GlobalFeedItem({ persona, broadcast, onSelectPersona, onDeletePost, onT
                          {broadcast.content}
                       </h2>
                    )}
-                        <span className="text-[10px] font-black uppercase text-white/40 tracking-widest font-mono">NODE_{getPersonaName(persona).slice(0, 8)} • {persona.age || '22'} • {persona.city}</span>
-                        <h3 className="text-4xl md:text-7xl font-syncopate font-bold uppercase italic tracking-tighter text-white drop-shadow-2xl leading-none">{getPersonaName(persona)}</h3>
+                        <span className="text-[10px] font-black uppercase text-white/40 tracking-widest font-mono">NODE_{displayName.slice(0, 8)} • {displayAge} • {displayCity}</span>
+                        <h3 className="text-4xl md:text-7xl font-syncopate font-bold uppercase italic tracking-tighter text-white drop-shadow-2xl leading-none">{displayName}</h3>
                         <p className="max-w-md text-lg md:text-2xl font-outfit text-white/90 lowercase italic leading-tight drop-shadow-xl">{broadcast.content}</p>
                      </div>
                      <div className="flex items-center gap-4 md:gap-6 pointer-events-auto">
