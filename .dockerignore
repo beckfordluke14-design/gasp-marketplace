@@ -17,10 +17,14 @@ build_log.txt
 check-*.js
 test-*.js
 trigger-*.js
+
+# Essential Resources for Deployment Build
 !src/
 !public/
+!scripts/
 !package.json
 !package-lock.json
 !tsconfig.json
 !next.config.ts
-
+!railway.json
+!nixpacks.toml
