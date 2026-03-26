@@ -87,7 +87,7 @@ function MarketplaceMain() {
     ...initialPersonas
   ].filter((p, index, self) => 
     index === self.findIndex((t) => t.id === p.id)
-  ).filter(p => p.is_active !== false && p.is_active !== null); // 🛡️ GLOBAL VISIBILITY LOCK: Must be explicitly active or have no active field.
+  ).filter(p => p.is_active === true); // 🛡️ GLOBAL RETIREMENT GATE: Strict visibility. Only explicitly active nodes enter the UI.
   
   const refinedPersonas = allPersonas.map(p => ({
     ...p,
@@ -272,7 +272,7 @@ function MarketplaceMain() {
          )}
       </AnimatePresence>
       
-      {!isZenMode && <Sidebar selectedPersonaId={selectedPersonaId} onSelectPersona={handleSelectPersona} unreadCounts={unreadCounts} personas={refinedPersonas.filter(p => p.is_active !== false)} />} {/* Sanitized sidebar list */}
+      {!isZenMode && <Sidebar selectedPersonaId={selectedPersonaId} onSelectPersona={handleSelectPersona} unreadCounts={unreadCounts} personas={refinedPersonas} />} {/* Sanitized sidebar list */}
       
       <main className="flex-1 flex flex-col relative overflow-hidden">
           {!isZenMode && <div className="h-28 md:h-36 shrink-0" />}
