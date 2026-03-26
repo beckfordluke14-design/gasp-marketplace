@@ -123,15 +123,23 @@ export default function PostStudio() {
     setSyncing(null);
   };
 
-  // ── Hero toggle: sets post as hero AND promotes its image as the persona's canonical photo
+  // ── Hero toggle: sets post as hero AND forces it to feed (clears vault)
   const toggleHero = async (post: PersonaPost) => {
     setSyncing(post.id);
     const next = !post.is_burner;
-    const data = await callAudit('update-post', { id: post.id, is_featured: next });
+    // Hero = always in feed: clear vault when enabling
+    const data = await callAudit('update-post', {
+      id: post.id,
+      is_featured: next,
+      ...(next ? { is_vault: false } : {}),  // hero forces feed
+    });
     if (data.success) {
-      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_burner: next } : p));
+      setPosts(prev => prev.map(p =>
+        p.id === post.id
+          ? { ...p, is_burner: next, ...(next ? { is_vault: false } : {}) }
+          : p
+      ));
       // When SETTING hero: promote this post's image as the persona's canonical photo
-      // Chat avatars, sidebar, and story bar all read seed_image_url from the personas table
       if (next && post.content_url) {
         await callAudit('update-persona', { id: post.persona_id, seed_image_url: post.content_url });
       }
@@ -287,13 +295,18 @@ export default function PostStudio() {
 
   const toggleLinkedHero = async (post: PersonaPost) => {
     const next = !post.is_burner;
-    await callAudit('update-post', { id: post.id, is_featured: next });
-    // When SETTING hero from the modal: also promote this image as the canonical persona photo
+    // Hero forces feed: clear vault flag when enabling hero
+    await callAudit('update-post', {
+      id: post.id,
+      is_featured: next,
+      ...(next ? { is_vault: false } : {}),
+    });
     if (next && post.content_url) {
       await callAudit('update-persona', { id: post.persona_id, seed_image_url: post.content_url });
     }
-    setLinkedPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_burner: next } : p));
-    setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_burner: next } : p));
+    const patch = { is_burner: next, ...(next ? { is_vault: false } : {}) };
+    setLinkedPosts(prev => prev.map(p => p.id === post.id ? { ...p, ...patch } : p));
+    setPosts(prev => prev.map(p => p.id === post.id ? { ...p, ...patch } : p));
   };
 
   // ── Filtering — HERO posts appear in feed too (is_burner is additive)

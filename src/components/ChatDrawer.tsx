@@ -473,13 +473,26 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     setLoadingPics(true);
     const { data } = await supabase
       .from('posts')
-      .select('id, content_url, caption, is_vault')
+      .select('id, content_url, caption, is_vault, is_burner, is_freebie')
       .eq('persona_id', personaId)
       .not('content_url', 'is', null)
+      // Hidden states: tombstoned by soft-delete / duplicate action
       .not('caption', 'eq', 'DELETED_NODE_SYNC_V15')
+      .not('caption', 'like', 'DELETED%')
+      // Freebies are private chat gifts — keep them out of the gallery
+      .neq('is_freebie', true)
       .order('created_at', { ascending: false })
       .limit(60);
-    if (data) setPicPosts(data);
+    if (data) {
+      // Client-side safety net: strip anything that slipped through (stale cache guard)
+      const visible = data.filter(p =>
+        p.content_url &&
+        p.caption !== 'DELETED_NODE_SYNC_V15' &&
+        !p.caption?.startsWith('DELETED') &&
+        !p.is_freebie
+      );
+      setPicPosts(visible);
+    }
     setLoadingPics(false);
   };
 

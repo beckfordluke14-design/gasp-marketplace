@@ -14,7 +14,7 @@ export async function GET(req: Request) {
   const PAGE_COUNT = 20;
   
   try {
-    // ✅ Show ONLY public posts (no vaults) from ACTIVE personas
+    // ✅ Feed: public posts from active personas — hidden posts excluded regardless of hero flag
     const { data: dbPosts, error } = await supabase
         .from('posts')
         .select('*, personas!inner(id, name, city, age, seed_image_url, is_active)')
@@ -22,7 +22,9 @@ export async function GET(req: Request) {
         .eq('is_vault', false)
         .neq('is_freebie', true)                          // freebies are chat gifts, not public feed
         .not('content_url', 'is', null)
-        .not('caption', 'eq', 'DELETED_NODE_SYNC_V15')
+        .not('caption', 'eq', 'DELETED_NODE_SYNC_V15')   // soft-hidden / duplicate-marked posts
+        .not('caption', 'like', 'DELETED%')               // any tombstone variant
+        .order('is_burner', { ascending: false })          // hero posts float to top
         .order('created_at', { ascending: false })
         .range(page * PAGE_COUNT, (page + 1) * PAGE_COUNT - 1);
 
