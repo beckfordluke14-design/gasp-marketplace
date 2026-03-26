@@ -21,7 +21,7 @@ export default function PersonaAvatar({
   fill, 
   width,
   height,
-  className = 'object-cover',
+  className = 'object-cover object-[center_20%] sm:object-top', // Default to top-focused crop for portraits
   priority = false,
   unoptimized = true
 }: PersonaAvatarProps) {

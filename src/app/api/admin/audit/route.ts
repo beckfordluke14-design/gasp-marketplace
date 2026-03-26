@@ -192,7 +192,26 @@ export async function POST(req: Request) {
                 if (error) throw error;
                 return NextResponse.json({ success: true });
             }
+            case 'bulk-delete': {
+                const { ids } = payload;
+                if (!ids || !Array.isArray(ids)) throw new Error('ID Array Missing.');
+                console.log(`[Neural Admin] Bulk Soft-hiding ${ids.length} posts.`);
+                const { error } = await supabase.from('posts')
+                    .update({ is_burner: false, is_vault: false, caption: 'DELETED_NODE_SYNC_V15' })
+                    .in('id', ids);
+                if (error) throw error;
+                return NextResponse.json({ success: true });
+            }
+            case 'bulk-delete-hard': {
+                const { ids } = payload;
+                if (!ids || !Array.isArray(ids)) throw new Error('ID Array Missing.');
+                console.log(`[Neural Admin] Purging ${ids.length} nodes from existence.`);
+                const { error } = await supabase.from('posts').delete().in('id', ids);
+                if (error) throw error;
+                return NextResponse.json({ success: true });
+            }
             case 'create-post': {
+
                 const { persona_id, content_url, content_type, is_vault, is_featured, caption } = payload;
                 if (!persona_id || !content_url) throw new Error('persona_id and content_url required.');
                 const { error } = await supabase.from('posts').insert([{

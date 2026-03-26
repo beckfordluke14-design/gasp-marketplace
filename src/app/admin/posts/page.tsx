@@ -69,6 +69,12 @@ export default function PostStudio() {
   // Linked posts for the edit modal
   const [linkedPosts, setLinkedPosts] = useState<PersonaPost[]>([]);
   const [loadingLinked, setLoadingLinked] = useState(false);
+  
+  // ── Bulk Selection Machine ──
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set());
+  const longPressTimer = useState<any>(null)[0]; // Ref-like but simple
+
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -283,7 +289,56 @@ export default function PostStudio() {
     closeEdit();
   };
 
-  // ── Hard delete a linked post directly from the modal
+  // ── Bulk Console Actions ──
+  const toggleSelection = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+        if (next.size === 0) setSelectionMode(false);
+      } else {
+        next.add(id);
+        setSelectionMode(true);
+      }
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    const allIds = filtered.map(p => p.id);
+    setSelectedIds(new Set(allIds));
+    setSelectionMode(true);
+  };
+
+  const cancelSelection = () => {
+    setSelectedIds(new Set());
+    setSelectionMode(false);
+  };
+
+  const bulkSoftHide = async () => {
+    const ids = Array.from(selectedIds);
+    if (!ids.length || !confirm(`Soft-hide ${ids.length} nodes from the public feed?`)) return;
+    setLoading(true);
+    const data = await callAudit('bulk-delete', { ids });
+    if (data.success) {
+      setPosts(prev => prev.filter(p => !selectedIds.has(p.id)));
+      cancelSelection();
+    }
+    setLoading(false);
+  };
+
+  const bulkHardDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (!ids.length || !confirm(`⚠️ PERMANENT PURGE — remove ${ids.length} nodes from existence?`)) return;
+    setLoading(true);
+    const data = await callAudit('bulk-delete-hard', { ids });
+    if (data.success) {
+      setPosts(prev => prev.filter(p => !selectedIds.has(p.id)));
+      cancelSelection();
+    }
+    setLoading(false);
+  };
+
   const deleteLinkedPost = async (lp: PersonaPost) => {
     if (!confirm('⚠️ Hard delete this post from the database?')) return;
     const data = await callAudit('delete-post-hard', { id: lp.id });
@@ -392,7 +447,14 @@ export default function PostStudio() {
             <button onClick={fetchPosts} className="w-9 h-9 shrink-0 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all">
               <RefreshCw size={13} className={loading ? 'animate-spin text-[#00f0ff]' : 'text-white/40'} />
             </button>
+            <button 
+              onClick={() => { if (selectionMode) cancelSelection(); else selectAll(); }} 
+              className={`px-3 h-9 shrink-0 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectionMode ? 'bg-[#ff00ff]/20 border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border-white/10 text-white/40 hover:text-white'}`}
+            >
+              {selectionMode ? `Clear` : `Select All`}
+            </button>
           </div>
+
         </div>
 
         {/* Filter tabs */}
@@ -444,6 +506,7 @@ export default function PostStudio() {
                 const showName = post.personas?.name || post.persona_id;
                 const showAge  = String(post.personas?.age  || '');
                 const showCity = post.personas?.city || '';
+                const isSelected = selectedIds.has(post.id);
 
                 return (
                   <motion.div
@@ -452,10 +515,10 @@ export default function PostStudio() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: syncing === post.id ? 0.4 : 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="group relative bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden hover:border-white/30 transition-all"
+                    className={`group relative bg-white/[0.02] border rounded-2xl overflow-hidden transition-all ${isSelected ? 'border-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.1)]' : 'border-white/10 hover:border-white/30'}`}
                   >
                       {/* Media wrapper */}
-                      <div className="relative aspect-[3/4] bg-black">
+                      <div className="relative aspect-[3/4] bg-black overflow-hidden">
                         {/* Media — detect by content_type OR url extension */}
                         {(() => {
                           const isVid = post.content_type === 'video' || /\.mp4|\.mov|\.webm/i.test(post.content_url || '');
@@ -485,6 +548,13 @@ export default function PostStudio() {
                           {post.is_burner  && <span className="px-2 py-0.5 bg-[#ffea00] text-black text-[7px] sm:text-[8px] font-black uppercase tracking-widest rounded-full">Hero</span>}
                         </div>
 
+                        {/* Selection checkmark */}
+                        {(selectionMode || isSelected) && (
+                          <div className={`absolute top-2 right-2 z-30 w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg transition-all ${isSelected ? 'bg-[#00f0ff] border-[#00f0ff] text-black scale-110' : 'bg-black/40 border-white/40 text-transparent'}`}>
+                             <Check size={14} strokeWidth={4} />
+                          </div>
+                        )}
+
                         {/* Saved flash */}
                         {savedFlash === post.id && (
                           <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
@@ -494,44 +564,75 @@ export default function PostStudio() {
                           </div>
                         )}
 
-                        {/* Hover overlay — 3×2 action grid */}
-                        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto z-10 px-2">
-                          {filterMode === 'orphaned' && post.is_vault && (
-                            <button onClick={() => pushToFeed(post)}
-                              className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-[#00f0ff] text-black rounded-lg text-[8px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_16px_rgba(0,240,255,0.4)]">
-                              <ArrowLeftRight size={10} /> → Feed
-                            </button>
+                        <div 
+                          onPointerDown={(e) => {
+                             // NEURAL LONG-PRESS: Mobile friendly, clears on scroll/move
+                             const id = post.id;
+                             const timer = setTimeout(() => toggleSelection(id), 500);
+                             (e.target as any)._lp = timer;
+                             (e.target as any)._startPos = { x: e.clientX, y: e.clientY };
+                          }}
+                          onPointerMove={(e) => {
+                             const start = (e.target as any)._startPos;
+                             if (start) {
+                               const dist = Math.sqrt(Math.pow(e.clientX - start.x, 2) + Math.pow(e.clientY - start.y, 2));
+                               if (dist > 3) clearTimeout((e.target as any)._lp); // Clear if user is scrolling
+                             }
+                          }}
+                          onPointerUp={(e) => clearTimeout((e.target as any)._lp)}
+                          onClick={(e) => {
+                             if (selectionMode) {
+                               e.stopPropagation();
+                               toggleSelection(post.id);
+                             }
+                          }}
+                          className={`absolute inset-0 bg-black/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 z-20 px-2 ${selectionMode ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none group-hover:pointer-events-auto'}`}
+                        >
+
+                          {selectionMode ? (
+                             <div className="text-center">
+                               <p className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">{isSelected ? 'Deselect Node' : 'Select Node'}</p>
+                             </div>
+                          ) : (
+                            <>
+                              {filterMode === 'orphaned' && post.is_vault && (
+                                <button onClick={() => pushToFeed(post)}
+                                  className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-[#00f0ff] text-black rounded-lg text-[8px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_16px_rgba(0,240,255,0.4)]">
+                                  <ArrowLeftRight size={10} /> → Feed
+                                </button>
+                              )}
+                              <button onClick={() => openEdit(post)}
+                                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-white text-black rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#00f0ff] transition-all">
+                                <Pencil size={11} /> Edit
+                              </button>
+                              <div className="grid grid-cols-3 gap-1.5 w-full">
+                                <button onClick={() => toggleVault(post)} title={post.is_vault ? 'Move to Feed' : 'Move to Vault'}
+                                  className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_vault ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
+                                  <Lock size={11} />
+                                </button>
+                                <button onClick={() => toggleHero(post)} title="Set as Hero"
+                                  className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_burner ? 'bg-[#ffea00] text-black' : 'bg-white/10 text-white/50 hover:bg-[#ffea00]/40'}`}>
+                                  <Star size={11} />
+                                </button>
+                                <button onClick={() => toggleFreebie(post)} title={post.is_freebie ? 'Remove Freebie' : 'Mark as Gift'}
+                                  className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_freebie ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
+                                  <Gift size={11} />
+                                </button>
+                                <button onClick={() => markDuplicate(post.id)} title="Hide Duplicate"
+                                  className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/30 hover:text-orange-300 flex items-center justify-center transition-all">
+                                  <Copy size={11} />
+                                </button>
+                                <button onClick={() => softHide(post.id)} title="Hide from Feed"
+                                  className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/20 hover:text-orange-400 flex items-center justify-center transition-all">
+                                  <EyeOff size={11} />
+                                </button>
+                                <button onClick={() => hardDelete(post.id)} title="Permanent Delete"
+                                  className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-red-500/30 hover:text-red-400 flex items-center justify-center transition-all">
+                                  <Trash2 size={11} />
+                                </button>
+                              </div>
+                            </>
                           )}
-                          <button onClick={() => openEdit(post)}
-                            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-white text-black rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#00f0ff] transition-all">
-                            <Pencil size={11} /> Edit
-                          </button>
-                          <div className="grid grid-cols-3 gap-1.5 w-full">
-                            <button onClick={() => toggleVault(post)} title={post.is_vault ? 'Move to Feed' : 'Move to Vault'}
-                              className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_vault ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
-                              <Lock size={11} />
-                            </button>
-                            <button onClick={() => toggleHero(post)} title="Set as Hero"
-                              className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_burner ? 'bg-[#ffea00] text-black' : 'bg-white/10 text-white/50 hover:bg-[#ffea00]/40'}`}>
-                              <Star size={11} />
-                            </button>
-                            <button onClick={() => toggleFreebie(post)} title={post.is_freebie ? 'Remove Freebie' : 'Mark as Gift'}
-                              className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_freebie ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
-                              <Gift size={11} />
-                            </button>
-                            <button onClick={() => markDuplicate(post.id)} title="Hide Duplicate"
-                              className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/30 hover:text-orange-300 flex items-center justify-center transition-all">
-                              <Copy size={11} />
-                            </button>
-                            <button onClick={() => softHide(post.id)} title="Hide from Feed"
-                              className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/20 hover:text-orange-400 flex items-center justify-center transition-all">
-                              <EyeOff size={11} />
-                            </button>
-                            <button onClick={() => hardDelete(post.id)} title="Permanent Delete"
-                              className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-red-500/30 hover:text-red-400 flex items-center justify-center transition-all">
-                              <Trash2 size={11} />
-                            </button>
-                          </div>
                         </div>
                       </div>
 
@@ -555,7 +656,77 @@ export default function PostStudio() {
         )}
       </div>
 
+      {/* ── Bulk Console (Floating Action Bar) ── */}
+      <AnimatePresence>
+        {selectionMode && selectedIds.size > 0 && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-lg px-4"
+          >
+             <div className="bg-[#0e0e0e]/95 backdrop-blur-2xl border border-[#00f0ff]/30 rounded-[2rem] p-4 flex items-center justify-between shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+                <div className="flex flex-col pl-2">
+                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00f0ff]">{selectedIds.size} Nodes Selected</p>
+                   <button onClick={selectAll} className="text-[8px] font-black uppercase text-white/30 hover:text-white text-left transition-colors">Select Entire Grid</button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                   <button 
+                     onClick={async () => {
+                       const ids = Array.from(selectedIds);
+                       if (!confirm(`Mark ${ids.length} as Vault (Paid)?`)) return;
+                       setLoading(true);
+                       for (const id of ids) await callAudit('update-post', { id, is_vault: true, is_freebie: false });
+                       setPosts(prev => prev.map(p => ids.includes(p.id) ? { ...p, is_vault: true, is_freebie: false } : p));
+                       cancelSelection();
+                       setLoading(false);
+                     }}
+                     className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase text-white/40 hover:text-[#ff00ff] hover:border-[#ff00ff]/30 transition-all"
+                   >
+                     Vault
+                   </button>
+                   <button 
+                     onClick={async () => {
+                       const ids = Array.from(selectedIds);
+                       if (!confirm(`Mark ${ids.length} as Gifts (Free)?`)) return;
+                       setLoading(true);
+                       for (const id of ids) await callAudit('update-post', { id, is_freebie: true, is_vault: false });
+                       setPosts(prev => prev.map(p => ids.includes(p.id) ? { ...p, is_freebie: true, is_vault: false } : p));
+                       cancelSelection();
+                       setLoading(false);
+                     }}
+                     className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase text-white/40 hover:text-[#ff00ff] hover:border-[#ff00ff]/30 transition-all"
+                   >
+                     Gift
+                   </button>
+                   <button 
+                     onClick={bulkSoftHide}
+                     className="px-3 py-2.5 bg-white/10 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest text-white/60 hover:bg-orange-500/20 hover:text-orange-200 transition-all"
+                   >
+                     Toss
+                   </button>
+                   <button 
+                     onClick={bulkHardDelete}
+                     className="px-3 py-2.5 bg-red-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:scale-[1.05] transition-all"
+                   >
+                     Purge
+                   </button>
+                   <button 
+                     onClick={cancelSelection}
+                     className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-xl text-white/40 hover:text-white transition-all"
+                   >
+                      <X size={16} />
+                   </button>
+                </div>
+
+             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── Full Edit Modal ── */}
+
       <AnimatePresence>
         {editPost && draft && (
           <motion.div

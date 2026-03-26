@@ -274,7 +274,7 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                          loop 
                          muted 
                          playsInline 
-                         className="w-full h-full object-contain"
+                          className="w-full h-full object-cover object-top lg:object-contain" // Cover for mobile-style, contain fallback for weird aspect ratios on desktop if needed
                        />
                     ) : (
                       <Image
@@ -282,8 +282,9 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                         alt=""
                         fill
                         unoptimized
-                        className="object-contain"
+                        className="object-cover object-top lg:object-contain"
                       />
+
                     )}
                   </div>
                 )}
