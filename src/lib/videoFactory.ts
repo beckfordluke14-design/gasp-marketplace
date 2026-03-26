@@ -7,22 +7,12 @@ const GROK_API_KEY = process.env.GROK_API_KEY || process.env.XAI_API_KEY || '';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-if (!GEMINI_API_KEY) {
-  throw new Error('MISSING_GEMINI_KEY: Ensure GOOGLE_GENERATIVE_AI_API_KEY is configured in your Railway Environment Variables.');
-}
-
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-
-/**
- * STEP 1: IMAGE GENERATOR & STORAGE SERVICE
- * Resilient Multi-Node Genesis.
- */
 export async function generateBaseImage(
   personaId: string, 
   visualCategory: string, 
   customClothing?: string
 ): Promise<string> {
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   console.log(`📸 [Factory] Generating Base Image for ${personaId} via ${visualCategory}...`);
   
   const { data: persona } = await supabase.from('personas').select('system_prompt').eq('id', personaId).single();
@@ -33,7 +23,9 @@ export async function generateBaseImage(
 
   // 1. PRIMARY STAGE: Google Gemini (High-Status Genesis)
   try {
+     if (!GEMINI_API_KEY) throw new Error('MISSING_GEMINI_KEY');
      console.log(`🤖 [Factory] Calling Gemini Node...`);
+     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-image-preview" as any });
      const result: any = await model.generateContent(prompt);
      const imageBase64 = result.response.candidates[0].content.parts[0].inlineData.data;
@@ -109,6 +101,7 @@ export async function dispatchGrokVideo(
     visualCategory: string, 
     personaId: string
 ) {
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   console.log(`🎬 [Factory] Dispatching Grok Render request for ${personaId}...`);
   
   const config = VISION_LIBRARY[visualCategory as VisualCategory];

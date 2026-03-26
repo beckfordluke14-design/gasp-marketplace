@@ -8,8 +8,8 @@ import { Camera, Zap, Film, Lock, Layers, Info, CheckCircle2, X } from 'lucide-r
 import Image from 'next/image';
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 );
 
 export default function LiveStudioDeck({ persona, onClose }: { persona: any, onClose: () => void }) {

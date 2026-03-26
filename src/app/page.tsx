@@ -43,6 +43,7 @@ const supabase = createClient(
 );
 
 function MarketplaceMain() {
+  const [mounted, setMounted] = useState(false);
   const [selectedPersonaId, setSelectedPersonaId] = useState(initialPersonas[0].id);
   const [lastActivePersonaId, setLastActivePersonaId] = useState<string>('');
   const [openChatIds, setOpenChatIds] = useState<string[]>([]);
@@ -56,8 +57,18 @@ function MarketplaceMain() {
   const [followNotify, setFollowNotify] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+       <div className="w-12 h-12 border-4 border-[#ffea00]/20 border-t-[#ffea00] rounded-full animate-spin" />
+    </div>
+  );
+
   const allPersonas = [
-    ...dbPersonas.map(p => {
+    ...(dbPersonas || []).map(p => {
         const fallback = (initialPersonas.find(i => i.id === p.id) || {}) as any;
         return {
             ...fallback,

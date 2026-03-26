@@ -1,9 +1,0 @@
-[phases.setup]
-nixPkgs = ["nodePackages.npm", "ffmpeg"]
-
-[phases.build]
-cmds = ["npm install --no-package-lock", "npm run build"]
-
-[start]
-cmd = "npm run start"
-
