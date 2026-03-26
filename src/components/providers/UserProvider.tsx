@@ -10,6 +10,7 @@ interface UserContextType {
   profile: {
     id: string;
     nickname?: string;
+    is_admin?: boolean;
     is_known?: boolean;
     last_active_at?: string;
     credit_balance?: number;

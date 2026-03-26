@@ -112,13 +112,13 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                     {status === 'confirmed' ? 'Stake Verified' : 'Session Recovery Active'}
                  </span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-syncopate font-black uppercase italic text-white tracking-tighter">
-                 Sovereign Bridge
+              <h2 className="text-2xl md:text-5xl font-syncopate font-black uppercase italic text-white tracking-tighter leading-none">
+                 Stake Terminal
               </h2>
           </div>
        </div>
 
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
           
           {/* LEFT: THE QR NODE */}
           <div className="space-y-6">
@@ -128,8 +128,8 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                 </div>
                 
                 <div className="w-full space-y-4">
-                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00f0ff] text-center">
-                      Step 1: Scan Merchant Node
+                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00f0ff] text-center italic">
+                      Step 1: Initialize Settlement
                    </p>
                    <div 
                       onClick={() => {
@@ -148,23 +148,27 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
              
              <div className="hidden md:block p-4 rounded-2xl bg-white/[0.01] border border-white/5 text-center">
                 <p className="text-[9px] text-white/20 font-black uppercase tracking-widest italic leading-relaxed">
-                   Node monitoring for <span className="text-white">{nativeEquivalent} {network === 'solana' ? 'SOL' : 'ETH'}</span>
+                   Active monitoring for <span className="text-white">{nativeEquivalent} {network === 'solana' ? 'SOL' : 'ETH'}</span>
                 </p>
              </div>
           </div>
 
           {/* RIGHT: THE SETTLEMENT HUB */}
           <div className="space-y-6">
-             <div className="p-6 rounded-[2rem] bg-white/5 border border-white/10 flex flex-col gap-6">
-                <div className="flex items-center justify-between">
-                   <div className="flex flex-col gap-1">
-                      <span className="text-[10px] uppercase font-black text-white/40 tracking-widest">{pkg.label}</span>
-                      <span className="text-2xl font-syncopate font-bold text-white italic uppercase tracking-tighter">
-                         {totalCredits.toLocaleString()}c
-                      </span>
+             <div className="p-6 md:p-10 rounded-[2rem] bg-white/5 border border-white/10 flex flex-col gap-8 shadow-2xl">
+                <div className="flex flex-col gap-6">
+                   <div className="flex flex-col gap-1.5 border-b border-white/5 pb-6">
+                      <span className="text-[10px] uppercase font-black text-white/40 tracking-widest italic">{pkg.label}</span>
+                      <div className="flex flex-wrap items-baseline gap-3">
+                        <span className="text-3xl md:text-4xl font-syncopate font-black text-white italic uppercase tracking-tighter break-all">
+                           {totalCredits.toLocaleString()}
+                        </span>
+                        <span className="text-[10px] md:text-sm font-black text-white/20 uppercase tracking-[0.2em]">Credits</span>
+                      </div>
                    </div>
-                   <div className="text-right">
-                      <span className="text-3xl font-black text-[#00f0ff] italic leading-none">${pkg.priceUsd}</span>
+                   <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic">Total Settlement</span>
+                      <span className="text-3xl md:text-5xl font-syncopate font-black text-[#00f0ff] italic tracking-tighter shadow-[#00f0ff]/10 drop-shadow-xl h-20 flex items-center">${pkg.priceUsd}</span>
                    </div>
                 </div>
 
