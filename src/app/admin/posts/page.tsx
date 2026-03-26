@@ -81,6 +81,7 @@ export default function PostStudio() {
   const [showSoloModal, setShowSoloModal]   = useState<PersonaPost | null>(null);
   const [soloDraft, setSoloDraft]           = useState({ name: '', age: '22', city: '', vibe: 'mysterious' });
   const [mergingPost, setMergingPost]       = useState<PersonaPost | null>(null);
+  const [identityTarget, setIdentityTarget] = useState<{ id: string, name: string } | null>(null);
 
 
   useEffect(() => { setMounted(true); }, []);
@@ -656,7 +657,7 @@ export default function PostStudio() {
                                 className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-white text-black rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#00f0ff] transition-all">
                                 <Pencil size={11} /> Edit
                               </button>
-                              <div className="grid grid-cols-3 gap-1.5 w-full">
+                              <div className="grid grid-cols-4 gap-1.5 w-full">
                                 <button onClick={() => toggleVault(post)} title={post.is_vault ? 'Move to Feed' : 'Move to Vault'}
                                   className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_vault ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
                                   <Lock size={11} />
@@ -669,6 +670,11 @@ export default function PostStudio() {
                                   className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_freebie ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
                                   <Gift size={11} />
                                 </button>
+                                <button onClick={() => setShowSoloModal(post)} title="Go Solo: Create New Persona"
+                                  className="h-8 rounded-lg bg-white/5 text-white/40 hover:bg-[#00f0ff]/20 hover:text-white flex items-center justify-center transition-all">
+                                  <Sparkles size={11} />
+                                </button>
+
                                 <button onClick={() => markDuplicate(post.id)} title="Hide Duplicate"
                                   className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/30 hover:text-orange-300 flex items-center justify-center transition-all">
                                   <Copy size={11} />
@@ -681,23 +687,43 @@ export default function PostStudio() {
                                   className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_gallery ? 'bg-[#00f0ff] text-black' : 'bg-white/10 text-white/50 hover:bg-[#00f0ff]/40'}`}>
                                   <FolderHeart size={11} />
                                 </button>
-                                <button onClick={() => setShowSoloModal(post)} title="Go Solo: Create New Persona"
-                                  className="h-8 rounded-lg bg-white/5 text-white/40 hover:bg-[#00f0ff]/20 hover:text-white flex items-center justify-center transition-all">
-                                  <Sparkles size={11} />
-                                </button>
-                                <button onClick={() => { 
-                                    const targetId = prompt('Merge post into which Persona ID?');
-                                    if (targetId) {
-                                        callAudit('update-post', { id: post.id, persona_id: targetId }).then(() => fetchPosts());
-                                    }
-                                 }} title="Reassign to Persona"
-                                  className="h-8 rounded-lg bg-white/5 text-white/40 hover:bg-[#ff00ff]/20 hover:text-white flex items-center justify-center transition-all">
-                                  <UserPlus size={11} />
-                                </button>
                                 <button onClick={() => hardDelete(post.id)} title="Permanent Delete"
                                   className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-red-500/30 hover:text-red-400 flex items-center justify-center transition-all">
                                   <Trash2 size={11} />
                                 </button>
+
+                                {/* Identity Buffer Actions */}
+                                <button onClick={() => setIdentityTarget({ id: post.persona_id, name: showName })} title={identityTarget?.id === post.persona_id ? 'Active Target' : 'Set as Pulse Target'}
+                                  className={`h-8 rounded-lg flex items-center justify-center transition-all col-span-1 ${identityTarget?.id === post.persona_id ? 'bg-[#00f0ff] text-black shadow-[0_0_15px_rgba(0,240,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-[#00f0ff]/20 hover:text-white'}`}>
+                                  <UserCheck size={11} />
+                                </button>
+
+                                {identityTarget && identityTarget.id !== post.persona_id && (
+                                  <button onClick={() => {
+                                      if (!confirm(`Move node to ${identityTarget.name}?`)) return;
+                                      callAudit('update-post', { id: post.id, persona_id: identityTarget.id }).then(() => {
+                                          setPosts(prev => prev.map(p => p.id === post.id ? { ...p, persona_id: identityTarget.id, personas: { ...p.personas, name: identityTarget.name } } : p));
+                                          flash(post.id);
+                                      });
+                                  }} title={`Move Node to ${identityTarget.name}`}
+                                    className="h-8 rounded-lg bg-[#00f0ff]/20 border border-[#00f0ff]/40 text-[#00f0ff] hover:bg-[#00f0ff] hover:text-black flex items-center justify-center transition-all animate-pulse col-span-1">
+                                    <Package size={11} />
+                                  </button>
+                                )}
+
+                                {identityTarget && identityTarget.id !== post.persona_id && (
+                                  <button onClick={async () => {
+                                      if (!confirm(`CRITICAL: Merge ALL items from ${showName} into ${identityTarget.name}? ${showName} will be DELETED.`)) return;
+                                      setLoading(true);
+                                      const res = await callAudit('merge-persona', { sourceId: post.persona_id, targetId: identityTarget.id });
+                                      if (res.success) { alert('Identity Merged.'); fetchPosts(); }
+                                      else alert(res.error || 'Merge fail.');
+                                      setLoading(false);
+                                  }} title={`Merge ${showName} into ${identityTarget.name}`}
+                                    className="h-8 rounded-lg bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff] hover:bg-[#ff00ff] hover:text-black flex items-center justify-center transition-all col-span-2">
+                                    <span className="text-[7px] font-black uppercase pr-1">Merge</span> <Link2 size={11} />
+                                  </button>
+                                )}
                               </div>
                             </>
                           )}
@@ -788,6 +814,36 @@ export default function PostStudio() {
                    </button>
                 </div>
 
+             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Active Target Pulse Bar ── */}
+      <AnimatePresence>
+        {identityTarget && !selectionMode && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-sm px-4"
+          >
+             <div className="bg-black/90 backdrop-blur-2xl border border-[#00f0ff]/40 rounded-[2rem] p-3 flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+                <div className="flex items-center gap-3 pl-2">
+                   <div className="w-8 h-8 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center text-[#00f0ff]">
+                      <UserCheck size={16} />
+                   </div>
+                   <div className="flex flex-col">
+                      <p className="text-[9px] font-black uppercase text-[#00f0ff] tracking-widest leading-none">Identity Buffer</p>
+                      <p className="text-[8px] font-bold text-white/40 tracking-wider mt-1">{identityTarget.name.toUpperCase()}</p>
+                   </div>
+                </div>
+                <div className="flex items-center gap-1 pr-1">
+                   <div className="text-[7px] text-white/20 font-black uppercase pr-2 italic">Click icons to move/merge</div>
+                   <button onClick={() => setIdentityTarget(null)} className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-full text-white/40 hover:text-white transition-all">
+                      <X size={14} />
+                   </button>
+                </div>
              </div>
           </motion.div>
         )}
