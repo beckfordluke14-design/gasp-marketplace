@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Pencil, Trash2, Star, Lock, Unlock, X, 
   Search, Filter, RefreshCw, LayoutGrid, Check, 
-  EyeOff, Copy, AlertCircle, Video as VideoIcon, Image as ImageIcon,
+  EyeOff, Copy, AlertCircle, Video, Image,
   RotateCcw
 } from 'lucide-react';
 import { proxyImg } from '@/lib/profiles';
