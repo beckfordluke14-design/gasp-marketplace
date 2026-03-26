@@ -1,9 +1,10 @@
 'use client';
 
 import { X, Zap, Trophy, ShieldCheck, Loader2, ArrowRight } from 'lucide-react';
-import { COIN_PACKAGES, CREDIT_PACKAGES } from '@/lib/economy/constants';
+import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import SovereignCheckout from './SovereignCheckout';
 
 interface TopUpDrawerProps {
   onClose: () => void;
@@ -11,72 +12,39 @@ interface TopUpDrawerProps {
 }
 
 /**
- * $GASPAI HYBRID STAKE HUB v1.8
- * Objective: Maximize revenue via CCBill (Card) + Crypto (USDC) with 1:1 TGE Stake logic.
+ * ⛽ SOVEREIGN STAKE HUB v2.0
+ * Objective: 100% Bank-Free Revenue via Direct P2P Crypto Settlement.
  */
 export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
-  const [loadingPkg, setLoadingPkg] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'crypto'>('card');
+  const [selectedPkgId, setSelectedPkgId] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  // 🧬 CCBILL ACCOUNT CONFIGURATION
-  const CCBILL_ACC_NO = '953456'; 
-  const CCBILL_SUBACC = '0001';
-  const CCBILL_FORM_NAME = '123flex'; 
+  // 🧬 CUSTOM STAKE LOGIC
+  const [customAmount, setCustomAmount] = useState<string>('');
+  const handleCustomStake = () => {
+    const amount = parseFloat(customAmount);
+    if (isNaN(amount) || amount < 1) return;
+    setSelectedPkgId(`custom_${amount}`);
+  };
 
-  // 🧬 REAL MERCHANT WALLET ADDRESS (SOLANA NETWORK)
-  const CRYPTO_WALLET_ADDRESS = 'DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS'; 
-
-  /**
-   * HYBRID REDIRECT ENGINE
-   * Dispatches to CCBill or provides Crypto instructions.
-   */
-  async function handlePurchase(pkgId: string) {
-    if (loadingPkg) return;
-    const pkg = CREDIT_PACKAGES.find(p => p.id === pkgId);
-    if (!pkg) return;
-
-    setLoadingPkg(pkgId);
-    
-    // 1. Log Intent for Auditor Tracking
-    try {
-        const { createBrowserClient } = await import('@supabase/ssr');
-        const supabase = createBrowserClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-        );
-        await supabase.from('cart_intent').insert({ 
-            user_id: userId, 
-            package_id: pkgId, 
-            method: paymentMethod 
-        });
-    } catch (e) { console.warn('Intent log skipped.'); }
-
-    if (paymentMethod === 'card') {
-      // CCBILL SECURE REDIRECT
-      const baseUrl = 'https://api.ccbill.com/wap-frontflex/flexformv2.php';
-      const params = new URLSearchParams({
-          clientAccNo: CCBILL_ACC_NO,
-          clientSubacc: CCBILL_SUBACC,
-          formName: CCBILL_FORM_NAME,
-          currencyCode: '840', // USD
-          initialPrice: pkg.priceUsd.toString(),
-          initialPeriod: '90',
-          'X-userId': userId,
-          'X-packageId': pkgId
-      });
-      window.location.href = `${baseUrl}?${params.toString()}`;
-    } else {
-      // 🧬 HELIO CRYPTO BRIDGE v1.8
-      // Objective: Zero-Touch USDC Settlement
-      const helioUrl = pkg.helioPayLink || 'https://hel.io/sh/REPLACE_ME';
-      const params = new URLSearchParams({
-          customAction: 'gasp_stake',
-          customer_id: userId, // 🧬 METADATA TUNNEL
-          package_id: pkgId
-      });
-      window.location.href = `${helioUrl}?${params.toString()}`;
-      setLoadingPkg(null);
-    }
+  if (isSuccess) {
+    return (
+      <div className="fixed inset-y-0 right-0 w-full md:w-[420px] bg-black/95 backdrop-blur-3xl border-l border-white/10 z-[300] flex flex-col items-center justify-center p-8 text-center font-outfit">
+        <div className="w-20 h-20 rounded-full bg-[#00f0ff]/20 flex items-center justify-center mb-6 border border-[#00f0ff]/40 shadow-[0_0_50px_rgba(0,240,255,0.2)]">
+          <Zap size={40} className="text-[#00f0ff] animate-pulse" />
+        </div>
+        <h3 className="text-2xl font-syncopate font-black uppercase italic text-white mb-2">Stake Confirmed</h3>
+        <p className="text-xs text-white/40 uppercase tracking-[0.3em] font-black leading-relaxed">
+          The Blockchain Node has verified your settlement. Credits + 15% Bonus injected into your identity node. 🧬🛡️
+        </p>
+        <button 
+          onClick={onClose}
+          className="mt-12 w-full h-14 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
+        >
+          Return to Console
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -85,15 +53,15 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
       {/* Header */}
       <div className="p-8 border-b border-white/5 flex items-center justify-between bg-black/40">
         <div className="flex items-center gap-4">
-           <div className="w-12 h-12 rounded-2xl bg-[#ffea00] flex items-center justify-center shadow-[0_0_30px_rgba(255,234,0,0.3)]">
+           <div className="w-12 h-12 rounded-2xl bg-[#00f0ff] flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.3)]">
               <Zap size={24} className="text-black" />
            </div>
            <div>
               <h3 className="text-xl font-syncopate font-black uppercase italic text-white leading-none">
                  $GASPAI HUB
               </h3>
-              <p className="text-[10px] text-[#ffea00] uppercase font-black tracking-widest mt-2 underline decoration-[#ffea00]/30 underline-offset-4">
-                 TGE Stake Reservation
+              <p className="text-[10px] text-[#00f0ff] uppercase font-black tracking-widest mt-2 underline decoration-[#00f0ff]/30 underline-offset-4">
+                 Sovereign Stake Terminal
               </p>
            </div>
         </div>
@@ -103,121 +71,116 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto no-scrollbar p-8 space-y-8">
+      <div className="flex-1 overflow-y-auto no-scrollbar">
         
-        {/* Method Toggles */}
-        <div className="bg-white/5 rounded-2xl p-1.5 flex items-center gap-1 border border-white/10">
-           <button 
-             onClick={() => setPaymentMethod('card')}
-             className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${paymentMethod === 'card' ? 'bg-[#ffea00] text-black shadow-[0_0_15px_#ffea0044]' : 'text-white/40 hover:text-white'}`}
-           >
-              Credit Card
-           </button>
-           <button 
-             onClick={() => setPaymentMethod('crypto')}
-             className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative overflow-hidden ${paymentMethod === 'crypto' ? 'bg-[#00f0ff] text-black shadow-[0_0_15px_#00f0ff44]' : 'text-white/40 hover:text-white'}`}
-           >
-              Crypto (USDC)
-              {paymentMethod !== 'crypto' && <span className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-[#00f0ff] text-black text-[6px] font-black rounded-full">+15% Bonus</span>}
-           </button>
-        </div>
-
-        {/* 🧬 CRYPTO-SPECIFIC INSTRUCTIONS */}
-        {paymentMethod === 'crypto' && (
-            <div className="p-5 rounded-2xl bg-[#00f0ff]/5 border border-[#00f0ff]/20 animate-in fade-in slide-in-from-top-4 duration-500">
-               <div className="flex items-center justify-between mb-3">
+        {selectedPkgId ? (
+          <SovereignCheckout 
+            userId={userId}
+            packageId={selectedPkgId}
+            onSuccess={() => setIsSuccess(true)}
+            onCancel={() => setSelectedPkgId(null)}
+          />
+        ) : (
+          <div className="p-8 space-y-8 animate-in fade-in duration-500">
+            {/* 🧬 MERCHANT STATUS */}
+            <div className="p-5 rounded-2xl bg-[#00f0ff]/5 border border-[#00f0ff]/20 flex items-center justify-between">
+               <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
                      <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                     <span className="text-[8px] font-black uppercase tracking-widest text-[#00f0ff]">Gasp Merchant Node v1.8 Active</span>
+                     <span className="text-[8px] font-black uppercase tracking-widest text-[#00f0ff]">P2P Ledger Logic v2.0 Active</span>
                   </div>
-                  <ShieldCheck size={12} className="text-white/20" />
+                  <p className="text-[10px] text-white/40 font-bold italic mt-1">Bank-Free Sovereign Settlement Enabled.</p>
                </div>
-               <p className="text-[10px] text-white/50 leading-relaxed font-bold italic">
-                  Node Protocol: <span className="text-white underline decoration-[#00f0ff]/30 text-[11px]">SOLANA Network ONLY</span>. USDC Stablecoin Settlement Active. <span className="text-[#00f0ff]">No USDC? Acquire instantly in Phantom/Trust via Card.</span> 🛡️
-               </p>
-               <button 
-                 onClick={() => {
-                   navigator.clipboard.writeText(CRYPTO_WALLET_ADDRESS);
-                   alert('Gasp Merchant Address Copied to Clipboard! 🏎️💨');
-                 }}
-                 className="w-full h-10 mt-4 border border-[#00f0ff]/30 rounded-xl flex items-center justify-between px-4 hover:bg-[#00f0ff]/10 transition-all group"
-               >
-                  <span className="text-[7px] font-black text-white/40 uppercase tracking-widest group-hover:text-white">Copy Merchant Ledger ID</span>
-                  <div className="flex items-center gap-2">
-                     <span className="text-[6px] font-mono text-white/10 uppercase group-hover:text-white/30 transition-colors uppercase">USDC (SOL/BASE)</span>
-                     <ArrowRight size={10} className="text-[#00f0ff]" />
-                  </div>
-               </button>
+               <ShieldCheck size={16} className="text-[#00f0ff]/30" />
             </div>
+
+            {/* 🪙 CUSTOM WHALE STAKE */}
+            <div className="space-y-4">
+               <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-[#00f0ff] italic">Custom Whale Stake</h4>
+               <div className="relative group">
+                  <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                     <span className="text-lg font-black text-[#00f0ff]">$</span>
+                  </div>
+                  <input 
+                    type="number"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                    placeholder="Enter USD Amount (e.g. 5000)"
+                    className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-32 text-xl font-black text-white focus:outline-none focus:border-[#00f0ff]/40 transition-all"
+                  />
+                  <button 
+                    onClick={handleCustomStake}
+                    className="absolute inset-y-2 right-2 px-6 rounded-xl bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(0,240,255,0.2)]"
+                  >
+                     Stake Now
+                  </button>
+               </div>
+               <p className="text-[7px] text-white/20 uppercase tracking-[0.2em] font-black ml-1">
+                  Custom amounts automatically qualify for the 1.15x Multiplier. 🛡️
+               </p>
+            </div>
+
+            <div className="space-y-4">
+               <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white/40 italic">Select Your Tier</h4>
+               <div className="grid gap-4">
+                  {CREDIT_PACKAGES.map((pkg) => (
+                    <button
+                      key={pkg.id}
+                      onClick={() => setSelectedPkgId(pkg.id)}
+                      className={`
+                        relative group transition-all duration-300
+                        p-6 rounded-2xl bg-white/5 border border-white/10 
+                        flex items-center justify-between overflow-hidden
+                        hover:bg-white/[0.08] hover:border-[#00f0ff]/40
+                        ${pkg.isPopular ? 'border-[#00f0ff]/40 bg-[#00f0ff]/5 shadow-[0_0_20px_rgba(0,240,255,0.1)]' : ''}
+                      `}
+                    >
+                      <div className="flex flex-col items-start gap-1 relative z-10 text-left">
+                        {pkg.isPopular && (
+                            <span className="text-[9px] font-black uppercase text-[#00f0ff] tracking-[0.2em] mb-3 flex items-center gap-2">
+                                <Trophy size={10} fill="#00f0ff" />
+                                Elite Genesis Tier
+                            </span>
+                        )}
+                        <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">{pkg.label}</span>
+                        <span className="text-3xl font-syncopate font-bold text-white mt-1 italic leading-none">
+                            {Math.floor(pkg.credits * 1.15).toLocaleString()}
+                            <span className="text-[10px] uppercase font-black text-white/20 tracking-widest not-italic ml-2">credits</span>
+                        </span>
+                        <div className="mt-4 px-2.5 py-1 rounded-md bg-[#00f0ff]/10 border border-[#00f0ff]/10">
+                            <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest font-syncopate italic">
+                               Exclusive 1.15x Stake Multiplier
+                            </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-3 z-10">
+                        <span className="text-xl font-black text-white/20 group-hover:text-white transition-colors italic">
+                            ${pkg.priceUsd}
+                        </span>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[#00f0ff] text-black shadow-lg group-hover:scale-110 active:scale-95 transition-all">
+                            <Zap size={20} />
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+               </div>
+            </div>
+
+            {/* Compliance / Info Array */}
+            <div className="p-6 rounded-2xl border border-white/5 bg-white/[0.02] space-y-4">
+                <h5 className="text-[9px] font-black uppercase tracking-[0.25em] text-[#00f0ff] flex items-center gap-2">
+                    <ShieldCheck size={12} /> SECURE PROTOCOL G-V1.8
+                </h5>
+                <p className="text-[8px] text-white/10 uppercase tracking-[0.3em] mt-2 block leading-loose border-t border-white/5 pt-4 font-black italic">
+                    Decentralized P2P Settlement. Zero Chargebacks. 15% Bonus Credits Applied to every Sovereign Tier. 🪙
+                </p>
+                <p className="text-[7px] text-white/5 uppercase tracking-[0.3em] font-black italic text-center">
+                    All reservations are final and settled on the blockchain. 🧬🛡️
+                </p>
+            </div>
+          </div>
         )}
-
-        <div className="space-y-4">
-           <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white/40 italic">Select Your Tier</h4>
-           <div className="grid gap-4">
-              {CREDIT_PACKAGES.map((pkg) => (
-                <button
-                  key={pkg.id}
-                  disabled={!!loadingPkg}
-                  onClick={() => handlePurchase(pkg.id)}
-                  className={`
-                    relative group transition-all duration-300
-                    p-6 rounded-2xl bg-white/5 border border-white/10 
-                    flex items-center justify-between overflow-hidden
-                    hover:bg-white/[0.08] hover:border-white/20
-                    ${pkg.isPopular ? 'border-[#ffea00]/40 bg-[#ffea00]/5 shadow-[0_0_20px_rgba(255,234,0,0.1)]' : ''}
-                    disabled:opacity-50 disabled:grayscale
-                  `}
-                >
-                  <div className="flex flex-col items-start gap-1 relative z-10 text-left">
-                    {pkg.isPopular && (
-                        <span className="text-[9px] font-black uppercase text-[#ffea00] tracking-[0.2em] mb-3 flex items-center gap-2">
-                            <Trophy size={10} fill="#ffea00" />
-                            Elite Whale Tier
-                        </span>
-                    )}
-                    <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">{pkg.label}</span>
-                    <span className="text-3xl font-syncopate font-bold text-white mt-1 italic leading-none">
-                        {(paymentMethod === 'crypto' ? Math.floor(pkg.credits * 1.15) : pkg.credits).toLocaleString()}
-                        <span className="text-[10px] uppercase font-black text-white/20 tracking-widest not-italic ml-2">credits</span>
-                    </span>
-                    <div className="mt-4 px-2.5 py-1 rounded-md bg-white/10 border border-white/10">
-                        <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest font-syncopate italic">
-                           {paymentMethod === 'crypto' ? 'Exclusive 1.15x Stake Multiplier' : 'Airdrop Multiplier Active'}
-                        </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-end gap-3 z-10">
-                    <span className="text-xl font-black text-white/20 group-hover:text-white transition-colors italic">
-                        ${pkg.priceUsd}
-                    </span>
-                    <div className={`
-                        w-12 h-12 rounded-xl flex items-center justify-center
-                        ${paymentMethod === 'card' ? 'bg-[#ffea00]' : 'bg-[#00f0ff]'} text-black shadow-lg
-                        group-hover:scale-110 active:scale-95 transition-all
-                    `}>
-                        {loadingPkg === pkg.id ? <Loader2 className="animate-spin" size={20} /> : <Zap size={20} />}
-                    </div>
-                  </div>
-                </button>
-              ))}
-           </div>
-        </div>
-
-        {/* Info & CCBill Compliance Array */}
-        <div className="p-6 rounded-2xl border border-white/5 bg-white/[0.02] space-y-4">
-            <h5 className="text-[9px] font-black uppercase tracking-[0.25em] text-[#ffea00] flex items-center gap-2">
-                <ShieldCheck size={12} /> SECURE PROTOCOL G-V1.7
-            </h5>
-            <p className="text-[8px] text-white/10 uppercase tracking-[0.3em] mt-2 block leading-loose border-t border-white/5 pt-4 font-black italic">
-                {paymentMethod === 'card' 
-                  ? 'Processed by AllTheseFlows LLC via CCBill. 18+ Verification Mandatory.' 
-                  : 'Direct Crypto Bridge. Zero Chargebacks. 15% Bonus Credits Applied.'}
-            </p>
-            <p className="text-[7px] text-white/5 uppercase tracking-[0.3em] font-black italic text-center">
-                Virtual currency possesses zero cash value until $GASPAI token generation. All reservations are final. 🧬🛡️
-            </p>
-        </div>
       </div>
     </div>
   );
