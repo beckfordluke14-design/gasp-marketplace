@@ -46,6 +46,9 @@ function MarketplaceMain() {
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [guestId, setGuestId] = useState<string>('');
   const [dbPersonas, setDbPersonas] = useState<any[]>([]);
+  // 🛡️ SOVEREIGN CHAT CACHE: Ensures any persona clicked from feed can open a chat
+  // even if their image filter excluded them from refinedPersonas
+  const [chatPersonaCache, setChatPersonaCache] = useState<Record<string, any>>({});
   const [isZenMode, setIsZenMode] = useState(false);
   const [deadIds, setDeadIds] = useState<Set<string>>(new Set());
   const searchParams = useSearchParams();
@@ -116,11 +119,37 @@ function MarketplaceMain() {
     }));
   }, [allPersonas]);
 
-  const handleSelectPersona = (id: string) => {
+  const handleSelectPersona = async (id: string) => {
     setSelectedPersonaId(id);
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     setOpenChatIds(prev => (isMobile ? [id] : prev.includes(id) ? prev : [...prev, id]));
     setMinimizedIds(prev => prev.filter(m => m !== id));
+
+    // 🛡️ SOVEREIGN PERSONA FETCH: If persona not in local list, fetch from DB
+    // This handles DB-only personas that didn't pass the image filter in refinedPersonas
+    const alreadyKnown = refinedPersonas.find((p: any) => p.id === id) || chatPersonaCache[id];
+    if (!alreadyKnown) {
+      try {
+        const { data: fetchedPersona } = await supabase
+          .from('personas')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
+        if (fetchedPersona) {
+          setChatPersonaCache(prev => ({
+            ...prev,
+            [id]: {
+              ...fetchedPersona,
+              image: fetchedPersona.seed_image_url || fetchedPersona.image || '/v1.png',
+              vibe: 'online now',
+              status: 'online'
+            }
+          }));
+        }
+      } catch (e) {
+        console.warn('[Chat] Persona fetch failed for', id, e);
+      }
+    }
   };
 
   const handleCloseChat = (id: string) => {
@@ -195,8 +224,23 @@ function MarketplaceMain() {
         <AnimatePresence mode="popLayout">
            {[...openChatIds].reverse().map((id, index) => {
               const isMinimized = minimizedIds.includes(id);
-              const p = refinedPersonas.find((persona: any) => persona.id === id);
-              if (!p || isMinimized) return null;
+              // 🛡️ SOVEREIGN LOOKUP: Check refinedPersonas first, then chatPersonaCache for DB-fetched personas
+              const p = refinedPersonas.find((persona: any) => persona.id === id) || chatPersonaCache[id];
+              // Show loading placeholder if we're still fetching the persona
+              if (isMinimized) return null;
+              if (!p) {
+                // Persona not loaded yet — show minimal loading drawer so user doesn't see blank
+                return (
+                  <motion.div key={id} initial={{ x: '100%', opacity: 0 }} animate={{ x: `-${index * 12}px`, opacity: 1 }} exit={{ x: '100%', opacity: 0 }}
+                    className="h-full w-[480px] pointer-events-auto bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.8)] flex items-center justify-center"
+                  >
+                    <div className="flex flex-col items-center gap-4 opacity-20">
+                      <div className="w-10 h-10 border-2 border-[#ff00ff]/40 border-t-[#ff00ff] rounded-full animate-spin" />
+                      <span className="text-[8px] font-black uppercase tracking-widest text-white">establishing link...</span>
+                    </div>
+                  </motion.div>
+                );
+              }
               return (
                 <motion.div key={id} initial={{ x: '100%', opacity: 0 }} animate={{ x: `-${index * 12}px`, opacity: 1 }} exit={{ x: '100%', opacity: 0 }} 
                    className="h-full pointer-events-auto bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.8)]"

@@ -47,6 +47,8 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
   const [isFollowing, setIsFollowing] = useState(false);
   const [bondScore, setBondScore] = useState(0);
   const [dbLoaded, setDbLoaded] = useState(false);
+  // 🎙️ LIVE VOICE CAPTURE: Store voice note from stream before DB sync races it
+  const [liveVoiceUrl, setLiveVoiceUrl] = useState<string | null>(null);
   
   // 🍿 LIGHTBOX STATE
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -64,11 +66,14 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     },
     onResponse: () => {
       setIsTyping(false);
+      // 🎙️ Clear stale live voice from previous message
+      setLiveVoiceUrl(null);
     },
     onFinish: async () => {
       setIsTyping(false);
-      // 🔥 NEURAL SYNC: Fetch the enriched messages from Supabase after the stream finishes
-      // This ensures we get the real media_url, audio_script, and translation from the DB
+      // 🔥 NEURAL SYNC: Fetch enriched messages from Supabase after stream finishes
+      // Small delay to allow DB write to complete before sync
+      await new Promise(r => setTimeout(r, 800));
       const { data: syncMsgs } = await supabase
         .from('chat_messages')
         .select('*')
@@ -90,6 +95,8 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
           created_at: m.created_at
         } as any)));
       }
+      // Clear live voice once DB messages are loaded (they now have the URL persisted)
+      setLiveVoiceUrl(null);
       
       // Update bond score after chat session
       const { data: stats } = await supabase.from('user_persona_stats').select('bond_score').eq('user_id', idToUse).eq('persona_id', personaId).maybeSingle();
@@ -144,6 +151,17 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     };
     loadData();
   }, [personaId, idToUse]);
+
+  // 🎙️ LIVE VOICE CAPTURE: Watch chatData stream for voice_note events
+  // This is the replacement for onData (more stable across AI SDK versions)
+  useEffect(() => {
+    if (!chatData || !Array.isArray(chatData)) return;
+    const voiceEvent = chatData.find((d: any) => d?.type === 'voice_note' && d?.audioUrl);
+    if (voiceEvent?.audioUrl && voiceEvent.audioUrl !== liveVoiceUrl) {
+      console.log('🎙️ [ChatDrawer] Live voice detected in chatData:', voiceEvent.audioUrl);
+      setLiveVoiceUrl(voiceEvent.audioUrl);
+    }
+  }, [chatData]);
 
   useEffect(() => {
     // 🚦 GATED SCROLL: Only auto-scroll to bottom if we are in the chat tab and new data arrives
@@ -267,11 +285,15 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
               const isAssistant = msg.role === 'assistant';
               const isLast = idx === messages.length - 1;
               
-              // LIVE DATA: Check for voice notes in the chatData stream
-              const liveData: any = isLast && isAssistant ? (chatData || []).find((d: any) => d.type === 'voice_note') : null;
-              const hasVoice = msg.type === 'voice' || msg.media_url?.includes('.mp3') || liveData?.audioUrl;
-              const voiceUrl = msg.media_url || liveData?.audioUrl;
-              const translation = msg.audio_translation || liveData?.translation;
+              // 🎙️ LIVE VOICE RESOLUTION:
+              // Priority: 1) DB-persisted media_url, 2) live captured stream URL (before DB sync)
+              // liveVoiceUrl is set immediately when the stream fires, then cleared after DB sync
+              const liveCapturedUrl = isLast && isAssistant && !msg.media_url ? liveVoiceUrl : null;
+              const hasVoice = msg.type === 'voice' || msg.media_url?.includes('.mp3') || !!liveCapturedUrl;
+              const voiceUrl = msg.media_url || liveCapturedUrl || null;
+              // Translation: from DB (persisted) or live stream chatData
+              const liveStreamData = isLast && isAssistant ? (chatData || []).find((d: any) => d?.type === 'voice_note' && d?.translation) : null;
+              const translation = msg.audio_translation || liveStreamData?.translation;
 
               return (
                 <div key={msg.id || idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>

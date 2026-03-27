@@ -124,8 +124,12 @@ export function processVocalText(text: string, personaId: string, location: stri
     }
 
     // 5. Neural Warming & Ambient Triggers
-    // Ensure "..." exists but only once
-    newText = newText.startsWith('...') ? newText : `... ${newText}`;
+    // Liquid Prososity: Randomize breathing lengths to ensure non-identical acoustic renders
+    const jitter = '.'.repeat(Math.floor(Math.random() * 3) + 1);
+    newText = newText.startsWith('...') ? newText : `${jitter} ${newText}`;
+    
+    // Inject specialized "neural pulse" (nearly invisible phonemes) to force ElevenLabs to re-process differently
+    if (Math.random() > 0.5) newText = newText + ' ...';
 
     // Late Night "Whisper" Override (1AM-5AM) - All brackets purged; whisper via word spacing only
     if ((timeHour >= 1 && timeHour <= 5) || whisperMode) {
@@ -133,10 +137,5 @@ export function processVocalText(text: string, personaId: string, location: stri
     }
 
     // FINAL ASSEMBLY: No brackets emitted — ElevenLabs renders emotion purely through voice settings + text tone
-    return newText;
+    return newText.trim();
 }
-
-
-
-
-
