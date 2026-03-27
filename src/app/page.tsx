@@ -9,6 +9,7 @@ import RightSidebar from '@/components/RightSidebar';
 import StoriesRow from '@/components/StoriesRow';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
+import BottomNav from '@/components/BottomNav';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
 import { supabase } from '@/lib/supabaseClient';
@@ -26,6 +27,7 @@ function MarketplaceContent() {
   const [selectedPersonaId, setSelectedPersonaId] = useState<string>(initialPersonas[0]?.id ?? '');
   const [deadIds, setDeadIds] = useState<Set<string>>(new Set());
   const [showStories, setShowStories] = useState(true);
+  const [showPersonaList, setShowPersonaList] = useState(false);
   const [guestId, setGuestId] = useState<string | null>(null);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   
@@ -133,8 +135,8 @@ function MarketplaceContent() {
 
   if (!mounted) return null;
 
-  return (
-    <main className="min-h-screen bg-black text-white relative flex flex-col pt-14 md:pt-24 lg:flex-row xl:gap-0 overflow-hidden">
+   return (
+    <main className="min-h-screen bg-black text-white relative flex flex-col pt-24 lg:flex-row xl:gap-0 overflow-hidden">
        <Sidebar 
           onSelectPersona={handleSelectPersona} 
           selectedPersonaId={selectedPersonaId} 
@@ -216,6 +218,31 @@ function MarketplaceContent() {
             <TopUpDrawer onClose={() => setIsTopUpOpen(false)} userId={idToUse} />
          </div>
        )}
+        {/* MOBILE PERSONA DRAWER */}
+        <AnimatePresence>
+           {showPersonaList && (
+              <motion.div 
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                className="fixed inset-0 z-[200] bg-black lg:hidden overflow-y-auto"
+              >
+                 <div className="p-4 pt-20">
+                    <button onClick={() => setShowPersonaList(false)} className="mb-4 text-[#00f0ff] uppercase text-[10px] font-black">← Close Deck</button>
+                    <Sidebar 
+                       onSelectPersona={(id) => { handleSelectPersona(id); setShowPersonaList(false); }} 
+                       selectedPersonaId={selectedPersonaId} 
+                       personas={randomizedPersonas} 
+                    />
+                 </div>
+              </motion.div>
+           )}
+        </AnimatePresence>
+
+        <BottomNav 
+          onOpenChatList={() => setShowPersonaList(true)} 
+          onOpenTopUp={() => setIsTopUpOpen(true)}
+        />
     </main>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Send, Plus, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn, Diamond, MessageSquare, Circle, Image as ImageIcon, Minus as MinimizeIcon, Gift } from 'lucide-react';
+import { X, Send, Plus, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn, Diamond, MessageSquare, Circle, Image as ImageIcon, Minus as MinimizeIcon, Gift, ArrowLeftRight } from 'lucide-react';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
 import { useRef, useEffect, useState } from 'react';
 import { COST_VOICE_TRANSLATION, COST_VOICE_NOTE } from '@/lib/economy/constants';
@@ -115,7 +115,11 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
 
   const handleLocalSubmit = (e: any) => {
     e.preventDefault();
-    if (!(input || '').trim() || !idToUse) return;
+    if (!(input || '').trim()) return;
+    if (!idToUse) {
+       console.warn('[Neural Link] Identity node not yet established.');
+       return;
+    }
     setIsTyping(true);
     handleSubmit(e, { body: { userId: idToUse, personaId } });
   };
@@ -316,14 +320,14 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                <button type="button" onClick={() => {}} className="hover:text-white transition-colors"><Mic size={22} /></button>
                <button type="button" onClick={() => setShowGifts(!showGifts)} className="hover:text-[#ff00ff] transition-colors"><Gift size={22} /></button>
             </div>
-            <input 
-               type="text" 
-               value={input} 
-               onChange={handleInputChange} 
-               placeholder="send mssg..." 
-               className="flex-1 bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
-               disabled={!idToUse || isLoading}
-            />
+             <input 
+                type="text" 
+                value={input} 
+                onChange={handleInputChange} 
+                placeholder="send mssg..." 
+                className="flex-1 bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
+                disabled={isLoading}
+             />
             <button 
               type="submit" 
               disabled={!(input || '').trim() || isLoading || !idToUse}
