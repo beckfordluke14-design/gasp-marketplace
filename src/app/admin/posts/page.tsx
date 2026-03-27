@@ -1008,7 +1008,7 @@ export default function PostStudio() {
                     </p>
                   </div>
 
-                  {/* ── Linked Posts (sibling posts from same persona) ── */}
+                  {/* ──────────────── Linked Posts ──────────────── */}
                   <div className="space-y-4">
                     <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#ff00ff]/60 flex items-center gap-2">
                       <span className="w-4 h-px bg-[#ff00ff]/20" />
@@ -1039,31 +1039,64 @@ export default function PostStudio() {
                         {linkedPosts.map(lp => (
                           <div key={lp.id} className="group relative bg-white/[0.02] border border-white/10 rounded-xl overflow-hidden hover:border-white/30 transition-all">
                             <div className="relative aspect-[3/4] bg-black">
-                               {/* Media — video or image */}
+                               {/* Media Layer */}
                                {(() => {
                                  const isVid = /\.mp4|\.mov|\.webm/i.test(lp.content_url || '');
                                  return isVid ? (
                                    <>
-                                     <video
-                                       src={lp.content_url}
-                                       className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
-                                       autoPlay muted loop playsInline
-                                     />
+                                     <video src={lp.content_url} className="w-full h-full object-cover opacity-70" autoPlay muted loop playsInline />
                                      <div className="absolute top-1 right-1 px-1 py-0.5 bg-black/60 rounded text-[6px] font-black text-white uppercase tracking-widest">▶ Vid</div>
                                    </>
                                  ) : (
-                                   <img
-                                     src={proxyImg(lp.content_url)}
-                                     alt=""
-                                     className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
-                                     loading="lazy"
-                                   />
+                                   <img src={proxyImg(lp.content_url)} alt="" className="w-full h-full object-cover opacity-70" loading="lazy" />
+                                 );
+                               })()}
+                               
+                               {/* Status Badges */}
+                               <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                                 {lp.is_vault && <span className="px-1.5 py-0.5 bg-[#ff00ff] text-white text-[6px] font-black uppercase rounded-full">V</span>}
+                                 {lp.is_burner && <span className="px-1.5 py-0.5 bg-[#ffea00] text-black text-[6px] font-black uppercase rounded-full">H</span>}
+                               </div>
+
+                               {/* Hover Actions */}
+                               <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 z-20">
+                                 <div className="flex gap-1.5">
+                                   <button onClick={(e) => { e.stopPropagation(); toggleLinkedVault(lp); }} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${lp.is_vault ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/40 hover:text-white'}`}><Lock size={12} /></button>
+                                   <button onClick={(e) => { e.stopPropagation(); toggleLinkedHero(lp); }} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${lp.is_burner ? 'bg-[#ffea00] text-black' : 'bg-white/10 text-white/40 hover:text-white'}`}><Star size={12} /></button>
+                                   <button onClick={(e) => { e.stopPropagation(); deleteLinkedPost(lp); }} className="w-8 h-8 rounded-full bg-white/10 text-white/40 hover:bg-red-500/50 hover:text-white flex items-center justify-center transition-all"><Trash2 size={12} /></button>
+                                 </div>
+                                 <button onClick={(e) => { e.stopPropagation(); closeEdit(); openEdit(lp); }} className="px-2.5 py-1 bg-white/10 rounded-full text-white text-[8px] font-black uppercase hover:bg-white/20 flex items-center gap-1"><ArrowLeftRight size={10} /> Edit</button>
+                               </div>
+                            </div>
+                            <div className="p-2 border-t border-white/5 bg-black/40">
+                              <p className="text-[7px] text-white/30 truncate uppercase tracking-widest font-black leading-none">{lp.caption || 'NO CAPTION'}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Mobile-friendly Footer */}
+                <div className="p-5 sm:p-8 border-t border-white/5 bg-black/40 flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={saveAll}
+                    disabled={saving}
+                    className="flex-1 py-4 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#00f0ff] active:scale-95 transition-all shadow-xl disabled:opacity-50"
+                  >
+                    {saving ? 'Saving...' : 'Save & Close'}
+                  </button>
+                  <button
+                    onClick={closeEdit}
+                    className="flex-1 sm:flex-none px-10 py-4 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white/40 hover:bg-white/10 transition-all"
                   >
                     Cancel
                   </button>
                 </div>
-              </div>
-            </motion.div>
+
+              </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
