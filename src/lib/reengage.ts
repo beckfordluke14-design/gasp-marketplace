@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { initialPersonas } from './profiles';
 import { getEnvironmentContext } from './governor';
 import { isDaylightHours } from './governor/drip';
+import { sendNudgeEmail } from './emails';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
@@ -68,6 +69,18 @@ async function triggerSpontaneousPing(session: any, persona: any) {
   ];
   
   const ping = vibes[Math.floor(Math.random() * vibes.length)];
+ 
+  // 🛡️ IDENTITY PULSE: Fetch user email from ledger (Privy Synced)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('email')
+    .eq('id', session.user_id)
+    .single();
+
+  if (profile?.email) {
+    console.log(`[Governor] TRIGGERING EMAIL NUDGE: ${profile.email} (via ${persona.name})`);
+    await sendNudgeEmail(profile.email, persona.name, ping);
+  }
 
   // Insert into Chat History to trigger UI "Green Dot" or Push
   await supabase.from('chat_messages').insert({
@@ -77,9 +90,9 @@ async function triggerSpontaneousPing(session: any, persona: any) {
     role: 'assistant',
     content: ping
   });
-
+ 
   // Increment 'unread' indicator if UI is configured
-  console.log(`[Governor] SENT: ${ping} by ${persona.name}`);
+  console.log(`[Governor] SENT IN-APP: ${ping} by ${persona.name}`);
 }
 
 async function triggerVaultTease(session: any, p: any) {
