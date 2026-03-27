@@ -59,32 +59,23 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
   };
 
   return (
-      <div className="flex flex-col items-end gap-1">
-         <div 
-           className="flex items-center gap-2 md:gap-3 px-3 md:px-5 py-2 md:py-2.5 rounded-2xl md:rounded-full bg-black/5 backdrop-blur-3xl border border-white/5 shadow-inner"
-         >
-           <div className="w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center bg-[#00f0ff]/10 text-[#00f0ff]">
-              <Diamond size={14} className="font-black" />
-           </div>
-           <div className="flex flex-col items-start leading-none">
-              <span className="text-[14px] md:text-[18px] font-black italic tracking-tighter text-white font-outfit">
-                 {balance !== null ? balance.toLocaleString() : '---'}
-              </span>
-              <span className="text-[6px] font-black uppercase tracking-[0.2em] text-[#00f0ff]/40">Verified Balance</span>
-           </div>
-         </div>
-       
-       {balance !== null && balance === 0 && (
-         <button 
-           onClick={claimStarter}
-           disabled={loading}
-           className="px-6 py-2 bg-[#ff00ff] text-black text-[9px] font-black uppercase tracking-widest rounded-xl animate-pulse hover:scale-110 transition-all shadow-[0_0_30px_#ff00ff] flex items-center gap-2"
-         >
-           {loading ? <Zap size={10} className="animate-spin" /> : <SparklesIcon />}
-           Claim 5000 Starter Credits
-         </button>
-       )}
-     </div>
+      <div className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 text-white">
+         <Diamond size={12} className="md:size-14 text-[#00f0ff] animate-pulse" />
+         <span className="text-[12px] md:text-[14px] font-black italic tracking-tighter">
+            {balance !== null ? balance.toLocaleString() : '---'}
+         </span>
+         
+         {balance !== null && balance === 0 && (
+           <button 
+             onClick={claimStarter}
+             disabled={loading}
+             className="ml-4 px-4 py-1.5 bg-[#ff00ff] text-black text-[9px] font-black uppercase tracking-widest rounded-xl animate-pulse hover:scale-110 transition-all shadow-[0_0_30px_#ff00ff] flex items-center gap-2"
+           >
+             {loading ? <Zap size={10} className="animate-spin" /> : <SparklesIcon />}
+             Claim Starter
+           </button>
+         )}
+      </div>
   );
 }
 

@@ -35,7 +35,7 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] flex flex-col pointer-events-none">
         {/* MAIN NAVIGATION BAR */}
-        <header className="h-14 md:h-16 bg-black/40 backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-3 md:px-4 pointer-events-auto">
+        <header className="h-14 md:h-16 bg-black/40 backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-6 md:px-12 pointer-events-auto">
             
             {/* LOGO SECTION */}
             <div className="flex items-center gap-8 md:gap-12 pointer-events-auto">
