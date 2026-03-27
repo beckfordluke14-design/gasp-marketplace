@@ -39,8 +39,8 @@ function LoginForm() {
        >
           <div className="bg-black/40 backdrop-blur-3xl border border-white/5 rounded-[3rem] p-10 md:p-14 shadow-[0_0_120px_rgba(0,0,0,0.8)] overflow-hidden relative group">
              {/* Glow Accents */}
-             <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#ff00ff]/10 rounded-full blur-[60px] group-hover:bg-[#ff00ff]/20 transition-colors duration-1000" />
-             <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-[#00f0ff]/10 rounded-full blur-[60px] group-hover:bg-[#00f0ff]/20 transition-colors duration-1000" />
+             <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#ff00ff]/10 rounded-full blur-[60px] group-hover:bg-[#ff00ff]/20 transition-colors duration-1000 pointer-events-none" />
+             <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-[#00f0ff]/10 rounded-full blur-[60px] group-hover:bg-[#00f0ff]/20 transition-colors duration-1000 pointer-events-none" />
              
              <div className="flex flex-col items-center mb-12 text-center relative z-10">
                 <div className="w-20 h-20 bg-gradient-to-tr from-[#ff00ff] to-[#00f0ff] rounded-3xl flex items-center justify-center rotate-12 mb-10 shadow-[0_0_50px_rgba(255,0,255,0.3)] group-hover:rotate-[102deg] transition-transform duration-1000">
@@ -56,23 +56,46 @@ function LoginForm() {
                 </p>
              </div>
 
-             <div className="space-y-4 relative z-10">
+             <div className="space-y-4 relative z-10 w-full">
+                {/* 🛡️ Primary Social Entry: Google */}
                 <button 
                   onClick={() => login({ loginMethod: 'google' })}
-                  className="w-full h-18 rounded-2xl bg-white text-black font-syncopate font-black uppercase text-[11px] tracking-[0.1em] shadow-[0_10px_30px_rgba(255,255,255,0.1)] hover:bg-[#00f0ff] hover:text-black hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 group/btn"
+                  className="w-full h-16 rounded-2xl bg-white text-black font-syncopate font-black uppercase text-[10px] tracking-[0.1em] shadow-[0_10px_30px_rgba(255,255,255,0.05)] hover:bg-[#00e0ff] hover:text-black hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center px-6 gap-4 group/btn"
                 >
-                   <div className="w-6 h-6 bg-black rounded-lg flex items-center justify-center group-hover/btn:scale-110 transition-transform">
-                     <span className="text-white text-[10px] font-bold">G</span>
+                   <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center group-hover/btn:scale-110 transition-transform">
+                     <span className="text-white text-[12px] font-bold">G</span>
                    </div>
-                   Continue with Google
-                   <div className="px-1.5 py-0.5 bg-black/5 rounded text-[7px] border border-black/10 opacity-40">PRIVACY+</div>
+                   <span className="flex-1 text-left">Continue with Google</span>
                 </button>
 
+                {/* 🛡️ Secondary Social Nodes: Twitter + Discord */}
+                <div className="grid grid-cols-2 gap-3">
+                   <button 
+                     onClick={() => login({ loginMethod: 'twitter' })}
+                     className="h-14 rounded-2xl bg-[#1d9bf0]/10 border border-[#1d9bf0]/20 text-[#1d9bf0] font-black uppercase text-[9px] tracking-widest hover:bg-[#1d9bf0] hover:text-white transition-all flex items-center justify-center gap-2"
+                   >
+                     Twitter
+                   </button>
+                   <button 
+                     onClick={() => login({ loginMethod: 'discord' })}
+                     className="h-14 rounded-2xl bg-[#5865f2]/10 border border-[#5865f2]/20 text-[#5865f2] font-black uppercase text-[9px] tracking-widest hover:bg-[#5865f2] hover:text-white transition-all flex items-center justify-center gap-2"
+                   >
+                     Discord
+                   </button>
+                </div>
+
+                <div className="flex items-center gap-4 py-2">
+                   <div className="h-px flex-1 bg-white/5" />
+                   <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/10">or</span>
+                   <div className="h-px flex-1 bg-white/5" />
+                </div>
+
+                {/* 🛡️ Direct Neural Entry (Email/Wallet Modal) */}
                 <button 
                   onClick={() => login()}
-                  className="w-full h-18 rounded-2xl bg-transparent border border-white/10 text-white font-syncopate font-black uppercase text-[10px] tracking-[0.2em] hover:bg-white/5 hover:border-[#ff00ff] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 italic"
+                  className="w-full h-16 rounded-2xl bg-transparent border border-white/10 text-white hover:text-[#ff00ff] font-syncopate font-black uppercase text-[9px] tracking-[0.2em] hover:bg-white/5 hover:border-[#ff00ff]/40 transition-all flex items-center justify-center gap-3 italic"
                 >
-                   <KeyRound size={18} className="text-[#ff00ff]" /> Initialize Identity
+                   <KeyRound size={16} className="text-[#ff00ff]" /> Initialize Universal ID
                 </button>
 
                 <div className="pt-6 border-t border-white/5 mt-8 items-center flex flex-col gap-4">
