@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Zap, Trophy, ShieldCheck, Loader2, ArrowRight } from 'lucide-react';
+import { X, Diamond, Trophy, ShieldCheck, Loader2, ArrowRight } from 'lucide-react';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -12,7 +12,7 @@ interface TopUpDrawerProps {
 }
 
 /**
- * ⛽ SOVEREIGN STAKE HUB v2.0
+ * ⛽ CREDIT TOP-UP HUB v2.0
  * Objective: 100% Bank-Free Revenue via Direct P2P Crypto Settlement.
  */
 export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
@@ -39,10 +39,10 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   if (isSuccess) {
     return (
       <div className="fixed inset-y-0 right-0 w-full md:w-[420px] bg-black/95 backdrop-blur-3xl border-l border-white/10 z-[300] flex flex-col items-center justify-center p-10 text-center font-outfit">
-        <div className="w-24 h-24 rounded-full bg-[#00f0ff]/20 flex items-center justify-center mb-8 border border-[#00f0ff]/40 shadow-[0_0_60px_rgba(0,240,255,0.3)]">
-          <Zap size={48} className="text-[#00f0ff] animate-pulse" />
+        <div className="w-24 h-24 rounded-full bg-[#00f0ff]/20 flex items-center justify-center mb-8 border border-[#00f0ff]/40 shadow-[0_0_60px_rgba(16,185,129,0.3)]">
+          <Diamond size={48} className="text-[#00f0ff] animate-pulse" />
         </div>
-        <h3 className="text-3xl font-syncopate font-black uppercase italic text-white mb-4">Stake Confirmed</h3>
+        <h3 className="text-3xl font-syncopate font-black uppercase italic text-white mb-4">Transfer Confirmed</h3>
         <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-black leading-relaxed px-6">
           The Blockchain Node has verified your settlement. Credits + 15% Bonus injected into your identity node. 🧬🛡️
         </p>
@@ -62,15 +62,15 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
       {/* Header */}
       <div className="p-8 border-b border-white/5 flex items-center justify-between bg-black/40">
         <div className="flex items-center gap-4">
-           <div className="w-12 h-12 rounded-2xl bg-[#00f0ff] flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.3)]">
-              <Zap size={24} className="text-black" />
+           <div className="w-12 h-12 rounded-2xl bg-[#00f0ff] flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+              <Diamond size={24} className="text-black" />
            </div>
            <div>
               <h3 className="text-xl font-syncopate font-black uppercase italic text-white leading-none">
                  $GASPAI HUB
               </h3>
               <p className="text-[10px] text-[#00f0ff] uppercase font-black tracking-widest mt-2 underline decoration-[#00f0ff]/30 underline-offset-4">
-                 Sovereign Stake Terminal
+                 Credit Top-Up Terminal
               </p>
            </div>
         </div>
@@ -109,20 +109,20 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
                      <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
-                     <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-[#00f0ff]">P2P Ledger Logic v2.0 Active</span>
+                     <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-[#00f0ff]">P2P Credit Logic v2.0 Active</span>
                   </div>
                   <p className="text-[9px] md:text-[10px] text-white/40 font-bold italic mt-1">Bank-Free Sovereign Settlement Enabled.</p>
                </div>
                <ShieldCheck size={16} className="text-[#00f0ff]/30" />
             </div>
 
-            {/* 🪙 CUSTOM WHALE STAKE */}
+            {/* 🪙 CUSTOM WHALE TOP-UP */}
             <div className="space-y-4">
-               <h4 className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] text-[#00f0ff] italic">Custom Whale Stake</h4>
+               <h4 className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] text-[#00f0ff] italic">Custom Whale Top-Up</h4>
                <div className="flex flex-col gap-3 group">
                   <div className="relative flex-1">
                      <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                        <span className="text-lg font-black text-[#00f0ff]">$</span>
+                        <span className="text-lg font-black text-[#00f0ff]">💎</span>
                      </div>
                      <input 
                        type="number"
@@ -134,9 +134,9 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                   </div>
                   <button 
                     onClick={handleCustomStake}
-                    className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(0,240,255,0.2)]"
+                    className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)]"
                   >
-                     Stake Now
+                     Buy Now
                   </button>
                </div>
                <p className="text-[7px] text-white/20 uppercase tracking-[0.2em] font-black ml-1">
@@ -156,13 +156,13 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                         p-6 rounded-2xl bg-white/5 border border-white/10 
                         flex items-center justify-between overflow-hidden
                         hover:bg-white/[0.08] hover:border-[#00f0ff]/40
-                        ${pkg.isPopular ? 'border-[#00f0ff]/40 bg-[#00f0ff]/5 shadow-[0_0_20px_rgba(0,240,255,0.1)]' : ''}
+                        ${pkg.isPopular ? 'border-[#00f0ff]/40 bg-[#00f0ff]/5 shadow-[0_0_20px_rgba(16,185,129,0.1)]' : ''}
                       `}
                     >
                       <div className="flex flex-col items-start gap-1 relative z-10 text-left">
                         {pkg.isPopular && (
                             <span className="text-[9px] font-black uppercase text-[#00f0ff] tracking-[0.2em] mb-3 flex items-center gap-2">
-                                <Trophy size={10} fill="#00f0ff" />
+                                <Diamond size={10} fill="#00f0ff" />
                                 Elite Genesis Tier
                             </span>
                         )}
@@ -171,11 +171,6 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                             {Math.floor(pkg.credits * 1.15).toLocaleString()}
                             <span className="text-[10px] uppercase font-black text-white/20 tracking-widest not-italic ml-2">credits</span>
                         </span>
-                        <div className="mt-4 px-2.5 py-1 rounded-md bg-[#00f0ff]/10 border border-[#00f0ff]/10">
-                            <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest font-syncopate italic">
-                               Exclusive 1.15x Stake Multiplier
-                            </span>
-                        </div>
                       </div>
 
                       <div className="flex flex-col items-end gap-3 z-10">
@@ -183,7 +178,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                             ${pkg.priceUsd}
                         </span>
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[#00f0ff] text-black shadow-lg group-hover:scale-110 active:scale-95 transition-all">
-                            <Zap size={20} />
+                            <Diamond size={20} className="font-black" />
                         </div>
                       </div>
                     </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Coins, ChevronRight } from 'lucide-react';
+import { Diamond, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -59,8 +59,8 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
           onClick={onOpenTopUp}
           className={`flex items-center gap-1.5 md:gap-3 px-3 md:px-4 py-1.5 md:py-2 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group`}
         >
-          <div className="w-5 h-5 md:w-8 md:h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-[#00f0ff] to-[#0080ff] shadow-[0_0_20px_#00f0ff]">
-             <Coins size={10} className="md:size-16 text-black font-bold" />
+          <div className="w-5 h-5 md:w-8 md:h-8 rounded-full flex items-center justify-center bg-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.4)]">
+             <Diamond size={10} className="md:size-16 text-black font-black" />
           </div>
           <div className="flex flex-col items-start leading-none gap-0.5">
              <span className="text-[12px] md:text-[14px] font-black tracking-tighter text-white">

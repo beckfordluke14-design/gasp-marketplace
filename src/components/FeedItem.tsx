@@ -1,6 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { type Persona, type Broadcast, proxyImg } from '@/lib/profiles';
 import Image from 'next/image';
 import { Lock, Circle, MessageSquare, Image as ImageIcon } from 'lucide-react';
@@ -24,6 +25,16 @@ const getCityStatus = (persona: Persona) => {
 
 export default function FeedItem({ persona, broadcast }: FeedItemProps) {
   const cityStatus = getCityStatus(persona);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+
+  useEffect(() => {
+     const hasSeen = localStorage.getItem('gasp_zoom_hint');
+     if (!hasSeen) {
+        setShowHint(true);
+        localStorage.setItem('gasp_zoom_hint', 'true');
+     }
+  }, []);
 
   return (
     <div className="border-b border-white/5 pb-12 mb-12 last:border-0">
@@ -48,14 +59,60 @@ export default function FeedItem({ persona, broadcast }: FeedItemProps) {
         )}
 
         {broadcast.type === 'image' && (
-          <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl">
-            <Image
-              src={proxyImg(broadcast.image_url || persona.image)}
-              alt=""
-              fill
-              unoptimized
-              className="object-cover"
-            />
+          <div className={`relative aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl transition-all ${isZoomed ? 'z-[1000] cursor-move' : 'cursor-zoom-in'}`}>
+            
+             {/* 🔍 MACRO ZOOM CONTAINER */}
+             <motion.div 
+               className="w-full h-full relative"
+               drag={isZoomed}
+               dragConstraints={{ left: -300, right: 300, top: -300, bottom: 300 }}
+               animate={{ scale: isZoomed ? 2 : 1 }}
+               onTap={() => setIsZoomed(!isZoomed)}
+             >
+                <Image
+                  src={proxyImg(broadcast.image_url || persona.image)}
+                  alt=""
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
+             </motion.div>
+
+             {/* ✨ ZOOM HINT PULSE: NOW YOU CAN ZOOM */}
+             <AnimatePresence>
+                {showHint && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 pointer-events-none"
+                  >
+                     <div className="flex flex-col items-center gap-4">
+                        <div className="w-20 h-20 rounded-full border border-[#ff00ff] shadow-[0_0_50px_#ff00ff] flex items-center justify-center animate-pulse">
+                           <ImageIcon className="text-[#ff00ff]" size={32} />
+                        </div>
+                        <div className="bg-black/80 px-4 py-2 rounded-xl border border-white/10">
+                           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white italic">NEURAL ZOOM ACTIVE</span>
+                        </div>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setShowHint(false); }}
+                          className="pointer-events-auto mt-4 px-6 py-2 bg-white text-black text-[9px] font-black uppercase rounded-full"
+                        >
+                           Got it
+                        </button>
+                     </div>
+                  </motion.div>
+                )}
+             </AnimatePresence>
+
+             {/* 📢 PERSISTENT ZOOM HUD */}
+             {isZoomed && (
+                <div className="absolute top-6 left-6 z-[1001] bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 pointer-events-none">
+                    <span className="text-[8px] font-black uppercase tracking-widest text-[#00ff00] italic">
+                        MACRO MODE • DRAG TO DISCOVER
+                    </span>
+                </div>
+             )}
           </div>
         )}
 

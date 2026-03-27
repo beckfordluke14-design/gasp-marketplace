@@ -2,13 +2,10 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, Suspense } from 'react';
-import Sidebar from '@/components/Sidebar';
 import GlobalFeed from '@/components/GlobalFeed';
-import StoriesRow from '@/components/StoriesRow';
-import RightSidebar from '@/components/RightSidebar';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import ChatDrawer from '@/components/ChatDrawer';
-import Header from '@/components/Header';
+import TopDiscovery from '@/components/TopDiscovery';
 import ChatCluster from '@/components/ChatCluster';
 import ConnectionsHub from '@/components/ConnectionsHub';
 import GhostActivityTicker from '@/components/GhostActivityTicker';
@@ -141,45 +138,27 @@ function MarketplaceMain() {
     <div className="flex h-[100dvh] bg-black overflow-hidden font-inter" 
          onDoubleClick={handleZenToggle}
     >
-      {/* 🧭 FLOATING DISCOVERY HUB (Rotating Bubbles) */}
-      {!isZenMode && !isChatOpenMobile && (
-        <NeuralDiscoveryBubbles personas={refinedPersonas} onSelectPersona={handleSelectPersona} />
-      )}
-
-      {/* 🧬 MAIN SIDEBAR: PERSISTENT ON DESKTOP */}
+      {/* 🏔️ SOVEREIGN SKY: TOP DISCOVERY DIRECTORY */}
       {!isZenMode && (
-        <div className={`${isChatOpenMobile ? 'hidden lg:block' : 'block'}`}>
-           <Sidebar selectedPersonaId={selectedPersonaId} onSelectPersona={handleSelectPersona} unreadCounts={{}} personas={refinedPersonas} />
-        </div>
+         <TopDiscovery 
+           selectedPersonaId={selectedPersonaId} 
+           onSelectPersona={handleSelectPersona} 
+           unreadCounts={unreadCounts} 
+           personas={refinedPersonas} 
+         />
       )}
 
-      <main className="flex-1 flex flex-col relative overflow-hidden bg-black border-r border-white/5">
-          <AnimatePresence>
-             {!isZenMode && (
-               <motion.div initial={{ y: -100 }} animate={{ y: 0 }} exit={{ y: -100 }} 
-                    className={`fixed inset-x-0 top-0 z-[1000] ${isChatOpenMobile ? 'hidden md:block' : 'block'}`}
-               >
-                <Header onOpenTopUp={() => setIsTopUpOpen(true)} />
-               </motion.div>
-             )}
-          </AnimatePresence>
+      <main className="flex-1 flex flex-col relative overflow-hidden bg-black">
+          <div className="flex-1 overflow-y-auto no-scrollbar pt-48 pb-64 flex justify-center">
+             <div className="w-full max-w-[1200px] px-4">
+                <GlobalFeed onSelectPersona={handleSelectPersona} />
+             </div>
+          </div>
 
-          <div className="flex-1 overflow-hidden relative">
-            <GlobalFeed onSelectPersona={handleSelectPersona} />
-
-            {/* 🕴️ GHOST PULSE TICKER: SOCIAL PROOF */}
-            {!isZenMode && !isChatOpenMobile && (
-              <div className="absolute bottom-6 left-6 z-[800]">
-                 <GhostActivityTicker />
-              </div>
-            )}
+          <div className="fixed bottom-6 left-6 z-[800]">
+             <GhostActivityTicker />
           </div>
       </main>
-
-      {/* 🏙️ RIGHT DISCOVERY GALLERY */}
-      {!isZenMode && !isChatOpenMobile && (
-         <RightSidebar onSelectPersona={handleSelectPersona} personas={refinedPersonas} />
-      )}
 
       {/* 🔮 CHAT HUB: BOOSTED Z-INDEX */}
       <div className={`fixed inset-y-0 right-0 ${isChatOpenMobile ? 'z-[2000]' : 'z-[500]'} flex flex-row-reverse pointer-events-none items-end`}>

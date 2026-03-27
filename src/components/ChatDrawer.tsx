@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Send, Plus, Coins, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn, Diamond } from 'lucide-react';
+import { X, Send, Plus, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn, Diamond, MessageSquare, Circle, Image as ImageIcon } from 'lucide-react';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
 import { useRef, useEffect, useState } from 'react';
 import { COST_VOICE_TRANSLATION, COST_VOICE_NOTE } from '@/lib/economy/constants';
@@ -120,11 +120,12 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     if (statData) setBondScore(statData.bond_score);
     const { data: walletData } = await supabase.from('wallets').select('balance').eq('user_id', guestId).maybeSingle();
     if (walletData) setWalletBalance(walletData.balance);
-    const { data: vData } = await supabase.from('posts').select('*').eq('persona_id', personaId).eq('is_vault', true).order('created_at', { ascending: false });
+    const { data: vData } = await supabase.from('posts').select('*').eq('persona_id', personaId).order('created_at', { ascending: false });
     const { data: uData } = await supabase.from('user_vault_unlocks').select('post_id').eq('user_id', guestId);
     if (vData) {
       const unlockedIds = (uData || []).map(u => u.post_id);
-      setVaultItems(vData.map(v => ({ ...v, is_unlocked: unlockedIds.includes(v.id) })));
+      const items = vData.map(v => ({ ...v, is_unlocked: unlockedIds.includes(v.id) }));
+      setVaultItems(items);
     }
   };
 
@@ -320,17 +321,97 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
         <button onClick={() => setChatTab('pics')} className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest ${chatTab==='pics'?'text-white border-b-2 border-[#ff00ff]':'text-white/30'}`}>Pics</button>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6 pb-64">
-        {[...dbMessages, ...messages].map((msg: any) => (
-          <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-            {!msg.media_url && msg.content && !msg.content.startsWith('[SYSTEM]') && (
-              <div className={`max-w-[85%] px-5 py-3 rounded-[1.6rem] text-xs leading-relaxed shadow-xl ${msg.role === 'user' ? 'bg-[#ff00ff] text-black font-bold' : 'bg-white/5 text-white border border-white/5'}`}>
-                {msg.content}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6 pb-64 relative">
+        {chatTab === 'chat' ? (
+          <>
+            {[...dbMessages, ...messages].map((msg: any) => (
+              <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                {/* 💬 TEXT PULSE */}
+                {!msg.media_url && msg.content && !msg.content.startsWith('[SYSTEM]') && (
+                  <div className={`max-w-[85%] px-5 py-3 rounded-[1.6rem] text-xs leading-relaxed shadow-xl ${msg.role === 'user' ? 'bg-[#ff00ff] text-black font-bold' : 'bg-white/5 text-white border border-white/5'}`}>
+                    {msg.content}
+                  </div>
+                )}
+                
+                {/* 📸 REGULAR PIC / FREEBIE PULSE */}
+                {msg.media_url && !msg.media_url.includes('.mp3') && (
+                   <FreebieImageBubble imageUrl={msg.media_url} />
+                )}
+
+                {/* 🎙️ VOICE NOTE PULSE */}
+                {msg.media_url && msg.media_url.includes('.mp3') && (
+                   <VoiceNoteBubble audioUrl={msg.media_url} translation={msg.audio_translation} />
+                )}
               </div>
-            )}
+            ))}
+            {isTyping && <div className="p-3 bg-white/5 rounded-full w-12 flex gap-1"><div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce"/><div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce delay-100"/><div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce delay-200"/></div>}
+          </>
+        ) : (
+          /* 💎 THE MEDIA HUB: GALLERY + VAULT */
+          <div className="grid grid-cols-2 gap-4 pb-48">
+             {vaultItems.length > 0 ? vaultItems.map((item) => (
+                <div key={item.id} className="relative aspect-[3/4] bg-white/5 rounded-3xl overflow-hidden border border-white/5 group shadow-2xl">
+                   {/* 🌫️ BLURRED PREVIEW (ONLY FOR LOCKED VAULT) */}
+                   <div className={`absolute inset-0 z-10 transition-all ${(!item.is_unlocked && item.is_vault) ? 'bg-black/40 backdrop-blur-3xl group-hover:backdrop-blur-xl' : 'bg-transparent group-hover:bg-black/10'}`} />
+                   {item.content_url && (
+                      <Image 
+                        src={proxyImg(item.content_url)} 
+                        alt="Media Node" 
+                        fill 
+                        unoptimized 
+                        className={`object-cover transition-all ${(!item.is_unlocked && item.is_vault) ? 'blur-2xl opacity-60' : 'blur-0 opacity-100'}`} 
+                      />
+                   )}
+
+                   {/* 🏷️ STATUS BADGE (GALLERY VS VAULT) */}
+                   <div className="absolute top-4 left-4 z-30 flex gap-2">
+                       {item.is_vault ? (
+                          <div className="px-2 py-1 rounded-full bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff] text-[6px] font-black uppercase tracking-widest flex items-center gap-1 backdrop-blur-md">
+                             <Diamond size={8} /> PRIVATE ARCHIVE
+                          </div>
+                       ) : (
+                          <div className="px-2 py-1 rounded-full bg-white/10 border border-white/20 text-white/40 text-[6px] font-black uppercase tracking-widest backdrop-blur-md">
+                             CONSOLIDATED
+                          </div>
+                       )}
+                   </div>
+
+                   {/* 🔒 LOCK OVERLAY (VAULT ONLY) */}
+                   {item.is_vault && !item.is_unlocked && (
+                      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
+                         <div className="w-12 h-12 rounded-full border border-[#ff00ff]/30 flex items-center justify-center mb-3 bg-[#ff00ff]/5 shadow-[0_0_20px_rgba(255,0,255,0.1)]">
+                            <Lock size={20} className="text-[#ff00ff]" />
+                         </div>
+                         <p className="text-[8px] font-black text-white/40 uppercase tracking-[0.2em] text-center italic">{item.caption || "Secret File"}</p>
+                      </div>
+                   )}
+
+                   {/* 💵 UNLOCK TRIGGER (VAULT ONLY) */}
+                   {item.is_vault && (
+                      <div className="absolute bottom-4 inset-x-4 z-30">
+                        {item.is_unlocked ? (
+                           <div className="w-full bg-[#00ff00]/20 border border-[#00ff00]/40 text-[#00ff00] text-[8px] font-black uppercase tracking-widest py-3 rounded-2xl flex items-center justify-center gap-2 italic">
+                              <Check size={12} /> UNLOCKED
+                           </div>
+                        ) : (
+                           <button 
+                             onClick={() => setConfirmingItem(item)}
+                             className="w-full h-12 bg-white text-black text-[9px] font-black uppercase tracking-[0.15em] rounded-2xl shadow-2xl hover:bg-[#ffea00] active:scale-95 transition-all flex items-center justify-center gap-2 italic"
+                           >
+                              UNLOCK - {item.content_url?.includes('.mp4') ? 150 : 40} credits
+                           </button>
+                        )}
+                      </div>
+                   )}
+                </div>
+             )) : (
+                <div className="col-span-2 py-20 text-center space-y-4">
+                   <div className="w-16 h-16 rounded-full border border-white/5 flex items-center justify-center mx-auto opacity-20"><ImageIcon className="text-white" size={32} /></div>
+                   <p className="text-[10px] text-white/20 font-black uppercase tracking-widest italic leading-relaxed">Media Hub Offline.<br/>Check back for neural nodes.</p>
+                </div>
+             )}
           </div>
-        ))}
-        {isTyping && <div className="p-3 bg-white/5 rounded-full w-12 flex gap-1"><div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce"/><div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce delay-100"/><div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce delay-200"/></div>}
+        )}
       </div>
 
       <div className="absolute bottom-0 inset-x-0 p-8 pt-4 bg-gradient-to-t from-black via-black/90 to-transparent pb-10">
@@ -349,11 +430,11 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                     { name: 'Rose', icon: '🌹', price: 100, bond: 25 }, 
                     { name: 'Diamond', icon: '💎', price: 500, bond: 150 }
                  ].map(g => (
-                   <button key={g.name} onClick={() => sendGift(g as any)} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-[#ff00ff]/10 relative overflow-hidden group">
-                      <span className="text-xl group-hover:scale-125 transition-transform">{g.icon}</span>
-                      <span className="text-[8px] font-black uppercase text-white/50">{g.price}c</span>
-                      {tapItem?.name === g.name && tapCount > 0 && <div className="absolute inset-0 bg-[#ff00ff]/20 flex items-center justify-center animate-pulse"><span className="text-lg font-black text-white italic">x{tapCount}</span></div>}
-                   </button>
+                    <button key={g.name} onClick={() => sendGift(g as any)} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-[#ff00ff]/10 relative overflow-hidden group">
+                       <span className="text-xl group-hover:scale-125 transition-transform">{g.icon}</span>
+                       <span className="text-[8px] font-black uppercase text-white/50">{g.price} credits</span>
+                       {tapItem?.name === g.name && tapCount > 0 && <div className="absolute inset-0 bg-[#ff00ff]/20 flex items-center justify-center animate-pulse"><span className="text-lg font-black text-white italic">x{tapCount}</span></div>}
+                    </button>
                  ))}
               </motion.div>
             )}
@@ -364,39 +445,38 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
             <input type="text" value={localInput} onChange={(e) => setLocalInput(e.target.value)} placeholder="send mssg..." className="flex-1 bg-transparent outline-none text-xs text-white" />
             <button type="submit" disabled={!localInput.trim()} className="p-3 rounded-2xl bg-[#ff00ff] text-black shadow-[0_0_20px_#ff00ff44]"><Send size={16} /></button>
          </form>
+
+         {/* 💎 ACTION ICONS: DEEP LINKED VAULT */}
+         <div className="flex items-center gap-8 mt-6 px-4">
+            <button className="group flex flex-col items-center gap-2">
+              <div className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center transition-all group-hover:border-[#ff00ff]/50">
+                <Circle size={16} className="text-white/40 group-hover:text-[#ff00ff]" />
+              </div>
+              <span className="text-[6px] font-black uppercase tracking-widest text-white/20">infuse</span>
+            </button>
+            <button onClick={() => setChatTab('chat')} className="group flex flex-col items-center gap-2">
+              <div className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${chatTab==='chat'?'border-[#ff00ff]/50 bg-[#ff00ff]/5':'border-white/10'}`}>
+                <MessageSquare size={16} className={chatTab==='chat'?'text-[#ff00ff]':'text-white/40'} />
+              </div>
+              <span className="text-[6px] font-black uppercase tracking-widest text-white/20">uplink</span>
+            </button>
+            <button onClick={() => setChatTab('pics')} className="group flex flex-col items-center gap-2">
+              <div className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${chatTab==='pics'?'border-[#ff00ff]/50 bg-[#ff00ff]/5':'border-white/10'}`}>
+                <ImageIcon size={16} className={chatTab==='pics'?'text-[#ff00ff]':'text-white/40'} />
+              </div>
+              <span className="text-[6px] font-black uppercase tracking-widest text-white/20">vault</span>
+            </button>
+         </div>
       </div>
 
       <AnimatePresence>
-        {showVault && (
-          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} className="absolute inset-0 z-[600] bg-black border-l border-white/5 flex flex-col">
-            <div className="p-6 border-b border-white/5 flex items-center justify-between">
-                <div><h3 className="font-syncopate font-black uppercase text-2xl text-white">Private Archive</h3><p className="text-[#ffea00] text-[10px] uppercase font-bold">Encrypted Nodes</p></div>
-                <button onClick={() => setShowVault(false)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><X size={20} /></button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-6 grid grid-cols-2 gap-4 pb-32">
-               {vaultItems.map((item) => (
-                 <div key={item.id} className="relative aspect-[3/4] bg-white/5 rounded-2xl overflow-hidden border border-white/10 group">
-                    <div className="absolute inset-0 bg-black/60 z-10 backdrop-blur-xl group-hover:backdrop-blur-sm" />
-                    {item.content_url && <img src={proxyImg(item.content_url)} className="absolute inset-0 w-full h-full object-cover blur-md" />}
-                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
-                       <Lock size={24} className="text-[#ff00ff] mb-2" />
-                       <span className="text-white text-[10px] font-black uppercase text-center line-clamp-2">{item.caption || "Secret Visual"}</span>
-                    </div>
-                    <div className="absolute bottom-3 inset-x-3 z-30">
-                       <button onClick={() => setConfirmingItem(item)} className="w-full bg-[#ff00ff] text-black font-black uppercase text-[10px] py-3 rounded-xl shadow-[0_5px_15px_rgba(255,0,255,0.3)]">Unlock - {item.content_url?.includes('.mp4')?150:40}c</button>
-                    </div>
-                 </div>
-               ))}
-            </div>
-          </motion.div>
-        )}
         {confirmingItem && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[2000] bg-black/95 flex items-center justify-center p-8 backdrop-blur-2xl">
              <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 text-center space-y-6 shadow-2xl">
                 <div className="w-16 h-16 rounded-full bg-[#ff00ff]/10 flex items-center justify-center mx-auto"><Lock size={24} className="text-[#ff00ff]" /></div>
                 <div><h3 className="text-lg font-syncopate font-black text-white italic uppercase">Confirm Unlock</h3><p className="text-[10px] text-white/40 uppercase mt-2">Spend Credits for Private Content?</p></div>
                 <div className="space-y-3 pt-4">
-                   <button onClick={() => unlockVaultItem(confirmingItem)} className="w-full h-14 bg-[#ff00ff] text-black text-[10px] font-black uppercase rounded-2xl">Confirm - {confirmingItem.content_url?.includes('.mp4')?150:40}c</button>
+                   <button onClick={() => unlockVaultItem(confirmingItem)} className="w-full h-14 bg-[#ff00ff] text-black text-[10px] font-black uppercase rounded-2xl shadow-[0_0_20px_rgba(255,0,255,0.4)]">Confirm - {confirmingItem.content_url?.includes('.mp4')?150:40} credits</button>
                    <button onClick={() => setConfirmingItem(null)} className="w-full h-10 text-[9px] font-black text-white/20 uppercase">Cancel</button>
                 </div>
              </div>

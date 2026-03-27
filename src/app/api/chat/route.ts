@@ -199,7 +199,15 @@ export async function POST(req: Request) {
     }
 
     const brainJson = await orResponse.json();
-    const rawContent = brainJson.choices[0].message.content;
+    
+    // 🛡️ SOVEREIGN GUARD: Verify Grok Output
+    const rawContent = brainJson.choices?.[0]?.message?.content;
+    
+    if (!rawContent) {
+        console.error('[Brain API] Crushing Uplink Failure:', brainJson);
+        throw new Error('Neural Uplink Depleted (Empty Choices)');
+    }
+
     const cleanContent = rawContent.replace(/```json|```/g, '').trim();
     const syndicateOutput = JSON.parse(cleanContent);
     
@@ -207,7 +215,7 @@ export async function POST(req: Request) {
     const streamA_Native = syndicateOutput.audio_script; // For TTS
     const streamA_Translation = syndicateOutput.translation; // Locked for Squeeze
 
-    console.log('✅ [Brain API] Grok Decided:', syndicateOutput.moment_key);
+    console.log('✅ [Brain API] Grok Decided:', syndicateOutput.moment_key || 'node_pulse');
 
     // 🏆 PERSISTENT RECALL: Detect and Save Nickname
     if (syndicateOutput.new_nickname_detected) {
