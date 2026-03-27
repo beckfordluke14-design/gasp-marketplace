@@ -52,8 +52,19 @@ function MarketplaceMain() {
   useEffect(() => { 
     setMounted(true); 
     const loadPersonas = async () => {
-        const { data } = await supabase.from('personas').select('*').eq('is_active', true);
-        if (data) setDbPersonas(data);
+        // 🧬 CNS DISCOVERY: Synchronize with Post Studio 'Feed/Hero' Approvals
+        // Only personas with public feed posts (is_vault=false) or Hero status (is_featured=true) are sanctioned for the Hub
+        const { data: sanctioned } = await supabase
+            .from('personas')
+            .select('*, posts(is_vault, is_featured)')
+            .eq('is_active', true); // Must be online + have content
+
+        if (sanctioned) {
+            const feedApproved = sanctioned.filter(p => 
+                (p.posts as any[] || []).some(post => !post.is_vault || post.is_featured)
+            );
+            setDbPersonas(feedApproved);
+        }
     };
     loadPersonas();
 
@@ -93,31 +104,21 @@ function MarketplaceMain() {
     const dbMapped = (dbPersonas || []).map(p => {
       const fallback = (initialPersonas.find(i => i.id === p.id) || {}) as any;
       return {
-        ...fallback,
-        id: p.id,
-        name: p.name || fallback.name || 'Unknown',
-        city: p.city || fallback.city || 'Santiago',
-        age: p.age || fallback.age || 22,
-        vibe: fallback.vibe || GASP_PULSES[(p.id || '').length % GASP_PULSES.length],
+        ...fallback, // Status-quo defaults
+        ...p,        // Database sovereignty updates (spread ALL fields)
         image: proxyImg(p.seed_image_url || p.image || fallback.image),
-        is_active: p.is_active,
-        status: p.status || 'online',
-        timezone: p.timezone || 'America/New_York',
-        systemPrompt: fallback.systemPrompt || `You are ${p.name}, a persona on GASP.`,
-        broadcasts: fallback.broadcasts || [],
-        slang_profile: fallback.slang_profile || { base: 'neutral', rules: [] },
+        isOnline: p.status === 'online' || p.is_active, // Virtual presence
+        vibe: p.vibe || fallback.vibe || GASP_PULSES[(p.id || '').length % GASP_PULSES.length]
       };
     });
-    // Merge DB + static, deduplicate by id, only reject truly blank images
+
+    // Merge DB + hardcoded, deduplicate by unique Identity slug
     return [
       ...dbMapped,
       ...initialPersonas
     ]
       .filter((p, index, self) => index === self.findIndex((t) => t.id === p.id))
-      .filter(p => {
-        const img = p.image || '';
-        return img && img !== '' && img !== 'undefined' && img !== 'null';
-      });
+      .filter(p => p.id && p.id !== '' && p.id !== 'undefined'); // Zero filter policy for higher node counts
   }, [dbPersonas]);
 
   const refinedPersonas = useMemo(() => {

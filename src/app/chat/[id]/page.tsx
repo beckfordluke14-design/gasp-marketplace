@@ -96,16 +96,33 @@ export default function VerdadChatPage(props: any) {
   useEffect(() => {
     if (staticPersona || !id) return; // Already found statically
     async function fetchDbPersona() {
-      const { data } = await supabase
+      // 🛡️ RE-ENFORCED GATE: Only approved nodes (is_active=true) can open a baseline chat
+      const { data: p } = await supabase
         .from('personas')
-        .select('*')
+        .select('*, posts(*)')
         .eq('id', id)
+        .eq('is_active', true)
         .single();
-      if (data) {
+      
+      if (p) {
+        // Map posts to vault items: Price defaults to 25 if not set in metadata
+        const vaultItems = (p.posts || [])
+          .filter((post: any) => post.is_vault)
+          .map((post: any) => ({
+            id: post.id,
+            type: post.content_type === 'video' ? 'video' : 'image',
+            blurred_url: post.content_url, // Using full as blur for now
+            full_url: post.content_url,
+            niche_tag: 'EDITORIAL',
+            price: post.price || 25,
+            caption: post.caption || ''
+          }));
+
         setDbPersona({
-          ...data,
-          image: data.seed_image_url || data.image || '/icons/icon-512x512.png',
-          timezone: data.timezone || 'America/New_York',
+          ...p,
+          image: p.seed_image_url || p.image || '/icons/icon-512x512.png',
+          timezone: p.timezone || 'America/New_York',
+          vault: vaultItems
         });
       }
     }
@@ -185,17 +202,37 @@ export default function VerdadChatPage(props: any) {
     if (id && persona && messages.length > 0) markAsRead();
   }, [id, persona, messages]);
 
-  // WHALE-HUNTER REVENUE ENGINE (Legacy compatibility)
-  const handleVaultUnlockLegacy = async (itemId: string) => {
+  // WHALE-HUNTER REVENUE ENGINE (Atomic Database Sync)
+  const handleVaultUnlock = async (itemId: string) => {
     const item = persona?.vault?.find((i: any) => i.id === itemId);
-    if (!item || userBalance < item.price) return false;
+    if (!item) return false;
     
-    return new Promise<boolean>((resolve) => {
-        setTimeout(() => {
-            setUserBalance(prev => prev - item.price);
-            resolve(true);
-        }, 1200);
-    });
+    try {
+        const res = await fetch('/api/economy/unlock', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                userId, 
+                mediaId: itemId, 
+                amount: item.price || 25 
+            })
+        });
+        const state = await res.json();
+        
+        if (res.ok && state.success) {
+            setUnlockedMedia(prev => ({ ...prev, [itemId]: item.full }));
+            // Update local balance immediately
+            setUserBalance(state.balance);
+            return true;
+        } else {
+            console.error('Unlock failed', state.error);
+            if (res.status === 400) setShowPaywall(true); 
+            return false;
+        }
+    } catch (err) {
+        console.error('[Economy Pulse] Unlock failed:', err);
+        return false;
+    }
   };
 
   // REAL ECONOMY UNLOCK (Step 5)
@@ -513,7 +550,7 @@ export default function VerdadChatPage(props: any) {
                     <VaultGallery 
                         items={persona?.vault || []} 
                         userBalance={userBalance}
-                        onUnlock={handleVaultUnlockLegacy}
+                        onUnlock={handleVaultUnlock} 
                     />
                 </motion.div>
               )}
