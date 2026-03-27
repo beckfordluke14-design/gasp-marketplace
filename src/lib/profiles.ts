@@ -78,7 +78,7 @@ export function proxyImg(url: any): string {
   
   const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vvcwjlcequbkhlpmwzlc.supabase.co';
   
-  let finalUrl = url.trim();
+  let finalUrl = (url || '').trim();
 
   // 1. Full URLs: Return as is (Direct Loading)
   if (finalUrl.startsWith('http')) return finalUrl;

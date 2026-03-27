@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, MessageSquare } from 'lucide-react';
 import GlobalFeed from '@/components/GlobalFeed';
 import RightSidebar from '@/components/RightSidebar';
+import StoriesRow from '@/components/StoriesRow';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -24,6 +25,7 @@ function MarketplaceContent() {
   const [chatPersonaCache, setChatPersonaCache] = useState<Record<string, any>>({});
   const [selectedPersonaId, setSelectedPersonaId] = useState<string>(initialPersonas[0]?.id ?? '');
   const [deadIds, setDeadIds] = useState<Set<string>>(new Set());
+  const [showStories, setShowStories] = useState(true);
   const [guestId, setGuestId] = useState<string | null>(null);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   
@@ -141,8 +143,33 @@ function MarketplaceContent() {
        <div className="flex-1 flex flex-col relative h-screen">
           <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} />
           <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-             <div className="flex-1 overflow-hidden relative">
-                <GlobalFeed onSelectPersona={handleSelectPersona} />
+             <div className="flex-1 overflow-hidden relative flex flex-col pt-4">
+                <AnimatePresence>
+                   {showStories && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }} 
+                        animate={{ height: 'auto', opacity: 1 }} 
+                        exit={{ height: 0, opacity: 0 }}
+                        className="shrink-0 mb-2 overflow-hidden"
+                      >
+                         <StoriesRow personas={randomizedPersonas} onSelectPersona={handleSelectPersona} />
+                      </motion.div>
+                   )}
+                </AnimatePresence>
+                
+                {/* STORY TOGGLE PORTAL */}
+                <div className="absolute right-6 top-8 z-50 flex items-center gap-3">
+                   <button 
+                     onClick={() => setShowStories(!showStories)}
+                     className={`w-10 h-10 rounded-xl bg-black/40 backdrop-blur-3xl border border-white/10 flex items-center justify-center text-white/20 hover:text-[#ffea00] transition-all ${!showStories ? 'bg-[#ffea00]/10 text-[#ffea00]' : ''}`}
+                   >
+                      <Zap size={16} className={!showStories ? 'animate-pulse' : ''} />
+                   </button>
+                </div>
+
+                <div className="flex-1 overflow-hidden relative">
+                   <GlobalFeed onSelectPersona={handleSelectPersona} />
+                </div>
              </div>
              <RightSidebar 
                onSelectPersona={handleSelectPersona} 

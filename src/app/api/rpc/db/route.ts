@@ -29,7 +29,7 @@ export async function POST(req: Request) {
             supabase.from('chat_messages').select('*').eq('user_id', userId).eq('persona_id', personaId).order('created_at', { ascending: true }),
             supabase.from('user_vault_unlocks').select('item_id').eq('user_id', userId),
             supabase.from('persona_vault').select('*').eq('persona_id', personaId).order('created_at', { ascending: false }),
-            supabase.from('posts').select('*').eq('persona_id', personaId).or('is_gallery.eq.true,is_vault.eq.true,is_freebie.eq.true').order('created_at', { ascending: false }),
+            supabase.from('posts').select('*').eq('persona_id', personaId).or('is_gallery.eq.true,is_vault.eq.true').order('created_at', { ascending: false }),
             supabase.from('user_relationships').select('*').eq('user_id', userId).eq('persona_id', personaId).maybeSingle(),
             supabase.from('user_persona_stats').select('bond_score').eq('user_id', userId).eq('persona_id', personaId).maybeSingle()
         ]);

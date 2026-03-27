@@ -57,6 +57,7 @@ export default function PostStudio() {
   // Linked posts for the edit modal
   const [linkedPosts, setLinkedPosts] = useState<PersonaPost[]>([]);
   const [loadingLinked, setLoadingLinked] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   
   // ── Bulk Selection Machine ──
   const [selectionMode, setSelectionMode] = useState(false);
@@ -651,106 +652,69 @@ export default function PostStudio() {
                              }
                           }}
                           onPointerUp={(e) => clearTimeout((e.target as any)._lp)}
-                          className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-all flex flex-col items-center justify-center gap-2 z-20 px-2 ${
-                            selectionMode 
+                          onClick={(e) => { 
+                            if (selectionMode) { toggleSelection(post.id); return; }
+                            setExpandedId(expandedId === post.id ? null : post.id);
+                          }}
+                          className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-all flex flex-col items-center justify-center gap-3 z-20 px-4 ${
+                            selectionMode || expandedId === post.id
                               ? 'opacity-100 pointer-events-auto cursor-pointer' 
-                              : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'
+                              : 'opacity-0 md:group-hover:opacity-100 pointer-events-none md:group-hover:pointer-events-auto'
                           }`}
                         >
-
-
                           {selectionMode ? (
                              <div className="text-center">
                                <p className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">{isSelected ? 'Deselect Node' : 'Select Node'}</p>
                              </div>
                           ) : (
                             <>
-                              {filterMode === 'orphaned' && post.is_vault && (
-                                <button onClick={() => pushToFeed(post)}
-                                  className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-[#00f0ff] text-black rounded-lg text-[8px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_16px_rgba(0,240,255,0.4)]">
-                                  <ArrowLeftRight size={10} /> → Feed
-                                </button>
-                              )}
-                              {filterMode === 'hidden' && (
-                                <button
-                                  onClick={() => restoreAsHero(post)}
-                                  disabled={syncing === post.id}
-                                  className="w-full flex items-center justify-center gap-1.5 px-2 py-2 bg-green-500 text-black rounded-lg text-[8px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_16px_rgba(0,255,100,0.4)] disabled:opacity-50"
-                                >
-                                  <Star size={10} /> Send to Feed as Hero
-                                </button>
-                              )}
-                              <button onClick={() => openEdit(post)}
-                                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-white text-black rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#00f0ff] transition-all">
-                                <Pencil size={11} /> Edit
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); openEdit(post); }}
+                                className="w-full h-12 bg-white text-black rounded-full flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 transition-all text-[11px] font-black uppercase tracking-widest mb-1"
+                              >
+                                <Pencil size={14} className="mb-0.5" />
+                                EDIT
                               </button>
-                              <div className="grid grid-cols-4 gap-1.5 w-full">
-                                <button onClick={() => toggleVault(post)} title={post.is_vault ? 'Move to Feed' : 'Move to Vault'}
-                                  className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_vault ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
-                                  <Lock size={11} />
+
+                              <div className="grid grid-cols-4 gap-2 w-full">
+                                <button onClick={(e) => { e.stopPropagation(); toggleVault(post); }} title={post.is_vault ? 'Move to Feed' : 'Move to Vault'}
+                                  className={`h-11 rounded-xl flex items-center justify-center transition-all active:scale-95 ${post.is_vault ? 'bg-[#ffea00] text-black' : 'bg-white/10 text-white/50 hover:bg-white/20'}`}>
+                                  <Lock size={16} />
                                 </button>
-                                <button onClick={() => toggleHero(post)} title="Set as Hero"
-                                  className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_burner ? 'bg-[#ffea00] text-black' : 'bg-white/10 text-white/50 hover:bg-[#ffea00]/40'}`}>
-                                  <Star size={11} />
+                                <button onClick={(e) => { e.stopPropagation(); toggleHero(post); }} title="Set as Hero"
+                                  className={`h-11 rounded-xl flex items-center justify-center transition-all active:scale-95 ${post.is_burner ? 'bg-[#ffea00] text-black shadow-[0_0_15px_#ffea0044]' : 'bg-white/10 text-white/50 hover:bg-white/20'}`}>
+                                  <Star size={16} />
                                 </button>
-                                <button onClick={() => toggleFreebie(post)} title={post.is_freebie ? 'Remove Freebie' : 'Mark as Gift'}
-                                  className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_freebie ? 'bg-[#ff00ff] text-white' : 'bg-white/10 text-white/50 hover:bg-[#ff00ff]/40'}`}>
-                                  <Gift size={11} />
+                                <button onClick={(e) => { e.stopPropagation(); toggleFreebie(post); }} title={post.is_freebie ? 'Remove Freebie' : 'Mark as Gift'}
+                                  className={`h-11 rounded-xl flex items-center justify-center transition-all active:scale-95 ${post.is_freebie ? 'bg-[#ff00ff] text-white shadow-[0_0_15px_#ff00ff44]' : 'bg-white/10 text-white/50 hover:bg-white/20'}`}>
+                                  <Gift size={16} />
                                 </button>
-                                <button onClick={() => setShowSoloModal(post)} title="Go Solo: Create New Persona"
-                                  className="h-8 rounded-lg bg-white/5 text-white/40 hover:bg-[#00f0ff]/20 hover:text-white flex items-center justify-center transition-all">
-                                  <Sparkles size={11} />
+                                <button onClick={(e) => { e.stopPropagation(); setShowSoloModal(post); }} title="Go Solo: Create New Persona"
+                                  className="h-11 rounded-xl bg-white/10 text-white/40 hover:bg-[#00f0ff] hover:text-black flex items-center justify-center transition-all active:scale-95">
+                                  <Sparkles size={16} />
                                 </button>
 
-                                <button onClick={() => markDuplicate(post.id)} title="Hide Duplicate"
-                                  className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/30 hover:text-orange-300 flex items-center justify-center transition-all">
-                                  <Copy size={11} />
+                                <button onClick={(e) => { e.stopPropagation(); markDuplicate(post.id); }} title="Hide Duplicate"
+                                  className="h-11 rounded-xl bg-white/10 text-white/50 hover:bg-orange-500 hover:text-white flex items-center justify-center transition-all active:scale-95">
+                                  <Copy size={16} />
                                 </button>
-                                <button onClick={() => softHide(post.id)} title="Hide from Feed"
-                                  className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-orange-500/20 hover:text-orange-400 flex items-center justify-center transition-all">
-                                  <EyeOff size={11} />
+                                <button onClick={(e) => { e.stopPropagation(); softHide(post.id); }} title="Hide from Feed"
+                                  className="h-11 rounded-xl bg-white/10 text-white/50 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all active:scale-95">
+                                  <EyeOff size={16} />
                                 </button>
-                                <button onClick={() => toggleGallery(post)} title={post.is_gallery ? 'Remove from Gallery' : 'Move to Gallery'}
-                                  className={`h-8 rounded-lg flex items-center justify-center transition-all ${post.is_gallery ? 'bg-[#00f0ff] text-black' : 'bg-white/10 text-white/50 hover:bg-[#00f0ff]/40'}`}>
-                                  <FolderHeart size={11} />
+                                <button onClick={(e) => { e.stopPropagation(); toggleGallery(post); }} title={post.is_gallery ? 'Remove from Gallery' : 'Move to Gallery'}
+                                  className={`h-11 rounded-xl flex items-center justify-center transition-all active:scale-95 ${post.is_gallery ? 'bg-[#00f0ff] text-black shadow-[0_0_15px_#00f0ff44]' : 'bg-white/10 text-white/50 hover:bg-white/20'}`}>
+                                  <FolderHeart size={16} />
                                 </button>
-                                <button onClick={() => hardDelete(post.id)} title="Permanent Delete"
-                                  className="h-8 rounded-lg bg-white/10 text-white/50 hover:bg-red-500/30 hover:text-red-400 flex items-center justify-center transition-all">
-                                  <Trash2 size={11} />
-                                </button>
-
-                                {/* Identity Buffer Actions */}
-                                <button onClick={() => setIdentityTarget({ id: post.persona_id, name: showName })} title={identityTarget?.id === post.persona_id ? 'Active Target' : 'Set as Pulse Target'}
-                                  className={`h-8 rounded-lg flex items-center justify-center transition-all col-span-1 ${identityTarget?.id === post.persona_id ? 'bg-[#00f0ff] text-black shadow-[0_0_15px_rgba(0,240,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-[#00f0ff]/20 hover:text-white'}`}>
-                                  <UserCheck size={11} />
+                                <button onClick={(e) => { e.stopPropagation(); hardDelete(post.id); }} title="Permanent Delete"
+                                  className="h-11 rounded-xl bg-white/10 text-white/50 hover:bg-red-600 hover:text-white flex items-center justify-center transition-all active:scale-95">
+                                  <Trash2 size={16} />
                                 </button>
 
-                                {identityTarget && identityTarget.id !== post.persona_id && (
-                                  <button onClick={() => {
-                                      if (!confirm(`Move node to ${identityTarget.name}?`)) return;
-                                      callAudit('update-post', { id: post.id, persona_id: identityTarget.id }).then(() => {
-                                          setPosts(prev => prev.map(p => p.id === post.id ? { ...p, persona_id: identityTarget.id, personas: { ...p.personas, name: identityTarget.name } } : p));
-                                          flash(post.id);
-                                      });
-                                  }} title={`Move Node to ${identityTarget.name}`}
-                                    className="h-8 rounded-lg bg-[#00f0ff]/20 border border-[#00f0ff]/40 text-[#00f0ff] hover:bg-[#00f0ff] hover:text-black flex items-center justify-center transition-all animate-pulse col-span-1">
-                                    <Package size={11} />
-                                  </button>
-                                )}
-
-                                {identityTarget && identityTarget.id !== post.persona_id && (
-                                  <button onClick={async () => {
-                                      if (!confirm(`CRITICAL: Merge ALL items from ${showName} into ${identityTarget.name}? ${showName} will be DELETED.`)) return;
-                                      setLoading(true);
-                                      const res = await callAudit('merge-persona', { sourceId: post.persona_id, targetId: identityTarget.id });
-                                      if (res.success) { alert('Identity Merged.'); fetchPosts(); }
-                                      else alert(res.error || 'Merge fail.');
-                                      setLoading(false);
-                                  }} title={`Merge ${showName} into ${identityTarget.name}`}
-                                    className="h-8 rounded-lg bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff] hover:bg-[#ff00ff] hover:text-black flex items-center justify-center transition-all col-span-2">
-                                    <span className="text-[7px] font-black uppercase pr-1">Merge</span> <Link2 size={11} />
-                                  </button>
-                                )}
+                                <button onClick={(e) => { e.stopPropagation(); setIdentityTarget({ id: post.persona_id, name: showName }); }} title={identityTarget?.id === post.persona_id ? 'Active Target' : 'Set as Pulse Target'}
+                                  className={`h-11 rounded-xl flex items-center justify-center transition-all active:scale-95 ${identityTarget?.id === post.persona_id ? 'bg-[#00f0ff] text-black shadow-[0_0_15px_#00f0ff44]' : 'bg-white/5 text-white/40 hover:bg-white/20'}`}>
+                                  <UserCheck size={16} />
+                                </button>
                               </div>
                             </>
                           )}
