@@ -9,7 +9,8 @@ import RightSidebar from '@/components/RightSidebar';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import ChatDrawer from '@/components/ChatDrawer';
 import Header from '@/components/Header';
-import ChatDock from '@/components/ChatDock';
+import ChatCluster from '@/components/ChatCluster';
+import ConnectionsHub from '@/components/ConnectionsHub';
 import GhostActivityTicker from '@/components/GhostActivityTicker';
 import PersonaAvatar from '@/components/persona/PersonaAvatar';
 import TopUpDrawer from '@/components/economy/TopUpDrawer';
@@ -41,6 +42,8 @@ function MarketplaceMain() {
   const [selectedPersonaId, setSelectedPersonaId] = useState(initialPersonas[0]?.id ?? '');
   const [openChatIds, setOpenChatIds] = useState<string[]>([]);
   const [minimizedIds, setMinimizedIds] = useState<string[]>([]);
+  const [followedIds, setFollowedIds] = useState<string[]>([]);
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [guestId, setGuestId] = useState<string>('');
   const [dbPersonas, setDbPersonas] = useState<any[]>([]);
   const [isZenMode, setIsZenMode] = useState(false);
@@ -53,7 +56,38 @@ function MarketplaceMain() {
         if (data) setDbPersonas(data);
     };
     loadPersonas();
+
+    // 🔔 UNREAD SYNC: Monitor global message pulses
+    const syncUnreads = () => {
+       const stored = JSON.parse(localStorage.getItem('gasp_unread_counts') || '{}');
+       setUnreadCounts(stored);
+    };
+    syncUnreads();
+    window.addEventListener('gasp_unread_pulse', syncUnreads);
+    return () => window.removeEventListener('gasp_unread_pulse', syncUnreads);
   }, []);
+
+  useEffect(() => {
+    let id = localStorage.getItem('gasp_guest_id');
+    if (!id) {
+       id = `guest-${Math.random().toString(36).substring(2, 11)}`;
+       localStorage.setItem('gasp_guest_id', id);
+    }
+    setGuestId(id);
+
+    // 🤝 DATABASE CONNECTION SYNC
+    const syncFollows = async () => {
+       if (!id) return;
+       const { data } = await supabase.from('user_relationships').select('persona_id').eq('user_id', id);
+       if (data) setFollowedIds(data.map(r => r.persona_id));
+    };
+
+    syncFollows();
+    
+    // Listen for manual sync events from ChatDrawer (BroadcastChannel or window event)
+    window.addEventListener('gasp_sync_follows', syncFollows);
+    return () => window.removeEventListener('gasp_sync_follows', syncFollows);
+  }, [guestId]);
 
   const allPersonas = [
     ...(dbPersonas || []).map(p => {
@@ -75,15 +109,6 @@ function MarketplaceMain() {
     ...p,
     vibe: GASP_PULSES[(Math.floor(Date.now() / 3600000) + (p.id || '').length) % GASP_PULSES.length]
   }));
-
-  useEffect(() => {
-    let id = localStorage.getItem('gasp_guest_id');
-    if (!id) {
-       id = `guest-${Math.random().toString(36).substring(2, 11)}`;
-       localStorage.setItem('gasp_guest_id', id);
-    }
-    setGuestId(id);
-  }, []);
 
   const handleSelectPersona = (id: string) => {
     setSelectedPersonaId(id);
@@ -109,11 +134,14 @@ function MarketplaceMain() {
 
   if (!mounted) return (<div className="min-h-screen bg-black flex items-center justify-center"><div className="w-12 h-12 border-4 border-[#ffea00]/20 border-t-[#ffea00] rounded-full animate-spin" /></div>);
 
+  // Combine minimized and followed for the Bubbly Hub
+  const activeHubIds = [...new Set([...minimizedIds, ...followedIds])];
+
   return (
     <div className="flex h-[100dvh] bg-black overflow-hidden font-inter" 
          onDoubleClick={handleZenToggle}
     >
-      {/* 🧭 FAR-LEFT DISCOVERY STRIP (Rotating Bubbles) */}
+      {/* 🧭 FLOATING DISCOVERY HUB (Rotating Bubbles) */}
       {!isZenMode && !isChatOpenMobile && (
         <NeuralDiscoveryBubbles personas={refinedPersonas} onSelectPersona={handleSelectPersona} />
       )}
@@ -171,12 +199,18 @@ function MarketplaceMain() {
         </AnimatePresence>
       </div>
 
+      {/* 🫧 ACTIVE CHAT HUB: MINIMIZED BUBBLES */}
       {!isZenMode && minimizedIds.length > 0 && (
-         <ChatDock minimizedIds={minimizedIds} unreadCounts={{}} onRestore={(id) => setMinimizedIds(prev => prev.filter(mid => mid !== id))} personas={refinedPersonas} />
+         <ChatCluster activeChatIds={minimizedIds} unreadCounts={unreadCounts} onRestore={(id) => setOpenChatIds(prev => prev.includes(id) ? prev : [...prev, id])} personas={refinedPersonas} />
+      )}
+
+      {/* 📱 CONNECTIONS VAULT: IPHONE-STYLE INBOX */}
+      {!isZenMode && followedIds.length > 0 && (
+         <ConnectionsHub followedIds={followedIds} unreadCounts={unreadCounts} onSelectPersona={handleSelectPersona} personas={refinedPersonas} />
       )}
 
       {!isZenMode && !isChatOpenMobile && (
-        <MobileBottomNav unreadCounts={{}} onSelectChat={() => handleSelectPersona(selectedPersonaId)} onOpenTopUp={() => setIsTopUpOpen(true)} />
+        <MobileBottomNav unreadCounts={unreadCounts} onSelectChat={() => handleSelectPersona(selectedPersonaId)} onOpenTopUp={() => setIsTopUpOpen(true)} />
       )}
 
       {isTopUpOpen && <TopUpDrawer userId={guestId} onClose={() => setIsTopUpOpen(false)} />}

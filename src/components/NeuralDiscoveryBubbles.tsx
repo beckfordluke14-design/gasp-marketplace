@@ -12,8 +12,8 @@ interface NeuralDiscoveryBubblesProps {
 }
 
 /**
- * 🛰️ NEURAL DISCOVERY HUB v1.0
- * Objective: Drive autonomous discovery via rotating left-side persona bubbles.
+ * 🛰️ NEURAL DISCOVERY HUB v1.2
+ * Objective: Drive autonomous discovery via floating, transparent persona nodes.
  */
 export default function NeuralDiscoveryBubbles({ personas, onSelectPersona }: NeuralDiscoveryBubblesProps) {
   const [activePersonas, setActivePersonas] = useState<any[]>([]);
@@ -24,11 +24,11 @@ export default function NeuralDiscoveryBubbles({ personas, onSelectPersona }: Ne
 
     const pickRandom = () => {
        const shuffled = [...personas].sort(() => 0.5 - Math.random());
-       setActivePersonas(shuffled.slice(0, 3));
+       setActivePersonas(shuffled.slice(0, 4)); // Show 4 at a time
     };
 
     pickRandom();
-    const interval = setInterval(pickRandom, 8000); // 8-sec rotation cycle
+    const interval = setInterval(pickRandom, 8000); 
     return () => clearInterval(interval);
   }, [personas]);
 
@@ -37,40 +37,45 @@ export default function NeuralDiscoveryBubbles({ personas, onSelectPersona }: Ne
   return (
     <motion.div 
       initial={false}
-      animate={{ width: isVisible ? (typeof window !== 'undefined' && window.innerWidth < 768 ? 48 : 80) : 32 }}
-      className="flex flex-col items-center py-8 border-r border-white/5 bg-black/5 backdrop-blur-3xl shrink-0 overflow-hidden relative transition-all"
+      animate={{ width: isVisible ? 120 : 48 }}
+      className="fixed top-1/2 -translate-y-1/2 left-[5%] md:left-[120px] z-[800] flex flex-col items-center py-6 bg-transparent pointer-events-none"
     >
-       <div className="flex-1 flex flex-col items-center gap-8 py-4">
+       <div className="flex flex-col items-center gap-10">
          <AnimatePresence mode="popLayout">
             {isVisible && activePersonas.map((p, idx) => {
-               // SYNDICATE V10: Story/Discovery Pulse
-               const hasUnviewed = Math.random() > 0.4; // Simulated story check
+               // SYNDICATE V10: IG-Style Story Node
+               const hasUnviewed = Math.random() > 0.3; 
                return (
                  <motion.div
                    key={p.id}
-                   initial={{ x: -20, opacity: 0, scale: 0.8 }}
+                   initial={{ x: -30, opacity: 0, scale: 0.5 }}
                    animate={{ x: 0, opacity: 1, scale: 1 }}
-                   exit={{ x: -40, opacity: 0, scale: 0.5 }}
-                   transition={{ delay: idx * 0.1, type: 'spring', damping: 20 }}
+                   exit={{ x: -30, opacity: 0, scale: 0.5 }}
+                   transition={{ delay: idx * 0.1, type: 'spring', damping: 18 }}
                    className="pointer-events-auto group relative cursor-pointer"
                    onClick={() => onSelectPersona(p.id)}
                  >
-                    {/* 🧬 STORY GLOW RING */}
+                    {/* ⭕️ INSTAGRAM-STYLE STORY RING (NO GLOW) */}
                     {hasUnviewed && (
-                      <motion.div 
-                        animate={{ rotate: 360 }}
-                        transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
-                        className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-[#ff00ff] via-[#00f0ff] to-[#ffea00] p-[1px] opacity-100 blur-[2px] shadow-[0_0_15px_rgba(255,0,255,0.4)]"
-                      />
+                      <div className="absolute -inset-[3px] rounded-full p-[2px] bg-gradient-to-tr from-[#ff00ff] via-[#ff6b6b] to-[#ffea00]">
+                         <div className="w-full h-full rounded-full bg-black" />
+                      </div>
                     )}
 
-                    {/* THE BUBBLE NODE (NO BORDER) */}
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-black shadow-[0_10px_30px_rgba(0,0,0,1)] relative z-10 transition-all group-hover:scale-110">
+                    {/* THE BUBBLE NODE (FLOATING / SHADOW) */}
+                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-transparent bg-black shadow-[0_15px_30px_rgba(0,0,0,0.8)] relative z-10 transition-all group-hover:scale-110">
                        <PersonaAvatar src={p.image} alt={p.name} />
                     </div>
 
-                    {/* 🛰️ ONLINE DOT INDICATOR (GREEN GLOW) */}
-                    <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] animate-pulse z-20" />
+                    {/* 🟢 GREEN STATUS INDICATOR */}
+                    <div className="absolute -bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] animate-pulse z-20" />
+
+                    {/* Tooltip Label */}
+                    <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
+                       <span className="text-[10px] font-black uppercase text-white tracking-widest bg-black/40 backdrop-blur-md px-3 py-1 rounded-lg">
+                          {p.name.toLowerCase()}
+                       </span>
+                    </div>
                  </motion.div>
                );
             })}
@@ -80,7 +85,7 @@ export default function NeuralDiscoveryBubbles({ personas, onSelectPersona }: Ne
        {/* 👁️ THE SOVEREIGN TOGGLE */}
        <button 
          onClick={() => setIsVisible(!isVisible)}
-         className="mt-auto w-10 h-10 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white/20 hover:text-white/60 transition-all active:scale-95"
+         className="mt-12 pointer-events-auto w-10 h-10 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-3xl border border-white/10 text-white/20 hover:text-[#00ff00] hover:border-[#00ff00]/40 transition-all active:scale-90 shadow-2xl"
        >
           {isVisible ? <EyeOff size={16} /> : <Eye size={16} />}
        </button>

@@ -21,6 +21,12 @@ import {
 import { useUser } from '@/components/providers/UserProvider';
 import PersonaAvatar from '@/components/persona/PersonaAvatar';
 import Link from 'next/link';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
+);
 
 interface SidebarProps {
   selectedPersonaId: string;
@@ -45,22 +51,25 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
   const rank = getSyncRank(profile?.credit_balance || 0);
 
   useEffect(() => {
-    const stored = localStorage.getItem('gasp_following');
-    if (stored) {
-      try {
-        setFollowing(JSON.parse(stored));
-      } catch (e) {
-        setFollowing([]);
-      }
-    }
-
-    const handleStorage = () => {
-      const updated = localStorage.getItem('gasp_following');
-      if (updated) setFollowing(JSON.parse(updated));
+    const gid = profile?.id || localStorage.getItem('gasp_guest_id');
+    
+    // 🤝 DATABASE CONNECTION SYNC
+    const syncFollows = async () => {
+       const idToUse = profile?.id || localStorage.getItem('gasp_guest_id');
+       if (!idToUse) return;
+       const { data } = await supabase.from('user_relationships').select('persona_id').eq('user_id', idToUse);
+       if (data) setFollowing(data.map(r => r.persona_id));
     };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, []);
+
+    syncFollows();
+    
+    window.addEventListener('gasp_sync_follows', syncFollows);
+    window.addEventListener('storage', syncFollows);
+    return () => {
+       window.removeEventListener('gasp_sync_follows', syncFollows);
+       window.removeEventListener('storage', syncFollows);
+    };
+  }, [profile]);
 
   const [shuffledOthers, setShuffledOthers] = useState<any[]>([]);
 
@@ -105,6 +114,31 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
               <span className={`text-[12px] font-black uppercase italic tracking-tighter transition-colors ${unread > 0 ? 'text-[#ff00ff]' : 'text-white'}`}>
                 {getPersonaName(persona)}
               </span>
+              
+              {/* 🤝 DIRECT CONNECT NODE */}
+              <button 
+                onClick={async (e) => {
+                   e.stopPropagation();
+                   const gid = profile?.id || localStorage.getItem('gasp_guest_id');
+                   if (!gid) return;
+
+                   if (isFollowing) {
+                      await supabase.from('user_relationships').delete().eq('user_id', gid).eq('persona_id', persona.id);
+                   } else {
+                      await supabase.from('user_relationships').upsert({ user_id: gid, persona_id: persona.id, affinity_score: 1 });
+                   }
+                   
+                   // 🛰️ Internal broadcasting for immediate HUD sync
+                   window.dispatchEvent(new Event('gasp_sync_follows'));
+                }}
+                className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all ${
+                  isFollowing 
+                  ? 'bg-[#ff00ff]/10 border-[#ff00ff]/40 text-[#ff00ff]' 
+                  : 'bg-white/5 border-white/10 text-white/20 hover:text-white hover:border-white/40'
+                }`}
+              >
+                  <PlusCircle size={12} className={isFollowing ? 'rotate-45 transition-transform' : ''} />
+              </button>
            </div>
            <p className="text-[9px] text-white/30 truncate leading-relaxed">
               {persona.vibe.toUpperCase()}

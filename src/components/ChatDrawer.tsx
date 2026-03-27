@@ -86,23 +86,30 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     if (id.startsWith('guest-')) {
        setMessageCount(parseInt(localStorage.getItem('gasp_msg_count') || '0', 10));
     }
-    const storedFollows = JSON.parse(localStorage.getItem('gasp_following') || '[]');
-    setIsFollowing(storedFollows.includes(personaId));
+    
+    // 🤝 DATABASE CONNECTION SYNC
+    const checkFollow = async () => {
+       if (!id || !personaId) return;
+       const { data } = await supabase.from('user_relationships').select('*').eq('user_id', id).eq('persona_id', personaId).maybeSingle();
+       setIsFollowing(!!data);
+    };
+    checkFollow();
+
     const h = new Date().getHours();
     setActiveChatters(Math.floor(Math.random() * 20) + ((h > 20 || h < 4) ? 80 : 30));
   }, [user, personaId]);
 
-  const handleFollowToggle = () => {
-    const stored = localStorage.getItem('gasp_following') || '[]';
-    let following = JSON.parse(stored);
+  const handleFollowToggle = async () => {
+    if (!guestId || !personaId) return;
+    
     if (isFollowing) {
-       following = following.filter((id: string) => id !== personaId);
+       await supabase.from('user_relationships').delete().eq('user_id', guestId).eq('persona_id', personaId);
     } else {
-       following.push(personaId);
+       await supabase.from('user_relationships').upsert({ user_id: guestId, persona_id: personaId, affinity_score: 1 });
     }
-    localStorage.setItem('gasp_following', JSON.stringify(following));
+    
     setIsFollowing(!isFollowing);
-    window.dispatchEvent(new Event('storage')); // 🧬 Sync all discovery nodes
+    window.dispatchEvent(new Event('gasp_sync_follows')); // 📡 Update layouts
   };
 
   const loadData = async () => {
@@ -268,10 +275,22 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                <div className="flex items-center gap-2 leading-none">
                  <h3 className="text-[13px] md:text-lg font-black uppercase italic text-white tracking-tighter">{persona.name.toLowerCase()}</h3>
                </div>
-               <div className="flex items-center gap-3 mt-1.5 opacity-60">
-                  <span className="text-[8px] text-white uppercase tracking-widest">{persona.city}</span>
-                  <div className="w-1 h-[1px] bg-white/20" />
-                  <span className="text-[8px] text-[#00ff00] font-black uppercase tracking-widest italic leading-none">Locked Hub</span>
+               
+               {/* 💎 SECURE CACHE NODE: FORBIDDEN PROFESSIONAL VIBE */}
+               <div 
+                 onClick={() => setChatTab('pics')}
+                 className="flex items-center gap-2 mt-2 cursor-pointer group/node"
+               >
+                  <motion.div 
+                    animate={{ scale: [1, 1.2, 1] }} 
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="w-4 h-4 rounded-full bg-[#ff00ff]/10 border border-[#ff00ff]/30 flex items-center justify-center shadow-[0_0_10px_#ff00ff22]"
+                  >
+                     <Diamond size={8} className="text-[#ff00ff]" />
+                  </motion.div>
+                  <span className="text-[7px] md:text-[8px] text-white/40 group-hover/node:text-[#ff00ff] font-black uppercase tracking-[0.2em] transition-all italic leading-none">
+                     SECURE ARCHIVE • {vaultItems.length || '---'} NODES
+                  </span>
                </div>
             </div>
         </div>
