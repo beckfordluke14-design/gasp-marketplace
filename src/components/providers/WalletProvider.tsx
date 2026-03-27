@@ -1,12 +1,13 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { ethers } from 'ethers';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { useWallets } from '@privy-io/react-auth';
+import { usePrivy } from '@privy-io/react-auth';
 
 /**
- * 🛰️ NEURAL WALLET BRIDGE
- * Universal adapter for EVM (Metamask) and Solana (Phantom).
- * Objective: Frictionless settlement protocol.
+ * 🛰️ NEURAL WALLET BRIDGE (Privy Edition)
+ * Universal adapter for EVM and Solana, powered by the Privy Identity Gate.
+ * Objective: Unified settlement protocol for all authenticated titans.
  */
 
 interface WalletState {
@@ -14,7 +15,7 @@ interface WalletState {
   network: 'evm' | 'solana' | null;
   isConnected: boolean;
   isConnecting: boolean;
-  installedWallets: any[]; // Detected browser wallets
+  installedWallets: any[]; // Privy takes care of discovery
 }
 
 interface WalletContextType extends WalletState {
@@ -27,134 +28,34 @@ interface WalletContextType extends WalletState {
 const WalletContext = createContext<WalletContextType | null>(null);
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<WalletState>({
-    address: null,
-    network: null,
-    isConnected: false,
+  const { connectWallet, logout, authenticated } = usePrivy();
+  const { wallets } = useWallets();
+
+  const activeWallet = wallets[0]; // Primary settlement agent
+
+  const state = useMemo(() => ({
+    address: activeWallet?.address || null,
+    network: (activeWallet?.walletClientType === 'phantom' || activeWallet?.address.length > 42) ? 'solana' : 'evm' as any,
+    isConnected: !!activeWallet,
     isConnecting: false,
-    installedWallets: [],
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const providers: any[] = [];
-    const handleAnnounce = (event: any) => {
-      if (providers.find(p => p.info.uuid === event.detail.info.uuid)) return;
-      providers.push(event.detail);
-      setState(s => ({ ...s, installedWallets: [...providers] }));
-    };
-
-    window.addEventListener('eip6963:announceProvider' as any, handleAnnounce);
-    window.dispatchEvent(new Event('eip6963:requestProvider'));
-    
-    return () => window.removeEventListener('eip6963:announceProvider' as any, handleAnnounce);
-  }, []);
+    installedWallets: wallets.map(w => ({ info: { name: w.walletClientType, icon: '' }, provider: w })),
+  }), [wallets, activeWallet]);
 
   const connectMetamask = useCallback(async () => {
-    if (typeof window === 'undefined') return;
-    const ethereum = (window as any).ethereum;
-
-    if (ethereum) {
-      setState(s => ({ ...s, isConnecting: true }));
-      try {
-        const provider = new ethers.BrowserProvider(ethereum);
-        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-        
-        setState(s => ({
-          ...s,
-          address: accounts[0],
-          network: 'evm',
-          isConnected: true,
-          isConnecting: false,
-        }));
-
-        // Listen for changes
-        ethereum.on('accountsChanged', (newAccounts: string[]) => {
-          if (newAccounts.length === 0) {
-            setState(s => ({ ...s, address: null, network: null, isConnected: false, isConnecting: false }));
-          } else {
-            setState(s => ({ ...s, address: newAccounts[0] }));
-          }
-        });
-
-        ethereum.on('chainChanged', () => window.location.reload());
-
-      } catch (err) {
-        console.error('[EVM] Connection Failure:', err);
-        setState(s => ({ ...s, isConnecting: false }));
-      }
-    } else {
-      window.open('https://metamask.io/download/', '_blank');
-    }
-  }, []);
-
-  const connectInjected = useCallback(async (injected: any) => {
-    setState(s => ({ ...s, isConnecting: true }));
-    try {
-      const provider = new ethers.BrowserProvider(injected.provider);
-      const accounts = await injected.provider.request({ method: 'eth_requestAccounts' });
-      
-      setState(s => ({
-        ...s,
-        address: accounts[0],
-        network: 'evm',
-        isConnected: true,
-        isConnecting: false,
-      }));
-
-      injected.provider.on('accountsChanged', (newAccounts: string[]) => {
-        if (newAccounts.length === 0) {
-          setState(s => ({ ...s, address: null, network: null, isConnected: false }));
-        } else {
-          setState(s => ({ ...s, address: newAccounts[0] }));
-        }
-      });
-    } catch (err) {
-      console.error('[Injected] Connection Failure:', err);
-      setState(s => ({ ...s, isConnecting: false }));
-    }
-  }, []);
+    connectWallet();
+  }, [connectWallet]);
 
   const connectPhantom = useCallback(async () => {
-    if (typeof window === 'undefined') return;
-    const solana = (window as any).solana;
+    connectWallet();
+  }, [connectWallet]);
 
-    if (solana?.isPhantom) {
-      setState(s => ({ ...s, isConnecting: true }));
-      try {
-        const resp = await solana.connect();
-        setState(s => ({
-          ...s,
-          address: resp.publicKey.toString(),
-          network: 'solana',
-          isConnected: true,
-          isConnecting: false,
-        }));
-
-        solana.on('accountChanged', (publicKey: any) => {
-          if (publicKey) {
-            setState(s => ({ ...s, address: publicKey.toString() }));
-          } else {
-            setState(s => ({ ...s, address: null, network: null, isConnected: false, isConnecting: false }));
-          }
-        });
-
-      } catch (err) {
-        console.error('[SOL] Connection Failure:', err);
-        setState(s => ({ ...s, isConnecting: false }));
-      }
-    } else {
-      window.open('https://phantom.app/', '_blank');
-    }
-  }, []);
+  const connectInjected = useCallback(async () => {
+    connectWallet();
+  }, [connectWallet]);
 
   const disconnect = useCallback(() => {
-    setState(s => ({ ...s, address: null, network: null, isConnected: false, isConnecting: false }));
-    // Note: Phantom allows programmatic disconnect, Metamask typically doesn't
-    const solana = (window as any).solana;
-    if (solana?.isPhantom) solana.disconnect();
-  }, []);
+    logout();
+  }, [logout]);
 
   return (
     <WalletContext.Provider value={{ ...state, connectMetamask, connectPhantom, connectInjected, disconnect }}>

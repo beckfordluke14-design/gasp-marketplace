@@ -274,14 +274,9 @@ function GlobalFeedItem({ persona, broadcast, onSelectPersona, onDeletePost, onT
                          autoFocus
                       />
                    ) : (
-                      <>
-                        <h2 className="text-[20px] md:text-[28px] lg:text-[36px] font-black tracking-tighter text-white italic lowercase leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
-                           {broadcast.content}
-                        </h2>
-                        {broadcast.content?.toLowerCase() !== displayName.toLowerCase() && (
-                          <h3 className="text-4xl md:text-7xl font-syncopate font-bold uppercase italic tracking-tighter text-white/90 drop-shadow-2xl leading-none mt-2">{displayName}</h3>
-                        )}
-                      </>
+                      <h2 className="text-[20px] md:text-[28px] lg:text-[36px] font-black tracking-tighter text-white italic lowercase leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+                         {broadcast.content}
+                      </h2>
                    )}
                      </div>
                      <div className="flex items-center gap-4 md:gap-6 pointer-events-auto">

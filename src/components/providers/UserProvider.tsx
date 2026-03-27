@@ -2,11 +2,12 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
-import { Session, User } from '@supabase/supabase-js';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { Session } from '@supabase/supabase-js';
 
 interface UserContextType {
-  user: User | null;
-  session: Session | null;
+  user: any | null; // Privy User
+  session: any | null;
   profile: {
     id: string;
     nickname?: string;
@@ -14,10 +15,14 @@ interface UserContextType {
     is_known?: boolean;
     last_active_at?: string;
     credit_balance?: number;
+    total_spent_usd?: number;
   } | null;
   loading: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
+  ready: boolean;
+  authenticated: boolean;
+  login: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -35,88 +40,78 @@ function getSupabase() {
 }
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const { ready, authenticated, user, logout, login } = usePrivy();
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
-    const { data, error } = await getSupabase()
+  const fetchProfile = async (userId: string, privyUser: any) => {
+    // 🛡️ NO-AUTH LIMIT: We query the public profiles table directly 
+    // Secure via RLS (uuid-deterministic mapping)
+    const { data: existing, error: fetchErr } = await getSupabase()
       .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
     
-    if (error) {
-      console.warn('[UserContext] Profile fetch err:', error.message);
-      return;
+    // 🧬 Extract Email Identity (Google, Social, or Direct)
+    const email = privyUser?.email?.address || privyUser?.google?.email || privyUser?.twitter?.username;
+
+    if (fetchErr) {
+       // Auto-Genesis: Initial Node Registration
+       console.log('[UserProvider] New node detected. Registering identity...');
+       const { data: newProfile } = await getSupabase()
+          .from('profiles')
+          .insert({ 
+            id: userId, 
+            credit_balance: 50, 
+            role: 'user', 
+            email: email, 
+            last_active_at: new Date().toISOString() 
+          })
+          .select()
+          .single();
+       if (newProfile) setProfile(newProfile);
+       return;
     }
-    setProfile(data);
+
+    // 🧬 Update Pulse: Sync any changed email handle
+    if (email && existing.email !== email) {
+       await getSupabase().from('profiles').update({ email }).eq('id', userId);
+    }
+    
+    setProfile({ ...existing, email: email || existing.email });
   };
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data: { session: initialSession } } = await getSupabase().auth.getSession();
-      setSession(initialSession);
-      setUser(initialSession?.user || null);
-      if (initialSession?.user) {
-        await fetchProfile(initialSession.user.id);
-      }
-      setLoading(false);
-    };
+    if (!ready) return;
 
-    getSession();
-
-    // ACTIVITY PING: THE PULSE
-    let pingInterval: any;
-    if (user) {
-      pingInterval = setInterval(async () => {
-        await getSupabase()
-          .from('profiles')
-          .update({ last_active_at: new Date().toISOString(), ghost_email_sent: false })
-          .eq('id', user.id);
-      }, 1000 * 60 * 5); // 5 mins
+    if (authenticated && user) {
+       // Identity Handshake
+       fetchProfile(user.id, user);
+       
+       // Sync Guest Data
+       const guestId = localStorage.getItem('gasp_guest_id');
+       if (guestId && guestId !== user.id) {
+          getSupabase().rpc('migrate_guest_data', { p_guest_id: guestId, p_user_id: user.id });
+          localStorage.removeItem('gasp_guest_id');
+       }
+    } else {
+       setProfile(null);
     }
-
-    const { data: { subscription } } = getSupabase().auth.onAuthStateChange(async (event: string, newSession: any) => {
-      setSession(newSession);
-      const newUser = newSession?.user || null;
-      setUser(newUser);
-      
-      if (newUser) {
-        // ✨ GUEST MIGRATION: The Handshake 
-        const guestId = localStorage.getItem('gasp_guest_id');
-        if (guestId && !guestId.includes(newUser.id)) {
-           console.log('[Neural Bridge]: Migrating guest data...', guestId, '->', newUser.id);
-           const { data: migResult } = await getSupabase().rpc('migrate_guest_data', { p_guest_id: guestId, p_user_id: newUser.id });
-           if (migResult?.success) {
-              console.log('[Neural Bridge]: Migration Complete.');
-              localStorage.removeItem('gasp_guest_id');
-           }
-        }
-        await fetchProfile(newUser.id);
-      } else {
-        setProfile(null);
-      }
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+    setLoading(false);
+  }, [ready, authenticated, user]);
 
   const refreshProfile = async () => {
-    if (user) await fetchProfile(user.id);
+    if (authenticated && user) await fetchProfile(user.id, user);
   };
 
   const signOut = async () => {
-    await getSupabase().auth.signOut();
+    await logout();
     window.location.href = '/login';
   };
 
   return (
-    <UserContext.Provider value={{ user, session, profile, loading, refreshProfile, signOut }}>
+    <UserContext.Provider value={{ user, session: null, profile, loading, refreshProfile, signOut, ready, authenticated, login }}>
       {children}
     </UserContext.Provider>
   );
