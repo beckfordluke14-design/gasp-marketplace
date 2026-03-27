@@ -31,6 +31,14 @@ import VaultGallery from '@/components/chat/VaultGallery';
 import TipModal from '@/components/chat/TipModal';
 import ChatVaultItem from '@/components/chat/ChatVaultItem';
 import { createClient } from '@supabase/supabase-js';
+
+// 🛡️ SAFE CLIENT: Never crashes on missing env vars
+function getSafeSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
 import VoiceMessage from '@/components/chat/VoiceMessage';
 import PersonaAvatar from '@/components/persona/PersonaAvatar';
 import { useUser } from '@/components/providers/UserProvider';
@@ -108,28 +116,33 @@ export default function VerdadChatPage(props: any) {
   // 🧊 NEURAL HYDRATION: Load historical nodes
   useEffect(() => {
     async function hydrateHistory() {
-        console.log(`🧠 [Brain] Resuming connection for ${persona?.name}...`);
-        const supabaseClient = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        try {
+            console.log(`🧠 [Brain] Resuming connection for ${persona?.name}...`);
+            const supabaseClient = getSafeSupabase();
+            if (!supabaseClient) {
+                console.warn('[Brain] Supabase client unavailable — skipping history hydration.');
+                return;
+            }
 
-        const { data: dbMessages } = await supabaseClient
-            .from('chat_messages')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('persona_id', id)
-            .order('created_at', { ascending: true });
+            const { data: dbMessages } = await supabaseClient
+                .from('chat_messages')
+                .select('*')
+                .eq('user_id', userId)
+                .eq('persona_id', id)
+                .order('created_at', { ascending: true });
 
-        if (dbMessages && dbMessages.length > 0) {
-            setMessages(dbMessages.map((m: any) => ({
-                id: m.id,
-                role: m.role as any,
-                content: m.content,
-                createdAt: new Date(m.created_at),
-                content_type: m.content_type, // Persist voice note status
-                media_url: m.media_url       // Persist audio link
-            })));
+            if (dbMessages && dbMessages.length > 0) {
+                setMessages(dbMessages.map((m: any) => ({
+                    id: m.id,
+                    role: m.role as any,
+                    content: m.content,
+                    createdAt: new Date(m.created_at),
+                    content_type: m.content_type,
+                    media_url: m.media_url
+                })));
+            }
+        } catch (err) {
+            console.warn('[Brain] History hydration skipped:', err);
         }
     }
     if (id && persona) hydrateHistory();
@@ -138,16 +151,16 @@ export default function VerdadChatPage(props: any) {
   // SYNDICATE: MARK AS READ (Read Receipt Sync)
   useEffect(() => {
     async function markAsRead() {
-        const supabaseClient = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
-        
-        // Mark all unread assistant messages as read for this persona
-        await supabaseClient
-            .from('chat_messages')
-            .update({ is_read: true })
-            .match({ user_id: userId, persona_id: id, role: 'assistant', is_read: false });
+        try {
+            const supabaseClient = getSafeSupabase();
+            if (!supabaseClient) return;
+            await supabaseClient
+                .from('chat_messages')
+                .update({ is_read: true })
+                .match({ user_id: userId, persona_id: id, role: 'assistant', is_read: false });
+        } catch (err) {
+            console.warn('[Brain] Read receipt sync skipped:', err);
+        }
     }
     if (id && persona && messages.length > 0) markAsRead();
   }, [id, persona, messages]);
