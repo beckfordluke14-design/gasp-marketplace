@@ -44,8 +44,8 @@ export async function POST(req: Request) {
           .maybeSingle();
         userBalance = profileData?.credit_balance || 0;
     } else {
-        // Guest user logic - strict 3-message wall (6 messages total in array)
-        if (messages.length >= 6) {
+        // Guest user logic - 20 exchange soft wall (40 messages total in array)
+        if (messages.length >= 40) {
            return new Response('Neural Link Depleted. Sign up to continue.', { status: 402 });
         }
         userBalance = 999; 
