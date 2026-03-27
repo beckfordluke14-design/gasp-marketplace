@@ -72,7 +72,7 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
   };
 
   return (
-    <div className="fixed top-32 left-0 right-0 lg:left-[320px] lg:right-[320px] xl:left-[320px] xl:right-[380px] z-[400] flex flex-col items-center pointer-events-none px-2 lg:px-8">
+    <div className="fixed top-24 left-0 right-0 lg:left-[320px] lg:right-[320px] xl:left-[320px] xl:right-[380px] z-[400] flex flex-col items-center pointer-events-none px-0 lg:px-4">
       {/* 👁️ ALPHA TOGGLE */}
       <button 
         onClick={() => setIsVisible(!isVisible)}
@@ -87,65 +87,69 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="flex items-center gap-4 p-4 lg:p-6 bg-transparent pointer-events-auto max-w-[95vw] lg:max-w-none overflow-x-auto no-scrollbar scroll-smooth pr-[100px]"
+            className="w-full flex justify-center"
           >
-             {personas.filter(p => !deadIds.has(p.id)).map((p) => {
-                const isSelected = selectedPersonaId === p.id;
-                const unread = unreadCounts[p.id] || 0;
-                const isFollowing = following.includes(p.id);
-                const isSeen = seenIds.includes(p.id);
+             <div className="w-full max-w-[95vw] lg:max-w-none bg-black/40 backdrop-blur-3xl border-y border-white/5 h-20 md:h-24 flex items-center overflow-hidden pointer-events-auto [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+                <div className="flex items-center gap-4 px-10 overflow-x-auto no-scrollbar scroll-smooth w-full">
+                   {personas.filter(p => !deadIds.has(p.id)).map((p) => {
+                      const isSelected = selectedPersonaId === p.id;
+                      const unread = unreadCounts[p.id] || 0;
+                      const isFollowing = following.includes(p.id);
+                      const isSeen = seenIds.includes(p.id);
 
-                return (
-                  <motion.button
-                    key={p.id}
-                    onClick={() => handleSelect(p.id)}
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    className={`relative shrink-0 flex flex-col items-center gap-1.5 p-1 rounded-full transition-all ${
-                      isSelected ? 'bg-white/5 shadow-xl' : 'hover:bg-white/5'
-                    }`}
-                  >
-                     {/* 🌈 STORY RING NODE */}
-                     <div className={`w-14 h-14 rounded-full p-[3px] transition-all flex items-center justify-center overflow-hidden relative ${
-                       !isSeen ? 'bg-gradient-to-tr from-[#ffea00] via-[#ff00ff] to-[#00f0ff]' : 'bg-white/10'
-                     }`}>
-                        <div className="w-full h-full rounded-full border-2 border-black overflow-hidden bg-black relative">
-                           <div 
-                             className="w-full h-full select-none pointer-events-none"
-                             onContextMenu={(e) => e.preventDefault()}
-                           >
-                              <PersonaAvatar 
-                                 src={p.image} 
-                                 alt={p.name} 
-                                 onImageError={() => {
-                                   console.warn(`[Gasp Stories] Purging dead story node: ${p.id} (${p.name})`);
-                                   setDeadIds(prev => new Set([...Array.from(prev), p.id]));
-                                 }}
-                               />
+                      return (
+                        <motion.button
+                          key={p.id}
+                          onClick={() => handleSelect(p.id)}
+                          whileHover={{ scale: 1.1, y: -2 }}
+                          className={`relative shrink-0 flex flex-col items-center gap-1.5 p-1 rounded-full transition-all ${
+                            isSelected ? 'bg-white/5 shadow-xl' : 'hover:bg-white/5'
+                          }`}
+                        >
+                           {/* 🌈 STORY RING NODE */}
+                           <div className={`w-14 h-14 rounded-full p-[3px] transition-all flex items-center justify-center overflow-hidden relative ${
+                             !isSeen ? 'bg-gradient-to-tr from-[#ffea00] via-[#ff00ff] to-[#00f0ff]' : 'bg-white/10'
+                           }`}>
+                              <div className="w-full h-full rounded-full border-2 border-black overflow-hidden bg-black relative">
+                                 <div 
+                                   className="w-full h-full select-none pointer-events-none"
+                                   onContextMenu={(e) => e.preventDefault()}
+                                 >
+                                    <PersonaAvatar 
+                                      src={p.image} 
+                                      alt={p.name} 
+                                      onImageError={() => {
+                                        console.warn(`[Gasp Stories] Purging dead story node: ${p.id} (${p.name})`);
+                                        setDeadIds(prev => new Set([...Array.from(prev), p.id]));
+                                      }}
+                                    />
+                                 </div>
+
+                                 {/* 🛡️ ANTI-DOWNLOAD OVERLAY */}
+                                 <div className="absolute inset-0 z-10" onContextMenu={(e) => e.preventDefault()} />
+                              </div>
+                              
+                              {/* 🟢 ONLINE INDICATOR */}
+                              {p.isOnline && (
+                                 <div className="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] z-20" />
+                              )}
                            </div>
 
-                           {/* 🛡️ ANTI-DOWNLOAD OVERLAY */}
-                           <div className="absolute inset-0 z-10" onContextMenu={(e) => e.preventDefault()} />
-                        </div>
-                        
-                        {/* 🟢 ONLINE INDICATOR */}
-                        {p.isOnline && (
-                           <div className="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] z-20" />
-                        )}
-                     </div>
-
-                     {/* 🏙️ NAME TAG */}
-                     {isSelected && (
-                        <motion.span 
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="text-[7px] font-black uppercase tracking-widest text-[#00f0ff] italic bg-black/40 px-2 py-0.5 rounded-full"
-                        >
-                           {p.name}
-                        </motion.span>
-                     )}
-                  </motion.button>
-                );
-             })}
+                           {/* 🏙️ NAME TAG */}
+                           {isSelected && (
+                              <motion.span 
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="text-[7px] font-black uppercase tracking-widest text-[#00f0ff] italic bg-black/40 px-2 py-0.5 rounded-full"
+                              >
+                                 {p.name}
+                              </motion.span>
+                           )}
+                        </motion.button>
+                      );
+                   })}
+                </div>
+             </div>
           </motion.div>
         )}
       </AnimatePresence>

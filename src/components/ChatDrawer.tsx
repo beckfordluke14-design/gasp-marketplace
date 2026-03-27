@@ -56,6 +56,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
 
   const { messages, input, handleInputChange, handleSubmit, setMessages, data: chatData, isLoading }: any = useChat({
     api: '/api/chat',
+    id: personaId, // Unique ID for each persona instance
     body: { 
       personaId, 
       userId: idToUse 

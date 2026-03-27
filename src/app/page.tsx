@@ -1,7 +1,7 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import GlobalFeed from '@/components/GlobalFeed';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import ChatDrawer from '@/components/ChatDrawer';
@@ -89,27 +89,31 @@ function MarketplaceMain() {
     return () => window.removeEventListener('gasp_sync_follows', syncFollows);
   }, [guestId]);
 
-  const allPersonas = [
-    ...(dbPersonas || []).map(p => {
-        const fallback = (initialPersonas.find(i => i.id === p.id) || {}) as any;
-        return {
-            ...fallback,
-            id: p.id,
-            name: p.name,
-            city: p.city,
-            image: proxyImg(p.seed_image_url || p.image || fallback.image),
-            is_active: p.is_active,
-        };
-    }),
-    ...initialPersonas
-  ].filter((p, index, self) => index === self.findIndex((t) => t.id === p.id))
-   .filter(p => p.image && p.image !== '' && p.image !== 'undefined' && p.image !== 'null' && !p.image.includes('placeholder'));
+  const allPersonas = useMemo(() => {
+    return [
+      ...(dbPersonas || []).map(p => {
+          const fallback = (initialPersonas.find(i => i.id === p.id) || {}) as any;
+          return {
+              ...fallback,
+              id: p.id,
+              name: p.name,
+              city: p.city,
+              image: proxyImg(p.seed_image_url || p.image || fallback.image),
+              is_active: p.is_active,
+          };
+      }),
+      ...initialPersonas
+    ].filter((p, index, self) => index === self.findIndex((t) => t.id === p.id))
+     .filter(p => p.image && p.image !== '' && p.image !== 'undefined' && p.image !== 'null' && !p.image.includes('placeholder'));
+  }, [dbPersonas]);
 
-  const refinedPersonas = allPersonas.map(p => ({
-    ...p,
-    isOnline: (p.id.length % 3 === 0) || (p.id.length % 5 === 0), // Simulated neural activity
-    vibe: GASP_PULSES[(Math.floor(Date.now() / 3600000) + (p.id || '').length) % GASP_PULSES.length]
-  }));
+  const refinedPersonas = useMemo(() => {
+    return allPersonas.map(p => ({
+      ...p,
+      isOnline: p.status === 'online',
+      vibe: GASP_PULSES[(p.id || '').length % GASP_PULSES.length]
+    }));
+  }, [allPersonas]);
 
   const handleSelectPersona = (id: string) => {
     setSelectedPersonaId(id);
@@ -188,7 +192,7 @@ function MarketplaceMain() {
         <AnimatePresence mode="popLayout">
            {[...openChatIds].reverse().map((id, index) => {
               const isMinimized = minimizedIds.includes(id);
-              const p = refinedPersonas.find(p => p.id === id);
+              const p = refinedPersonas.find((persona: any) => persona.id === id);
               if (!p || isMinimized) return null;
               return (
                 <motion.div key={id} initial={{ x: '100%', opacity: 0 }} animate={{ x: `-${index * 12}px`, opacity: 1 }} exit={{ x: '100%', opacity: 0 }} 
