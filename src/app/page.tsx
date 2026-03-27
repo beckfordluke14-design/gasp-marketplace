@@ -145,7 +145,7 @@ function MarketplaceContent() {
        <div className="flex-1 flex flex-col relative h-screen">
           <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} />
           <div className="flex-1 flex flex-col h-[100dvh] overflow-hidden">
-             <div className="flex-1 overflow-hidden relative flex flex-col pt-4">
+             <div className="flex-1 overflow-hidden relative flex flex-col pt-32 lg:pt-4">
                 <AnimatePresence>
                    {showStories && (
                       <motion.div 
@@ -227,7 +227,8 @@ function MarketplaceContent() {
                 exit={{ x: '-100%' }}
                 className="fixed inset-0 z-[200] bg-black lg:hidden overflow-y-auto"
               >
-                 <div className="p-4 pt-20">
+                 {/* 🚀 MAIN CONTENT HUB */}
+                 <div className="pt-36 lg:pt-32 pb-32">
                     <button onClick={() => setShowPersonaList(false)} className="mb-4 text-[#00f0ff] uppercase text-[10px] font-black">← Close Deck</button>
                     <Sidebar 
                        onSelectPersona={(id) => { handleSelectPersona(id); setShowPersonaList(false); }} 

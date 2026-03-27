@@ -146,76 +146,73 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
 
    const hasVault = vaultItems.some(v => v.is_vault);
 
-   return (
-     <>
-        {/* MOBILE BACKDROP */}
+    return (
+      <>
+        {/* MOBILE BACKDROP Overlay */}
         <div 
-          className="fixed inset-0 z-[950] bg-black/60 lg:hidden pointer-events-auto backdrop-blur-sm" 
+          className="fixed inset-0 z-[950] bg-black/60 lg:hidden pointer-events-auto backdrop-blur-sm shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]"
           onClick={onClose}
         />
         
-        <div className="fixed inset-x-0 bottom-0 z-[1000] lg:relative lg:inset-auto lg:z-auto flex flex-col w-full md:w-[480px] h-[85dvh] lg:h-screen bg-black border-t lg:border-t-0 lg:border-l border-white/10 rounded-t-[2.5rem] lg:rounded-t-0 relative shadow-2xl overflow-hidden font-outfit">
-      
-      {/* 🏔️ HEADER: SYNDICATE HIGH-FIDELITY (Matches Screen) */}
-      <div className="flex flex-col bg-black/40 backdrop-blur-3xl border-b border-white/10 shrink-0 p-6 pb-0">
-         <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-               <div className="relative shrink-0">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 bg-zinc-800">
-                     <PersonaAvatar src={persona?.image || '/v1.png'} alt={persona?.name || 'Lila'} />
-                  </div>
-               </div>
-                <div className="flex flex-col gap-0.5 max-w-[150px]">
-               <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-black uppercase italic tracking-tighter text-white flex items-center gap-2">
-                     {persona?.name || 'Lila'}
-                  </h3>
-                  <div className="px-2 py-0.5 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-full flex items-center gap-1">
-                     <div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-pulse" />
-                     <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest">47 ACTIVE</span>
-                  </div>
-               </div>
-               <div className="flex items-center gap-1.5">
-                  <SparkleIcon size={8} className="text-[#ff00ff]" />
-                  <span className="text-[7px] font-black uppercase tracking-[0.2em] text-[#ff00ff] italic">PRIORITY CONNECTION ESTABLISHED</span>
-             <div className="flex items-center gap-3 text-white/40">
-                <button className="relative group hover:text-white transition-colors">
-                   <ShoppingBag size={18} />
-                   {hasVault && (
-                      <span className="absolute -top-2 -right-2 w-3.5 h-3.5 bg-[#ff00ff] rounded-full flex items-center justify-center border border-black shadow-[0_0_10px_#ff00ff]">
-                         <Gift size={8} className="text-white" />
-                      </span>
-                   )}
+        {/* Main Sheet Container */}
+        <div className="fixed inset-x-0 bottom-0 z-[1000] lg:relative lg:inset-auto lg:z-auto flex flex-col w-full md:w-[480px] h-[85dvh] lg:h-screen bg-black border-t lg:border-t-0 lg:border-l border-white/10 rounded-t-[2.5rem] lg:rounded-t-0 shadow-2xl overflow-hidden font-outfit">
+          
+          {/* Header Block */}
+          <div className="flex flex-col bg-black/40 backdrop-blur-3xl border-b border-white/10 shrink-0 p-6 pb-0">
+             <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-4">
+                   <div className="relative shrink-0">
+                      <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 bg-zinc-800 shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+                         <PersonaAvatar src={persona?.image || '/v1.png'} alt={persona?.name || 'Lila'} />
+                      </div>
+                   </div>
+                   <div className="flex flex-col gap-0.5">
+                      <div className="flex items-center gap-2">
+                         <h3 className="text-lg font-black uppercase text-white leading-none tracking-tighter italic">{persona?.name || 'Lila'}</h3>
+                         <div className="px-2 py-0.5 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-full flex items-center gap-1">
+                            <div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-pulse shadow-[0_0_5px_#00f0ff]" />
+                            <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest">ACTIVE</span>
+                         </div>
+                      </div>
+                      <div className="flex items-center gap-1 opacity-60">
+                         <SparkleIcon size={8} className="text-[#ff00ff]" />
+                         <span className="text-[7px] font-black uppercase tracking-widest text-[#ff00ff] italic font-syncopate">Priority Loop</span>
+                      </div>
+                   </div>
+                </div>
+
+                <div className="flex items-center gap-3 text-white/40">
+                   <button className="relative group hover:text-white transition-colors">
+                      <ShoppingBag size={18} />
+                      {hasVault && (
+                         <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-[#ff00ff] rounded-full flex items-center justify-center border border-black shadow-[0_0_10px_#ff00ff]">
+                            <Gift size={8} className="text-white" />
+                         </span>
+                      )}
+                   </button>
+                   <button className="hover:text-white transition-colors"><Trophy size={18} /></button>
+                   <button onClick={onClose} className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors border border-white/10"><X size={16} /></button>
+                </div>
+             </div>
+
+             <div className="flex gap-8">
+                <button onClick={() => setChatTab('chat')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'chat' ? 'text-white' : 'text-white/30'}`}>
+                   <Send size={12} className={chatTab === 'chat' ? 'rotate-[-20deg]' : ''} /> CHAT
+                   {chatTab === 'chat' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
                 </button>
-                <button className="hover:text-white transition-colors"><Trophy size={18} /></button>
-                <button onClick={onClose} className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"><X size={18} /></button>
+                <button onClick={() => setChatTab('pics')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
+                   PICS {hasVault && <Gift size={11} className="text-[#ff00ff] animate-pulse" />}
+                   {chatTab === 'pics' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
+                </button>
              </div>
           </div>
-       </div>
 
-         {/* NAVIGATION TABS (Electric Cyan Line) */}
-         <div className="flex gap-10">
-            <button onClick={() => setChatTab('chat')} className={`pb-4 text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'chat' ? 'text-white' : 'text-white/30'}`}>
-               <Send size={12} className={chatTab === 'chat' ? 'rotate-[-20deg]' : ''} /> CHAT
-               {chatTab === 'chat' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
-            </button>
-            <button onClick={() => setChatTab('pics')} className={`pb-4 text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
-               PICS {hasVault && <Gift size={12} className="text-[#ff00ff] animate-pulse" />}
-               {chatTab === 'pics' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
-            </button>
-         </div>
-      </div>
-
-      {/* 🚀 MESSAGES STREAM (Matched Bubble Aesthetics) */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8 no-scrollbar scroll-smooth bg-[#0a0a0a]">
-        {chatTab === 'chat' ? (
-          <>
-            <div className="space-y-8">
-               {messages.map((msg: any, idx: number) => {
+          {/* Stream Block */}
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8 no-scrollbar scroll-smooth bg-[#0a0a0a]">
+            {chatTab === 'chat' ? (
+              <div className="space-y-8">
+                {messages.map((msg: any, idx: number) => {
                   const isAssistant = msg.role === 'assistant';
-                  const isLast = idx === messages.length - 1;
-                  const liveStreamData = isLast && isAssistant ? (chatData || []).find((d: any) => d?.type === 'voice_note' && d?.translation) : null;
-                  
                   return (
                     <div key={msg.id || idx} className={`flex flex-col ${isAssistant ? 'items-start' : 'items-end'} gap-2`}>
                        {msg.type === 'voice' || msg.audio_script ? (
@@ -235,7 +232,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                              caption={msg.content} 
                           />
                        ) : (
-                          <div className={`max-w-[85%] px-5 py-3.5 rounded-[1.5rem] text-[14px] leading-relaxed tracking-tight ${isAssistant ? 'bg-zinc-900 text-white font-medium border border-white/5' : 'bg-[#ff00ff] text-white font-black'}`}>
+                          <div className={`max-w-[85%] px-5 py-3.5 rounded-[1.5rem] text-[14px] leading-relaxed tracking-tight ${isAssistant ? 'bg-zinc-900 text-white font-medium border border-white/5' : 'bg-[#ff00ff] text-white font-black shadow-[0_10px_30px_rgba(255,0,255,0.2)]'}`}>
                              {msg.content}
                           </div>
                        )}
@@ -247,41 +244,40 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                        )}
                     </div>
                   );
-               })}
-               {(isLoading || isTyping) && (
-                  <div className="flex items-start gap-2 animate-in fade-in duration-300">
-                     <div className="px-4 py-3 bg-zinc-900 rounded-full flex gap-1.5 items-center">
-                        <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.3s]" />
-                        <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.15s]" />
-                        <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce" />
-                     </div>
-                  </div>
-               )}
-            </div>
-          </>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 pb-64">
-              {vaultItems.map((item, index) => (
-                 <div 
-                   key={item.id} 
-                   onClick={() => {
-                     if (!item.is_vault || item.is_unlocked) {
-                        const viewableItems = vaultItems.filter(v => !v.is_vault || v.is_unlocked).map(v => ({ url: v.content_url || '', caption: v.caption }));
-                        const itemIndex = viewableItems.findIndex(v => v.url === item.content_url);
-                        setSelectedLightboxIndex(itemIndex >= 0 ? itemIndex : 0);
-                        setLightboxItems(viewableItems);
-                        setLightboxOpen(true);
-                     }
-                   }}
-                   className="relative aspect-[3/4] bg-zinc-900 rounded-3xl overflow-hidden border border-white/5 group shadow-2xl cursor-pointer"
-                 >
-                    <div className={`absolute inset-0 z-10 ${(!item.is_unlocked && item.is_vault) ? 'bg-black/80 backdrop-blur-3xl' : ''}`} />
-                    {item.content_url && (
-                       <Image src={proxyImg(item.content_url)} alt="Media" fill unoptimized className={`object-cover ${(!item.is_unlocked && item.is_vault) ? 'blur-2xl opacity-60' : 'opacity-100'}`} />
-                    )}
-                    {item.is_vault && !item.is_unlocked && (
-                       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
-                          <Lock size={20} className="text-white/40 mb-3" />
+                })}
+                {(isLoading || isTyping) && (
+                   <div className="flex items-start gap-2">
+                      <div className="px-4 py-3 bg-zinc-900 rounded-full flex gap-1.5 items-center">
+                         <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.3s]" />
+                         <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.15s]" />
+                         <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce" />
+                      </div>
+                   </div>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 pb-64">
+                {vaultItems.map((item) => (
+                   <div 
+                     key={item.id} 
+                     onClick={() => {
+                       if (!item.is_vault || item.is_unlocked) {
+                          const viewableItems = vaultItems.filter(v => !v.is_vault || v.is_unlocked).map(v => ({ url: v.content_url || '', caption: v.caption }));
+                          const itemIndex = viewableItems.findIndex(v => v.url === item.content_url);
+                          setSelectedLightboxIndex(itemIndex >= 0 ? itemIndex : 0);
+                          setLightboxItems(viewableItems);
+                          setLightboxOpen(true);
+                       }
+                     }}
+                     className="relative aspect-[3/4] bg-zinc-900 rounded-3xl overflow-hidden border border-white/5 group shadow-2xl cursor-pointer"
+                   >
+                     <div className={`absolute inset-0 z-10 ${(!item.is_unlocked && item.is_vault) ? 'bg-black/80 backdrop-blur-3xl' : ''}`} />
+                     {item.content_url && (
+                        <Image src={proxyImg(item.content_url)} alt="Media" fill unoptimized className={`object-cover ${(!item.is_unlocked && item.is_vault) ? 'blur-2xl opacity-60' : 'opacity-100'}`} />
+                     )}
+                     {item.is_vault && !item.is_unlocked && (
+                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
+                           <Lock size={20} className="text-white/40 mb-3 grayscale brightness-200" />
                            <button 
                              onClick={(e) => { e.stopPropagation(); unlockItem(item); }} 
                              disabled={isProcessing}
@@ -289,64 +285,65 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                            >
                               {isProcessing ? 'SYCING...' : `UNLOCK ${item.price || 75}cr`}
                            </button>
-                       </div>
-                    )}
-                 </div>
-              ))}
-          </div>
-        )}
-      </div>
-
-      {/* 🚀 INPUT HUB (Final Polish per Reference) */}
-      <div className="bg-[#0a0a0a] px-6 pb-[env(safe-area-inset-bottom,40px)] pt-4 relative">
-         <AnimatePresence>
-            {showGifts && (
-               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full left-6 right-6 mb-6 z-50 bg-[#111] border border-white/10 rounded-[2rem] p-6 shadow-2xl">
-                  <div className="flex items-center justify-between mb-4 px-2">
-                     <span className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff]">Send Gift</span>
-                     <button onClick={() => setShowGifts(false)} className="text-white/40 hover:text-white"><X size={14} /></button>
-                  </div>
-                  <div className="grid grid-cols-4 gap-4">
-                     {[ { e: '🌹', c: 10 }, { e: '🍫', c: 25 }, { e: '💎', c: 100 }, { e: '💍', c: 500 }].map(g => (
-                        <button key={g.e} onClick={() => setShowGifts(false)} className="flex flex-col items-center gap-2 p-4 bg-black/40 border border-white/5 rounded-2xl hover:border-[#ff00ff]/50 transition-all">
-                           <span className="text-2xl">{g.e}</span>
-                           <span className="text-[7px] font-black text-white/40">{g.c}cr</span>
-                        </button>
-                     ))}
-                  </div>
-               </motion.div>
+                        </div>
+                     )}
+                   </div>
+                ))}
+              </div>
             )}
-         </AnimatePresence>
+          </div>
 
-         <motion.form 
-           onSubmit={handleLocalSubmit} 
-           className="bg-zinc-900/80 border border-white/5 rounded-[2.5rem] p-2 pr-2.5 pl-5 flex items-center gap-4 shadow-2xl backdrop-blur-3xl"
-         >
-            <div className="flex items-center gap-5 text-white/40">
-               <button type="button" className="hover:text-white transition-colors"><Plus size={22} /></button>
-               <button type="button" onClick={() => {}} className="hover:text-white transition-colors"><Mic size={22} /></button>
-               <button type="button" onClick={() => setShowGifts(!showGifts)} className="w-10 h-10 rounded-full flex items-center justify-center bg-[#ff00ff]/10 text-[#ff00ff] border border-[#ff00ff]/20 hover:bg-[#ff00ff] hover:text-black transition-all shadow-[0_0_15px_rgba(255,0,255,0.1)]">
-                  <Gift size={20} />
-               </button>
-            </div>
-             <input 
-                type="text" 
-                value={input} 
-                onChange={handleInputChange} 
-                placeholder="send mssg..." 
-                className="flex-1 bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
-                disabled={isLoading}
-             />
-            <button 
-              type="submit" 
-              disabled={!(input || '').trim() || isLoading || !idToUse}
-              className="w-12 h-12 rounded-full bg-[#ff00ff] flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,0,255,0.3)] hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
-            >
-               <Send size={20} className="mr-0.5" />
-            </button>
-         </motion.form>
-      </div>
-    </>
+          {/* Input Block */}
+          <div className="bg-[#0a0a0a] px-6 pb-[env(safe-area-inset-bottom,40px)] pt-4 relative">
+             <AnimatePresence>
+                {showGifts && (
+                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full left-6 right-6 mb-6 z-50 bg-[#111] border border-white/10 rounded-[2rem] p-6 shadow-2xl">
+                      <div className="flex items-center justify-between mb-4 px-2">
+                         <span className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff]">Send Gift</span>
+                         <button onClick={() => setShowGifts(false)} className="text-white/40 hover:text-white"><X size={14} /></button>
+                      </div>
+                      <div className="grid grid-cols-4 gap-4">
+                         {[ { e: '🌹', c: 10 }, { e: '🍫', c: 25 }, { e: '💎', c: 100 }, { e: '💍', c: 500 }].map(g => (
+                            <button key={g.e} onClick={() => setShowGifts(false)} className="flex flex-col items-center gap-2 p-4 bg-black/40 border border-white/5 rounded-2xl hover:border-[#ff00ff]/50 transition-all">
+                               <span className="text-2xl">{g.e}</span>
+                               <span className="text-[7px] font-black text-white/40">{g.c}cr</span>
+                            </button>
+                         ))}
+                      </div>
+                   </motion.div>
+                )}
+             </AnimatePresence>
+
+             <motion.form 
+               onSubmit={handleLocalSubmit} 
+               className="bg-zinc-900/80 border border-white/5 rounded-[2.5rem] p-2 pr-2.5 pl-5 flex items-center gap-4 shadow-2xl backdrop-blur-3xl"
+             >
+                <div className="flex items-center gap-5 text-white/40">
+                   <button type="button" className="hover:text-white transition-colors"><Plus size={22} /></button>
+                   <button type="button" onClick={() => {}} className="hover:text-white transition-colors"><Mic size={22} /></button>
+                   <button type="button" onClick={() => setShowGifts(!showGifts)} className="w-10 h-10 rounded-full flex items-center justify-center bg-[#ff00ff]/10 text-[#ff00ff] border border-[#ff00ff]/20 hover:bg-[#ff00ff] hover:text-black transition-all shadow-[0_0_15px_rgba(255,0,255,0.1)]">
+                      <Gift size={20} />
+                   </button>
+                </div>
+                 <input 
+                    type="text" 
+                    value={input} 
+                    onChange={handleInputChange} 
+                    placeholder="send mssg..." 
+                    className="flex-1 bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
+                    disabled={isLoading}
+                 />
+                <button 
+                  type="submit" 
+                  disabled={!(input || '').trim() || isLoading || !idToUse}
+                  className="w-12 h-12 rounded-full bg-[#ff00ff] flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,0,255,0.3)] hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
+                >
+                   <Send size={20} className="mr-0.5" />
+                </button>
+             </motion.form>
+          </div>
+        </div>
+      </>
   );
 }
 
