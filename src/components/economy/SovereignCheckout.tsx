@@ -194,7 +194,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                    <div 
                       onClick={() => {
                         navigator.clipboard.writeText(MERCHANT_WALLETS[network]);
-                        alert('Node ID Copied! 🛡️');
+                        alert('Wallet Address Copied! 🛡️');
                       }}
                       className="p-4 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between group cursor-pointer hover:border-[#00f0ff]/40 transition-all font-mono"
                    >
@@ -268,7 +268,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                   type="text" 
                   value={senderWallet} 
                   onChange={(e) => setSenderWallet(e.target.value)} 
-                  placeholder="Your Wallet ID (Optional Manual Link)..." 
+                  placeholder="Your Wallet Address (Optional Manual Link)..." 
                   className="w-full h-12 bg-black/40 border border-white/10 rounded-2xl px-5 text-sm font-bold text-white placeholder:text-white/10 focus:border-[#00f0ff]" 
                 />
                 

@@ -46,9 +46,10 @@ export default function RosterGallery() {
 
   if (loading) return <div className="h-screen bg-black flex items-center justify-center"><Zap size={40} className="text-[#ffea00] animate-spin" /></div>;
 
+  const [deadIds, setDeadIds] = useState(new Set<string>());
   return (
     <div className="min-h-screen bg-black text-white font-outfit">
-      <Header />
+      <Header onOpenTopUp={() => {}} deadIds={deadIds} setDeadIds={setDeadIds} />
       
       <div className="pt-32 px-6 pb-20 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-12">
@@ -79,7 +80,7 @@ export default function RosterGallery() {
                              <img 
                                 src={proxyImg(p.seed_image_url)} 
                                 className="w-full h-full object-cover transition-all duration-1000"
-                                onError={(e: any) => e.target.src = '/gasp_white.png'}
+                                onError={(e: any) => e.target.src = '/icons/icon-512x512.png'}
                             />
                             {!(p.seed_image_url.includes('supabase') || p.seed_image_url.includes('permanent_x') || p.seed_image_url.includes('master_')) && (
                                 <div className="absolute inset-0 bg-red-500/20 flex flex-col items-center justify-center text-center p-2 backdrop-blur-sm animate-pulse">

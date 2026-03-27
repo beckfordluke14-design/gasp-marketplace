@@ -15,7 +15,7 @@ import RightSidebar from '@/components/RightSidebar';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 
@@ -26,10 +26,6 @@ const GASP_PULSES = [
   "klk with the vibe.", "streets is watching.", "feeling elite today."
 ];
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
 
 import { useUser } from '@/components/providers/UserProvider';
 

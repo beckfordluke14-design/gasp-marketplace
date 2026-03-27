@@ -29,7 +29,7 @@ export function GaspPrivyProvider({ children }: { children: React.ReactNode }) {
         appearance: {
           theme: 'dark',
           accentColor: '#ff00ff', // GASP MAGENTA
-          logo: '/gasp_white.png',
+          logo: '/icons/icon-512x512.png',
           showWalletLoginFirst: true,
         },
         // 💎 Embedded Wallet: Zero-friction settlement node creation

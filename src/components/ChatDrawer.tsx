@@ -5,7 +5,7 @@ import { initialPersonas, proxyImg } from '@/lib/profiles';
 import { useRef, useEffect, useState } from 'react';
 import { COST_VOICE_TRANSLATION, COST_VOICE_NOTE } from '@/lib/economy/constants';
 import Image from 'next/image';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import BondProgress from './persona/BondProgress';
 import VoiceNoteBubble from './chat/VoiceNoteBubble';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,10 +17,6 @@ import FreebieImageBubble from './chat/FreebieImageBubble';
 import MediaLightbox from './chat/MediaLightbox';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
 
 interface ChatDrawerProps {
   personaId: string;

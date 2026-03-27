@@ -74,7 +74,7 @@ export function getPersonaName(p: any): string {
 }
 
 export function proxyImg(url: string | null | undefined): string {
-  if (!url) return '/gasp_white.png';
+  if (!url) return '/icons/icon-512x512.png';
   
   const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   
@@ -125,12 +125,35 @@ export interface Persona {
   broadcasts: Broadcast[];
 }
 
-// ── initialPersonas: formerly hardcoded fallback roster.
-// All personas now live in Supabase (personas table).
-// Admin hide/delete/vault actions only work correctly when the feed is DB-driven.
-// Keeping this array non-empty would ghost-inject personas that were intentionally removed.
-// -- initialPersonas: formerly hardcoded fallback roster.
-// All personas now live in Supabase (personas table).
-// Admin hide/delete/vault actions only work correctly when the feed is DB-driven.
-// Keeping this array non-empty would ghost-inject personas that were intentionally removed.
-export const initialPersonas: Persona[] = [];
+// ── initialPersonas: Sovereign Fallback Roster
+// Keeps the Syndicate Hub active even during DB desynchronization.
+export const initialPersonas: Persona[] = [
+  {
+    id: 'valentina-lima',
+    agency_id: 'independent',
+    agency_name: 'Independent Syndicate',
+    name: 'Valentina Lima',
+    city: 'Santiago',
+    country: 'DR',
+    flag: '🇩🇴',
+    timezone: 'America/Santo_Domingo',
+    age: 23,
+    skin_tone: 'caramel',
+    personality: 'mysterious',
+    greed_level: 0.8,
+    culture: 'dominican',
+    language: 'spanish',
+    syndicate_zone: 'Caribbean',
+    vibe: 'in the penthouse.',
+    occupation: 'Neural Weaver',
+    image: '/v1.png',
+    status: 'online',
+    lastSeen: 'just arrived.',
+    slang_profile: {
+       base: 'dominican-slang',
+       rules: ['use parce sparingly', 'use mi amor often', 'focus on class']
+    },
+    systemPrompt: 'You are Valentina Lima...',
+    broadcasts: []
+  }
+];

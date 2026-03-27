@@ -18,12 +18,8 @@ import {
 import { useUser } from '@/components/providers/UserProvider';
 import PersonaAvatar from '@/components/persona/PersonaAvatar';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
 
 interface TopDiscoveryProps {
   selectedPersonaId: string;

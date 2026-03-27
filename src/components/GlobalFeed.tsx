@@ -5,16 +5,12 @@ import { initialPersonas, proxyImg, getPersonaName, type Persona, type Broadcast
 import { MessageSquare, Zap, Lock, Heart, Trash2, Star, Brain, X, Save, Pencil, Check } from 'lucide-react';
 import { trackEvent } from '@/lib/telemetry';
 import { useUser } from '@/components/providers/UserProvider';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
 import BrandingOverlay from '@/components/ui/BrandingOverlay';
 // postAliases removed — identity reads directly from personas table (DB is source of truth)
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
 
 interface GlobalFeedProps {
   onSelectPersona: (id: string, initialMsg?: string) => void;
