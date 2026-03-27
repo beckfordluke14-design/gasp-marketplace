@@ -24,19 +24,18 @@ export function GaspPrivyProvider({ children }: { children: React.ReactNode }) {
     <PrivyProvider
       appId={PRIVY_APP_ID}
       config={{
-        // 🧬 Supported Protocols: The "Syndicate" Standard
-        loginMethods: ['email', 'wallet', 'google', 'twitter', 'discord', 'apple'],
+        // 🧬 Supported Protocols: The "Syndicate" Standard (Hardened)
+        loginMethods: ['email', 'wallet', 'google', 'twitter', 'discord', 'apple', 'farcaster', 'tiktok'],
         appearance: {
           theme: 'dark',
-          accentColor: '#ff00ff', // GASP MAGENTA
-          logo: '/icons/icon-512x512.png',
-          showWalletLoginFirst: true,
+          accentColor: '#ff00ff', 
+          logo: '/icon.svg',
+          showWalletLoginFirst: false, // Default to social nodes for better guest conversion
         },
         // 💎 Embedded Wallet: Zero-friction settlement node creation
         embeddedWallets: {
-          ethereum: {
-            createOnLogin: 'users-without-wallets',
-          },
+          ethereum: { createOnLogin: 'users-without-wallets' },
+          solana: { createOnLogin: 'users-without-wallets' },
         },
       }}
     >

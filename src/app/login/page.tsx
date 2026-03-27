@@ -25,15 +25,16 @@ function LoginForm() {
 
   // Handle specific login types with fallback
   const handleLogin = (method?: string) => {
+    console.log('[Sovereign Login] Initializing neural bridge node:', method || 'universal');
     try {
       if (method) {
-        login({ loginMethod: method });
+        login({ loginMethod: method as any });
       } else {
         login();
       }
-    } catch (e) {
-      console.error('[Privy] Direct login failed, falling back to modal:', e);
-      login(); // Fallback to universal modal
+    } catch (e: any) {
+      console.error('[Sovereign Login] Bridge protocol error:', e.message);
+      login(); // Forced fallback to universal modal
     }
   };
 

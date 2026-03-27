@@ -80,7 +80,9 @@ export default function RootLayout({
     <html lang="en" className="dark h-full antialiased scroll-smooth">
       <head>
         <link rel="preconnect" href="https://asset.gasp.fun" crossOrigin="anonymous" />
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="16x16" />
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
+        <meta name="theme-color" content="#0a0a0a" />
         <style dangerouslySetInnerHTML={{ __html: `
           #debug-marker { display: block !important; background: red; color: white; position: fixed; top: 0; left: 0; z-index: 99999; padding: 10px; font-weight: bold; }
         ` }} />
