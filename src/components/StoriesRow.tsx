@@ -126,18 +126,18 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                  animate={{ opacity: 1, y: 0, scale: 1 }}
                  exit={{ opacity: 0, y: -20, scale: 0.9 }}
                  onClick={() => setIsExpanded(true)}
-                 className="px-6 py-3 bg-black/40 backdrop-blur-3xl border border-white/10 rounded-full flex items-center gap-3 shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:border-[#00f0ff]/40 transition-all group"
+                 className="px-4 py-2 bg-black/20 backdrop-blur-xl border border-white/5 rounded-full flex items-center gap-2.5 shadow-[0_5px_15px_rgba(0,0,0,0.3)] hover:border-[#00f0ff]/40 transition-all pointer-events-auto"
                >
-                  <div className="flex -space-x-3">
+                  <div className="flex -space-x-2">
                      {storyData.slice(0, 3).map((s, i) => (
-                        <div key={s.personaId} className="w-6 h-6 rounded-full border border-black overflow-hidden relative" style={{ zIndex: 3 - i }}>
+                        <div key={s.personaId} className="w-5 h-5 rounded-full border border-black overflow-hidden relative" style={{ zIndex: 3 - i }}>
                            <PersonaAvatar src={s.personaImage} alt="" />
                         </div>
                      ))}
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60 group-hover:text-[#00f0ff]">
-                     {unviewedCount > 0 ? `${unviewedCount} NEW STORIES` : 'DISCOVER STORIES'}
-                  </span>
+                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-[#00f0ff]">
+                      {unviewedCount > 0 ? `${unviewedCount} NEW STORIES` : 'DISCOVER STORIES'}
+                   </span>
                   {unviewedCount > 0 && (
                      <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse shadow-[0_0_10px_#00f0ff]" />
                   )}

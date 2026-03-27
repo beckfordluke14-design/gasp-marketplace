@@ -152,9 +152,9 @@ function MarketplaceContent() {
                          initial={{ y: -20, opacity: 0 }} 
                          animate={{ y: 0, opacity: 1 }} 
                          exit={{ y: -20, opacity: 0 }}
-                         className="absolute top-24 inset-x-0 z-[80] px-4 pointer-events-none"
+                         className="absolute top-16 inset-x-0 z-[80] px-4 pointer-events-none"
                        >
-                          <div className="max-w-2xl mx-auto bg-black/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-2 pointer-events-auto shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
+                          <div className="max-w-2xl mx-auto py-1 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
                              <StoriesRow personas={randomizedPersonas} onSelectPersona={handleSelectPersona} />
                           </div>
                        </motion.div>
@@ -186,7 +186,7 @@ function MarketplaceContent() {
        <div className="fixed inset-0 pointer-events-none z-[1000] flex items-end justify-end p-6 gap-4">
           <AnimatePresence>
             {openChatIds.filter(id => !minimizedIds.includes(id)).map((sId, index) => {
-              const p = refinedPersonas.find((persona: any) => String(persona.id) === sId) || chatPersonaCache[sId];
+              const p = initialPersonas.find((persona: any) => String(persona.id) === sId) || chatPersonaCache[sId];
               if (!p) return (
                 <motion.div key={sId} initial={{ x: '100%', opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: '100%', opacity: 0 }} className="h-full pointer-events-auto bg-black border-l border-white/5 shadow-2xl">
                     <div className="flex flex-col items-center justify-center h-full p-10 text-center gap-6">

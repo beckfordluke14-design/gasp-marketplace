@@ -35,7 +35,7 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] flex flex-col pointer-events-none">
         {/* MAIN NAVIGATION BAR */}
-        <header className="h-14 md:h-24 bg-black/60 backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-4 md:px-10 pointer-events-auto">
+        <header className="h-14 md:h-16 bg-black/40 backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-4 md:px-10 pointer-events-auto">
             
             {/* LOGO SECTION */}
             <div className="flex items-center gap-8 md:gap-12 pointer-events-auto">
@@ -156,8 +156,8 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
         </header>
 
         {/* FLOATING DISCOVERY HUB (SUBBAR): DETACHED TO SHOW MORE CONTENT */}
-        <div className="absolute top-[calc(100%+1rem)] left-1/2 -translate-x-1/2 w-full max-w-[320px] md:max-w-xl px-4 flex items-center justify-center pointer-events-auto z-[90]">
-            <div className="w-full bg-black/40 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.5)] p-0.5">
+        <div className="absolute top-[85%] left-1/2 -translate-x-1/2 w-full max-w-[280px] md:max-w-xl px-4 flex items-center justify-center pointer-events-auto z-[90]">
+            <div className="w-full bg-black/20 backdrop-blur-xl border border-white/5 rounded-full shadow-[0_5px_20px_rgba(0,0,0,0.3)] p-0.5">
                 <PersonaSearch deadIds={deadIds} setDeadIds={setDeadIds} />
             </div>
         </div>
