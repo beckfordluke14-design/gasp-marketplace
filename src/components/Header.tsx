@@ -155,12 +155,12 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
             </div>
         </header>
 
-                {/* ATTACHED DISCOVERY HUB (SUBBAR): TRANSPARENT TO SHOW MORE CONTENT */}
-                <div className="h-10 md:h-14 flex items-center justify-center bg-transparent pointer-events-auto">
-                    <div className="w-full max-w-[280px] md:max-w-xl mx-auto px-4">
-                        <PersonaSearch deadIds={deadIds} setDeadIds={setDeadIds} />
-                    </div>
-                </div>
+        {/* FLOATING DISCOVERY HUB (SUBBAR): DETACHED TO SHOW MORE CONTENT */}
+        <div className="absolute top-[calc(100%+1rem)] left-1/2 -translate-x-1/2 w-full max-w-[320px] md:max-w-xl px-4 flex items-center justify-center pointer-events-auto z-[90]">
+            <div className="w-full bg-black/40 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.5)] p-0.5">
+                <PersonaSearch deadIds={deadIds} setDeadIds={setDeadIds} />
+            </div>
+        </div>
     </div>
   );
 }

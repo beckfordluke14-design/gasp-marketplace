@@ -145,19 +145,21 @@ function MarketplaceContent() {
        <div className="flex-1 flex flex-col relative h-screen">
           <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} />
           <div className="flex-1 flex flex-col h-[100dvh] overflow-hidden">
-             <div className="flex-1 overflow-hidden relative flex flex-col pt-32 lg:pt-4">
-                <AnimatePresence>
-                   {showStories && (
-                      <motion.div 
-                        initial={{ height: 0, opacity: 0 }} 
-                        animate={{ height: 'auto', opacity: 1 }} 
-                        exit={{ height: 0, opacity: 0 }}
-                        className="shrink-0 mb-2 overflow-hidden"
-                      >
-                         <StoriesRow personas={randomizedPersonas} onSelectPersona={handleSelectPersona} />
-                      </motion.div>
-                   )}
-                </AnimatePresence>
+             <div className="flex-1 overflow-hidden relative flex flex-col">
+                 <AnimatePresence mode="wait">
+                    {showStories && (
+                       <motion.div 
+                         initial={{ y: -20, opacity: 0 }} 
+                         animate={{ y: 0, opacity: 1 }} 
+                         exit={{ y: -20, opacity: 0 }}
+                         className="absolute top-24 inset-x-0 z-[80] px-4 pointer-events-none"
+                       >
+                          <div className="max-w-2xl mx-auto bg-black/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-2 pointer-events-auto shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
+                             <StoriesRow personas={randomizedPersonas} onSelectPersona={handleSelectPersona} />
+                          </div>
+                       </motion.div>
+                    )}
+                 </AnimatePresence>
                 
                 {/* STORY TOGGLE PORTAL */}
                 <div className="absolute right-6 top-8 z-50 flex items-center gap-3">

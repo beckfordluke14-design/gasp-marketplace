@@ -185,9 +185,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                    <button className="relative group hover:text-white transition-colors">
                       <ShoppingBag size={18} />
                       {hasVault && (
-                         <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-[#ff00ff] rounded-full flex items-center justify-center border border-black shadow-[0_0_10px_#ff00ff]">
-                            <Gift size={8} className="text-white" />
-                         </span>
+                         <span className="absolute -top-1.5 -right-1.5 text-[10px] animate-jalapeño">🌶️</span>
                       )}
                    </button>
                    <button className="hover:text-white transition-colors"><Trophy size={18} /></button>
@@ -201,7 +199,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                    {chatTab === 'chat' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
                 </button>
                 <button onClick={() => setChatTab('pics')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
-                   PICS {hasVault && <Gift size={11} className="text-[#ff00ff] animate-pulse" />}
+                   PICS
                    {chatTab === 'pics' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
                 </button>
              </div>
@@ -321,8 +319,8 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                 <div className="flex items-center gap-5 text-white/40">
                    <button type="button" className="hover:text-white transition-colors"><Plus size={22} /></button>
                    <button type="button" onClick={() => {}} className="hover:text-white transition-colors"><Mic size={22} /></button>
-                   <button type="button" onClick={() => setShowGifts(!showGifts)} className="w-10 h-10 rounded-full flex items-center justify-center bg-[#ff00ff]/10 text-[#ff00ff] border border-[#ff00ff]/20 hover:bg-[#ff00ff] hover:text-black transition-all shadow-[0_0_15px_rgba(255,0,255,0.1)]">
-                      <Gift size={20} />
+                   <button type="button" onClick={() => setShowGifts(!showGifts)} className="hover:text-[#ff00ff] transition-colors">
+                      <Zap size={20} />
                    </button>
                 </div>
                  <input 
@@ -335,7 +333,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                  />
                 <button 
                   type="submit" 
-                  disabled={!(input || '').trim() || isLoading || !idToUse}
+                  disabled={!(input || '').trim() || isLoading}
                   className="w-12 h-12 rounded-full bg-[#ff00ff] flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,0,255,0.3)] hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
                 >
                    <Send size={20} className="mr-0.5" />
