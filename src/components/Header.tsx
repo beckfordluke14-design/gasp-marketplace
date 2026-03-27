@@ -62,16 +62,16 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                   }}
                   className="text-xl md:text-5xl font-black uppercase tracking-tighter text-white font-outfit italic cursor-pointer group leading-none relative shadow-[0_0_30px_rgba(255,255,255,0.1)]"
                 >
-                  gasp
-                  
-                  {/* Subtle Glitch Layer */}
-                  <motion.span 
-                    animate={{ opacity: [0, 0.4, 0], x: [-10, 10, -10] }}
-                    transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                    className="absolute inset-0 text-[#00f0ff] mix-blend-screen pointer-events-none select-none opacity-0"
-                  >
-                    gasp
-                  </motion.span>
+                  gasp<span className="text-[#ff00ff]">.</span>
+                   
+                   {/* Subtle Glitch Layer */}
+                   <motion.span 
+                     animate={{ opacity: [0, 0.4, 0], x: [-10, 10, -10] }}
+                     transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                     className="absolute inset-0 text-[#00f0ff] mix-blend-screen pointer-events-none select-none opacity-0"
+                   >
+                     gasp.
+                   </motion.span>
                 </motion.h1>
 
                 {/* DESKTOP NAV */}
@@ -121,10 +121,10 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                    </button>
                 )}
 
-                {/* 🏎️💨 REVENUE HUB */}
+                {/* 🏎️💨 REVENUE HUB: ORANGE/BLACK HIGH-STATUS PROTOCOL */}
                 <button 
                   onClick={() => onOpenTopUp()}
-                  className="h-8 md:h-12 px-4 md:px-8 bg-[#00f0ff] text-black text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-full hover:shadow-[0_0_30px_rgba(0,240,255,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic"
+                  className="h-8 md:h-12 px-4 md:px-8 bg-[#ff6a00] text-black text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-full hover:shadow-[0_0_30px_rgba(255,106,0,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic shadow-[0_0_15px_rgba(255,106,0,0.2)]"
                 >
                    <span className="hidden md:inline">GET </span>CREDITS
                 </button>
