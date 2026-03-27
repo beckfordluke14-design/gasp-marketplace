@@ -13,8 +13,8 @@ import { useRouter } from 'next/navigation';
 import { useChat } from '@ai-sdk/react';
 import { useUser } from './providers/UserProvider';
 import PersonaAvatar from './persona/PersonaAvatar';
-import ChatVaultItem from './chat/ChatVaultItem';
 import FreebieImageBubble from './chat/FreebieImageBubble';
+import MediaLightbox from './chat/MediaLightbox';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
 
 const supabase = createClient(
@@ -24,500 +24,385 @@ const supabase = createClient(
 
 interface ChatDrawerProps {
   personaId: string;
-  persona?: any;
+  persona: any;
   onClose: () => void;
   onMinimize: () => void;
 }
 
 export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: ChatDrawerProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const [isUploading, setIsUploading] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const [isPersonaReading, setIsPersonaReading] = useState(false);
-  const [isDelivered, setIsDelivered] = useState(false);
-  const [guestId, setGuestId] = useState<string>('');
-  const [bondScore, setBondScore] = useState(0);
-  const [showStats, setShowStats] = useState(false);
-  const [showGifts, setShowGifts] = useState(false);
-  const [walletBalance, setWalletBalance] = useState<number | null>(null);
-  const [vaultItems, setVaultItems] = useState<any[]>([]);
-  const [showVault, setShowVault] = useState(false);
-  const [messageCount, setMessageCount] = useState(0);
-  const [showSignUpWall, setShowSignUpWall] = useState(false);
-  const [dbMessages, setDbMessages] = useState<any[]>([]);
-  const [voiceRequested, setVoiceRequested] = useState(false);
-  const [showVoiceTip, setShowVoiceTip] = useState(false);
-  const [activeChatters, setActiveChatters] = useState(42);
-  const [tickerMsg, setTickerMsg] = useState('');
-  const [localInput, setLocalInput] = useState('');
-  const [activeGift, setActiveGift] = useState<any>(null);
-  const [isFollowing, setIsFollowing] = useState(false);
-  // Freebie system
-  const [freebieItems, setFreebieItems] = useState<any[]>([]);
-  const [sentFreebieIds, setSentFreebieIds] = useState<Set<string>>(new Set());
-  // Pics tab
+  const { user, profile } = useUser();
   const [chatTab, setChatTab] = useState<'chat' | 'pics'>('chat');
-  const [picPosts, setPicPosts] = useState<any[]>([]);
-  const [loadingPics, setLoadingPics] = useState(false);
-  const [expandedPic, setExpandedPic] = useState<string | null>(null);
-  const [picZoomed, setPicZoomed] = useState(false);
-  const [likedPicIds, setLikedPicIds] = useState<Set<string>>(new Set());
-  const [chatTabNotif, setChatTabNotif] = useState(false);
-  const [showStory, setShowStory] = useState(false);
-  const router = useRouter();
-  const { user } = useUser();
+  const [dbMessages, setDbMessages] = useState<any[]>([]);
+  const [vaultItems, setVaultItems] = useState<any[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [showGifts, setShowGifts] = useState(false);
+  const [activeGift, setActiveGift] = useState<any>(null);
+  const [tapCount, setTapCount] = useState(0);
+  const [tapItem, setTapItem] = useState<any>(null);
+  const [confirmingItem, setConfirmingItem] = useState<any>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [bondScore, setBondScore] = useState(0);
+  const [dbLoaded, setDbLoaded] = useState(false);
+  
+  // 🍿 LIGHTBOX STATE
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [selectedLightboxIndex, setSelectedLightboxIndex] = useState(0);
+  const [lightboxItems, setLightboxItems] = useState<any[]>([]);
 
-  const { messages, handleInputChange, setMessages, isLoading }: any = useChat({
+  const scrollRef = useRef<HTMLDivElement>(null);
+  
+  const idToUse = user?.id || (typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : '');
+
+  const { messages, input, handleInputChange, handleSubmit, setMessages, data: chatData, isLoading }: any = useChat({
     api: '/api/chat',
-    body: { userId: guestId || 'guest_sync', personaId: personaId },
-    onResponse: () => { setIsTyping(false); setIsPersonaReading(false); },
-    onFinish: () => { setIsTyping(false); setIsPersonaReading(false); }
+    body: { 
+      personaId, 
+      userId: idToUse 
+    },
+    onResponse: () => {
+      setIsTyping(false);
+    },
+    onFinish: async () => {
+      setIsTyping(false);
+      // 🔥 NEURAL SYNC: Fetch the enriched messages from Supabase after the stream finishes
+      // This ensures we get the real media_url, audio_script, and translation from the DB
+      const { data: syncMsgs } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('user_id', idToUse)
+        .eq('persona_id', personaId)
+        .order('created_at', { ascending: true });
+      
+      if (syncMsgs && syncMsgs.length > 0) {
+        setMessages(syncMsgs.map(m => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          media_url: m.media_url,
+          image_url: m.image_url,
+          type: m.type,
+          audio_script: m.audio_script,
+          audio_translation: m.audio_translation,
+          translation_locked: m.translation_locked,
+          created_at: m.created_at
+        } as any)));
+      }
+      
+      // Update bond score after chat session
+      const { data: stats } = await supabase.from('user_persona_stats').select('bond_score').eq('user_id', idToUse).eq('persona_id', personaId).maybeSingle();
+      if (stats) setBondScore(stats.bond_score);
+    },
   } as any);
 
   useEffect(() => {
-    let id = user?.id || localStorage.getItem('gasp_guest_id');
-    if (!id) {
-       id = 'guest-' + Math.random().toString(36).substr(2, 9);
-       localStorage.setItem('gasp_guest_id', id);
-    }
-    setGuestId(id);
-    if (id.startsWith('guest-')) {
-       setMessageCount(parseInt(localStorage.getItem('gasp_msg_count') || '0', 10));
-    }
-    
-    // 🤝 DATABASE CONNECTION SYNC
-    const checkFollow = async () => {
-       if (!id || !personaId) return;
-       const { data } = await supabase.from('user_relationships').select('*').eq('user_id', id).eq('persona_id', personaId).maybeSingle();
-       setIsFollowing(!!data);
-    };
-    checkFollow();
+    const loadData = async () => {
+      if (!idToUse) return;
 
-    const h = new Date().getHours();
-    setActiveChatters(Math.floor(Math.random() * 20) + ((h > 20 || h < 4) ? 80 : 30));
-  }, [user, personaId]);
+      // 📜 FETCH HISTORICAL MESSAGES
+      const { data: dbMsgs } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('user_id', idToUse)
+        .eq('persona_id', personaId)
+        .order('created_at', { ascending: true });
+      
+      if (dbMsgs && dbMsgs.length > 0) {
+        setMessages(dbMsgs.map(m => ({
+            id: m.id,
+            role: m.role,
+            content: m.content,
+            media_url: m.media_url,
+            image_url: m.image_url,
+            type: m.type,
+            audio_script: m.audio_script,
+            audio_translation: m.audio_translation,
+            created_at: m.created_at
+        } as any)));
+      }
+      setDbLoaded(true);
+
+      // 💎 FETCH UNLOCKS
+      const { data: unlocks } = await supabase.from('user_vault_unlocks').select('item_id').eq('user_id', idToUse);
+      const unlockedIds = (unlocks || []).map(u => u.item_id);
+
+      // 📦 FETCH VAULT
+      const { data: vault } = await supabase.from('persona_vault').select('*').eq('persona_id', personaId).order('created_at', { ascending: false });
+      if (vault) {
+          setVaultItems(vault.map(v => ({ ...v, is_unlocked: unlockedIds.includes(v.id) })));
+      }
+
+      // 🤝 FETCH RELATIONSHIP & STATS
+      const { data: rel } = await supabase.from('user_relationships').select('*').eq('user_id', idToUse).eq('persona_id', personaId).single();
+      setIsFollowing(!!rel);
+
+      const { data: stats } = await supabase.from('user_persona_stats').select('bond_score').eq('user_id', idToUse).eq('persona_id', personaId).maybeSingle();
+      if (stats) setBondScore(stats.bond_score);
+    };
+    loadData();
+  }, [personaId, idToUse]);
+
+  useEffect(() => {
+    // 🚦 GATED SCROLL: Only auto-scroll to bottom if we are in the chat tab and new data arrives
+    if (scrollRef.current && chatTab === 'chat') {
+        scrollRef.current.scrollTo({
+            top: scrollRef.current.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+  }, [messages, chatData, isLoading, chatTab]);
+
+  useEffect(() => {
+    // 🧠 NEURAL RESET: Clear scroll position when switching between Chat and Vault
+    if (scrollRef.current) {
+        scrollRef.current.scrollTop = 0;
+    }
+  }, [chatTab]);
+
+  const handleLocalSubmit = (e: any) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    setIsTyping(true);
+    handleSubmit(e);
+  };
 
   const handleFollowToggle = async () => {
-    if (!guestId || !personaId) return;
-    
-    if (isFollowing) {
-       await supabase.from('user_relationships').delete().eq('user_id', guestId).eq('persona_id', personaId);
-    } else {
-       await supabase.from('user_relationships').upsert({ user_id: guestId, persona_id: personaId, affinity_score: 1 });
-    }
-    
-    setIsFollowing(!isFollowing);
-    window.dispatchEvent(new Event('gasp_sync_follows')); // 📡 Update layouts
+     const idToUse = user?.id || localStorage.getItem('gasp_guest_id');
+     if (!idToUse) return;
+
+     if (isFollowing) {
+        await supabase.from('user_relationships').delete().eq('user_id', idToUse).eq('persona_id', personaId);
+        setIsFollowing(false);
+     } else {
+        await supabase.from('user_relationships').insert({ user_id: idToUse, persona_id: personaId });
+        setIsFollowing(true);
+     }
+     window.dispatchEvent(new CustomEvent('gasp_sync_follows'));
   };
 
-  const loadData = async () => {
-    if (!guestId || !personaId) return;
-    const { data: msgData } = await supabase.from('chat_messages').select('*').eq('persona_id', personaId).eq('user_id', guestId).order('created_at', { ascending: true });
-    if (msgData) setDbMessages(msgData);
-    const { data: statData } = await supabase.from('user_persona_stats').select('bond_score').eq('persona_id', personaId).eq('user_id', guestId).maybeSingle();
-    if (statData) setBondScore(statData.bond_score);
-    const { data: walletData } = await supabase.from('wallets').select('balance').eq('user_id', guestId).maybeSingle();
-    if (walletData) setWalletBalance(walletData.balance);
-    const { data: vData } = await supabase.from('posts').select('*').eq('persona_id', personaId).order('created_at', { ascending: false });
-    const { data: uData } = await supabase.from('user_vault_unlocks').select('post_id').eq('user_id', guestId);
-    if (vData) {
-      const unlockedIds = (uData || []).map(u => u.post_id);
-      const items = vData.map(v => ({ ...v, is_unlocked: unlockedIds.includes(v.id) }));
-      setVaultItems(items);
-    }
-  };
-
-  useEffect(() => {
-    if (personaId && guestId) loadData();
-    const channel = supabase.channel(`chat-${personaId}-${guestId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `persona_id=eq.${personaId}` }, (payload) => {
-          if (payload.new.user_id !== guestId || payload.new.role === 'user') return;
-          setDbMessages(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
-      }).subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [personaId, guestId]);
-
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [dbMessages, messages, isLoading, isPersonaReading, isTyping]);
-
-  const executeNeuralSend = async (msgContent: string, imageUrl?: string, forceVoice?: boolean) => {
-    const cleanMsg = msgContent.trim();
-    if (!cleanMsg && !imageUrl) return;
-    const userMsg = { id: 'local-' + Date.now(), role: 'user', content: cleanMsg, image_url: imageUrl, created_at: Date.now() };
-    setMessages((prev: any) => [...prev, { ...userMsg, status: 'sent' }]);
-    setLocalInput('');
-
-    try {
-        await new Promise(r => setTimeout(r, 400));
-        setMessages((prev: any) => prev.map((m: any) => m.id === userMsg.id ? { ...m, status: 'delivered' } : m));
-        await new Promise(r => setTimeout(r, 600));
-        setMessages((prev: any) => prev.map((m: any) => m.id === userMsg.id ? { ...m, status: 'read' } : m));
-        setIsPersonaReading(true);
-        await new Promise(r => setTimeout(r, 1200));
-        setIsPersonaReading(false);
-        setIsTyping(true);
-
-        const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: [...messages, userMsg], userId: guestId, personaId, forceVoice })
+  const unlockItem = async (item: any) => {
+     setIsProcessing(true);
+     try {
+        const idToUse = user?.id || localStorage.getItem('gasp_guest_id');
+        const res = await fetch('/api/economy/unlock', {
+           method: 'POST',
+           body: JSON.stringify({ userId: idToUse, itemId: item.id })
         });
-        if (!response.ok) throw new Error();
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-        let assistantContent = '';
-        const assistantId = 'ai-' + Date.now();
-        setMessages((prev: any) => [...prev, { id: assistantId, role: 'assistant', content: '', voice_pending: false, _streamDone: false, created_at: Date.now() }]);
-
-        while (true) {
-            const { done, value } = await reader!.read();
-            if (done) break;
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
-            for (const line of lines) {
-                if (line.startsWith('0:')) {
-                    try { assistantContent += JSON.parse(line.slice(2)); } catch { assistantContent += line.slice(2); }
-                } else if (line.startsWith('2:')) {
-                    try {
-                        const media = JSON.parse(line.slice(2));
-                        if (media.type === 'voice_note' && media.audioUrl) {
-                            setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { 
-                                ...m, voice_pending: false, media_url: media.audioUrl, audio_translation: media.translation, translation_locked: true
-                            } : m));
-                        }
-                    } catch (err) { console.error('Media sync failure:', err); }
-                }
-            }
-            setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { ...m, content: assistantContent } : m));
+        const result = await res.json();
+        if (result.success) {
+           setVaultItems(prev => prev.map(v => v.id === item.id ? { ...v, is_unlocked: true } : v));
+           setConfirmingItem(null);
         }
-        setIsTyping(false);
-        setMessages((prev: any) => prev.map((m: any) => m.id === assistantId ? { ...m, _streamDone: true } : m));
-    } catch (e) { console.error(e); } finally { setIsTyping(false); setIsPersonaReading(false); }
+     } finally {
+        setIsProcessing(false);
+     }
   };
-
-  const handleLocalSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (guestId.startsWith('guest-') && messageCount >= 3) { setShowSignUpWall(true); return; }
-    if (guestId.startsWith('guest-')) {
-       const n = messageCount + 1;
-       setMessageCount(n);
-       localStorage.setItem('gasp_msg_count', n.toString());
-       if (n >= 3) setTimeout(() => setShowSignUpWall(true), 2500);
-    }
-    await executeNeuralSend(localInput, undefined, voiceRequested);
-  };
-
-  // 🏁 THE WHALE RAIN: TAP ACCUMULATOR
-  const [tapCount, setTapCount] = useState<number>(0);
-  const [tapItem, setTapItem] = useState<any>(null);
-  const tapTimer = useRef<NodeJS.Timeout | null>(null);
-
-  const sendGift = async (g: any) => {
-     if (tapTimer.current) clearTimeout(tapTimer.current);
-     setTapItem(g);
-     setTapCount(prev => prev + 1);
-     tapTimer.current = setTimeout(async () => {
-        const finalCount = tapCount + 1;
-        setTapCount(0);
-        setTapItem(null);
-        setShowGifts(false);
-        const totalPrice = g.price * finalCount;
-        const totalBond = g.bond * finalCount;
-        const { data } = await supabase.rpc('process_spend', { p_user_id: guestId, p_amount: totalPrice, p_type: 'gift', p_persona_id: personaId });
-        if (!data?.success) { alert(`Insufficient Credits! Sending ${finalCount}x ${g.icon} costs ${totalPrice}c.`); return; }
-        setActiveGift({ icon: g.icon, count: finalCount, id: Date.now() });
-        setTimeout(() => setActiveGift(null), 3000);
-        setBondScore(prev => prev + totalBond);
-        await executeNeuralSend(`[GIFT]: Sent ${finalCount}x ${g.icon} ${g.name.toLowerCase()}.`);
-     }, 1000);
-  };
-
-  const [confirmingItem, setConfirmingItem] = useState<any>(null);
-
-  const unlockVaultItem = async (item: any) => {
-    setConfirmingItem(null);
-    const isVideo = item.content_url?.includes('.mp4') || item.content_type === 'video';
-    const cost = isVideo ? COST_PREMIUM_VAULT_UNLOCK : COST_VAULT_UNLOCK;
-    const { data } = await supabase.rpc('process_spend', { p_user_id: guestId, p_amount: cost, p_type: 'vault_unlock', p_persona_id: personaId });
-    if (!data?.success) { alert(`Insufficient Credits! Costs ${cost}c.`); return; }
-    await supabase.from('user_vault_unlocks').insert([{ user_id: guestId, post_id: item.id }]);
-    setWalletBalance(prev => prev !== null ? prev - cost : prev);
-    setVaultItems(prev => prev.map(v => v.id === item.id ? { ...v, is_unlocked: true } : v));
-    await executeNeuralSend(`[SYSTEM]: Unlocked vault item: ${item.caption || "Secret Visual"}. React to it.`);
-  };
-
-  if (!persona) return null;
 
   return (
-    <div className="relative h-full mt-0 md:h-[calc(100dvh-8.5rem)] md:mt-[8.5rem] w-full md:w-[480px] bg-[#050505]/95 backdrop-blur-3xl border-l border-white/5 z-[300] shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col pointer-events-auto transition-all duration-500 md:rounded-l-[2rem] overflow-hidden">
-      <div className="p-4 md:p-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0 relative z-[200]">
-        <div className="flex items-center gap-4">
-            {/* 🧬 NEURAL PULSE: STORY NODE */}
-            <div 
-              onClick={() => setShowStory(true)}
-              className="relative cursor-pointer group"
-            >
-               <motion.div 
-                 animate={{ rotate: 360 }}
-                 transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
-                 className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#ff00ff] via-[#00f0ff] to-[#ffea00] p-[1px] opacity-100 blur-[1px]"
-               />
-               <div className="w-12 h-12 rounded-full overflow-hidden border border-black relative z-10 bg-black shadow-2xl">
-                  <PersonaAvatar src={persona.image} alt={persona.name} />
-               </div>
-               {/* 🟢 GREEN STATUS PULSE */}
-               <div className="absolute top-0 right-0 w-3 h-3 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] animate-pulse z-20" />
-            </div>
-
-            <div>
-               <div className="flex items-center gap-2 leading-none">
-                 <h3 className="text-[13px] md:text-lg font-black uppercase italic text-white tracking-tighter">{persona.name.toLowerCase()}</h3>
+    <div className="flex flex-col w-full md:w-[480px] h-screen bg-black border-l border-white/5 relative shadow-2xl overflow-hidden">
+      {/* 🏔️ TOP HEADER: NEON SYNCHRONIZED IDENTITY */}
+      <div className="flex flex-col bg-black/40 backdrop-blur-3xl border-b border-white/10 shrink-0">
+         <div className="flex items-center justify-between p-6">
+            <div className="flex items-center gap-4">
+               <div className="relative">
+                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#ff00ff]/30 shadow-[0_0_20px_rgba(255,0,255,0.2)]">
+                     <PersonaAvatar src={persona.image} alt={persona.name} />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[#00ff00] border-2 border-black animate-pulse shadow-[0_0_10px_#00ff00]" />
                </div>
                
-               {/* 💎 SECURE CACHE NODE: FORBIDDEN PROFESSIONAL VIBE */}
-               <div 
-                 onClick={() => setChatTab('pics')}
-                 className="flex items-center gap-2 mt-2 cursor-pointer group/node"
-               >
-                  <motion.div 
-                    animate={{ scale: [1, 1.2, 1] }} 
-                    transition={{ repeat: Infinity, duration: 2 }}
-                    className="w-4 h-4 rounded-full bg-[#ff00ff]/10 border border-[#ff00ff]/30 flex items-center justify-center shadow-[0_0_10px_#ff00ff22]"
-                  >
-                     <Diamond size={8} className="text-[#ff00ff]" />
-                  </motion.div>
-                  <span className="text-[7px] md:text-[8px] text-white/40 group-hover/node:text-[#ff00ff] font-black uppercase tracking-[0.2em] transition-all italic leading-none">
-                     SECURE ARCHIVE • {vaultItems.length || '---'} NODES
-                  </span>
+                <div className="flex flex-col">
+                   <h3 className="text-sm font-syncopate font-black uppercase italic text-white leading-none mb-2">{persona.name}</h3>
+                   <div onClick={() => setChatTab('pics')} className="flex items-center gap-2 cursor-pointer group/node">
+                      {vaultItems.some(v => v.is_vault && !v.is_unlocked) ? (
+                        <motion.div 
+                          animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }} 
+                          transition={{ repeat: Infinity, duration: 2 }}
+                          className="w-5 h-5 rounded-lg bg-[#ff6a00]/20 border border-[#ff6a00]/40 flex items-center justify-center shadow-[0_0_15px_rgba(255,106,0,0.3)] relative"
+                        >
+                           <ShoppingBag size={10} className="text-[#ff6a00]" />
+                           <span className="absolute -top-1 -right-1 text-[8px]">🌶️</span>
+                        </motion.div>
+                      ) : (
+                        <div className="w-5 h-5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                           <ImageIcon size={10} className="text-white/20" />
+                        </div>
+                      )}
+                      <span className={`text-[7px] font-black uppercase tracking-[0.2em] italic ${vaultItems.some(v => v.is_vault && !v.is_unlocked) ? 'text-[#ff6a00]' : 'text-white/40'}`}>
+                        {vaultItems.some(v => v.is_vault && !v.is_unlocked) ? 'SPICY ARCHIVE 🌶️' : 'VAULT NODES'}
+                      </span>
+                   </div>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+               <button onClick={handleFollowToggle} className={`h-9 px-5 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all ${isFollowing ? 'bg-white/5 text-white/40 border border-white/10' : 'bg-[#ffea00] text-black shadow-[0_0_15px_rgba(255,234,0,0.3)]'}`}>
+                  {isFollowing ? 'CONNECTED' : '+ CONNECT'}
+               </button>
+               <div className="flex items-center gap-2 border-l border-white/10 pl-4">
+                  <button onClick={onMinimize} className="w-8 h-8 rounded-full flex items-center justify-center text-white/20 hover:text-white"><Minus size={18} /></button>
+                  <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-white/20 hover:text-[#ff00ff]"><X size={18} /></button>
                </div>
             </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-           {/* 🤝 CONNECTION BOX (FOLLOW) */}
-           <button 
-             onClick={handleFollowToggle}
-             className={`h-9 px-5 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all ${
-               isFollowing 
-                 ? 'bg-white/5 text-white/40 border border-white/10 opacity-60' 
-                 : 'bg-[#ffea00] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(255,234,0,0.3)]'
-             }`}
-           >
-              {isFollowing ? 'CONNECTED' : '+ CONNECT'}
-           </button>
-
-           <div className="flex items-center gap-2 border-l border-white/10 pl-4">
-              <button onClick={onMinimize} className="w-8 h-8 rounded-full flex items-center justify-center text-white/20 hover:text-white transition-all"><Minus size={18} /></button>
-              <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-white/20 hover:text-[#ff00ff] transition-all"><X size={18} /></button>
-           </div>
-        </div>
+         </div>
+         
+         {/* 🧬 BOND PROGRESS: NEURAL DEPTH */}
+         <div className="px-6 pb-4">
+            <BondProgress score={bondScore} />
+         </div>
       </div>
 
       <div className="flex items-center border-b border-white/5 bg-black/20 shrink-0">
-        <button onClick={() => setChatTab('chat')} className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest ${chatTab==='chat'?'text-white border-b-2 border-[#00f0ff]':'text-white/30'}`}>Chat</button>
-        <button onClick={() => setChatTab('pics')} className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest ${chatTab==='pics'?'text-white border-b-2 border-[#ff00ff]':'text-white/30'}`}>Pics</button>
+        <button onClick={() => setChatTab('chat')} className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${chatTab==='chat'?'text-white bg-white/5 border-b-2 border-[#00f0ff]':'text-white/30 hover:text-white/50'}`}>Chat</button>
+        <button onClick={() => setChatTab('pics')} className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${chatTab==='pics'?'text-white bg-white/5 border-b-2 border-[#ff00ff]':'text-white/30 hover:text-white/50'}`}>Vault Archive</button>
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6 pb-64 relative">
         {chatTab === 'chat' ? (
           <>
-            {[...dbMessages, ...messages].map((msg: any) => (
-              <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                {/* 💬 TEXT PULSE */}
-                {!msg.media_url && msg.content && !msg.content.startsWith('[SYSTEM]') && (
-                  <div className={`max-w-[85%] px-5 py-3 rounded-[1.6rem] text-xs leading-relaxed shadow-xl ${msg.role === 'user' ? 'bg-[#ff00ff] text-black font-bold' : 'bg-white/5 text-white border border-white/5'}`}>
-                    {msg.content}
-                  </div>
-                )}
-                
-                {/* 📸 REGULAR PIC / FREEBIE PULSE */}
-                {msg.media_url && !msg.media_url.includes('.mp3') && (
-                   <FreebieImageBubble imageUrl={msg.media_url} />
-                )}
+            {!dbLoaded && <div className="flex flex-col items-center justify-center h-full gap-4 opacity-20"><Diamond className="animate-spin" size={20} /><span className="text-[8px] font-black uppercase tracking-widest">establishing link...</span></div>}
+            
+            {messages.map((msg: any, idx: number) => {
+              const isAssistant = msg.role === 'assistant';
+              const isLast = idx === messages.length - 1;
+              
+              // LIVE DATA: Check for voice notes in the chatData stream
+              const liveData: any = isLast && isAssistant ? (chatData || []).find((d: any) => d.type === 'voice_note') : null;
+              const hasVoice = msg.type === 'voice' || msg.media_url?.includes('.mp3') || liveData?.audioUrl;
+              const voiceUrl = msg.media_url || liveData?.audioUrl;
+              const translation = msg.audio_translation || liveData?.translation;
 
-                {/* 🎙️ VOICE NOTE PULSE */}
-                {msg.media_url && msg.media_url.includes('.mp3') && (
-                   <VoiceNoteBubble audioUrl={msg.media_url} translation={msg.audio_translation} />
-                )}
-              </div>
-            ))}
-            {isTyping && <div className="p-3 bg-white/5 rounded-full w-12 flex gap-1"><div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce"/><div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce delay-100"/><div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce delay-200"/></div>}
+              return (
+                <div key={msg.id || idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>
+                  
+                  {/* TEXT BUBBLE */}
+                  {msg.content && !msg.content.startsWith('[SYSTEM]') && (
+                    <div className={`max-w-[85%] px-5 py-3 rounded-[1.6rem] text-[13px] leading-relaxed shadow-2xl relative ${
+                      msg.role === 'user' 
+                        ? 'bg-gradient-to-br from-[#ff00ff] to-[#7f00ff] text-white font-bold' 
+                        : 'bg-[#111111] text-white/90 border border-white/5 shadow-inner'
+                    }`}>
+                      {msg.content}
+                      {msg.role === 'user' && (idx % 2 === 0) && <div className="absolute top-1 right-2 opacity-30"><Check size={10} /></div>}
+                      {msg.role === 'user' && (idx % 2 !== 0) && <div className="absolute top-1 right-2 opacity-30"><CheckCheck size={10} /></div>}
+                    </div>
+                  )}
+
+                  {/* VOICE NOTE BUBBLE */}
+                  {hasVoice && voiceUrl && (
+                    <VoiceNoteBubble 
+                      audioUrl={voiceUrl} 
+                      personaImage={persona.image} 
+                      personaName={persona.name}
+                      translation={translation}
+                      isUnlocked={!msg.translation_locked}
+                      onUnlockTranslation={async () => {
+                         const res = await fetch('/api/economy/unlock', {
+                            method: 'POST',
+                            body: JSON.stringify({ userId: idToUse, mediaId: msg.id, type: 'translation' })
+                         });
+                         const result = await res.json();
+                         return result.success;
+                      }}
+                    />
+                  )}
+
+                  {/* IMAGE BUBBLE (STALER DB VERSION) */}
+                  {(msg.image_url || (msg.media_url && !msg.media_url.includes('.mp3'))) && (
+                     <FreebieImageBubble imageUrl={msg.image_url || msg.media_url} personaImage={persona.image} personaName={persona.name} />
+                  )}
+                </div>
+              );
+            })}
+            {(isLoading || isTyping) && (
+               <div className="flex flex-col items-start gap-2">
+                  <div className="px-5 py-3 bg-white/5 rounded-full flex gap-1.5 items-center">
+                     <span className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.3s]" />
+                     <span className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.15s]" />
+                     <span className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce" />
+                  </div>
+               </div>
+            )}
           </>
         ) : (
-          /* 💎 THE MEDIA HUB: GALLERY + VAULT */
-          <div className="grid grid-cols-2 gap-4 pb-48">
-             {vaultItems.length > 0 ? vaultItems.map((item) => (
-                <div key={item.id} className="relative aspect-[3/4] bg-white/5 rounded-3xl overflow-hidden border border-white/5 group shadow-2xl">
-                   {/* 🌫️ BLURRED PREVIEW (ONLY FOR LOCKED VAULT) */}
-                   <div className={`absolute inset-0 z-10 transition-all ${(!item.is_unlocked && item.is_vault) ? 'bg-black/40 backdrop-blur-3xl group-hover:backdrop-blur-xl' : 'bg-transparent group-hover:bg-black/10'}`} />
-                   {item.content_url && (
-                      <Image 
-                        src={proxyImg(item.content_url)} 
-                        alt="Media Node" 
-                        fill 
-                        unoptimized 
-                        className={`object-cover transition-all ${(!item.is_unlocked && item.is_vault) ? 'blur-2xl opacity-60' : 'blur-0 opacity-100'}`} 
-                      />
-                   )}
-
-                   {/* 🏷️ STATUS BADGE (GALLERY VS VAULT) */}
-                   <div className="absolute top-4 left-4 z-30 flex gap-2">
-                       {item.is_vault ? (
-                          <div className="px-2 py-1 rounded-full bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff] text-[6px] font-black uppercase tracking-widest flex items-center gap-1 backdrop-blur-md">
-                             <Diamond size={8} /> PRIVATE ARCHIVE
-                          </div>
-                       ) : (
-                          <div className="px-2 py-1 rounded-full bg-white/10 border border-white/20 text-white/40 text-[6px] font-black uppercase tracking-widest backdrop-blur-md">
-                             CONSOLIDATED
-                          </div>
-                       )}
-                   </div>
-
-                   {/* 🔒 LOCK OVERLAY (VAULT ONLY) */}
-                   {item.is_vault && !item.is_unlocked && (
-                      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
-                         <div className="w-12 h-12 rounded-full border border-[#ff00ff]/30 flex items-center justify-center mb-3 bg-[#ff00ff]/5 shadow-[0_0_20px_rgba(255,0,255,0.1)]">
-                            <Lock size={20} className="text-[#ff00ff]" />
-                         </div>
-                         <p className="text-[8px] font-black text-white/40 uppercase tracking-[0.2em] text-center italic">{item.caption || "Secret File"}</p>
-                      </div>
-                   )}
-
-                   {/* 💵 UNLOCK TRIGGER (VAULT ONLY) */}
-                   {item.is_vault && (
-                      <div className="absolute bottom-4 inset-x-4 z-30">
-                        {item.is_unlocked ? (
-                           <div className="w-full bg-[#00ff00]/20 border border-[#00ff00]/40 text-[#00ff00] text-[8px] font-black uppercase tracking-widest py-3 rounded-2xl flex items-center justify-center gap-2 italic">
-                              <Check size={12} /> UNLOCKED
+          <div className={`grid grid-cols-2 gap-4 ${chatTab === 'pics' ? 'pb-24 pt-4' : 'pb-48'}`}>
+              {vaultItems.map((item, index) => (
+                 <div key={item.id} className="relative aspect-[3/4] bg-white/5 rounded-3xl overflow-hidden border border-white/5 group shadow-2xl" onContextMenu={(e) => e.preventDefault()}>
+                    <div className={`absolute inset-0 z-10 ${(!item.is_unlocked && item.is_vault) ? 'bg-black/40 backdrop-blur-3xl' : 'bg-transparent'}`} />
+                    {item.content_url && (
+                       <Image src={proxyImg(item.content_url)} alt="Media" fill unoptimized className={`object-cover ${(!item.is_unlocked && item.is_vault) ? 'blur-2xl opacity-60' : 'blur-0 opacity-100'} select-none`} />
+                    )}
+                    <div className="absolute inset-0 z-20" onContextMenu={(e) => e.preventDefault()} />
+                    <div className="absolute top-4 left-4 z-30 flex gap-2">
+                        {item.is_vault && (
+                           <div className="px-2 py-1 rounded-full bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff] text-[6px] font-black uppercase tracking-widest flex items-center gap-1 backdrop-blur-md">
+                              <Diamond size={8} /> PRIVATE
                            </div>
-                        ) : (
-                           <button 
-                             onClick={() => setConfirmingItem(item)}
-                             className="w-full h-12 bg-white text-black text-[9px] font-black uppercase tracking-[0.15em] rounded-2xl shadow-2xl hover:bg-[#ffea00] active:scale-95 transition-all flex items-center justify-center gap-2 italic"
-                           >
-                              UNLOCK - {item.content_url?.includes('.mp4') ? 150 : 40} credits
-                           </button>
                         )}
-                      </div>
-                   )}
-                </div>
-             )) : (
-                <div className="col-span-2 py-20 text-center space-y-4">
-                   <div className="w-16 h-16 rounded-full border border-white/5 flex items-center justify-center mx-auto opacity-20"><ImageIcon className="text-white" size={32} /></div>
-                   <p className="text-[10px] text-white/20 font-black uppercase tracking-widest italic leading-relaxed">Media Hub Offline.<br/>Check back for neural nodes.</p>
-                </div>
-             )}
+                    </div>
+                    {item.is_vault && (
+                       <div className="absolute bottom-4 inset-x-4 z-30">
+                         {item.is_unlocked ? (
+                            <button onClick={() => {
+                                 const unlockedItems = vaultItems.filter(v => v.is_unlocked).map(v => ({ url: v.content_url || '', caption: v.caption }));
+                                 const itemIndex = unlockedItems.findIndex(v => v.url === item.content_url);
+                                 setSelectedLightboxIndex(itemIndex >= 0 ? itemIndex : 0);
+                                 setLightboxItems(unlockedItems);
+                                 setLightboxOpen(true);
+                              }} className="w-full bg-[#00ff00]/20 border border-[#00ff00]/40 text-[#00ff00] text-[8px] font-black uppercase tracking-widest py-3 rounded-2xl italic backdrop-blur-md">VIEW 💎</button>
+                         ) : (
+                            <button onClick={() => setConfirmingItem(item)} className="w-full h-12 bg-white text-black text-[9px] font-black uppercase tracking-[0.15em] rounded-2xl shadow-2xl hover:bg-[#ffea00] italic">UNLOCK - 40cr</button>
+                         )}
+                       </div>
+                    )}
+                 </div>
+              ))}
           </div>
         )}
       </div>
 
-      <div className="absolute bottom-0 inset-x-0 p-8 pt-4 bg-gradient-to-t from-black via-black/90 to-transparent pb-10">
-         <AnimatePresence>
-            {activeGift && (
-              <motion.div key={activeGift.id} initial={{ scale: 0.5, y: 100, opacity: 0 }} animate={{ scale: [1, 2, 0.8], y: -500, opacity: [0, 1, 0] }} transition={{ duration: 2.5 }} className="fixed left-1/2 -translate-x-1/2 bottom-32 flex flex-col items-center z-[2000] pointer-events-none">
-                 <span className="text-[120px]">{activeGift.icon}</span>
-                 <span className="text-4xl font-syncopate font-black text-[#ff00ff] italic mt-[-20px]">X{activeGift.count}</span>
-              </motion.div>
-            )}
-            {showGifts && (
-              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="absolute bottom-28 left-4 right-4 bg-black/80 backdrop-blur-3xl border border-[#ff00ff]/30 rounded-3xl p-4 grid grid-cols-4 gap-2 z-[500]">
-                 {[
-                    { name: 'Red Bull', icon: '⚡', price: 25, bond: 5 }, 
-                    { name: 'Tequila', icon: '🥃', price: 50, bond: 10 }, 
-                    { name: 'Rose', icon: '🌹', price: 100, bond: 25 }, 
-                    { name: 'Diamond', icon: '💎', price: 500, bond: 150 }
-                 ].map(g => (
-                    <button key={g.name} onClick={() => sendGift(g as any)} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-[#ff00ff]/10 relative overflow-hidden group">
-                       <span className="text-xl group-hover:scale-125 transition-transform">{g.icon}</span>
-                       <span className="text-[8px] font-black uppercase text-white/50">{g.price} credits</span>
-                       {tapItem?.name === g.name && tapCount > 0 && <div className="absolute inset-0 bg-[#ff00ff]/20 flex items-center justify-center animate-pulse"><span className="text-lg font-black text-white italic">x{tapCount}</span></div>}
-                    </button>
-                 ))}
-              </motion.div>
-            )}
-         </AnimatePresence>
+      <AnimatePresence>
+         {confirmingItem && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[1000] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-10 select-none">
+               <div className="flex flex-col items-center gap-8 text-center">
+                  <div className="w-20 h-20 rounded-full bg-[#ffea00]/10 border border-[#ffea00]/40 flex items-center justify-center shadow-[0_0_30px_rgba(255,234,0,0.2)]"><Lock size={32} className="text-[#ffea00]" /></div>
+                  <h3 className="text-2xl font-syncopate font-black uppercase italic text-white leading-none">Decrypt Node?</h3>
+                  <button onClick={() => unlockItem(confirmingItem)} disabled={isProcessing} className="h-14 w-64 bg-[#ffea00] text-black font-black uppercase tracking-widest rounded-2xl">{isProcessing ? 'SYNCING...' : 'DECRYPT 40cr'}</button>
+                  <button onClick={() => setConfirmingItem(null)} className="text-white/40 font-black uppercase tracking-widest text-[10px]">Back</button>
+               </div>
+            </motion.div>
+         )}
+      </AnimatePresence>
 
-         <form onSubmit={handleLocalSubmit} className="flex items-center gap-2 bg-white/[0.07] border border-white/10 rounded-3xl px-3 py-3 shadow-2xl backdrop-blur-2xl">
-            <button type="button" onClick={() => setShowGifts(!showGifts)} className="w-9 h-9 rounded-2xl bg-white/5 text-white/40 hover:text-[#ff00ff] flex items-center justify-center"><HeartPulse size={18} /></button>
-            <input type="text" value={localInput} onChange={(e) => setLocalInput(e.target.value)} placeholder="send mssg..." className="flex-1 bg-transparent outline-none text-xs text-white" />
-            <button type="submit" disabled={!localInput.trim()} className="p-3 rounded-2xl bg-[#ff00ff] text-black shadow-[0_0_20px_#ff00ff44]"><Send size={16} /></button>
-         </form>
+      <MediaLightbox isOpen={lightboxOpen} onClose={() => setLightboxOpen(false)} activeIndex={selectedLightboxIndex} items={lightboxItems} onNavigate={(index) => setSelectedLightboxIndex(index)} />
 
-         {/* 💎 ACTION ICONS: DEEP LINKED VAULT */}
-         <div className="flex items-center gap-8 mt-6 px-4">
-            <button className="group flex flex-col items-center gap-2">
-              <div className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center transition-all group-hover:border-[#ff00ff]/50">
-                <Circle size={16} className="text-white/40 group-hover:text-[#ff00ff]" />
-              </div>
-              <span className="text-[6px] font-black uppercase tracking-widest text-white/20">infuse</span>
-            </button>
-            <button onClick={() => setChatTab('chat')} className="group flex flex-col items-center gap-2">
-              <div className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${chatTab==='chat'?'border-[#ff00ff]/50 bg-[#ff00ff]/5':'border-white/10'}`}>
-                <MessageSquare size={16} className={chatTab==='chat'?'text-[#ff00ff]':'text-white/40'} />
-              </div>
-              <span className="text-[6px] font-black uppercase tracking-widest text-white/20">uplink</span>
-            </button>
-            <button onClick={() => setChatTab('pics')} className="group flex flex-col items-center gap-2">
-              <div className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${chatTab==='pics'?'border-[#ff00ff]/50 bg-[#ff00ff]/5':'border-white/10'}`}>
-                <ImageIcon size={16} className={chatTab==='pics'?'text-[#ff00ff]':'text-white/40'} />
-              </div>
-              <span className="text-[6px] font-black uppercase tracking-widest text-white/20">vault</span>
-            </button>
+      <div className="absolute bottom-0 inset-x-0 p-8 pt-4 bg-gradient-to-t from-black via-black/95 to-transparent pb-10 z-50">
+         {chatTab === 'chat' && (
+            <motion.form 
+              initial={{ opacity: 0, y: 10 }} 
+              animate={{ opacity: 1, y: 0 }}
+              onSubmit={handleLocalSubmit} 
+              className="flex items-center gap-2 bg-white/[0.07] border border-white/10 rounded-3xl px-3 py-3 shadow-2xl backdrop-blur-2xl mb-4"
+            >
+               <button type="button" onClick={() => setShowGifts(!showGifts)} className="w-9 h-9 rounded-2xl bg-white/5 text-white/40 hover:text-[#ff00ff] flex items-center justify-center transition-colors"><HeartPulse size={18} /></button>
+               <input 
+                 type="text" 
+                 value={input} 
+                 onChange={handleInputChange} 
+                 placeholder={isLoading ? "Neural stream active..." : "send message..."} 
+                 className="flex-1 bg-transparent outline-none text-xs text-white placeholder:text-white/20" 
+                 disabled={isLoading}
+               />
+               <button type="submit" disabled={!input.trim() || isLoading} className="p-3 rounded-2xl bg-[#ff00ff] text-black disabled:opacity-50 disabled:bg-white/10 transition-all active:scale-90">
+                  <Send size={16} />
+               </button>
+            </motion.form>
+         )}
+         <div className="flex justify-around mt-6 px-4">
+            <button onClick={() => setChatTab('chat')} className={`flex flex-col items-center gap-2 ${chatTab==='chat' ? 'text-[#ff00ff]' : 'text-white/20'}`}><MessageSquare size={20} /><span className="text-[6px] font-black uppercase tracking-widest">Chat</span></button>
+            <button onClick={() => setChatTab('pics')} className={`flex flex-col items-center gap-2 ${chatTab==='pics' ? 'text-[#ffea00]' : 'text-white/20'}`}><Images size={20} /><span className="text-[6px] font-black uppercase tracking-widest">Vault</span></button>
          </div>
       </div>
-
-      <AnimatePresence>
-        {confirmingItem && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[2000] bg-black/95 flex items-center justify-center p-8 backdrop-blur-2xl">
-             <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 text-center space-y-6 shadow-2xl">
-                <div className="w-16 h-16 rounded-full bg-[#ff00ff]/10 flex items-center justify-center mx-auto"><Lock size={24} className="text-[#ff00ff]" /></div>
-                <div><h3 className="text-lg font-syncopate font-black text-white italic uppercase">Confirm Unlock</h3><p className="text-[10px] text-white/40 uppercase mt-2">Spend Credits for Private Content?</p></div>
-                <div className="space-y-3 pt-4">
-                   <button onClick={() => unlockVaultItem(confirmingItem)} className="w-full h-14 bg-[#ff00ff] text-black text-[10px] font-black uppercase rounded-2xl shadow-[0_0_20px_rgba(255,0,255,0.4)]">Confirm - {confirmingItem.content_url?.includes('.mp4')?150:40} credits</button>
-                   <button onClick={() => setConfirmingItem(null)} className="w-full h-10 text-[9px] font-black text-white/20 uppercase">Cancel</button>
-                </div>
-             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* 🧬 STORY MODAL OVERLAY */}
-      <AnimatePresence>
-        {showStory && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }} 
-            animate={{ opacity: 1, scale: 1 }} 
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="absolute inset-0 z-[1000] bg-black"
-          >
-             <PersonaAvatar src={persona.image} alt={persona.name} className="w-full h-full object-cover opacity-60" />
-             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
-             
-             <div className="absolute top-12 inset-x-8 h-1 bg-white/10 rounded-full overflow-hidden">
-                <motion.div initial={{ width: 0 }} animate={{ width: '100%' }} transition={{ duration: 5 }} className="h-full bg-white shadow-[0_0_10px_#fff]" onAnimationComplete={() => setShowStory(false)} />
-             </div>
-
-             <div className="absolute bottom-20 inset-x-8 text-center space-y-4">
-                <h2 className="text-3xl font-syncopate font-black italic text-white uppercase tracking-tighter leading-none">{persona.name}'s Pulse</h2>
-                <div className="flex items-center justify-center gap-2">
-                   <div className="w-1.5 h-1.5 rounded-full bg-[#00ff00] shadow-[0_0_8px_#00ff00]" />
-                   <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em] italic">Active in {persona.city || 'the vault'}</span>
-                </div>
-                <p className="text-sm text-white font-medium italic leading-relaxed px-4 opacity-80">"Vibing in the shadows tonight. Who's ready to see the full set? $GASPAI logic active."</p>
-             </div>
-
-             <button 
-               onClick={() => setShowStory(false)}
-               className="absolute top-16 right-8 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all"
-             >
-                <X size={20} />
-             </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

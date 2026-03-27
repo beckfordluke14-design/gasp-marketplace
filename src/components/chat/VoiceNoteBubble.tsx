@@ -12,6 +12,7 @@ interface VoiceNoteBubbleProps {
   durationSeconds?: number;
   timestamp?: string;
   translation?: string;              // Locked English translation (from DB)
+  isUnlocked?: boolean;              // Persistence: is this node already decoded?
   onUnlockTranslation?: () => Promise<boolean>; // Returns true if spend succeeded
 }
 
@@ -28,13 +29,14 @@ export default function VoiceNoteBubble({
   durationSeconds,
   timestamp,
   translation,
+  isUnlocked,
   onUnlockTranslation,
 }: VoiceNoteBubbleProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(durationSeconds || 0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [translationUnlocked, setTranslationUnlocked] = useState(false);
+  const [translationUnlocked, setTranslationUnlocked] = useState(isUnlocked || false);
   const [isUnlocking, setIsUnlocking] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animFrameRef = useRef<number>(0);
@@ -188,7 +190,7 @@ export default function VoiceNoteBubble({
               <span className="text-[9px] font-black uppercase tracking-wider text-white/40 group-hover:text-white/70 transition-colors flex-1 text-left">
                 {isUnlocking ? 'unlocking...' : 'decode what she said'}
               </span>
-              <span className="text-[9px] font-black text-[#ff00ff] shrink-0">10 credits</span>
+              <span className="text-[9px] font-black text-[#ff00ff] shrink-0">25 credits</span>
             </button>
           )}
         </div>

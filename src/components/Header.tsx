@@ -149,8 +149,8 @@ export default function Header({ onOpenTopUp }: { onOpenTopUp: () => void }) {
             </div>
         </header>
 
-        {/* ATTACHED DISCOVERY HUB (SUBBAR) */}
-        <div className="h-10 md:h-14 flex items-center justify-center bg-black/40 backdrop-blur-3xl border-b border-white/5 pointer-events-auto">
+        {/* ATTACHED DISCOVERY HUB (SUBBAR): TRANSPARENT TO SHOW MORE CONTENT */}
+        <div className="h-10 md:h-14 flex items-center justify-center bg-transparent pointer-events-auto">
             <div className="w-full max-w-[280px] md:max-w-xl mx-auto px-4">
                 <PersonaSearch />
             </div>

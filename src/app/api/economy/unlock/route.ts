@@ -15,13 +15,42 @@ export async function POST(req: Request) {
   console.log('💎 [Economy] Processing Media Unlock Pulse...');
   
   try {
-    const { userId, mediaId } = await req.json();
+    const { userId, mediaId, type } = await req.json();
 
     if (!userId || !mediaId) {
-      return new Response('User ID and Media ID required', { status: 400 });
+      return new Response('User ID and Content ID required', { status: 400 });
     }
 
-    // 1. NEURAL CACHE CHECK: Is this media already unlocked for this user?
+    // ── CASE A: VOICE NOTE TRANSLATION ──
+    if (type === 'translation') {
+       console.log(`🎙️ [Economy] Decoding Voice Note ${mediaId} for User ${userId}...`);
+       
+       // 1. Check if already unlocked locally in messages
+       const { data: msg } = await supabase.from('chat_messages').select('translation_locked, audio_translation').eq('id', mediaId).single();
+       if (msg && !msg.translation_locked) {
+          return new Response(JSON.stringify({ success: true, translation: msg.audio_translation, already_owned: true }), { headers: { 'Content-Type': 'application/json' } });
+       }
+
+       // 2. Resolve Balance & Atomic Deduct (Using RPC if possible, or manual for now to match current patterns)
+       // Here we use the same RPC but we might need a more generic one or just the current one if it handles credit deduction.
+       // Looking at current code, 'unlock_media' seems to be the core credit deduct + access grant.
+       const cost = 25; // COST_VOICE_TRANSLATION
+       
+       const { data: result, error: rpcError } = await supabase.rpc('unlock_translation', {
+          p_user_id: userId,
+          p_message_id: mediaId,
+          p_cost: cost
+       });
+
+       if (rpcError) {
+          console.error('[Economy] Translation Transaction Collapse:', rpcError.message);
+          return new Response('Transaction failed: DB Sync Issue', { status: 500 });
+       }
+
+       return new Response(JSON.stringify(result), { headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // ── CASE B: MEDIA VAULT (Original Logic) ──
     const { data: existingUnlock } = await supabase
       .from('unlocked_media')
       .select('unlocked_at')

@@ -106,6 +106,7 @@ function MarketplaceMain() {
 
   const refinedPersonas = allPersonas.map(p => ({
     ...p,
+    isOnline: (p.id.length % 3 === 0) || (p.id.length % 5 === 0), // Simulated neural activity
     vibe: GASP_PULSES[(Math.floor(Date.now() / 3600000) + (p.id || '').length) % GASP_PULSES.length]
   }));
 
@@ -155,7 +156,7 @@ function MarketplaceMain() {
 
       {/* 🗺️ CENTER FEED */}
       <main className="flex-1 flex flex-col relative overflow-hidden bg-black">
-          <div className="flex-1 overflow-y-auto no-scrollbar pt-48 pb-64 flex justify-center">
+          <div className="flex-1 overflow-y-auto no-scrollbar pt-32 pb-64 flex justify-center">
              <div className="w-full max-w-[1200px] px-4">
                 <GlobalFeed onSelectPersona={handleSelectPersona} />
              </div>

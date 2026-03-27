@@ -94,20 +94,39 @@ export default function FreebieImageBubble({
             <motion.div
               onClick={(e) => {
                 e.stopPropagation();
-                setScale(prev => prev === 1 ? 2 : 1);
+                setScale(prev => prev === 1 ? 2.5 : 1);
               }}
               animate={{ scale }}
-              transition={{ type: 'spring', damping: 20 }}
-              className="relative max-w-[90vw] max-h-[80vh] cursor-zoom-in"
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative max-w-[95vw] max-h-[85vh] cursor-zoom-in group/media"
             >
               <img
                 src={imageUrl}
-                alt="Gift"
-                className="rounded-2xl object-contain max-w-[90vw] max-h-[80vh] shadow-2xl"
+                alt="Secure Asset"
+                onContextMenu={(e) => e.preventDefault()}
+                className="rounded-3xl object-contain max-w-[95vw] max-h-[85vh] shadow-[0_0_60px_rgba(255,0,255,0.2)] select-none pointer-events-none"
               />
+              
+              {/* 🛡️ SOVEREIGN WATERMARK */}
+              <div className="absolute inset-x-0 bottom-8 flex justify-center pointer-events-none select-none opacity-40 group-hover/media:opacity-60 transition-opacity">
+                 <span className="text-[14px] md:text-[18px] font-black uppercase tracking-[0.6em] text-white/50 italic drop-shadow-2xl">
+                    GASP.FUN
+                 </span>
+              </div>
+
+              {/* 🛡️ ANTI-DOWNLOAD MESH */}
+              <div 
+                className="absolute inset-0 z-10" 
+                onContextMenu={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setScale(prev => prev === 1 ? 2.5 : 1);
+                }}
+              />
+
               {scale > 1 && (
-                <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/60 rounded-full text-[8px] text-white/50 uppercase tracking-widest">
-                  tap to reset
+                <div className="absolute top-4 right-4 px-3 py-1 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full text-[8px] text-[#ffea00] font-black uppercase tracking-widest z-20">
+                   active zoom • tap to reset
                 </div>
               )}
             </motion.div>
