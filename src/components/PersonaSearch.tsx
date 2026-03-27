@@ -23,9 +23,27 @@ export default function PersonaSearch({ deadIds, setDeadIds }: { deadIds: Set<st
 
   useEffect(() => {
     async function fetchAll() {
-      const { data: dbPersonas } = await supabase.from('personas').select('*').eq('is_active', true);
+      // 🚑 NEURAL SYNC: Derive search results from active personas and feed
+      const res = await fetch('/api/admin/feed?limit=200');
+      const json = await res.json();
+      
+      const dbPersonas: any[] = [];
+      if (json.success && json.posts) {
+         const seen = new Set();
+         json.posts.forEach((p: any) => {
+            if (p.personas && !seen.has(p.persona_id)) {
+               seen.add(p.persona_id);
+               dbPersonas.push({
+                  ...p.personas,
+                  id: p.persona_id,
+                  image: proxyImg(p.content_url || p.personas.seed_image_url)
+               });
+            }
+         });
+      }
+
       const combined = [
-        ...(dbPersonas || []).map(p => ({ id: p.id, name: p.name, city: p.city, race: p.race, tags: p.tags, image: p.seed_image_url || '/v1.png' })),
+        ...dbPersonas,
         ...initialPersonas.map(p => ({ id: p.id, name: p.name, city: p.city, race: (p as any).race, tags: p.tags, image: (p as any).image || '/v1.png' }))
       ];
       // Unique by ID
@@ -47,7 +65,7 @@ export default function PersonaSearch({ deadIds, setDeadIds }: { deadIds: Set<st
     if (query.length > 0) {
       const filtered = allPersonas
         .filter(p => !deadIds.has(p.id))
-        .filter(p => p.image && p.image !== '/v1.png' && p.image !== '')
+        .filter(p => p.image && p.image !== '/v1.png' && p.image !== '' && p.image !== 'undefined' && p.image !== 'null') // Filter out vault/gift items
         .filter(p => 
           p.name.toLowerCase().includes(query.toLowerCase()) || 
           (p.city && p.city.toLowerCase().includes(query.toLowerCase())) ||

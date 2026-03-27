@@ -146,11 +146,26 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
       const { data: unlocks } = await supabase.from('user_vault_unlocks').select('item_id').eq('user_id', idToUse);
       const unlockedIds = (unlocks || []).map(u => u.item_id);
 
-      // 📦 FETCH VAULT
-      const { data: vault } = await supabase.from('persona_vault').select('*').eq('persona_id', personaId).order('created_at', { ascending: false });
-      if (vault) {
-          setVaultItems(vault.map(v => ({ ...v, is_unlocked: unlockedIds.includes(v.id) })));
-      }
+      // 📦 FETCH VAULT & NON-HERO GALLERY POSTS
+      const [{ data: vault }, { data: galleryPosts }] = await Promise.all([
+          supabase.from('persona_vault').select('*').eq('persona_id', personaId).order('created_at', { ascending: false }),
+          supabase.from('posts').select('*').eq('persona_id', personaId).or('is_gallery.eq.true,is_vault.eq.true,is_freebie.eq.true').order('created_at', { ascending: false })
+      ]);
+
+      const allGalleryItems = [
+          ...(vault || []).map(v => ({ ...v, is_unlocked: unlockedIds.includes(v.id) })),
+          ...(galleryPosts || []).map(p => ({
+              id: p.id,
+              content_url: p.content_url || p.image_url,
+              caption: p.caption,
+              is_vault: p.is_vault || p.is_freebie || true, // Treat all gallery posts as premium highlights
+              is_unlocked: p.is_unlocked || unlockedIds.includes(p.id) || !p.is_vault, // Some gallery images might be free
+              type: p.type || 'image',
+              created_at: p.created_at
+          }))
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setVaultItems(allGalleryItems);
 
       // 🤝 FETCH RELATIONSHIP & STATS
       const { data: rel } = await supabase.from('user_relationships').select('*').eq('user_id', idToUse).eq('persona_id', personaId).single();

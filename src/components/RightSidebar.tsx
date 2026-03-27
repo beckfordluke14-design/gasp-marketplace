@@ -24,13 +24,10 @@ export default function RightSidebar({ onSelectPersona, personas, deadIds, setDe
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  // Simulated status variation for the gallery
+  // 🎲 NEURAL SYNC: Use the randomized personas provided by the main page
   const galleryItems = personas
     .filter(p => p.image && p.image !== 'undefined' && p.image !== 'null' && p.image !== '' && !deadIds.has(p.id))
-    .map((p, idx) => ({
-      ...p,
-      isOnline: idx % 2 === 0, // Even id's are "Online", Odd id's are "Offline"
-    })).reverse();
+    .slice(0, 50); // High-fidelity discovery cap
 
   return (
     <aside className="hidden lg:flex w-[280px] xl:w-[320px] 2xl:w-[380px] h-screen bg-black border-l border-white/5 flex-col shrink-0 overflow-hidden sticky top-0">

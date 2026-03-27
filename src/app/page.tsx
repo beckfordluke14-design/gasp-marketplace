@@ -28,7 +28,6 @@ const GASP_PULSES = [
 
 
 import { useUser } from '@/components/providers/UserProvider';
-
 import NeuralDiscoveryBubbles from '@/components/NeuralDiscoveryBubbles';
 
 function MarketplaceMain() {
@@ -52,17 +51,43 @@ function MarketplaceMain() {
   useEffect(() => { 
     setMounted(true); 
     const loadPersonas = async () => {
-        // 🚑 SOVEREIGN FIX: Use service-role API route to bypass RLS on personas table
-        // The anon key is blocked by RLS — same pattern as /api/admin/feed which works
+        // 🚑 NEURAL SYNC: Fetch all active personas AND the feed to ensure total coverage
         try {
-          const res = await fetch('/api/personas');
-          const json = await res.json();
-          if (json.success && json.personas?.length > 0) {
-            console.log(`[Personas] Loaded ${json.personas.length} active personas from DB`);
-            setDbPersonas(json.personas);
-          } else {
-            console.warn('[Personas] API returned empty or error:', json.error);
+          const [resFeed, resActive] = await Promise.all([
+             fetch('/api/admin/feed?limit=200'),
+             fetch('/api/personas')
+          ]);
+          
+          const jsonFeed = await resFeed.json();
+          const jsonActive = await resActive.json();
+          
+          const mergedSet = new Map();
+          
+          // Seed from active personas table (Source of Truth)
+          if (jsonActive.success) {
+             jsonActive.personas.forEach((p: any) => mergedSet.set(String(p.id), p));
           }
+
+          // Merge updates from the feed (Current Hero Images)
+          if (jsonFeed.success && jsonFeed.posts) {
+             jsonFeed.posts.forEach((p: any) => {
+                if (p.personas) {
+                   const pid = String(p.persona_id);
+                   const existing = mergedSet.get(pid) || {};
+                   mergedSet.set(pid, {
+                      ...existing,
+                      ...p.personas,
+                      id: pid,
+                      // Prioritize the feed's hero content for the bubble image
+                      image: proxyImg(p.content_url || p.personas.seed_image_url || existing.image)
+                   });
+                }
+             });
+          }
+
+          const finalPersonas = Array.from(mergedSet.values());
+          console.log(`[Neural Sync] Synced ${finalPersonas.length} characters in cloud.`);
+          setDbPersonas(finalPersonas);
         } catch (e) {
           console.error('[Personas] Fetch failed:', e);
         }
@@ -89,8 +114,9 @@ function MarketplaceMain() {
 
     // 🤝 DATABASE CONNECTION SYNC
     const syncFollows = async () => {
-       if (!id) return;
-       const { data } = await supabase.from('user_relationships').select('persona_id').eq('user_id', id);
+       const idToUse = id;
+       if (!idToUse) return;
+       const { data } = await supabase.from('user_relationships').select('persona_id').eq('user_id', idToUse);
        if (data) setFollowedIds(data.map(r => r.persona_id));
     };
 
@@ -106,9 +132,9 @@ function MarketplaceMain() {
       const fallback = (initialPersonas.find(i => i.id === p.id) || {}) as any;
       return {
         ...fallback, // Status-quo defaults
-        ...p,        // Database sovereignty updates (spread ALL fields)
-        image: proxyImg(p.seed_image_url || p.image || fallback.image),
-        isOnline: p.status === 'online' || p.is_active, // Virtual presence
+        ...p,        // Database sovereignty updates
+        image: proxyImg(p.image || p.seed_image_url || fallback.image),
+        isOnline: p.status === 'online' || p.is_active === true,
         vibe: p.vibe || fallback.vibe || GASP_PULSES[(p.id || '').length % GASP_PULSES.length]
       };
     });
@@ -119,49 +145,57 @@ function MarketplaceMain() {
       ...initialPersonas
     ]
       .filter((p, index, self) => index === self.findIndex((t) => t.id === p.id))
-      .filter(p => p.id && p.id !== '' && p.id !== 'undefined'); // Zero filter policy for higher node counts
+      .filter(p => p.id && p.id !== '' && p.id !== 'undefined');
   }, [dbPersonas]);
 
   const refinedPersonas = useMemo(() => {
-    return allPersonas.map(p => ({
+    // 🎲 HIGH-VALUE SHUFFLE: Randomize the stories and sidebar 
+    const randomized = [...allPersonas].sort(() => 0.5 - Math.random());
+
+    return randomized.map(p => ({
       ...p,
-      // Preserve actual online status from DB, don't overwrite with fixed false
       isOnline: p.status === 'online' || p.is_active === true,
-      // Only fall back to GASP_PULSES if the persona has no real vibe from DB
       vibe: p.vibe || GASP_PULSES[(p.id || '').length % GASP_PULSES.length]
     }));
   }, [allPersonas]);
 
-  const handleSelectPersona = async (id: string) => {
-    setSelectedPersonaId(id);
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    setOpenChatIds(prev => (isMobile ? [id] : prev.includes(id) ? prev : [...prev, id]));
-    setMinimizedIds(prev => prev.filter(m => m !== id));
-
-    // 🛡️ SOVEREIGN PERSONA FETCH: If persona not in local list, fetch from DB
-    // This handles DB-only personas that didn't pass the image filter in refinedPersonas
-    const alreadyKnown = refinedPersonas.find((p: any) => p.id === id) || chatPersonaCache[id];
-    if (!alreadyKnown) {
-      try {
-        const { data: fetchedPersona } = await supabase
-          .from('personas')
-          .select('*')
-          .eq('id', id)
-          .maybeSingle();
-        if (fetchedPersona) {
-          setChatPersonaCache(prev => ({
-            ...prev,
-            [id]: {
-              ...fetchedPersona,
-              image: fetchedPersona.seed_image_url || fetchedPersona.image || '/v1.png',
-              vibe: 'online now',
-              status: 'online'
+  const handleSelectPersona = async (id: string, initialMsg?: string, personaObj?: any) => {
+    const sId = String(id);
+    setSelectedPersonaId(sId);
+    
+    // 🛡️ IDENTITY CACHE: If we have the persona object (from feed/search), cache it locally
+    // to prevent 'Establishing Link' hangs while DB fetches the rest.
+    if (personaObj) {
+        setChatPersonaCache(prev => ({ ...prev, [sId]: personaObj }));
+    } else {
+        // Only fetch if we don't already have it in refinedPersonas or cache
+        const alreadyKnown = refinedPersonas.find((p: any) => String(p.id) === sId) || chatPersonaCache[sId];
+        if (!alreadyKnown) {
+          try {
+            const { data: fetchedPersona } = await supabase.from('personas').select('*').eq('id', sId).maybeSingle();
+            if (fetchedPersona) {
+              setChatPersonaCache(prev => ({
+                ...prev,
+                [sId]: {
+                  ...fetchedPersona,
+                  image: fetchedPersona.seed_image_url || fetchedPersona.image || '/v1.png',
+                  vibe: 'online now',
+                  status: 'online'
+                }
+              }));
             }
-          }));
+          } catch (e) {
+            console.warn('[Chat] Persona fetch failed for', sId, e);
+          }
         }
-      } catch (e) {
-        console.warn('[Chat] Persona fetch failed for', id, e);
-      }
+    }
+
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    setOpenChatIds(prev => (isMobile ? [sId] : prev.includes(sId) ? prev : [...prev, sId]));
+    setMinimizedIds(prev => prev.filter(m => m !== sId));
+    
+    if (isMobile) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -171,7 +205,6 @@ function MarketplaceMain() {
   };
 
   const handleZenToggle = () => {
-     // 🛡️ SOVEREIGN GATE: Only admins can trigger the Zen Cleanse
      const isAdmin = (profile as any)?.is_admin;
      if (isAdmin) {
         setIsZenMode(!isZenMode);
@@ -182,17 +215,12 @@ function MarketplaceMain() {
 
   if (!mounted) return (<div className="min-h-screen bg-black flex items-center justify-center"><div className="w-12 h-12 border-4 border-[#ffea00]/20 border-t-[#ffea00] rounded-full animate-spin" /></div>);
 
-  // Combine minimized and followed for the Bubbly Hub
   const activeHubIds = [...new Set([...minimizedIds, ...followedIds])];
 
   return (
-    <div className="flex h-[100dvh] bg-black overflow-hidden font-inter" 
-         onDoubleClick={handleZenToggle}
-    >
-      {/* 🏔️ FIXED HEADER: LOGO + NAV + CREDITS */}
+    <div className="flex h-[100dvh] bg-black overflow-hidden font-inter" onDoubleClick={handleZenToggle}>
       <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} />
 
-      {/* 🏔️ SOVEREIGN SKY: TOP DISCOVERY DIRECTORY (CENTERED BETWEEN SIDEBARS) */}
       {!isZenMode && (
          <TopDiscovery 
            selectedPersonaId={selectedPersonaId} 
@@ -204,7 +232,6 @@ function MarketplaceMain() {
          />
       )}
 
-      {/* 🕴️ THE GASPAI PILLAR: STAKE LEDGER & DIRECTORY */}
       {!isZenMode && (
          <Sidebar 
            selectedPersonaId={selectedPersonaId} 
@@ -214,38 +241,33 @@ function MarketplaceMain() {
          />
       )}
 
-      {/* 🗺️ CENTER FEED */}
       <main className="flex-1 flex flex-col relative overflow-hidden bg-black">
           <div className="flex-1 overflow-y-auto no-scrollbar pt-32 pb-64 flex justify-center">
              <div className="w-full max-w-[1200px] px-4">
                 <GlobalFeed onSelectPersona={handleSelectPersona} />
              </div>
           </div>
-
           <div className="fixed bottom-6 left-6 z-[800]">
              <GhostActivityTicker />
           </div>
       </main>
 
-      {/* 🗂️ RIGHT SIDEBAR: PROFILE GALLERY GRID */}
       {!isZenMode && (
         <RightSidebar onSelectPersona={handleSelectPersona} personas={refinedPersonas} deadIds={deadIds} setDeadIds={setDeadIds} />
       )}
 
-      {/* 🔮 CHAT HUB: BOOSTED Z-INDEX */}
       <div className={`fixed inset-y-0 right-0 ${isChatOpenMobile ? 'z-[2000]' : 'z-[500]'} flex flex-row-reverse pointer-events-none items-end`}>
         <AnimatePresence mode="popLayout">
            {[...openChatIds].reverse().map((id, index) => {
-              const isMinimized = minimizedIds.includes(id);
-              // 🛡️ SOVEREIGN LOOKUP: Check refinedPersonas first, then chatPersonaCache for DB-fetched personas
-              const p = refinedPersonas.find((persona: any) => persona.id === id) || chatPersonaCache[id];
-              // Show loading placeholder if we're still fetching the persona
+              const sId = String(id);
+              const isMinimized = minimizedIds.includes(sId);
+              const p = refinedPersonas.find((persona: any) => String(persona.id) === sId) || chatPersonaCache[sId];
+              
               if (isMinimized) return null;
               if (!p) {
-                // Persona not loaded yet — show minimal loading drawer so user doesn't see blank
                 return (
-                  <motion.div key={id} initial={{ x: '100%', opacity: 0 }} animate={{ x: `-${index * 12}px`, opacity: 1 }} exit={{ x: '100%', opacity: 0 }}
-                    className="h-full w-[480px] pointer-events-auto bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.8)] flex items-center justify-center"
+                  <motion.div key={sId} initial={{ x: '100%', opacity: 0 }} animate={{ x: `-${index * 12}px`, opacity: 1 }} exit={{ x: '100%', opacity: 0 }}
+                    className="h-full w-[480px] pointer-events-auto bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.8)] flex items-center justify-center border-l border-white/5"
                   >
                     <div className="flex flex-col items-center gap-4 opacity-20">
                       <div className="w-10 h-10 border-2 border-[#ff00ff]/40 border-t-[#ff00ff] rounded-full animate-spin" />
@@ -255,22 +277,20 @@ function MarketplaceMain() {
                 );
               }
               return (
-                <motion.div key={id} initial={{ x: '100%', opacity: 0 }} animate={{ x: `-${index * 12}px`, opacity: 1 }} exit={{ x: '100%', opacity: 0 }} 
+                <motion.div key={sId} initial={{ x: '100%', opacity: 0 }} animate={{ x: `-${index * 12}px`, opacity: 1 }} exit={{ x: '100%', opacity: 0 }} 
                    className="h-full pointer-events-auto bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.8)]"
                 >
-                  <ChatDrawer personaId={id} persona={p} onClose={() => handleCloseChat(id)} onMinimize={() => setMinimizedIds([...minimizedIds, id])} />
+                  <ChatDrawer personaId={sId} persona={p} onClose={() => handleCloseChat(sId)} onMinimize={() => setMinimizedIds([...minimizedIds, sId])} />
                 </motion.div>
               );
            })}
         </AnimatePresence>
       </div>
 
-      {/* 🫧 ACTIVE CHAT HUB: MINIMIZED BUBBLES */}
       {!isZenMode && minimizedIds.length > 0 && (
-         <ChatCluster activeChatIds={minimizedIds} unreadCounts={unreadCounts} onRestore={(id) => setOpenChatIds(prev => prev.includes(id) ? prev : [...prev, id])} personas={refinedPersonas} />
+         <ChatCluster activeChatIds={minimizedIds} unreadCounts={unreadCounts} onRestore={(id) => handleSelectPersona(String(id))} personas={refinedPersonas} />
       )}
 
-      {/* 📱 CONNECTIONS VAULT: IPHONE-STYLE INBOX */}
       {!isZenMode && followedIds.length > 0 && (
          <ConnectionsHub followedIds={followedIds} unreadCounts={unreadCounts} onSelectPersona={handleSelectPersona} personas={refinedPersonas} />
       )}

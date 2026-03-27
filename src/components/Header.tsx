@@ -60,9 +60,9 @@ export default function Header({ onOpenTopUp, deadIds, setDeadIds }: { onOpenTop
                     textShadow: { duration: 0.4, repeat: 1 },
                     x: { duration: 0.2, repeat: 2 }
                   }}
-                  className="text-xl md:text-5xl font-black uppercase tracking-tighter text-white font-outfit italic cursor-pointer group leading-none relative"
+                  className="text-xl md:text-5xl font-black uppercase tracking-tighter text-white font-outfit italic cursor-pointer group leading-none relative shadow-[0_0_30px_rgba(255,255,255,0.1)]"
                 >
-                  gasp<span className="text-[#ff00ff] drop-shadow-[0_0_15px_rgba(255,0,255,1)]">.</span>
+                  gasp
                   
                   {/* Subtle Glitch Layer */}
                   <motion.span 
@@ -70,7 +70,7 @@ export default function Header({ onOpenTopUp, deadIds, setDeadIds }: { onOpenTop
                     transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
                     className="absolute inset-0 text-[#00f0ff] mix-blend-screen pointer-events-none select-none opacity-0"
                   >
-                    gasp.
+                    gasp
                   </motion.span>
                 </motion.h1>
 
