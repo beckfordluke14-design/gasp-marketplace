@@ -11,6 +11,8 @@ import ConnectionsHub from '@/components/ConnectionsHub';
 import GhostActivityTicker from '@/components/GhostActivityTicker';
 import PersonaAvatar from '@/components/persona/PersonaAvatar';
 import TopUpDrawer from '@/components/economy/TopUpDrawer';
+import RightSidebar from '@/components/RightSidebar';
+import Header from '@/components/Header';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
 import { createClient } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -138,6 +140,9 @@ function MarketplaceMain() {
     <div className="flex h-[100dvh] bg-black overflow-hidden font-inter" 
          onDoubleClick={handleZenToggle}
     >
+      {/* 🏔️ FIXED HEADER: LOGO + NAV + CREDITS */}
+      <Header onOpenTopUp={() => setIsTopUpOpen(true)} />
+
       {/* 🏔️ SOVEREIGN SKY: TOP DISCOVERY DIRECTORY */}
       {!isZenMode && (
          <TopDiscovery 
@@ -148,6 +153,7 @@ function MarketplaceMain() {
          />
       )}
 
+      {/* 🗺️ CENTER FEED */}
       <main className="flex-1 flex flex-col relative overflow-hidden bg-black">
           <div className="flex-1 overflow-y-auto no-scrollbar pt-48 pb-64 flex justify-center">
              <div className="w-full max-w-[1200px] px-4">
@@ -159,6 +165,11 @@ function MarketplaceMain() {
              <GhostActivityTicker />
           </div>
       </main>
+
+      {/* 🗂️ RIGHT SIDEBAR: PROFILE GALLERY GRID */}
+      {!isZenMode && (
+        <RightSidebar onSelectPersona={handleSelectPersona} personas={refinedPersonas} />
+      )}
 
       {/* 🔮 CHAT HUB: BOOSTED Z-INDEX */}
       <div className={`fixed inset-y-0 right-0 ${isChatOpenMobile ? 'z-[2000]' : 'z-[500]'} flex flex-row-reverse pointer-events-none items-end`}>
