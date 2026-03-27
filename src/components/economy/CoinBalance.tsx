@@ -59,22 +59,20 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
   };
 
   return (
-     <div className="flex flex-col items-end gap-2">
-        <button 
-          onClick={onOpenTopUp}
-          className={`flex items-center gap-2 md:gap-3 px-3 md:px-5 py-2 md:py-2.5 rounded-2xl md:rounded-[1.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] hover:border-[#00f0ff]/40 transition-all group shadow-2xl backdrop-blur-3xl`}
-        >
-          <div className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center bg-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.4)] group-hover:scale-110 transition-transform">
-             <Diamond size={12} className="md:size-16 text-black font-black" />
-          </div>
-          <div className="flex flex-col items-start leading-none gap-0.5">
-             <span className="text-[13px] md:text-[16px] font-syncopate font-black italic tracking-tighter text-white">
-                {balance !== null ? balance.toLocaleString() : <Zap size={14} className="animate-pulse text-[#00f0ff]" />}
-             </span>
-             <span className="hidden md:block text-[7px] font-black uppercase tracking-[0.2em] text-[#00f0ff] opacity-60">Verified Balance</span>
-          </div>
-          <ChevronRight size={14} className="text-white/20 group-hover:text-white transition-colors ml-1" />
-        </button>
+      <div className="flex flex-col items-end gap-1">
+         <div 
+           className="flex items-center gap-2 md:gap-3 px-3 md:px-5 py-2 md:py-2.5 rounded-2xl md:rounded-full bg-black/5 backdrop-blur-3xl border border-white/5 shadow-inner"
+         >
+           <div className="w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center bg-[#00f0ff]/10 text-[#00f0ff]">
+              <Diamond size={14} className="font-black" />
+           </div>
+           <div className="flex flex-col items-start leading-none">
+              <span className="text-[14px] md:text-[18px] font-black italic tracking-tighter text-white font-outfit">
+                 {balance !== null ? balance.toLocaleString() : '---'}
+              </span>
+              <span className="text-[6px] font-black uppercase tracking-[0.2em] text-[#00f0ff]/40">Verified Balance</span>
+           </div>
+         </div>
        
        {balance !== null && balance === 0 && (
          <button 
@@ -86,7 +84,7 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
            Claim 5000 Starter Credits
          </button>
        )}
-    </div>
+     </div>
   );
 }
 

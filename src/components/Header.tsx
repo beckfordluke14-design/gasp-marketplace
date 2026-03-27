@@ -126,7 +126,7 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                   onClick={() => onOpenTopUp()}
                   className="h-8 md:h-12 px-4 md:px-8 bg-[#ff6a00] text-black text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-full hover:shadow-[0_0_30px_rgba(255,106,0,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic shadow-[0_0_15px_rgba(255,106,0,0.2)]"
                 >
-                   <span className="hidden md:inline">GET </span>CREDITS
+                   ADD CREDITS
                 </button>
 
                 {/* COIN BALANCE DISPLAY */}
