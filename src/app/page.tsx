@@ -52,19 +52,10 @@ function MarketplaceMain() {
   useEffect(() => { 
     setMounted(true); 
     const loadPersonas = async () => {
-        // 🧬 CNS DISCOVERY: Synchronize with Post Studio 'Feed/Hero' Approvals
-        // Only personas with public feed posts (is_vault=false) or Hero status (is_featured=true) are sanctioned for the Hub
-        const { data: sanctioned } = await supabase
-            .from('personas')
-            .select('*, posts(is_vault, is_featured)')
-            .eq('is_active', true); // Must be online + have content
-
-        if (sanctioned) {
-            const feedApproved = sanctioned.filter(p => 
-                (p.posts as any[] || []).some(post => !post.is_vault || post.is_featured)
-            );
-            setDbPersonas(feedApproved);
-        }
+        // 🚑 EMERGENCY RECOVERY: Restoring 100% Baseline Visibility
+        // Every approved node (is_active=true) is now forced to show in the Hub/Sidebar/Stories
+        const { data } = await supabase.from('personas').select('*').eq('is_active', true); 
+        if (data) setDbPersonas(data);
     };
     loadPersonas();
 

@@ -96,34 +96,41 @@ export default function VerdadChatPage(props: any) {
   useEffect(() => {
     if (staticPersona || !id) return; // Already found statically
     async function fetchDbPersona() {
-      // 🛡️ RE-ENFORCED GATE: Only approved nodes (is_active=true) can open a baseline chat
+      // 🚑 EMERGENCY RECOVERY: Restoring 100% Baseline Chat Pulse
       const { data: p } = await supabase
         .from('personas')
-        .select('*, posts(*)')
+        .select('*')
         .eq('id', id)
         .eq('is_active', true)
         .single();
       
       if (p) {
-        // Map posts to vault items: Price defaults to 25 if not set in metadata
-        const vaultItems = (p.posts || [])
-          .filter((post: any) => post.is_vault)
-          .map((post: any) => ({
+        setDbPersona({
+          ...p,
+          image: p.seed_image_url || p.image || '/icons/icon-512x512.png',
+          timezone: p.timezone || 'America/New_York',
+          vault: [] // Load separately to prevent crash
+        });
+
+        // Standalone Vault Fetch (Pulse 2)
+        const { data: vItems } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('persona_id', id)
+          .eq('is_vault', true);
+        
+        if (vItems) {
+          const vaultItems = vItems.map((post: any) => ({
             id: post.id,
             type: post.content_type === 'video' ? 'video' : 'image',
-            blurred_url: post.content_url, // Using full as blur for now
+            blurred_url: post.content_url,
             full_url: post.content_url,
             niche_tag: 'EDITORIAL',
             price: post.price || 25,
             caption: post.caption || ''
           }));
-
-        setDbPersona({
-          ...p,
-          image: p.seed_image_url || p.image || '/icons/icon-512x512.png',
-          timezone: p.timezone || 'America/New_York',
-          vault: vaultItems
-        });
+          setDbPersona((prev: any) => prev ? { ...prev, vault: vaultItems } : prev);
+        }
       }
     }
     fetchDbPersona();
