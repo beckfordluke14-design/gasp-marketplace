@@ -11,7 +11,14 @@ import { PrivyProvider } from "@privy-io/react-auth";
 export function GaspPrivyProvider({ children }: { children: React.ReactNode }) {
   // 🛡️ PLACEHOLDER APP ID: User needs to replace this in the dashboard 
   // Get yours at: https://dashboard.privy.io/
-  const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "clxp_placeholder_id";
+  const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "";
+  const isPlaceholder = PRIVY_APP_ID === "" || PRIVY_APP_ID === "clxp_placeholder_id";
+
+  // 🛡️ BUILD GATE: Bypass the provider during static analysis if the ID is missing
+  // This prevents 'Cannot initialize with invalid ID' build errors.
+  if (isPlaceholder) {
+    return <>{children}</>;
+  }
 
   return (
     <PrivyProvider
@@ -27,7 +34,9 @@ export function GaspPrivyProvider({ children }: { children: React.ReactNode }) {
         },
         // 💎 Embedded Wallet: Zero-friction settlement node creation
         embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
+          ethereum: {
+            createOnLogin: 'users-without-wallets',
+          },
         },
       }}
     >
