@@ -102,12 +102,21 @@ function MarketplaceContent() {
   const handleSelectPersona = async (id: string, initialMsg?: string, personaObj?: any) => {
     const sId = String(id);
     setSelectedPersonaId(sId);
+    
+    // 🧠 NEURAL HYDRATE: Ensure persona is cached even if not in the active filtered list
     if (personaObj) {
       setChatPersonaCache(prev => ({ ...prev, [sId]: personaObj }));
     } else {
-      const p = refinedPersonas.find(persona => String(persona.id) === sId);
-      if (p) setChatPersonaCache(prev => ({ ...prev, [sId]: p }));
+      const p = initialPersonas.find(persona => String(persona.id) === sId) || 
+                dbPersonas.find(persona => String(persona.id) === sId);
+      if (p) {
+        setChatPersonaCache(prev => ({ ...prev, [sId]: p }));
+      } else {
+         // Fallback: Final sync trigger
+         console.warn('[Neural Sync]: Attempting deferred hydrate for:', sId);
+      }
     }
+    
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     setOpenChatIds(prev => (isMobile ? [sId] : prev.includes(sId) ? prev : [...prev, sId]));
     setMinimizedIds(prev => prev.filter(m => m !== sId));
