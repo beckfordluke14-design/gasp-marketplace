@@ -4,7 +4,9 @@ import { useState, Suspense } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Disc, ShieldAlert, KeyRound, UserCheck } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useUser } from '@/components/providers/UserProvider';
 
 function LoginForm() {
   const { login, authenticated, ready, user } = useUser();
