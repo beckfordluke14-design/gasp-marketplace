@@ -147,18 +147,25 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
    const hasVault = vaultItems.some(v => v.is_vault);
 
    return (
-    <div className="flex flex-col w-full md:w-[480px] h-[100dvh] md:h-screen bg-black border-l border-white/5 relative shadow-2xl overflow-hidden font-outfit">
+     <>
+        {/* MOBILE BACKDROP */}
+        <div 
+          className="fixed inset-0 z-[950] bg-black/60 lg:hidden pointer-events-auto backdrop-blur-sm" 
+          onClick={onClose}
+        />
+        
+        <div className="fixed inset-x-0 bottom-0 z-[1000] lg:relative lg:inset-auto lg:z-auto flex flex-col w-full md:w-[480px] h-[85dvh] lg:h-screen bg-black border-t lg:border-t-0 lg:border-l border-white/10 rounded-t-[2.5rem] lg:rounded-t-0 relative shadow-2xl overflow-hidden font-outfit">
       
       {/* 🏔️ HEADER: SYNDICATE HIGH-FIDELITY (Matches Screen) */}
       <div className="flex flex-col bg-black/40 backdrop-blur-3xl border-b border-white/10 shrink-0 p-6 pb-0">
          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-               <div className="relative">
-                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/10 bg-zinc-800">
+               <div className="relative shrink-0">
+                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 bg-zinc-800">
                      <PersonaAvatar src={persona?.image || '/v1.png'} alt={persona?.name || 'Lila'} />
                   </div>
                </div>
-               <div className="flex flex-col gap-0.5">
+                <div className="flex flex-col gap-0.5 max-w-[150px]">
                <div className="flex items-center gap-2">
                   <h3 className="text-xl font-black uppercase italic tracking-tighter text-white flex items-center gap-2">
                      {persona?.name || 'Lila'}
@@ -171,20 +178,20 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                <div className="flex items-center gap-1.5">
                   <SparkleIcon size={8} className="text-[#ff00ff]" />
                   <span className="text-[7px] font-black uppercase tracking-[0.2em] text-[#ff00ff] italic">PRIORITY CONNECTION ESTABLISHED</span>
-               </div>
-            </div>
-         </div>
-         
-         <div className="flex items-center gap-4 text-white/40">
-            <button className="hover:text-white transition-colors relative">
-               <ShoppingBag size={20} />
-               {hasVault && <span className="absolute -top-2 -right-2 text-xs animate-jalapeño">🌶️</span>}
-            </button>
-            <button className="hover:text-white transition-colors"><Trophy size={20} /></button>
-            <button onClick={onMinimize} className="hover:text-white transition-colors"><MinimizeIcon size={20} /></button>
-            <button onClick={onClose} className="hover:text-white transition-colors"><X size={20} /></button>
-         </div>
-      </div>
+             <div className="flex items-center gap-3 text-white/40">
+                <button className="relative group hover:text-white transition-colors">
+                   <ShoppingBag size={18} />
+                   {hasVault && (
+                      <span className="absolute -top-2 -right-2 w-3.5 h-3.5 bg-[#ff00ff] rounded-full flex items-center justify-center border border-black shadow-[0_0_10px_#ff00ff]">
+                         <Gift size={8} className="text-white" />
+                      </span>
+                   )}
+                </button>
+                <button className="hover:text-white transition-colors"><Trophy size={18} /></button>
+                <button onClick={onClose} className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"><X size={18} /></button>
+             </div>
+          </div>
+       </div>
 
          {/* NAVIGATION TABS (Electric Cyan Line) */}
          <div className="flex gap-10">
@@ -193,7 +200,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                {chatTab === 'chat' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
             </button>
             <button onClick={() => setChatTab('pics')} className={`pb-4 text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
-               PICS {hasVault && <span className="text-xs">🌶️</span>}
+               PICS {hasVault && <Gift size={12} className="text-[#ff00ff] animate-pulse" />}
                {chatTab === 'pics' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
             </button>
          </div>
@@ -253,7 +260,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
             </div>
           </>
         ) : (
-          <div className="grid grid-cols-2 gap-4 pb-48">
+          <div className="grid grid-cols-2 gap-4 pb-64">
               {vaultItems.map((item, index) => (
                  <div 
                    key={item.id} 
@@ -318,7 +325,9 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
             <div className="flex items-center gap-5 text-white/40">
                <button type="button" className="hover:text-white transition-colors"><Plus size={22} /></button>
                <button type="button" onClick={() => {}} className="hover:text-white transition-colors"><Mic size={22} /></button>
-               <button type="button" onClick={() => setShowGifts(!showGifts)} className="hover:text-[#ff00ff] transition-colors"><Gift size={22} /></button>
+               <button type="button" onClick={() => setShowGifts(!showGifts)} className="w-10 h-10 rounded-full flex items-center justify-center bg-[#ff00ff]/10 text-[#ff00ff] border border-[#ff00ff]/20 hover:bg-[#ff00ff] hover:text-black transition-all shadow-[0_0_15px_rgba(255,0,255,0.1)]">
+                  <Gift size={20} />
+               </button>
             </div>
              <input 
                 type="text" 
@@ -337,7 +346,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
             </button>
          </motion.form>
       </div>
-    </div>
+    </>
   );
 }
 
