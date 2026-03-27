@@ -71,11 +71,13 @@ export async function middleware(req: NextRequest) {
      }
      const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, is_admin')
         .eq('id', user.id)
         .single();
         
-     if (!profile || profile.role !== 'admin') {
+     const isAdmin = profile?.role === 'admin' || profile?.is_admin === true;
+        
+     if (!profile || !isAdmin) {
         return NextResponse.redirect(new URL('/feed', req.url));
      }
   }

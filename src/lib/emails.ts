@@ -6,10 +6,14 @@ import { Resend } from 'resend';
  * Connects the 'Gasp Brain' (Supabase) to the 'Inbox' of your Titans.
  */
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function sendNudgeEmail(email: string, personaName: string, message: string) {
-  if (!email || !process.env.RESEND_API_KEY) return;
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!email || !apiKey) {
+    console.warn('[Dispatcher] Skipping email dispatch: Missing target or API key.');
+    return;
+  }
+
+  const resend = new Resend(apiKey);
 
   try {
     const { data, error } = await resend.emails.send({
