@@ -125,18 +125,20 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                  initial={{ opacity: 0, y: -20, scale: 0.9 }}
                  animate={{ opacity: 1, y: 0, scale: 1 }}
                  exit={{ opacity: 0, y: -20, scale: 0.9 }}
-                 onClick={() => setIsExpanded(true)}
-                 className="px-4 py-2 bg-black/20 backdrop-blur-xl border border-white/5 rounded-full flex items-center gap-2.5 shadow-[0_5px_15px_rgba(0,0,0,0.3)] hover:border-[#00f0ff]/40 transition-all pointer-events-auto"
-               >
-                  <div className="flex -space-x-2">
-                     {storyData.slice(0, 3).map((s, i) => (
-                        <div key={s.personaId} className="w-5 h-5 rounded-full border border-black overflow-hidden relative" style={{ zIndex: 3 - i }}>
-                           <PersonaAvatar src={s.personaImage} alt="" />
-                        </div>
-                     ))}
-                  </div>
-                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-[#00f0ff]">
-                      {unviewedCount > 0 ? `${unviewedCount} NEW STORIES` : 'DISCOVER STORIES'}
+                  onClick={() => setIsExpanded(true)}
+                  className="px-3.5 py-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full flex items-center gap-2 shadow-[0_5px_20px_rgba(0,0,0,0.5)] hover:border-[#00f0ff]/40 transition-all pointer-events-auto group"
+                >
+                   <div className="flex -space-x-2.5">
+                      {storyData.slice(0, 3).map((s, i) => (
+                         <div key={s.personaId} className="w-6 h-6 rounded-full p-[1.5px] bg-gradient-to-tr from-[#00f0ff] via-[#ff00ff] to-[#ffea00] relative" style={{ zIndex: 3 - i }}>
+                            <div className="w-full h-full rounded-full border border-black overflow-hidden bg-zinc-800">
+                               <PersonaAvatar src={s.personaImage} alt="" />
+                            </div>
+                         </div>
+                      ))}
+                   </div>
+                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 group-hover:text-white transition-colors">
+                      {unviewedCount > 0 ? `${unviewedCount} NEW` : 'DISCOVER STORIES'}
                    </span>
                   {unviewedCount > 0 && (
                      <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse shadow-[0_0_10px_#00f0ff]" />

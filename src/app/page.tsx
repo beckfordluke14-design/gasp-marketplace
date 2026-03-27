@@ -152,7 +152,7 @@ function MarketplaceContent() {
                          initial={{ y: -20, opacity: 0 }} 
                          animate={{ y: 0, opacity: 1 }} 
                          exit={{ y: -20, opacity: 0 }}
-                         className="absolute top-16 inset-x-0 z-[80] px-4 pointer-events-none"
+                         className="absolute top-12 inset-x-0 z-[80] px-4 pointer-events-none"
                        >
                           <div className="max-w-2xl mx-auto py-1 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
                              <StoriesRow personas={randomizedPersonas} onSelectPersona={handleSelectPersona} />
