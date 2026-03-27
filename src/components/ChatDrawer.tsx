@@ -27,8 +27,22 @@ interface ChatDrawerProps {
 
 export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: ChatDrawerProps) {
   const { profile, ready: authReady } = useUser();
-  const userId = profile?.id || 'guest';
-  const idToUse = userId;
+  // 🛡️ SOVEREIGN ID RESOLUTION:
+  // - Authenticated: use profile.id (UUID)
+  // - Guest: use persisted gasp_guest_id from localStorage (format: 'guest-xxxxx')
+  // ⚠️ NEVER use bare 'guest' — the /api/chat route checks startsWith('guest-') for the 3-msg wall
+  const [guestIdLocal, setGuestIdLocal] = useState<string>('');
+  useEffect(() => {
+    if (!profile?.id) {
+      let id = localStorage.getItem('gasp_guest_id');
+      if (!id) {
+        id = `guest-${Math.random().toString(36).substring(2, 11)}`;
+        localStorage.setItem('gasp_guest_id', id);
+      }
+      setGuestIdLocal(id);
+    }
+  }, [profile?.id]);
+  const idToUse = profile?.id || guestIdLocal;
 
   const [chatTab, setChatTab] = useState<'chat' | 'pics'>('chat');
   const [dbMessages, setDbMessages] = useState<any[]>([]);
@@ -102,7 +116,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
 
   useEffect(() => {
     const loadData = async () => {
-      if (!idToUse) return;
+      if (!idToUse || idToUse === '') return;  // Guard: wait for ID to resolve
 
       // 📜 FETCH HISTORICAL MESSAGES
       const { data: dbMsgs } = await supabase
@@ -179,6 +193,11 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
   const handleLocalSubmit = (e: any) => {
     e.preventDefault();
     if (!input.trim()) return;
+    // 🛡️ SOVEREIGN GUARD: Never submit without a valid user ID
+    if (!idToUse || idToUse === '') {
+      console.warn('[ChatDrawer] Blocked submit: userId not yet resolved');
+      return;
+    }
     setIsTyping(true);
     handleSubmit(e);
   };

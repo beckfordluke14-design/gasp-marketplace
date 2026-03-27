@@ -176,7 +176,7 @@ export async function POST(req: Request) {
             'X-Title': 'GASP Syndicate Circuit'
         },
         body: JSON.stringify({
-            model: 'x-ai/grok-4.1-fast',
+            model: 'x-ai/grok-3-fast',
             messages: [
                 { role: 'system', content: brainPrompt },
                 ...messages.slice(-5)

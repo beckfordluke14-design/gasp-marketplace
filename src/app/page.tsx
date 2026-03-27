@@ -52,10 +52,20 @@ function MarketplaceMain() {
   useEffect(() => { 
     setMounted(true); 
     const loadPersonas = async () => {
-        // 🚑 EMERGENCY RECOVERY: Restoring 100% Baseline Visibility
-        // Every approved node (is_active=true) is now forced to show in the Hub/Sidebar/Stories
-        const { data } = await supabase.from('personas').select('*').eq('is_active', true); 
-        if (data) setDbPersonas(data);
+        // 🚑 SOVEREIGN FIX: Use service-role API route to bypass RLS on personas table
+        // The anon key is blocked by RLS — same pattern as /api/admin/feed which works
+        try {
+          const res = await fetch('/api/personas');
+          const json = await res.json();
+          if (json.success && json.personas?.length > 0) {
+            console.log(`[Personas] Loaded ${json.personas.length} active personas from DB`);
+            setDbPersonas(json.personas);
+          } else {
+            console.warn('[Personas] API returned empty or error:', json.error);
+          }
+        } catch (e) {
+          console.error('[Personas] Fetch failed:', e);
+        }
     };
     loadPersonas();
 
@@ -115,8 +125,10 @@ function MarketplaceMain() {
   const refinedPersonas = useMemo(() => {
     return allPersonas.map(p => ({
       ...p,
-      isOnline: p.status === 'online',
-      vibe: GASP_PULSES[(p.id || '').length % GASP_PULSES.length]
+      // Preserve actual online status from DB, don't overwrite with fixed false
+      isOnline: p.status === 'online' || p.is_active === true,
+      // Only fall back to GASP_PULSES if the persona has no real vibe from DB
+      vibe: p.vibe || GASP_PULSES[(p.id || '').length % GASP_PULSES.length]
     }));
   }, [allPersonas]);
 

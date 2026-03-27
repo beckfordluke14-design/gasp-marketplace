@@ -73,10 +73,10 @@ export function getPersonaName(p: any): string {
     return "Archive Node";
 }
 
-export function proxyImg(url: string | null | undefined): string {
-  if (!url) return '/icons/icon-512x512.png';
+export function proxyImg(url: any): string {
+  if (!url || typeof url !== 'string') return '/v1.png';
   
-  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vvcwjlcequbkhlpmwzlc.supabase.co';
   
   let finalUrl = url.trim();
 

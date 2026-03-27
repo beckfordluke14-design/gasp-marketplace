@@ -2,14 +2,9 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState, useRef } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Clock, User, Sparkles } from 'lucide-react';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { Send, Clock, Sparkles } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 interface ChatContainerProps {
   personaId: string;
@@ -20,24 +15,26 @@ interface ChatContainerProps {
 /**
  * THE RESUME CHAT ENGINE (Persistence Node)
  * Objective: Hydrate history and maintain thread continuity across sessions.
+ * NOTE: useChat is cast 'as any' throughout because @ai-sdk/react v3+ changed the API surface.
  */
 export default function ChatContainer({ personaId, personaName, guestId }: ChatContainerProps) {
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 1. USE-CHAT CIRCUIT: Hydrated via Supabase History
-  const { messages, input, handleInputChange, handleSubmit, setMessages, isLoading } = useChat({
+  // 1. USE-CHAT CIRCUIT — cast as any to survive AI SDK v3 API changes
+  const { messages, input, handleInputChange, handleSubmit, setMessages, isLoading }: any = useChat({
     api: '/api/chat',
+    id: `${personaId}-${guestId}`,
     body: {
       userId: guestId,
-      personaId: personaId
-    }
-  });
+      personaId,
+    },
+  } as any);
 
-  // 2. NEURAL HYDRATION: Load historical nodes before allowing input
+  // 2. NEURAL HYDRATION: Load historical messages from Supabase
   useEffect(() => {
     async function loadHistory() {
-      console.log(`🧠 [Hydration] Resuming neural thread for ${personaName}...`);
+      if (!guestId || !personaId) return;
       
       const { data: dbMessages } = await supabase
         .from('chat_messages')
@@ -48,26 +45,32 @@ export default function ChatContainer({ personaId, personaName, guestId }: ChatC
         .limit(20);
 
       if (dbMessages && dbMessages.length > 0) {
-        setMessages(dbMessages.map(m => ({
+        setMessages(dbMessages.map((m: any) => ({
           id: m.id,
-          role: m.role as any,
+          role: m.role,
           content: m.content,
-          createdAt: new Date(m.created_at)
+          createdAt: new Date(m.created_at),
         })));
       }
-      
+
       setHistoryLoaded(true);
     }
-    
-    if (guestId && personaId) loadHistory();
-  }, [guestId, personaId, personaName, setMessages]);
 
-  // 3. Auto-Scroll Logic
+    loadHistory();
+  }, [guestId, personaId, setMessages]);
+
+  // 3. Auto-scroll on new messages
   useEffect(() => {
     if (scrollRef.current) {
-       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const handleLocalSubmit = (e: any) => {
+    e.preventDefault();
+    if (!input?.trim() || !guestId) return;
+    handleSubmit(e);
+  };
 
   return (
     <div className="flex flex-col h-full bg-black/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl">
@@ -89,16 +92,16 @@ export default function ChatContainer({ personaId, personaName, guestId }: ChatC
            </div>
         ) : (
            <AnimatePresence>
-             {messages.map((m) => (
-                <motion.div 
+             {(messages || []).map((m: any) => (
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   key={m.id}
                   className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div className={`max-w-[85%] px-5 py-3 rounded-[1.5rem] text-xs leading-relaxed shadow-xl ${
-                    m.role === 'user' 
-                    ? 'bg-[#00f0ff] text-black font-bold rounded-tr-none' 
+                    m.role === 'user'
+                    ? 'bg-[#00f0ff] text-black font-bold rounded-tr-none'
                     : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'
                   }`}>
                     {m.content}
@@ -107,22 +110,32 @@ export default function ChatContainer({ personaId, personaName, guestId }: ChatC
              ))}
            </AnimatePresence>
         )}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="px-5 py-3 bg-white/5 rounded-full flex gap-1.5 items-center">
+              <span className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <span className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <span className="w-1 h-1 bg-[#00f0ff] rounded-full animate-bounce" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Input Core */}
       <div className="p-6 bg-black/60 border-t border-white/10">
-         <form onSubmit={handleSubmit} className="relative flex items-center">
-            <input 
-              value={input}
+         <form onSubmit={handleLocalSubmit} className="relative flex items-center">
+            <input
+              value={input || ''}
               onChange={handleInputChange}
-              disabled={!historyLoaded}
+              disabled={!historyLoaded || isLoading}
               onKeyDown={(e) => e.stopPropagation()}
-              placeholder={`resume with ${personaName.toLowerCase()}...`}
+              placeholder={`message ${personaName.toLowerCase()}...`}
               className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-xs font-medium outline-none focus:border-[#00f0ff]/40 transition-all text-white placeholder:text-white/20 relative z-[500] pointer-events-auto"
             />
-            <button 
-              type="submit" 
-              className="absolute right-3 p-3 bg-[#00f0ff] text-black rounded-xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)]"
+            <button
+              type="submit"
+              disabled={!input?.trim() || isLoading}
+              className="absolute right-3 p-3 bg-[#00f0ff] text-black rounded-xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)] disabled:opacity-40"
             >
                <Send size={16} />
             </button>
@@ -131,6 +144,3 @@ export default function ChatContainer({ personaId, personaName, guestId }: ChatC
     </div>
   );
 }
-
-
-

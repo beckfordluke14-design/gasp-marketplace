@@ -71,12 +71,12 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
 
   useEffect(() => {
     const followedIds = following;
-    const others = personas.filter(p => !followedIds.includes(p.id));
+    const others = personas.filter((p: any) => !followedIds.includes(p.id));
     // SYNDICATE V10: High-Value Discovery Shuffle
     setShuffledOthers([...others].sort(() => 0.5 - Math.random()));
   }, [personas, following]);
 
-  const followedPersonas = personas.filter(p => !following.includes(p.id) ? false : true); 
+  const followedPersonas = personas.filter((p: any) => following.includes(p.id)); 
   const otherPersonas = shuffledOthers;
 
   const renderPersona = (persona: any) => {
@@ -137,7 +137,7 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
               </button>
            </div>
            <p className="text-[9px] text-white/30 truncate leading-relaxed">
-              {persona.vibe.toUpperCase()}
+              {(persona.vibe || persona.city || 'online now').toUpperCase()}
            </p>
         </div>
       </motion.div>

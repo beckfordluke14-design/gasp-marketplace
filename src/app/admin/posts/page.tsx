@@ -9,21 +9,7 @@ import {
   Package, ExternalLink, ArrowLeftRight, Gift, Copy, UserCheck, UserPlus, Sparkles, FolderHeart
 } from 'lucide-react';
 import { proxyImg } from '@/lib/profiles';
-import { createClient } from '@supabase/supabase-js';
 import NextLink from 'next/link';
-
-export const dynamic = 'force-dynamic';
-
-let _client: ReturnType<typeof createClient> | null = null;
-function getClient() {
-  if (!_client) {
-    _client = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-  }
-  return _client;
-}
 
 interface PersonaPost {
   id: string;
@@ -88,21 +74,25 @@ export default function PostStudio() {
 
   const fetchPosts = useCallback(async () => {
     setLoading(true);
-    const { data } = await getClient()
-      .from('posts')
-      .select('*, personas(name, age, city)')
-      .order('created_at', { ascending: false });
-    if (data) setPosts(data as PersonaPost[]);
+    try {
+      // all=true bypasses public-feed filters so admin sees vault/hidden posts too
+      const res = await fetch('/api/admin/feed?page=0&limit=500&all=true');
+      const json = await res.json();
+      if (json.success) setPosts((json.posts || []) as PersonaPost[]);
+    } catch (e) {
+      console.error('[PostStudio] fetchPosts failed:', e);
+    }
     setLoading(false);
   }, []);
 
   const fetchPersonas = useCallback(async () => {
-    const { data } = await getClient()
-      .from('personas')
-      .select('id, name')
-      .eq('is_active', true)
-      .order('name');
-    if (data) setPersonas(data);
+    try {
+      const res = await fetch('/api/personas');
+      const json = await res.json();
+      if (json.success) setPersonas(json.personas || []);
+    } catch (e) {
+      console.error('[PostStudio] fetchPersonas failed:', e);
+    }
   }, []);
 
   useEffect(() => {
@@ -264,16 +254,17 @@ export default function PostStudio() {
       city: post.personas?.city || '',
     });
 
-    // Load sibling posts from same persona
+    // Load sibling posts from same persona using service-role API
     setLoadingLinked(true);
     setLinkedPosts([]);
-    const { data } = await getClient()
-      .from('posts')
-      .select('*, personas(name, age, city)')
-      .eq('persona_id', post.persona_id)
-      .neq('id', post.id)
-      .order('created_at', { ascending: false });
-    setLinkedPosts((data as PersonaPost[]) || []);
+    try {
+      const res = await fetch(`/api/admin/feed?persona_id=${post.persona_id}&limit=50`);
+      const json = await res.json();
+      const siblings = (json.posts || []).filter((p: PersonaPost) => p.id !== post.id);
+      setLinkedPosts(siblings);
+    } catch (e) {
+      console.error('[PostStudio] linked posts fetch failed:', e);
+    }
     setLoadingLinked(false);
   };
 
