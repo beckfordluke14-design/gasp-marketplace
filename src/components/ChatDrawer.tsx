@@ -114,14 +114,24 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
   }, [messages, chatData, isLoading, chatTab]);
 
   const handleLocalSubmit = (e: any) => {
-    e.preventDefault();
-    if (!(input || '').trim()) return;
+    if (e) e.preventDefault();
+    const cleanInput = (input || '').trim();
+    if (!cleanInput) return;
+    
     if (!idToUse) {
-       console.warn('[Neural Link] Identity node not yet established.');
+       console.error('[Gasp submission]: Identity node is missing or desynchronized.', { guestId, profileId: profile?.id });
        return;
     }
+
+    console.log('[Gasp submission]: Establishing link for message:', cleanInput.substring(0, 20) + '...');
     setIsTyping(true);
-    handleSubmit(e, { body: { userId: idToUse, personaId } });
+    
+    try {
+      handleSubmit(e, { body: { userId: idToUse, personaId } });
+    } catch (err) {
+      console.error('[Gasp submission]: Neural desync during handleSubmit:', err);
+      setIsTyping(false);
+    }
   };
 
   const unlockItem = async (item: any) => {
@@ -155,7 +165,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
         />
         
         {/* Main Sheet Container */}
-        <div className="fixed inset-x-0 bottom-0 z-[1000] lg:relative lg:inset-auto lg:z-auto flex flex-col w-full md:w-[480px] h-[85dvh] lg:h-screen bg-black border-t lg:border-t-0 lg:border-l border-white/10 rounded-t-[2.5rem] lg:rounded-t-0 shadow-2xl overflow-hidden font-outfit">
+        <div className="fixed inset-x-2 md:inset-x-0 bottom-1.5 md:bottom-0 z-[1000] lg:relative lg:inset-auto lg:z-auto flex flex-col w-[calc(100%-1rem)] md:w-[480px] h-[85dvh] lg:h-screen bg-black border-t lg:border-t-0 lg:border-l border-white/10 rounded-[2.5rem] lg:rounded-0 shadow-2xl overflow-hidden font-outfit">
           
           {/* Header Block */}
           <div className="flex flex-col bg-black/40 backdrop-blur-3xl border-b border-white/10 shrink-0 p-6 pb-0">
@@ -331,13 +341,14 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                     className="flex-1 bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
                     disabled={isLoading}
                  />
-                <button 
-                  type="submit" 
-                  disabled={!(input || '').trim() || isLoading}
-                  className="w-12 h-12 rounded-full bg-[#ff00ff] flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,0,255,0.3)] hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
-                >
-                   <Send size={20} className="mr-0.5" />
-                </button>
+                 <button 
+                   type="submit" 
+                   onClick={handleLocalSubmit}
+                   disabled={!(input || '').trim() || isLoading || !idToUse}
+                   className="w-12 h-12 rounded-full bg-[#ff00ff] flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,0,255,0.3)] hover:scale-110 active:scale-90 transition-all disabled:opacity-30 disabled:grayscale pointer-events-auto"
+                 >
+                    <Send size={20} className="mr-0.5" />
+                 </button>
              </motion.form>
           </div>
         </div>
