@@ -13,6 +13,7 @@ interface PersonaAvatarProps {
   className?: string;
   priority?: boolean;
   unoptimized?: boolean;
+  onImageError?: () => void;
 }
 
 export default function PersonaAvatar({ 
@@ -23,7 +24,8 @@ export default function PersonaAvatar({
   height,
   className = 'object-cover object-[center_20%] sm:object-top', // Default to top-focused crop for portraits
   priority = false,
-  unoptimized = true
+  unoptimized = true,
+  onImageError
 }: PersonaAvatarProps) {
   const [error, setError] = useState(false);
   const finalSrc = proxyImg(src);
@@ -67,7 +69,10 @@ export default function PersonaAvatar({
         className={className}
         priority={priority}
         unoptimized={unoptimized}
-        onError={() => setError(true)}
+        onError={() => {
+          setError(true);
+          onImageError?.();
+        }}
       />
     </div>
   );

@@ -37,6 +37,7 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
   const [following, setFollowing] = useState<string[]>([]);
   const [isVisible, setIsVisible] = useState(true);
   const [seenIds, setSeenIds] = useState<string[]>([]);
+  const [deadIds, setDeadIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const syncSeen = () => {
@@ -88,7 +89,7 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
             exit={{ y: -20, opacity: 0 }}
             className="flex items-center gap-4 p-4 lg:p-6 bg-transparent pointer-events-auto max-w-[95vw] lg:max-w-none overflow-x-auto no-scrollbar scroll-smooth pr-[100px]"
           >
-             {personas.map((p) => {
+             {personas.filter(p => !deadIds.has(p.id)).map((p) => {
                 const isSelected = selectedPersonaId === p.id;
                 const unread = unreadCounts[p.id] || 0;
                 const isFollowing = following.includes(p.id);
@@ -112,7 +113,14 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
                              className="w-full h-full select-none pointer-events-none"
                              onContextMenu={(e) => e.preventDefault()}
                            >
-                              <PersonaAvatar src={p.image} alt={p.name} />
+                              <PersonaAvatar 
+                                 src={p.image} 
+                                 alt={p.name} 
+                                 onImageError={() => {
+                                   console.warn(`[Gasp Stories] Purging dead story node: ${p.id} (${p.name})`);
+                                   setDeadIds(prev => new Set([...Array.from(prev), p.id]));
+                                 }}
+                               />
                            </div>
 
                            {/* 🛡️ ANTI-DOWNLOAD OVERLAY */}

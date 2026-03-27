@@ -9,6 +9,7 @@ import { Zap, Heart } from 'lucide-react';
 
 export default function RightSidebar({ onSelectPersona, personas }: { onSelectPersona: (id: string) => void, personas: any[] }) {
   const [following, setFollowing] = useState<string[]>([]);
+  const [deadIds, setDeadIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const stored = localStorage.getItem('gasp_following');
@@ -24,10 +25,12 @@ export default function RightSidebar({ onSelectPersona, personas }: { onSelectPe
   }, []);
 
   // Simulated status variation for the gallery
-  const galleryItems = personas.map((p, idx) => ({
-    ...p,
-    isOnline: idx % 2 === 0, // Even id's are "Online", Odd id's are "Offline"
-  })).reverse();
+  const galleryItems = personas
+    .filter(p => p.image && p.image !== 'undefined' && p.image !== 'null' && p.image !== '' && !deadIds.has(p.id))
+    .map((p, idx) => ({
+      ...p,
+      isOnline: idx % 2 === 0, // Even id's are "Online", Odd id's are "Offline"
+    })).reverse();
 
   return (
     <aside className="hidden lg:flex w-[280px] xl:w-[320px] 2xl:w-[380px] h-screen bg-black border-l border-white/5 flex-col shrink-0 overflow-hidden sticky top-0">
@@ -56,6 +59,10 @@ export default function RightSidebar({ onSelectPersona, personas }: { onSelectPe
               <PersonaAvatar
                 src={persona.image}
                 alt={persona.name}
+                onImageError={() => {
+                  console.warn(`[Gasp Gallery] Purging dead link node: ${persona.id} (${persona.name})`);
+                  setDeadIds(prev => new Set([...Array.from(prev), persona.id]));
+                }}
               />
               
               {/* Overlay Gradient */}

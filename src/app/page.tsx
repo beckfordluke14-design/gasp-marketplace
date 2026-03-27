@@ -103,7 +103,7 @@ function MarketplaceMain() {
     }),
     ...initialPersonas
   ].filter((p, index, self) => index === self.findIndex((t) => t.id === p.id))
-   .filter(p => p.image);
+   .filter(p => p.image && p.image !== '' && p.image !== 'undefined' && p.image !== 'null' && !p.image.includes('placeholder'));
 
   const refinedPersonas = allPersonas.map(p => ({
     ...p,
