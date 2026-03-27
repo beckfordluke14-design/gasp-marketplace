@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Outfit, Syncopate } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "@/components/providers/UserProvider";
+import { WalletProvider } from "@/components/providers/WalletProvider";
 import InstallHint from "@/components/pwa/InstallHint";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 // GASP STABLE PROTOCOL: RE-HYDRATING NIXPACKS CACHE
@@ -86,8 +87,10 @@ export default function RootLayout({
       <body className={`${inter.variable} ${outfit.variable} ${syncopate.variable} font-sans bg-black text-white antialiased selection:bg-[#ff00ff] selection:text-black overflow-x-hidden hide-scrollbar text-base`}>
         <GoogleAnalytics />
         <UserProvider>
-          <InstallHint />
-          {children}
+          <WalletProvider>
+            <InstallHint />
+            {children}
+          </WalletProvider>
         </UserProvider>
 
         {/* SECURE MICRO-NAV (CCBill Requirement - Completely Unobtrusive) */}

@@ -13,7 +13,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 );
 
-export default function PersonaSearch() {
+export default function PersonaSearch({ deadIds, setDeadIds }: { deadIds: Set<string>, setDeadIds: (ids: any) => void }) {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
@@ -45,7 +45,7 @@ export default function PersonaSearch() {
 
   useEffect(() => {
     if (query.length > 0) {
-      const filtered = allPersonas.filter(p => 
+      const filtered = allPersonas.filter(p => !deadIds.has(p.id)).filter(p => 
         p.name.toLowerCase().includes(query.toLowerCase()) || 
         (p.city && p.city.toLowerCase().includes(query.toLowerCase())) ||
         (p.race && p.race.toLowerCase().includes(query.toLowerCase())) ||
@@ -104,7 +104,15 @@ export default function PersonaSearch() {
                   className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-all group text-left"
                 >
                   <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 shrink-0 relative">
-                    <PersonaAvatar src={p.image} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                    <PersonaAvatar 
+                      src={p.image} 
+                      alt="" 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform" 
+                      onImageError={() => {
+                        console.warn(`[Gasp Search] Purging dead search node: ${p.id} (${p.name})`);
+                        setDeadIds((prev: any) => new Set([...Array.from(prev), p.id]));
+                      }}
+                    />
                   </div>
                   <div className="flex-1">
                     <h4 className="text-[10px] font-black uppercase tracking-widest text-white group-hover:text-[#ff00ff] transition-colors">{p.name}</h4>

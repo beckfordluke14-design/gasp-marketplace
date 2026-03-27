@@ -47,6 +47,7 @@ function MarketplaceMain() {
   const [guestId, setGuestId] = useState<string>('');
   const [dbPersonas, setDbPersonas] = useState<any[]>([]);
   const [isZenMode, setIsZenMode] = useState(false);
+  const [deadIds, setDeadIds] = useState<Set<string>>(new Set());
   const searchParams = useSearchParams();
 
   useEffect(() => { 
@@ -147,7 +148,7 @@ function MarketplaceMain() {
          onDoubleClick={handleZenToggle}
     >
       {/* 🏔️ FIXED HEADER: LOGO + NAV + CREDITS */}
-      <Header onOpenTopUp={() => setIsTopUpOpen(true)} />
+      <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} />
 
       {/* 🏔️ SOVEREIGN SKY: TOP DISCOVERY DIRECTORY (CENTERED BETWEEN SIDEBARS) */}
       {!isZenMode && (
@@ -156,6 +157,8 @@ function MarketplaceMain() {
            onSelectPersona={handleSelectPersona} 
            unreadCounts={unreadCounts} 
            personas={refinedPersonas} 
+           deadIds={deadIds}
+           setDeadIds={setDeadIds}
          />
       )}
 
@@ -184,7 +187,7 @@ function MarketplaceMain() {
 
       {/* 🗂️ RIGHT SIDEBAR: PROFILE GALLERY GRID */}
       {!isZenMode && (
-        <RightSidebar onSelectPersona={handleSelectPersona} personas={refinedPersonas} />
+        <RightSidebar onSelectPersona={handleSelectPersona} personas={refinedPersonas} deadIds={deadIds} setDeadIds={setDeadIds} />
       )}
 
       {/* 🔮 CHAT HUB: BOOSTED Z-INDEX */}

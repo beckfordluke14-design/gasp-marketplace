@@ -7,9 +7,9 @@ import Image from 'next/image';
 import PersonaAvatar from './persona/PersonaAvatar';
 import { Zap, Heart } from 'lucide-react';
 
-export default function RightSidebar({ onSelectPersona, personas }: { onSelectPersona: (id: string) => void, personas: any[] }) {
+export default function RightSidebar({ onSelectPersona, personas, deadIds, setDeadIds }: { onSelectPersona: (id: string) => void, personas: any[], deadIds: Set<string>, setDeadIds: (ids: any) => void }) {
   const [following, setFollowing] = useState<string[]>([]);
-  const [deadIds, setDeadIds] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState<'gallery'|'stats'>('gallery');
 
   useEffect(() => {
     const stored = localStorage.getItem('gasp_following');

@@ -7,8 +7,9 @@ import { useState, useEffect } from 'react';
 import CoinBalance from './economy/CoinBalance';
 import PersonaSearch from './PersonaSearch';
 import { useUser } from './providers/UserProvider';
+import WalletConnect from './economy/WalletConnect';
 
-export default function Header({ onOpenTopUp }: { onOpenTopUp: () => void }) {
+export default function Header({ onOpenTopUp, deadIds, setDeadIds }: { onOpenTopUp: () => void, deadIds: Set<string>, setDeadIds: (ids: any) => void }) {
   const router = useRouter();
   const { user, profile } = useUser();
   const [mounted, setMounted] = useState(false);
@@ -133,6 +134,11 @@ export default function Header({ onOpenTopUp }: { onOpenTopUp: () => void }) {
                   <CoinBalance onOpenTopUp={() => onOpenTopUp()} />
                 </div>
 
+                {/* WALLET CONNECTION HUB */}
+                <div className="hidden lg:block">
+                   <WalletConnect />
+                </div>
+
                 {/* ADMIN OVERRIDE STAR */}
                 {isAdmin && (
                    <div 
@@ -149,12 +155,12 @@ export default function Header({ onOpenTopUp }: { onOpenTopUp: () => void }) {
             </div>
         </header>
 
-        {/* ATTACHED DISCOVERY HUB (SUBBAR): TRANSPARENT TO SHOW MORE CONTENT */}
-        <div className="h-10 md:h-14 flex items-center justify-center bg-transparent pointer-events-auto">
-            <div className="w-full max-w-[280px] md:max-w-xl mx-auto px-4">
-                <PersonaSearch />
-            </div>
-        </div>
+                {/* ATTACHED DISCOVERY HUB (SUBBAR): TRANSPARENT TO SHOW MORE CONTENT */}
+                <div className="h-10 md:h-14 flex items-center justify-center bg-transparent pointer-events-auto">
+                    <div className="w-full max-w-[280px] md:max-w-xl mx-auto px-4">
+                        <PersonaSearch deadIds={deadIds} setDeadIds={setDeadIds} />
+                    </div>
+                </div>
     </div>
   );
 }

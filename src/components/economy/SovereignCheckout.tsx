@@ -1,8 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShieldCheck, Zap, Copy, Loader2, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Zap, Copy, Loader2, ArrowRight, Wallet as WalletIcon, Diamond } from 'lucide-react';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
+import { useWallet } from '../providers/WalletProvider';
+import { ethers } from 'ethers';
+import * as solanaWeb3 from '@solana/web3.js';
 
 interface SovereignCheckoutProps {
   userId: string;
@@ -21,6 +24,8 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [status, setStatus] = useState<'waiting' | 'scanning' | 'confirmed'>('waiting');
+  
+  const { isConnected, address, network: walletNetwork } = useWallet();
   
   const MERCHANT_WALLETS = {
     solana: 'DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS',
@@ -59,6 +64,61 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
   const nativeSolLink = `solana:${MERCHANT_WALLETS.solana}?amount=${nativeEquivalent}&label=Gasp%20Stake&memo=${userId}`;
   const evmPayLink = `ethereum:${MERCHANT_WALLETS.base}?amount=${pkg.priceUsd}&label=Gasp%20Stake`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(network === 'solana' ? solanaPayLink : evmPayLink)}`;
+
+  const handleWalletStake = async () => {
+    if (!isConnected) {
+       alert('Connection Required: Please link Metamask or Phantom to initialize the neural bridge.');
+       return;
+    }
+    
+    setIsVerifying(true);
+    setVerificationError(null);
+
+    try {
+        if (walletNetwork === 'evm') {
+           const ethereum = (window as any).ethereum;
+           if (!ethereum) throw new Error('EVM Node Disconnected');
+           
+           const provider = new ethers.BrowserProvider(ethereum);
+           const signer = await provider.getSigner();
+
+           // 💎 SETTLEMENT: BASE L2 Settlement
+           const tx = await signer.sendTransaction({
+              to: MERCHANT_WALLETS.base,
+              value: ethers.parseEther(nativeEquivalent)
+           });
+           
+           setSenderWallet(address!);
+           console.log('[EVM] Settlement Pending:', tx.hash);
+
+        } else if (walletNetwork === 'solana') {
+           const solana = (window as any).solana;
+           if (!solana?.isPhantom) throw new Error('Solana Node Disconnected');
+
+           const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
+           const transaction = new solanaWeb3.Transaction().add(
+             solanaWeb3.SystemProgram.transfer({
+               fromPubkey: new solanaWeb3.PublicKey(address!),
+               toPubkey: new solanaWeb3.PublicKey(MERCHANT_WALLETS.solana),
+               lamports: Math.floor(parseFloat(nativeEquivalent) * solanaWeb3.LAMPORTS_PER_SOL),
+             })
+           );
+
+           const { blockhash } = await connection.getLatestBlockhash();
+           transaction.recentBlockhash = blockhash;
+           transaction.feePayer = new solanaWeb3.PublicKey(address!);
+
+           const { signature } = await solana.signAndSendTransaction(transaction);
+           setSenderWallet(address!);
+           console.log('[SOL] Settlement Pending:', signature);
+        }
+    } catch (e: any) {
+        console.error('[Settlement Error]:', e);
+        setVerificationError(e.message || 'Node Settlement Refused.');
+    } finally {
+        setIsVerifying(false);
+    }
+  };
 
   const handleVerify = async (silent = false) => {
     if (!silent) setIsVerifying(true);
@@ -178,14 +238,27 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                       <button onClick={() => setNetwork('base')} className={`flex-1 h-10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${network === 'base' ? 'bg-[#0052FF] text-white' : 'text-white/30'}`}>Base L2</button>
                    </div>
                    
-                   <a href={network === 'solana' ? solanaPayLink : evmPayLink} className="w-full h-16 rounded-2xl bg-white text-black flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all text-[10px] font-black uppercase tracking-[0.2em]">
-                      <Zap size={20} fill="black" /> One-Click Stake
-                   </a>
+                   {isConnected && walletNetwork === (network === 'solana' ? 'solana' : 'evm') ? (
+                       <button 
+                         onClick={handleWalletStake}
+                         disabled={isVerifying}
+                         className={`w-full h-16 rounded-2xl ${network === 'solana' ? 'bg-[#9945FF] shadow-[0_0_40px_rgba(153,69,255,0.4)]' : 'bg-[#0052FF] shadow-[0_0_40px_rgba(0,82,255,0.4)]'} text-white flex items-center justify-center gap-3 transition-all text-[11px] font-black uppercase tracking-[0.2em] animate-pulse`}
+                       >
+                          {isVerifying ? <Loader2 size={24} className="animate-spin" /> : <WalletIcon size={20} />}
+                          {isVerifying ? 'Settling Node...' : `Approve ${nativeEquivalent} ${network === 'solana' ? 'SOL' : 'ETH'}`}
+                       </button>
+                    ) : (
+                       <a href={network === 'solana' ? solanaPayLink : evmPayLink} className="w-full h-16 rounded-2xl bg-white text-black flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all text-[10px] font-black uppercase tracking-[0.2em]">
+                          <Zap size={20} fill="black" /> One-Click Stake
+                       </a>
+                    )}
 
-                   <a href={network === 'solana' ? nativeSolLink : undefined} className={`w-full h-16 rounded-2xl flex items-center justify-center gap-3 transition-all text-[10px] font-black uppercase tracking-[0.2em] ${network === 'solana' ? 'bg-[#9945FF] text-white shadow-lg h-16' : 'bg-white/5 text-white/10 cursor-not-allowed'}`}>
-                      Pay in {network === 'solana' ? 'SOL' : 'ETH'}
-                   </a>
-                </div>
+                    <div className="text-center">
+                       <p className="text-[8px] font-black uppercase text-white/20 tracking-widest italic">
+                          {isConnected ? 'Connection Node Green' : 'Manual / QR Bridge Fallback'}
+                       </p>
+                    </div>
+                 </div>
              </div>
 
              <div className="space-y-4">

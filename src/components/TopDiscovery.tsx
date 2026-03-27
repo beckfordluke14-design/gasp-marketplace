@@ -27,17 +27,19 @@ const supabase = createClient(
 
 interface TopDiscoveryProps {
   selectedPersonaId: string;
-  onSelectPersona: (id: string) => void;
-  unreadCounts?: Record<string, number>;
+  onSelectPersona: (id: string, initialMsg?: string) => void;
+  unreadCounts: Record<string, number>;
   personas: any[];
+  deadIds: Set<string>;
+  setDeadIds: (ids: any) => void;
 }
 
-export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unreadCounts = {}, personas }: TopDiscoveryProps) {
-  const { profile } = useUser();
+export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unreadCounts = {}, personas, deadIds, setDeadIds }: TopDiscoveryProps) {
+  const { user, profile } = useUser();
   const [following, setFollowing] = useState<string[]>([]);
   const [isVisible, setIsVisible] = useState(true);
   const [seenIds, setSeenIds] = useState<string[]>([]);
-  const [deadIds, setDeadIds] = useState<Set<string>>(new Set());
+  
 
   useEffect(() => {
     const syncSeen = () => {
