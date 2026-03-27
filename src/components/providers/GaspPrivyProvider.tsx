@@ -29,7 +29,7 @@ export function GaspPrivyProvider({ children }: { children: React.ReactNode }) {
         appearance: {
           theme: 'dark',
           accentColor: '#ff00ff', 
-          logo: '/icon.svg',
+          logo: '/icons/icon.svg',
           showWalletLoginFirst: false, // Default to social nodes for better guest conversion
         },
         // 💎 Embedded Wallet: Zero-friction settlement node creation
