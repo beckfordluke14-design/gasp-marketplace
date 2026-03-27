@@ -14,6 +14,7 @@ import TopUpDrawer from '@/components/economy/TopUpDrawer';
 import RightSidebar from '@/components/RightSidebar';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
 import { supabase } from '@/lib/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -280,7 +281,9 @@ function MarketplaceMain() {
                 <motion.div key={sId} initial={{ x: '100%', opacity: 0 }} animate={{ x: `-${index * 12}px`, opacity: 1 }} exit={{ x: '100%', opacity: 0 }} 
                    className="h-full pointer-events-auto bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.8)]"
                 >
-                  <ChatDrawer personaId={sId} persona={p} onClose={() => handleCloseChat(sId)} onMinimize={() => setMinimizedIds([...minimizedIds, sId])} />
+                   <ErrorBoundary>
+                      <ChatDrawer personaId={sId} persona={p} onClose={() => handleCloseChat(sId)} onMinimize={() => setMinimizedIds([...minimizedIds, sId])} />
+                   </ErrorBoundary>
                 </motion.div>
               );
            })}

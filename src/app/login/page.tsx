@@ -25,15 +25,19 @@ function LoginForm() {
 
   // Handle specific login types with fallback
   const handleLogin = (method?: string) => {
-    console.log('[Sovereign Login] Initializing neural bridge node:', method || 'universal');
+    console.log('🏁 [Sovereign Login] Initializing neural bridge node:', method || 'universal');
+    alert(`[DEBUG] Initializing ${method || 'universal'} login node...`); // Forced diagnostic for visibility
     try {
       if (method) {
+        console.log(`[Sovereign Login] Targeted node: ${method}`);
         login({ loginMethod: method as any });
       } else {
+        console.log('[Sovereign Login] Universal portal requested.');
         login();
       }
     } catch (e: any) {
-      console.error('[Sovereign Login] Bridge protocol error:', e.message);
+      console.error('❌ [Sovereign Login] Bridge protocol fatal:', e);
+      alert('Neural Link Failed: ' + e.message);
       login(); // Forced fallback to universal modal
     }
   };

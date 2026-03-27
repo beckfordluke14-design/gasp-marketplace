@@ -437,5 +437,5 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
          </div>
       </div>
     </div>
-  );
+   );
 }
