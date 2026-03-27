@@ -274,12 +274,15 @@ function GlobalFeedItem({ persona, broadcast, onSelectPersona, onDeletePost, onT
                          autoFocus
                       />
                    ) : (
-                      <h2 className="text-[20px] md:text-[28px] lg:text-[36px] font-black tracking-tighter text-white italic lowercase leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
-                         {broadcast.content}
-                      </h2>
+                      <>
+                        <h2 className="text-[20px] md:text-[28px] lg:text-[36px] font-black tracking-tighter text-white italic lowercase leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+                           {broadcast.content}
+                        </h2>
+                        {broadcast.content?.toLowerCase() !== displayName.toLowerCase() && (
+                          <h3 className="text-4xl md:text-7xl font-syncopate font-bold uppercase italic tracking-tighter text-white/90 drop-shadow-2xl leading-none mt-2">{displayName}</h3>
+                        )}
+                      </>
                    )}
-                        <h3 className="text-4xl md:text-7xl font-syncopate font-bold uppercase italic tracking-tighter text-white drop-shadow-2xl leading-none">{displayName}</h3>
-                        <p className="max-w-md text-lg md:text-2xl font-outfit text-white/90 lowercase italic leading-tight drop-shadow-xl">{broadcast.content}</p>
                      </div>
                      <div className="flex items-center gap-4 md:gap-6 pointer-events-auto">
                         <button onClick={handleLike} className={`w-14 h-14 md:w-20 md:h-20 rounded-2xl backdrop-blur-3xl border flex flex-col items-center justify-center transition-all ${hasLiked ? 'bg-red-500/20 border-red-500/50 text-red-500 shadow-[0_0_30px_#ff000044]' : 'bg-black/60 border-white/10 text-white/40 hover:scale-110 hover:border-white/30'}`}><Heart size={26} className={hasLiked ? 'fill-current' : ''} /><span className="text-[8px] md:text-[10px] font-black mt-1 uppercase">{likes}</span></button>

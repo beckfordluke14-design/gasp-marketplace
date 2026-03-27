@@ -129,7 +129,7 @@ export default function Header({ onOpenTopUp }: { onOpenTopUp: () => void }) {
                 </button>
 
                 {/* COIN BALANCE DISPLAY */}
-                <div onClick={() => onOpenTopUp()} className="hidden md:block cursor-pointer hover:opacity-80 transition-all">
+                <div onClick={() => onOpenTopUp()} className="cursor-pointer hover:opacity-80 transition-all scale-75 md:scale-100 origin-right">
                   <CoinBalance onOpenTopUp={() => onOpenTopUp()} />
                 </div>
 

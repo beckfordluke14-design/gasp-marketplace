@@ -12,6 +12,7 @@ import GhostActivityTicker from '@/components/GhostActivityTicker';
 import PersonaAvatar from '@/components/persona/PersonaAvatar';
 import TopUpDrawer from '@/components/economy/TopUpDrawer';
 import RightSidebar from '@/components/RightSidebar';
+import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
 import { createClient } from '@supabase/supabase-js';
@@ -144,9 +145,19 @@ function MarketplaceMain() {
       {/* 🏔️ FIXED HEADER: LOGO + NAV + CREDITS */}
       <Header onOpenTopUp={() => setIsTopUpOpen(true)} />
 
-      {/* 🏔️ SOVEREIGN SKY: TOP DISCOVERY DIRECTORY */}
+      {/* 🏔️ SOVEREIGN SKY: TOP DISCOVERY DIRECTORY (CENTERED BETWEEN SIDEBARS) */}
       {!isZenMode && (
          <TopDiscovery 
+           selectedPersonaId={selectedPersonaId} 
+           onSelectPersona={handleSelectPersona} 
+           unreadCounts={unreadCounts} 
+           personas={refinedPersonas} 
+         />
+      )}
+
+      {/* 🕴️ THE GASPAI PILLAR: STAKE LEDGER & DIRECTORY */}
+      {!isZenMode && (
+         <Sidebar 
            selectedPersonaId={selectedPersonaId} 
            onSelectPersona={handleSelectPersona} 
            unreadCounts={unreadCounts} 

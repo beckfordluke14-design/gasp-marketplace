@@ -71,7 +71,7 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
   };
 
   return (
-    <div className="fixed top-28 left-0 right-0 lg:right-[320px] xl:right-[380px] z-[400] flex flex-col items-center pointer-events-none px-4">
+    <div className="fixed top-32 left-0 right-0 lg:left-[320px] lg:right-[320px] xl:left-[320px] xl:right-[380px] z-[400] flex flex-col items-center pointer-events-none px-2 lg:px-8">
       {/* 👁️ ALPHA TOGGLE */}
       <button 
         onClick={() => setIsVisible(!isVisible)}
@@ -86,7 +86,7 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="flex items-center gap-3 p-2 bg-transparent pointer-events-auto max-w-full overflow-x-auto no-scrollbar"
+            className="flex items-center gap-4 p-4 lg:p-6 bg-transparent pointer-events-auto max-w-[95vw] lg:max-w-none overflow-x-auto no-scrollbar scroll-smooth pr-[100px]"
           >
              {personas.map((p) => {
                 const isSelected = selectedPersonaId === p.id;

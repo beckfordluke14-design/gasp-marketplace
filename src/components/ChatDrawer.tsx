@@ -117,6 +117,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
             type: m.type,
             audio_script: m.audio_script,
             audio_translation: m.audio_translation,
+            translation_locked: m.translation_locked,
             created_at: m.created_at
         } as any)));
       }
