@@ -3,15 +3,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { initialPersonas, proxyImg, getPersonaName } from '@/lib/profiles';
-import { createClient } from '@supabase/supabase-js';
-import { X, Lock, Volume2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Lock, Volume2, ChevronLeft, ChevronRight, Zap } from 'lucide-react';
 import Image from 'next/image';
 import PersonaAvatar from './persona/PersonaAvatar';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
+// 🛡️ SOVEREIGN SYNC: Using Stories API (Service Role) instead of 'anon' client.
+// This ensures that all story nodes are visible in the top bar regardless of RLS.
 
 interface StoryBubble {
   personaId: string;
@@ -45,37 +42,37 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
 
   useEffect(() => {
     async function fetchStories() {
-      const { data: dbStories } = await supabase
-        .from('persona_stories')
-        .select('*')
-        .gt('expires_at', new Date().toISOString())
-        .order('created_at', { ascending: false });
+      try {
+          const res = await fetch('/api/stories');
+          const json = await res.json();
+          const dbStories = json.stories || [];
 
-      // Build per-persona bubbles
-      const bubbles: StoryBubble[] = personas
-        .filter(p => p.image)
-        .map(p => {
-          const pStories = (dbStories || []).filter((s: any) => s.persona_id === p.id);
-          // Only include personas that have actual DB stories OR show them neutrally as fallback
-          const hasDatabaseStories = pStories.length > 0;
-          const finalStories = hasDatabaseStories ? pStories : [{
-            id: `fallback_${p.id}`,
-            asset_url: p.image,
-            type: 'image',
-            category: 'CHILL',
-            is_premium: false,
-          }];
-          return {
-            personaId: p.id,
-            personaName: getPersonaName(p),
-            personaImage: p.image,
-            stories: finalStories,
-            // 🛡️ FIX 2: Only glow pink if there are REAL unviewed DB stories — not fallback placeholders
-            hasUnviewed: hasDatabaseStories && pStories.some(s => !viewedIds.has(s.id)),
-          };
-        });
+          // Build per-persona bubbles
+          const bubbles: StoryBubble[] = personas
+            .filter(p => p.image)
+            .map(p => {
+              const pStories = (dbStories || []).filter((s: { persona_id: string }) => s.persona_id === p.id);
+              const hasDatabaseStories = pStories.length > 0;
+              const finalStories = hasDatabaseStories ? pStories : [{
+                id: `fallback_${p.id}`,
+                asset_url: p.image,
+                type: 'image',
+                category: 'CHILL',
+                is_premium: false,
+              }];
+              return {
+                personaId: p.id,
+                personaName: getPersonaName(p),
+                personaImage: p.image,
+                stories: finalStories,
+                hasUnviewed: hasDatabaseStories && pStories.some(s => !viewedIds.has(s.id)),
+              };
+            });
 
-      setStoryData(bubbles);
+          setStoryData(bubbles);
+      } catch (err) {
+          console.error('[Stories] Pulse Failure:', err);
+      }
     }
     if (personas.length > 0) fetchStories();
   }, [personas, viewedIds]);
@@ -89,7 +86,6 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
     const interval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
-          // Advance to next story or close
           const { bubble, storyIndex } = activeStory;
           if (storyIndex < bubble.stories.length - 1) {
             setActiveStory({ bubble, storyIndex: storyIndex + 1 });
@@ -106,7 +102,6 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
 
   const openStory = (bubble: StoryBubble) => {
     setActiveStory({ bubble, storyIndex: 0 });
-    // Mark all as viewed
     const newViewed = new Set(viewedIds);
     bubble.stories.forEach(s => newViewed.add(s.id));
     setViewedIds(newViewed);
@@ -119,36 +114,40 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
 
   return (
     <>
-      {/* STORIES ROW */}
-      <div className="w-full flex items-center gap-4 px-4 py-3 overflow-x-auto no-scrollbar">
+      <div className="w-full flex items-center gap-4 px-4 py-4 overflow-x-auto no-scrollbar scroll-smooth">
         {storyData.map((bubble, idx) => (
           <motion.button
             key={bubble.personaId}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: idx * 0.05 }}
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: idx * 0.05, type: 'spring', stiffness: 200 }}
             onClick={() => openStory(bubble)}
-            className="flex flex-col items-center gap-1.5 shrink-0 group"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex flex-col items-center gap-2 shrink-0 group relative"
           >
             {/* The ring */}
-            <div className={`p-[2px] rounded-full transition-all ${
+            <div className={`p-[2px] rounded-full transition-all duration-500 relative ${
               bubble.hasUnviewed
-                ? 'bg-gradient-to-br from-[#ff00ff] via-[#ff6b6b] to-[#ffea00] shadow-[0_0_20px_rgba(255,0,255,0.5)]'
-                : 'bg-white/10'
+                ? 'bg-gradient-to-br from-[#00f0ff] via-[#ff00ff] to-[#ffea00] shadow-[0_0_20px_rgba(255,0,255,0.4)]'
+                : 'bg-white/5 opacity-40 group-hover:opacity-100 group-hover:bg-white/10'
             }`}>
+              {bubble.hasUnviewed && (
+                 <div className="absolute inset-0 bg-[#00f0ff] animate-ping opacity-20 rounded-full pointer-events-none" />
+              )}
               <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-black relative">
                 <PersonaAvatar
                   src={bubble.personaImage}
                   alt={bubble.personaName}
                 />
                 
-                {/* 🧬 GREEN STATUS PULSE */}
+                {/* 🧬 GREEN STATUS PULSE (ONLY IF ACTIVE BUBBLE) */}
                 <div className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#00ff00] border border-black shadow-[0_0_8px_#00ff00] animate-pulse" />
               </div>
             </div>
             {/* Name */}
-            <span className={`text-[9px] font-black uppercase tracking-wider truncate max-w-[60px] leading-none ${
-              bubble.hasUnviewed ? 'text-white' : 'text-white/30'
+            <span className={`text-[9px] font-black uppercase tracking-widest truncate max-w-[64px] leading-none transition-all ${
+              bubble.hasUnviewed ? 'text-white' : 'text-white/20'
             }`}>
               {bubble.personaName}
             </span>
@@ -160,15 +159,15 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
       <AnimatePresence>
         {activeStory && currentStory && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[2000] bg-black flex flex-col"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            className="fixed inset-0 z-[2000] bg-black/95 backdrop-blur-3xl flex flex-col"
           >
             {/* Progress bars */}
-            <div className="absolute top-0 left-0 right-0 z-10 flex gap-1 p-3 pt-safe">
+            <div className="absolute top-0 left-0 right-0 z-[2100] flex gap-1 p-4 pt-safe">
               {activeStory.bubble.stories.map((_, i) => (
-                <div key={i} className="flex-1 h-0.5 bg-white/20 rounded-full overflow-hidden">
+                <div key={i} className="flex-1 h-0.5 bg-white/10 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-white rounded-full transition-none"
                     style={{
@@ -180,14 +179,14 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
             </div>
 
             {/* Header */}
-            <div className="absolute top-8 left-0 right-0 z-10 flex items-center justify-between px-4">
+            <div className="absolute top-10 left-0 right-0 z-[2100] flex items-center justify-between px-6">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
-                  <PersonaAvatar src={activeStory.bubble.personaImage} alt="" width={32} height={32} />
+                <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20">
+                  <PersonaAvatar src={activeStory.bubble.personaImage} alt="" />
                 </div>
                 <div>
-                  <p className="text-xs font-black uppercase text-white tracking-wider">{activeStory.bubble.personaName}</p>
-                  <p className="text-[9px] text-white/40 uppercase tracking-widest">{currentStory.category?.toLowerCase()} • now</p>
+                  <p className="text-[10px] font-black uppercase text-white tracking-widest">{activeStory.bubble.personaName} <Zap size={10} className="inline ml-1 text-[#ffea00]" /></p>
+                  <p className="text-[8px] text-white/40 uppercase tracking-[0.2em]">{currentStory.category || 'elite'} • now</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -196,28 +195,23 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                     onSelectPersona(activeStory.bubble.personaId);
                     setActiveStory(null);
                   }}
-                  className="px-3 py-1.5 bg-[#ff00ff]/20 border border-[#ff00ff]/40 rounded-full text-[9px] font-black text-[#ff00ff] uppercase tracking-wider"
+                  className="px-5 py-2 bg-white text-black rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-[#ffea00] transition-all"
                 >
-                  Message
+                  Bridge Direct
                 </button>
-                <button onClick={() => setActiveStory(null)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  <X size={14} className="text-white" />
+                <button onClick={() => setActiveStory(null)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all border border-white/5">
+                  <X size={16} className="text-white" />
                 </button>
               </div>
             </div>
 
             {/* Story Content / Navigation */}
             <div className="flex-1 relative flex items-center justify-center overflow-hidden">
-              {/* Desktop Container Control */}
-              <div className="relative h-full aspect-[9/16] max-h-screen bg-[#050505] shadow-2xl overflow-hidden group/container">
-                
-                {/* Navigation Overlay Areas (Invisible on Desktop, Useful for Mobile Tap) */}
+              <div className="relative h-full aspect-[9/16] bg-black shadow-2xl overflow-hidden group/container">
                 <div className="absolute inset-0 z-50 flex">
                   <div className="flex-1 cursor-pointer" onClick={() => {
                     const { bubble, storyIndex } = activeStory;
-                    if (storyIndex > 0) {
-                      setActiveStory({ bubble, storyIndex: storyIndex - 1 });
-                    }
+                    if (storyIndex > 0) setActiveStory({ bubble, storyIndex: storyIndex - 1 });
                   }} />
                   <div className="flex-1 cursor-pointer" onClick={() => {
                     const { bubble, storyIndex } = activeStory;
@@ -229,7 +223,6 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                   }} />
                 </div>
 
-                {/* Desktop Buttons */}
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
@@ -262,14 +255,14 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                       <Lock size={32} className="text-[#ff00ff]" />
                     </div>
                     <div className="text-center px-8 space-y-2">
-                      <h3 className="text-white font-black uppercase text-lg tracking-tight">Premium Story</h3>
-                      <p className="text-white/40 text-[10px] uppercase tracking-widest">unlock for 40 credits</p>
+                       <h3 className="text-white font-black uppercase text-lg tracking-tight">Encrypted Story</h3>
+                       <p className="text-white/40 text-[10px] uppercase tracking-widest leading-relaxed">this high-status node is locked</p>
                     </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); onSelectPersona(activeStory.bubble.personaId); setActiveStory(null); }}
-                      className="px-8 py-4 bg-[#ff00ff] text-black rounded-2xl font-black uppercase tracking-wider text-sm relative z-50"
+                      className="px-10 py-5 bg-[#ff00ff] text-white rounded-3xl font-black uppercase tracking-wider text-[11px] shadow-[0_0_40px_rgba(255,0,255,0.3)] hover:scale-105 transition-all"
                     >
-                      Unlock Story — 40 Credits
+                      Unlock for 40 Credits 💎
                     </button>
                   </div>
                 ) : (
@@ -281,7 +274,7 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                          loop 
                          muted 
                          playsInline 
-                          className="w-full h-full object-cover object-top lg:object-contain" // Cover for mobile-style, contain fallback for weird aspect ratios on desktop if needed
+                         className="w-full h-full object-cover"
                        />
                     ) : (
                       <Image
@@ -289,26 +282,27 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                         alt=""
                         fill
                         unoptimized
-                        className="object-cover object-top lg:object-contain"
+                        className="w-full h-full object-cover"
                       />
-
                     )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 pointer-events-none" />
                   </div>
                 )}
               </div>
             </div>
 
             {/* Bottom CTA */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+            <div className="absolute bottom-0 left-0 right-0 p-8 flex justify-center bg-gradient-to-t from-black/60 to-transparent">
               <button
                 onClick={(e) => { 
                   e.stopPropagation(); 
                   onSelectPersona(activeStory.bubble.personaId); 
                   setActiveStory(null);
                 }}
-                className="w-full py-4 bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl text-white font-black uppercase tracking-widest text-xs"
+                className="w-full max-w-sm h-16 bg-white/10 backdrop-blur-2xl border border-white/10 rounded-2xl text-white font-black uppercase tracking-[0.2em] text-[10px] hover:bg-white/20 transition-all flex items-center justify-center gap-3 active:scale-95"
               >
-                💬 Chat with {activeStory.bubble.personaName}
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
+                Open Neural Link
               </button>
             </div>
 
@@ -318,5 +312,3 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
     </>
   );
 }
-
-

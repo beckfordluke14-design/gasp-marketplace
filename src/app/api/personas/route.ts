@@ -9,13 +9,20 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
 );
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const showAll = searchParams.get('all') === 'true'; // Admin: show even retired/inactive
+
   try {
-    const { data: personas, error } = await supabase
+    let query = supabase
       .from('personas')
-      .select('id, name, city, country, flag, age, skin_tone, vibe, syndicate_zone, seed_image_url, is_active, status, system_prompt')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
+      .select('id, name, city, country, flag, age, skin_tone, vibe, syndicate_zone, seed_image_url, is_active, status, system_prompt');
+    
+    if (!showAll) {
+      query = query.eq('is_active', true);
+    }
+    
+    const { data: personas, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
       console.error('[Personas API] Supabase error:', error.message);

@@ -128,8 +128,38 @@ export async function POST(req: Request) {
                 if (error) throw error;
                 return NextResponse.json({ success: true });
             }
+            case 'update-persona-full': {
+                // Writes identity fields + specific metadata to the personas table. 
+                // Used by the Identity Architect (profiles page).
+                const { id, name, city, vibe, system_prompt, seed_image_url, status, metadata } = payload;
+                if (!id) throw new Error('Persona ID Missing.');
+                
+                const fields: Record<string, any> = { id };
+                if (name           !== undefined) fields.name           = name;
+                if (city           !== undefined) fields.city           = city;
+                if (vibe           !== undefined) fields.vibe           = vibe;
+                if (system_prompt  !== undefined) fields.system_prompt  = system_prompt;
+                if (seed_image_url !== undefined) fields.seed_image_url = seed_image_url;
+                if (status         !== undefined) fields.status         = status;
+                
+                // 🧬 METADATA EXTENSION (v1.1): Merge provided tags/culture fields
+                if (metadata) {
+                    if (metadata.culture) fields.culture = metadata.culture;
+                    if (metadata.ethnicity) fields.ethnicity = metadata.ethnicity;
+                    if (metadata.hair_style) fields.hair_style = metadata.hair_style;
+                    if (metadata.body_type) fields.body_type = metadata.body_type;
+                    if (metadata.skin_tone) fields.skin_tone = metadata.skin_tone;
+                    if (metadata.syndicate_zone) fields.syndicate_zone = metadata.syndicate_zone;
+                    if (metadata.language) fields.language = metadata.language;
+                }
+
+                console.log(`[Neural Admin] FULL Identity Architect Sync for ${id}`);
+                const { error } = await supabase.from('personas').upsert([fields]);
+                if (error) throw error;
+                return NextResponse.json({ success: true });
+            }
             case 'update-persona': {
-                // Writes identity fields to the personas table so chat + story sync automatically.
+                // Writes core identity fields to the personas table.
                 const { id, name, age, city, system_prompt, seed_image_url } = payload;
                 if (!id) throw new Error('Persona ID Missing.');
                 const fields: Record<string, any> = {};
@@ -137,9 +167,8 @@ export async function POST(req: Request) {
                 if (age            !== undefined) fields.age            = parseInt(age, 10) || age;
                 if (city           !== undefined) fields.city           = city;
                 if (system_prompt  !== undefined) fields.system_prompt  = system_prompt;
-                if (seed_image_url !== undefined) fields.seed_image_url = seed_image_url; // hero image sync
+                if (seed_image_url !== undefined) fields.seed_image_url = seed_image_url;
                 if (Object.keys(fields).length === 0) return NextResponse.json({ success: true });
-                console.log(`[Neural Admin] Identity update for persona ${id}:`, Object.keys(fields));
                 const { error } = await supabase.from('personas').update(fields).eq('id', id);
                 if (error) throw error;
                 return NextResponse.json({ success: true });

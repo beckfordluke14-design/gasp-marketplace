@@ -9,7 +9,7 @@ import PersonaSearch from './PersonaSearch';
 import { useUser } from './providers/UserProvider';
 import WalletConnect from './economy/WalletConnect';
 
-export default function Header({ onOpenTopUp, deadIds, setDeadIds }: { onOpenTopUp: () => void, deadIds: Set<string>, setDeadIds: (ids: any) => void }) {
+export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), setDeadIds = () => {} }: { onOpenTopUp?: () => void, deadIds?: Set<string>, setDeadIds?: (ids: any) => void }) {
   const router = useRouter();
   const { user, profile } = useUser();
   const [mounted, setMounted] = useState(false);

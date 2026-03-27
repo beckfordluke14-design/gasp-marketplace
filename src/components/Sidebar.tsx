@@ -21,8 +21,9 @@ import {
 import { useUser } from '@/components/providers/UserProvider';
 import PersonaAvatar from '@/components/persona/PersonaAvatar';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
 
+// 🛡️ SOVEREIGN SYNC: Using Neural RPC Service Proxy instead of direct 'anon' client.
+// This ensures follow actions are reliably recorded in the DB bypassing client-side RLS.
 
 interface SidebarProps {
   selectedPersonaId: string;
@@ -46,17 +47,23 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
 
   const rank = getSyncRank(profile?.credit_balance || 0);
 
-  useEffect(() => {
+  const syncFollows = async () => {
     const gid = profile?.id || localStorage.getItem('gasp_guest_id');
-    
-    // 🤝 DATABASE CONNECTION SYNC
-    const syncFollows = async () => {
-       const idToUse = profile?.id || localStorage.getItem('gasp_guest_id');
-       if (!idToUse) return;
-       const { data } = await supabase.from('user_relationships').select('persona_id').eq('user_id', idToUse);
-       if (data) setFollowing(data.map(r => r.persona_id));
-    };
+    if (!gid) return;
 
+    try {
+        const res = await fetch('/api/rpc/db', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'sync-follows', payload: { userId: gid } })
+        });
+        const json = await res.json();
+        if (json.success) setFollowing(json.following || []);
+    } catch (e) {
+        console.error('[Sidebar Sync] RPC Failure:', e);
+    }
+  };
+
+  useEffect(() => {
     syncFollows();
     
     window.addEventListener('gasp_sync_follows', syncFollows);
@@ -111,21 +118,24 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
                 {getPersonaName(persona)}
               </span>
               
-              {/* 🤝 DIRECT CONNECT NODE */}
+              {/* 🤝 DIRECT CONNECT NODE via Neural RPC */}
               <button 
                 onClick={async (e) => {
                    e.stopPropagation();
                    const gid = profile?.id || localStorage.getItem('gasp_guest_id');
                    if (!gid) return;
 
-                   if (isFollowing) {
-                      await supabase.from('user_relationships').delete().eq('user_id', gid).eq('persona_id', persona.id);
-                   } else {
-                      await supabase.from('user_relationships').upsert({ user_id: gid, persona_id: persona.id, affinity_score: 1 });
+                   try {
+                     await fetch('/api/rpc/db', {
+                       method: 'POST',
+                       body: JSON.stringify({ action: 'toggle-follow', payload: { userId: gid, personaId: persona.id, isFollowing } })
+                     });
+                     
+                     // 🛰️ Dispatches internal broadcast for HUD sync
+                     window.dispatchEvent(new Event('gasp_sync_follows'));
+                   } catch (err) {
+                     console.error('[Sidebar Connect] RPC Failure:', err);
                    }
-                   
-                   // 🛰️ Internal broadcasting for immediate HUD sync
-                   window.dispatchEvent(new Event('gasp_sync_follows'));
                 }}
                 className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all ${
                   isFollowing 
@@ -202,10 +212,7 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
       </div>
 
       <div className="p-6 border-t border-white/5 bg-black z-10 flex flex-col gap-5">
-          
-           {/* ══════════════════════════════════════════════════
-               CREDIT BALANCE HUB (Account Status)
-               ══════════════════════════════════════════════════ */}
+           {/* CREDIT BALANCE HUB */}
           <div className="bg-white/5 border border-white/10 rounded-[2rem] p-5 space-y-4 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-tr from-[#00ff00]/5 to-transparent pointer-events-none" />
             
@@ -265,7 +272,6 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
                 </div>
              </div>
              
-             {/* Progress to next Tier */}
              <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mt-2">
                 <motion.div 
                   initial={{ width: 0 }}
@@ -275,7 +281,6 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
              </div>
           </div>
 
-          {/* 🧬 THE WHALE MAGNET: GENESIS LEADERBOARD */}
           <div className="pt-4 border-t border-white/5 space-y-3 relative z-10">
                <div className="flex items-center justify-between">
                   <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30 italic">Top Supporters</span>
@@ -301,14 +306,13 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
 
              <div className="flex items-center justify-between pt-1 relative z-10 border-t border-white/5 mt-3 pt-3">
                 <p className="text-[7px] font-black uppercase text-white/20 tracking-widest italic leading-relaxed">
-                   Gasp System v1.7 • 1:1 Value-to-Token Model. <Link href="/docs/about" className="text-[#00f0ff] hover:underline underline-offset-2">Balance tracking active</Link> 💎
+                   Gasp System v1.7 • Service API Hardened. Balance tracking active 🛡️
                 </p>
                 <div className="flex flex-col items-end gap-1">
                    <div className="flex items-center gap-1">
                       <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
-                      <span className="text-[6px] font-black text-green-500 uppercase tracking-widest">System Secure</span>
+                      <span className="text-[6px] font-black text-green-500 uppercase tracking-widest">Sovereign Active</span>
                    </div>
-                   <span className="text-[5px] text-white/10 uppercase tracking-widest font-mono">ID: 0x8F...7G2P</span>
                 </div>
              </div>
 
@@ -317,35 +321,21 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
              <button className="w-full h-14 bg-[#ffea00] text-black rounded-3xl flex items-center justify-center gap-3 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(255,234,0,0.25)] active:scale-95">
                 <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
                    <Zap size={14} className="text-black" />
-                </div>
+                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest italic font-syncopate">BUY CREDITS →</span>
              </button>
-              <div className="flex items-center justify-center gap-2">
+               <div className="flex items-center justify-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-[#00f0ff] italic">USDC Preferred: +15% Purchase Bonus Active 💎</span>
+                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-[#00f0ff] italic">+15% Bonus Active 🛡️</span>
              </div>
           </div>
 
           <div className="flex flex-col gap-2 pt-2 border-t border-white/5 opacity-50">
-             <div className="flex items-center justify-between">
-                 <div className="flex gap-4">
-                    <a href="/terms" className="text-[8px] text-white/20 hover:text-white uppercase font-black italic">Terms</a>
-                    <a href="/contact" className="text-[8px] text-[#ff00ff]/60 hover:text-[#ff00ff] uppercase font-black italic">Priority Support</a>
-                 </div>
-                 <div className="flex items-center gap-1">
-                    <div className="w-1 h-1 rounded-full bg-[#ff00ff] animate-pulse" />
-                    <span className="text-[6px] font-black text-[#ff00ff] uppercase tracking-widest italic">Version 1.8 Locked</span>
-                 </div>
-             </div>
-              <span className="text-[7px] text-white/10 uppercase tracking-widest italic font-black flex items-center justify-between">
-                 <div className="flex items-center gap-4">
-                    <span>Managed by Zoinkz • V1.8</span>
-                    <span className="text-white/30 border-l border-white/5 pl-4">Authored by Zoinkz 🧬</span>
-                 </div>
-                 <span className="text-[#00f0ff] animate-pulse uppercase tracking-[0.2em] px-2 py-0.5 rounded-full bg-[#00f0ff]/5 border border-[#00f0ff]/20">
-                    Security Hub: BASE Network ONLY 🛡️
-                 </span>
-              </span>
+              <div className="flex items-center justify-between">
+                  <div className="flex gap-4">
+                     <span className="text-[8px] text-white/20 uppercase font-black italic">Sovereign Protocol v1.8</span>
+                  </div>
+              </div>
           </div>
        </div>
     </aside>
