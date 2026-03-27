@@ -45,12 +45,15 @@ export default function PersonaSearch({ deadIds, setDeadIds }: { deadIds: Set<st
 
   useEffect(() => {
     if (query.length > 0) {
-      const filtered = allPersonas.filter(p => !deadIds.has(p.id)).filter(p => 
-        p.name.toLowerCase().includes(query.toLowerCase()) || 
-        (p.city && p.city.toLowerCase().includes(query.toLowerCase())) ||
-        (p.race && p.race.toLowerCase().includes(query.toLowerCase())) ||
-        (p.tags && p.tags.some((t: string) => t.toLowerCase().includes(query.toLowerCase())))
-      ).slice(0, 10); // increased limit to 10 for tag-based discovery
+      const filtered = allPersonas
+        .filter(p => !deadIds.has(p.id))
+        .filter(p => p.image && p.image !== '/v1.png' && p.image !== '')
+        .filter(p => 
+          p.name.toLowerCase().includes(query.toLowerCase()) || 
+          (p.city && p.city.toLowerCase().includes(query.toLowerCase())) ||
+          (p.race && p.race.toLowerCase().includes(query.toLowerCase())) ||
+          (p.tags && p.tags.some((t: string) => t.toLowerCase().includes(query.toLowerCase())))
+        ).slice(0, 10); // increased limit to 10 for tag-based discovery
       setResults(filtered);
       setIsOpen(true);
     } else {
