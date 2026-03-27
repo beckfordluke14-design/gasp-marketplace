@@ -748,15 +748,15 @@ export default function PostStudio() {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-lg px-4"
+            className="fixed bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-lg px-4"
           >
-             <div className="bg-[#0e0e0e]/95 backdrop-blur-2xl border border-[#00f0ff]/30 rounded-[2rem] p-4 flex items-center justify-between shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
-                <div className="flex flex-col pl-2">
+             <div className="bg-[#0e0e0e]/95 backdrop-blur-2xl border border-[#00f0ff]/30 rounded-[2rem] p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+                <div className="flex flex-col items-center sm:items-start pl-0 sm:pl-2">
                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00f0ff]">{selectedIds.size} Nodes Selected</p>
                    <button onClick={selectAll} className="text-[8px] font-black uppercase text-white/30 hover:text-white text-left transition-colors">Select Entire Grid</button>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-center gap-2">
                    <button 
                      onClick={async () => {
                        const ids = Array.from(selectedIds);
@@ -767,7 +767,7 @@ export default function PostStudio() {
                        cancelSelection();
                        setLoading(false);
                      }}
-                     className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase text-white/40 hover:text-[#ff00ff] hover:border-[#ff00ff]/30 transition-all"
+                     className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase text-white/40 hover:text-[#ff00ff] hover:border-[#ff00ff]/30 transition-all active:scale-95"
                    >
                      Vault
                    </button>
@@ -781,27 +781,27 @@ export default function PostStudio() {
                        cancelSelection();
                        setLoading(false);
                      }}
-                     className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase text-white/40 hover:text-[#ff00ff] hover:border-[#ff00ff]/30 transition-all"
+                     className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase text-white/40 hover:text-[#ff00ff] hover:border-[#ff00ff]/30 transition-all active:scale-95"
                    >
                      Gift
                    </button>
                    <button 
                      onClick={bulkSoftHide}
-                     className="px-3 py-2.5 bg-white/10 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest text-white/60 hover:bg-orange-500/20 hover:text-orange-200 transition-all"
+                     className="px-4 py-2 bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white/60 hover:bg-orange-500/20 hover:text-orange-200 transition-all active:scale-95"
                    >
                      Toss
                    </button>
                    <button 
                      onClick={bulkHardDelete}
-                     className="px-3 py-2.5 bg-red-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:scale-[1.05] transition-all"
+                     className="px-4 py-2 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:scale-[1.05] transition-all active:scale-95"
                    >
                      Purge
                    </button>
                    <button 
                      onClick={cancelSelection}
-                     className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-xl text-white/40 hover:text-white transition-all"
+                     className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-xl text-white/60 hover:text-white transition-all active:scale-95"
                    >
-                      <X size={16} />
+                      <X size={18} />
                    </button>
                 </div>
 
@@ -851,271 +851,213 @@ export default function PostStudio() {
             className="fixed inset-0 z-[999] bg-black/90 backdrop-blur-xl flex items-start justify-center p-3 sm:p-4 overflow-y-auto"
             onClick={closeEdit}
           >
-            <motion.div
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-              className="bg-[#0e0e0e] border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] w-full max-w-3xl my-4 sm:my-8 overflow-hidden"
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Modal header */}
-              <div className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-6 border-b border-white/5 sticky top-0 bg-[#0e0e0e] z-10">
-                <div className="min-w-0">
-                  <h2 className="text-base sm:text-xl font-syncopate font-black italic uppercase tracking-tighter">Edit Post</h2>
-                  <p className="text-[9px] text-[#00f0ff] font-black uppercase tracking-widest mt-0.5 truncate">
-                    {editPost.personas?.name || editPost.persona_id} · {new Date(editPost.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-                <button onClick={closeEdit} className="w-9 h-9 shrink-0 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white ml-3">
-                  <X size={16} />
-                </button>
-              </div>
-
-              <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
-                {/* Preview */}
-                <div className="relative aspect-video bg-black rounded-xl sm:rounded-2xl overflow-hidden border border-white/5">
-                  <img src={proxyImg(draft.content_url || editPost.content_url)} alt="" className="w-full h-full object-cover opacity-70" />
-                   <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 flex gap-2">
-                    {draft.is_freebie && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[8px] font-black uppercase tracking-widest rounded-full flex items-center gap-1"><Gift size={8} /> Gift</span>}
-                    {!draft.is_freebie && draft.is_vault  && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[8px] font-black uppercase tracking-widest rounded-full">Vault</span>}
-                    {draft.is_gallery && <span className="px-2 py-0.5 bg-[#00f0ff] text-black text-[8px] font-black uppercase tracking-widest rounded-full">Gallery</span>}
-                    {draft.is_burner && <span className="px-2 py-0.5 bg-[#ffea00] text-black text-[8px] font-black uppercase tracking-widest rounded-full">Hero</span>}
-                  </div>
-                </div>
-
-
-                {/* ── DB Fields ── */}
-                <div className="space-y-4">
-                  <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 flex items-center gap-2">
-                    <span className="w-4 h-px bg-white/20" /> Database Fields <span className="flex-1 h-px bg-white/10" />
-                  </p>
-
-                  <label className="block space-y-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Caption</span>
-                    <textarea
-                      value={draft.caption}
-                      onChange={e => setDraft(d => d ? { ...d, caption: e.target.value } : d)}
-                      rows={3}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-sm text-white focus:border-[#00f0ff]/50 outline-none resize-none leading-relaxed transition-all"
-                      placeholder="Post caption..."
-                    />
-                  </label>
-
-                  <label className="block space-y-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><Link2 size={10} />Content URL</span>
-                    <input
-                      type="text"
-                      value={draft.content_url}
-                      onChange={e => setDraft(d => d ? { ...d, content_url: e.target.value } : d)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-3 text-xs font-mono text-white/70 focus:border-[#00f0ff]/50 outline-none transition-all"
-                      placeholder="https://asset.gasp.fun/..."
-                    />
-                  </label>
-
-                  {/* Vault / Hero / Gift / Gallery toggles */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-                    <button
-                      onClick={() => setDraft(d => d ? { ...d, is_vault: !d.is_vault, is_freebie: !d.is_vault ? false : d.is_freebie, is_gallery: !d.is_vault ? false : d.is_gallery } : d)}
-                      className={`py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${draft.is_vault ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border border-white/10 text-white/40'}`}
-                    >
-                      <Lock size={13} /> {draft.is_vault ? 'Vault ✓' : 'Set Vault'}
-                    </button>
-                    <button
-                      onClick={() => setDraft(d => d ? { ...d, is_burner: !d.is_burner } : d)}
-                      className={`py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${draft.is_burner ? 'bg-[#ffea00]/20 border border-[#ffea00]/40 text-[#ffea00]' : 'bg-white/5 border border-white/10 text-white/40'}`}
-                    >
-                      <Star size={13} /> {draft.is_burner ? 'Hero ✓' : 'Set Hero'}
-                    </button>
-                    <button
-                      onClick={() => setDraft(d => d ? { ...d, is_freebie: !d.is_freebie, is_vault: !d.is_freebie ? false : d.is_vault } : d)}
-                      className={`py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${draft.is_freebie ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border border-white/10 text-white/40'}`}
-                    >
-                      <Gift size={13} /> {draft.is_freebie ? 'Gift ✓' : 'Set Gift'}
-                    </button>
-                    <button
-                      onClick={() => setDraft(d => d ? { ...d, is_gallery: !d.is_gallery, is_vault: !d.is_gallery ? false : d.is_vault } : d)}
-                      className={`py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${draft.is_gallery ? 'bg-[#00f0ff]/20 border border-[#00f0ff]/40 text-[#00f0ff]' : 'bg-white/5 border border-white/10 text-white/40'}`}
-                    >
-                      <FolderHeart size={13} /> {draft.is_gallery ? 'Gallery ✓' : 'Set Gallery'}
-                    </button>
-                  </div>
-
-                  <p className="text-[9px] text-white/20 leading-relaxed">
-                    ⭐ Hero tag is <strong className="text-white/40">additive</strong>. Vault and Gallery are <strong className="text-white/40">exclusive</strong> — they remove posts from the global feed.
-                  </p>
-                </div>
-
-                {/* ── Identity Fields (DB + Chat + Story sync) ── */}
-                <div className="space-y-4">
-                  <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#00f0ff]/60 flex items-center gap-2">
-                    <span className="w-4 h-px bg-[#00f0ff]/20" /> Identity Fields
-                    <span className="text-white/20 normal-case tracking-normal font-normal">→ syncs to chat · story · feed</span>
-                    <span className="flex-1 h-px bg-[#00f0ff]/10" />
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                    <label className="block space-y-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><User size={10} />Name</span>
-                      <input
-                        type="text"
-                        value={draft.name}
-                        onChange={e => setDraft(d => d ? { ...d, name: e.target.value } : d)}
-                        placeholder={editPost.personas?.name || 'Persona name'}
-                        className="w-full bg-[#00f0ff]/5 border border-[#00f0ff]/10 rounded-xl px-3 sm:px-4 py-3 text-sm text-white focus:border-[#00f0ff]/50 outline-none transition-all"
-                      />
-                      <p className="text-[8px] text-white/20">DB: {editPost.personas?.name || '—'}</p>
-                    </label>
-
-                    <label className="block space-y-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><Hash size={10} />Age</span>
-                      <input
-                        type="text"
-                        value={draft.age}
-                        onChange={e => setDraft(d => d ? { ...d, age: e.target.value } : d)}
-                        placeholder={String(editPost.personas?.age || '22')}
-                        className="w-full bg-[#00f0ff]/5 border border-[#00f0ff]/10 rounded-xl px-3 sm:px-4 py-3 text-sm text-white focus:border-[#00f0ff]/50 outline-none transition-all"
-                      />
-                      <p className="text-[8px] text-white/20">DB: {editPost.personas?.age || '—'}</p>
-                    </label>
-
-                    <label className="block space-y-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><MapPin size={10} />City</span>
-                      <input
-                        type="text"
-                        value={draft.city}
-                        onChange={e => setDraft(d => d ? { ...d, city: e.target.value } : d)}
-                        placeholder={editPost.personas?.city || 'City'}
-                        className="w-full bg-[#00f0ff]/5 border border-[#00f0ff]/10 rounded-xl px-3 sm:px-4 py-3 text-sm text-white focus:border-[#00f0ff]/50 outline-none transition-all"
-                      />
-                      <p className="text-[8px] text-white/20">DB: {editPost.personas?.city || '—'}</p>
-                    </label>
-                  </div>
-
-                  <p className="text-[9px] text-[#00f0ff]/40 bg-[#00f0ff]/5 border border-[#00f0ff]/10 rounded-xl px-3 sm:px-4 py-3 leading-relaxed">
-                    ⚡ Changes write to the <strong>personas table</strong> — the persona knows their new name in chat, story shows it, feed reflects it. Leave blank to keep existing DB value.
-                  </p>
-                </div>
-
-                {/* ── Linked Posts (sibling posts from same persona) ── */}
-                <div className="space-y-4">
-                  <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#ff00ff]/60 flex items-center gap-2">
-                    <span className="w-4 h-px bg-[#ff00ff]/20" />
-                    <Package size={10} className="text-[#ff00ff]/60" />
-                    Linked Posts
-                    <span className="text-white/20 normal-case tracking-normal font-normal">
-                      ({editPost.personas?.name || editPost.persona_id}&apos;s other posts)
-                    </span>
-                    <span className="flex-1 h-px bg-[#ff00ff]/10" />
-                    <NextLink
-                      href={`/admin/posts?persona=${editPost.persona_id}`}
-                      className="text-[8px] font-black uppercase tracking-widest text-white/20 hover:text-white flex items-center gap-1"
-                      onClick={closeEdit}
-                    >
-                      <ExternalLink size={9} /> View All
-                    </NextLink>
-                  </p>
-
-                  {loadingLinked ? (
-                    <div className="flex items-center gap-3 py-4 text-white/20">
-                      <RefreshCw size={14} className="animate-spin" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Loading linked posts...</span>
+            <div className="fixed inset-0 z-[2000] bg-black/95 sm:bg-black/80 backdrop-blur-3xl overflow-y-auto no-scrollbar py-6 sm:py-12 md:py-20 px-3 sm:px-6">
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 30 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 30 }}
+                className="w-full max-w-4xl mx-auto bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,1)] relative overflow-hidden"
+              >
+                {/* Header / Top Bar */}
+                <div className="p-5 sm:p-8 border-b border-white/5 bg-black/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#ffea00] shrink-0">
+                      <Pencil size={24} />
                     </div>
-                  ) : linkedPosts.length === 0 ? (
-                    <p className="text-[10px] text-white/20 py-4">No other posts from this persona.</p>
-                  ) : (
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-72 overflow-y-auto pr-1">
-                      {linkedPosts.map(lp => (
-                        <div key={lp.id} className="group relative bg-white/[0.02] border border-white/10 rounded-xl overflow-hidden hover:border-white/30 transition-all">
-                          <div className="relative aspect-[3/4] bg-black">
-                             {/* Media — video or image */}
-                             {(() => {
-                               const isVid = /\.mp4|\.mov|\.webm/i.test(lp.content_url || '');
-                               return isVid ? (
-                                 <>
-                                   <video
-                                     src={lp.content_url}
+                    <div>
+                      <h3 className="text-xl font-syncopate font-black uppercase italic text-white leading-none">Edit Node</h3>
+                      <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] mt-2">Administrative Interface</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <button 
+                      onClick={saveAll}
+                      disabled={saving}
+                      className="flex-1 sm:flex-none h-12 px-8 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#00f0ff] transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)] active:scale-95 disabled:opacity-50"
+                    >
+                      {saving ? 'Saving...' : 'Save & Close'}
+                    </button>
+                    <button onClick={closeEdit} className="w-12 h-12 rounded-xl bg-white/5 hover:bg-red-500/20 hover:text-red-500 flex items-center justify-center transition-all border border-white/5">
+                       <X size={20} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
+                  {/* Preview */}
+                  <div className="relative aspect-video bg-black rounded-xl sm:rounded-2xl overflow-hidden border border-white/5">
+                    <img src={proxyImg(draft.content_url || editPost.content_url)} alt="" className="w-full h-full object-cover opacity-70" />
+                     <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 flex gap-2">
+                      {draft.is_freebie && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[8px] font-black uppercase tracking-widest rounded-full flex items-center gap-1"><Gift size={8} /> Gift</span>}
+                      {!draft.is_freebie && draft.is_vault  && <span className="px-2 py-0.5 bg-[#ff00ff] text-white text-[8px] font-black uppercase tracking-widest rounded-full">Vault</span>}
+                      {draft.is_gallery && <span className="px-2 py-0.5 bg-[#00f0ff] text-black text-[8px] font-black uppercase tracking-widest rounded-full">Gallery</span>}
+                      {draft.is_burner && <span className="px-2 py-0.5 bg-[#ffea00] text-black text-[8px] font-black uppercase tracking-widest rounded-full">Hero</span>}
+                    </div>
+                  </div>
+
+
+                  {/* ── DB Fields ── */}
+                  <div className="space-y-4">
+                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 flex items-center gap-2">
+                      <span className="w-4 h-px bg-white/20" /> Database Fields <span className="flex-1 h-px bg-white/10" />
+                    </p>
+
+                    <label className="block space-y-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Caption</span>
+                      <textarea
+                        value={draft.caption}
+                        onChange={e => setDraft(d => d ? { ...d, caption: e.target.value } : d)}
+                        rows={3}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-sm text-white focus:border-[#00f0ff]/50 outline-none resize-none leading-relaxed transition-all"
+                        placeholder="Post caption..."
+                      />
+                    </label>
+
+                    <label className="block space-y-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><Link2 size={10} />Content URL</span>
+                      <input
+                        type="text"
+                        value={draft.content_url}
+                        onChange={e => setDraft(d => d ? { ...d, content_url: e.target.value } : d)}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-3 text-xs font-mono text-white/70 focus:border-[#00f0ff]/50 outline-none transition-all"
+                        placeholder="https://asset.gasp.fun/..."
+                      />
+                    </label>
+
+                    {/* Vault / Hero / Gift / Gallery toggles */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                      <button
+                        onClick={() => setDraft(d => d ? { ...d, is_vault: !d.is_vault, is_freebie: !d.is_vault ? false : d.is_freebie, is_gallery: !d.is_vault ? false : d.is_gallery } : d)}
+                        className={`py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${draft.is_vault ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border border-white/10 text-white/40'}`}
+                      >
+                        <Lock size={13} /> {draft.is_vault ? 'Vault ✓' : 'Set Vault'}
+                      </button>
+                      <button
+                        onClick={() => setDraft(d => d ? { ...d, is_burner: !d.is_burner } : d)}
+                        className={`py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${draft.is_burner ? 'bg-[#ffea00]/20 border border-[#ffea00]/40 text-[#ffea00]' : 'bg-white/5 border border-white/10 text-white/40'}`}
+                      >
+                        <Star size={13} /> {draft.is_burner ? 'Hero ✓' : 'Set Hero'}
+                      </button>
+                      <button
+                        onClick={() => setDraft(d => d ? { ...d, is_freebie: !d.is_freebie, is_vault: !d.is_freebie ? false : d.is_vault } : d)}
+                        className={`py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${draft.is_freebie ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border border-white/10 text-white/40'}`}
+                      >
+                        <Gift size={13} /> {draft.is_freebie ? 'Gift ✓' : 'Set Gift'}
+                      </button>
+                      <button
+                        onClick={() => setDraft(d => d ? { ...d, is_gallery: !d.is_gallery, is_vault: !d.is_gallery ? false : d.is_vault } : d)}
+                        className={`py-3 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${draft.is_gallery ? 'bg-[#00f0ff]/20 border border-[#00f0ff]/40 text-[#00f0ff]' : 'bg-white/5 border border-white/10 text-white/40'}`}
+                      >
+                        <FolderHeart size={13} /> {draft.is_gallery ? 'Gallery ✓' : 'Set Gallery'}
+                      </button>
+                    </div>
+
+                    <p className="text-[9px] text-white/20 leading-relaxed">
+                      ⭐ Hero tag is <strong className="text-white/40">additive</strong>. Vault and Gallery are <strong className="text-white/40">exclusive</strong> — they remove posts from the global feed.
+                    </p>
+                  </div>
+
+                  {/* ── Identity Fields (DB + Chat + Story sync) ── */}
+                  <div className="space-y-4">
+                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#00f0ff]/60 flex items-center gap-2">
+                      <span className="w-4 h-px bg-[#00f0ff]/20" /> Identity Fields
+                      <span className="text-white/20 normal-case tracking-normal font-normal">→ syncs to chat · story · feed</span>
+                      <span className="flex-1 h-px bg-[#00f0ff]/10" />
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                      <label className="block space-y-2">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><User size={10} />Name</span>
+                        <input
+                          type="text"
+                          value={draft.name}
+                          onChange={e => setDraft(d => d ? { ...d, name: e.target.value } : d)}
+                          placeholder={editPost.personas?.name || 'Persona name'}
+                          className="w-full bg-[#00f0ff]/5 border border-[#00f0ff]/10 rounded-xl px-3 sm:px-4 py-3 text-sm text-white focus:border-[#00f0ff]/50 outline-none transition-all"
+                        />
+                        <p className="text-[8px] text-white/20">DB: {editPost.personas?.name || '—'}</p>
+                      </label>
+
+                      <label className="block space-y-2">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><Hash size={10} />Age</span>
+                        <input
+                          type="text"
+                          value={draft.age}
+                          onChange={e => setDraft(d => d ? { ...d, age: e.target.value } : d)}
+                          placeholder={String(editPost.personas?.age || '22')}
+                          className="w-full bg-[#00f0ff]/5 border border-[#00f0ff]/10 rounded-xl px-3 sm:px-4 py-3 text-sm text-white focus:border-[#00f0ff]/50 outline-none transition-all"
+                        />
+                        <p className="text-[8px] text-white/20">DB: {editPost.personas?.age || '—'}</p>
+                      </label>
+
+                      <label className="block space-y-2">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><MapPin size={10} />City</span>
+                        <input
+                          type="text"
+                          value={draft.city}
+                          onChange={e => setDraft(d => d ? { ...d, city: e.target.value } : d)}
+                          placeholder={editPost.personas?.city || 'City'}
+                          className="w-full bg-[#00f0ff]/5 border border-[#00f0ff]/10 rounded-xl px-3 sm:px-4 py-3 text-sm text-white focus:border-[#00f0ff]/50 outline-none transition-all"
+                        />
+                        <p className="text-[8px] text-white/20">DB: {editPost.personas?.city || '—'}</p>
+                      </label>
+                    </div>
+
+                    <p className="text-[9px] text-[#00f0ff]/40 bg-[#00f0ff]/5 border border-[#00f0ff]/10 rounded-xl px-3 sm:px-4 py-3 leading-relaxed">
+                      ⚡ Changes write to the <strong>personas table</strong> — the persona knows their new name in chat, story shows it, feed reflects it. Leave blank to keep existing DB value.
+                    </p>
+                  </div>
+
+                  {/* ── Linked Posts (sibling posts from same persona) ── */}
+                  <div className="space-y-4">
+                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#ff00ff]/60 flex items-center gap-2">
+                      <span className="w-4 h-px bg-[#ff00ff]/20" />
+                      <Package size={10} className="text-[#ff00ff]/60" />
+                      Linked Posts
+                      <span className="text-white/20 normal-case tracking-normal font-normal">
+                        ({editPost.personas?.name || editPost.persona_id}&apos;s other posts)
+                      </span>
+                      <span className="flex-1 h-px bg-[#ff00ff]/10" />
+                      <NextLink
+                        href={`/admin/posts?persona=${editPost.persona_id}`}
+                        className="text-[8px] font-black uppercase tracking-widest text-white/20 hover:text-white flex items-center gap-1"
+                        onClick={closeEdit}
+                      >
+                        <ExternalLink size={9} /> View All
+                      </NextLink>
+                    </p>
+
+                    {loadingLinked ? (
+                      <div className="flex items-center gap-3 py-4 text-white/20">
+                        <RefreshCw size={14} className="animate-spin" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Loading linked posts...</span>
+                      </div>
+                    ) : linkedPosts.length === 0 ? (
+                      <p className="text-[10px] text-white/20 py-4">No other posts from this persona.</p>
+                    ) : (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-72 overflow-y-auto pr-1">
+                        {linkedPosts.map(lp => (
+                          <div key={lp.id} className="group relative bg-white/[0.02] border border-white/10 rounded-xl overflow-hidden hover:border-white/30 transition-all">
+                            <div className="relative aspect-[3/4] bg-black">
+                               {/* Media — video or image */}
+                               {(() => {
+                                 const isVid = /\.mp4|\.mov|\.webm/i.test(lp.content_url || '');
+                                 return isVid ? (
+                                   <>
+                                     <video
+                                       src={lp.content_url}
+                                       className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+                                       autoPlay muted loop playsInline
+                                     />
+                                     <div className="absolute top-1 right-1 px-1 py-0.5 bg-black/60 rounded text-[6px] font-black text-white uppercase tracking-widest">▶ Vid</div>
+                                   </>
+                                 ) : (
+                                   <img
+                                     src={proxyImg(lp.content_url)}
+                                     alt=""
                                      className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
-                                     autoPlay muted loop playsInline
+                                     loading="lazy"
                                    />
-                                   <div className="absolute top-1 right-1 px-1 py-0.5 bg-black/60 rounded text-[6px] font-black text-white uppercase tracking-widest">▶ Vid</div>
-                                 </>
-                               ) : (
-                                 <img
-                                   src={proxyImg(lp.content_url)}
-                                   alt=""
-                                   className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
-                                   loading="lazy"
-                                 />
-                               );
-                             })()}
-                            {/* Status badges */}
-                            <div className="absolute top-1 left-1 flex flex-col gap-0.5 z-10">
-                              {lp.is_vault  && <span className="px-1.5 py-0.5 bg-[#ff00ff] text-white text-[6px] font-black uppercase tracking-widest rounded-full">V</span>}
-                              {lp.is_burner && <span className="px-1.5 py-0.5 bg-[#ffea00] text-black text-[6px] font-black uppercase tracking-widest rounded-full">H</span>}
-                            </div>
-                            {/* Hover actions */}
-                            <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-1.5 pointer-events-none group-hover:pointer-events-auto z-10">
-                              <div className="flex gap-1">
-                                <button
-                                  onClick={() => toggleLinkedVault(lp)}
-                                  title={lp.is_vault ? 'Remove from Vault' : 'Add to Vault'}
-                                  className={`w-7 h-7 rounded-full flex items-center justify-center transition-all text-white text-[8px] font-black ${lp.is_vault ? 'bg-[#ff00ff]' : 'bg-white/10 hover:bg-[#ff00ff]/40'}`}
-                                >
-                                  <Lock size={10} />
-                                </button>
-                                <button
-                                  onClick={() => toggleLinkedHero(lp)}
-                                  title={lp.is_burner ? 'Remove Hero' : 'Set Hero'}
-                                  className={`w-7 h-7 rounded-full flex items-center justify-center transition-all text-white text-[8px] font-black ${lp.is_burner ? 'bg-[#ffea00] text-black' : 'bg-white/10 hover:bg-[#ffea00]/40'}`}
-                                >
-                                  <Star size={10} />
-                                </button>
-                                <button
-                                  onClick={() => { setShowSoloModal(lp); closeEdit(); }}
-                                  title="Go Solo: Birth Identity"
-                                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-[#00f0ff] text-white flex items-center justify-center transition-all"
-                                >
-                                  <Sparkles size={10} />
-                                </button>
-                                {/* Hard delete this linked post from the modal */}
-                                <button
-                                  onClick={() => deleteLinkedPost(lp)}
-                                  title="Delete this post permanently"
-                                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-red-500/50 text-white/50 hover:text-white flex items-center justify-center transition-all"
-                                >
-                                  <Trash2 size={10} />
-                                </button>
-                              </div>
-                              <button
-                                onClick={() => { closeEdit(); openEdit(lp); }}
-                                title="Switch to this post"
-                                className="flex items-center gap-1 px-2 py-1 bg-white/10 rounded-full text-white text-[7px] font-black uppercase tracking-widest hover:bg-white/20"
-                              >
-                                <ArrowLeftRight size={8} /> Edit
-                              </button>
-                            </div>
-                          </div>
-                          <div className="p-1.5">
-                            <p className="text-[7px] text-white/30 line-clamp-2 leading-relaxed">{lp.caption || '—'}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Save */}
-                <div className="flex items-center gap-3 pt-2">
-                  <button
-                    onClick={saveAll}
-                    disabled={saving}
-                    className="flex-1 py-4 sm:py-5 bg-white text-black rounded-xl sm:rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-[#00f0ff] active:scale-95 transition-all shadow-xl disabled:opacity-50"
-                  >
-                    {saving ? 'Saving...' : 'Save All Changes'}
-                  </button>
-                  <button
-                    onClick={closeEdit}
-                    className="py-4 sm:py-5 px-4 sm:px-6 bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/10 transition-all"
                   >
                     Cancel
                   </button>

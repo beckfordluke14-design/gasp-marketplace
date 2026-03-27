@@ -125,12 +125,16 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
      try {
         const res = await fetch('/api/economy/unlock', {
            method: 'POST',
-           body: JSON.stringify({ userId: idToUse, itemId: item.id })
+           body: JSON.stringify({ userId: idToUse, mediaId: item.id, type: 'vault' })
         });
         const result = await res.json();
         if (result.success) {
-           setVaultItems(prev => prev.map(v => v.id === item.id ? { ...v, is_unlocked: true } : v));
+           setVaultItems(prev => prev.map(v => v.id === item.id || v.mediaId === item.id ? { ...v, is_unlocked: true } : v));
+           // Pulse check: Sync profile credits in context if possible
+           window.dispatchEvent(new CustomEvent('gasp_credits_updated'));
         }
+     } catch (e) {
+        console.error('[Gasp Neural Unlock] Pulse Failure:', e);
      } finally {
         setIsProcessing(false);
      }
@@ -139,7 +143,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
    const hasVault = vaultItems.some(v => v.is_vault);
 
    return (
-    <div className="flex flex-col w-full md:w-[480px] h-screen bg-black border-l border-white/5 relative shadow-2xl overflow-hidden font-outfit">
+    <div className="flex flex-col w-full md:w-[480px] h-[100dvh] md:h-screen bg-black border-l border-white/5 relative shadow-2xl overflow-hidden font-outfit">
       
       {/* 🏔️ HEADER: SYNDICATE HIGH-FIDELITY (Matches Screen) */}
       <div className="flex flex-col bg-black/40 backdrop-blur-3xl border-b border-white/10 shrink-0 p-6 pb-0">
@@ -170,7 +174,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
          <div className="flex items-center gap-4 text-white/40">
             <button className="hover:text-white transition-colors relative">
                <ShoppingBag size={20} />
-               {hasVault && <span className="absolute -top-2 -right-2 text-xs">🌶️</span>}
+               {hasVault && <span className="absolute -top-2 -right-2 text-xs animate-jalapeño">🌶️</span>}
             </button>
             <button className="hover:text-white transition-colors"><Trophy size={20} /></button>
             <button onClick={onMinimize} className="hover:text-white transition-colors"><MinimizeIcon size={20} /></button>
@@ -267,12 +271,13 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                     {item.is_vault && !item.is_unlocked && (
                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
                           <Lock size={20} className="text-white/40 mb-3" />
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); unlockItem(item); }} 
-                            className="w-full h-10 bg-white text-black text-[9px] font-black uppercase rounded-2xl hover:bg-[#ffea00] transition-colors"
-                          >
-                             UNLOCK 75cr
-                          </button>
+                           <button 
+                             onClick={(e) => { e.stopPropagation(); unlockItem(item); }} 
+                             disabled={isProcessing}
+                             className="w-full h-10 bg-white text-black text-[9px] font-black uppercase rounded-2xl hover:bg-[#ffea00] transition-colors disabled:opacity-50"
+                           >
+                              {isProcessing ? 'SYCING...' : `UNLOCK ${item.price || 75}cr`}
+                           </button>
                        </div>
                     )}
                  </div>
@@ -282,7 +287,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
       </div>
 
       {/* 🚀 INPUT HUB (Final Polish per Reference) */}
-      <div className="bg-[#0a0a0a] px-6 pb-10 pt-4 relative">
+      <div className="bg-[#0a0a0a] px-6 pb-[env(safe-area-inset-bottom,40px)] pt-4 relative">
          <AnimatePresence>
             {showGifts && (
                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full left-6 right-6 mb-6 z-50 bg-[#111] border border-white/10 rounded-[2rem] p-6 shadow-2xl">

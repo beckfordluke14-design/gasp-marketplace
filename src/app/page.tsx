@@ -142,7 +142,7 @@ function MarketplaceContent() {
        />
        <div className="flex-1 flex flex-col relative h-screen">
           <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} />
-          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+          <div className="flex-1 flex flex-col h-[100dvh] overflow-hidden">
              <div className="flex-1 overflow-hidden relative flex flex-col pt-4">
                 <AnimatePresence>
                    {showStories && (

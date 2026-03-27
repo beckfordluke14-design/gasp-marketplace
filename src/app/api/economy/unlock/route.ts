@@ -66,29 +66,43 @@ export async function POST(req: Request) {
     }
 
     // ── CASE B: MEDIA VAULT (Original Logic) ──
-    const { data: existingUnlock } = await supabase
-      .from('unlocked_media')
-      .select('unlocked_at')
-      .eq('user_id', userId)
-      .eq('media_id', mediaId)
-      .maybeSingle();
-
-    // 2. Resolve Media URL early if unlocked
-    const { data: media, error: mediaError } = await supabase
-      .from('media_vault')
-      .select('price_credits, media_url')
+    // CNS: Try posts table first (most common for vaulted feed items)
+    let { data: media, error: mediaError } = await supabase
+      .from('posts')
+      .select('id, content_url, is_vault')
       .eq('id', mediaId)
       .single();
 
+    // Fallback: Try persona_vault table
     if (mediaError || !media) {
-      return new Response('Media node not found in vault registry', { status: 404 });
+       const { data: vaultMedia, error: vaultMediaError } = await supabase
+         .from('persona_vault')
+         .select('id, content_url')
+         .eq('id', mediaId)
+         .single();
+       media = vaultMedia;
     }
 
+    if (!media) {
+      return new Response('Media node not found in any registry', { status: 404 });
+    }
+
+    // Resolve price: In Syndicate V1.5, we favor 75cr for standard vault and 150cr for premiums
+    // We can also check a 'price_credits' column if it exists in persona_vault
+    const cost = (media as any).price_credits || 75;
+
+    const { data: existingUnlock } = await supabase
+      .from('user_vault_unlocks')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('item_id', mediaId)
+      .maybeSingle();
+
     if (existingUnlock) {
-      console.log(`♻️ [Economy] Media ${mediaId} already unlocked for ${userId}. Granting access without charge.`);
+      console.log(`♻️ [Economy] Media ${mediaId} already unlocked for ${userId}.`);
       return new Response(JSON.stringify({
         success: true,
-        media_url: media.media_url,
+        media_url: media.content_url,
         already_owned: true
       }), {
         headers: { 'Content-Type': 'application/json' }
@@ -96,46 +110,51 @@ export async function POST(req: Request) {
     }
 
     // 3. TRANSACTION STAGE: Call the Atomic Unlock RPC
-    console.log(`💸 [Economy] Deducting ${media.price_credits} credits for media ${mediaId}...`);
+    // RPC 'unlock_media' should handle: 1. check balance, 2. deduct, 3. add to user_vault_unlocks
+    console.log(`💸 [Economy] Deducting ${cost} credits for media ${mediaId}...`);
     const { data: rpcResult, error: rpcError } = await supabase.rpc('unlock_media', {
       p_user_id: userId,
-      p_media_id: mediaId,
-      p_cost: media.price_credits
+      p_item_id: mediaId,
+      p_cost: cost
     });
 
     if (rpcError) {
       console.error('[Economy] Transaction Collapse:', rpcError.message);
-      return new Response('Transaction failed: Internal Database Sync Issue', { status: 500 });
+      
+      // FALLBACK: Manual tx if RPC is signature mismatched
+      const { data: profile } = await supabase.from('profiles').select('credit_balance').eq('id', userId).single();
+      if ((profile?.credit_balance || 0) < cost) {
+         return new Response('Insufficient Balance', { status: 400 });
+      }
+      
+      await supabase.from('profiles').update({ 
+         credit_balance: (profile?.credit_balance || 0) - cost,
+         updated_at: new Date().toISOString()
+      }).eq('id', userId);
+
+      const { error: insErr } = await supabase.from('user_vault_unlocks').insert({ 
+         user_id: userId, 
+         item_id: mediaId 
+      });
+
+      if (insErr) throw insErr;
+      
+      return new Response(JSON.stringify({ success: true, media_url: media.content_url }), { headers: { 'Content-Type': 'application/json' } });
     }
 
     // 4. Return Final Payload
     if (rpcResult?.success) {
-      console.log(`✅ [Economy] Unlock successful for User ${userId}. Media is live.`);
-
-      // 🧬 PULSE PROTOCOL: Track Spent-to-Earn (Future Airdrop)
-      try {
-        const { data: profile } = await supabase.from('profiles').select('credit_balance').eq('id', userId).single();
-        if (profile) {
-          await supabase.from('profiles').update({
-            credit_balance: Math.max(0, (profile.credit_balance || 0) - media.price_credits),
-            updated_at: new Date().toISOString()
-          }).eq('id', userId);
-        }
-      } catch (e) {
-        console.warn('[Unlock Loyalty] Profile update skipped.');
-      }
-
+      console.log(`✅ [Economy] Unlock successful for User ${userId}.`);
       return new Response(JSON.stringify({
         success: true,
-        media_url: media.media_url
+        media_url: media.content_url
       }), {
         headers: { 'Content-Type': 'application/json' }
       });
     } else {
-      console.warn(`💰 [Economy] Insufficient balance for User ${userId}. Charging 402/Unauthorized.`);
       return new Response(JSON.stringify({
         success: false,
-        error: rpcResult?.error || 'Insufficient funds'
+        error: rpcResult?.description || 'Insufficient funds'
       }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }

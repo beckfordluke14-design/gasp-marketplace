@@ -100,6 +100,8 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
     return () => clearInterval(interval);
   }, [activeStory?.storyIndex, activeStory?.bubble.personaId]);
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const openStory = (bubble: StoryBubble) => {
     setActiveStory({ bubble, storyIndex: 0 });
     const newViewed = new Set(viewedIds);
@@ -109,56 +111,97 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
   };
 
   const currentStory = activeStory ? activeStory.bubble.stories[activeStory.storyIndex] : null;
+  const unviewedCount = storyData.filter(s => s.hasUnviewed).length;
 
   if (storyData.length === 0) return null;
 
   return (
     <>
-      <div className="w-full relative group/stories">
-        {/* EDGE FADES */}
-        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none opacity-0 group-hover/stories:opacity-100 transition-opacity md:w-32" />
-        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none opacity-0 group-hover/stories:opacity-100 transition-opacity md:w-32" />
-
-        <div className="w-full flex items-center gap-4 px-4 py-4 md:px-12 overflow-x-auto no-scrollbar scroll-smooth relative touch-pan-x">
-          {storyData.map((bubble, idx) => (
-            <motion.button
-              key={bubble.personaId}
-              initial={{ opacity: 0, scale: 0.8, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ delay: idx * 0.05, type: 'spring', stiffness: 200 }}
-              onClick={() => openStory(bubble)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex flex-col items-center gap-2 shrink-0 group relative min-w-[70px] md:min-w-[90px]"
-            >
-              {/* The ring */}
-              <div className={`p-[2px] rounded-full transition-all duration-500 relative ${
-                bubble.hasUnviewed
-                  ? 'bg-gradient-to-br from-[#00f0ff] via-[#ff00ff] to-[#ffea00] shadow-[0_0_20px_rgba(255,0,255,0.4)]'
-                  : 'bg-white/5 opacity-40 group-hover:opacity-100 group-hover:bg-white/10'
-              }`}>
-                {bubble.hasUnviewed && (
-                   <div className="absolute inset-0 bg-[#00f0ff] animate-ping opacity-20 rounded-full pointer-events-none" />
-                )}
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-black relative">
-                  <PersonaAvatar
-                    src={bubble.personaImage}
-                    alt={bubble.personaName}
-                  />
+      <div className="w-full relative group/stories py-4 flex justify-center">
+         <AnimatePresence mode="wait">
+            {!isExpanded ? (
+               <motion.button
+                 key="bubble"
+                 initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                 animate={{ opacity: 1, y: 0, scale: 1 }}
+                 exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                 onClick={() => setIsExpanded(true)}
+                 className="px-6 py-3 bg-black/40 backdrop-blur-3xl border border-white/10 rounded-full flex items-center gap-3 shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:border-[#00f0ff]/40 transition-all group"
+               >
+                  <div className="flex -space-x-3">
+                     {storyData.slice(0, 3).map((s, i) => (
+                        <div key={s.personaId} className="w-6 h-6 rounded-full border border-black overflow-hidden relative" style={{ zIndex: 3 - i }}>
+                           <PersonaAvatar src={s.personaImage} alt="" />
+                        </div>
+                     ))}
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60 group-hover:text-[#00f0ff]">
+                     {unviewedCount > 0 ? `${unviewedCount} NEW STORIES` : 'DISCOVER STORIES'}
+                  </span>
+                  {unviewedCount > 0 && (
+                     <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse shadow-[0_0_10px_#00f0ff]" />
+                  )}
+               </motion.button>
+            ) : (
+               <motion.div
+                 key="expanded"
+                 initial={{ opacity: 0, height: 0 }}
+                 animate={{ opacity: 1, height: 'auto' }}
+                 exit={{ opacity: 0, height: 0 }}
+                 className="w-full relative flex flex-col gap-2 items-center"
+               >
+                  <div className="w-full flex items-center justify-between px-6 md:px-12 mb-2">
+                     <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20">Discovery Pulse</span>
+                     <button onClick={() => setIsExpanded(false)} className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20 hover:text-white transition-colors flex items-center gap-2">
+                        HIDE <X size={10} />
+                     </button>
+                  </div>
                   
-                  {/* 🧬 GREEN STATUS PULSE */}
-                  <div className="absolute top-1 right-1 w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] animate-pulse" />
-                </div>
-              </div>
-              {/* Name */}
-              <span className={`text-[10px] md:text-[11px] font-black uppercase tracking-widest truncate max-w-[80px] leading-none transition-all ${
-                bubble.hasUnviewed ? 'text-white' : 'text-white/20'
-              }`}>
-                {bubble.personaName}
-              </span>
-            </motion.button>
-          ))}
-        </div>
+                  <div className="w-full relative">
+                     <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none opacity-0 group-hover/stories:opacity-100 transition-opacity md:w-32" />
+                     <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none opacity-0 group-hover/stories:opacity-100 transition-opacity md:w-32" />
+
+                     <div className="w-full flex items-center gap-4 px-4 pb-4 md:px-12 overflow-x-auto no-scrollbar scroll-smooth relative touch-pan-x">
+                        {storyData.map((bubble, idx) => (
+                           <motion.button
+                           key={bubble.personaId}
+                           initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                           animate={{ opacity: 1, scale: 1, y: 0 }}
+                           transition={{ delay: idx * 0.05, type: 'spring', stiffness: 200 }}
+                           onClick={() => openStory(bubble)}
+                           whileHover={{ scale: 1.05 }}
+                           whileTap={{ scale: 0.95 }}
+                           className="flex flex-col items-center gap-2 shrink-0 group relative min-w-[70px] md:min-w-[90px]"
+                           >
+                           {/* The ring */}
+                           <div className={`p-[2px] rounded-full transition-all duration-500 relative ${
+                              bubble.hasUnviewed
+                                 ? 'bg-gradient-to-br from-[#00f0ff] via-[#ff00ff] to-[#ffea00] shadow-[0_0_20px_rgba(255,0,255,0.4)]'
+                                 : 'bg-white/5 opacity-40 group-hover:opacity-100 group-hover:bg-white/10'
+                           }`}>
+                              {bubble.hasUnviewed && (
+                                 <div className="absolute inset-0 bg-[#00f0ff] animate-ping opacity-20 rounded-full pointer-events-none" />
+                              )}
+                              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-black relative">
+                                 <PersonaAvatar
+                                    src={bubble.personaImage}
+                                    alt={bubble.personaName}
+                                 />
+                                 <div className="absolute top-1 right-1 w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] animate-pulse" />
+                              </div>
+                           </div>
+                           <span className={`text-[10px] md:text-[11px] font-black uppercase tracking-widest truncate max-w-[80px] leading-none transition-all ${
+                              bubble.hasUnviewed ? 'text-white' : 'text-white/20'
+                           }`}>
+                              {bubble.personaName}
+                           </span>
+                           </motion.button>
+                        ))}
+                     </div>
+                  </div>
+               </motion.div>
+            )}
+         </AnimatePresence>
       </div>
 
       {/* STORY VIEWER */}
