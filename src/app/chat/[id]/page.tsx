@@ -30,14 +30,11 @@ import { twMerge } from 'tailwind-merge';
 import VaultGallery from '@/components/chat/VaultGallery';
 import TipModal from '@/components/chat/TipModal';
 import ChatVaultItem from '@/components/chat/ChatVaultItem';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 
-// 🛡️ SAFE CLIENT: Never crashes on missing env vars
+// 🛡️ SAFE CLIENT: Centralized bridge
 function getSafeSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-  if (!url || !key) return null;
-  return createClient(url, key);
+  return supabase;
 }
 import VoiceMessage from '@/components/chat/VoiceMessage';
 import PersonaAvatar from '@/components/persona/PersonaAvatar';
@@ -88,10 +85,32 @@ export default function VerdadChatPage(props: any) {
   const [userBalance, setUserBalance] = useState(150); // MOCK BALANCE
   const [isTipModalOpen, setIsTipModalOpen] = useState(false);
   const [unlockedMedia, setUnlockedMedia] = useState<Record<string, string>>({}); // mediaId -> full_url
+  const [dbPersona, setDbPersona] = useState<any>(null);
 
-  // MULTI-TENANT LOOKUP
-  const persona = id ? initialPersonas.find(p => p.id.toLowerCase() === id.toLowerCase()) : null;
+  // MULTI-TENANT LOOKUP: Check hardcoded fallback first, then DB
+  const staticPersona = id ? initialPersonas.find(p => p.id.toLowerCase() === id.toLowerCase()) : null;
+  const persona: any = staticPersona || dbPersona;
   const cityStatus = persona ? getCityStatus(persona) : { time: '00:00', weather: '...' };
+
+  // 🧬 DB PERSONA FETCH: Load from Supabase if not in static roster
+  useEffect(() => {
+    if (staticPersona || !id) return; // Already found statically
+    async function fetchDbPersona() {
+      const { data } = await supabase
+        .from('personas')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (data) {
+        setDbPersona({
+          ...data,
+          image: data.seed_image_url || data.image || '/icons/icon-512x512.png',
+          timezone: data.timezone || 'America/New_York',
+        });
+      }
+    }
+    fetchDbPersona();
+  }, [id, staticPersona]);
 
   const { messages, input, setMessages, handleInputChange, handleSubmit, isLoading, data }: any = useChat({
     api: '/api/chat',
@@ -145,8 +164,9 @@ export default function VerdadChatPage(props: any) {
             console.warn('[Brain] History hydration skipped:', err);
         }
     }
-    if (id && persona) hydrateHistory();
-  }, [id, persona, setMessages]);
+    // Hydrate once we have either a static or DB persona resolved
+    if (id) hydrateHistory();
+  }, [id, userId, setMessages]);
 
   // SYNDICATE: MARK AS READ (Read Receipt Sync)
   useEffect(() => {
@@ -167,7 +187,7 @@ export default function VerdadChatPage(props: any) {
 
   // WHALE-HUNTER REVENUE ENGINE (Legacy compatibility)
   const handleVaultUnlockLegacy = async (itemId: string) => {
-    const item = persona?.vault?.find(i => i.id === itemId);
+    const item = persona?.vault?.find((i: any) => i.id === itemId);
     if (!item || userBalance < item.price) return false;
     
     return new Promise<boolean>((resolve) => {

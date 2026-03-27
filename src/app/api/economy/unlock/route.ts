@@ -47,6 +47,21 @@ export async function POST(req: Request) {
           return new Response('Transaction failed: DB Sync Issue', { status: 500 });
        }
 
+        // 🧬 CNS SYNC: Update Profile node to prevent UI drift
+        if (result?.success) {
+           try {
+             const { data: profile } = await supabase.from('profiles').select('credit_balance').eq('id', userId).single();
+             if (profile) {
+                await supabase.from('profiles').update({
+                  credit_balance: Math.max(0, (profile.credit_balance || 0) - cost),
+                  updated_at: new Date().toISOString()
+                }).eq('id', userId);
+             }
+           } catch (e) {
+             console.warn('[Translate Economy] Profile sync failed.');
+           }
+        }
+
        return new Response(JSON.stringify(result), { headers: { 'Content-Type': 'application/json' } });
     }
 
@@ -100,10 +115,12 @@ export async function POST(req: Request) {
       // 🧬 PULSE PROTOCOL: Track Spent-to-Earn (Future Airdrop)
       try {
         const { data: profile } = await supabase.from('profiles').select('credit_balance').eq('id', userId).single();
-        await supabase.from('profiles').update({
-          credit_balance: (profile?.credit_balance || 0) + media.price_credits,
-          updated_at: new Date().toISOString()
-        }).eq('id', userId);
+        if (profile) {
+          await supabase.from('profiles').update({
+            credit_balance: Math.max(0, (profile.credit_balance || 0) - media.price_credits),
+            updated_at: new Date().toISOString()
+          }).eq('id', userId);
+        }
       } catch (e) {
         console.warn('[Unlock Loyalty] Profile update skipped.');
       }
