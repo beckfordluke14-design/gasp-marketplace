@@ -30,7 +30,10 @@ interface ChatDrawerProps {
 }
 
 export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: ChatDrawerProps) {
-  const { user, profile } = useUser();
+  const { profile, ready: authReady } = useUser();
+  const userId = profile?.id || 'guest';
+  const idToUse = userId;
+
   const [chatTab, setChatTab] = useState<'chat' | 'pics'>('chat');
   const [dbMessages, setDbMessages] = useState<any[]>([]);
   const [vaultItems, setVaultItems] = useState<any[]>([]);
@@ -51,8 +54,6 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
   const [lightboxItems, setLightboxItems] = useState<any[]>([]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  
-  const idToUse = user?.id || (typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : '');
 
   const { messages, input, handleInputChange, handleSubmit, setMessages, data: chatData, isLoading }: any = useChat({
     api: '/api/chat',
@@ -169,7 +170,6 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
   };
 
   const handleFollowToggle = async () => {
-     const idToUse = user?.id || localStorage.getItem('gasp_guest_id');
      if (!idToUse) return;
 
      if (isFollowing) {
@@ -185,7 +185,6 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
   const unlockItem = async (item: any) => {
      setIsProcessing(true);
      try {
-        const idToUse = user?.id || localStorage.getItem('gasp_guest_id');
         const res = await fetch('/api/economy/unlock', {
            method: 'POST',
            body: JSON.stringify({ userId: idToUse, itemId: item.id })
@@ -208,13 +207,13 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
             <div className="flex items-center gap-4">
                <div className="relative">
                   <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#ff00ff]/30 shadow-[0_0_20px_rgba(255,0,255,0.2)]">
-                     <PersonaAvatar src={persona.image} alt={persona.name} />
+                     <PersonaAvatar src={persona?.image || '/v1.png'} alt={persona?.name || 'Persona'} />
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[#00ff00] border-2 border-black animate-pulse shadow-[0_0_10px_#00ff00]" />
                </div>
                
                 <div className="flex flex-col">
-                   <h3 className="text-sm font-syncopate font-black uppercase italic text-white leading-none mb-2">{persona.name}</h3>
+                   <h3 className="text-sm font-syncopate font-black uppercase italic text-white leading-none mb-2">{persona?.name || 'Unknown Persona'}</h3>
                    <div onClick={() => setChatTab('pics')} className="flex items-center gap-2 cursor-pointer group/node">
                       {vaultItems.some(v => v.is_vault && !v.is_unlocked) ? (
                         <motion.div 

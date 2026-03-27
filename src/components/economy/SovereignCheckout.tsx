@@ -181,10 +181,10 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
           
           {/* LEFT: THE QR NODE */}
-          <div className="space-y-6">
-             <div className="p-8 rounded-[2.5rem] bg-white/[0.03] border border-white/10 flex flex-col items-center gap-8 shadow-[0_30px_100px_rgba(0,0,0,1)]">
-                <div className="shrink-0 w-full aspect-square max-w-[240px] bg-white p-3 rounded-3xl shadow-[0_0_50px_rgba(255,255,255,0.2)]">
-                   <img src={qrCodeUrl} alt="QR" className="w-full h-full" />
+          <div className="space-y-4">
+             <div className="p-6 md:p-8 rounded-[2.5rem] bg-white/[0.03] border border-white/10 flex flex-col items-center gap-6 shadow-[0_30px_100px_rgba(0,0,0,1)]">
+                <div className="shrink-0 w-full aspect-square max-w-[180px] md:max-w-[240px] bg-white p-2 rounded-2xl shadow-[0_0_50px_rgba(255,255,255,0.2)]">
+                   <img src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(network === 'solana' ? nativeSolLink : evmPayLink)}`} alt="QR" className="w-full h-full" />
                 </div>
                 
                 <div className="w-full space-y-4">
@@ -237,21 +237,23 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                       <button onClick={() => setNetwork('solana')} className={`flex-1 h-10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${network === 'solana' ? 'bg-[#9945FF] text-white' : 'text-white/30'}`}>Solana</button>
                       <button onClick={() => setNetwork('base')} className={`flex-1 h-10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${network === 'base' ? 'bg-[#0052FF] text-white' : 'text-white/30'}`}>Base L2</button>
                    </div>
-                   
-                   {isConnected && walletNetwork === (network === 'solana' ? 'solana' : 'evm') ? (
-                       <button 
-                         onClick={handleWalletStake}
-                         disabled={isVerifying}
-                         className={`w-full h-16 rounded-2xl ${network === 'solana' ? 'bg-[#9945FF] shadow-[0_0_40px_rgba(153,69,255,0.4)]' : 'bg-[#0052FF] shadow-[0_0_40px_rgba(0,82,255,0.4)]'} text-white flex items-center justify-center gap-3 transition-all text-[11px] font-black uppercase tracking-[0.2em] animate-pulse`}
-                       >
-                          {isVerifying ? <Loader2 size={24} className="animate-spin" /> : <WalletIcon size={20} />}
-                          {isVerifying ? 'Settling Node...' : `Approve ${nativeEquivalent} ${network === 'solana' ? 'SOL' : 'ETH'}`}
-                       </button>
-                    ) : (
-                       <a href={network === 'solana' ? solanaPayLink : evmPayLink} className="w-full h-16 rounded-2xl bg-white text-black flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all text-[10px] font-black uppercase tracking-[0.2em]">
-                          <Zap size={20} fill="black" /> One-Click Stake
-                       </a>
-                    )}
+                                      {isConnected && walletNetwork === (network === 'solana' ? 'solana' : 'evm') ? (
+                        <button 
+                          onClick={handleWalletStake}
+                          disabled={isVerifying}
+                          className={`w-full h-16 rounded-2xl ${network === 'solana' ? 'bg-[#9945FF] shadow-[0_0_40px_rgba(153,69,255,0.4)]' : 'bg-[#0052FF] shadow-[0_0_40px_rgba(0,82,255,0.4)]'} text-white flex items-center justify-center gap-3 transition-all text-[11px] font-black uppercase tracking-[0.2em] animate-pulse`}
+                        >
+                           {isVerifying ? <Loader2 size={24} className="animate-spin" /> : <WalletIcon size={20} />}
+                           {isVerifying ? 'Settling Node...' : `Settle via ${walletNetwork === 'solana' ? 'Phantom' : 'Metamask'}`}
+                        </button>
+                     ) : (
+                        <a 
+                          href={network === 'solana' ? nativeSolLink : evmPayLink} 
+                          className="w-full h-16 rounded-2xl bg-white text-black flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all text-[10px] font-black uppercase tracking-[0.2em]"
+                        >
+                           <Zap size={20} fill="black" /> {network === 'solana' ? 'Sign via Phantom' : 'One-Click Stake'}
+                        </a>
+                     )}
 
                     <div className="text-center">
                        <p className="text-[8px] font-black uppercase text-white/20 tracking-widest italic">

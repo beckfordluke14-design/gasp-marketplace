@@ -33,6 +33,7 @@ import ChatVaultItem from '@/components/chat/ChatVaultItem';
 import { createClient } from '@supabase/supabase-js';
 import VoiceMessage from '@/components/chat/VoiceMessage';
 import PersonaAvatar from '@/components/persona/PersonaAvatar';
+import { useUser } from '@/components/providers/UserProvider';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -66,6 +67,9 @@ export default function VerdadChatPage(props: any) {
   if (!unwrappedParams) return <div className="h-screen bg-black" />;
   const id = unwrappedParams.id;
   
+  const { user: privyUser, profile, ready: authReady } = useUser();
+  const userId = profile?.id || 'guest';
+
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   
@@ -78,13 +82,13 @@ export default function VerdadChatPage(props: any) {
   const [unlockedMedia, setUnlockedMedia] = useState<Record<string, string>>({}); // mediaId -> full_url
 
   // MULTI-TENANT LOOKUP
-  const persona = initialPersonas.find(p => p.id.toLowerCase() === id.toLowerCase());
+  const persona = id ? initialPersonas.find(p => p.id.toLowerCase() === id.toLowerCase()) : null;
   const cityStatus = persona ? getCityStatus(persona) : { time: '00:00', weather: '...' };
 
   const { messages, input, setMessages, handleInputChange, handleSubmit, isLoading, data }: any = useChat({
     api: '/api/chat',
     body: {
-      userId: 'mock-user-123', // In real app, get from auth
+      userId: userId, 
       personaId: id,
       profileId: id, // compatibility
       cityContext: cityStatus 
@@ -113,7 +117,7 @@ export default function VerdadChatPage(props: any) {
         const { data: dbMessages } = await supabaseClient
             .from('chat_messages')
             .select('*')
-            .eq('user_id', 'mock-user-123')
+            .eq('user_id', userId)
             .eq('persona_id', id)
             .order('created_at', { ascending: true });
 
@@ -143,7 +147,7 @@ export default function VerdadChatPage(props: any) {
         await supabaseClient
             .from('chat_messages')
             .update({ is_read: true })
-            .match({ user_id: 'mock-user-123', persona_id: id, role: 'assistant', is_read: false });
+            .match({ user_id: userId, persona_id: id, role: 'assistant', is_read: false });
     }
     if (id && persona && messages.length > 0) markAsRead();
   }, [id, persona, messages]);

@@ -32,17 +32,17 @@ export async function POST(req: Request) {
       return new Response('User ID and Persona ID required', { status: 400 });
     }
 
-    // 1. Pre-Check: Economy & Auth (GASP Standard: Wallets node)
+    // 1. Pre-Check: Economy & Auth (GASP Standard: Profiles node)
     let userBalance = 0;
     
-    // UUID Safe Check: Skip wallet lookup for guest strings
+    // UUID Safe Check: Sync with Privy/Supabase Profile Ledger
     if (finalUserId && !finalUserId.startsWith('guest-')) {
-        const { data: walletData } = await supabase
-          .from('wallets')
-          .select('balance')
-          .eq('user_id', finalUserId)
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('credit_balance')
+          .eq('id', finalUserId)
           .maybeSingle();
-        userBalance = walletData?.balance || 0;
+        userBalance = profileData?.credit_balance || 0;
     } else {
         // Guest user logic - strict 3-message wall (6 messages total in array)
         if (messages.length >= 6) {
