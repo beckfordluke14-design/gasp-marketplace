@@ -41,17 +41,17 @@ export default function LegalGate() {
         {/* Holographic VIP Glow */}
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-[#ff00ff]/10 via-transparent to-[#00f0ff]/10 opacity-50 pointer-events-none" />
 
-        <div className="space-y-1 relative z-10 w-full">
-           <p className="text-[9px] text-[#00f0ff] uppercase tracking-[0.3em] font-black animate-pulse shadow-[#00f0ff]">Classified Access</p>
-           <h2 className="text-white font-syncopate font-black uppercase italic tracking-tighter text-3xl md:text-4xl drop-shadow-lg">
-             VIP Pass
-           </h2>
-           <div className="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent pt-4" />
-        </div>
-        
-        <p className="text-white/70 font-outfit text-xs md:text-sm leading-relaxed relative z-10 pt-2">
-          This is an <span className="text-white font-bold tracking-wide">18+ Hyper-realistic AI Experience.</span> By entering, you confirm you are 18 years or older and agree to the Terms of Service provided by AllTheseFlows LLC. You acknowledge that all personas, media, and interactions on this platform are synthetic assets generated for entertainment.
-        </p>
+         <div className="space-y-1 relative z-10 w-full">
+            <p className="text-[9px] text-[#00f0ff] uppercase tracking-[0.3em] font-black animate-pulse shadow-[#00f0ff]">Entry Verification</p>
+            <h2 className="text-white font-syncopate font-black uppercase italic tracking-tighter text-3xl md:text-4xl drop-shadow-lg">
+              Enter Gasp
+            </h2>
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent pt-4" />
+         </div>
+         
+         <p className="text-white/70 font-outfit text-xs md:text-sm leading-relaxed relative z-10 pt-2">
+           This is an <span className="text-white font-bold tracking-wide">18+ AI Platform.</span> By entering, you confirm you are 18 years or older and agree to the Terms of Service provided by Zoinkz. You acknowledge that all personas, media, and interactions on this platform are fictional assets generated for entertainment.
+         </p>
 
         <button 
           onClick={handleEnter}

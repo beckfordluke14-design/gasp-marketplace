@@ -135,7 +135,7 @@ export default function Header({ onOpenTopUp, deadIds, setDeadIds }: { onOpenTop
                 </div>
 
                 {/* WALLET CONNECTION HUB */}
-                <div className="hidden lg:block">
+                <div className="flex">
                    <WalletConnect />
                 </div>
 

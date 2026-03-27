@@ -207,45 +207,45 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
 
       <div className="p-6 border-t border-white/5 bg-black z-10 flex flex-col gap-5">
           
-          {/* ══════════════════════════════════════════════════
-              SYNDICATE STAKE LEDGER (1:1 TGE Reservation)
-              ══════════════════════════════════════════════════ */}
+           {/* ══════════════════════════════════════════════════
+               CREDIT BALANCE HUB (Account Status)
+               ══════════════════════════════════════════════════ */}
           <div className="bg-white/5 border border-white/10 rounded-[2rem] p-5 space-y-4 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-tr from-[#00ff00]/5 to-transparent pointer-events-none" />
             
             <div className="flex items-center justify-between relative z-10 border-b border-white/5 pb-3">
                <div className="flex flex-col">
-                  <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30 italic">LIFETIME RESERVATION</span>
+                  <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30 italic">ACCOUNT STATUS</span>
                   <div className="flex items-center gap-2 mt-1">
                      <span className="text-[#00ff00] font-black text-[12px] italic">⚡️</span>
                      <span className="text-[12px] font-syncopate font-black italic text-white leading-none">
-                        {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[8px] text-[#00ff00] not-italic">$GASPAI STAKE</span>
+                        {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[8px] text-[#00ff00] not-italic">CREDITS</span>
                      </span>
                   </div>
                </div>
                <div className="px-2 py-0.5 rounded-full bg-[#00ff00]/10 border border-[#00ff00]/20">
-                  <span className="text-[7px] font-black text-[#00ff00] uppercase tracking-widest italic">VERIFIED 1:1 STAKE</span>
+                  <span className="text-[7px] font-black text-[#00ff00] uppercase tracking-widest italic">VERIFIED</span>
                </div>
             </div>
 
             <div className="flex items-center justify-between relative z-10 px-1">
                <div className="flex flex-col gap-1">
-                  <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/30">Next Snapshot Cycle</span>
+                  <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/30">Next Update</span>
                   <span className="text-[10px] font-black text-[#ff00ff] italic font-syncopate">48:24:12</span>
                </div>
                <div className="flex items-center gap-1">
                   <div className="w-1 h-1 rounded-full bg-green-500" />
-                  <span className="text-[6px] font-black text-white/40 uppercase tracking-widest">Active Sink</span>
+                  <span className="text-[6px] font-black text-white/40 uppercase tracking-widest">System Active</span>
                </div>
             </div>
 
-            <Link href="/docs/whitepaper" className="block p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] transition-all group/btn">
+            <Link href="/docs/about" className="block p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] transition-all group/btn">
                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                      <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover/btn:bg-[#ffea00]/10 transition-colors">
                         <ArrowRight size={14} className="text-white/20 group-hover/btn:text-[#ffea00]" />
                      </div>
-                     <span className="text-[8px] font-black uppercase tracking-widest text-white/40 group-hover/btn:text-white transition-colors">Review Whitepaper</span>
+                     <span className="text-[8px] font-black uppercase tracking-widest text-white/40 group-hover/btn:text-white transition-colors">About Gasp</span>
                   </div>
                   <div className="h-1 w-1 rounded-full bg-white/10 group-hover/btn:bg-[#ffea00] animate-pulse" />
                </div>
@@ -256,7 +256,7 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
              <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
                    <Zap size={14} className="text-[#00f0ff] animate-pulse" />
-                   <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff] italic">Genesis Rank</span>
+                   <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff] italic">Loyalty Rank</span>
                 </div>
              </div>
              <p className="text-[8px] font-black uppercase text-white/40 tracking-[0.2em] italic">Current Standing</p>
@@ -265,7 +265,7 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
              </h3>
              <div className="flex items-center gap-2 mt-2">
                 <div className="px-2 py-1 rounded-lg bg-white/5 border border-white/10">
-                   <span className="text-[8px] font-black text-white/60 uppercase">{rank.priority} Allocation Multiplier</span>
+                   <span className="text-[8px] font-black text-white/60 uppercase">{rank.priority} Rewards Boost</span>
                 </div>
              </div>
              
@@ -282,8 +282,8 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
           {/* 🧬 THE WHALE MAGNET: GENESIS LEADERBOARD */}
           <div className="pt-4 border-t border-white/5 space-y-3 relative z-10">
                <div className="flex items-center justify-between">
-                  <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30 italic">Genesis Leaders</span>
-                  <span className="text-[7px] font-black uppercase tracking-widest text-[#00f0ff] hover:underline cursor-pointer">Live Audit →</span>
+                  <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30 italic">Top Supporters</span>
+                  <span className="text-[7px] font-black uppercase tracking-widest text-[#00f0ff] hover:underline cursor-pointer">Live Board →</span>
                </div>
                <div className="space-y-2">
                   <div className="flex items-center justify-between text-[9px]">
@@ -303,18 +303,18 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
                </div>
             </div>
 
-            <div className="flex items-center justify-between pt-1 relative z-10 border-t border-white/5 mt-3 pt-3">
-               <p className="text-[7px] font-black uppercase text-white/20 tracking-widest italic leading-relaxed">
-                  Gasp Reserve Protocol v1.7 • 1:1 USD-to-Token Stake Model. <Link href="/docs/whitepaper" className="text-[#00f0ff] hover:underline underline-offset-2">Credits Ledger Active</Link> 💎
-               </p>
-               <div className="flex flex-col items-end gap-1">
-                  <div className="flex items-center gap-1">
-                     <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
-                     <span className="text-[6px] font-black text-green-500 uppercase tracking-widest">System Integrity Verified</span>
-                  </div>
-                  <span className="text-[5px] text-white/10 uppercase tracking-widest font-mono">HASH: 0x8F...7G2P</span>
-               </div>
-            </div>
+             <div className="flex items-center justify-between pt-1 relative z-10 border-t border-white/5 mt-3 pt-3">
+                <p className="text-[7px] font-black uppercase text-white/20 tracking-widest italic leading-relaxed">
+                   Gasp System v1.7 • 1:1 Value-to-Token Model. <Link href="/docs/about" className="text-[#00f0ff] hover:underline underline-offset-2">Balance tracking active</Link> 💎
+                </p>
+                <div className="flex flex-col items-end gap-1">
+                   <div className="flex items-center gap-1">
+                      <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-[6px] font-black text-green-500 uppercase tracking-widest">System Secure</span>
+                   </div>
+                   <span className="text-[5px] text-white/10 uppercase tracking-widest font-mono">ID: 0x8F...7G2P</span>
+                </div>
+             </div>
 
           {/* STAKE CTA */}
           <div className="space-y-3">
@@ -322,38 +322,36 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
                 <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
                    <Zap size={14} className="text-black" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest italic font-syncopate">ACQUIRE CREDITS →</span>
+                <span className="text-[10px] font-black uppercase tracking-widest italic font-syncopate">BUY CREDITS →</span>
              </button>
-             <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-[#00f0ff] italic">USDC Preferred: +15% Stake Bonus Active 💎</span>
+                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-[#00f0ff] italic">USDC Preferred: +15% Purchase Bonus Active 💎</span>
              </div>
           </div>
 
           <div className="flex flex-col gap-2 pt-2 border-t border-white/5 opacity-50">
              <div className="flex items-center justify-between">
-                <div className="flex gap-4">
-                   <a href="/terms" className="text-[8px] text-white/20 hover:text-white uppercase font-black italic">Terms</a>
-                   <a href="/contact" className="text-[8px] text-[#ff00ff]/60 hover:text-[#ff00ff] uppercase font-black italic">TGE Support</a>
-                </div>
-                <div className="flex items-center gap-1">
-                   <div className="w-1 h-1 rounded-full bg-[#ff00ff] animate-pulse" />
-                   <span className="text-[6px] font-black text-[#ff00ff] uppercase tracking-widest italic">Neural Synapse v1.8 Locked</span>
-                </div>
+                 <div className="flex gap-4">
+                    <a href="/terms" className="text-[8px] text-white/20 hover:text-white uppercase font-black italic">Terms</a>
+                    <a href="/contact" className="text-[8px] text-[#ff00ff]/60 hover:text-[#ff00ff] uppercase font-black italic">Priority Support</a>
+                 </div>
+                 <div className="flex items-center gap-1">
+                    <div className="w-1 h-1 rounded-full bg-[#ff00ff] animate-pulse" />
+                    <span className="text-[6px] font-black text-[#ff00ff] uppercase tracking-widest italic">Version 1.8 Locked</span>
+                 </div>
              </div>
-             <span className="text-[7px] text-white/10 uppercase tracking-widest italic font-black flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                   <span>Managed by AllTheseFlows LLC • Node v1.8</span>
-                   <span className="text-white/30 border-l border-white/5 pl-4">Authored by ATF Founder 🧬</span>
-                </div>
-                <span className="text-[#00f0ff] animate-pulse uppercase tracking-[0.2em] px-2 py-0.5 rounded-full bg-[#00f0ff]/5 border border-[#00f0ff]/20">
-                   Guardian Node: BASE Network ONLY 🛡️
-                </span>
-             </span>
+              <span className="text-[7px] text-white/10 uppercase tracking-widest italic font-black flex items-center justify-between">
+                 <div className="flex items-center gap-4">
+                    <span>Managed by Zoinkz • V1.8</span>
+                    <span className="text-white/30 border-l border-white/5 pl-4">Authored by Zoinkz 🧬</span>
+                 </div>
+                 <span className="text-[#00f0ff] animate-pulse uppercase tracking-[0.2em] px-2 py-0.5 rounded-full bg-[#00f0ff]/5 border border-[#00f0ff]/20">
+                    Security Hub: BASE Network ONLY 🛡️
+                 </span>
+              </span>
           </div>
        </div>
     </aside>
   );
 }
-
-

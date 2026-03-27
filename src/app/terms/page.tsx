@@ -24,7 +24,7 @@ export default function TermsOfService() {
             
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">1. Acceptance of Terms</h2>
-                <p>Welcome to Gasp.fun, operated by AllTheseFlows LLC ("we," "us," or "our"). By accessing or using our platform, you agree to be bound by these Terms of Service. If you do not agree, you must immediately terminate your use of the service.</p>
+                <p>Welcome to Gasp.fun, operated by Zoinkz ("we," "us," or "our"). By accessing or using our platform, you agree to be bound by these Terms of Service. If you do not agree, you must immediately terminate your use of the service.</p>
             </section>
 
             <section className="space-y-3">
@@ -39,7 +39,7 @@ export default function TermsOfService() {
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">4. Account Responsibility</h2>
-                <p>You are solely responsible for maintaining the confidentiality of your account credentials (including "Guest" identification hashes) and for all activities that occur under your account. AllTheseFlows LLC is not liable for any loss or damage arising from your failure to protect your login information.</p>
+                <p>You are solely responsible for maintaining the confidentiality of your account credentials (including "Guest" identification hashes) and for all activities that occur under your account. Zoinkz is not liable for any loss or damage arising from your failure to protect your login information.</p>
             </section>
 
             <section className="space-y-3">

@@ -38,6 +38,7 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
   const { user, profile } = useUser();
   const [following, setFollowing] = useState<string[]>([]);
   const [isVisible, setIsVisible] = useState(true);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
   const [seenIds, setSeenIds] = useState<string[]>([]);
   
 
@@ -55,12 +56,18 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
        if (data) setFollowing(data.map(r => r.persona_id));
     };
 
+    const handleWalletToggle = (e: any) => {
+       setWalletModalOpen(!!e.detail);
+    };
+
     syncFollows();
     window.addEventListener('gasp_sync_follows', syncFollows);
     window.addEventListener('storage', syncFollows);
+    window.addEventListener('gasp_wallet_modal_toggle', handleWalletToggle);
     return () => {
        window.removeEventListener('gasp_sync_follows', syncFollows);
        window.removeEventListener('storage', syncFollows);
+       window.removeEventListener('gasp_wallet_modal_toggle', handleWalletToggle);
     };
   }, [profile]);
 
@@ -84,12 +91,13 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
       </button>
 
       <AnimatePresence>
-        {isVisible && (
+        {isVisible && !walletModalOpen && (
           <motion.div 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -20, opacity: 0 }}
+            exit={{ y: -50, opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
             className="w-full flex justify-center"
+            transition={{ type: "spring", damping: 20, stiffness: 100 }}
           >
              <div className="w-full max-w-[95vw] lg:max-w-none bg-black/40 backdrop-blur-3xl border-y border-white/5 h-20 md:h-24 flex items-center overflow-hidden pointer-events-auto [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
                 <div className="flex items-center gap-4 px-10 overflow-x-auto no-scrollbar scroll-smooth w-full">
@@ -122,7 +130,7 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
                                       alt={p.name} 
                                       onImageError={() => {
                                         console.warn(`[Gasp Stories] Purging dead story node: ${p.id} (${p.name})`);
-                                        setDeadIds(prev => new Set([...Array.from(prev), p.id]));
+                                        setDeadIds((prev: any) => new Set([...Array.from(prev as any), p.id]));
                                       }}
                                     />
                                  </div>

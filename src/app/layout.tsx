@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     "AI chat", "NSFW AI", "adult AI platform", "AI persona",
     "crypto AI", "GASPAI", "web3 creator", "AI social"
   ],
-  authors: [{ name: "AllTheseFlows LLC" }],
+  authors: [{ name: "Zoinkz" }],
   robots: {
     index: true,
     follow: true,

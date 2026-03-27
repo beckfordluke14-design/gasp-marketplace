@@ -22,7 +22,7 @@ interface UserContextType {
   signOut: () => Promise<void>;
   ready: boolean;
   authenticated: boolean;
-  login: () => void;
+  login: (options?: any) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
