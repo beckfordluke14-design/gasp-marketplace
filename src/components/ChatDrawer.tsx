@@ -1,7 +1,7 @@
 'use client';
 
 import { X, Send, Plus, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn, Diamond, MessageSquare, Circle, Image as ImageIcon, Minus as MinimizeIcon, Gift, ArrowLeftRight, Zap } from 'lucide-react';
-import { initialPersonas, proxyImg } from '@/lib/profiles';
+import { initialProfiles, proxyImg } from '@/lib/profiles';
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { COST_VOICE_TRANSLATION, COST_VOICE_NOTE } from '@/lib/economy/constants';
 import Image from 'next/image';
@@ -10,22 +10,22 @@ import BondProgress from './persona/BondProgress';
 import VoiceNoteBubble from './chat/VoiceNoteBubble';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from './providers/UserProvider';
-import PersonaAvatar from './persona/PersonaAvatar';
+import ProfileAvatar from './persona/ProfileAvatar';
 import FreebieImageBubble from './chat/FreebieImageBubble';
 import MediaLightbox from './chat/MediaLightbox';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
 import { trackEvent } from '@/lib/telemetry';
 
 interface ChatDrawerProps {
-  personaId: string;
-  persona: any;
+  profileId: string;
+  profile: any;
   onClose: () => void;
   onMinimize: () => void;
   onOpenTopUp: () => void;
 }
 
-export default function ChatDrawer({ personaId, persona, onClose, onMinimize, onOpenTopUp }: ChatDrawerProps) {
-  const { profile } = useUser();
+export default function ChatDrawer({ profileId, profile, onClose, onMinimize, onOpenTopUp }: ChatDrawerProps) {
+  const { profile: userProfile } = useUser();
 
   // 🔑 SOVEREIGN SYNC: Initialize synchronously to prevent disabled button race condition
   const [guestId] = useState<string>(() => {
@@ -38,7 +38,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
     return gid;
   });
 
-  const idToUse = profile?.id || guestId;
+  const idToUse = userProfile?.id || guestId;
   const [chatTab, setChatTab] = useState<'chat' | 'pics'>('chat');
   const [vaultItems, setVaultItems] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -74,7 +74,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
         body: JSON.stringify({
           messages: [...messages, userMsg],
           userId: idToUse,
-          personaId,
+          personaId: profileId,
         }),
       });
 
@@ -126,7 +126,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
       setIsLoading(false);
       setIsTyping(false);
     }
-  }, [messages, isLoading, idToUse, personaId]);
+  }, [messages, isLoading, idToUse, profileId]);
 
 
   useEffect(() => {
@@ -135,7 +135,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
       try {
         const res = await fetch('/api/rpc/db', {
             method: 'POST',
-            body: JSON.stringify({ action: 'chat-context', payload: { userId: idToUse, personaId } })
+            body: JSON.stringify({ action: 'chat-context', payload: { userId: idToUse, personaId: profileId } })
         });
         const result = await res.json();
         if (result.success) {
@@ -148,7 +148,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
       setDbLoaded(true);
     };
     loadData();
-  }, [personaId, idToUse]);
+  }, [profileId, idToUse]);
 
   useEffect(() => {
     if (!chatData || !Array.isArray(chatData)) return;
@@ -184,15 +184,15 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
         } else {
             // ⛽ RECHARGE TRIGGER: Push to store if desynced
             if (result.error?.includes('balance') || result.error?.includes('funds')) {
-               alert('Neural Balance Depleted. Top up to unlock.');
+               alert('Not enough credits. Top up to unlock.');
                onOpenTopUp();
             } else {
-               alert(`Sync Error: ${result.error || 'Identity desync'}`);
+               alert(`Error: ${result.error || 'Connection error'}`);
             }
          }
       } catch (e: any) {
-         console.error('[Gasp Neural Unlock] Pulse Failure:', e);
-         alert(`Narrative Hub desynced: ${e.message || 'Check Network'}`);
+         console.error('[Gasp Unlock] Error:', e);
+         alert(`Connection lost: ${e.message || 'Check Network'}`);
       } finally {
          setIsProcessing(false);
       }
@@ -217,12 +217,12 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
                 <div className="flex items-center gap-4">
                    <div className="relative shrink-0">
                       <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 bg-zinc-800 shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-                         <PersonaAvatar src={persona?.image || '/v1.png'} alt={persona?.name || 'Lila'} />
+                         <ProfileAvatar src={profile?.image || '/v1.png'} alt={profile?.name || ''} />
                       </div>
                    </div>
                    <div className="flex flex-col gap-0.5">
                       <div className="flex items-center gap-2">
-                         <h3 className="text-lg font-black uppercase text-white leading-none tracking-tighter italic">{persona?.name || 'Lila'}</h3>
+                         <h3 className="text-lg font-black uppercase text-white leading-none tracking-tighter italic">{profile?.name || ''}</h3>
                          <div className="px-2 py-0.5 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-full flex items-center gap-1">
                             <div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-pulse shadow-[0_0_5px_#00f0ff]" />
                             <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest">ACTIVE</span>
@@ -230,7 +230,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
                       </div>
                       <div className="flex items-center gap-1 opacity-60">
                          <SparkleIcon size={8} className="text-[#ff00ff]" />
-                         <span className="text-[7px] font-black uppercase tracking-widest text-[#ff00ff] italic font-syncopate">Priority Loop</span>
+                         <span className="text-[7px] font-black uppercase tracking-widest text-[#ff00ff] italic font-syncopate">Verified Connection</span>
                       </div>
                    </div>
                 </div>
@@ -270,8 +270,8 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
                        {msg.type === 'voice' || msg.audio_script ? (
                           <VoiceNoteBubble 
                              audioUrl={msg.media_url || liveVoiceUrl || ''} 
-                             personaImage={persona?.image}
-                             personaName={persona?.name}
+                             personaImage={profile?.image}
+                             personaName={profile?.name}
                              translation={msg.audio_translation}
                              isUnlocked={!msg.translation_locked}
                              onUnlockTranslation={async () => true}
@@ -279,8 +279,8 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
                        ) : msg.type === 'image' || msg.image_url ? (
                           <FreebieImageBubble 
                              imageUrl={proxyImg(msg.image_url || msg.media_url)} 
-                             personaImage={persona?.image} 
-                             personaName={persona?.name} 
+                             personaImage={profile?.image} 
+                             personaName={profile?.name} 
                              caption={msg.content} 
                           />
                        ) : (
@@ -397,7 +397,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
           </div>
         </div>
       </>
-  );
+    );
 }
 
 function SparkleIcon({ size, className }: { size: number, className: string }) {

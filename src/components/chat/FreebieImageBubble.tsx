@@ -3,24 +3,24 @@
 import { useState } from 'react';
 import { Gift, X, ZoomIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import PersonaAvatar from '../persona/PersonaAvatar';
+import ProfileAvatar from '../persona/ProfileAvatar';
 
 interface FreebieImageBubbleProps {
   imageUrl:     string;
-  personaImage?: string;
-  personaName?: string;
+  profileImage?: string;
+  profileName?: string;
   caption?:     string;
 }
 
 /**
  * FREEBIE IMAGE BUBBLE
  * Small gift thumbnail in chat → taps to full lightbox with zoom.
- * The persona gifted this image — it's free, no unlock required.
+ * The profile gifted this image — it's free, no unlock required.
  */
 export default function FreebieImageBubble({
   imageUrl,
-  personaImage,
-  personaName,
+  profileImage,
+  profileName,
   caption,
 }: FreebieImageBubbleProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -30,9 +30,9 @@ export default function FreebieImageBubble({
     <>
       {/* ── THUMBNAIL CHAT BUBBLE ── */}
       <div className="flex items-end gap-2 mt-1">
-        {personaImage && (
+        {profileImage && (
           <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20 shrink-0 mb-1">
-            <PersonaAvatar src={personaImage} alt={personaName || ''} />
+            <ProfileAvatar src={profileImage} alt={profileName || ''} />
           </div>
         )}
 
@@ -79,7 +79,7 @@ export default function FreebieImageBubble({
               <div className="flex items-center gap-2 px-3 py-1.5 bg-[#ff00ff]/20 border border-[#ff00ff]/30 rounded-full">
                 <Gift size={12} className="text-[#ff00ff]" />
                 <span className="text-[9px] font-black uppercase tracking-widest text-[#ff00ff]">
-                  Gifted by {personaName || 'her'}
+                  Gifted by {profileName || 'her'}
                 </span>
               </div>
               <button

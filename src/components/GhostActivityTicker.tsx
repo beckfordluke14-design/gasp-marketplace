@@ -30,12 +30,12 @@ function randomUsername(): string {
   return `${pre}${suf}${num}`;
 }
 
-// ── PERSONA NAMES ─────────────────────────────────────────────────────────────
-const PERSONA_NAMES = [
+// ── PROFILE NAMES ─────────────────────────────────────────────────────────────
+const PROFILE_NAMES = [
   'Isabella', 'Valeria', 'Elena', 'Bianca', 'Valentina', 'Ana', 'Sofia'
 ];
-function randomPersona(): string {
-  return PERSONA_NAMES[Math.floor(Math.random() * PERSONA_NAMES.length)];
+function randomProfileName(): string {
+  return PROFILE_NAMES[Math.floor(Math.random() * PROFILE_NAMES.length)];
 }
 
 // ── CITIES ────────────────────────────────────────────────────────────────────
@@ -57,28 +57,28 @@ interface ActivityEvent {
 
 function generateEvent(): ActivityEvent {
   const user = randomUsername();
-  const persona = randomPersona();
+  const profileName = randomProfileName();
   const city = randomCity();
   const id = `${Date.now()}-${Math.random()}`;
 
   const templates = [
     // Chat activity — most common (drives DM aspiration)
-    { icon: MessageSquare, color: '#00f0ff', text: `${user} is chatting with ${persona} 💬` },
-    { icon: MessageSquare, color: '#00f0ff', text: `Someone from ${city} just opened ${persona}'s chat` },
-    { icon: MessageSquare, color: '#00f0ff', text: `${user} sent ${persona} a message 👀` },
+    { icon: MessageSquare, color: '#00f0ff', text: `${user} is chatting with ${profileName} 💬` },
+    { icon: MessageSquare, color: '#00f0ff', text: `Someone from ${city} just opened ${profileName}'s chat` },
+    { icon: MessageSquare, color: '#00f0ff', text: `${user} sent ${profileName} a message 👀` },
 
     // Vault unlocks — social proof for sales
-    { icon: Lock, color: '#ff00ff', text: `${user} unlocked ${persona}'s vault 🔒` },
+    { icon: Lock, color: '#ff00ff', text: `${user} unlocked ${profileName}'s vault 🔒` },
     { icon: Lock, color: '#ff00ff', text: `Someone from ${city} unlocked premium content 💎` },
-    { icon: Lock, color: '#ff00ff', text: `${user} just upgraded to access ${persona}'s archive 🔥` },
+    { icon: Lock, color: '#ff00ff', text: `${user} just upgraded to access ${profileName}'s archive 🔥` },
 
     // Scarcity / activity signals
-    { icon: Eye, color: '#ffea00', text: `${Math.floor(Math.random() * 40) + 15} people viewing ${persona} right now` },
-    { icon: Zap, color: '#ffea00', text: `${persona}'s vault is ${Math.floor(Math.random() * 20) + 75}% full — spots limited 💎` },
+    { icon: Eye, color: '#ffea00', text: `${Math.floor(Math.random() * 40) + 15} people viewing ${profileName} right now` },
+    { icon: Zap, color: '#ffea00', text: `${profileName}'s vault is ${Math.floor(Math.random() * 20) + 75}% full — spots limited 💎` },
 
     // Hearts / follows
-    { icon: Heart, color: '#ff4444', text: `${user} added ${persona} to favorites ❤️` },
-    { icon: Heart, color: '#ff4444', text: `${user} from ${city} just followed ${persona}` },
+    { icon: Heart, color: '#ff4444', text: `${user} added ${profileName} to favorites ❤️` },
+    { icon: Heart, color: '#ff4444', text: `${user} from ${city} just followed ${profileName}` },
   ];
 
   const t = templates[Math.floor(Math.random() * templates.length)];
@@ -144,5 +144,3 @@ export default function GhostActivityTicker() {
     </div>
   );
 }
-
-

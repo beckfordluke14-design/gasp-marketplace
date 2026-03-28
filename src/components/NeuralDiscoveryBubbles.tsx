@@ -2,37 +2,37 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import PersonaAvatar from './persona/PersonaAvatar';
-import { getPersonaName } from '@/lib/profiles';
+import ProfileAvatar from './persona/ProfileAvatar';
+import { getProfileName } from '@/lib/profiles';
 import { Eye, EyeOff } from 'lucide-react';
 
 interface NeuralDiscoveryBubblesProps {
-  personas: any[];
-  onSelectPersona: (id: string) => void;
+  profiles: any[];
+  onSelectProfile: (id: string) => void;
 }
 
 /**
- * 🛰️ NEURAL DISCOVERY HUB v1.2
- * Objective: Drive autonomous discovery via floating, transparent persona nodes.
+ * DISCOVERY FEED v1.2
+ * Objective: Drive autonomous discovery via floating profile avatars.
  */
-export default function NeuralDiscoveryBubbles({ personas, onSelectPersona }: NeuralDiscoveryBubblesProps) {
-  const [activePersonas, setActivePersonas] = useState<any[]>([]);
+export default function NeuralDiscoveryBubbles({ profiles, onSelectProfile }: NeuralDiscoveryBubblesProps) {
+  const [activeProfiles, setActiveProfiles] = useState<any[]>([]);
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    if (personas.length === 0) return;
+    if (profiles.length === 0) return;
 
-    const pickRandom = () => {
-       const shuffled = [...personas].sort(() => 0.5 - Math.random());
-       setActivePersonas(shuffled.slice(0, 4)); // Show 4 at a time
+    const refreshDiscovery = () => {
+       const shuffled = [...profiles].sort(() => 0.5 - Math.random());
+       setActiveProfiles(shuffled.slice(0, 4)); // Show 4 at a time
     };
 
-    pickRandom();
-    const interval = setInterval(pickRandom, 8000); 
+    refreshDiscovery();
+    const interval = setInterval(refreshDiscovery, 8000); 
     return () => clearInterval(interval);
-  }, [personas]);
+  }, [profiles]);
 
-  if (activePersonas.length === 0) return null;
+  if (activeProfiles.length === 0) return null;
 
   return (
     <motion.div 
@@ -42,8 +42,7 @@ export default function NeuralDiscoveryBubbles({ personas, onSelectPersona }: Ne
     >
        <div className="flex flex-col items-center gap-10">
          <AnimatePresence mode="popLayout">
-            {isVisible && activePersonas.map((p, idx) => {
-               // SYNDICATE V10: IG-Style Story Node
+            {isVisible && activeProfiles.map((p, idx) => {
                const hasUnviewed = Math.random() > 0.3; 
                return (
                  <motion.div
@@ -53,24 +52,24 @@ export default function NeuralDiscoveryBubbles({ personas, onSelectPersona }: Ne
                    exit={{ x: -30, opacity: 0, scale: 0.5 }}
                    transition={{ delay: idx * 0.1, type: 'spring', damping: 18 }}
                    className="pointer-events-auto group relative cursor-pointer"
-                   onClick={() => onSelectPersona(p.id)}
+                   onClick={() => onSelectProfile(p.id)}
                  >
-                    {/* ⭕️ INSTAGRAM-STYLE STORY RING (NO GLOW) */}
+                    {/* Story Ring */}
                     {hasUnviewed && (
                       <div className="absolute -inset-[3px] rounded-full p-[2px] bg-gradient-to-tr from-[#ff00ff] via-[#ff6b6b] to-[#ffea00]">
                          <div className="w-full h-full rounded-full bg-black" />
                       </div>
                     )}
 
-                    {/* THE BUBBLE NODE (FLOATING / SHADOW) */}
+                    {/* Avatar Bubble */}
                     <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-transparent bg-black shadow-[0_15px_30px_rgba(0,0,0,0.8)] relative z-10 transition-all group-hover:scale-110">
-                       <PersonaAvatar src={p.image} alt={p.name} />
+                       <ProfileAvatar src={p.image} alt={p.name} />
                     </div>
 
-                    {/* 🟢 GREEN STATUS INDICATOR */}
+                    {/* Status Indicator */}
                     <div className="absolute -bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] animate-pulse z-20" />
 
-                    {/* Tooltip Label */}
+                    {/* Label */}
                     <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
                        <span className="text-[10px] font-black uppercase text-white tracking-widest bg-black/40 backdrop-blur-md px-3 py-1 rounded-lg">
                           {p.name.toLowerCase()}
@@ -82,7 +81,7 @@ export default function NeuralDiscoveryBubbles({ personas, onSelectPersona }: Ne
          </AnimatePresence>
        </div>
 
-       {/* 👁️ THE SOVEREIGN TOGGLE */}
+       {/* View Toggle */}
        <button 
          onClick={() => setIsVisible(!isVisible)}
          className="mt-12 pointer-events-auto w-10 h-10 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-3xl border border-white/10 text-white/20 hover:text-[#00ff00] hover:border-[#00ff00]/40 transition-all active:scale-90 shadow-2xl"

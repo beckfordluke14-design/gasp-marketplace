@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { proxyImg } from '@/lib/profiles';
 import Image from 'next/image';
 
-interface PersonaAvatarProps {
+interface ProfileAvatarProps {
   src: string;
   alt?: string;
   fill?: boolean;
@@ -16,7 +16,7 @@ interface PersonaAvatarProps {
   onImageError?: () => void;
 }
 
-export default function PersonaAvatar({ 
+export default function ProfileAvatar({ 
   src, 
   alt = '', 
   fill, 
@@ -26,7 +26,7 @@ export default function PersonaAvatar({
   priority = false,
   unoptimized = true,
   onImageError
-}: PersonaAvatarProps) {
+}: ProfileAvatarProps) {
   const [error, setError] = useState(false);
   const finalSrc = proxyImg(src);
   const isVideo = finalSrc.toLowerCase().endsWith('.mp4');

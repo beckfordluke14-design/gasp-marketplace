@@ -9,10 +9,10 @@ interface VoiceMessageProps {
     isLocked?: boolean;
     unlockCost?: number;
     onUnlock?: () => void;
-    personaName: string;
+    profileName: string;
 }
 
-export default function VoiceMessage({ audioUrl, isLocked = false, unlockCost = 49, onUnlock, personaName }: VoiceMessageProps) {
+export default function VoiceMessage({ audioUrl, isLocked = false, unlockCost = 49, onUnlock, profileName }: VoiceMessageProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -32,7 +32,7 @@ export default function VoiceMessage({ audioUrl, isLocked = false, unlockCost = 
     };
 
     return (
-        <div className="relative w-full max-w-[280px] rounded-2xl bg-black/40 border border-white/5 backdrop-blur-xl p-3 flexItems-center overflow-hidden">
+        <div className="relative w-full max-w-[280px] rounded-2xl bg-black/40 border border-white/5 backdrop-blur-xl p-3 flex items-center overflow-hidden">
             {/* AUDIO ELEMENT */}
             {audioUrl && (
                 <audio 
@@ -76,7 +76,7 @@ export default function VoiceMessage({ audioUrl, isLocked = false, unlockCost = 
                     {!audioUrl ? (
                         // RECORDING STATE
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-[#ff003c] font-bold uppercase tracking-widest">{personaName} is recording...</span>
+                            <span className="text-[10px] text-[#ff003c] font-bold uppercase tracking-widest">{profileName} is recording...</span>
                             <span className="text-[9px] text-white/30 hidden">Simulated Neural Link</span>
                         </div>
                     ) : (
@@ -110,6 +110,3 @@ export default function VoiceMessage({ audioUrl, isLocked = false, unlockCost = 
         </div>
     );
 }
-
-
-

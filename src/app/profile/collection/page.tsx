@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Star, Zap, CheckCircle2 } from 'lucide-react';
@@ -67,7 +69,7 @@ export default function UserCollection() {
       ) : collection.length === 0 ? (
          <div className="h-64 flex flex-col items-center justify-center gap-6 opacity-30 border-2 border-dashed border-white/5 rounded-[3rem]">
             <ShoppingBag size={60} />
-            <p className="text-xs font-black uppercase tracking-[0.3em]">Your vault is empty. Unlock personas to begin.</p>
+            <p className="text-xs font-black uppercase tracking-[0.3em]">Your vault is empty. Unlock profiles to begin.</p>
          </div>
       ) : (
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
@@ -113,7 +115,7 @@ export default function UserCollection() {
                                />
                            </div>
                            <div className="flex-1">
-                               <h4 className="text-xs font-black uppercase tracking-widest leading-none mb-1">{item.persona_name || 'Persona'}</h4>
+                               <h4 className="text-xs font-black uppercase tracking-widest leading-none mb-1">{item.persona_name || 'Profile'}</h4>
                                <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em]">{item.tier || 'Vault'}</p>
                            </div>
                         </div>
@@ -126,6 +128,3 @@ export default function UserCollection() {
     </div>
   );
 }
-
-
-

@@ -11,7 +11,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { initialPersonas, proxyImg } from '@/lib/profiles';
+import { initialProfiles, proxyImg } from '@/lib/profiles';
 import { supabase } from '@/lib/supabaseClient';
 import { trackEvent } from '@/lib/telemetry';
 import TopUpDrawer from '@/components/economy/TopUpDrawer';
@@ -20,14 +20,14 @@ import { useUser } from '@/components/providers/UserProvider';
 
 function MarketplaceContent() {
   const [mounted, setMounted] = useState(false);
-  const [dbPersonas, setDbPersonas] = useState<any[]>([]);
+  const [dbProfiles, setDbProfiles] = useState<any[]>([]);
   const [openChatIds, setOpenChatIds] = useState<string[]>([]);
   const [minimizedIds, setMinimizedIds] = useState<string[]>([]);
-  const [chatPersonaCache, setChatPersonaCache] = useState<Record<string, any>>({});
-  const [selectedPersonaId, setSelectedPersonaId] = useState<string>(initialPersonas[0]?.id ?? '');
+  const [chatProfileCache, setChatProfileCache] = useState<Record<string, any>>({});
+  const [selectedProfileId, setSelectedProfileId] = useState<string>(initialProfiles[0]?.id ?? '');
   const [deadIds, setDeadIds] = useState<Set<string>>(new Set());
   const [showStories, setShowStories] = useState(true);
-  const [showPersonaList, setShowPersonaList] = useState(false);
+  const [showProfileList, setShowProfileList] = useState(false);
   const [guestId, setGuestId] = useState<string | null>(null);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   
@@ -35,7 +35,7 @@ function MarketplaceContent() {
 
   useEffect(() => { 
     setMounted(true); 
-    const loadPersonas = async () => {
+    const loadProfiles = async () => {
         try {
           const [resFeed, resActive] = await Promise.all([
              fetch(`/api/admin/feed?limit=200&t=${Date.now()}`),
@@ -66,12 +66,12 @@ function MarketplaceContent() {
                 }
              });
           }
-          setDbPersonas(Array.from(mergedSet.values()));
+          setDbProfiles(Array.from(mergedSet.values()));
         } catch (e) {
           console.error('[Personas] Fetch failed:', e);
         }
     };
-    loadPersonas();
+    loadProfiles();
 
     const syncUnreads = () => {
        const stored = JSON.parse(localStorage.getItem('gasp_unread_counts') || '{}');
@@ -88,35 +88,35 @@ function MarketplaceContent() {
     }
     setGuestId(gId);
     
-    const pId = searchParams.get('persona');
-    if (pId) handleSelectPersona(String(pId));
+    const pId = searchParams.get('profile');
+    if (pId) handleSelectProfile(String(pId));
 
     return () => window.removeEventListener('gasp_unread_sync_trigger', syncUnreads);
   }, [searchParams]);
 
-  const refinedPersonas = useMemo(() => {
+  const refinedProfiles = useMemo(() => {
     const registry = new Map();
-    [...dbPersonas, ...initialPersonas].forEach(p => {
+    [...dbProfiles, ...initialProfiles].forEach(p => {
        if (!registry.has(String(p.id))) registry.set(String(p.id), p);
     });
     return Array.from(registry.values());
-  }, [dbPersonas]);
+  }, [dbProfiles]);
 
-  const handleSelectPersona = async (id: string, initialMsg?: string, personaObj?: any) => {
+  const handleSelectProfile = async (id: string, initialMsg?: string, profileObj?: any) => {
     const sId = String(id);
-    setSelectedPersonaId(sId);
+    setSelectedProfileId(sId);
     
-    // 🧠 NEURAL HYDRATE: Ensure persona is cached even if not in the active filtered list
-    if (personaObj) {
-      setChatPersonaCache(prev => ({ ...prev, [sId]: personaObj }));
+    // 🧠 PROFILE HYDRATE: Ensure profile is cached
+    if (profileObj) {
+      setChatProfileCache(prev => ({ ...prev, [sId]: profileObj }));
     } else {
-      const p = initialPersonas.find(persona => String(persona.id) === sId) || 
-                dbPersonas.find(persona => String(persona.id) === sId);
+      const p = initialProfiles.find(profileItem => String(profileItem.id) === sId) || 
+                dbProfiles.find(profileItem => String(profileItem.id) === sId);
       if (p) {
-        setChatPersonaCache(prev => ({ ...prev, [sId]: p }));
+        setChatProfileCache(prev => ({ ...prev, [sId]: p }));
       } else {
          // Fallback: Final sync trigger
-         console.warn('[Neural Sync]: Attempting deferred hydrate for:', sId);
+         console.warn('[Profile Sync]: Attempting deferred hydrate for:', sId);
       }
     }
     
@@ -136,23 +136,23 @@ function MarketplaceContent() {
 
   const [randomSeed] = useState(() => Math.random());
   
-  const randomizedPersonas = useMemo(() => {
-    // 🎲 CYBER-SHUFFLE: Non-deterministic character placement for elite discovery
-    return [...refinedPersonas].sort((a, b) => {
+  const randomizedProfiles = useMemo(() => {
+    // 🎲 RANDOM SHUFFLE
+    return [...refinedProfiles].sort((a, b) => {
        const scoreA = (parseInt(String(a.id).substring(0, 8), 16) || 0) * randomSeed;
        const scoreB = (parseInt(String(b.id).substring(0, 8), 16) || 0) * randomSeed;
-       return scoreB - scoreA; // Reverse sorted by random product
+       return scoreB - scoreA; 
     });
-  }, [refinedPersonas, randomSeed]);
+  }, [refinedProfiles, randomSeed]);
 
   if (!mounted) return null;
 
    return (
     <main className="min-h-screen bg-black text-white relative flex flex-col pt-24 lg:flex-row xl:gap-0 overflow-hidden">
        <Sidebar 
-          onSelectPersona={handleSelectPersona} 
-          selectedPersonaId={selectedPersonaId} 
-          personas={randomizedPersonas} 
+          onSelectProfile={handleSelectProfile} 
+          selectedProfileId={selectedProfileId} 
+          profiles={randomizedProfiles} 
        />
        
        <div className="flex-1 flex flex-col relative h-screen overflow-hidden">
@@ -168,7 +168,7 @@ function MarketplaceContent() {
                       className="absolute top-1 inset-x-0 z-[80] px-4 pointer-events-none"
                     >
                        <div className="max-w-2xl mx-auto py-1 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
-                          <StoriesRow personas={randomizedPersonas} onSelectPersona={handleSelectPersona} />
+                          <StoriesRow profiles={randomizedProfiles} onSelectProfile={handleSelectProfile} />
                        </div>
                     </motion.div>
                  )}
@@ -185,15 +185,15 @@ function MarketplaceContent() {
               </div>
 
               <div className="flex-1 overflow-hidden relative">
-                 <GlobalFeed onSelectPersona={handleSelectPersona} />
+                 <GlobalFeed onSelectProfile={handleSelectProfile} />
               </div>
            </div>
         </div>
 
         {/* 3rd Column Discovery Blade */}
         <RightSidebar 
-          onSelectPersona={handleSelectPersona} 
-          personas={randomizedPersonas} 
+          onSelectProfile={handleSelectProfile} 
+          profiles={randomizedProfiles} 
           deadIds={deadIds} 
           setDeadIds={setDeadIds} 
         />
@@ -201,7 +201,7 @@ function MarketplaceContent() {
        <div className="fixed inset-0 pointer-events-none z-[1000] flex items-end justify-end p-6 gap-4">
           <AnimatePresence>
             {openChatIds.filter(id => !minimizedIds.includes(id)).map((sId, index) => {
-              const p = initialPersonas.find((persona: any) => String(persona.id) === sId) || chatPersonaCache[sId];
+              const p = initialProfiles.find((profileItem: any) => String(profileItem.id) === sId) || chatProfileCache[sId];
               if (!p) return (
                 <motion.div key={sId} initial={{ x: '100%', opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: '100%', opacity: 0 }} className="h-full pointer-events-auto bg-black border-l border-white/5 shadow-2xl">
                     <div className="flex flex-col items-center justify-center h-full p-10 text-center gap-6">
@@ -214,8 +214,8 @@ function MarketplaceContent() {
                 <motion.div key={sId} initial={{ x: '100%', opacity: 0 }} animate={{ x: `-${index * 12}px`, opacity: 1 }} exit={{ x: '100%', opacity: 0 }} className="h-full pointer-events-auto bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.8)]">
                    <ErrorBoundary key={sId}>
                        <ChatDrawer 
-                         personaId={sId} 
-                         persona={p} 
+                         profileId={sId} 
+                         profile={p} 
                          onClose={() => handleCloseChat(sId)} 
                          onMinimize={() => setMinimizedIds([...minimizedIds, sId])} 
                          onOpenTopUp={() => setIsTopUpOpen(true)}
@@ -241,9 +241,9 @@ function MarketplaceContent() {
             <TopUpDrawer onClose={() => setIsTopUpOpen(false)} userId={idToUse} />
          </div>
        )}
-        {/* MOBILE PERSONA DRAWER */}
+        {/* MOBILE PROFILE DRAWER */}
         <AnimatePresence>
-           {showPersonaList && (
+           {showProfileList && (
               <motion.div 
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
@@ -252,11 +252,11 @@ function MarketplaceContent() {
               >
                  {/* 🚀 MAIN CONTENT HUB */}
                  <div className="pt-36 lg:pt-32 pb-32">
-                    <button onClick={() => setShowPersonaList(false)} className="mb-4 text-[#00f0ff] uppercase text-[10px] font-black">← Close Deck</button>
+                    <button onClick={() => setShowProfileList(false)} className="mb-4 text-[#00f0ff] uppercase text-[10px] font-black">← Close Deck</button>
                     <Sidebar 
-                       onSelectPersona={(id) => { handleSelectPersona(id); setShowPersonaList(false); }} 
-                       selectedPersonaId={selectedPersonaId} 
-                       personas={randomizedPersonas} 
+                       onSelectProfile={(id) => { handleSelectProfile(id); setShowProfileList(false); }} 
+                       selectedProfileId={selectedProfileId} 
+                       profiles={randomizedProfiles} 
                     />
                  </div>
               </motion.div>
@@ -264,7 +264,7 @@ function MarketplaceContent() {
         </AnimatePresence>
 
         <BottomNav 
-          onOpenChatList={() => setShowPersonaList(true)} 
+          onOpenProfileList={() => setShowProfileList(true)} 
           onOpenTopUp={() => setIsTopUpOpen(true)}
         />
     </main>

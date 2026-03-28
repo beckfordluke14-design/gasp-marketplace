@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import PersonaAvatar from './persona/PersonaAvatar';
+import ProfileAvatar from './persona/ProfileAvatar';
 import { useRouter } from 'next/navigation';
 import { MapPin, MessageCircle, Play } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
@@ -51,11 +51,10 @@ export default function ProfileCard({
       )}
     >
       {/* Background Image */}
-      <PersonaAvatar
+      <ProfileAvatar
         src={image}
         alt={name}
         className="object-cover transition-transform duration-700 group-hover:scale-110"
-        priority
       />
 
       {/* Badges Overlay */}
@@ -67,7 +66,7 @@ export default function ProfileCard({
           </div>
         ) : (
           <div className="flex items-center gap-2 bg-black/40 text-white/80 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest backdrop-blur-sm border border-white/10">
-            <div className={cn("w-2 h-2 rounded-full animate-pulse", statusColors[status])} />
+            <div className={cn("w-2 h-2 rounded-full animate-pulse", statusColors[status as keyof typeof statusColors])} />
             {status}
           </div>
         )}
@@ -117,5 +116,3 @@ export default function ProfileCard({
     </motion.div>
   );
 }
-
-

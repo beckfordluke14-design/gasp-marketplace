@@ -2,18 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { initialPersonas, proxyImg, getPersonaName } from '@/lib/profiles';
+import { initialPersonas, proxyImg, getProfileName } from '@/lib/profiles';
 import { X, Lock, Volume2, ChevronLeft, ChevronRight, Zap } from 'lucide-react';
 import Image from 'next/image';
-import PersonaAvatar from './persona/PersonaAvatar';
+import ProfileAvatar from './persona/ProfileAvatar';
 
 // 🛡️ SOVEREIGN SYNC: Using Stories API (Service Role) instead of 'anon' client.
-// This ensures that all story nodes are visible in the top bar regardless of RLS.
 
 interface StoryBubble {
-  personaId: string;
-  personaName: string;
-  personaImage: string;
+  profileId: string;
+  profileName: string;
+  profileImage: string;
   stories: {
     id: string;
     asset_url: string;
@@ -25,11 +24,11 @@ interface StoryBubble {
 }
 
 interface StoriesRowProps {
-  personas: any[];
-  onSelectPersona: (id: string) => void;
+  profiles: any[];
+  onSelectProfile: (id: string) => void;
 }
 
-export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProps) {
+export default function StoriesRow({ profiles, onSelectProfile }: StoriesRowProps) {
   const [storyData, setStoryData] = useState<StoryBubble[]>([]);
   const [viewedIds, setViewedIds] = useState<Set<string>>(new Set());
   const [activeStory, setActiveStory] = useState<{ bubble: StoryBubble; storyIndex: number } | null>(null);
@@ -47,8 +46,8 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
           const json = await res.json();
           const dbStories = json.stories || [];
 
-          // Build per-persona bubbles
-          const bubbles: StoryBubble[] = personas
+          // Build per-profile bubbles
+          const bubbles: StoryBubble[] = profiles
             .filter(p => p.image)
             .map(p => {
               const pStories = (dbStories || []).filter((s: { persona_id: string }) => s.persona_id === p.id);
@@ -61,9 +60,9 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                 is_premium: false,
               }];
               return {
-                personaId: p.id,
-                personaName: getPersonaName(p),
-                personaImage: p.image,
+                profileId: p.id,
+                profileName: getProfileName(p),
+                profileImage: p.image,
                 stories: finalStories,
                 hasUnviewed: hasDatabaseStories && pStories.some((s: any) => !viewedIds.has(s.id)),
               };
@@ -74,8 +73,8 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
           console.error('[Stories] Pulse Failure:', err);
       }
     }
-    if (personas.length > 0) fetchStories();
-  }, [personas, viewedIds]);
+    if (profiles.length > 0) fetchStories();
+  }, [profiles, viewedIds]);
 
 
   // Auto-progress through story
@@ -98,7 +97,7 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
       });
     }, 100);
     return () => clearInterval(interval);
-  }, [activeStory?.storyIndex, activeStory?.bubble.personaId]);
+  }, [activeStory?.storyIndex, activeStory?.bubble.profileId]);
 
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -130,15 +129,15 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                 >
                    <div className="flex -space-x-2.5">
                       {storyData.slice(0, 3).map((s, i) => (
-                         <div key={s.personaId} className="w-6 h-6 rounded-full p-[1.5px] bg-gradient-to-tr from-[#00f0ff] via-[#ff00ff] to-[#ffea00] relative" style={{ zIndex: 3 - i }}>
+                         <div key={s.profileId} className="w-6 h-6 rounded-full p-[1.5px] bg-gradient-to-tr from-[#00f0ff] via-[#ff00ff] to-[#ffea00] relative" style={{ zIndex: 3 - i }}>
                             <div className="w-full h-full rounded-full border border-black overflow-hidden bg-zinc-800">
-                               <PersonaAvatar src={s.personaImage} alt="" />
+                               <ProfileAvatar src={s.profileImage} alt="" />
                             </div>
                          </div>
                       ))}
                    </div>
                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 group-hover:text-white transition-colors">
-                      {unviewedCount > 0 ? `${unviewedCount} NEW` : 'DISCOVER STORIES'}
+                      {unviewedCount > 0 ? `${unviewedCount} NEW` : 'DISCOVER PROFILES'}
                    </span>
                   {unviewedCount > 0 && (
                      <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse shadow-[0_0_10px_#00f0ff]" />
@@ -153,7 +152,7 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                  className="w-full relative flex flex-col gap-2 items-center"
                >
                   <div className="w-full flex items-center justify-between px-6 md:px-12 mb-2">
-                     <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20">Discovery Pulse</span>
+                     <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20">Discovery Profiles</span>
                      <button onClick={() => setIsExpanded(false)} className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20 hover:text-white transition-colors flex items-center gap-2">
                         HIDE <X size={10} />
                      </button>
@@ -166,7 +165,7 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                      <div className="w-full flex items-center gap-4 px-4 pb-4 md:px-12 overflow-x-auto no-scrollbar scroll-smooth relative touch-pan-x">
                         {storyData.map((bubble, idx) => (
                            <motion.button
-                           key={bubble.personaId}
+                           key={bubble.profileId}
                            initial={{ opacity: 0, scale: 0.8, y: 10 }}
                            animate={{ opacity: 1, scale: 1, y: 0 }}
                            transition={{ delay: idx * 0.05, type: 'spring', stiffness: 200 }}
@@ -177,25 +176,25 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                            >
                            {/* The ring */}
                            <div className={`p-[2px] rounded-full transition-all duration-500 relative ${
-                              bubble.hasUnviewed
-                                 ? 'bg-gradient-to-br from-[#00f0ff] via-[#ff00ff] to-[#ffea00] shadow-[0_0_20px_rgba(255,0,255,0.4)]'
-                                 : 'bg-white/5 opacity-40 group-hover:opacity-100 group-hover:bg-white/10'
+                               bubble.hasUnviewed
+                                  ? 'bg-gradient-to-br from-[#00f0ff] via-[#ff00ff] to-[#ffea00] shadow-[0_0_20px_rgba(255,0,255,0.4)]'
+                                  : 'bg-white/5 opacity-40 group-hover:opacity-100 group-hover:bg-white/10'
                            }`}>
-                              {bubble.hasUnviewed && (
-                                 <div className="absolute inset-0 bg-[#00f0ff] animate-ping opacity-20 rounded-full pointer-events-none" />
-                              )}
-                              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-black relative">
-                                 <PersonaAvatar
-                                    src={bubble.personaImage}
-                                    alt={bubble.personaName}
-                                 />
-                                 <div className="absolute top-1 right-1 w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] animate-pulse" />
-                              </div>
-                           </div>
+                               {bubble.hasUnviewed && (
+                                  <div className="absolute inset-0 bg-[#00f0ff] animate-ping opacity-20 rounded-full pointer-events-none" />
+                               )}
+                               <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-black relative">
+                                  <ProfileAvatar
+                                     src={bubble.profileImage}
+                                     alt={bubble.profileName}
+                                  />
+                                  <div className="absolute top-1 right-1 w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] animate-pulse" />
+                               </div>
+                            </div>
                            <span className={`text-[10px] md:text-[11px] font-black uppercase tracking-widest truncate max-w-[80px] leading-none transition-all ${
-                              bubble.hasUnviewed ? 'text-white' : 'text-white/20'
+                               bubble.hasUnviewed ? 'text-white' : 'text-white/20'
                            }`}>
-                              {bubble.personaName}
+                               {bubble.profileName}
                            </span>
                            </motion.button>
                         ))}
@@ -233,17 +232,17 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
             <div className="absolute top-10 left-0 right-0 z-[2100] flex items-center justify-between px-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20">
-                  <PersonaAvatar src={activeStory.bubble.personaImage} alt="" />
+                  <ProfileAvatar src={activeStory.bubble.profileImage} alt="" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase text-white tracking-widest">{activeStory.bubble.personaName} <Zap size={10} className="inline ml-1 text-[#ffea00]" /></p>
+                  <p className="text-[10px] font-black uppercase text-white tracking-widest">{activeStory.bubble.profileName} <Zap size={10} className="inline ml-1 text-[#ffea00]" /></p>
                   <p className="text-[8px] text-white/40 uppercase tracking-[0.2em]">{currentStory.category || 'elite'} • now</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
-                    onSelectPersona(activeStory.bubble.personaId);
+                    onSelectProfile(activeStory.bubble.profileId);
                     setActiveStory(null);
                   }}
                   className="px-5 py-2 bg-white text-black rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-[#ffea00] transition-all"
@@ -305,7 +304,7 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
                        <p className="text-white/40 text-[10px] uppercase tracking-widest leading-relaxed">this node is locked</p>
                     </div>
                     <button
-                      onClick={(e) => { e.stopPropagation(); onSelectPersona(activeStory.bubble.personaId); setActiveStory(null); }}
+                      onClick={(e) => { e.stopPropagation(); onSelectProfile(activeStory.bubble.profileId); setActiveStory(null); }}
                       className="px-10 py-5 bg-[#ff00ff] text-white rounded-3xl font-black uppercase tracking-wider text-[11px] shadow-[0_0_40px_rgba(255,0,255,0.3)] hover:scale-105 transition-all"
                     >
                       Unlock for 40 Credits
@@ -342,7 +341,7 @@ export default function StoriesRow({ personas, onSelectPersona }: StoriesRowProp
               <button
                 onClick={(e) => { 
                   e.stopPropagation(); 
-                  onSelectPersona(activeStory.bubble.personaId); 
+                  onSelectProfile(activeStory.bubble.profileId); 
                   setActiveStory(null);
                 }}
                 className="w-full max-w-sm h-16 bg-white border border-white/10 rounded-2xl text-black font-black uppercase tracking-[0.2em] text-[10px] hover:bg-[#ffea00] hover:border-[#ffea00] transition-all flex items-center justify-center gap-3 active:scale-95"

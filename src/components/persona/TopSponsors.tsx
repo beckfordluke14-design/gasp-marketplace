@@ -7,14 +7,14 @@ interface TopSponsor {
 }
 
 interface TopSponsorsProps {
-  personaId: string;
+  profileId: string;
 }
 
 /**
  * SYSTEM 2: THE 'WHALE WARS' LEADERBOARD
  * Objective: Maximize ARPU via Status & Competition.
  */
-export default function TopSponsors({ personaId }: TopSponsorsProps) {
+export default function TopSponsors({ profileId }: TopSponsorsProps) {
   const [sponsors, setSponsors] = useState<TopSponsor[]>([]);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function TopSponsors({ personaId }: TopSponsorsProps) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'GET_TOP_SPONSORS',
-                    persona_id: personaId
+                    persona_id: profileId
                 })
             });
             const data = await res.json();
@@ -37,7 +37,7 @@ export default function TopSponsors({ personaId }: TopSponsorsProps) {
         }
     }
     fetchSponsors();
-  }, [personaId]);
+  }, [profileId]);
 
   return (
     <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/5 space-y-6">
@@ -107,6 +107,3 @@ export default function TopSponsors({ personaId }: TopSponsorsProps) {
     </div>
   );
 }
-
-
-

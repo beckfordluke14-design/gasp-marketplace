@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Zap, Wallet, Activity, User, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CoinBalance from './economy/CoinBalance';
-import PersonaSearch from './PersonaSearch';
+import ProfileSearch from './ProfileSearch';
 import { useUser } from './providers/UserProvider';
 import WalletConnect from './economy/WalletConnect';
 
@@ -25,19 +25,19 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
   
   const navItems = [
     { label: 'Feed', active: true, href: '/' },
-    ...(isAdmin ? [{ label: 'Audit Hub', active: false, href: '/admin/audit' }] : []),
+    ...(isAdmin ? [{ label: 'Admin Panel', active: false, href: '/admin/audit' }] : []),
     { label: 'Collection', active: false, href: '/vault' },
-    { label: 'Hubs', active: false, href: '/' },
+    { label: 'Explore', active: false, href: '/' },
   ];
 
   if (!mounted) return null;
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] flex flex-col pointer-events-none">
-        {/* MAIN NAVIGATION BAR */}
+        {/* Navigation Bar */}
         <header className="h-12 md:h-14 bg-black/20 backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-6 md:px-12 pointer-events-auto transition-all">
             
-            {/* LOGO SECTION */}
+            {/* Logo */}
             <div className="flex items-center gap-8 md:gap-10 pointer-events-auto">
                 <motion.h1 
                   onClick={() => router.push('/')}
@@ -64,7 +64,6 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                 >
                   gasp<span className="text-[#ff00ff]">.</span>
                    
-                   {/* Subtle Glitch Layer */}
                    <motion.span 
                      animate={{ opacity: [0, 0.4, 0], x: [-10, 10, -10] }}
                      transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
@@ -74,7 +73,7 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                    </motion.span>
                 </motion.h1>
 
-                {/* DESKTOP NAV */}
+                {/* Main Nav */}
                 <nav className="hidden xl:flex items-center gap-6">
                     {navItems.map((item) => (
                       <button 
@@ -93,10 +92,10 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                 </nav>
             </div>
 
-            {/* ACTION HUB (MOBILE & DESKTOP) */}
+            {/* User Actions */}
             <div className="flex items-center gap-1 md:gap-2 pointer-events-auto">
                 
-                {/* 🕴️ THE IDENTITY NODE (PROFESSIONAL CTA) */}
+                {/* User Profile */}
                 {user ? (
                    <div 
                      onClick={() => router.push('/vault')}
@@ -108,7 +107,7 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                          </div>
                       </div>
                       <span className="hidden md:block text-[8px] font-black uppercase tracking-[0.1em] text-white/40 group-hover:text-white transition-colors">
-                         {profile?.nickname || 'TITAN'}
+                         {profile?.nickname || 'ACCOUNT'}
                       </span>
                    </div>
                 ) : (
@@ -121,25 +120,23 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                    </button>
                 )}
 
-                {/* 🏎️💨 REVENUE HUB: NEUTRAL CYAN NODES */}
+                {/* Add Credits */}
                 <button 
                   onClick={() => onOpenTopUp()}
                   className="h-7 md:h-9 px-4 md:px-6 bg-[#00f0ff] text-black text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] rounded-full hover:shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic shadow-[0_0_10px_rgba(0,240,255,0.2)]"
                 >
-                   ADD CREDITS
+                   BUY CREDITS
                 </button>
 
-                {/* COIN BALANCE DISPLAY */}
                 <div onClick={() => onOpenTopUp()} className="cursor-pointer hover:opacity-80 transition-all scale-[0.6] md:scale-[0.8] origin-right">
                   <CoinBalance onOpenTopUp={() => onOpenTopUp()} />
                 </div>
 
-                {/* WALLET CONNECTION HUB */}
                 <div className="flex scale-[0.8] origin-right">
                    <WalletConnect />
                 </div>
 
-                {/* ADMIN OVERRIDE STAR */}
+                {/* Admin Toggle */}
                 {isAdmin && (
                    <div 
                      onClick={() => {
@@ -155,10 +152,10 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
             </div>
         </header>
 
-        {/* FLOATING DISCOVERY HUB (SUBBAR): DETACHED TO SHOW MORE CONTENT */}
+        {/* Floating Search Bar */}
         <div className="absolute top-[105%] left-1/2 -translate-x-1/2 w-full max-w-[280px] md:max-w-xl px-4 flex items-center justify-center pointer-events-auto z-[90]">
             <div className="w-full bg-black/20 backdrop-blur-xl border border-white/5 rounded-full shadow-[0_5px_20px_rgba(0,0,0,0.3)] p-0.5">
-                <PersonaSearch deadIds={deadIds} setDeadIds={setDeadIds} />
+                <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
             </div>
         </div>
     </div>

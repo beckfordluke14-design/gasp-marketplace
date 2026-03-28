@@ -1,10 +1,8 @@
 'use client';
 
 /**
- * GASP VAULT SCARCITY ENGINE
- * Converts fence-sitters into buyers.
- * Rotates between: countdown timer, spots left, recent unlock activity.
- * All psychological triggers — none feel like ads.
+ * COUNTDOWN TIMER & STATUS
+ * Shows recent activity and limited spots for private content.
  */
 
 import { useEffect, useState } from 'react';
@@ -15,16 +13,16 @@ interface VaultScarcityProps {
   personaName: string;
   price?: number;
   onUnlock?: () => void;
-  compact?: boolean; // compact mode for feed cards
+  compact?: boolean; 
 }
 
 const SCARCITY_MESSAGES = [
-  (name: string) => `${name}'s archive closes to new members soon`,
-  (name: string) => `${Math.floor(Math.random() * 8) + 3} people viewed this in the last hour`,
+  (name: string) => `${name}'s private collection access is limited`,
+  (name: string) => `${Math.floor(Math.random() * 8) + 3} people viewed this recently`,
   (_: string) => `Limited access — only a few spots left at this price`,
-  (name: string) => `Someone from Miami just unlocked ${name}'s vault`,
-  (_: string) => `This content will move to Diamond tier soon`,
-  (name: string) => `${name} personally selects who sees this`,
+  (name: string) => `A user just unlocked ${name}'s private content`,
+  (_: string) => `This content will be harder to access soon`,
+  (name: string) => `Access to this content is limited`,
 ];
 
 export default function VaultScarcity({ personaName, price = 150, onUnlock, compact = false }: VaultScarcityProps) {

@@ -153,7 +153,7 @@ export default function AutopilotPanel() {
             className="w-full accent-[#ff00ff]"
           />
           <p className="text-[8px] text-white/20 uppercase tracking-widest">
-            {postsPerRun} posts × all active personas per trigger
+            {postsPerRun} posts × all active profiles per trigger
           </p>
         </div>
 
@@ -255,6 +255,3 @@ export default function AutopilotPanel() {
     </div>
   );
 }
-
-
-

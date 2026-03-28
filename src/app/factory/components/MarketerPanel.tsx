@@ -5,16 +5,16 @@ import { Target, TrendingUp, BarChart3, Zap, MapPin, Search, UserPlus, RefreshCc
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MarketerPanel({ onBirth }: { onBirth?: () => void }) {
-  const [verdict, setVerdict] = useState<any>(null);
+  const [analysis, setAnalysis] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isBirthing, setIsBirthing] = useState(false);
+  const [isDeploying, setIsDeploying] = useState(false);
 
-  const fetchAnalysis = async () => {
+  const fetchMarketAlpha = async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/factory/marketer');
       const data = await res.json();
-      setVerdict(data);
+      setAnalysis(data);
     } catch (e) {
       console.error(e);
     } finally {
@@ -23,26 +23,26 @@ export default function MarketerPanel({ onBirth }: { onBirth?: () => void }) {
   };
 
   useEffect(() => {
-    fetchAnalysis();
+    fetchMarketAlpha();
   }, []);
 
-  const handleStrategicBirth = async () => {
-    if (!verdict || isBirthing) return;
-    setIsBirthing(true);
+  const handleStrategicDeployment = async () => {
+    if (!analysis || isDeploying) return;
+    setIsDeploying(true);
     try {
       const res = await fetch('/api/factory/marketer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vibe_hint: verdict.recommended_birth_vibe })
+        body: JSON.stringify({ vibe_hint: analysis.recommended_birth_vibe })
       });
       if (res.ok) {
         if (onBirth) onBirth();
-        fetchAnalysis(); // Refresh after birth
+        fetchMarketAlpha(); // Refresh after birth
       }
     } catch (e) {
       console.error(e);
     } finally {
-      setIsBirthing(false);
+      setIsDeploying(false);
     }
   };
 
@@ -64,7 +64,7 @@ export default function MarketerPanel({ onBirth }: { onBirth?: () => void }) {
             </div>
         </div>
         <button 
-          onClick={fetchAnalysis}
+          onClick={fetchMarketAlpha}
           disabled={loading}
           className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white/50 flex items-center gap-2 transition-all"
         >
@@ -96,18 +96,18 @@ export default function MarketerPanel({ onBirth }: { onBirth?: () => void }) {
                   <div className="space-y-2">
                      <span className="px-3 py-1 bg-blue-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full">AI Verdict</span>
                      <h3 className="text-2xl md:text-3xl font-syncopate font-black uppercase leading-tight text-white drop-shadow-2xl italic">
-                        {verdict.market_verdict}
+                        {analysis.market_verdict}
                      </h3>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div className="bg-black/40 border border-white/5 rounded-2xl p-6 space-y-1">
                         <p className="text-[8px] text-white/20 uppercase tracking-widest font-black">Target Niche</p>
-                        <p className="text-lg font-syncopate font-black text-blue-400 uppercase italic">{verdict.target_niche}</p>
+                        <p className="text-lg font-syncopate font-black text-blue-400 uppercase italic">{analysis.target_niche}</p>
                      </div>
                      <div className="bg-black/40 border border-white/5 rounded-2xl p-6 space-y-1">
-                        <p className="text-[8px] text-white/20 uppercase tracking-widest font-black">Target Race</p>
-                        <p className="text-lg font-syncopate font-black text-white uppercase italic">{verdict.target_race}</p>
+                        <p className="text-[8px] text-white/20 uppercase tracking-widest font-black">Target Culture</p>
+                        <p className="text-lg font-syncopate font-black text-white uppercase italic">{analysis.target_race}</p>
                      </div>
                   </div>
 
@@ -115,18 +115,18 @@ export default function MarketerPanel({ onBirth }: { onBirth?: () => void }) {
                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                            <ShieldCheck size={14} className="text-green-500" />
-                           <p className="text-[10px] font-black uppercase text-green-500/80">Governance Lock: Straight Male Fantasy</p>
+                           <p className="text-[10px] font-black uppercase text-green-500/80">Governance Lock: Active</p>
                         </div>
-                        <p className="text-[9px] text-white/30 uppercase tracking-widest">{verdict.scarcity_advice}</p>
+                        <p className="text-[9px] text-white/30 uppercase tracking-widest">{analysis.scarcity_advice}</p>
                      </div>
 
                      <button 
-                        onClick={handleStrategicBirth}
-                        disabled={isBirthing}
+                        onClick={handleStrategicDeployment}
+                        disabled={isDeploying}
                         className="bg-blue-500 hover:bg-blue-400 text-black px-10 py-5 rounded-2xl text-[12px] font-black uppercase tracking-[0.2em] shadow-[0_20px_60px_-15px_rgba(59,130,246,0.6)] flex items-center justify-center gap-3 active:scale-95 transition-all"
                      >
-                        {isBirthing ? <RefreshCcw className="animate-spin" /> : <UserPlus size={18} />}
-                        Execute Strategic Birth
+                        {isDeploying ? <RefreshCcw className="animate-spin" /> : <UserPlus size={18} />}
+                        Execute Strategic Deployment
                      </button>
                   </div>
                </div>
@@ -139,7 +139,7 @@ export default function MarketerPanel({ onBirth }: { onBirth?: () => void }) {
                   <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-white/40">Real-Time Search Ingest</h4>
                </div>
                <p className="text-sm font-outfit text-white/60 lowercase italic leading-relaxed">
-                  "... {verdict.raw_pulse} ..."
+                  "... {analysis.raw_pulse} ..."
                </p>
             </div>
           </div>
@@ -153,7 +153,7 @@ export default function MarketerPanel({ onBirth }: { onBirth?: () => void }) {
                </div>
 
                <div className="space-y-4">
-                  {verdict.performance_leads?.map((id: string, idx: number) => (
+                  {analysis.performance_leads?.map((id: string, idx: number) => (
                     <div key={id} className="group flex items-center justify-between p-4 bg-black/40 border border-white/5 rounded-2xl hover:border-blue-500/50 transition-all cursor-pointer">
                        <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-black italic">
@@ -172,7 +172,7 @@ export default function MarketerPanel({ onBirth }: { onBirth?: () => void }) {
                <div className="pt-6 border-t border-white/5 space-y-4">
                   <div className="flex items-center justify-between">
                      <p className="text-[9px] text-white/20 uppercase tracking-widest">Total Strategic Nodes</p>
-                     <p className="text-xl font-syncopate font-black text-white/70">X-00{verdict.total_active_nodes || 1}</p>
+                     <p className="text-xl font-syncopate font-black text-white/70">X-00{analysis.total_active_nodes || 1}</p>
                   </div>
                   <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                      <div className="h-full bg-blue-500 w-1/3 animate-pulse" />
@@ -188,7 +188,7 @@ export default function MarketerPanel({ onBirth }: { onBirth?: () => void }) {
                </div>
                <div className="space-y-3">
                   <p className="text-[10px] text-white/50 leading-relaxed font-outfit lowercase italic">
-                     Japanese Street Fashion (Harajuku) is spiking in male-centric search queries. Recommended Asian Cosplay pivot for Q2.
+                     Japanese Street Fashion (Harajuku) is spiking in male-centric search queries. Recommended Asian Style pivot for Q2.
                   </p>
                </div>
             </div>
@@ -199,6 +199,3 @@ export default function MarketerPanel({ onBirth }: { onBirth?: () => void }) {
     </div>
   );
 }
-
-
-

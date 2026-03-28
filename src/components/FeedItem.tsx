@@ -2,16 +2,16 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { type Persona, type Broadcast, proxyImg } from '@/lib/profiles';
+import { type Profile, type Broadcast, proxyImg } from '@/lib/profiles';
 import Image from 'next/image';
 import { Lock, Circle, MessageSquare, Image as ImageIcon } from 'lucide-react';
 
 interface FeedItemProps {
-  persona: Persona;
+  profile: Profile;
   broadcast: Broadcast;
 }
 
-const getCityStatus = (persona: Persona) => {
+const getCityStatus = (profile: Profile) => {
     const weatherPool: Record<string, string> = {
         'Santiago': '82°F',
         'Medellín': '74°F',
@@ -19,12 +19,12 @@ const getCityStatus = (persona: Persona) => {
         'Madrid': '64°F'
     };
     return {
-        weather: weatherPool[persona.city] || '72°F'
+        weather: weatherPool[profile.city] || '72°F'
     };
 };
 
-export default function FeedItem({ persona, broadcast }: FeedItemProps) {
-  const cityStatus = getCityStatus(persona);
+export default function FeedItem({ profile, broadcast }: FeedItemProps) {
+  const cityStatus = getCityStatus(profile);
   const [isZoomed, setIsZoomed] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
@@ -42,10 +42,10 @@ export default function FeedItem({ persona, broadcast }: FeedItemProps) {
       <div className="flex items-center justify-between mb-6 px-4">
         <div className="flex items-center gap-3">
           <span className="text-xl font-black uppercase italic tracking-tighter text-white">
-            {persona.name}
+            {profile.name}
           </span>
           <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-bold uppercase tracking-wider text-white/40">
-            {persona.city} • {cityStatus.weather}
+            {profile.city} • {cityStatus.weather}
           </div>
         </div>
       </div>
@@ -70,7 +70,7 @@ export default function FeedItem({ persona, broadcast }: FeedItemProps) {
                onTap={() => setIsZoomed(!isZoomed)}
              >
                 <Image
-                  src={proxyImg(broadcast.image_url || persona.image)}
+                  src={proxyImg(broadcast.image_url || profile.image)}
                   alt=""
                   fill
                   unoptimized
@@ -92,7 +92,7 @@ export default function FeedItem({ persona, broadcast }: FeedItemProps) {
                            <ImageIcon className="text-[#ff00ff]" size={32} />
                         </div>
                         <div className="bg-black/80 px-4 py-2 rounded-xl border border-white/10">
-                           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white italic">NEURAL ZOOM ACTIVE</span>
+                           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white italic">IMAGE ZOOM ENABLED</span>
                         </div>
                         <button 
                           onClick={(e) => { e.stopPropagation(); setShowHint(false); }}
@@ -105,11 +105,11 @@ export default function FeedItem({ persona, broadcast }: FeedItemProps) {
                 )}
              </AnimatePresence>
 
-             {/* 📢 PERSISTENT ZOOM HUD */}
+             {/* UI: ZOOM HUD */}
              {isZoomed && (
                 <div className="absolute top-6 left-6 z-[1001] bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 pointer-events-none">
                     <span className="text-[8px] font-black uppercase tracking-widest text-[#00ff00] italic">
-                        MACRO MODE • DRAG TO DISCOVER
+                        ZOOM MODE • DRAG TO VIEW
                     </span>
                 </div>
              )}
@@ -124,7 +124,7 @@ export default function FeedItem({ persona, broadcast }: FeedItemProps) {
                   <Lock size={24} className="text-[#FF007F]" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-black uppercase italic tracking-tight text-white">lifestyle vault</h3>
+                  <h3 className="text-lg font-black uppercase italic tracking-tight text-white">private collection</h3>
                   <p className="text-xs text-white/40 lowercase">unlock this private moment</p>
                 </div>
                 <button className="px-8 py-4 bg-[#FF007F] text-black rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(255,0,127,0.4)] hover:scale-105 active:scale-95 transition-all">
@@ -135,7 +135,7 @@ export default function FeedItem({ persona, broadcast }: FeedItemProps) {
               <video src={broadcast.video_url} autoPlay loop muted className="w-full h-full object-cover" />
             )}
             <Image
-              src={proxyImg(persona.image)}
+              src={proxyImg(profile.image)}
               alt=""
               fill
               unoptimized
@@ -147,32 +147,30 @@ export default function FeedItem({ persona, broadcast }: FeedItemProps) {
 
       {/* Action Icons (OII) */}
       <div className="flex items-center gap-8 mt-8 px-6">
-        {/* O: Quick Tip */}
+        {/* O: Tip */}
         <button className="group flex flex-col items-center gap-2">
           <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-[#FF007F]/50 transition-all shadow-xl group-hover:shadow-[#FF007F]/10">
             <Circle size={18} className="text-white/40 group-hover:text-[#FF007F] transition-colors" />
           </div>
-          <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/20 group-hover:text-white/40">infuse</span>
+          <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/20 group-hover:text-white/40">tip</span>
         </button>
 
-        {/* I: Private Message */}
+        {/* I: Chat */}
         <button className="group flex flex-col items-center gap-2">
           <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-[#FF007F]/50 transition-all shadow-xl">
             <MessageSquare size={18} className="text-white/40 group-hover:text-[#FF007F] transition-colors" />
           </div>
-          <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/20">uplink</span>
+          <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/20">chat</span>
         </button>
 
-        {/* I: Vault / Media */}
+        {/* I: Private Media */}
         <button className="group flex flex-col items-center gap-2">
           <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-[#FF007F]/50 transition-all shadow-xl">
             <ImageIcon size={18} className="text-white/40 group-hover:text-[#FF007F] transition-colors" />
           </div>
-          <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/20">vault</span>
+          <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/20">private</span>
         </button>
       </div>
     </div>
   );
 }
-
-

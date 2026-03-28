@@ -2,21 +2,21 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import PersonaAvatar from './persona/PersonaAvatar';
+import ProfileAvatar from './persona/ProfileAvatar';
 import { Eye, EyeOff, MessageSquare } from 'lucide-react';
 
 interface ChatClusterProps {
   activeChatIds: string[];
   unreadCounts: Record<string, number>;
   onRestore: (id: string) => void;
-  personas: any[];
+  profiles: any[];
 }
 
 /**
  * 🛰️ NEURAL BUBBLY HUB v1.0
- * Objective: Manage high-volume persona connections via a floating, swarming cluster.
+ * Objective: Manage high-volume profile connections via a floating, swarming cluster.
  */
-export default function ChatCluster({ activeChatIds, unreadCounts, onRestore, personas }: ChatClusterProps) {
+export default function ChatCluster({ activeChatIds, unreadCounts, onRestore, profiles }: ChatClusterProps) {
   const [isVisible, setIsVisible] = useState(true);
 
   if (activeChatIds.length === 0) return null;
@@ -48,8 +48,8 @@ export default function ChatCluster({ activeChatIds, unreadCounts, onRestore, pe
             >
                <div className="flex flex-wrap items-center justify-center gap-3 max-w-[280px]">
                   {activeChatIds.map((id, idx) => {
-                     const p = personas.find(p => p.id === id);
-                     if (!p) return null;
+                     const profileItem = profiles.find(p => p.id === id);
+                     if (!profileItem) return null;
                      const unread = unreadCounts[id] || 0;
 
                      return (
@@ -66,7 +66,7 @@ export default function ChatCluster({ activeChatIds, unreadCounts, onRestore, pe
                            <div className={`${iconClass} rounded-full overflow-hidden border-2 transition-all relative shadow-2xl ${
                              unread > 0 ? 'border-[#ff00ff]' : 'border-white/10 group-hover:border-white/40'
                            }`}>
-                              <PersonaAvatar src={p.image} alt={p.name} />
+                              <ProfileAvatar src={profileItem.image} alt={profileItem.name} />
                               
                               {/* 🟢 GREEN STATUS GLOW */}
                               <div className="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-[#00ff00] border border-black shadow-[0_0_8px_#00ff00] animate-pulse z-20" />

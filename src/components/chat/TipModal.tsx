@@ -9,10 +9,10 @@ interface TipModalProps {
     onClose: () => void;
     onTip: (amount: number) => Promise<boolean>;
     userBalance: number;
-    personaName: string;
+    profileName: string;
 }
 
-export default function TipModal({ isOpen, onClose, onTip, userBalance, personaName }: TipModalProps) {
+export default function TipModal({ isOpen, onClose, onTip, userBalance, profileName }: TipModalProps) {
     const [selectedAmount, setSelectedAmount] = useState<number>(10);
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -59,11 +59,11 @@ export default function TipModal({ isOpen, onClose, onTip, userBalance, personaN
                             </div>
 
                             <div className="space-y-4">
-                                <h2 className="text-4xl font-outfit font-black italic uppercase italic tracking-tighter leading-none">
+                                <h2 className="text-4xl font-outfit font-black italic uppercase tracking-tighter leading-none">
                                     Priority <span className="text-neon-purple">Infusion</span>
                                 </h2>
                                 <p className="text-sm text-white/40 italic leading-relaxed px-6">
-                                    Send a gift to <span className="text-white">{personaName}</span>. Priority messages bypass the agency buffer and trigger an immediate response.
+                                    Send a gift to <span className="text-white">{profileName}</span>. Priority messages bypass the agency buffer and trigger an immediate response.
                                 </p>
                             </div>
 
@@ -123,6 +123,3 @@ export default function TipModal({ isOpen, onClose, onTip, userBalance, personaN
         </AnimatePresence>
     );
 }
-
-
-

@@ -50,7 +50,7 @@ export default function LegalGate() {
          </div>
          
          <p className="text-white/70 font-outfit text-xs md:text-sm leading-relaxed relative z-10 pt-2">
-           This is an <span className="text-white font-bold tracking-wide">18+ AI Platform.</span> By entering, you confirm you are 18 years or older and agree to the Terms of Service provided by Zoinkz. You acknowledge that all personas, media, and interactions on this platform are fictional assets generated for entertainment.
+           This is an <span className="text-white font-bold tracking-wide">18+ AI Platform.</span> By entering, you confirm you are 18 years or older and agree to the Terms of Service provided by Zoinkz. You acknowledge that all profiles, media, and interactions on this platform are fictional assets generated for entertainment.
          </p>
 
         <button 
@@ -70,5 +70,3 @@ export default function LegalGate() {
     </div>
   );
 }
-
-

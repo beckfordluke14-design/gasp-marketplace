@@ -1,27 +1,27 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { initialPersonas, type Persona } from '@/lib/profiles';
+import { initialProfiles, type Profile } from '@/lib/profiles';
 import FeedItem from './FeedItem';
 
 interface CenterPanelProps {
-  selectedPersonaId: string;
+  selectedProfileId: string;
 }
 
-export default function CenterPanel({ selectedPersonaId }: CenterPanelProps) {
-  const selectedPersona = initialPersonas.find(p => p.id === selectedPersonaId) || initialPersonas[0] || {} as any;
-  const broadcasts = selectedPersona.broadcasts || [];
+export default function CenterPanel({ selectedProfileId }: CenterPanelProps) {
+  const selectedProfile = initialProfiles.find(p => p.id === selectedProfileId) || initialProfiles[0] || {} as any;
+  const broadcasts = selectedProfile.broadcasts || [];
 
   return (
-    <div className="flex-1 h-screen overflow-y-auto no-scrollbar bg-[#000000] scroll-smooth pt-32 h-screen pb-40">
+    <div className="flex-1 overflow-y-auto no-scrollbar bg-[#000000] scroll-smooth pt-32 h-screen pb-40">
       <AnimatePresence mode="wait">
         <motion.div
-          key={selectedPersona.id}
+          key={selectedProfile.id}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
-          layoutId={`feed-${selectedPersona.id}`}
+          layoutId={`feed-${selectedProfile.id}`}
           className="container max-w-2xl mx-auto px-6"
         >
           {/* Section Header */}
@@ -29,16 +29,16 @@ export default function CenterPanel({ selectedPersonaId }: CenterPanelProps) {
              <div className="flex items-center gap-3">
                 <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">node link established</span>
              </div>
-             <h3 className="text-4xl md:text-5xl font-outfit font-black italic uppercase italic tracking-tighter leading-none text-white transition-all">
-                {selectedPersona.name} <span className="text-[#FF007F]">Reality</span> Feed
+             <h3 className="text-4xl md:text-5xl font-outfit font-black italic uppercase tracking-tighter leading-none text-white transition-all">
+                {selectedProfile.name} <span className="text-[#FF007F]">Reality</span> Feed
              </h3>
           </div>
 
           {/* Broadcasts Feed */}
           <div className="flex flex-col">
             {broadcasts.length > 0 ? (
-              broadcasts.map((b) => (
-                <FeedItem key={b.id} persona={selectedPersona} broadcast={b} />
+              broadcasts.map((b: any) => (
+                <FeedItem key={b.id} profile={selectedProfile} broadcast={b} />
               ))
             ) : (
               <div className="flex flex-col items-center justify-center pt-20 text-center gap-6">
@@ -52,6 +52,3 @@ export default function CenterPanel({ selectedPersonaId }: CenterPanelProps) {
     </div>
   );
 }
-
-
-

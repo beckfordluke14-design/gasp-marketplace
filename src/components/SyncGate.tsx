@@ -53,17 +53,16 @@ export default function SyncGate() {
             </div>
 
             <div className="space-y-4">
-              <h1 className="text-3xl font-syncopate font-black uppercase italic italic tracking-tighter text-white">
-                Neural Sync Gate
+              <h1 className="text-3xl font-syncopate font-black uppercase italic tracking-tighter text-white">
+                Welcome to Gasp
               </h1>
               <p className="text-[11px] text-white/40 uppercase font-black tracking-[0.2em] leading-relaxed">
-                You are entering an <span className="text-white">18+ Hyper-realistic</span> AI Experience. 
+                You are entering an <span className="text-white">18+ AI Experience</span>. 
                 By proceeding, you verify you are 18+ and agree to the 
                 <Link href="/terms" target="_blank" className="text-[#00f0ff] uppercase italic hover:underline"> Terms of Service</Link> 
-                {' '}provided by <span className="text-white">AllTheseFlows LLC</span>.
               </p>
               <p className="text-[9px] text-white/20 uppercase font-black tracking-widest pt-2">
-                 You acknowledge that all personas, media, and interactions on this platform are <span className="text-white/40">synthetic assets</span> generated for entertainment.
+                 You acknowledge that all profiles and interactions on this platform are <span className="text-white/40">AI-generated</span> for entertainment.
               </p>
             </div>
 
@@ -71,12 +70,12 @@ export default function SyncGate() {
                onClick={handleAgree}
                className="group w-full h-16 bg-[#ffea00] text-black rounded-2xl font-syncopate font-black uppercase italic tracking-widest text-[11px] shadow-[0_10px_40px_rgba(255,234,0,0.2)] hover:bg-white transition-all active:scale-95 flex items-center justify-center gap-3"
             >
-               Accept Neural Sync Protocol
+               Enter Platform
                <Zap size={16} className="text-black group-hover:scale-125 transition-transform" />
             </button>
 
             <div className="flex flex-col gap-2 pt-2">
-               <p className="text-[8px] text-white/20 uppercase font-black tracking-widest">Digital AI Content Enabled</p>
+               <p className="text-[8px] text-white/20 uppercase font-black tracking-widest">AI Content Enabled</p>
                <p className="text-[8px] text-white/20 uppercase font-black tracking-widest">© 2026 GASP.FUN LLC</p>
             </div>
           </motion.div>
@@ -85,5 +84,3 @@ export default function SyncGate() {
     </AnimatePresence>
   );
 }
-
-

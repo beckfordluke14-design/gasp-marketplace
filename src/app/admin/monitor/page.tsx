@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Play, CheckCircle2, XCircle, RefreshCcw, Zap, Activity, Clock, Database, ChevronRight, Sparkles } from 'lucide-react';
@@ -215,28 +217,28 @@ export default function FactoryMonitor() {
 
                          {/* ONE-CLICK PUBLISH — only for completed jobs with media */}
                          {job.status === 'completed' && job.media_url ? (
-                           publishedJobs[job.id] === 'done' ? (
-                             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 text-green-400">
-                               <CheckCircle2 size={14} />
-                               <span className="text-[9px] font-black uppercase tracking-widest">Published</span>
-                             </div>
-                           ) : (
-                             <motion.button
-                               whileHover={{ scale: 1.05 }}
-                               whileTap={{ scale: 0.95 }}
-                               onClick={() => publishAsPost(job)}
-                               disabled={publishedJobs[job.id] === 'publishing'}
-                               className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#00f0ff] text-black font-black uppercase tracking-widest text-[9px] shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:shadow-[0_0_30px_rgba(0,240,255,0.6)] transition-all disabled:opacity-50"
-                             >
-                               {publishedJobs[job.id] === 'publishing' ? (
-                                 <><RefreshCcw size={12} className="animate-spin" /> Pushing...</>
-                               ) : (
-                                 <><Play size={12} fill="currentColor" /> Publish to Feed</>
-                               )}
-                             </motion.button>
-                           )
+                            publishedJobs[job.id] === 'done' ? (
+                              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 text-green-400">
+                                <CheckCircle2 size={14} />
+                                <span className="text-[9px] font-black uppercase tracking-widest">Published</span>
+                              </div>
+                            ) : (
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => publishAsPost(job)}
+                                disabled={publishedJobs[job.id] === 'publishing'}
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#00f0ff] text-black font-black uppercase tracking-widest text-[9px] shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:shadow-[0_0_30px_rgba(0,240,255,0.6)] transition-all disabled:opacity-50"
+                              >
+                                {publishedJobs[job.id] === 'publishing' ? (
+                                  <><RefreshCcw size={12} className="animate-spin" /> Pushing...</>
+                                ) : (
+                                  <><Play size={12} fill="currentColor" /> Publish to Feed</>
+                                )}
+                              </motion.button>
+                            )
                          ) : (
-                           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Persona: {job.persona_id}</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Profile: {job.persona_id}</p>
                          )}
                       </div>
                   </motion.div>
@@ -265,6 +267,3 @@ function StatusBadge({ status }: { status: string }) {
     </div>
   );
 }
-
-
-

@@ -1,7 +1,9 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Search, Trash2, Zap, ArrowLeft, Loader2, Sparkles, Filter } from 'lucide-react';
-import { initialPersonas } from '@/lib/profiles';
+import { initialProfiles } from '@/lib/profiles';
 import Header from '@/components/Header';
 
 export const dynamic = 'force-dynamic';
@@ -32,15 +34,15 @@ export default function BillboardCommander() {
             // 1. Remap DB Nodes from SQL join structure
             const dbPosts = (data.posts || []).map((p: any) => ({
                 ...p,
-                personas: { name: p.name, city: p.city, seed_image_url: p.seed_image_url }
+                profiles: { name: p.name, city: p.city, seed_image_url: p.seed_image_url }
             }));
 
             // 2. Initial Nodes (static fallback)
-            const initialNodes: any[] = initialPersonas.flatMap(p => 
+            const initialNodes: any[] = initialProfiles.flatMap(p => 
                 (p.broadcasts || []).map((b: any) => ({
                     id: b.id,
-                    persona_id: p.id,
-                    personas: { name: p.name, city: p.city, seed_image_url: p.image },
+                    profile_id: p.id,
+                    profiles: { name: p.name, city: p.city, seed_image_url: p.image },
                     content_type: b.type,
                     caption: b.content,
                     content_url: b.image_url || b.video_url,
@@ -58,8 +60,8 @@ export default function BillboardCommander() {
             // 4. Construction Nodes (from jobs)
             const constructionNodes = (data.jobs || []).map((j: any) => ({
                 id: `job-${j.job_id}`,
-                persona_id: j.persona_id,
-                personas: { name: j.persona_id.split('-')[0], city: 'Factory Node', seed_image_url: j.temp_image_url || '/v1.png' },
+                profile_id: j.persona_id,
+                profiles: { name: j.persona_id.split('-')[0], city: 'Factory Node', seed_image_url: j.temp_image_url || '/v1.png' },
                 content_type: 'video',
                 caption: 'RENDER IN PROGRESS: Syncing Neural Cluster...',
                 content_url: j.temp_image_url || '/v1.png',
@@ -69,21 +71,21 @@ export default function BillboardCommander() {
                 created_at: j.created_at
             }));
 
-            // 5. Empty Persona Injections
+            // 5. Empty Profile Injections
             const empties = (data.personas || []).filter((p: any) => 
-                !unique.some(post => post.persona_id === p.id) && 
+                !unique.some(post => post.profile_id === p.id) && 
                 !data.jobs?.some((j: any) => j.persona_id === p.id)
             );
             const newNodes = empties.map((p: any) => ({
                 id: `new-${p.id}`,
-                persona_id: p.id,
-                personas: { name: p.name, city: p.city, seed_image_url: p.seed_image_url || '/v1.png' },
+                profile_id: p.id,
+                profiles: { name: p.name, city: p.city, seed_image_url: p.seed_image_url || '/v1.png' },
                 content_type: 'genesis',
                 caption: 'NEW: Genesis Dispatch Required.',
                 content_url: p.seed_image_url || '/v1.png',
                 is_featured: false,
                 is_vault: false,
-                is_new_persona: true,
+                is_new_profile: true,
                 created_at: new Date().toISOString()
             }));
 
@@ -99,25 +101,25 @@ export default function BillboardCommander() {
         fetchAllPosts();
     }, []);
 
-    const dispatchBirth = async (personaId: string) => {
-        setSavingId(`new-${personaId}`);
+    const dispatchBirth = async (profileId: string) => {
+        setSavingId(`new-${profileId}`);
         try {
             const res = await fetch('/api/factory/birth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ persona_id: personaId, category: 'STREET_FLASH_CANDID' })
+                body: JSON.stringify({ persona_id: profileId, category: 'STREET_FLASH_CANDID' })
             });
             if (!res.ok) throw new Error('Dispatch Handshake Failed.');
             alert(`New Node Dispatched! Content appearing soon. 🏁🦾🏎️💨`);
             fetchAllPosts();
         } catch (e) {
-            alert(e);
+            alert(e as any);
         }
         setSavingId(null);
     };
 
     const toggleFeatured = async (post: any, currentState: boolean) => {
-        if (post.is_new_persona) return dispatchBirth(post.persona_id);
+        if (post.is_new_profile) return dispatchBirth(post.profile_id);
         if (post.is_rendering) return;
 
         setSavingId(post.id);
@@ -149,15 +151,15 @@ export default function BillboardCommander() {
     };
 
     const filtered = posts.filter(p => {
-        const matchesSearch = p.personas?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        const matchesSearch = p.profiles?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                               p.caption?.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesFeatured = filterOnlyFeatured ? p.is_featured : true;
         
         let matchesTab = true;
-        if (activeTab === 'feed') matchesTab = !p.is_vault && !p.is_new_persona && !p.is_rendering;
-        if (activeTab === 'vault') matchesTab = p.is_vault && !p.is_new_persona && !p.is_rendering;
+        if (activeTab === 'feed') matchesTab = !p.is_vault && !p.is_new_profile && !p.is_rendering;
+        if (activeTab === 'vault') matchesTab = p.is_vault && !p.is_new_profile && !p.is_rendering;
         if (activeTab === 'local') matchesTab = p.is_local;
-        if (activeTab === 'all' && (p.is_new_persona || p.is_rendering)) matchesTab = true;
+        if (activeTab === 'all' && (p.is_new_profile || p.is_rendering)) matchesTab = true;
 
         return matchesSearch && matchesFeatured && matchesTab;
     });
@@ -237,7 +239,7 @@ export default function BillboardCommander() {
                                     key={post.id}
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    className={`relative group aspect-[9/16] rounded-[2rem] overflow-hidden border transition-all ${post.is_featured ? 'border-[#ffea00]/40 shadow-[0_0_30px_#ffea0011]' : 'border-white/10 backdrop-blur-3xl'} ${(post.is_new_persona || post.is_rendering) ? 'border-dashed opacity-80 ring-2 ring-[#00f0ff]/20' : ''}`}
+                                    className={`relative group aspect-[9/16] rounded-[2rem] overflow-hidden border transition-all ${post.is_featured ? 'border-[#ffea00]/40 shadow-[0_0_30px_#ffea0011]' : 'border-white/10 backdrop-blur-3xl'} ${(post.is_new_profile || post.is_rendering) ? 'border-dashed opacity-80 ring-2 ring-[#00f0ff]/20' : ''}`}
                                 >
                                     <div className="absolute inset-0 bg-black">
                                         {post.content_type === 'video' && !post.is_rendering ? (
@@ -250,14 +252,14 @@ export default function BillboardCommander() {
 
                                     <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col gap-4">
                                         <div>
-                                            <h4 className="text-[11px] font-syncopate font-black uppercase italic tracking-tighter text-white drop-shadow-lg">{post.personas?.name}</h4>
-                                            <p className="text-[8px] font-black uppercase tracking-widest text-[#ffea00] drop-shadow-md">/{post.personas?.city}</p>
+                                            <h4 className="text-[11px] font-syncopate font-black uppercase italic tracking-tighter text-white drop-shadow-lg">{post.profiles?.name}</h4>
+                                            <p className="text-[8px] font-black uppercase tracking-widest text-[#ffea00] drop-shadow-md">/{post.profiles?.city}</p>
                                         </div>
 
                                         <div className="flex items-center gap-2">
-                                            {post.is_new_persona ? (
+                                            {post.is_new_profile ? (
                                                 <button 
-                                                    onClick={() => dispatchBirth(post.persona_id)}
+                                                    onClick={() => dispatchBirth(post.profile_id || post.persona_id)}
                                                     disabled={savingId === post.id}
                                                     className="flex-1 h-12 rounded-xl bg-[#00f0ff] text-black text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-2"
                                                 >
@@ -291,7 +293,7 @@ export default function BillboardCommander() {
                                         </div>
                                     )}
 
-                                    {(post.is_new_persona || post.is_rendering) && (
+                                    {(post.is_new_profile || post.is_rendering) && (
                                         <div className="absolute top-4 left-4 bg-[#00f0ff] text-black px-3 py-1.5 rounded-full flex items-center gap-1.5 animate-pulse">
                                             <Zap size={10} fill="black" />
                                             <p className="text-[7px] font-black uppercase tracking-widest italic">{post.is_rendering ? 'Rendering' : 'New'}</p>
@@ -312,6 +314,3 @@ export default function BillboardCommander() {
         </main>
     );
 }
-
-
-

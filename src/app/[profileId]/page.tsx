@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { initialPersonas } from '@/lib/profiles';
+import { initialProfiles } from '@/lib/profiles';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Send, Sparkles, TrendingUp, Radio, Lock, Volume2, MessageSquare, Camera } from 'lucide-react';
 import Image from 'next/image';
@@ -9,14 +9,14 @@ import { useEffect, useState, useRef } from 'react';
 
 type ChatStep = 'intro' | 'awaiting_pic' | 'pic_sent' | 'reacted' | 'signup';
 
-export default function PersonaLanding() {
+export default function ProfileLanding() {
   const params = useParams();
   const router = useRouter();
-  const personaId = params.personaId as string;
-  const persona = initialPersonas.find(p => p.id.toLowerCase() === personaId.toLowerCase());
+  const profileId = params.profileId as string;
+  const profile = initialProfiles.find(p => p.id.toLowerCase() === profileId.toLowerCase());
 
   const [activeCount, setActiveCount] = useState(42);
-  const [messages, setMessages] = useState<{ from: 'persona' | 'user'; text?: string; img?: string }[]>([]);
+  const [messages, setMessages] = useState<{ from: 'profile' | 'user'; text?: string; img?: string }[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [step, setStep] = useState<ChatStep>('intro');
   const [replyInput, setReplyInput] = useState('');
@@ -24,16 +24,16 @@ export default function PersonaLanding() {
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const others = initialPersonas.filter(p => p.id !== persona?.id).slice(0, 3);
+  const others = initialProfiles.filter(p => p.id !== profile?.id).slice(0, 3);
 
-  // Helper: persona sends a message after a delay with typing indicator
-  const personaSays = (text: string, afterMs: number, typingMs = 1400) =>
+  // Helper: profile sends a message after a delay with typing indicator
+  const profileSays = (text: string, afterMs: number, typingMs = 1400) =>
     new Promise<void>(resolve => {
       setTimeout(() => {
         setIsTyping(true);
         setTimeout(() => {
           setIsTyping(false);
-          setMessages(prev => [...prev, { from: 'persona', text }]);
+          setMessages(prev => [...prev, { from: 'profile', text }]);
           resolve();
         }, typingMs);
       }, afterMs);
@@ -45,11 +45,11 @@ export default function PersonaLanding() {
     // Stage 1: Natural cold open
     let alive = true;
     (async () => {
-      await personaSays('heyy 👀', 1600, 700);
+      await profileSays('heyy 👀', 1600, 700);
       if (!alive) return;
-      await personaSays("omg hi, didn't expect someone to find my page lol", 900, 1800);
+      await profileSays("omg hi, didn't expect someone to find my page lol", 900, 1800);
       if (!alive) return;
-      await personaSays('send me a pic first, what do you look like? 📸', 800, 1500);
+      await profileSays('send me a pic first, what do you look like? 📸', 800, 1500);
       if (!alive) return;
       setStep('awaiting_pic');
     })();
@@ -62,18 +62,18 @@ export default function PersonaLanding() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  if (!persona) {
-    return <div className="min-h-screen bg-black flex items-center justify-center text-white font-syncopate">IDENTITY NOT FOUND</div>;
+  if (!profile) {
+    return <div className="min-h-screen bg-black flex items-center justify-center text-white font-syncopate">PROFILE NOT FOUND</div>;
   }
 
   const handleConnect = (initialMsg?: string) => {
     const favs = JSON.parse(localStorage.getItem('gasp_favorites') || '[]');
-    if (!favs.includes(persona.id)) {
-      favs.push(persona.id);
+    if (!favs.includes(profile.id)) {
+      favs.push(profile.id);
       localStorage.setItem('gasp_favorites', JSON.stringify(favs));
       window.dispatchEvent(new Event('storage'));
     }
-    router.push(`/?persona=${persona.id}${initialMsg ? `&msg=${encodeURIComponent(initialMsg)}` : ''}`);
+    router.push(`/?profile=${profile.id}${initialMsg ? `&msg=${encodeURIComponent(initialMsg)}` : ''}`);
   };
 
   // User sends a text reply
@@ -96,8 +96,8 @@ export default function PersonaLanding() {
       setStep('pic_sent');
 
       // She reacts after a realistic delay
-      await personaSays('omg wait 😭🔥', 800, 900);
-      await personaSays('ok ur actually so cute wtf', 600, 1200);
+      await profileSays('omg wait 😭🔥', 800, 900);
+      await profileSays('ok ur actually so cute wtf', 600, 1200);
       setStep('signup');
     };
     reader.readAsDataURL(file);
@@ -117,7 +117,7 @@ export default function PersonaLanding() {
             <span className="text-[9px] font-black uppercase tracking-widest text-white/60">Live Pulse</span>
           </div>
           <div className="space-y-4">
-            {[...initialPersonas].reverse().slice(0, 4).map((p, i) => (
+            {[...initialProfiles].reverse().slice(0, 4).map((p, i) => (
               <motion.div key={p.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
                 className="p-3 bg-white/5 border border-white/5 rounded-2xl flex items-center gap-3 opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
                 onClick={() => router.push(`/${p.id}`)}
@@ -144,7 +144,7 @@ export default function PersonaLanding() {
           <div className="relative group">
             <div className="absolute inset-0 bg-[#00f0ff]/20 blur-[60px] scale-125 opacity-30 group-hover:opacity-60 transition-all rounded-full" />
             <div className="w-52 h-52 md:w-60 md:h-60 rounded-[4rem] overflow-hidden border border-white/10 relative z-10 shadow-2xl">
-              <Image src={persona.image} alt={persona.name} fill unoptimized className="object-cover" />
+              <Image src={profile.image} alt={profile.name} fill unoptimized className="object-cover" />
             </div>
             <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-[#00f0ff] px-5 py-1.5 rounded-full flex items-center gap-2 z-20 whitespace-nowrap shadow-[0_0_30px_rgba(0,240,255,0.4)]">
               <div className="w-1.5 h-1.5 rounded-full bg-black animate-pulse" />
@@ -154,9 +154,9 @@ export default function PersonaLanding() {
 
           {/* Name */}
           <div className="space-y-2 pt-4">
-            <h1 className="text-6xl md:text-8xl font-syncopate font-black uppercase italic tracking-tighter text-white">{persona.name}</h1>
+            <h1 className="text-6xl md:text-8xl font-syncopate font-black uppercase italic tracking-tighter text-white">{profile.name}</h1>
             <p className="text-white/30 text-[10px] font-black uppercase tracking-[0.3em] italic">
-              {persona.vibe || 'Elite connection.'} · {persona.city} {persona.flag}
+              {profile.vibe || 'Elite connection.'} · {profile.city} {profile.flag}
             </p>
           </div>
 
@@ -179,12 +179,7 @@ export default function PersonaLanding() {
           </div>
 
           {/* ══════════════════════════════════════════════════
-              THE COLD OPEN — Photo Investment Flow
-              1. She texts first
-              2. Asks for a pic
-              3. They upload (client-side only)
-              4. She compliments
-              5. Sign-up wall
+              THE COLD OPEN — Photo Investment Flow Flow
               ══════════════════════════════════════════════════ */}
           <div className="w-full max-w-xs text-left space-y-3">
 
@@ -196,9 +191,9 @@ export default function PersonaLanding() {
                 animate={{ opacity: 1, y: 0 }}
                 className={`flex items-end gap-2 ${msg.from === 'user' ? 'flex-row-reverse' : ''}`}
               >
-                {msg.from === 'persona' && (
+                {msg.from === 'profile' && (
                   <div className="w-7 h-7 rounded-xl overflow-hidden shrink-0 border border-white/10 relative self-end">
-                    <Image src={persona.image} alt="" fill unoptimized className="object-cover" />
+                    <Image src={profile.image} alt="" fill unoptimized className="object-cover" />
                   </div>
                 )}
                 {msg.img ? (
@@ -207,7 +202,7 @@ export default function PersonaLanding() {
                   </div>
                 ) : (
                   <div className={`rounded-3xl px-4 py-2.5 max-w-[85%] ${
-                    msg.from === 'persona'
+                    msg.from === 'profile'
                       ? 'bg-[#1c1c1c] border border-white/5 rounded-bl-sm'
                       : 'bg-[#00f0ff]/20 border border-[#00f0ff]/20 rounded-br-sm'
                   }`}>
@@ -222,7 +217,7 @@ export default function PersonaLanding() {
               {isTyping && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-end gap-2">
                   <div className="w-7 h-7 rounded-xl overflow-hidden shrink-0 border border-white/10 relative">
-                    <Image src={persona.image} alt="" fill unoptimized className="object-cover" />
+                    <Image src={profile.image} alt="" fill unoptimized className="object-cover" />
                   </div>
                   <div className="bg-[#1c1c1c] border border-white/5 rounded-3xl rounded-bl-sm px-4 py-3">
                     <div className="flex items-center gap-1">
@@ -259,8 +254,7 @@ export default function PersonaLanding() {
                     onClick={() => fileRef.current?.click()}
                     className="w-full h-12 bg-white/5 border border-white/10 hover:border-[#ff00ff]/40 rounded-2xl flex items-center justify-center gap-3 transition-all group active:scale-95"
                   >
-                    <Camera size={16} className="text-[#ff00ff] group-hover:scale-110 transition-transform" />
-                    <span className="text-[12px] font-bold text-white/60 group-hover:text-white transition-colors italic">send a pic 📸</span>
+                    <span className="text-[12px] font-bold text-white/60 group-hover:text-white transition-colors italic">Send a pic 📸</span>
                   </button>
                   <button
                     onClick={() => handleConnect()}
@@ -284,7 +278,7 @@ export default function PersonaLanding() {
                       onClick={() => handleConnect()}
                       className="w-full h-12 bg-[#ffea00] text-black rounded-2xl font-syncopate font-black uppercase italic tracking-widest text-[10px] hover:bg-white transition-all active:scale-95 shadow-[0_8px_30px_rgba(255,234,0,0.2)]"
                     >
-                      Continue Chatting →
+                      Connect with {profile.name} →
                     </button>
                     <p className="text-[8px] text-white/20 uppercase font-black tracking-widest">Free to join · Takes 10 seconds</p>
                   </div>
@@ -351,7 +345,7 @@ export default function PersonaLanding() {
             <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-6 px-6">
               {[1, 2, 3, 4].map(i => (
                 <div key={i} onClick={() => handleConnect()} className="min-w-[90px] aspect-[4/5] rounded-2xl overflow-hidden border border-white/5 relative group/v shrink-0 cursor-pointer">
-                  <Image src={persona.image} alt="" fill unoptimized className="object-cover blur-2xl opacity-25 grayscale" />
+                  <Image src={profile.image} alt="" fill unoptimized className="object-cover blur-2xl opacity-25 grayscale" />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/50 group-hover/v:bg-black/30 transition-all">
                     <Lock size={16} className="text-white/20 group-hover/v:text-[#ff00ff] transition-colors" />
                   </div>
@@ -391,7 +385,7 @@ export default function PersonaLanding() {
         <div className="w-px h-10 bg-gradient-to-b from-white/20 to-transparent mb-8" />
         <h4 className="text-[10px] font-black uppercase tracking-[0.5em] text-[#ff00ff] mb-8 italic">Discover More</h4>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full">
-          {initialPersonas.filter(p => p.id !== persona.id).slice(0, 4).map(p => (
+          {initialProfiles.filter(p => p.id !== profile.id).slice(0, 4).map(p => (
             <motion.div key={p.id} onClick={() => router.push(`/${p.id}`)} whileHover={{ y: -4 }}
               className="relative group cursor-pointer aspect-[3/4] rounded-[2rem] overflow-hidden border border-white/5">
               <Image src={p.image} alt={p.name} fill unoptimized className="object-cover opacity-60 group-hover:opacity-100 transition-all duration-700 grayscale group-hover:grayscale-0" />
@@ -420,20 +414,8 @@ export default function PersonaLanding() {
           onClick={() => handleConnect()}
           className="w-full max-w-sm bg-[#ffea00] text-black h-14 rounded-[2rem] font-syncopate font-black uppercase italic tracking-widest text-[11px] shadow-[0_8px_30px_rgba(255,234,0,0.2)] flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
-          <MessageSquare size={15} />
-          Chat with {persona.name}
+          Connect with {profile.name}
         </motion.button>
-      </div>
-
-      {/* Brand Footer */}
-      <div className="py-16 opacity-10 flex flex-col items-center gap-3">
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 bg-white rounded flex items-center justify-center rotate-45">
-            <Zap size={11} className="-rotate-45 text-black" />
-          </div>
-          <span className="font-syncopate font-black italic tracking-tighter text-sm uppercase">Gasp.fun</span>
-        </div>
-        <p className="text-[8px] font-black uppercase tracking-[0.4em]">© 2026 gasp.fun LLC</p>
       </div>
 
     </div>

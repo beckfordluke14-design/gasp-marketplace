@@ -6,19 +6,19 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 interface BottomNavProps {
-  onOpenChatList?: () => void;
+  onOpenProfileList?: () => void;
   onOpenTopUp?: () => void;
   unreadCount?: number;
 }
 
-export default function BottomNav({ onOpenChatList, onOpenTopUp, unreadCount = 0 }: BottomNavProps) {
+export default function BottomNav({ onOpenProfileList, onOpenTopUp, unreadCount = 0 }: BottomNavProps) {
   const pathname = usePathname();
 
   const navItems = [
     { label: 'Home', icon: Home, href: '/', active: pathname === '/' },
-    { label: 'Chat', icon: MessageSquare, onClick: onOpenChatList, active: false, badge: unreadCount },
+    { label: 'Profiles', icon: MessageSquare, onClick: onOpenProfileList, active: false, badge: unreadCount },
     { label: 'Vault', icon: Shield, href: '/vault', active: pathname === '/vault' },
-    { label: 'TopUp', icon: Zap, onClick: onOpenTopUp, active: false, highlight: true },
+    { label: 'Credits', icon: Zap, onClick: onOpenTopUp, active: false, highlight: true },
     { label: 'Profile', icon: User, href: '/vault', active: false },
   ];
 

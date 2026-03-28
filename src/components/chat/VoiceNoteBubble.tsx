@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Languages, LockOpen } from 'lucide-react';
+import { Play, Pause, Languages, LockOpen, Mic } from 'lucide-react';
 import Image from 'next/image';
-import PersonaAvatar from '../persona/PersonaAvatar';
+import ProfileAvatar from '../persona/ProfileAvatar';
 
 interface VoiceNoteBubbleProps {
   audioUrl: string;
-  personaImage?: string;
-  personaName?: string;
+  profileImage?: string;
+  profileName?: string;
   durationSeconds?: number;
   timestamp?: string;
   translation?: string;              // Locked English translation (from DB)
@@ -24,8 +24,8 @@ interface VoiceNoteBubbleProps {
  */
 export default function VoiceNoteBubble({
   audioUrl,
-  personaImage,
-  personaName,
+  profileImage,
+  profileName,
   durationSeconds,
   timestamp,
   translation,
@@ -41,7 +41,6 @@ export default function VoiceNoteBubble({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animFrameRef = useRef<number>(0);
 
-  // Seeded waveform heights — deterministic per audio URL so it doesn't jump
   // Seeded waveform heights
   const barCount = 35;
   const bars = Array.from({ length: barCount }, (_, i) => {
@@ -92,13 +91,11 @@ export default function VoiceNoteBubble({
   const handleUnlockTranslation = async () => {
     if (isUnlocking || translationUnlocked) return;
     setIsUnlocking(true);
-    // 🧬 SOVEREIGN SYNC: Deducting credits for neural decode
     try {
         if (onUnlockTranslation) {
             const success = await onUnlockTranslation();
             if (success) setTranslationUnlocked(true);
         } else {
-            // Mock success for testing if no callback passed
             setTranslationUnlocked(true);
         }
     } finally {
@@ -158,7 +155,7 @@ export default function VoiceNoteBubble({
             {/* CHARACTER IDENTITY NODE */}
             <div className="relative shrink-0 ml-2">
                 <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-white/5 shadow-xl">
-                    <PersonaAvatar src={personaImage || '/v1.png'} alt="Lila" />
+                    <ProfileAvatar src={profileImage || '/v1.png'} alt={profileName || ''} />
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[#00f0ff] border-2 border-black flex items-center justify-center shadow-[0_0_10px_#00f0ff]">
                     <Mic size={8} className="text-black" />
@@ -192,6 +189,3 @@ export default function VoiceNoteBubble({
     </div>
   );
 }
-
-
-

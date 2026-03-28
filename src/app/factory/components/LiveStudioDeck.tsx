@@ -4,7 +4,7 @@ import { VISION_LIBRARY, type VisualCategory } from '@/config/vision';
 import { Camera, Zap, Film, Layers, Info, CheckCircle2, X } from 'lucide-react';
 import Image from 'next/image';
 
-export default function LiveStudioDeck({ persona, onClose }: { persona: any, onClose: () => void }) {
+export default function LiveStudioDeck({ profile, onClose }: { profile: any, onClose: () => void }) {
   const [selectedCategory, setSelectedCategory] = useState<VisualCategory>('STREET_FLASH_CANDID');
   const [customClothing, setCustomClothing] = useState('');
   const [isRendering, setIsRendering] = useState(false);
@@ -24,7 +24,7 @@ export default function LiveStudioDeck({ persona, onClose }: { persona: any, onC
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'CHECK_VIDEO_JOB',
-                    persona_id: persona.id
+                    persona_id: profile.id
                 })
             });
             const job = await res.json();
@@ -41,7 +41,7 @@ export default function LiveStudioDeck({ persona, onClose }: { persona: any, onC
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [isRendering, persona.id, finalVideoUrl]);
+  }, [isRendering, profile.id, finalVideoUrl]);
 
   const handleDispatch = async () => {
      setIsRendering(true);
@@ -56,7 +56,7 @@ export default function LiveStudioDeck({ persona, onClose }: { persona: any, onC
            method: 'POST',
            headers: { 'Content-Type': 'application/json' },
            body: JSON.stringify({ 
-             personaId: persona.id, 
+             personaId: profile.id, 
              categoryId: selectedCategory,
              customClothing: customClothing
            })
@@ -64,7 +64,7 @@ export default function LiveStudioDeck({ persona, onClose }: { persona: any, onC
        
        if (!res.ok) throw new Error('Generation bridge failed.');
        
-       setLogs(p => [...p, '[stage_2] DISPATCHED TO GROK CLUSTER.', '[pulse] rendering motion vectors...']);
+       setLogs(p => [...p, '[stage_2] DISPATCHED TO ENGINE CLUSTER.', '[pulse] rendering motion vectors...']);
      } catch (e: any) {
         setLogs(p => [...p, '[error] Dispatch failed => ' + e.message]);
         setIsRendering(false);
@@ -83,7 +83,7 @@ export default function LiveStudioDeck({ persona, onClose }: { persona: any, onC
         <div className="flex-1 p-6 md:p-10 space-y-8 overflow-y-auto no-scrollbar border-r border-white/5">
             <div className="flex justify-between items-start">
                <div>
-                  <h3 className="text-[#ff00ff] font-syncopate font-black uppercase tracking-widest text-sm md:text-lg italic">Live Vision Deck</h3>
+                  <h3 className="text-[#ff00ff] font-syncopate font-black uppercase tracking-widest text-sm md:text-lg italic">Vision Deck</h3>
                   <p className="text-[9px] text-white/20 uppercase tracking-[0.4em] font-black mt-1">Multi-Stage Synthesis Engine</p>
                </div>
                <button onClick={() => setShowHowTo(!showHowTo)} className="p-2 rounded-full bg-white/5 text-white/40 hover:text-[#00f0ff] transition-all">
@@ -147,7 +147,7 @@ export default function LiveStudioDeck({ persona, onClose }: { persona: any, onC
         <div className="w-full md:w-[380px] bg-black p-6 md:p-10 flex flex-col justify-between border-l border-white/5">
             <div className="space-y-6">
                <div className="aspect-[3/4] bg-white/5 rounded-3xl overflow-hidden relative border border-white/10 group">
-                  <Image src={persona.seed_image_url || persona.image} alt="" fill unoptimized className={`object-cover ${isRendering ? 'blur-xl animate-pulse grayscale' : ''}`} />
+                  <Image src={profile.seed_image_url || profile.image} alt="" fill unoptimized className={`object-cover ${isRendering ? 'blur-xl animate-pulse grayscale' : ''}`} />
                   {isRendering && (
                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/40 backdrop-blur-sm z-10">
                         <Film className="w-10 h-10 text-[#00f0ff] animate-spin" />
@@ -156,8 +156,8 @@ export default function LiveStudioDeck({ persona, onClose }: { persona: any, onC
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
                   <div className="absolute bottom-6 inset-x-6 flex items-center gap-3">
-                     <span className="px-3 py-1 bg-black/80 backdrop-blur-md rounded-lg text-[10px] font-black uppercase text-[#ffea00] border border-[#ffea00]/30 shadow-lg">Source: Gemini 3.1</span>
-                     {isRendering && <span className="px-3 py-1 bg-[#ff00ff] rounded-lg text-[10px] font-black uppercase text-black animate-bounce shadow-xl">Grok Active</span>}
+                     <span className="px-3 py-1 bg-black/80 backdrop-blur-md rounded-lg text-[10px] font-black uppercase text-[#ffea00] border border-[#ffea00]/30 shadow-lg">Engine: V.4.0 High-Fidelity</span>
+                     {isRendering && <span className="px-3 py-1 bg-[#ff00ff] rounded-lg text-[10px] font-black uppercase text-black animate-bounce shadow-xl">Gasp Active</span>}
                   </div>
                </div>
 
@@ -187,6 +187,3 @@ export default function LiveStudioDeck({ persona, onClose }: { persona: any, onC
     </div>
   );
 }
-
-
-

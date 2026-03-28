@@ -3,28 +3,28 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
 import Image from 'next/image';
-import PersonaAvatar from './persona/PersonaAvatar';
+import ProfileAvatar from './persona/ProfileAvatar';
 
 interface ChatDockProps {
   minimizedIds: string[];
   unreadCounts: Record<string, number>;
   onRestore: (id: string) => void;
-  personas: any[];
+  profiles: any[];
 }
 
 /**
- * THE CHAT DOCK (Minimized Personas)
+ * THE CHAT DOCK (Minimized Profiles)
  * Objective: High-end taskbar for characters with LIVE notifications.
  */
-export default function ChatDock({ minimizedIds, unreadCounts, onRestore, personas }: ChatDockProps) {
+export default function ChatDock({ minimizedIds, unreadCounts, onRestore, profiles }: ChatDockProps) {
   if (minimizedIds.length === 0) return null;
 
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[400] flex items-center gap-4 bg-black/40 backdrop-blur-3xl px-6 py-4 rounded-[2.5rem] border border-white/5 shadow-[0_0_50px_rgba(0,0,0,1)]">
       <AnimatePresence mode="popLayout">
         {minimizedIds.map((id) => {
-          const p = personas.find((p) => p.id === id);
-          if (!p) return null;
+          const profileItem = profiles.find((p) => p.id === id);
+          if (!profileItem) return null;
           
           const unread = unreadCounts[id] || 0;
 
@@ -43,7 +43,7 @@ export default function ChatDock({ minimizedIds, unreadCounts, onRestore, person
                 w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all relative
                 ${unread > 0 ? 'border-[#ff00ff] shadow-[0_0_20px_rgba(255,0,255,0.4)]' : 'border-[#ff00ff]/20 group-hover:border-[#ff00ff]'}
               `}>
-                <PersonaAvatar src={p.image} alt={p.name} />
+                <ProfileAvatar src={profileItem.image} alt={profileItem.name} />
                 
                 {/* Status Indicator (GREEN GLOW) */}
                 <div className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_8px_#00ff00] animate-pulse" />
@@ -58,7 +58,7 @@ export default function ChatDock({ minimizedIds, unreadCounts, onRestore, person
 
               {/* Tooltip */}
               <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  {p.name.toLowerCase()}
+                  {profileItem.name.toLowerCase()}
               </div>
             </motion.button>
           );
@@ -67,6 +67,3 @@ export default function ChatDock({ minimizedIds, unreadCounts, onRestore, person
     </div>
   );
 }
-
-
-

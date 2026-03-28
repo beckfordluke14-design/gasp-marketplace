@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { initialPersonas, proxyImg, getPersonaName } from '@/lib/profiles';
+import { initialPersonas, proxyImg, getProfileName } from '@/lib/profiles';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
@@ -16,21 +16,21 @@ import {
   Diamond
 } from 'lucide-react';
 import { useUser } from '@/components/providers/UserProvider';
-import PersonaAvatar from '@/components/persona/PersonaAvatar';
+import ProfileAvatar from '@/components/persona/ProfileAvatar';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 
 
 interface TopDiscoveryProps {
-  selectedPersonaId: string;
-  onSelectPersona: (id: string, initialMsg?: string) => void;
+  selectedProfileId: string;
+  onSelectProfile: (id: string, initialMsg?: string) => void;
   unreadCounts: Record<string, number>;
-  personas: any[];
+  profiles: any[];
   deadIds: Set<string>;
   setDeadIds: (ids: any) => void;
 }
 
-export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unreadCounts = {}, personas, deadIds, setDeadIds }: TopDiscoveryProps) {
+export default function TopDiscovery({ selectedProfileId, onSelectProfile, unreadCounts = {}, profiles, deadIds, setDeadIds }: TopDiscoveryProps) {
   const { user, profile } = useUser();
   const [following, setFollowing] = useState<string[]>([]);
   const [isVisible, setIsVisible] = useState(true);
@@ -77,7 +77,7 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
   }, [profile]);
 
   const handleSelect = (id: string) => {
-     onSelectPersona(id);
+     onSelectProfile(id);
      if (!seenIds.includes(id)) {
         const next = [...seenIds, id];
         setSeenIds(next);
@@ -106,8 +106,8 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
           >
              <div className="w-full max-w-[95vw] lg:max-w-none bg-black/40 backdrop-blur-3xl border-y border-white/5 h-20 md:h-24 flex items-center overflow-hidden pointer-events-auto [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
                 <div className="flex items-center gap-4 px-10 overflow-x-auto no-scrollbar scroll-smooth w-full">
-                   {personas.filter(p => !deadIds.has(p.id)).map((p) => {
-                      const isSelected = selectedPersonaId === p.id;
+                   {profiles.filter(p => !deadIds.has(p.id)).map((p) => {
+                      const isSelected = selectedProfileId === p.id;
                       const unread = unreadCounts[p.id] || 0;
                       const isFollowing = following.includes(p.id);
                       const isSeen = seenIds.includes(p.id);
@@ -130,7 +130,7 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
                                    className="w-full h-full select-none pointer-events-none"
                                    onContextMenu={(e) => e.preventDefault()}
                                  >
-                                    <PersonaAvatar 
+                                    <ProfileAvatar 
                                       src={p.image} 
                                       alt={p.name} 
                                       onImageError={() => {

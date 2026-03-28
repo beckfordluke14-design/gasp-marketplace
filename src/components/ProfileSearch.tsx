@@ -4,30 +4,30 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, X, Zap, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import PersonaAvatar from './persona/PersonaAvatar';
-import { initialPersonas, proxyImg } from '@/lib/profiles';
+import ProfileAvatar from './persona/ProfileAvatar';
+import { initialProfiles, proxyImg } from '@/lib/profiles';
 
-export default function PersonaSearch({ deadIds, setDeadIds }: { deadIds: Set<string>, setDeadIds: (ids: any) => void }) {
+export default function ProfileSearch({ deadIds, setDeadIds }: { deadIds: Set<string>, setDeadIds: (ids: any) => void }) {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [allPersonas, setAllPersonas] = useState<any[]>([]);
+  const [allProfiles, setAllProfiles] = useState<any[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchAll() {
-      // 🚑 NEURAL SYNC: Derive search results from active personas and feed
+      // 🚑 NEURAL SYNC: Derive search results from active profiles and feed
       const res = await fetch('/api/admin/feed?limit=200');
       const json = await res.json();
       
-      const dbPersonas: any[] = [];
+      const dbProfiles: any[] = [];
       if (json.success && json.posts) {
          const seen = new Set();
          json.posts.forEach((p: any) => {
             if (p.personas && !seen.has(p.persona_id)) {
                seen.add(p.persona_id);
-               dbPersonas.push({
+               dbProfiles.push({
                   ...p.personas,
                   id: p.persona_id,
                   image: proxyImg(p.content_url || p.personas.seed_image_url)
@@ -37,12 +37,12 @@ export default function PersonaSearch({ deadIds, setDeadIds }: { deadIds: Set<st
       }
 
       const combined = [
-        ...dbPersonas,
-        ...initialPersonas.map(p => ({ id: p.id, name: p.name, city: p.city, race: (p as any).race, tags: p.tags, image: (p as any).image || '/v1.png' }))
+        ...dbProfiles,
+        ...initialProfiles.map(p => ({ id: p.id, name: p.name, city: p.city, race: (p as any).race, tags: p.tags, image: p.image || '/v1.png' }))
       ];
       // Unique by ID
       const unique = combined.filter((p, i, self) => i === self.findIndex(t => t.id === p.id));
-      setAllPersonas(unique);
+      setAllProfiles(unique);
     }
     fetchAll();
 
@@ -57,27 +57,27 @@ export default function PersonaSearch({ deadIds, setDeadIds }: { deadIds: Set<st
 
   useEffect(() => {
     if (query.length > 0) {
-      const filtered = allPersonas
+      const filtered = allProfiles
         .filter(p => !deadIds.has(p.id))
-        .filter(p => p.image && p.image !== '/v1.png' && p.image !== '' && p.image !== 'undefined' && p.image !== 'null') // Filter out vault/gift items
+        .filter(p => p.image && p.image !== '/v1.png' && p.image !== '' && p.image !== 'undefined' && p.image !== 'null') 
         .filter(p => 
           p.name.toLowerCase().includes(query.toLowerCase()) || 
           (p.city && p.city.toLowerCase().includes(query.toLowerCase())) ||
           (p.race && p.race.toLowerCase().includes(query.toLowerCase())) ||
           (p.tags && p.tags.some((t: string) => t.toLowerCase().includes(query.toLowerCase())))
-        ).slice(0, 10); // increased limit to 10 for tag-based discovery
+        ).slice(0, 10); 
       setResults(filtered);
       setIsOpen(true);
     } else {
       setResults([]);
       setIsOpen(false);
     }
-  }, [query, allPersonas]);
+  }, [query, allProfiles, deadIds]);
 
   const handleSelect = (pId: string) => {
     setQuery('');
     setIsOpen(false);
-    router.push(`/?persona=${pId}`);
+    router.push(`/?profile=${pId}`);
   };
 
   return (
@@ -119,7 +119,7 @@ export default function PersonaSearch({ deadIds, setDeadIds }: { deadIds: Set<st
                   className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-all group text-left"
                 >
                   <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 shrink-0 relative">
-                    <PersonaAvatar 
+                    <ProfileAvatar 
                       src={p.image} 
                       alt="" 
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform" 
@@ -147,5 +147,3 @@ export default function PersonaSearch({ deadIds, setDeadIds }: { deadIds: Set<st
     </div>
   );
 }
-
-

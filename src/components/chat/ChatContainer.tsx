@@ -7,8 +7,8 @@ import { Send, Clock, Sparkles } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
 interface ChatContainerProps {
-  personaId: string;
-  personaName: string;
+  profileId: string;
+  profileName: string;
   guestId: string;
 }
 
@@ -17,30 +17,30 @@ interface ChatContainerProps {
  * Objective: Hydrate history and maintain thread continuity across sessions.
  * NOTE: useChat is cast 'as any' throughout because @ai-sdk/react v3+ changed the API surface.
  */
-export default function ChatContainer({ personaId, personaName, guestId }: ChatContainerProps) {
+export default function ChatContainer({ profileId, profileName, guestId }: ChatContainerProps) {
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // 1. USE-CHAT CIRCUIT — cast as any to survive AI SDK v3 API changes
   const { messages, input, handleInputChange, handleSubmit, setMessages, isLoading }: any = useChat({
     api: '/api/chat',
-    id: `${personaId}-${guestId}`,
+    id: `${profileId}-${guestId}`,
     body: {
       userId: guestId,
-      personaId,
+      personaId: profileId,
     },
   } as any);
 
   // 2. NEURAL HYDRATION: Load historical messages from Supabase
   useEffect(() => {
     async function loadHistory() {
-      if (!guestId || !personaId) return;
+      if (!guestId || !profileId) return;
       
       const { data: dbMessages } = await supabase
         .from('chat_messages')
         .select('*')
         .eq('user_id', guestId)
-        .eq('persona_id', personaId)
+        .eq('persona_id', profileId)
         .order('created_at', { ascending: true })
         .limit(20);
 
@@ -57,7 +57,7 @@ export default function ChatContainer({ personaId, personaName, guestId }: ChatC
     }
 
     loadHistory();
-  }, [guestId, personaId, setMessages]);
+  }, [guestId, profileId, setMessages]);
 
   // 3. Auto-scroll on new messages
   useEffect(() => {
@@ -129,7 +129,7 @@ export default function ChatContainer({ personaId, personaName, guestId }: ChatC
               onChange={handleInputChange}
               disabled={!historyLoaded || isLoading}
               onKeyDown={(e) => e.stopPropagation()}
-              placeholder={`message ${personaName.toLowerCase()}...`}
+              placeholder={`message ${profileName.toLowerCase()}...`}
               className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-xs font-medium outline-none focus:border-[#00f0ff]/40 transition-all text-white placeholder:text-white/20 relative z-[500] pointer-events-auto"
             />
             <button

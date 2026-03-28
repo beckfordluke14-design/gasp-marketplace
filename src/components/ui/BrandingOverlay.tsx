@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface BrandingOverlayProps {
-  personaName?: string;
+  profileName?: string;
   className?: string;
 }
 
@@ -10,7 +10,7 @@ interface BrandingOverlayProps {
  * Purpose: Professional-grade CTA over public content while keeping source files clean.
  * Design: High-lux, semi-transparent neon magenta/cyan.
  */
-const BrandingOverlay: React.FC<BrandingOverlayProps> = ({ personaName, className = "" }) => {
+const BrandingOverlay: React.FC<BrandingOverlayProps> = ({ profileName, className = "" }) => {
   return (
     <div className={`absolute inset-0 pointer-events-none z-20 overflow-hidden ${className}`}>
         {/* Horizon-Sync Horizontal Branding (Shifted Left) - GASP V11 */}
