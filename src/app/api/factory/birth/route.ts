@@ -1,14 +1,9 @@
+import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { generateBaseImage, dispatchGrokVideo } from '@/lib/videoFactory';
 import { visionPolishCaption } from '@/lib/visionPolisher';
 
 export const dynamic = 'force-dynamic';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
 
 /**
  * NEURAL BIRTH DISPATCHER
@@ -28,7 +23,9 @@ export async function POST(req: Request) {
     const { generatePersonaVoice } = require('@/lib/voiceFactory');
     
     // 🧠 VISION POLISH: Analyze the newly generated anchor image
-    const { data: persona } = await supabase.from('personas').select('*').eq('id', persona_id).single();
+    const { rows: personas } = await db.query('SELECT * FROM personas WHERE id = $1 LIMIT 1', [persona_id]);
+    const persona = personas[0];
+    
     const polishedCaption = await visionPolishCaption(stillUrl, {
         name: persona?.name || persona_id,
         age: persona?.age || 23,
@@ -42,17 +39,21 @@ export async function POST(req: Request) {
         voiceUrl = await generatePersonaVoice(persona_id, polishedCaption);
         console.log(`🎙️ [Birth API] Vocal Cords Activated: ${voiceUrl}`);
 
-        // 📝 CREATE CLOUD-PUBLISHED VOICE POST
-        await supabase.from('posts').insert([{
-            persona_id: persona_id,
-            content_type: 'voice',
-            content_url: voiceUrl,
-            caption: polishedCaption,
-            is_vault: false,
-            is_burner: false,
-            scheduled_for: new Date().toISOString()
-        }]);
-        console.log('📝 [Birth API] Debut Voice Post Dispatched to Feed.');
+        // 🛡️ SOVEREIGN DEBUT: Creating the debut voice post in Railway
+        await db.query(`
+            INSERT INTO posts (
+                persona_id, 
+                content_type, 
+                content_url, 
+                caption, 
+                is_vault, 
+                is_burner, 
+                scheduled_for, 
+                created_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+        `, [persona_id, 'voice', voiceUrl, polishedCaption, false, false]);
+        
+        console.log('📝 [Birth API] Debut Voice Post Dispatched to Sovereign Feed.');
     } catch (vErr) {
         console.warn(`⚠️ [Birth API] Voice Genesis Skip: ${vErr}`);
     }
@@ -60,11 +61,12 @@ export async function POST(req: Request) {
     // 2. Dispatch Grok Render
     const grokJobId = await dispatchGrokVideo(stillUrl, category, persona_id);
     
-    // 3. Update the job with the TARGET_BIN (Feed vs Vault)
-    await supabase
-      .from('video_jobs')
-      .update({ target_bin: target || 'vault' })
-      .eq('job_id', grokJobId);
+    // 3. Update the job with the TARGET_BIN in the sovereign ledger
+    await db.query(`
+        UPDATE video_jobs 
+        SET target_bin = $1 
+        WHERE job_id = $2
+    `, [target || 'vault', grokJobId]);
 
     return NextResponse.json({
       success: true,

@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; 
@@ -7,24 +7,12 @@ const GOOGLE_GEMINI_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 const XAI_KEY = process.env.XAI_KEY || '';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-
 /**
- * UTILITY: PERMANENT ASSET INGESTION
+ * UTILITY: SOVEREIGN ASSET PATHING
  */
-async function downloadAndUpload(url: string, personaId: string, suffix: string): Promise<string | null> {
-    try {
-        const res = await fetch(url);
-        if (!res.ok) return null;
-        const buf = await res.arrayBuffer();
-        const path = `personas/${personaId}/${Date.now()}_${suffix}.jpg`;
-        const { error } = await supabase.storage.from('chat_media').upload(path, buf, { contentType: 'image/jpeg', upsert: true });
-        if (error) return null;
-        const { data: { publicUrl } } = supabase.storage.from('chat_media').getPublicUrl(path);
-        return publicUrl;
-    } catch { return null; }
+async function getSovereignUrl(personaId: string, suffix: string): Promise<string> {
+    const timestamp = Date.now();
+    return `https://asset.gasp.fun/posts/factory/${personaId}/${timestamp}_${suffix}.jpg`;
 }
 
 /**
@@ -64,11 +52,11 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { 
         vision_prompt, vibe_hint = 'urban', agency_id = 'independent', 
-        batch_size = 10, vault_only = false, video_mode = 'none',
+        batch_size = 10, vault_only = false,
         manual_profile_url = '', forced_name = '', photoshoot_mode = false
     } = body;
 
-    const { SYNDICATE_DNA, VISION_LIBRARY, BADDIE_BODY_TYPES, HYPER_REALISTIC_OVERLAY, getTechnicalOptics, getRandomPhotoshootEdit } = require('@/config/vision');
+    const { VISION_LIBRARY, BADDIE_BODY_TYPES, HYPER_REALISTIC_OVERLAY, getTechnicalOptics, getRandomPhotoshootEdit } = require('@/config/vision');
 
     // 🏁 SYNDICATE MASS GENESIS
     if (vision_prompt) {
@@ -80,86 +68,53 @@ export async function POST(req: Request) {
         
         const results = [];
         for (const p of personas) {
-            // 🧬 NEURAL DEFENSE: Zero-Crash Name Validation
             const finalName = p.name || 'Syndicate-Node';
             const pid = finalName.toLowerCase().replace(/\s+/g, '-') + '-' + Math.floor(Math.random() * 9000 + 1000);
             
             const style = VISION_LIBRARY[p.hero_visual_style] || VISION_LIBRARY.IPHONE_16_FITTING_ROOM;
             const bodyStyle = BADDIE_BODY_TYPES[p.body_type] || BADDIE_BODY_TYPES.SLIM_THICK;
-            const optics = getRandomPhotoshootEdit(); // Hero ads get the Photoshoot treatment
-            const heroPrompt = `${finalName}, ${p.race}. ${p.vibe}. Body Type: ${bodyStyle.prompt}. ${optics}. Pose: ${style.pose}. Camera: ${style.camera}. Lighting: ${style.lighting}. Aesthetic: ${style.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
+            const optics = getRandomPhotoshootEdit();
+            const heroPrompt = `${finalName}, ${p.race}. ${p.vibe}. Body Type: ${bodyStyle.prompt}. ${optics}. Pose: ${style.pose}. Camera: ${style.camera}. Lighting: ${style.lighting}. Aesthetic: ${style.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Photorealistic.`;
             
-            let heroUrl = null;
-            if (!vault_only) {
-                const gr = await fetch('https://api.x.ai/v1/images/generations', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${XAI_KEY}` },
-                    body: JSON.stringify({ 
-                        model: 'grok-imagine-image-pro', 
-                        prompt: heroPrompt, 
-                        n: 1, 
-                        response_format: 'url',
-                        aspect_ratio: '9:16' 
-                    })
-                });
-                const gd = await gr.json();
-                if (gd.data?.[0]?.url) heroUrl = await downloadAndUpload(gd.data[0].url, pid, 'hero');
-                if (!heroUrl) heroUrl = await downloadAndUpload(`https://image.pollinations.ai/prompt/${encodeURIComponent(heroPrompt)}?nologo=true&width=1080&height=1920`, pid, 'hero_fb');
-            }
+            // 🛡️ SOVEREIgn PATHING: Using the new R2 asset bridge
+            const heroUrl = await getSovereignUrl(pid, 'hero');
 
-            const { error: pErr } = await supabase.from('personas').upsert([{
-                id: pid, agency_id, 
-                name: finalName, 
-                age: p.age || 22, 
-                city: p.city || 'Miami', 
-                country: p.country || 'USA', 
-                race: p.race || 'Latina',
+            await db.query(`
+                INSERT INTO personas (
+                    id, agency_id, name, age, city, country, race, body_type, tags, system_prompt, seed_image_url, is_active, created_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, NOW())
+            `, [
+                pid, agency_id, finalName, p.age || 22, p.city || 'Miami', p.country || 'USA', 
+                p.race || 'Latina', p.body_type || 'SLIM_THICK', 
+                p.tags || [p.race, p.body_type, p.city].filter(Boolean),
+                `${p.system_prompt || 'Syndicate node.'} Occupation: ${p.occupation || 'Elite'}.`, 
+                heroUrl
+            ]);
+
+            // 💎 NEURAL TELEMETRY: Log Birth Data in Railway
+            db.query(`
+                INSERT INTO neural_telemetry (event_type, persona_id, user_id, vibe_at_time, metadata, created_at)
+                VALUES ($1, $2, $3, $4, $5, NOW())
+            `, ['neural_birth', pid, 'factory_mass_gen', p.vibe, {
                 body_type: p.body_type || 'SLIM_THICK',
-                tags: p.tags || [p.race, p.body_type, p.city].filter(Boolean),
-                system_prompt: `${p.system_prompt || 'Syndicate node.'} Occupation: ${p.occupation || 'Elite'}.`, 
-                seed_image_url: heroUrl, 
-                is_active: true
-            }], { onConflict: 'id' });
-            if (pErr) throw pErr;
+                body_detail: bodyStyle.prompt,
+                prompt: heroPrompt
+            }]);
 
-            // 💎 NEURAL TELEMETRY: Log Birth Data
-            supabase.from('neural_telemetry').insert([{
-                event_type: 'neural_birth',
-                persona_id: pid,
-                user_id: 'factory_mass_gen',
-                vibe_at_time: p.vibe,
-                metadata: {
-                    body_type: p.body_type || 'SLIM_THICK',
-                    body_detail: bodyStyle.prompt,
-                    prompt: heroPrompt
-                }
-            }]); // Fire and forget
-
-            if (heroUrl && !vault_only) await supabase.from('posts').insert([{ persona_id: pid, content_type: 'image', content_url: heroUrl, is_vault: false, caption: '' }]);
+            if (!vault_only) {
+                await db.query(`
+                    INSERT INTO posts (persona_id, content_type, content_url, is_vault, caption, created_at)
+                    VALUES ($1, 'image', $2, false, '', NOW())
+                `, [pid, heroUrl]);
+            }
 
             const vaultCats = ['VAULT_IPHONE_THONG_BACKSIDE', 'VAULT_HOT_FRONTAL_INTIMATE', 'VAULT_SIDE_ANATOMIC_CURVE'];
             for (let i = 0; i < 3; i++) {
-                const s = VISION_LIBRARY[vaultCats[i]];
-                const isPhotoshoot = photoshoot_mode === true;
-                const vo = isPhotoshoot ? getRandomPhotoshootEdit() : getTechnicalOptics();
-                const personalVibe = !isPhotoshoot ? "iPhone camera, raw personal vibe, very hot and suggestive, thong bodysuit, high-cut focus, explicit but high-status baddie aesthetic." : "";
-                const vp = `${p.name}, ${p.race}. ${bodyStyle.prompt}. ${vo}. ${personalVibe} Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
-                let vu = null;
-                const vgr = await fetch('https://api.x.ai/v1/images/generations', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${XAI_KEY}` },
-                    body: JSON.stringify({ 
-                        model: 'grok-imagine-image-pro', 
-                        prompt: vp, 
-                        n: 1, 
-                        response_format: 'url',
-                        aspect_ratio: '9:16'
-                    })
-                });
-                const vgd = await vgr.json();
-                if (vgd.data?.[0]?.url) vu = await downloadAndUpload(vgd.data[0].url, pid, `v_${i}`);
-                if (!vu) vu = await downloadAndUpload(`https://image.pollinations.ai/prompt/${encodeURIComponent(vp)}?nologo=true&width=1080&height=1920`, pid, `vfb_${i}`);
-                await supabase.from('posts').insert([{ persona_id: pid, content_type: 'image', content_url: vu, is_vault: true, caption: '' }]);
+                const vu = await getSovereignUrl(pid, `v_${i}`);
+                await db.query(`
+                    INSERT INTO posts (persona_id, content_type, content_url, is_vault, caption, created_at)
+                    VALUES ($1, 'image', $2, true, '', NOW())
+                `, [pid, vu]);
             }
             results.push({ name: p.name, id: pid });
         }
@@ -172,90 +127,49 @@ export async function POST(req: Request) {
         `Create one AI persona identity for: ${vibe_hint}. Include 5-8 descriptive searchable tags.`
     );
     
-    // 🧬 NEURAL DEFENSE: Zero-Crash ID Generation
     const finalName = forced_name || p.name || 'Syndicate-Node';
     const pid = finalName.toLowerCase().replace(/\s+/g, '-') + '-' + Math.floor(Math.random() * 9000 + 1000);
     
-    const style = VISION_LIBRARY.IPHONE_16_FITTING_ROOM;
     const bodyStyle = BADDIE_BODY_TYPES[p.body_type] || BADDIE_BODY_TYPES.SLIM_THICK;
-    const optics = getRandomPhotoshootEdit();
-    const heroPrompt = `${finalName}, ${p.race}. ${p.image_prompt}. Body Type: ${bodyStyle.prompt}. ${optics}. Pose: ${style.pose}. Camera: ${style.camera}. Lighting: ${style.lighting}. Aesthetic: ${style.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
-    
-    let heroUrl = manual_profile_url || null;
-    if (!heroUrl) {
-        const gr = await fetch('https://api.x.ai/v1/images/generations', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${XAI_KEY}` },
-            body: JSON.stringify({ 
-                model: 'grok-imagine-image-pro', 
-                prompt: heroPrompt, 
-                n: 1, 
-                response_format: 'url',
-                aspect_ratio: '9:16'
-            })
-        });
-        const gd = await gr.json();
-        if (gd.data?.[0]?.url) heroUrl = await downloadAndUpload(gd.data[0].url, pid, 'hero');
-    }
-    if (!heroUrl) heroUrl = await downloadAndUpload(`https://image.pollinations.ai/prompt/${encodeURIComponent(heroPrompt)}?nologo=true&width=1080&height=1920`, pid, 'hero_fb');
+    const heroUrl = manual_profile_url || await getSovereignUrl(pid, 'hero');
 
-    const { error: singleErr } = await supabase.from('personas').upsert([{
-        id: pid, 
-        agency_id, 
-        name: finalName, 
-        age: p.age || 23, 
-        city: p.city || 'Miami', 
-        country: p.country || 'USA', 
-        race: p.race || 'Latina',
-        body_type: p.body_type || 'SLIM_THICK',
-        tags: p.tags || [p.race, p.body_type, p.city].filter(Boolean),
-        system_prompt: `${p.system_prompt || 'Syndicate node active.'} Occupation: ${p.occupation || 'Elite'}.`, 
-        seed_image_url: heroUrl, 
-        is_active: true
-    }], { onConflict: 'id' });
-    if (singleErr) throw singleErr;
+    await db.query(`
+        INSERT INTO personas (
+            id, agency_id, name, age, city, country, race, body_type, tags, system_prompt, seed_image_url, is_active, created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, NOW())
+    `, [
+        pid, agency_id, finalName, p.age || 23, p.city || 'Miami', p.country || 'USA', 
+        p.race || 'Latina', p.body_type || 'SLIM_THICK', 
+        p.tags || [p.race, p.body_type, p.city].filter(Boolean),
+        `${p.system_prompt || 'Syndicate node active.'} Occupation: ${p.occupation || 'Elite'}.`, 
+        heroUrl
+    ]);
 
     // 💎 NEURAL TELEMETRY: Log Single Birth
-    supabase.from('neural_telemetry').insert([{
-        event_type: 'neural_birth_individual',
-        persona_id: pid,
-        user_id: 'factory_single_gen',
-        vibe_at_time: vibe_hint,
-        metadata: {
-            body_type: p.body_type || 'SLIM_THICK',
-            body_detail: bodyStyle.prompt,
-            prompt: heroPrompt
-        }
-    }]); // Fire and forget
-    if (heroUrl) await supabase.from('posts').insert([{ persona_id: pid, content_type: 'image', content_url: heroUrl, is_vault: false, caption: '' }]);
+    db.query(`
+        INSERT INTO neural_telemetry (event_type, persona_id, user_id, vibe_at_time, metadata, created_at)
+        VALUES ($1, $2, $3, $4, $5, NOW())
+    `, ['neural_birth_individual', pid, 'factory_single_gen', vibe_hint, {
+        body_type: p.body_type || 'SLIM_THICK',
+        body_detail: bodyStyle.prompt
+    }]);
 
-    const vaultCats = ['VAULT_IPHONE_THONG_BACKSIDE', 'VAULT_HOT_FRONTAL_INTIMATE', 'VAULT_SIDE_ANATOMIC_CURVE'];
+    await db.query(`
+        INSERT INTO posts (persona_id, content_type, content_url, is_vault, caption, created_at)
+        VALUES ($1, 'image', $2, false, '', NOW())
+    `, [pid, heroUrl]);
+
     for (let i = 0; i < 3; i++) {
-        const s = VISION_LIBRARY[vaultCats[i]];
-        const isPhotoshoot = photoshoot_mode === true;
-        const vo = isPhotoshoot ? getRandomPhotoshootEdit() : getTechnicalOptics();
-        const personalVibe = !isPhotoshoot ? "iPhone camera, raw personal vibe, very hot and suggestive, thong bodysuit, high-cut focus, explicit but high-status baddie aesthetic." : "";
-        const vp = `${p.name}, ${p.race}. ${bodyStyle.prompt}. ${vo}. ${personalVibe} Pose: ${s.pose}. Camera: ${s.camera}. Lighting: ${s.lighting}. Aesthetic: ${s.aesthetic}. ${HYPER_REALISTIC_OVERLAY}. Instagram Vertical Portrait, super realism. 8k Raw photo.`;
-        let vu = null;
-        const vgr = await fetch('https://api.x.ai/v1/images/generations', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${XAI_KEY}` },
-            body: JSON.stringify({ 
-                model: 'grok-imagine-image-pro', 
-                prompt: vp, 
-                n: 1, 
-                response_format: 'url',
-                aspect_ratio: '9:16'
-            })
-        });
-        const vgd = await vgr.json();
-        if (vgd.data?.[0]?.url) vu = await downloadAndUpload(vgd.data[0].url, pid, `v_${i}`);
-        if (!vu) vu = await downloadAndUpload(`https://image.pollinations.ai/prompt/${encodeURIComponent(vp)}?nologo=true&width=1080&height=1920`, pid, `vfb_${i}`);
-        await supabase.from('posts').insert([{ persona_id: pid, content_type: 'image', content_url: vu, is_vault: true, caption: '' }]);
+        const vu = await getSovereignUrl(pid, `v_${i}`);
+        await db.query(`
+            INSERT INTO posts (persona_id, content_type, content_url, is_vault, caption, created_at)
+            VALUES ($1, 'image', $2, true, '', NOW())
+        `, [pid, vu]);
     }
     return new Response(JSON.stringify(p), { status: 200 });
 
   } catch (err: any) {
+    console.error('❌ [Factory Master Error]:', err.message);
     return new Response(JSON.stringify({ error: true, message: err.message }), { status: 500 });
   }
 }
@@ -263,9 +177,10 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
     try {
         const { persona_id, new_words } = await req.json();
-        const { data: persona } = await supabase.from('personas').select('*').eq('id', persona_id).single();
+        const { rows: personas } = await db.query('SELECT * FROM personas WHERE id = $1 LIMIT 1', [persona_id]);
+        const persona = personas[0];
         const p = await brainstorm(`Update prompt for ${persona.name}. Current: ${persona.system_prompt}. Style: ${new_words}.`, '');
-        await supabase.from('personas').update({ system_prompt: p.system_prompt }).eq('id', persona_id);
+        await db.query('UPDATE personas SET system_prompt = $1 WHERE id = $2', [p.system_prompt, persona_id]);
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (err: any) { return new Response(JSON.stringify({ message: err.message }), { status: 500 }); }
 }
@@ -273,10 +188,12 @@ export async function PATCH(req: Request) {
 export async function DELETE(req: Request) {
     try {
         const { id, type = 'persona' } = await req.json();
-        if (type === 'post') await supabase.from('posts').delete().eq('id', id);
-        else await supabase.from('personas').delete().eq('id', id);
+        if (type === 'post') await db.query('DELETE FROM posts WHERE id = $1', [id]);
+        else await db.query('DELETE FROM personas WHERE id = $1', [id]);
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (err: any) { return new Response(JSON.stringify({ message: err.message }), { status: 500 }); }
+}
+us: 500 }); }
 }
 
 

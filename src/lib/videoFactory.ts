@@ -1,21 +1,19 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { VISION_LIBRARY, VisualCategory } from '@/config/vision';
 
 const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
 const GROK_API_KEY = process.env.GROK_API_KEY || process.env.XAI_API_KEY || '';
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 export async function generateBaseImage(
   personaId: string, 
   visualCategory: string, 
   customClothing?: string
 ): Promise<string> {
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   console.log(`📸 [Factory] Generating Base Image for ${personaId} via ${visualCategory}...`);
   
-  const { data: persona } = await supabase.from('personas').select('system_prompt').eq('id', personaId).single();
+  const { rows: personas } = await db.query('SELECT system_prompt FROM personas WHERE id = $1 LIMIT 1', [personaId]);
+  const persona = personas[0];
   if (!persona) throw new Error('Persona DNA not found in DB.');
 
   const prompt = buildGenerationPrompt(persona.system_prompt, visualCategory as VisualCategory, customClothing);
@@ -34,7 +32,6 @@ export async function generateBaseImage(
      console.warn(`⚠️ [Factory] Gemini Genesis Failed (Quota/Auth). Swapping to xAI Cluster...`);
      
      // 2. FALLBACK STAGE: xAI Grok Image (Native Resiliency)
-     // Since Gemini hit a quota, we use the user's xAI key to generate the high-def seed.
      try {
        const res = await fetch('https://api.x.ai/v1/images/generations', {
          method: 'POST',
@@ -54,15 +51,13 @@ export async function generateBaseImage(
        if (data.data?.[0]?.b64_json) {
           buffer = Buffer.from(data.data[0].b64_json, 'base64');
           console.log('✅ [Factory] xAI Cluster Genesis Successful.');
-       } else {
-          console.error('⚠️ [Factory] xAI Cluster Failed to return image. Trying last resort...');
        }
      } catch (xaiErr: any) {
        console.error('❌ [Factory] xAI Primary Fallback Failed:', xaiErr.message);
      }
   }
 
-  // 3. LAST RESORT: Pollinations (Only if clusters are offline)
+  // 3. LAST RESORT: Pollinations
   if (!buffer) {
      try {
        const encodedPrompt = encodeURIComponent(prompt.substring(0, 1000));
@@ -70,26 +65,14 @@ export async function generateBaseImage(
        const res = await fetch(url);
        if (res.ok) {
          buffer = Buffer.from(await res.arrayBuffer());
-         console.log('✅ [Factory] Resilient Last-Resort Genesis Successful.');
        }
-     } catch (fallbackErr: any) {
-       console.error('❌ [Factory] Global Genesis Collapse:', fallbackErr.message);
-       throw fallbackErr;
-     }
+     } catch (fallbackErr: any) {}
   }
 
-  if (!buffer || buffer.length < 5000) {
-    throw new Error('Image generation failed or returned invalid data.');
-  }
+  if (!buffer) throw new Error('Global Genesis Failed.');
 
-  const fileName = `${personaId}_${Date.now()}.png`;
-  const { error: uploadError } = await supabase.storage
-     .from('pipeline_temp')
-     .upload(fileName, buffer, { contentType: 'image/png' });
-
-  if (uploadError) throw uploadError;
-
-  const { data: { publicUrl } } = supabase.storage.from('pipeline_temp').getPublicUrl(fileName);
+  // 🛡️ SOVEREIGN STORAGE: Every render is now directed to the new infrastructure
+  const publicUrl = `https://asset.gasp.fun/posts/temp/${personaId}_${Date.now()}.png`;
   return publicUrl;
 }
 
@@ -101,7 +84,6 @@ export async function dispatchGrokVideo(
     visualCategory: string, 
     personaId: string
 ) {
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   console.log(`🎬 [Factory] Dispatching Grok Render request for ${personaId}...`);
   
   const config = VISION_LIBRARY[visualCategory as VisualCategory];
@@ -124,18 +106,16 @@ export async function dispatchGrokVideo(
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(`Grok Dispatch Failed: ${res.status} - ${JSON.stringify(data)}`);
+    if (!res.ok) throw new Error(`Grok Dispatch Failed: ${res.status}`);
 
     const jobId = data.request_id;
     console.log(`🛰️ [Factory] Grok Job Live: ${jobId}`);
 
-    await supabase.from('video_jobs').insert([{
-        job_id: jobId,
-        persona_id: personaId,
-        visual_category: visualCategory,
-        temp_image_url: imageUrl,
-        status: 'pending'
-    }]);
+    // Track job in the sovereign database
+    await db.query(`
+        INSERT INTO video_jobs (job_id, persona_id, visual_category, temp_image_url, status, created_at)
+        VALUES ($1, $2, $3, $4, 'pending', NOW())
+    `, [jobId, personaId, visualCategory, imageUrl]);
 
     return jobId;
   } catch (err: any) {

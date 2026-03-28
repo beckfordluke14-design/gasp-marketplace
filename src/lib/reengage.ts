@@ -1,29 +1,21 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { initialPersonas } from './profiles';
 import { getEnvironmentContext } from './governor';
 import { isDaylightHours } from './governor/drip';
 import { sendNudgeEmail } from './emails';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
-
 /**
  * SYSTEM 3: SPONTANEOUS PING & RE-ENGAGEMENT LOOP
- * Objective: Drive users back with randomized, daylight-aware nudges.
- * Hosted on a Cron Job (Railway/Supabase pg_cron).
  */
 export async function runSpontaneousPingWorker() {
   console.log('[Governor] Searching for ghosting events in daylight zones...');
 
-  // 1. Query active / recent session durations
-  const { data: sessions, error } = await supabase
-    .from('chat_sessions')
-    .select('*')
-    .order('last_message_at', { ascending: false });
+  // 1. Query active / recent session durations from Railway
+  const { rows: sessions } = await db.query(
+    'SELECT * FROM chat_sessions ORDER BY last_message_at DESC'
+  );
 
-  if (error || !sessions) return;
+  if (!sessions || sessions.length === 0) return;
 
   const now = new Date();
 
@@ -50,7 +42,7 @@ export async function runSpontaneousPingWorker() {
       await triggerSpontaneousPing(session, p);
     }
     
-    // SYSTEM 4: 24-Hour Vault Tease (Legacy logic preserved)
+    // SYSTEM 4: 24-Hour Vault Tease
     if (diffHours >= 24) {
       console.log(`[Governor] 24h Vault Tease triggered for ${p.name}`);
       await triggerVaultTease(session, p);
@@ -59,7 +51,6 @@ export async function runSpontaneousPingWorker() {
 }
 
 async function triggerSpontaneousPing(session: any, persona: any) {
-  // SYSTEM 3 Action: "so bored rn", "what u doing?", "u got pics? let me see u"
   const vibes = [
     "so bored rn",
     "what u doing?", 
@@ -69,44 +60,36 @@ async function triggerSpontaneousPing(session: any, persona: any) {
   ];
   
   const ping = vibes[Math.floor(Math.random() * vibes.length)];
- 
-  // 🛡️ IDENTITY PULSE: Fetch user email from ledger (Privy Synced)
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('email')
-    .eq('id', session.user_id)
-    .single();
+  
+  // 🛡️ IDENTITY PULSE: Fetch user email from ledger (Railway)
+  const { rows: profiles } = await db.query(
+    'SELECT email FROM profiles WHERE id = $1 LIMIT 1',
+    [session.user_id]
+  );
+  const profile = profiles[0];
 
   if (profile?.email) {
     console.log(`[Governor] TRIGGERING EMAIL NUDGE: ${profile.email} (via ${persona.name})`);
     await sendNudgeEmail(profile.email, persona.name, ping);
   }
 
-  // Insert into Chat History to trigger UI "Green Dot" or Push
-  await supabase.from('chat_messages').insert({
-    session_id: session.id,
-    user_id: session.user_id,
-    persona_id: persona.id,
-    role: 'assistant',
-    content: ping
-  });
+  // Insert into Chat History in Railway
+  await db.query(`
+    INSERT INTO chat_messages (session_id, user_id, persona_id, role, content, created_at)
+    VALUES ($1, $2, $3, 'assistant', $4, NOW())
+  `, [session.id, session.user_id, persona.id, ping]);
  
-  // Increment 'unread' indicator if UI is configured
   console.log(`[Governor] SENT IN-APP: ${ping} by ${persona.name}`);
 }
 
 async function triggerVaultTease(session: any, p: any) {
-  if (!p.vault) return;
+  if (!p.vault || p.vault.length === 0) return;
   const item = p.vault[Math.floor(Math.random() * p.vault.length)];
   
-  await supabase.from('chat_messages').insert({
-     session_id: session.id,
-     user_id: session.user_id,
-     persona_id: p.id,
-     role: 'assistant',
-     content: `was gonna show u this but u quiet 🤫`,
-     image_url: item.blurred_url // Tease with blurred vault item
-  });
+  await db.query(`
+    INSERT INTO chat_messages (session_id, user_id, persona_id, role, content, image_url, created_at)
+    VALUES ($1, $2, $3, 'assistant', 'was gonna show u this but u quiet 🤫', $4, NOW())
+  `, [session.id, session.user_id, p.id, item.blurred_url]);
 }
 
 
