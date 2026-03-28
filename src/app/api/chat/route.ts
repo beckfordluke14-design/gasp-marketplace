@@ -142,13 +142,13 @@ export async function POST(req: Request) {
     } catch (parseErr: any) {
         console.warn('[Brain API] Output Parse Failed:', parseErr.message, cleanContent);
         syndicateOutput = { 
-            text_message: "Syncing Neural Node... One moment.", 
-            audio_script: "Syncing Neural Node. One moment.",
-            translation: "Syncing Neural Node. One moment."
+            text_message: "...", 
+            audio_script: "...",
+            translation: "..."
         };
     }
     
-    const streamB_Text = syndicateOutput.text_message || "Processing link...";
+    const streamB_Text = syndicateOutput.text_message || "...";
     const streamA_Native = syndicateOutput.audio_script || "";
     const streamA_Translation = syndicateOutput.translation || "";
 
