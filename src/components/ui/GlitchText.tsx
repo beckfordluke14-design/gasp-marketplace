@@ -25,7 +25,7 @@ export default function GlitchText({ text, className }: { text: string; classNam
           animate: {
             opacity: [0, 1, 0.7, 1, 0],
             x: [0, -3, 3, -2, 0],
-            transition: { duration: 0.3, times: [0, 0.2, 0.4, 0.6, 1] }
+            transition: { duration: 0.5, times: [0, 0.2, 0.4, 0.6, 1] }
           }
         }}
         className="absolute inset-0 z-0 text-[#ff00ff] pointer-events-none select-none"
@@ -41,7 +41,7 @@ export default function GlitchText({ text, className }: { text: string; classNam
           animate: {
             opacity: [0, 1, 0.8, 1, 0],
             x: [0, 3, -3, 2, 0],
-            transition: { duration: 0.3, delay: 0.05, times: [0, 0.2, 0.4, 0.6, 1] }
+            transition: { duration: 0.5, delay: 0.1, times: [0, 0.2, 0.4, 0.6, 1] }
           }
         }}
         className="absolute inset-0 z-0 text-[#00f0ff] pointer-events-none select-none"

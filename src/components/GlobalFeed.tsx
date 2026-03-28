@@ -71,7 +71,9 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
   };
   const [likes, setLikes] = useState(broadcast.likes_count || Math.floor(Math.random() * 500));
   const [hasLiked, setHasLiked] = useState(false);
+  const [showChatBubble, setShowChatBubble] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
+  const lastTapRef = useRef<number>(0);
 
   useEffect(() => {
     let stareTimer: any;
@@ -79,10 +81,12 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
       if (entries[0].isIntersecting) {
           trackEvent('post_view', profile.id, { postId: broadcast.id });
           stareTimer = setTimeout(() => {
-             trackEvent('post_dwell', profile.id, { postId: broadcast.id, duration: '3s+' });
-          }, 3000);
+             trackEvent('post_dwell', profile.id, { postId: broadcast.id, duration: '2s+' });
+             setShowChatBubble(true);
+          }, 2000);
       } else {
           clearTimeout(stareTimer);
+          setShowChatBubble(false);
       }
     }, { threshold: 0.7 });
 
@@ -96,6 +100,15 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
         setHasLiked(true);
     }
   }, [broadcast.id]);
+
+  const handleInteraction = () => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+       onSelectProfile(profile.id);
+    }
+    lastTapRef.current = now;
+  };
 
   const handleLike = async () => {
     if (hasLiked) return;
@@ -249,10 +262,42 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
              <div className="absolute inset-0 z-50 pointer-events-none flex flex-col justify-end p-8 md:p-16">
                    <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-10 duration-1000">
                       <div className="flex flex-col gap-2 pointer-events-auto">
-                         <div className="flex items-center gap-3">
-                       <span className="text-[14px] md:text-[18px] font-black uppercase italic tracking-tighter text-white/90 drop-shadow-2xl">{displayName}</span>
-                       <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] shadow-[0_0_10px_#00f0ff]" />
-                    </div>
+                         <div className="flex items-center gap-3 relative">
+                        <span className="text-[14px] md:text-[18px] font-black uppercase italic tracking-tighter text-white/90 drop-shadow-2xl">{displayName}</span>
+                        
+                        <AnimatePresence>
+                           {showChatBubble && (
+                             <motion.div 
+                               initial={{ opacity: 0, x: -10, scale: 0.8 }}
+                               animate={{ 
+                                 opacity: 1, 
+                                 x: 0, 
+                                 scale: 1,
+                                 y: [0, -4, 0] 
+                               }}
+                               exit={{ opacity: 0, scale: 0.8 }}
+                               transition={{
+                                 y: {
+                                    repeat: Infinity,
+                                    duration: 2,
+                                    ease: "easeInOut"
+                                 }
+                               }}
+                               onClick={handleInteraction}
+                               className="flex items-center gap-2 px-3 py-1.5 bg-[#00f0ff] rounded-full shadow-[0_0_20px_rgba(0,240,255,0.4)] cursor-pointer hover:scale-105 active:scale-95 transition-all select-none"
+                             >
+                                <span className="text-[9px] font-black text-black uppercase tracking-widest whitespace-nowrap">Chat w/ {displayName}?</span>
+                                <motion.div 
+                                  animate={{ opacity: [1, 0] }}
+                                  transition={{ repeat: Infinity, duration: 0.8 }}
+                                  className="w-[2px] h-3 bg-black/40"
+                                />
+                             </motion.div>
+                           )}
+                        </AnimatePresence>
+
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] shadow-[0_0_10px_#00f0ff]" />
+                     </div>
                     
                     {isEditing ? (
                        <textarea 

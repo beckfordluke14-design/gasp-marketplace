@@ -311,7 +311,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
           <div className="space-y-2">
              <button 
                 onClick={() => (window as any).openTopUp?.()}
-                className="w-full h-11 bg-[#ff6b00] text-black rounded-2xl flex items-center justify-center gap-2 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(255,107,0,0.15)] active:scale-95"
+                className="w-full h-11 bg-[#00f0ff] text-black rounded-2xl flex items-center justify-center gap-2 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(0,240,255,0.15)] active:scale-95"
              >
                 <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center">
                    <Zap size={10} className="text-black" />

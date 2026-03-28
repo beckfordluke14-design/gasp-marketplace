@@ -38,17 +38,25 @@ export async function POST(req: Request) {
           data: {
             messages: messages || [],
             vaultItems: [
-              ...(vault || []).map(v => ({ ...v, is_unlocked: unlockedIds.includes(v.id) })),
+              ...(vault || []).map(v => ({ 
+                  ...v, 
+                  content_url: v.content_url || v.media_url,
+                  price: v.price_credits || v.price || 75,
+                  is_vault: true,
+                  is_unlocked: unlockedIds.includes(v.id),
+                  type: v.type || 'image'
+              })),
               ...(galleryPosts || []).map(p => ({
                   id: p.id,
                   content_url: p.content_url,
                   caption: p.caption,
+                  price: p.price_credits || p.lock_price || 75,
                   is_vault: p.is_vault || p.is_freebie || true,
                   is_unlocked: unlockedIds.includes(p.id) || !p.is_vault,
                   type: p.type || 'image',
                   created_at: p.created_at
               }))
-            ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
+            ].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()),
             isFollowing: relationships.length > 0,
             bondScore: stats[0]?.bond_score || 0
           }
