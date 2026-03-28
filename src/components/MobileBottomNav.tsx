@@ -36,7 +36,7 @@ export default function MobileBottomNav({ onSelectChat, onOpenTopUp, unreadCount
               <button
                 key={item.label}
                 onClick={item.action}
-                className="relative -top-8 w-16 h-16 rounded-full bg-[#00f0ff] border-4 border-black flex flex-col items-center justify-center shadow-[0_10px_30px_rgba(0,240,255,0.4)] hover:scale-110 active:scale-90 transition-all group"
+                className="relative -top-8 w-16 h-16 rounded-full bg-[#ff6b00] border-4 border-black flex flex-col items-center justify-center shadow-[0_10px_30px_rgba(255,107,0,0.6)] hover:scale-110 active:scale-90 transition-all group"
               >
                  <item.icon size={26} fill="black" className="text-black animate-pulse" />
                  <span className="text-[7px] font-black uppercase tracking-tighter text-black mt-0.5">{item.label}</span>

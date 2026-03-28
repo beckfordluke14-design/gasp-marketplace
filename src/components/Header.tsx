@@ -123,7 +123,7 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                 {/* Add Credits */}
                 <button 
                   onClick={() => onOpenTopUp()}
-                  className="h-7 md:h-9 px-4 md:px-6 bg-[#00f0ff] text-black text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] rounded-full hover:shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic shadow-[0_0_10px_rgba(0,240,255,0.2)]"
+                  className="h-7 md:h-9 px-4 md:px-6 bg-[#ff6b00] text-black text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] rounded-full hover:shadow-[0_0_20px_rgba(255,107,0,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic shadow-[0_0_10px_rgba(255,107,0,0.2)]"
                 >
                    BUY CREDITS
                 </button>

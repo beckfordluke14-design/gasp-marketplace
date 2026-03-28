@@ -167,8 +167,8 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
        <div className="flex items-center justify-between">
           <div className="space-y-1 text-left">
               <div className="flex items-center gap-2">
-                 <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                 <span className="text-[9px] font-black uppercase tracking-[0.4em] text-[#00f0ff]">
+                 <div className="w-1.5 h-1.5 rounded-full bg-[#ff6b00] animate-pulse" />
+                 <span className="text-[9px] font-black uppercase tracking-[0.4em] text-[#ff6b00]">
                     {status === 'confirmed' ? 'Stake Verified' : 'Session Recovery Active'}
                  </span>
               </div>
@@ -188,7 +188,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                 </div>
                 
                 <div className="w-full space-y-4">
-                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00f0ff] text-center italic">
+                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ff6b00] text-center italic">
                       Step 1: Initialize Settlement
                    </p>
                    <div 
@@ -196,7 +196,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                         navigator.clipboard.writeText(MERCHANT_WALLETS[network]);
                         alert('Wallet Address Copied! 🛡️');
                       }}
-                      className="p-4 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between group cursor-pointer hover:border-[#00f0ff]/40 transition-all font-mono"
+                      className="p-4 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between group cursor-pointer hover:border-[#ff6b00]/40 transition-all font-mono"
                    >
                       <code className="text-[9px] text-white/40 break-all truncate group-hover:text-white">
                          {MERCHANT_WALLETS[network]}
@@ -228,7 +228,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                    </div>
                    <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic">Total Settlement</span>
-                      <span className="text-3xl md:text-5xl font-syncopate font-black text-[#00f0ff] italic tracking-tighter shadow-[#00f0ff]/10 drop-shadow-xl h-20 flex items-center">${pkg.priceUsd}</span>
+                      <span className="text-3xl md:text-5xl font-syncopate font-black text-[#ff6b00] italic tracking-tighter shadow-[#ff6b00]/10 drop-shadow-xl h-20 flex items-center">${pkg.priceUsd}</span>
                    </div>
                 </div>
 
@@ -269,13 +269,13 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                   value={senderWallet} 
                   onChange={(e) => setSenderWallet(e.target.value)} 
                   placeholder="Your Wallet Address (Optional Manual Link)..." 
-                  className="w-full h-12 bg-black/40 border border-white/10 rounded-2xl px-5 text-sm font-bold text-white placeholder:text-white/10 focus:border-[#00f0ff]" 
+                  className="w-full h-12 bg-black/40 border border-white/10 rounded-2xl px-5 text-sm font-bold text-white placeholder:text-white/10 focus:border-[#ff6b00]" 
                 />
                 
                 <button 
                   onClick={() => handleVerify(false)} 
                   disabled={isVerifying || status === 'confirmed'}
-                  className="w-full h-16 rounded-2xl bg-[#00f0ff] text-black text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(0,240,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full h-16 rounded-2xl bg-[#ff6b00] text-black text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(0,240,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
                 >
                    {isVerifying ? <Loader2 size={24} className="animate-spin" /> : <ShieldCheck size={24} />}
                    {isVerifying ? 'Scanning Ledger...' : 'Manual Scan Override'}
