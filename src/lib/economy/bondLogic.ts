@@ -1,9 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
+import { db } from '../db';
 
 /**
  * THE BOND LEVEL ENGINE (Sunk Cost Fallacy & Progression)
@@ -28,11 +23,14 @@ export const BOND_TIERS: BondTier[] = [
 export async function updateBond(userId: string, personaId: string, type: 'message' | 'coin_spend') {
   const points = type === 'message' ? 1 : 10;
   
-  await supabase.rpc('increment_bond_score', {
-    p_user_id: userId,
-    p_persona_id: personaId,
-    p_points: points
-  });
+  // 🛡️ ATOMIC SYNC: Universal Bond Update in Railway
+  await db.query(`
+    INSERT INTO user_persona_stats (user_id, persona_id, bond_score, updated_at)
+    VALUES ($1, $2, $3, NOW())
+    ON CONFLICT (user_id, persona_id) DO UPDATE SET 
+        bond_score = user_persona_stats.bond_score + EXCLUDED.bond_score,
+        updated_at = NOW()
+  `, [userId, personaId, points]);
 }
 
 export function getBondTier(points: number): BondTier {

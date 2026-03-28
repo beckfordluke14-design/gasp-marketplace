@@ -193,8 +193,6 @@ export async function DELETE(req: Request) {
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (err: any) { return new Response(JSON.stringify({ message: err.message }), { status: 500 }); }
 }
-us: 500 }); }
-}
 
 
 

@@ -1,17 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
-import { OpenAI } from 'openai';
+import { db } from '../lib/db';
 import { BraveSearch } from '../lib/tools/braveSearch';
 
 // SYSTEM: AUTOMATED CULTURAL FEED AUTOMATOR (System 3)
 // Objective: Ground AI personas in real-time global news/trends.
 
-const GOOGLE_GEMINI_KEY = process.env.GOOGLE_GEMINI_KEY;
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-
-const brave = new BraveSearch('BSA2-DiqlsfcBvtr-S2oxY8DtQeWo5y');
+const GOOGLE_GEMINI_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+const brave = new BraveSearch(process.env.BRAVE_API_KEY || '');
 
 const CATEGORIES = ['crypto markets', 'sneaker drops', 'rap beef', 'sports highlights', 'major meme trends'];
 
@@ -30,10 +24,10 @@ async function runAutomation() {
 
     const topSnippet = `${news[0].title}: ${news[0].description}`;
 
-    // 2. FETCH ALL ACTIVE PERSONAS
-    const { data: personas, error: pError } = await supabase.from('personas').select('*').eq('is_active', true);
-    if (pError || !personas) {
-       console.error('[FeedAutomator] Failed to fetch active personas:', pError);
+    // 2. FETCH ALL ACTIVE PERSONAS from Railway
+    const { rows: personas } = await db.query('SELECT * FROM personas WHERE is_active = true');
+    if (!personas || personas.length === 0) {
+       console.error('[FeedAutomator] No active personas found in the sovereign vault.');
        return;
     }
 
@@ -42,7 +36,7 @@ async function runAutomation() {
     // 3. GENERATE OPINIONATED POST FOR EACH PERSONA (Gemini Direct)
     for (const persona of personas) {
       try {
-        const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GOOGLE_GEMINI_KEY}`;
+        const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_GEMINI_KEY}`;
         const brainRes = await fetch(googleUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -62,17 +56,15 @@ async function runAutomation() {
         const brainData = await brainRes.json();
         const postText = (brainData.candidates?.[0]?.content?.parts?.[0]?.text || "").toLowerCase().trim();
 
-        // 4. INSERT INTO POSTS TABLE
-        const { error: postError } = await supabase.from('posts').insert([{
-           persona_id: persona.id,
-           content_type: 'text',
-           caption: postText,
-           scheduled_for: new Date()
-        }]);
-
-        if (postError) console.error(`[FeedAutomator] Failed to post for ${persona.name}:`, postError);
-        else console.log(`[FeedAutomator] Content live for ${persona.name}: ${postText}`);
-
+        if (postText) {
+          // 4. INSERT INTO POSTS TABLE in Railway
+          await db.query(`
+            INSERT INTO posts (persona_id, content_type, caption, scheduled_for, created_at)
+            VALUES ($1, 'text', $2, NOW(), NOW())
+          `, [persona.id, postText]);
+          
+          console.log(`[FeedAutomator] Content live for ${persona.name}: ${postText}`);
+        }
       } catch (err) {
         console.error(`[FeedAutomator] Generation failure for ${persona.name}:`, err);
       }

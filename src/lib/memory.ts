@@ -1,43 +1,46 @@
-import { createClient } from '@supabase/supabase-js';
-import { OpenAI } from 'openai';
+import { db } from './db';
 
-const GOOGLE_GEMINI_KEY = process.env.GOOGLE_GEMINI_KEY;
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+const GOOGLE_GEMINI_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
 export async function storeMemory(userId: string, personaId: string, text: string, embedding: number[]) {
-  const { data, error } = await supabase.from('persona_memories').insert([{
-      user_id: userId,
-      persona_id: personaId,
-      memory_text: text,
-      embedding
-  }]);
-  return { data, error };
+  try {
+    await db.query(`
+      INSERT INTO persona_memories (user_id, persona_id, memory_text, embedding, created_at)
+      VALUES ($1, $2, $3, $4::vector, NOW())
+    `, [userId, personaId, text, `[${embedding.join(',')}]`]);
+    return { success: true };
+  } catch (error) {
+    console.error('[Memory Store Error]:', error);
+    return { error };
+  }
 }
 
 export async function retrieveMemories(userId: string, personaId: string, queryEmbedding: number[]) {
-  const { data, error } = await supabase.rpc('match_memories', {
-    query_embedding: queryEmbedding,
-    match_threshold: 0.5,
-    match_count: 5,
-    p_user_id: userId,
-    p_persona_id: personaId
-  });
-  return data || [];
+  try {
+    // Vector Similarity Search (Cosine Distance) in Railway Postgres
+    const { rows } = await db.query(`
+      SELECT memory_text, (embedding <=> $3::vector) as distance
+      FROM persona_memories
+      WHERE user_id = $1 AND persona_id = $2
+      ORDER BY embedding <=> $3::vector
+      LIMIT 5
+    `, [userId, personaId, `[${queryEmbedding.join(',')}]`]);
+    return rows.filter(r => (r.distance || 1) < 0.5).map(r => r.memory_text);
+  } catch (error) {
+    console.error('[Memory Retrieval Error]:', error);
+    return [];
+  }
 }
 
 /**
  * SYSTEM 2: THE LONG-TERM BRAIN (Memory Summarization)
- * 🔬 V6: ZERO-COST CIRCUIT via Gemini 1.5 Flash
  */
 export async function summarizeAndStore(messages: any[], userId: string, personaId: string) {
   if (messages.length < 5) return;
   if (messages.length % 5 !== 0) return;
 
   try {
-    const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GOOGLE_GEMINI_KEY}`;
+    const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_GEMINI_KEY}`;
     const prompt = `Extract key user facts (interests, brands they like, personal details, relationship status with you). Be extremely brief. format as a list. \n\nRecent context: ${JSON.stringify(messages.slice(-10))}`;
 
     const res = await fetch(googleUrl, {
@@ -57,11 +60,12 @@ export async function summarizeAndStore(messages: any[], userId: string, persona
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: { parts: [{ text: summary }] } })
     });
-    const { embedding: embedObj } = await embedRes.json();
+    const embedData = await embedRes.json();
+    const embeddingValues = embedData.embedding?.values;
     
-    if (embedObj?.values) {
-        await storeMemory(userId, personaId, summary, embedObj.values);
-        console.log('[Memory] Deep Consciousness Updated (Gemini Circuit) for User:', userId);
+    if (embeddingValues) {
+        await storeMemory(userId, personaId, summary, embeddingValues);
+        console.log('[Memory] Deep Consciousness Updated in Railway for User:', userId);
     }
   } catch (err) {
     console.error('[Memory] Summarization Failure:', err);

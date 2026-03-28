@@ -1,18 +1,8 @@
-'use client';
-
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Star, Zap, Play, CheckCircle2, RefreshCcw } from 'lucide-react';
-import { useUser } from '@/components/providers/UserProvider';
-import Image from 'next/image';
+import { ShoppingBag, Star, Zap, CheckCircle2 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
 
 /**
  * THE USER COLLECTION (Vault Persistence)
@@ -33,15 +23,21 @@ export default function UserCollection() {
     if (!guestId) return;
     console.log(`📸 [Collection] Fetching Neural Assets for ${guestId}...`);
 
-    // 1. Fetch Unlocked Media IDs
-    const { data: unlocks, error } = await supabase
-       .from('unlocked_media')
-       .select('*, media_vault(*, personas(name, image))')
-       .eq('user_id', guestId)
-       .order('unlocked_at', { ascending: false });
-
-    if (unlocks) {
-       setCollection(unlocks);
+    try {
+        const res = await fetch('/api/rpc/db', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'GET_USER_COLLECTION',
+                user_id: guestId
+            })
+        });
+        const data = await res.json();
+        if (Array.isArray(data)) {
+            setCollection(data);
+        }
+    } catch (e) {
+        console.error('[Collection] Sovereign Fetch Failed:', e);
     }
     setLoading(false);
   }
@@ -86,9 +82,9 @@ export default function UserCollection() {
                   >
                      {/* THE MEDIA NODE */}
                      <div className="relative aspect-square rounded-[2rem] overflow-hidden bg-white/5 border border-white/5 group-hover:border-[#00f0ff]/30 transition-all">
-                        {item.media_vault.media_url.includes('.mp4') ? (
+                        {item.media_url?.includes('.mp4') ? (
                            <video 
-                             src={item.media_vault.media_url} 
+                             src={item.media_url} 
                              autoPlay 
                              muted 
                              loop 
@@ -97,7 +93,7 @@ export default function UserCollection() {
                            />
                         ) : (
                            <img 
-                             src={item.media_vault.media_url} 
+                             src={item.media_url} 
                              alt="Vault Asset" 
                              className="w-full h-full object-cover" 
                            />
@@ -111,14 +107,14 @@ export default function UserCollection() {
                         <div className="flex items-center gap-3">
                            <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 shrink-0">
                                <img 
-                                src={item.media_vault.personas?.image || '/v1.png'} 
+                                src={item.persona_image || '/v1.png'} 
                                 alt="" 
                                 className="w-full h-full object-cover" 
                                />
                            </div>
                            <div className="flex-1">
-                               <h4 className="text-xs font-black uppercase tracking-widest leading-none mb-1">{item.media_vault.personas?.name || 'Persona'}</h4>
-                               <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em]">{item.media_vault.tier || 'Vault'}</p>
+                               <h4 className="text-xs font-black uppercase tracking-widest leading-none mb-1">{item.persona_name || 'Persona'}</h4>
+                               <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em]">{item.tier || 'Vault'}</p>
                            </div>
                         </div>
                      </div>

@@ -1,28 +1,22 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
+import { db } from './db';
 
 export type PersonaMood = 'bored' | 'toxic' | 'teasing' | 'vulnerable' | 'affectionate';
 
 export async function getMoodState(userId: string, personaId: string) {
-  // 1. Fetch user_persona_stats (verified in factory_init.sql)
-  const { data: stats, error: statError } = await supabase
-    .from('user_persona_stats')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('persona_id', personaId)
-    .single();
+  // 🛡️ SOVEREIGN STATS: Fetch user_persona_stats from Railway
+  const { rows: statsRows } = await db.query(
+    'SELECT * FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2 LIMIT 1',
+    [userId, personaId]
+  );
+  const stats = statsRows[0];
 
-  const { data: persona, error: perError } = await supabase
-    .from('personas')
-    .select('vibe, system_prompt')
-    .eq('id', personaId)
-    .single();
+  const { rows: personas } = await db.query(
+    'SELECT vibe, system_prompt FROM personas WHERE id = $1 LIMIT 1',
+    [personaId]
+  );
+  const persona = personas[0];
 
-  if (perError || !persona) {
+  if (!persona) {
     return { mood: 'bored' as PersonaMood, dna: 'Unknown persona' };
   }
 
@@ -31,7 +25,7 @@ export async function getMoodState(userId: string, personaId: string) {
   const mood = (persona.vibe?.includes('teasing') ? 'teasing' : 'bored') as PersonaMood;
 
   // 3. If bond_score < 10, lean heavily toward 'bored' or 'toxic'
-  if (!stats || (stats.bond_score || 0) < 10) {
+  if (!stats || (parseInt(stats.bond_score || '0', 10)) < 10) {
     const coinFlip = Math.random() > 0.5;
     return { mood: (coinFlip ? 'toxic' : 'bored') as PersonaMood, dna: persona.system_prompt };
   }

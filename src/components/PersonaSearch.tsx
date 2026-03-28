@@ -5,13 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Search, X, Zap, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PersonaAvatar from './persona/PersonaAvatar';
-import { createClient } from '@supabase/supabase-js';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
 
 export default function PersonaSearch({ deadIds, setDeadIds }: { deadIds: Set<string>, setDeadIds: (ids: any) => void }) {
   const router = useRouter();

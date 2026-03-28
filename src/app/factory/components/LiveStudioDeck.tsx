@@ -1,16 +1,8 @@
-'use client';
-
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createClient } from '@supabase/supabase-js';
 import { VISION_LIBRARY, type VisualCategory } from '@/config/vision';
-import { Camera, Zap, Film, Lock, Layers, Info, CheckCircle2, X } from 'lucide-react';
+import { Camera, Zap, Film, Layers, Info, CheckCircle2, X } from 'lucide-react';
 import Image from 'next/image';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
 
 export default function LiveStudioDeck({ persona, onClose }: { persona: any, onClose: () => void }) {
   const [selectedCategory, setSelectedCategory] = useState<VisualCategory>('STREET_FLASH_CANDID');
@@ -20,21 +12,35 @@ export default function LiveStudioDeck({ persona, onClose }: { persona: any, onC
   const [finalVideoUrl, setFinalVideoUrl] = useState<string | null>(null);
   const [showHowTo, setShowHowTo] = useState(false);
 
-  // Poll DB specifically for the new post or vault item
+  // 🛡️ SOVEREIGN POLLING: Pulse Check the Ledger
   useEffect(() => {
     if (!isRendering || finalVideoUrl) return;
     
-    const channel = supabase
-      .channel('video_gen_track')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'video_jobs' }, payload => {
-          if (payload.new.persona_id === persona.id && payload.new.status === 'completed') {
-             setLogs(prev => [...prev, '[grok_return] RENDER COMPLETE. Syncing Vault...']);
-             // In production, we'd fetch the latest media_vault item here
-             setIsRendering(false);
-          }
-      }).subscribe();
+    // Check every 3 seconds for the sovereign render return
+    const interval = setInterval(async () => {
+        try {
+            const res = await fetch('/api/rpc/db', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'CHECK_VIDEO_JOB',
+                    persona_id: persona.id
+                })
+            });
+            const job = await res.json();
+            
+            if (job && job.status === 'completed') {
+                setLogs(prev => [...prev, '[grok_return] RENDER COMPLETE. Syncing Vault...']);
+                setIsRendering(false);
+                setFinalVideoUrl(job.metadata?.content_url || 'SYNCHRONIZED');
+                clearInterval(interval);
+            }
+        } catch (e) {
+            console.warn('[Studio Deck] Polling Interrupted:', e);
+        }
+    }, 3000);
 
-    return () => { supabase.removeChannel(channel); };
+    return () => clearInterval(interval);
   }, [isRendering, persona.id, finalVideoUrl]);
 
   const handleDispatch = async () => {

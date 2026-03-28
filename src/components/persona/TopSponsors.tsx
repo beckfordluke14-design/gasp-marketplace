@@ -1,13 +1,5 @@
-'use client';
-
 import { Crown, Star, MoreHorizontal, Trophy, Award } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
 
 interface TopSponsor {
   user_id: string;
@@ -27,15 +19,21 @@ export default function TopSponsors({ personaId }: TopSponsorsProps) {
 
   useEffect(() => {
     async function fetchSponsors() {
-        const { data, error } = await supabase
-            .from('persona_top_spenders')
-            .select('*')
-            .eq('persona_id', personaId)
-            .order('total_discovery_spent', { ascending: false })
-            .limit(3);
-
-        if (data && !error) {
-            setSponsors(data);
+        try {
+            const res = await fetch('/api/rpc/db', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'GET_TOP_SPONSORS',
+                    persona_id: personaId
+                })
+            });
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                setSponsors(data);
+            }
+        } catch (e) {
+            console.error('[TopSponsors] Sovereign Fetch Failed:', e);
         }
     }
     fetchSponsors();

@@ -1,9 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
+import { db } from '../db';
 
 /**
  * SYSTEM 1: THE INFORMATION DRIP (Dynamic Prompting)
@@ -11,11 +6,10 @@ const supabase = createClient(
  */
 export async function getMissingFactsGoal(userId: string, personaId: string) {
   try {
-    const { data: memories } = await supabase
-      .from('persona_memories')
-      .select('memory_text')
-      .eq('user_id', userId)
-      .eq('persona_id', personaId);
+    const { rows: memories } = await db.query(
+      'SELECT memory_text FROM persona_memories WHERE user_id = $1 AND persona_id = $2',
+      [userId, personaId]
+    );
 
     const factText = (memories || []).map(m => m.memory_text.toLowerCase()).join(' ');
     
@@ -38,6 +32,7 @@ export async function getMissingFactsGoal(userId: string, personaId: string) {
     return prompts[target] || "";
 
   } catch (err) {
+    console.error('[Drip Governor Error]:', err);
     return "";
   }
 }
