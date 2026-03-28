@@ -136,7 +136,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     onClick={handleCustomStake}
                     className="w-full h-14 rounded-2xl bg-[#ff6b00] text-black text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)]"
                   >
-                     Buy Now
+                     Add Credits
                   </button>
                </div>
                <p className="text-[7px] text-white/20 uppercase tracking-[0.2em] font-black ml-1">

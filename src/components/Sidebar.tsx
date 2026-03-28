@@ -154,7 +154,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
   };
 
   return (
-    <aside className="hidden lg:flex w-[260px] h-screen bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 font-outfit transition-all">
+    <aside className="hidden lg:flex w-[260px] h-screen bg-black/15 backdrop-blur-xl border-r border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 font-outfit transition-all">
       <div className="h-20 shrink-0" />
 
       <div className="flex-1 overflow-y-auto no-scrollbar py-6">
@@ -316,7 +316,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center">
                    <Zap size={10} className="text-black" />
                  </div>
-                <span className="text-[8px] font-black uppercase tracking-widest italic font-syncopate">BUY CREDITS</span>
+                <span className="text-[8px] font-black uppercase tracking-widest italic font-syncopate">ADD CREDITS</span>
              </button>
                <div className="flex items-center justify-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />

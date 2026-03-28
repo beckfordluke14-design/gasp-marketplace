@@ -208,8 +208,8 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
           onClick={onClose}
         />
         
-        {/* Main Sheet Container */}
-        <div className="fixed inset-x-2 md:inset-x-0 bottom-1.5 md:bottom-0 z-[1000] lg:relative lg:inset-auto lg:z-auto flex flex-col w-[calc(100%-1rem)] md:w-[480px] h-[85dvh] lg:h-screen bg-black border-t lg:border-t-0 lg:border-l border-white/10 rounded-[2.5rem] lg:rounded-0 shadow-2xl overflow-hidden font-outfit">
+        {/* Main Sheet Container - Immersive Transparency */}
+        <div className="fixed inset-x-2 md:inset-x-0 bottom-1.5 md:bottom-0 z-[1000] lg:relative lg:inset-auto lg:z-auto flex flex-col w-[calc(100%-1rem)] md:w-[480px] h-[85dvh] lg:h-screen bg-black/40 backdrop-blur-3xl border-t lg:border-t-0 lg:border-l border-white/10 rounded-[2.5rem] lg:rounded-0 shadow-[0_-20px_100px_rgba(0,0,0,0.8)] overflow-hidden font-outfit transition-all duration-700">
           
           {/* Header Block */}
           <div className="flex flex-col bg-black/40 backdrop-blur-3xl border-b border-white/10 shrink-0 p-6 pb-0">
@@ -259,8 +259,8 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
              </div>
           </div>
 
-          {/* Stream Block */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8 no-scrollbar scroll-smooth bg-[#0a0a0a]">
+          {/* Stream Block - Adaptive Readability */}
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8 no-scrollbar scroll-smooth bg-transparent">
             {chatTab === 'chat' ? (
               <div className="space-y-8">
                 {messages.map((msg: any, idx: number) => {
@@ -283,11 +283,15 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
                              profileName={profile?.name} 
                              caption={msg.content} 
                           />
-                       ) : (
-                          <div className={`max-w-[85%] px-5 py-3.5 rounded-[1.5rem] text-[14px] leading-relaxed tracking-tight ${isAssistant ? 'bg-zinc-900 text-white font-medium border border-white/5' : 'bg-[#ff00ff] text-white font-black shadow-[0_10px_30px_rgba(255,0,255,0.2)]'}`}>
+                        ) : (
+                          <div className={`max-w-[85%] px-5 py-3.5 rounded-[2rem] text-[14px] leading-relaxed tracking-tight ${
+                             isAssistant 
+                             ? 'bg-white/10 backdrop-blur-xl text-white font-medium border border-white/10 shadow-xl' 
+                             : 'bg-[#ff00ff]/90 backdrop-blur-xl text-white font-black shadow-[0_15px_40px_rgba(255,0,255,0.4)]'
+                          }`}>
                              {msg.content}
                           </div>
-                       )}
+                        )}
                        {!isAssistant && (
                           <div className="flex items-center gap-1 px-1">
                              <span className="text-[7px] font-black uppercase text-white/20 tracking-widest">READ</span>
@@ -345,8 +349,8 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
             )}
           </div>
 
-          {/* Input Block */}
-          <div className="bg-[#0a0a0a] px-6 pb-[env(safe-area-inset-bottom,40px)] pt-4 relative">
+          {/* Input Block - Bottom Overlay */}
+          <div className="bg-black/10 backdrop-blur-xl pb-[env(safe-area-inset-bottom,40px)] px-6 pt-4 relative border-t border-white/5">
              <AnimatePresence>
                 {showGifts && (
                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full left-6 right-6 mb-6 z-50 bg-[#111] border border-white/10 rounded-[2rem] p-6 shadow-2xl">

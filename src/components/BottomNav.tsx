@@ -41,7 +41,7 @@ export default function BottomNav({ onOpenProfileList, onOpenTopUp, unreadCount 
                   className="w-14 h-14 rounded-full bg-[#ff6b00] text-black flex flex-col items-center justify-center gap-0.5 shadow-[0_15px_30px_rgba(255,107,0,0.4)] hover:scale-110 active:scale-95 transition-all border-[4px] border-black group z-10"
                 >
                   <Icon size={20} className="group-hover:rotate-12 transition-transform" />
-                  <span className="text-[6px] font-black uppercase tracking-widest leading-none">TopUp</span>
+                   <span className="text-[6px] font-black uppercase tracking-widest leading-none">Add</span>
                 </button>
               );
             }

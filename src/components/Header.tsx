@@ -125,7 +125,7 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                   onClick={() => onOpenTopUp()}
                   className="h-7 md:h-9 px-4 md:px-6 bg-[#ff6b00] text-black text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] rounded-full hover:shadow-[0_0_20px_rgba(255,107,0,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic shadow-[0_0_10px_rgba(255,107,0,0.2)]"
                 >
-                   BUY CREDITS
+                   ADD CREDITS
                 </button>
 
                 <div onClick={() => onOpenTopUp()} className="cursor-pointer hover:opacity-80 transition-all scale-[0.6] md:scale-[0.8] origin-right">
@@ -152,12 +152,12 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
             </div>
         </header>
 
-        {/* Floating Search Bar */}
-        <div className="absolute top-[105%] left-1/2 -translate-x-1/2 w-full max-w-[280px] md:max-w-xl px-4 flex items-center justify-center pointer-events-auto z-[90]">
-            <div className="w-full bg-black/20 backdrop-blur-xl border border-white/5 rounded-full shadow-[0_5px_20px_rgba(0,0,0,0.3)] p-0.5">
-                <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
-            </div>
-        </div>
+         {/* Floating Search Bar */}
+         <div className="absolute top-[105%] left-1/2 -translate-x-1/2 w-full max-w-[280px] md:max-w-xl px-4 flex items-center justify-center pointer-events-auto z-[90]">
+             <div className="w-full bg-black/5 backdrop-blur-md border border-white/5 rounded-full shadow-[0_5px_15px_rgba(0,0,0,0.2)] p-0.5">
+                 <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
+             </div>
+         </div>
     </div>
   );
 }

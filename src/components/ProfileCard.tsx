@@ -100,11 +100,14 @@ export default function ProfileCard({
           {vibe}
         </p>
 
-        {/* Aggressive CTA */}
-        <div className="mt-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-          <div className="flex items-center justify-center gap-2 w-full py-4 rounded-xl glass border border-white/20 text-white font-outfit font-bold uppercase tracking-widest text-xs hover:bg-white/10">
-            <MessageCircle size={16} />
-            Start Chat
+        {/* Interactive Chat Cursor */}
+        <div className="mt-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-full py-2.5 px-6 flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(255,255,255,0.05)] hover:bg-white/10 transition-all group/cursor">
+            <div className="w-2 h-2 rounded-full bg-[#00f0ff] animate-pulse" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60 group-hover/cursor:text-white transition-colors">
+              Chat with {name}?
+            </span>
+            <MessageCircle size={14} className="text-white/20 group-hover/cursor:text-[#00f0ff] transition-all" />
           </div>
         </div>
       </div>
