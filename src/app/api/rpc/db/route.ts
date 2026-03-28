@@ -3,11 +3,17 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { action, payload } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { action, payload } = body;
+
+    if (!action || !payload) {
+      return new Response('Missing Action or Payload', { status: 400 });
+    }
+
     const { userId, personaId } = payload;
 
-    if (!userId || !action) {
-      return new Response('Missing User ID or Action', { status: 400 });
+    if (!userId) {
+      return new Response('Missing User ID', { status: 400 });
     }
 
     switch (action) {

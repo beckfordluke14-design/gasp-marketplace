@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabaseClient';
 import { db } from '@/lib/db';
+import fs from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
@@ -138,23 +140,23 @@ async function generateAndStoreImage(persona: any, isVault: boolean, personaId: 
         if (!res.ok) throw new Error('Camo-Link Download Failed');
         
         const buffer = Buffer.from(await res.arrayBuffer());
-        const path = `personas/${personaId}/studio_${Date.now()}_${seed}.jpg`;
+        // 🛡️ SOVEREIGN STORAGE: Writing directly to the Railway local volume
+        const storageDir = path.join(process.cwd(), 'public', 'storage', 'chat_media');
+        if (!fs.existsSync(storageDir)) {
+           fs.mkdirSync(storageDir, { recursive: true });
+        }
+
+        const fileName = `studio_${Date.now()}_${seed}.jpg`;
+        const localFilePath = path.join(storageDir, fileName);
         
-        // Push to Permanent Public Storage (Maintaining Supabase as Asset Bridge)
-        const { error: uploadError } = await supabase.storage.from('chat_media').upload(path, buffer, {
-            contentType: 'image/jpeg',
-            cacheControl: '36000',
-            upsert: true
-        });
+        fs.writeFileSync(localFilePath, buffer);
 
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage.from('chat_media').getPublicUrl(path);
+        const publicUrl = `https://asset.gasp.fun/storage/chat_media/${fileName}`;
         console.log(`✅ [Studio] Permanent Identity Locked: ${publicUrl}`);
         return publicUrl;
     } catch (e) {
         console.warn('[Studio] Critical Genesis Error. Using resilient fallback.', e);
-        return `https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/chat_media/personas/v1.png?seed=${seed}`;
+        return `https://asset.gasp.fun/storage/chat_media/personas/v1.png?seed=${seed}`;
     }
 }
 

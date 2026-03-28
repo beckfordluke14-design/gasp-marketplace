@@ -359,24 +359,21 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
                 .save(outputPath);
         });
 
-        // 🛡️ SOVEREIGN STORAGE: Upload to Supabase 'posts' bucket
-        const fileName = `voices/v2_${personaId}_${Date.now()}.mp3`;
-        
-        const { error: uploadError } = await supabase.storage
-            .from('posts')
-            .upload(fileName, finalBuffer, {
-                contentType: 'audio/mpeg',
-                upsert: true
-            });
-
-        if (uploadError) {
-            console.error('❌ [VoiceFactory] Supabase Upload Failed:', uploadError.message);
-            throw new Error('Supabase Upload Failed');
+        // 🛡️ SOVEREIGN STORAGE: Writing directly to the Railway local volume
+        // asset.gasp.fun acts as the bridge for these local assets.
+        const storageDir = path.join(process.cwd(), 'public', 'storage', 'voices');
+        if (!fs.existsSync(storageDir)) {
+           fs.mkdirSync(storageDir, { recursive: true });
         }
 
-        const publicUrl = `https://asset.gasp.fun/posts/${fileName}`;
+        const fileName = `v2_${personaId}_${Date.now()}.mp3`;
+        const localFilePath = path.join(storageDir, fileName);
+        
+        fs.writeFileSync(localFilePath, finalBuffer);
 
-        console.log(`✅ [VoiceFactory] SOVEREIGN render generated (R2-Ready): ${publicUrl}`);
+        const publicUrl = `https://asset.gasp.fun/storage/voices/${fileName}`;
+
+        console.log(`✅ [VoiceFactory] SOVEREIGN render generated (Railway-Hosted): ${publicUrl}`);
         return publicUrl;
 
     } catch (err: any) {
