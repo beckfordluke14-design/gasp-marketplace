@@ -159,9 +159,9 @@ export async function POST(req: Request) {
         };
     }
     
-    const streamB_Text = syndicateOutput.text_message || "...";
-    const streamA_Native = syndicateOutput.audio_script || "";
-    const streamA_Translation = syndicateOutput.translation || "";
+    const streamA_Native = (syndicateOutput.audio_script || syndicateOutput.audio || "").trim();
+    const streamA_Translation = (syndicateOutput.translation || syndicateOutput.audio_translation || "").trim();
+    const streamB_Text = syndicateOutput.text_message || syndicateOutput.message || "...";
 
     // 🛡️ SOVEREIGN RECALL: Persist Nickname (fire-and-forget)
     if (syndicateOutput.new_nickname_detected) {
@@ -186,18 +186,22 @@ export async function POST(req: Request) {
 
             if (sendVoice) {
               try {
-                controller.enqueue(encoder.encode(`2:${JSON.stringify({ type: 'voice_note', audioUrl: null, profileName: profileItem?.name })}\n`));
+                controller.enqueue(encoder.encode(`2:${JSON.stringify({ type: 'voice_note', audioUrl: null, profileName: profileItem?.name || 'Persona' })}\n`));
                 voiceUrl = await generatePersonaVoice(finalProfileId, streamA_Native);
                 
-                controller.enqueue(encoder.encode(`2:${JSON.stringify({ 
-                    type: 'voice_note', 
-                    audioUrl: voiceUrl, 
-                    nativeScript: streamA_Native,
-                    translation: streamA_Translation,
-                    locked: true
-                })}\n`));
+                if (voiceUrl) {
+                  controller.enqueue(encoder.encode(`2:${JSON.stringify({ 
+                      type: 'voice_note', 
+                      audioUrl: voiceUrl, 
+                      nativeScript: streamA_Native,
+                      translation: streamA_Translation,
+                      locked: true
+                  })}\n`));
+                }
               } catch (vErr: any) {
-                console.warn(`[Brain API] Voice Failed: ${vErr.message}`);
+                console.warn(`[Brain API] Voice Generator Failed:`, vErr.message);
+                // Non-blocking: We don't want to crash the text stream if ElevenLabs is down
+                controller.enqueue(encoder.encode(`2:${JSON.stringify({ type: 'voice_failed', error: vErr.message })}\n`));
               }
             }
 

@@ -83,7 +83,9 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
       if (!res.ok) {
         const errText = await res.text();
         console.error('[Gasp Chat] API error:', res.status, errText);
-        setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: `hold on okay , give me a sec` }]);
+        // 🛡️ LIMIT TRIGGER: Show specific message for 402 (Neural Link Depleted)
+        const displayMsg = res.status === 402 ? (errText.slice(0, 80) || 'Neural Link Depleted.') : 'hold on okay , give me a sec';
+        setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: displayMsg }]);
         return;
       }
 
@@ -140,6 +142,7 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
         }
       }
     } catch (err: any) {
+      console.error('[Syndicate Terminal] Stream Error:', err);
       setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: 'hold on okay , give me a sec' }]);
     } finally {
       setIsLoading(false);
