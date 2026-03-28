@@ -152,9 +152,11 @@ export async function POST(req: Request) {
     const streamA_Native = syndicateOutput.audio_script || "";
     const streamA_Translation = syndicateOutput.translation || "";
 
-    // 🛡️ SOVEREIGN RECALL: Persist Nickname
+    // 🛡️ SOVEREIGN RECALL: Persist Nickname (fire-and-forget)
     if (syndicateOutput.new_nickname_detected) {
-        await SOV.updateNickname(finalUserId, syndicateOutput.new_nickname_detected);
+        SOV.updateNickname(finalUserId, syndicateOutput.new_nickname_detected).catch((e: any) =>
+            console.warn('[Chat] Nickname update failed (non-blocking):', e.message?.slice(0, 60))
+        );
     }
 
     // 4. SYNCING WITH UI PROTOCOL
@@ -188,19 +190,21 @@ export async function POST(req: Request) {
               }
             }
 
-            // 🛡️ SOVEREIGN PERSISTENCE: Saving History Directly
+            // 🛡️ SOVEREIGN PERSISTENCE: Fire-and-forget — NEVER block the stream
             const lastUserMessage = messages.filter((m: any) => m.role === 'user').pop();
-            
-            await SOV.saveMessage(finalUserId, finalProfileId, 'user', lastUserMessage?.content || '');
-            await SOV.saveMessage(finalUserId, finalProfileId, 'assistant', streamB_Text, {
-                audio_script: streamA_Native,
-                audio_translation: streamA_Translation,
-                translation_locked: true,
-                // 💸 APEX-ELITE TAX NODE: 50cr (Text) / 2,000cr (Voice)
-                price: !!voiceUrl ? 2000 : 50,
-                type: !!voiceUrl ? 'audio' : 'text',
-                media_url: !!voiceUrl ? voiceUrl : null,
-                image_url: null
+            Promise.all([
+                SOV.saveMessage(finalUserId, finalProfileId, 'user', lastUserMessage?.content || ''),
+                SOV.saveMessage(finalUserId, finalProfileId, 'assistant', streamB_Text, {
+                    audio_script: streamA_Native,
+                    audio_translation: streamA_Translation,
+                    translation_locked: true,
+                    price: !!voiceUrl ? 2000 : 50,
+                    type: !!voiceUrl ? 'audio' : 'text',
+                    media_url: !!voiceUrl ? voiceUrl : null,
+                    image_url: null
+                })
+            ]).catch((dbErr: any) => {
+                console.warn('[Chat] DB persistence failed (non-blocking):', dbErr.message?.slice(0, 100));
             });
 
             controller.close();

@@ -43,18 +43,33 @@ export async function updateLastMessage(userId: string, personaId: string) {
 }
 
 export async function saveMessage(userId: string, personaId: string, role: string, content: string, extra: any = {}) {
-  await db.query(
-    `INSERT INTO chat_messages (
-      user_id, persona_id, role, content, 
-      audio_script, audio_translation, translation_locked, 
-      price, type, media_url, image_url
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-    [
-      userId, personaId, role, content,
-      extra.audio_script || null, extra.audio_translation || null, extra.translation_locked || false,
-      extra.price || 0, extra.type || 'text', extra.media_url || null, extra.image_url || null
-    ]
-  );
+  // 🛡️ SOVEREIGN PERSISTENCE: Full insert attempt first
+  try {
+    await db.query(
+      `INSERT INTO chat_messages (
+        user_id, persona_id, role, content, 
+        audio_script, audio_translation, translation_locked, 
+        price, type, media_url, image_url
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [
+        userId, personaId, role, content,
+        extra.audio_script || null, extra.audio_translation || null, extra.translation_locked || false,
+        extra.price || 0, extra.type || 'text', extra.media_url || null, extra.image_url || null
+      ]
+    );
+  } catch (fullErr: any) {
+    // 🧪 NEURAL FAILSAFE: Schema mismatch — fall back to minimal core columns only
+    console.warn('[Sovereign] Full insert failed, trying minimal fallback:', fullErr.message?.slice(0, 80));
+    try {
+      await db.query(
+        `INSERT INTO chat_messages (user_id, persona_id, role, content) VALUES ($1, $2, $3, $4)`,
+        [userId, personaId, role, content]
+      );
+    } catch (minErr: any) {
+      // Non-critical — stream MUST NOT be blocked by persistence failures
+      console.warn('[Sovereign] Minimal insert also failed (non-blocking):', minErr.message?.slice(0, 80));
+    }
+  }
 }
 
 export async function updateNickname(userId: string, nickname: string) {
