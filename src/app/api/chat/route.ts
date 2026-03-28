@@ -100,8 +100,12 @@ export async function POST(req: Request) {
 
     const finalSystemPrompt = `${dna}\n\n${emozionState}\n\n${memoryContext}\n\n${awarenessContext}`;
 
-    // 🛡️ SOVEREIGN UPDATE: Resetting Ghosting directly
-    await SOV.updateLastMessage(finalUserId, finalProfileId);
+    // 🛡️ SOVEREIGN UPDATE: Resetting Ghosting directly (non-critical, never fails chat)
+    try {
+      await SOV.updateLastMessage(finalUserId, finalProfileId);
+    } catch (ghostErr: any) {
+      console.warn('[Chat] Ghosting update skipped:', ghostErr.message?.slice(0, 60));
+    }
 
     // 3. THE BRAIN: SYNDICATE MOMENT DIRECTOR (Grok Beta)
     const zoneKey = profileItem?.syndicate_zone || 'us_houston_black';
@@ -193,6 +197,6 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error('[AI Chat Error]:', error);
-    return new Response(error.message || 'Internal Server Error', { status: 500 });
+    return new Response('Something went wrong. Please try again.', { status: 500 });
   }
 }

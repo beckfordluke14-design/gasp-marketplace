@@ -312,39 +312,78 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4 pb-64">
-                {vaultItems.map((item) => (
-                   <div 
-                     key={item.id} 
-                     onClick={() => {
-                       if (!item.is_vault || item.is_unlocked) {
-                          const viewableItems = vaultItems.filter(v => !v.is_vault || v.is_unlocked).map(v => ({ url: v.content_url || '', caption: v.caption }));
-                          const itemIndex = viewableItems.findIndex(v => v.url === item.content_url);
-                          setSelectedLightboxIndex(itemIndex >= 0 ? itemIndex : 0);
-                          setLightboxItems(viewableItems);
-                          setLightboxOpen(true);
-                       }
-                     }}
-                     className="relative aspect-[3/4] bg-zinc-900 rounded-3xl overflow-hidden border border-white/5 group shadow-2xl cursor-pointer"
-                   >
-                     <div className={`absolute inset-0 z-10 ${(!item.is_unlocked && item.is_vault) ? 'bg-black/80 backdrop-blur-3xl' : ''}`} />
-                     {item.content_url && (
-                        <Image src={proxyImg(item.content_url)} alt="Media" fill unoptimized className={`object-cover ${(!item.is_unlocked && item.is_vault) ? 'blur-2xl opacity-60' : 'opacity-100'}`} />
-                     )}
-                     {item.is_vault && !item.is_unlocked && (
-                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
-                           <Lock size={20} className="text-white/40 mb-3 grayscale brightness-200" />
-                           <button 
-                             onClick={(e) => { e.stopPropagation(); unlockItem(item); }} 
-                             disabled={isProcessing}
-                             className="w-full h-10 bg-white text-black text-[9px] font-black uppercase rounded-2xl hover:bg-[#ffea00] transition-colors disabled:opacity-50"
-                           >
-                              {isProcessing ? 'SYNCING...' : `UNLOCK ${item.price || 75}cr`}
-                           </button>
-                        </div>
-                     )}
-                   </div>
-                ))}
+              <div className="pb-20">
+                {!dbLoaded ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-4">
+                    <div className="flex gap-2">
+                      <span className="w-2 h-2 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.3s]" />
+                      <span className="w-2 h-2 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.15s]" />
+                      <span className="w-2 h-2 bg-[#00f0ff] rounded-full animate-bounce" />
+                    </div>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-white/20">Syncing vault...</p>
+                  </div>
+                ) : vaultItems.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-3">
+                    <Lock size={28} className="text-white/10" />
+                    <p className="text-[9px] font-black uppercase tracking-widest text-white/20">No pics available yet</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {vaultItems.map((item: any) => (
+                      <div
+                        key={item.id}
+                        onClick={() => {
+                          if (!item.is_vault || item.is_unlocked) {
+                            const viewableItems = vaultItems.filter((v: any) => !v.is_vault || v.is_unlocked).map((v: any) => ({ url: v.content_url || '', caption: v.caption }));
+                            const itemIndex = viewableItems.findIndex((v: any) => v.url === item.content_url);
+                            setSelectedLightboxIndex(itemIndex >= 0 ? itemIndex : 0);
+                            setLightboxItems(viewableItems);
+                            setLightboxOpen(true);
+                          }
+                        }}
+                        className="relative aspect-[3/4] bg-zinc-900/80 rounded-2xl overflow-hidden border border-white/5 shadow-xl cursor-pointer group"
+                      >
+                        {/* Media preview — blurred if locked */}
+                        {item.content_url && (item.type === 'video' ? (
+                          <video
+                            src={proxyImg(item.content_url)}
+                            muted playsInline
+                            className={`absolute inset-0 w-full h-full object-cover transition-all ${item.is_vault && !item.is_unlocked ? 'blur-2xl scale-110 opacity-50' : 'opacity-100'}`}
+                          />
+                        ) : (
+                          <Image
+                            src={proxyImg(item.content_url)}
+                            alt="Vault Media"
+                            fill
+                            unoptimized
+                            className={`object-cover transition-all ${item.is_vault && !item.is_unlocked ? 'blur-2xl scale-110 opacity-50' : 'opacity-100'}`}
+                          />
+                        ))}
+
+                        {/* Lock overlay */}
+                        {item.is_vault && !item.is_unlocked && (
+                          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4 gap-3 bg-black/60">
+                            <Lock size={18} className="text-white/50" />
+                            <button
+                              onClick={(e) => { e.stopPropagation(); unlockItem(item); }}
+                              disabled={isProcessing}
+                              className="w-full py-2.5 bg-white text-black text-[9px] font-black uppercase rounded-xl hover:bg-[#ffea00] transition-colors disabled:opacity-50 shadow-lg"
+                            >
+                              {isProcessing ? 'SYNCING...' : `UNLOCK · ${item.price || 75}cr`}
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Unlocked badge */}
+                        {(!item.is_vault || item.is_unlocked) && (
+                          <div className="absolute top-2 right-2 z-20 bg-black/60 rounded-full p-1">
+                            <Check size={10} className="text-[#00f0ff]" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
