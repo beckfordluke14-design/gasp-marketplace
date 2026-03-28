@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
+import { NextResponse } from 'next/server';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { ethers } from 'ethers';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
@@ -120,44 +121,43 @@ export async function POST(req: Request) {
         }
 
         // 🧬 SECURE FULFILLMENT ATOMICS
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
-
         // 🛡️ DOUBLE-SPEND DEFENSE
-        const { data: existing } = await supabase.from('audit_ledger').select('id').eq('external_id', finalTxHash).maybeSingle();
-        if (existing) return new Response(JSON.stringify({ success: false, error: 'Sovereign Check: Transaction already settled.' }), { status: 400 });
+        const { rows: existing } = await db.query('SELECT id FROM audit_ledger WHERE external_id = $1 LIMIT 1', [finalTxHash]);
+        if (existing.length > 0) return NextResponse.json({ success: false, error: 'Sovereign Check: Transaction already settled.' }, { status: 400 });
 
         const totalCredits = pkg.credits + Math.floor(pkg.credits * 0.15); // Bonus applied
 
         // 1. Log Audit Ledger (Airdrop Source of Truth)
-        await supabase.from('audit_ledger').insert({
-            user_id: userId,
-            action: 'SOVEREIGN_AUTO_SCAN_SETTLEMENT',
-            amount_usd: pkg.priceUsd,
-            credits_added: totalCredits,
-            status: 'SETTLED',
-            network: network,
-            external_id: finalTxHash,
-            sender_wallet: senderWallet // 🧬 LOCKED FOR $GASPAI AIRDROP 🛡️
-        });
+        await db.query(`
+            INSERT INTO audit_ledger (user_id, action, amount_usd, credits_added, status, network, external_id, sender_wallet, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+        `, [
+            userId, 
+            'SOVEREIGN_AUTO_SCAN_SETTLEMENT', 
+            pkg.priceUsd, 
+            totalCredits, 
+            'SETTLED', 
+            network, 
+            finalTxHash, 
+            senderWallet
+        ]);
 
         // 2. Update Sovereign Ledger (Profiles table)
-        // We use UPSERT to handle Guest IDs that don't have a profile row yet.
-        const { data: profile } = await supabase.from('profiles').select('total_spent_usd, credit_balance').eq('id', userId).maybeSingle();
-        
-        await supabase.from('profiles').upsert({ 
-            id: userId,
-            total_spent_usd: (profile?.total_spent_usd || 0) + pkg.priceUsd,
-            credit_balance: (profile?.credit_balance || 0) + totalCredits,
-            updated_at: new Date().toISOString()
-        });
+        // We use UPSERT path via ON CONFLICT
+        await db.query(`
+            INSERT INTO profiles (id, total_spent_usd, credit_balance, updated_at)
+            VALUES ($1, $2, $3, NOW())
+            ON CONFLICT (id) 
+            DO UPDATE SET 
+                total_spent_usd = profiles.total_spent_usd + EXCLUDED.total_spent_usd,
+                credit_balance = profiles.credit_balance + EXCLUDED.credit_balance,
+                updated_at = NOW()
+        `, [userId, pkg.priceUsd, totalCredits]);
 
-        return new Response(JSON.stringify({ success: true, credits: totalCredits }), { status: 200 });
+        return NextResponse.json({ success: true, credits: totalCredits });
 
     } catch (e: any) {
         console.error('FATAL VERIFIER ERROR:', e.message);
-        return new Response(JSON.stringify({ success: false, error: 'Blockchain Node Congestion. Re-scan in 60s.' }), { status: 500 });
+        return NextResponse.json({ success: false, error: 'Blockchain Node Congestion. Re-scan in 60s.' }, { status: 500 });
     }
 }

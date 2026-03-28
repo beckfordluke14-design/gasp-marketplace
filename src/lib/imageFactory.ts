@@ -2,12 +2,6 @@
  * SYNDICATE PHASE 2: VISUAL PROOF LAYER (IMAGE DNA)
  * Nano Banana 2 / Gemini 3 Flash Image Proxy
  */
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
 
 export async function generatePersonaSelfie(personaId: string, zone: string, stability: number) {
     console.log(`📸 [Visual DNA] Generating Proof for: ${personaId} (Zone: ${zone})...`);

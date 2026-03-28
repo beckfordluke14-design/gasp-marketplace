@@ -1,306 +1,160 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
-
-// 🏁 DATA RECOVERY: Static Persona Sync
-const FALLBACK_PERSONAS: Record<string, any> = {
-    'isabella': { name: 'Isabella', city: 'Newark', is_active: true },
-    'tia-jamaica': { name: 'Tia', city: 'Kingston', is_active: true },
-    'zola-nigeria': { name: 'Zola', city: 'Lagos', is_active: true }
-};
 
 export async function POST(req: Request) {
     try {
         const { action, payload } = await req.json();
         console.log(`[Neural Command Pulse]: Action=${action}`, payload);
-        if (action === 'toggle-status') {
-            console.log(`[Neural Admin Sync] Cloud-Etching Node: ${payload.id} to state: ${payload.is_active}`);
-        }
 
         switch (action) {
             case 'sync-follow': {
                 const { user_id, persona_id, is_following } = payload;
                 if (!user_id || !persona_id) throw new Error('Identity Missing.');
                 
-                const { error } = await supabase.from('user_persona_stats').upsert([{ 
-                    user_id, 
-                    persona_id, 
-                    is_following: is_following || false,
-                    updated_at: new Date().toISOString()
-                }]);
-                if (error) console.error('[Follow Sync Failure]:', error.message);
+                await db.query(`
+                    INSERT INTO user_persona_stats (user_id, persona_id, is_following, updated_at)
+                    VALUES ($1, $2, $3, NOW())
+                    ON CONFLICT (user_id, persona_id) DO UPDATE SET is_following = EXCLUDED.is_following, updated_at = NOW()
+                `, [user_id, persona_id, is_following || false]);
                 return NextResponse.json({ success: true });
             }
             case 'toggle-status': {
                 const { id, is_active } = payload;
-                const { error } = await supabase.from('personas').update({ is_active }).eq('id', id);
-                if (error) {
-                    console.error('[Admin DB Error]:', error.message);
-                    throw error;
-                }
+                await db.query('UPDATE personas SET is_active = $1 WHERE id = $2', [is_active, id]);
                 return NextResponse.json({ success: true });
             }
             case 'global-rename': {
                 const { id, oldName, newName } = payload;
                 if (!id || !newName) throw new Error('Identity Target Missing.');
                 
-                // 1. Update Persona Node
-                const { error: pError } = await supabase.from('personas').update({ name: newName }).eq('id', id);
-                if (pError) throw pError;
+                await db.query('UPDATE personas SET name = $1 WHERE id = $2', [newName, id]);
 
-                // 2. Cascade to post captions (Neural Sweep)
                 if (oldName) {
-                    const { data: posts } = await supabase.from('posts').select('id, caption').eq('persona_id', id);
-                    if (posts) {
-                        for (const post of posts) {
-                            if (post.caption && post.caption.includes(oldName)) {
-                                const newCaption = post.caption.replace(new RegExp(oldName, 'gi'), newName);
-                                await supabase.from('posts').update({ caption: newCaption }).eq('id', post.id);
-                            }
-                        }
-                    }
+                    await db.query("UPDATE posts SET caption = REPLACE(caption, $1, $2) WHERE persona_id = $3", [oldName, newName, id]);
                 }
                 return NextResponse.json({ success: true });
             }
             case 'rename': {
                 const { id, name } = payload;
-                const { error } = await supabase.from('personas').update({ name }).eq('id', id);
-                if (error) throw error;
+                await db.query('UPDATE personas SET name = $1 WHERE id = $2', [name, id]);
                 return NextResponse.json({ success: true });
             }
             case 'kill': {
                 const { id } = payload;
-                const { error } = await supabase.from('personas').delete().eq('id', id);
-                if (error) throw error;
+                await db.query('DELETE FROM personas WHERE id = $1', [id]);
                 return NextResponse.json({ success: true });
             }
             case 'map-asset': {
                 const { persona_id, content_url, is_vault, caption } = payload;
-                const { error } = await supabase.from('posts').insert([{
-                    persona_id, content_url, is_vault, caption, scheduled_for: new Date().toISOString()
-                }]);
-                if (error) throw error;
+                await db.query(`
+                    INSERT INTO posts (persona_id, content_url, is_vault, caption, scheduled_for, created_at)
+                    VALUES ($1, $2, $3, $4, NOW(), NOW())
+                `, [persona_id, content_url, is_vault, caption]);
                 return NextResponse.json({ success: true });
             }
             case 'delete-post-hard': {
                 const { id } = payload;
-                if (!id) throw new Error('ID Missing.');
-                const { error } = await supabase.from('posts').delete().eq('id', id);
-                if (error) throw error;
+                await db.query('DELETE FROM posts WHERE id = $1', [id]);
                 return NextResponse.json({ success: true });
             }
             case 'delete-post': {
                 const { id } = payload;
-                console.log(`[Neural Admin] Soft-hiding post: ${id}`);
-                // Soft hide: mark post as hidden so feed queries filter it out
-                const { error } = await supabase.from('posts')
-                    .update({ is_burner: false, is_vault: false, caption: 'DELETED_NODE_SYNC_V15' })
-                    .eq('id', id);
-                if (error) throw error;
-                return NextResponse.json({ success: true });
-            }
-            case 'reassign-asset': {
-                const { asset, newPersonaId } = payload;
-                const { error } = await supabase.from('posts').insert([{
-                    persona_id: newPersonaId,
-                    content_type: asset.content_type || (asset.url?.endsWith('.mp4') ? 'video' : 'image'),
-                    content_url: asset.content_url || asset.url,
-                    caption: asset.caption || 'Mirror Sync: Cloned Node Asset.',
-                    is_vault: asset.is_vault,
-                    scheduled_for: new Date().toISOString()
-                }]);
-                if (error) throw error;
+                await db.query("UPDATE posts SET is_burner = false, is_vault = false, caption = 'DELETED_NODE_SYNC_V15' WHERE id = $1", [id]);
                 return NextResponse.json({ success: true });
             }
             case 'set-seed': {
                 const { id, url } = payload;
-                const { error } = await supabase.from('personas').update({ seed_image_url: url }).eq('id', id);
-                if (error) throw error;
+                await db.query('UPDATE personas SET seed_image_url = $1 WHERE id = $2', [url, id]);
                 return NextResponse.json({ success: true });
             }
             case 'toggle-vault': {
                 const { id, is_vault } = payload;
-                const { error } = await supabase.from('posts').update({ is_vault }).eq('id', id);
-                if (error) throw error;
+                await db.query('UPDATE posts SET is_vault = $1 WHERE id = $2', [is_vault, id]);
                 return NextResponse.json({ success: true });
             }
             case 'update-persona-full': {
-                // Writes identity fields + specific metadata to the personas table. 
-                // Used by the Identity Architect (profiles page).
                 const { id, name, city, vibe, system_prompt, seed_image_url, status, metadata } = payload;
                 if (!id) throw new Error('Persona ID Missing.');
                 
-                const fields: Record<string, any> = { id };
-                if (name           !== undefined) fields.name           = name;
-                if (city           !== undefined) fields.city           = city;
-                if (vibe           !== undefined) fields.vibe           = vibe;
-                if (system_prompt  !== undefined) fields.system_prompt  = system_prompt;
-                if (seed_image_url !== undefined) fields.seed_image_url = seed_image_url;
-                if (status         !== undefined) fields.status         = status;
-                
-                // 🧬 METADATA EXTENSION (v1.1): Merge provided tags/culture fields
-                if (metadata) {
-                    if (metadata.culture) fields.culture = metadata.culture;
-                    if (metadata.ethnicity) fields.ethnicity = metadata.ethnicity;
-                    if (metadata.hair_style) fields.hair_style = metadata.hair_style;
-                    if (metadata.body_type) fields.body_type = metadata.body_type;
-                    if (metadata.skin_tone) fields.skin_tone = metadata.skin_tone;
-                    if (metadata.syndicate_zone) fields.syndicate_zone = metadata.syndicate_zone;
-                    if (metadata.language) fields.language = metadata.language;
-                }
-
-                console.log(`[Neural Admin] FULL Identity Architect Sync for ${id}`);
-                const { error } = await supabase.from('personas').upsert([fields]);
-                if (error) throw error;
+                const m = metadata || {};
+                await db.query(`
+                    INSERT INTO personas (
+                        id, name, city, vibe, system_prompt, seed_image_url, status, 
+                        culture, ethnicity, hair_style, body_type, skin_tone, syndicate_zone, language, updated_at
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
+                    ON CONFLICT (id) DO UPDATE SET 
+                        name = EXCLUDED.name, city = EXCLUDED.city, vibe = EXCLUDED.vibe, 
+                        system_prompt = EXCLUDED.system_prompt, seed_image_url = EXCLUDED.seed_image_url, 
+                        status = EXCLUDED.status, culture = EXCLUDED.culture, ethnicity = EXCLUDED.ethnicity,
+                        hair_style = EXCLUDED.hair_style, body_type = EXCLUDED.body_type,
+                        skin_tone = EXCLUDED.skin_tone, syndicate_zone = EXCLUDED.syndicate_zone,
+                        language = EXCLUDED.language, updated_at = NOW()
+                `, [
+                    id, name, city, vibe, system_prompt, seed_image_url, status,
+                    m.culture, m.ethnicity, m.hair_style, m.body_type, m.skin_tone, m.syndicate_zone, m.language
+                ]);
                 return NextResponse.json({ success: true });
             }
             case 'update-persona': {
-                // Writes core identity fields to the personas table.
                 const { id, name, age, city, system_prompt, seed_image_url } = payload;
-                if (!id) throw new Error('Persona ID Missing.');
-                const fields: Record<string, any> = {};
-                if (name           !== undefined) fields.name           = name;
-                if (age            !== undefined) fields.age            = parseInt(age, 10) || age;
-                if (city           !== undefined) fields.city           = city;
-                if (system_prompt  !== undefined) fields.system_prompt  = system_prompt;
-                if (seed_image_url !== undefined) fields.seed_image_url = seed_image_url;
-                if (Object.keys(fields).length === 0) return NextResponse.json({ success: true });
-                const { error } = await supabase.from('personas').update(fields).eq('id', id);
-                if (error) throw error;
+                await db.query(`
+                    UPDATE personas SET 
+                        name = COALESCE($1, name), 
+                        age = COALESCE($2, age), 
+                        city = COALESCE($3, city), 
+                        system_prompt = COALESCE($4, system_prompt), 
+                        seed_image_url = COALESCE($5, seed_image_url),
+                        updated_at = NOW()
+                    WHERE id = $6
+                `, [name, age, city, system_prompt, seed_image_url, id]);
                 return NextResponse.json({ success: true });
             }
             case 'toggle-gallery': {
                 const { id, is_gallery } = payload;
-                const { error } = await supabase.from('posts').update({ is_gallery }).eq('id', id);
-                if (error) throw error;
+                await db.query('UPDATE posts SET is_gallery = $1 WHERE id = $2', [is_gallery, id]);
                 return NextResponse.json({ success: true });
             }
             case 'merge-persona': {
                 const { sourceId, targetId } = payload;
-                if (!sourceId || !targetId) throw new Error('Merge Identity Targets Missing.');
-                const { data, error } = await supabase.rpc('merge_personas', { 
-                    p_source_id: sourceId, 
-                    p_target_id: targetId 
-                });
-                if (error) throw error;
-                return NextResponse.json(data);
-            }
-            case 'solo-persona': {
-                const { postId, name, age, city, vibe } = payload;
-                if (!postId || !name) throw new Error('Solo Target/Name Missing.');
-                
-                // 1. Fetch source post
-                const { data: post, error: fError } = await supabase.from('posts').select('*').eq('id', postId).single();
-                if (fError || !post) throw new Error('Post Node Recover Failure.');
-
-                const newId = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
-                
-                // 2. Birth new persona
-                const { error: pError } = await supabase.from('personas').insert([{
-                    id: newId,
-                    name,
-                    age: parseInt(age, 10) || 22,
-                    city: city || 'Unknown',
-                    vibe: vibe || 'mysterious',
-                    is_active: true,
-                    seed_image_url: post.content_url
-                }]);
-                if (pError) throw pError;
-
-                // 3. Reassign the trigger post to the new owner
-                const { error: updError } = await supabase.from('posts').update({ persona_id: newId }).eq('id', postId);
-                if (updError) throw updError;
-
-                return NextResponse.json({ success: true, newPersonaId: newId });
+                await db.query('BEGIN');
+                try {
+                    await db.query('UPDATE chat_messages SET persona_id = $1 WHERE persona_id = $2', [targetId, sourceId]);
+                    await db.query('UPDATE posts SET persona_id = $1 WHERE persona_id = $2', [targetId, sourceId]);
+                    await db.query('DELETE FROM personas WHERE id = $1', [sourceId]);
+                    await db.query('COMMIT');
+                    return NextResponse.json({ success: true });
+                } catch (e) {
+                    await db.query('ROLLBACK');
+                    throw e;
+                }
             }
             case 'toggle-featured': {
                 const { id, is_featured } = payload;
-                const { error } = await supabase.from('posts').update({ is_burner: is_featured }).eq('id', id);
-                if (error) throw error;
-                return NextResponse.json({ success: true });
-            }
-            case 'update-post': {
-                const { id, caption, persona_id, content_url, content_type, is_vault, is_featured, is_freebie, is_gallery } = payload;
-                console.log(`[Neural Command]: Hard-Etching Post Update for ID: ${id}`);
-                
-                // 🛡️ SYNC PERSONA: Ensure persona exists for JOIN compatibility
-                if (persona_id) {
-                    const fallback = FALLBACK_PERSONAS[persona_id] || { name: persona_id, is_active: true };
-                    const { error: pError } = await supabase.from('personas').upsert([{ 
-                        id: persona_id, 
-                        name: fallback.name, 
-                        city: fallback.city || '', 
-                        is_active: true 
-                    }]);
-                    if (pError) console.error('[Persona Sync Error]:', pError.message);
-                }
-
-                // Build update object — only include defined fields
-                const updateFields: Record<string, any> = {};
-                if (caption     !== undefined) updateFields.caption      = caption;
-                if (persona_id  !== undefined) updateFields.persona_id   = persona_id;
-                if (content_url !== undefined) updateFields.content_url  = content_url;
-                if (content_type!== undefined) updateFields.content_type = content_type;
-                if (is_vault    !== undefined) updateFields.is_vault     = is_vault;
-                if (is_featured !== undefined) updateFields.is_burner    = is_featured;
-                if (is_freebie  !== undefined) updateFields.is_freebie   = is_freebie;
-                if (is_gallery  !== undefined) updateFields.is_gallery   = is_gallery;
-                updateFields.scheduled_for = new Date().toISOString();
-
-
-                const { error } = await supabase.from('posts').upsert([{ id, ...updateFields }]);
-                if (error) throw error;
+                await db.query('UPDATE posts SET is_burner = $1 WHERE id = $2', [is_featured, id]);
                 return NextResponse.json({ success: true });
             }
             case 'mark-freebie': {
-                // Marks a post as a freebie gift: removes from for-sale vault, available for chat drops
                 const { id, is_freebie } = payload;
-                if (!id) throw new Error('Post ID Missing.');
-                const { error } = await supabase.from('posts')
-                    .update({ is_freebie: is_freebie ?? true, is_vault: false })
-                    .eq('id', id);
-                if (error) throw error;
+                await db.query('UPDATE posts SET is_freebie = $1, is_vault = false WHERE id = $2', [is_freebie ?? true, id]);
                 return NextResponse.json({ success: true });
             }
             case 'bulk-delete': {
                 const { ids } = payload;
-                if (!ids || !Array.isArray(ids)) throw new Error('ID Array Missing.');
-                console.log(`[Neural Admin] Bulk Soft-hiding ${ids.length} posts.`);
-                const { error } = await supabase.from('posts')
-                    .update({ is_burner: false, is_vault: false, caption: 'DELETED_NODE_SYNC_V15' })
-                    .in('id', ids);
-                if (error) throw error;
+                await db.query("UPDATE posts SET is_burner = false, is_vault = false, caption = 'DELETED_NODE_SYNC_V15' WHERE id = ANY($1)", [ids]);
                 return NextResponse.json({ success: true });
             }
             case 'bulk-delete-hard': {
                 const { ids } = payload;
-                if (!ids || !Array.isArray(ids)) throw new Error('ID Array Missing.');
-                console.log(`[Neural Admin] Purging ${ids.length} nodes from existence.`);
-                const { error } = await supabase.from('posts').delete().in('id', ids);
-                if (error) throw error;
+                await db.query("DELETE FROM posts WHERE id = ANY($1)", [ids]);
                 return NextResponse.json({ success: true });
             }
             case 'create-post': {
-
-                const { persona_id, content_url, content_type, is_vault, is_featured, caption } = payload;
-                if (!persona_id || !content_url) throw new Error('persona_id and content_url required.');
-                const { error } = await supabase.from('posts').insert([{
-                    persona_id,
-                    content_url,
-                    content_type: content_type || 'video',
-                    is_vault:    is_vault    ?? false,
-                    is_burner:   is_featured ?? false,
-                    is_freebie:  payload.is_freebie ?? false,
-                    is_gallery:  payload.is_gallery ?? false,
-                    caption:     caption     || '',
-                    scheduled_for: new Date().toISOString(),
-
-                }]);
-                if (error) throw error;
+                const { persona_id, content_url, content_type, is_vault, is_featured, caption, is_freebie, is_gallery } = payload;
+                await db.query(`
+                    INSERT INTO posts (
+                        persona_id, content_url, content_type, is_vault, is_burner, is_freebie, is_gallery, caption, created_at
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+                `, [persona_id, content_url, content_type || 'image', is_vault ?? false, is_featured ?? false, is_freebie ?? false, is_gallery ?? false, caption || '']);
                 return NextResponse.json({ success: true });
             }
             default:

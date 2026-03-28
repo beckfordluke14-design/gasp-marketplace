@@ -1,18 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { useUser } from '@/components/providers/UserProvider';
 import { Lock, Heart, ArrowLeft, Grid, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
 
 export default function VaultCollection() {
   const { user } = useUser();
@@ -21,27 +15,18 @@ export default function VaultCollection() {
 
   useEffect(() => {
     // SYNDICATE V2.0: HYBRID PERSISTENCE (Guest + User)
-    let sessionId = user?.id || (typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : '');
+    const sessionId = user?.id || (typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : '');
     if (!sessionId) return;
 
     const fetchCollection = async () => {
       setLoading(true);
-      console.log(`🔓 [Vault] Decrypting collection for: ${sessionId}`);
-      
-      // 1. Fetch unlocks linked to this session
-      const { data: unlocks } = await supabase
-        .from('user_vault_unlocks')
-        .select('post_id')
-        .eq('user_id', sessionId);
-
-      if (unlocks && unlocks.length > 0) {
-        const postIds = unlocks.map(u => u.post_id);
-        const { data: posts } = await supabase
-            .from('posts')
-            .select('*, personas(name, seed_image_url)')
-            .in('id', postIds);
-        
-        if (posts) setItems(posts);
+      try {
+        console.log(`🔓 [Vault] Decrypting collection for: ${sessionId}`);
+        const res = await fetch(`/api/vault?userId=${sessionId}&t=${Date.now()}`);
+        const json = await res.json();
+        if (json.success) setItems(json.items || []);
+      } catch (e) {
+        console.error('[Vault Fetch Failure]:', e);
       }
       setLoading(false);
     };

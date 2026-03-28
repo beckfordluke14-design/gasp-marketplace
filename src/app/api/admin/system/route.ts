@@ -1,10 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -17,59 +12,36 @@ export async function GET(req: Request) {
         if (!personaId) throw new Error('Persona ID required.');
         
         const [
-            { data: persona },
-            { data: assets },
-            { count: relationshipsCount }
+            { rows: persona },
+            { rows: assets },
+            { rows: relationships }
         ] = await Promise.all([
-            supabase.from('personas').select('*').eq('id', personaId).single(),
-            supabase.from('posts').select('*').eq('persona_id', personaId).order('created_at', { ascending: false }),
-            supabase.from('user_relationships').select('*', { count: 'exact', head: true }).eq('persona_id', personaId)
+            db.query('SELECT * FROM personas WHERE id = $1 LIMIT 1', [personaId]),
+            db.query('SELECT * FROM posts WHERE persona_id = $1 ORDER BY created_at DESC', [personaId]),
+            db.query('SELECT count(*) FROM user_relationships WHERE persona_id = $1', [personaId])
         ]);
 
         return NextResponse.json({ 
             success: true, 
-            data: { persona, assets: assets || [], relationshipsCount: relationshipsCount || 0 } 
+            data: { 
+                persona: persona[0], 
+                assets: assets || [], 
+                relationshipsCount: parseInt(relationships[0]?.count || '0', 10) 
+            } 
         });
       }
 
       case 'scan-orphans': {
-        // 🔍 SCAN STORAGE BUCKETS FOR UNMAPPED ASSETS
-        const slug = personaId?.split('-')[0] || '';
-        const buckets = [
-          { name: 'chat_media', paths: personaId ? [`personas/${personaId}`, `personas/${slug}`, 'personas', ''] : ['personas', ''] },
-          { name: 'posts', paths: [''] },
-          { name: 'media_vault', paths: [''] }
-        ];
+        // 👻 SCAN DATABASE FOR GHOST POSTS IN THE SOVEREIGN VAULT
+        const { rows: dbOrphans } = await db.query('SELECT * FROM posts WHERE persona_id IS NULL');
+        
+        const orphans = (dbOrphans || []).map(o => ({
+            name: `DB_GHOST_${o.id.slice(0,4)}`,
+            bucket: 'posts_table',
+            url: o.content_url
+        }));
 
-        let allFiles: any[] = [];
-        const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-
-        for (const buck of buckets) {
-          for (const path of buck.paths) {
-            try {
-              const { data } = await supabase.storage.from(buck.name).list(path, { limit: 100 });
-              if (data) {
-                allFiles.push(...data.filter(f => f.id).map(f => ({
-                  name: f.name,
-                  bucket: buck.name,
-                  url: `${baseUrl}/storage/v1/object/public/${buck.name}/${path ? path + '/' : ''}${f.name}`
-                })));
-              }
-            } catch(e) {}
-          }
-        }
-
-        // 👻 SCAN DATABASE FOR GHOST POSTS
-        const { data: dbOrphans } = await supabase.from('posts').select('*').is('persona_id', null);
-        if (dbOrphans) {
-            allFiles.push(...dbOrphans.map(o => ({
-                name: `DB_GHOST_${o.id.slice(0,4)}`,
-                bucket: 'posts_table',
-                url: o.content_url
-            })));
-        }
-
-        return NextResponse.json({ success: true, files: allFiles });
+        return NextResponse.json({ success: true, files: orphans });
       }
 
       default:

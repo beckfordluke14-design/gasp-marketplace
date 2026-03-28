@@ -1,10 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-import { initialPersonas } from '@/lib/profiles';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+import { db } from '@/lib/db';
+import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
@@ -17,26 +12,28 @@ export async function POST(req: Request) {
 
     switch (action) {
       case 'chat-context': {
-        // 🔮 FETCH ALL NEURAL CHAT DATA IN ONE ROUND-TRIP
+        // 🛡️ SOVEREIGN NEURAL SYNC: Fetching all chat data in one Postgres handshake
+        console.log(`📡 [Neural Sync] Decrypting context for: ${userId} <-> ${personaId}`);
+
         const [
-            { data: messages },
-            { data: unlocks },
-            { data: vault },
-            { data: galleryPosts },
-            { data: relationship },
-            { data: stats }
+            { rows: messages },
+            { rows: unlocks },
+            { rows: vault },
+            { rows: galleryPosts },
+            { rows: relationships },
+            { rows: stats }
         ] = await Promise.all([
-            supabase.from('chat_messages').select('*').eq('user_id', userId).eq('persona_id', personaId).order('created_at', { ascending: true }),
-            supabase.from('user_vault_unlocks').select('item_id').eq('user_id', userId),
-            supabase.from('persona_vault').select('*').eq('persona_id', personaId).order('created_at', { ascending: false }),
-            supabase.from('posts').select('*').eq('persona_id', personaId).or('is_gallery.eq.true,is_vault.eq.true').order('created_at', { ascending: false }),
-            supabase.from('user_relationships').select('*').eq('user_id', userId).eq('persona_id', personaId).maybeSingle(),
-            supabase.from('user_persona_stats').select('bond_score').eq('user_id', userId).eq('persona_id', personaId).maybeSingle()
+            db.query('SELECT * FROM chat_messages WHERE user_id = $1 AND persona_id = $2 ORDER BY created_at ASC', [userId, personaId]),
+            db.query('SELECT post_id as item_id FROM user_vault_unlocks WHERE user_id = $1', [userId]),
+            db.query('SELECT * FROM persona_vault WHERE persona_id = $1 ORDER BY created_at DESC', [personaId]),
+            db.query('SELECT * FROM posts WHERE persona_id = $1 AND (is_gallery = true OR is_vault = true) ORDER BY created_at DESC', [personaId]),
+            db.query('SELECT * FROM user_relationships WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, personaId]),
+            db.query('SELECT bond_score FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, personaId])
         ]);
 
         const unlockedIds = (unlocks || []).map(u => u.item_id);
 
-        return Response.json({
+        return NextResponse.json({
           success: true,
           data: {
             messages: messages || [],
@@ -44,16 +41,16 @@ export async function POST(req: Request) {
               ...(vault || []).map(v => ({ ...v, is_unlocked: unlockedIds.includes(v.id) })),
               ...(galleryPosts || []).map(p => ({
                   id: p.id,
-                  content_url: p.content_url || p.image_url,
+                  content_url: p.content_url,
                   caption: p.caption,
                   is_vault: p.is_vault || p.is_freebie || true,
-                  is_unlocked: p.is_unlocked || unlockedIds.includes(p.id) || !p.is_vault,
+                  is_unlocked: unlockedIds.includes(p.id) || !p.is_vault,
                   type: p.type || 'image',
                   created_at: p.created_at
               }))
             ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
-            isFollowing: !!relationship,
-            bondScore: stats?.bond_score || 0
+            isFollowing: relationships.length > 0,
+            bondScore: stats[0]?.bond_score || 0
           }
         });
       }
@@ -61,27 +58,21 @@ export async function POST(req: Request) {
       case 'toggle-follow': {
         const { isFollowing } = payload;
         if (isFollowing) {
-          await supabase.from('user_relationships').delete().eq('user_id', userId).eq('persona_id', personaId);
-          return Response.json({ success: true, isFollowing: false });
+          await db.query('DELETE FROM user_relationships WHERE user_id = $1 AND persona_id = $2', [userId, personaId]);
+          return NextResponse.json({ success: true, isFollowing: false });
         } else {
-          await supabase.from('user_relationships').upsert({ user_id: userId, persona_id: personaId, affinity_score: 1 });
-          return Response.json({ success: true, isFollowing: true });
+          await db.query('INSERT INTO user_relationships (user_id, persona_id, affinity_score) VALUES ($1, $2, 1) ON CONFLICT (user_id, persona_id) DO NOTHING', [userId, personaId]);
+          return NextResponse.json({ success: true, isFollowing: true });
         }
       }
 
       case 'sync-follows': {
-        const { data } = await supabase.from('user_relationships').select('persona_id').eq('user_id', userId);
-        return Response.json({ success: true, following: (data || []).map(r => r.persona_id) });
+        const { rows } = await db.query('SELECT persona_id FROM user_relationships WHERE user_id = $1', [userId]);
+        return NextResponse.json({ success: true, following: rows.map(r => r.persona_id) });
       }
 
       case 'like-post': {
-        const { postId, hasLiked } = payload;
-        if (hasLiked) {
-           // Dec count (Optional: supabase.rpc handles atomic updates better but this works for syndicate v1)
-           return Response.json({ success: true });
-        } else {
-           return Response.json({ success: true });
-        }
+        return NextResponse.json({ success: true });
       }
 
       default:

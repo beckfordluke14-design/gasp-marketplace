@@ -1,18 +1,12 @@
+import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
-
 /**
- * THE FORCE-SYNC MASTER (V11.2)
- * Objective: Direct DB Infiltration for Tia & Zola.
+ * THE FORCE-SYNC MASTER (V12.0 - Sovereign Edition)
  */
 export async function GET() {
   const responses = [];
@@ -22,7 +16,7 @@ export async function GET() {
   ];
 
   for (const t of targets) {
-      console.log(`📡 Processing ${t.file}...`);
+      console.log(`📡 [Admin Master] Processing ${t.file}...`);
       const fullPath = path.join(process.cwd(), t.file);
       
       if (!fs.existsSync(fullPath)) {
@@ -31,25 +25,29 @@ export async function GET() {
       }
 
       try {
-          const buffer = fs.readFileSync(fullPath);
-          const dest = `v11_master_${t.persona}_${Date.now()}.mp4`;
+          const dest = `v12_master_${t.persona}_${Date.now()}.mp4`;
+          const publicUrl = `https://asset.gasp.fun/posts/videos/${dest}`;
 
-          // 1. Storage
-          await supabase.storage.from('media_vault').upload(dest, buffer, { contentType: 'video/mp4' });
-          const { data: { publicUrl } } = supabase.storage.from('media_vault').getPublicUrl(dest);
+          // 🛡️ SOVEREIGN REGISTRATION: Writing to the Railway vault
+          await db.query(`
+              INSERT INTO posts (
+                  persona_id, 
+                  content_type, 
+                  content_url, 
+                  caption, 
+                  is_featured, 
+                  is_vault, 
+                  created_at
+              ) VALUES ($1, $2, $3, $4, $5, $6, NOW())
+          `, [
+              t.persona,
+              'video',
+              publicUrl,
+              t.caption,
+              true,
+              false
+          ]);
 
-          // 2. Database (Using .insert with explicit column mapping)
-          const { error: dbErr } = await supabase.from('posts').insert({
-              persona_id: t.persona,
-              content_type: 'video',
-              content_url: publicUrl,
-              caption: t.caption,
-              is_featured: true,
-              is_vault: false,
-              created_at: new Date().toISOString()
-          });
-
-          if (dbErr) throw dbErr;
           responses.push({ file: t.file, status: 'synced', url: publicUrl });
 
       } catch (e: any) {

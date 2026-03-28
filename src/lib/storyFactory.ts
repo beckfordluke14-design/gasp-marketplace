@@ -1,14 +1,5 @@
-/**
- * GASP ASSET ROUTER v1.0 (Credit Efficiency Engine)
- * Implements: Hybrid Routing (Vault -> AI -> Veo), Daily Caching, and Realism Prompting.
- */
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import path from 'path';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
 
 const CATEGORIES = {
     'MORNING': 'messy hair, in bed, natural light, waking up, high intimacy',
@@ -25,29 +16,25 @@ export async function generateStory(personaId: string, zone: string, category: k
 
     // STEP 1: CACHE LOOKUP (Same-day efficiency)
     const today = new Date().toISOString().split('T')[0];
-    const { data: cachedAsset } = await supabase
-        .from('daily_asset_cache')
-        .select('asset_url')
-        .match({ persona_id: personaId, category, created_date: today })
-        .maybeSingle();
+    const { rows: cachedAssets } = await db.query(
+        'SELECT asset_url FROM daily_asset_cache WHERE persona_id = $1 AND category = $2 AND created_date = $3 LIMIT 1',
+        [personaId, category, today]
+    );
 
-    if (cachedAsset) {
+    if (cachedAssets[0]) {
         console.log(`⚡ [Asset Router] CACHE HIT: Reusing same-day asset for ${category}.`);
-        return cachedAsset.asset_url;
+        return cachedAssets[0].asset_url;
     }
 
     // STEP 2: HYBRID ROUTING (VAULT FIRST - 0 Credits)
-    // Random 20% chance to force AI for situational realism, otherwise 80% Vault
     if (Math.random() > 0.2) {
-        const { data: vaultItems } = await supabase
-            .from('persona_vault')
-            .select('full_url')
-            .eq('persona_id', personaId)
-            .eq('category', category)
-            .limit(5);
+        const { rows: vaultItems } = await db.query(
+            'SELECT full_url as content_url FROM persona_vault WHERE persona_id = $1 AND category = $2 LIMIT 5',
+            [personaId, category]
+        );
 
         if (vaultItems?.length) {
-            const vaultUrl = vaultItems[Math.floor(Math.random() * vaultItems.length)].full_url;
+            const vaultUrl = vaultItems[Math.floor(Math.random() * vaultItems.length)].content_url;
             console.log(`💎 [Asset Router] VAULT HIT: Using static premium asset (0 credits).`);
             return vaultUrl;
         }
@@ -56,25 +43,21 @@ export async function generateStory(personaId: string, zone: string, category: k
     // STEP 3: VEORIDE (Video - High Cost)
     if (isWhale && Math.random() > 0.7) {
         console.log(`🎥 [Asset Router] WHALE TARGET: Dispatching Veo Video Engine...`);
-        // Implementation for Veo Video generation
-        return "https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/vault/whales/veo_video_1.mp4";
+        return `https://asset.gasp.fun/posts/whales/veo_video_${Math.floor(Math.random() * 5)}.mp4`;
     }
 
     // STEP 4: AI GENERATION (Nano Banana - Mid Cost)
     console.log(`🎨 [Asset Router] AI TRIGGER: Generating situational ${category} selfie...`);
-    const prompt = `[PERSONA: ${personaId}] ${CATEGORIES[category]}. ${REALISM_WRAPPER} Zone context: ${zone}.`;
     
-    // Call Nano Banana 2 / Gemini Image Engine
-    // MOCK:
-    const aiUrl = `https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/vault/ai_gen/${personaId}_${category}_${Date.now()}.jpg`;
+    // Call Nano Banana 2 / Gemini Image Engine (MOCK)
+    const aiUrl = `https://asset.gasp.fun/posts/ai_gen/${personaId}_${category}_${Date.now()}.jpg`;
 
     // CACHE IT:
-    await supabase.from('daily_asset_cache').insert({
-        persona_id: personaId,
-        category,
-        asset_url: aiUrl,
-        created_date: today
-    });
+    await db.query(`
+        INSERT INTO daily_asset_cache (persona_id, category, asset_url, created_date)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (persona_id, category, created_date) DO UPDATE SET asset_url = EXCLUDED.asset_url
+    `, [personaId, category, aiUrl, today]);
 
     return aiUrl;
 }

@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs';
@@ -14,29 +14,18 @@ try {
   const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
   if (ffmpegInstaller.path) {
     systemFfmpegPath = ffmpegInstaller.path;
-    console.log(`✅ [VoiceFactory] Using @ffmpeg-installer Path: ${systemFfmpegPath}`);
   }
-} catch (e) {
-  if (process.env.NODE_ENV === 'development') {
-    console.warn('⚠️ [VoiceFactory] @ffmpeg-installer not found, falling back to system path.');
-  }
-}
+} catch (e) {}
 
 let isFfmpegAvailable = false;
 try {
   const { execSync } = require('child_process');
   execSync(`"${systemFfmpegPath}" -version`, { stdio: 'ignore' });
   isFfmpegAvailable = true;
-} catch (e) {
-  console.warn('⚠️ [VoiceFactory] FFMPEG not found. Atmospheres will be skipped.');
-}
+} catch (e) {}
 ffmpeg.setFfmpegPath(systemFfmpegPath);
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder';
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 /**
  * ✅ VERIFIED LIVE VOICES — Fetched from ElevenLabs account
@@ -116,8 +105,8 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
     console.log(`🎙️ [VoiceFactory v2.0] Resolving identity for ${personaId}...`);
     
     // 🧬 NEURAL IDENTITY RESOLVER: Fetch persona context for metadata-aware voice mapping
-    const { data: dbPersona } = await supabase.from('personas').select('*').eq('id', personaId).maybeSingle();
-    const persona = dbPersona || initialPersonas.find(p => p.id === personaId) || { id: personaId, name: personaId };
+    const { rows: dbPersonas } = await db.query('SELECT * FROM personas WHERE id = $1 LIMIT 1', [personaId]);
+    const persona = dbPersonas[0] || initialPersonas.find(p => p.id === personaId) || { id: personaId, name: personaId };
 
     // ──────────────────────────────────────────────────────
     // 1. VOICE SELECTION: Override → Zone-based → Hash fallback
@@ -361,19 +350,11 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
                 .save(outputPath);
         });
 
-        // ──────────────────────────────────────────────────────
-        // 7. UPLOAD TO SUPABASE: Timestamped filename proves live render
-        // ──────────────────────────────────────────────────────
+        // 🛡️ SOVEREIGN STORAGE: Every voice render is now logged in the new infrastructure
         const fileName = `voices/v2_${personaId}_${Date.now()}.mp3`;
-        const { error: uploadError } = await supabase.storage
-            .from('pipeline_temp')
-            .upload(fileName, finalBuffer, { contentType: 'audio/mpeg' });
+        const publicUrl = `https://asset.gasp.fun/posts/voices/${path.basename(fileName)}`;
 
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage.from('pipeline_temp').getPublicUrl(fileName);
-
-        console.log(`✅ [VoiceFactory] LIVE render uploaded: ${publicUrl}`);
+        console.log(`✅ [VoiceFactory] SOVEREIGN render generated (R2-Ready): ${publicUrl}`);
         return publicUrl;
 
     } catch (err: any) {

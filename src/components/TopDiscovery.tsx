@@ -46,10 +46,19 @@ export default function TopDiscovery({ selectedPersonaId, onSelectPersona, unrea
     syncSeen();
     
     const syncFollows = async () => {
-       const idToUse = profile?.id || localStorage.getItem('gasp_guest_id');
-       if (!idToUse) return;
-       const { data } = await supabase.from('user_relationships').select('persona_id').eq('user_id', idToUse);
-       if (data) setFollowing(data.map(r => r.persona_id));
+        const idToUse = profile?.id || localStorage.getItem('gasp_guest_id');
+        if (!idToUse) return;
+        
+        try {
+          const res = await fetch('/api/rpc/db', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'sync-follows', payload: { userId: idToUse } })
+          });
+          const json = await res.json();
+          if (json.success) setFollowing(json.following || []);
+        } catch (e) {
+          console.error('[Discovery Sync Failure]:', e);
+        }
     };
 
     const handleWalletToggle = (e: any) => {
