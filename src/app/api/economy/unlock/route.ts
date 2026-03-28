@@ -22,22 +22,29 @@ export async function POST(req: Request) {
           return NextResponse.json({ success: true, translation: msg[0].audio_translation, already_owned: true });
        }
 
-       const cost = 25; 
+       const cost = 1000; // 🧬 SYNDICATE DECODE COST
        
-       // ATOMIC TRANSACTION: Check balance + Deduct + Unlock
+       // ATOMIC TRANSACTION: Check balance + Deduct + Unlock + Log
        const { rows: profile } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1', [userId]);
        const balance = profile[0]?.credit_balance || 0;
 
        if (balance < cost) {
-          return NextResponse.json({ success: false, error: 'Insufficient Balance' }, { status: 400 });
+          return NextResponse.json({ success: false, error: 'Insufficient Balance', balance }, { status: 400 });
        }
 
        await db.query('BEGIN');
        try {
           await db.query('UPDATE profiles SET credit_balance = credit_balance - $1, updated_at = NOW() WHERE id = $2', [cost, userId]);
           await db.query('UPDATE chat_messages SET translation_locked = false WHERE id = $1', [mediaId]);
+          
+          // 🛡️ SYNDICATE LEDGER: Log Deduction
+          await db.query(`
+            INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
+            VALUES ($1, $2, 'translation_unlock', 'syndicate_core', $3, NOW())
+          `, [userId, cost, JSON.stringify({ messageId: mediaId })]);
+          
           await db.query('COMMIT');
-          return NextResponse.json({ success: true, translation: msg[0]?.audio_translation });
+          return NextResponse.json({ success: true, translation: msg[0]?.audio_translation, balance: balance - cost });
        } catch (err) {
           await db.query('ROLLBACK');
           throw err;
@@ -57,7 +64,7 @@ export async function POST(req: Request) {
       return new Response('Media node not found in any registry', { status: 404 });
     }
 
-    const cost = media.price_credits || 75;
+    const cost = media.price_credits || 6000; // 🧬 SYNDICATE VAULT COST
 
     const { rows: existingUnlock } = await db.query('SELECT * FROM user_vault_unlocks WHERE user_id = $1 AND post_id = $2 LIMIT 1', [userId, mediaId]);
 
@@ -70,23 +77,30 @@ export async function POST(req: Request) {
       });
     }
 
-    // ATOMIC TRANSACTION: Deduction + Unlock Record
+    // ATOMIC TRANSACTION: Deduction + Unlock Record + Log
     console.log(`💸 [Economy] Deducting ${cost} credits for media ${mediaId} from User ${userId}...`);
     
     const { rows: profile } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1', [userId]);
     const balance = profile[0]?.credit_balance || 0;
 
     if (balance < cost) {
-       return NextResponse.json({ success: false, error: 'Insufficient Balance' }, { status: 400 });
+       return NextResponse.json({ success: false, error: 'Insufficient Balance', balance }, { status: 400 });
     }
 
     await db.query('BEGIN');
     try {
        await db.query('UPDATE profiles SET credit_balance = credit_balance - $1, updated_at = NOW() WHERE id = $2', [cost, userId]);
        await db.query('INSERT INTO user_vault_unlocks (user_id, post_id, created_at) VALUES ($1, $2, NOW())', [userId, mediaId]);
+       
+       // 🛡️ SYNDICATE LEDGER: Log Deduction
+       await db.query(`
+         INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
+         VALUES ($1, $2, 'vault_unlock', 'syndicate_core', $3, NOW())
+       `, [userId, cost, JSON.stringify({ mediaId })]);
+       
        await db.query('COMMIT');
        console.log(`✅ [Economy] Unlock successful for User ${userId}.`);
-       return NextResponse.json({ success: true, media_url: media.content_url });
+       return NextResponse.json({ success: true, media_url: media.content_url, balance: balance - cost });
     } catch (err) {
        await db.query('ROLLBACK');
        throw err;

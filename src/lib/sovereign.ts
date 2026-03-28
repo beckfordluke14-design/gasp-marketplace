@@ -75,3 +75,28 @@ export async function saveMessage(userId: string, personaId: string, role: strin
 export async function updateNickname(userId: string, nickname: string) {
   await db.query('UPDATE profiles SET nickname = $1, is_known = true WHERE id = $2', [nickname, userId]);
 }
+
+export async function burnCredits(userId: string, amount: number, type: string = 'chat_message', meta: any = {}) {
+  try {
+     const { rows } = await db.query(`
+        UPDATE profiles 
+        SET credit_balance = credit_balance - $1, 
+            updated_at = NOW() 
+        WHERE id = $2 AND credit_balance >= $1 
+        RETURNING credit_balance
+     `, [amount, userId]);
+     
+     if (rows.length > 0) {
+        // Log transaction for audit 🛡️
+        await db.query(`
+           INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
+           VALUES ($1, $2, $3, 'syndicate_core', $4, NOW())
+        `, [userId, amount, type, JSON.stringify(meta)]);
+        return { success: true, balance: rows[0].credit_balance };
+     }
+     return { success: false, error: 'Insufficient Balance' };
+  } catch (err: any) {
+     console.error('[Sovereign] Burn failure:', err.message);
+     return { success: false, error: err.message };
+  }
+}

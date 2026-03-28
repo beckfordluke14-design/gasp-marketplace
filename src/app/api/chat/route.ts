@@ -209,19 +209,22 @@ export async function POST(req: Request) {
 
             // 🛡️ SOVEREIGN PERSISTENCE: Fire-and-forget — NEVER block the stream
             const lastUserMessage = messages.filter((m: any) => m.role === 'user').pop();
+            const burnAmount = 50; // Standard Text Burn Rate
+
             Promise.all([
+                SOV.burnCredits(finalUserId, burnAmount, 'chat_message', { personaId: finalProfileId }),
                 SOV.saveMessage(finalUserId, finalProfileId, 'user', lastUserMessage?.content || ''),
                 SOV.saveMessage(finalUserId, finalProfileId, 'assistant', streamB_Text, {
                     audio_script: streamA_Native,
                     audio_translation: streamA_Translation,
                     translation_locked: true,
-                    price: !!voiceUrl ? 2000 : 50,
+                    price: !!voiceUrl ? 1000 : 50,
                     type: !!voiceUrl ? 'audio' : 'text',
                     media_url: !!voiceUrl ? voiceUrl : null,
                     image_url: null
                 })
             ]).catch((dbErr: any) => {
-                console.warn('[Chat] DB persistence failed (non-blocking):', dbErr.message?.slice(0, 100));
+                console.warn('[Chat] Economic persistence failed (non-blocking):', dbErr.message?.slice(0, 100));
             });
 
             controller.close();
