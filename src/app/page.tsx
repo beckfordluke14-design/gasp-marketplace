@@ -151,47 +151,50 @@ function MarketplaceContent() {
           selectedPersonaId={selectedPersonaId} 
           personas={randomizedPersonas} 
        />
-       <div className="flex-1 flex flex-col relative h-screen">
-          <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} />
-          <div className="flex-1 flex flex-col h-[100dvh] overflow-hidden">
-             <div className="flex-1 overflow-hidden relative flex flex-col">
-                 <AnimatePresence mode="wait">
-                    {showStories && (
-                       <motion.div 
-                         initial={{ y: -20, opacity: 0 }} 
-                         animate={{ y: 0, opacity: 1 }} 
-                         exit={{ y: -20, opacity: 0 }}
-                         className="absolute top-9 inset-x-0 z-[80] px-4 pointer-events-none"
-                       >
-                          <div className="max-w-2xl mx-auto py-1 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
-                             <StoriesRow personas={randomizedPersonas} onSelectPersona={handleSelectPersona} />
-                          </div>
-                       </motion.div>
-                    )}
-                 </AnimatePresence>
-                
-                {/* STORY TOGGLE PORTAL */}
-                <div className="absolute right-6 top-8 z-50 flex items-center gap-3">
-                   <button 
-                     onClick={() => setShowStories(!showStories)}
-                     className={`w-10 h-10 rounded-xl bg-black/40 backdrop-blur-3xl border border-white/10 flex items-center justify-center text-white/20 hover:text-[#ffea00] transition-all ${!showStories ? 'bg-[#ffea00]/10 text-[#ffea00]' : ''}`}
-                   >
-                      <Zap size={16} className={!showStories ? 'animate-pulse' : ''} />
-                   </button>
-                </div>
+       
+       <div className="flex-1 flex flex-col relative h-screen overflow-hidden">
+           <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} />
+           
+           <div className="flex-1 flex flex-col relative pt-8">
+              <AnimatePresence mode="wait">
+                 {showStories && (
+                    <motion.div 
+                      initial={{ y: -20, opacity: 0 }} 
+                      animate={{ y: 0, opacity: 1 }} 
+                      exit={{ y: -20, opacity: 0 }}
+                      className="absolute top-1 inset-x-0 z-[80] px-4 pointer-events-none"
+                    >
+                       <div className="max-w-2xl mx-auto py-1 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
+                          <StoriesRow personas={randomizedPersonas} onSelectPersona={handleSelectPersona} />
+                       </div>
+                    </motion.div>
+                 )}
+              </AnimatePresence>
+             
+              {/* STORY TOGGLE PORTAL */}
+              <div className="absolute right-6 top-0 z-50 flex items-center gap-3">
+                 <button 
+                   onClick={() => setShowStories(!showStories)}
+                   className={`w-10 h-10 rounded-xl bg-black/40 backdrop-blur-3xl border border-white/10 flex items-center justify-center text-white/20 hover:text-[#ffea00] transition-all ${!showStories ? 'bg-[#ffea00]/10 text-[#ffea00]' : ''}`}
+                 >
+                    <Zap size={16} className={!showStories ? 'animate-pulse' : ''} />
+                 </button>
+              </div>
 
-                <div className="flex-1 overflow-hidden relative">
-                   <GlobalFeed onSelectPersona={handleSelectPersona} />
-                </div>
-             </div>
-             <RightSidebar 
-               onSelectPersona={handleSelectPersona} 
-               personas={randomizedPersonas} 
-               deadIds={deadIds} 
-               setDeadIds={setDeadIds} 
-             />
-          </div>
-       </div>
+              <div className="flex-1 overflow-hidden relative">
+                 <GlobalFeed onSelectPersona={handleSelectPersona} />
+              </div>
+           </div>
+        </div>
+
+        {/* 3rd Column Discovery Blade */}
+        <RightSidebar 
+          onSelectPersona={handleSelectPersona} 
+          personas={randomizedPersonas} 
+          deadIds={deadIds} 
+          setDeadIds={setDeadIds} 
+        />
+
        <div className="fixed inset-0 pointer-events-none z-[1000] flex items-end justify-end p-6 gap-4">
           <AnimatePresence>
             {openChatIds.filter(id => !minimizedIds.includes(id)).map((sId, index) => {
