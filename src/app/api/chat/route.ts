@@ -133,12 +133,24 @@ export async function POST(req: Request) {
 
     let orResponse = await callGrok();
     const brainJson = await orResponse.json();
-    const cleanContent = brainJson.choices?.[0]?.message?.content.replace(/```json|```/g, '').trim();
-    const syndicateOutput = JSON.parse(cleanContent);
+    const contentBody = brainJson.choices?.[0]?.message?.content || "";
+    const cleanContent = contentBody.replace(/```json|```/g, '').trim();
     
-    const streamB_Text = syndicateOutput.text_message;
-    const streamA_Native = syndicateOutput.audio_script;
-    const streamA_Translation = syndicateOutput.translation;
+    let syndicateOutput;
+    try {
+        syndicateOutput = JSON.parse(cleanContent || '{}');
+    } catch (parseErr: any) {
+        console.warn('[Brain API] Output Parse Failed:', parseErr.message, cleanContent);
+        syndicateOutput = { 
+            text_message: "Syncing Neural Node... One moment.", 
+            audio_script: "Syncing Neural Node. One moment.",
+            translation: "Syncing Neural Node. One moment."
+        };
+    }
+    
+    const streamB_Text = syndicateOutput.text_message || "Processing link...";
+    const streamA_Native = syndicateOutput.audio_script || "";
+    const streamA_Translation = syndicateOutput.translation || "";
 
     // 🛡️ SOVEREIGN RECALL: Persist Nickname
     if (syndicateOutput.new_nickname_detected) {

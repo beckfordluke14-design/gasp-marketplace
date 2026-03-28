@@ -105,7 +105,7 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
     const now = Date.now();
     const DOUBLE_TAP_DELAY = 300;
     if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
-       onSelectProfile(profile.id);
+       handleLike();
     }
     lastTapRef.current = now;
   };

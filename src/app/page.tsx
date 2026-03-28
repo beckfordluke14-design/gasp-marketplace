@@ -264,7 +264,7 @@ function MarketplaceContent() {
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
-                className="fixed inset-0 z-[200] bg-black lg:hidden overflow-y-auto"
+                className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-3xl lg:hidden overflow-y-auto"
               >
                  {/* 🚀 MAIN CONTENT HUB */}
                  <div className="pt-36 lg:pt-32 pb-32">

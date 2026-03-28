@@ -154,7 +154,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
   };
 
   return (
-    <aside className="hidden lg:flex w-[260px] h-screen bg-black/15 backdrop-blur-xl border-r border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 font-outfit transition-all">
+    <aside className="flex w-full lg:w-[260px] h-screen bg-transparent backdrop-blur-xl border-r border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 font-outfit transition-all">
       <div className="h-20 shrink-0" />
 
       <div className="flex-1 overflow-y-auto no-scrollbar py-6">
@@ -210,7 +210,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
         </div>
       </div>
 
-      <div className="p-4 border-t border-white/5 bg-black/20 z-10 flex flex-col gap-4 transition-all">
+      <div className="p-4 border-t border-white/5 bg-transparent z-10 flex flex-col gap-4 transition-all">
            {/* MY WALLET */}
           <div className="bg-white/5 border border-white/10 rounded-[1.5rem] p-3 space-y-3 relative overflow-hidden group transition-all">
             <div className="absolute inset-0 bg-gradient-to-tr from-[#00ff00]/5 to-transparent pointer-events-none" />
