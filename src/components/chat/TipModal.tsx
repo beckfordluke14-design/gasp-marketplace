@@ -20,7 +20,7 @@ export default function TipModal({ isOpen, onClose, onTip, userBalance, profileN
         { label: 'Subtle Spark', amount: 10, icon: <Gift size={16} /> },
         { label: 'Priority Echo', amount: 20, icon: <Zap size={16} /> },
         { label: 'Whale Surge', amount: 50, icon: <Crown size={16} /> },
-        { label: 'Elite Synthesis', amount: 150, icon: <Crown size={20} /> },
+        { label: 'Supreme Synthesis', amount: 150, icon: <Crown size={20} /> },
     ];
 
     const handleSendGift = async () => {

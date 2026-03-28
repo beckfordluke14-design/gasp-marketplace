@@ -20,7 +20,7 @@ const PREFIXES = [
 const SUFFIXES = [
   'Banger', 'Vibes', 'Grind', 'Flow', 'King', 'God', 'Wolf', 'Flex',
   'Heat', 'Ice', 'Cash', 'Gang', 'Boss', 'Plug', 'Mode', 'Drip',
-  'Lord', 'Sauce', 'Haze', 'Rider', 'Star', 'Elite', 'Alpha'
+  'Lord', 'Sauce', 'Haze', 'Rider', 'Star', 'Alpha'
 ];
 
 function randomUsername(): string {

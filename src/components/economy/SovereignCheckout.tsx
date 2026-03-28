@@ -15,7 +15,7 @@ interface SovereignCheckoutProps {
 }
 
 /**
- * ⛽ SOVEREIGN GASP NODE v5.0 (Elite Desk Edition)
+ * ⛽ SOVEREIGN GASP NODE v5.0 (Sovereign Desk Edition)
  * Objective: Side-by-Side Desktop Checkout + Session Persistence.
  */
 export default function SovereignCheckout({ userId, packageId, onSuccess, onCancel }: SovereignCheckoutProps) {

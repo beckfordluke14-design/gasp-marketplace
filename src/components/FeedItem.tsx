@@ -164,9 +164,32 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
                 </div>
              )}
           </div>
-        )}
-
-        {broadcast.type === 'video' && (
+         )}
+ 
+         {/* 💬 DYNAMIC TYPING TEASER: Triggers on scroll */}
+         <motion.div 
+           initial={{ opacity: 0, y: 20, scale: 0.95 }}
+           whileInView={{ opacity: 1, y: 0, scale: 1 }}
+           viewport={{ once: true, amount: 0.8 }}
+           transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
+           className="mt-8 flex items-center gap-4 bg-white/[0.03] backdrop-blur-2xl border border-white/5 rounded-[2rem] p-4 mx-2 group/teaser cursor-pointer hover:bg-white/5 transition-all"
+         >
+            <div className="flex gap-1.5 px-3 py-2 bg-black/40 rounded-full border border-white/10 shrink-0">
+               <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.3s]" />
+               <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.15s]" />
+               <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce" />
+            </div>
+            <div className="flex flex-col">
+               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00f0ff] animate-pulse">
+                  NEURAL LINK ACTIVE
+               </span>
+               <span className="text-[11px] font-bold text-white/40 group-hover/teaser:text-white transition-colors">
+                  {profile.name} is typing a message...
+               </span>
+            </div>
+         </motion.div>
+ 
+         {broadcast.type === 'video' && (
           <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-white/10 bg-white/5">
             {broadcast.is_locked ? (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-6 p-8 text-center backdrop-blur-3xl bg-black/40">

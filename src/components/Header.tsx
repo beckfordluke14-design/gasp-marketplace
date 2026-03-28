@@ -35,7 +35,7 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] flex flex-col pointer-events-none">
         {/* Navigation Bar */}
-        <header className="h-12 md:h-14 bg-black/20 backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-6 md:px-12 pointer-events-auto transition-all">
+        <header className="h-12 md:h-14 bg-transparent backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-6 md:px-12 pointer-events-auto transition-all">
             
             {/* Logo */}
             <div className="flex items-center gap-8 md:gap-10 pointer-events-auto">
@@ -152,9 +152,9 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
             </div>
         </header>
 
-         {/* Floating Search Bar */}
+         {/* Floating Search Bar - Fully Transparent / Floating Style */}
          <div className="absolute top-[105%] left-1/2 -translate-x-1/2 w-full max-w-[280px] md:max-w-xl px-4 flex items-center justify-center pointer-events-auto z-[90]">
-             <div className="w-full bg-black/5 backdrop-blur-md border border-white/5 rounded-full shadow-[0_5px_15px_rgba(0,0,0,0.2)] p-0.5">
+             <div className="w-full bg-transparent border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.4)] p-0.5">
                  <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
              </div>
          </div>

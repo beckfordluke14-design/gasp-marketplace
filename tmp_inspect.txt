@@ -1,0 +1,6 @@
+                      <div className="flex flex-col gap-2 pointer-events-auto">
+                         <div className="flex items-center gap-3">
+                       <span className="text-[14px] md:text-[18px] font-black uppercase italic tracking-tighter text-white/90 drop-shadow-2xl">{displayName}</span>
+                       <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] shadow-[0_0_10px_#00f0ff]" />
+                    </div>
+                    

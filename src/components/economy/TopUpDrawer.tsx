@@ -163,7 +163,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                         {pkg.isPopular && (
                             <span className="text-[9px] font-black uppercase text-[#ff6b00] tracking-[0.2em] mb-3 flex items-center gap-2">
                                 <Diamond size={10} fill="#ff6b00" />
-                                Elite Genesis Tier
+                                Sovereign Genesis Tier
                             </span>
                         )}
                         <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">{pkg.label}</span>

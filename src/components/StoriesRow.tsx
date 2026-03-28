@@ -260,7 +260,7 @@ export default function StoriesRow({ profiles, onSelectProfile }: StoriesRowProp
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase text-white tracking-widest">{activeStory.bubble.profileName} <Zap size={10} className="inline ml-1 text-[#ffea00]" /></p>
-                  <p className="text-[8px] text-white/40 uppercase tracking-[0.2em]">{currentStory.category || 'elite'} • now</p>
+                  <p className="text-[8px] text-white/40 uppercase tracking-[0.2em]">{currentStory.category || 'verified'} • now</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
