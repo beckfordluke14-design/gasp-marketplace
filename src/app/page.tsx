@@ -47,7 +47,10 @@ function MarketplaceContent() {
           
           const mergedSet = new Map();
           if (jsonActive.success) {
-             jsonActive.personas.forEach((p: any) => mergedSet.set(String(p.id), p));
+             jsonActive.personas.forEach((p: any) => mergedSet.set(String(p.id), {
+               ...p,
+               image: proxyImg(p.seed_image_url || p.image),
+             }));
           }
           if (jsonFeed.success && jsonFeed.posts) {
              jsonFeed.posts.forEach((p: any) => {
