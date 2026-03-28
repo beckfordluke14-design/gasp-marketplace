@@ -1,15 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
-export const dynamic = 'force-dynamic';
+import { db } from '@/lib/db';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
+export const dynamic = 'force-dynamic';
 
 /**
- * STRIPE PLACEHOLDER: MOCK CHECKOUT ENGINE
- * Objective: Simulate a high-speed successful purchase for local testing.
+ * STRIPE PLACEHOLDER: MOCK CHECKOUT ENGINE (Railway Edition)
+ * Objective: Simulate a high-speed successful purchase on the sovereign database.
  */
 export async function POST(req: Request) {
   try {
@@ -21,66 +17,45 @@ export async function POST(req: Request) {
     // 1. Simulate Stripe Network Latency (1.5s)
     await new Promise(resolve => setTimeout(resolve, 1500));
 
-    // 2. Add Coins via Wallets
-    // In production, we'd use 'upsert' or 'rpc' for atomic updates
-    const { data: wallet, error: walletError } = await supabase
-      .from('wallets')
-      .select('id, balance')
-      .eq('user_id', userId)
-      .single();
+    // 2. Add Coins via Wallets in Railway (Atomic)
+    console.log(`💎 [MockCheckout] Adding ${pkg.credits} coins to User ${userId} on Railway...`);
+    
+    await db.query(`
+        INSERT INTO wallets (user_id, balance, created_at, updated_at)
+        VALUES ($1, $2, NOW(), NOW())
+        ON CONFLICT (user_id) DO UPDATE SET 
+            balance = wallets.balance + EXCLUDED.balance,
+            updated_at = NOW()
+    `, [userId, pkg.credits]);
 
-    if (walletError && walletError.code !== 'PGRST116') throw walletError;
+    // 3. Log Deposit Transaction in Railway
+    await db.query(`
+        INSERT INTO transactions (user_id, amount, amount_usd, type, provider, created_at)
+        VALUES ($1, $2, $3, 'purchase', 'mock_stripe', NOW())
+    `, [userId, pkg.credits, pkg.priceUsd]);
 
-    if (!wallet) {
-      // First time purchaser: Create Wallet
-      await supabase.from('wallets').insert({
-        user_id: userId,
-        balance: pkg.credits
-      });
-    } else {
-      // Update existing balance
-      await supabase
-        .from('wallets')
-        .update({ balance: wallet.balance + pkg.credits, updated_at: new Date().toISOString() })
-        .eq('id', wallet.id);
-    }
-
-    // 3. Log Deposit Transaction
-    await supabase.from('transactions').insert({
-      user_id: userId,
-      amount: pkg.credits,
-      type: 'purchase'
-    });
-
-    // 4. 🧬 PULSE PROTOCOL: Update Whale Ledger (Future Airdrop Track)
+    // 4. 🧬 PULSE PROTOCOL: Update Whale Ledger in Railway
     try {
-      // In production, users should have total_spent_usd and credit_balance columns
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('total_spent_usd, credit_balance')
-        .eq('id', userId)
-        .single();
-
-      const { error: updError } = await supabase
-        .from('profiles')
-        .update({
-          total_spent_usd: (currentProfile?.total_spent_usd || 0) + pkg.priceUsd,
-          credit_balance: (currentProfile?.credit_balance || 0) + (pkg.priceUsd * 100), // $1 = 100 Credits
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', userId);
+        await db.query(`
+            UPDATE profiles 
+            SET total_spent_usd = total_spent_usd + $1,
+                credit_balance = credit_balance + ($1 * 100),
+                updated_at = NOW()
+            WHERE id = $2
+        `, [pkg.priceUsd, userId]);
     } catch (e) {
-      console.warn('[Whale Tracker] Profile update skipped - check column existence.');
+      console.warn('[Whale Tracker] Profile update skipped on Railway.');
     }
 
     return new Response(JSON.stringify({ 
         success: true, 
         package: pkg.label, 
-        added: pkg.credits 
+        added: pkg.credits,
+        railway_sync: true
     }), { status: 200 });
 
   } catch (err: any) {
-    console.error('[MockCheckout] Fatal Error:', err);
+    console.error('[MockCheckout] Fatal Error:', err.message);
     return new Response(err.message, { status: 500 });
   }
 }

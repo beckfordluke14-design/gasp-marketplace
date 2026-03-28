@@ -1,22 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
-
 export async function GET() {
   try {
-    const { data: stories, error } = await supabase
-      .from('persona_stories')
-      .select('*')
-      .gt('expires_at', new Date().toISOString())
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
+    const { rows: stories } = await db.query(`
+        SELECT * FROM persona_stories 
+        WHERE expires_at > NOW() 
+        ORDER BY created_at DESC
+    `);
     
     return NextResponse.json({ success: true, stories: stories || [] });
   } catch (error: any) {

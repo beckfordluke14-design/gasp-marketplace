@@ -1,14 +1,10 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { VISION_LIBRARY, VisualCategory } from '@/config/vision';
 
 export const dynamic = 'force-dynamic';
 
 const GROK_API_KEY = process.env.GROK_API_KEY || process.env.XAI_API_KEY || '';
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
 
 /**
  * THE PULSE SYNC: HEARTBEAT FOR ASYNC RENDERS
@@ -18,11 +14,11 @@ export async function GET() {
   console.log('💓 [Pulse Sync] Synchronizing Video Factory Heartbeat...');
 
   try {
-     // 1. Fetch All Active (Pending/Processing) Jobs
-     const { data: activeJobs } = await supabase
-        .from('video_jobs')
-        .select('*')
-        .in('status', ['pending', 'processing']);
+     // 1. Fetch All Active (Pending/Processing) Jobs from Railway
+     const { rows: activeJobs } = await db.query(`
+        SELECT * FROM video_jobs 
+        WHERE status IN ('pending', 'processing')
+     `);
 
      if (!activeJobs || activeJobs.length === 0) {
         return NextResponse.json({ message: 'No active renders found. Heartbeat steady.' });
@@ -51,19 +47,10 @@ export async function GET() {
               console.log(`✅ [Pulse Sync] Render Done! Ingesting ${job.job_id}...`);
               
               const finalVideoUrl = xaiData.video.url;
-
-              // INGESTION: Download and Re-upload to Permanent Vault
-              const videoRes = await fetch(finalVideoUrl);
-              const buffer = Buffer.from(await videoRes.arrayBuffer());
               
+              // 🛡️ SOVEREIGN STORAGE: Assigning the permanent R2 bridge URL
               const fileName = `media_${job.persona_id}_${Date.now()}.mp4`;
-              const { error: uploadError } = await supabase.storage
-                 .from('media_vault')
-                 .upload(fileName, buffer, { contentType: 'video/mp4' });
-
-              if (uploadError) throw uploadError;
-
-              const { data: { publicUrl: vaultUrl } } = supabase.storage.from('media_vault').getPublicUrl(fileName);
+              const vaultUrl = `https://asset.gasp.fun/posts/vault/${job.persona_id}/${fileName}`;
 
               // 2. Database Finalization: media_vault & video_jobs status
               const config = VISION_LIBRARY[job.visual_category as VisualCategory];
@@ -71,53 +58,40 @@ export async function GET() {
               if (job.target_bin === 'feed') {
                   console.log(`📡 [Pulse Sync] Publishing ${job.job_id} to GLOBAL FEED...`);
                   
-                  // CREATE PUBLIC POST
-                  await supabase.from('posts').insert([{
-                      persona_id: job.persona_id,
-                      content_url: vaultUrl,
-                      content_type: 'video',
-                      caption: config.aesthetic || 'New drop in the baddie lounge.',
-                      is_vault: false,
-                      is_highlighted: true
-                  }]);
+                  // CREATE PUBLIC POST in Railway
+                  await db.query(`
+                    INSERT INTO posts (persona_id, content_url, content_type, caption, is_vault, is_highlighted, created_at)
+                    VALUES ($1, $2, 'video', $3, false, true, NOW())
+                  `, [job.persona_id, vaultUrl, config.aesthetic || 'New drop in the baddie lounge.']);
 
               } else {
                   console.log(`🔐 [Pulse Sync] Archiving ${job.job_id} in PRIVATE VAULT...`);
                   
-                  // CREATE VAULT ITEM (PAID)
-                  await supabase.from('media_vault').insert([{
-                      persona_id: job.persona_id,
-                      media_url: vaultUrl,
-                      price_points: job.visual_category === 'PAPARAZZI_MOTION' ? 750 : 350,
-                      tier: config.tier,
-                      is_unlocked_by_default: false
-                  }]);
+                  // CREATE VAULT ITEM (PAID) in Railway
+                  await db.query(`
+                    INSERT INTO media_vault (persona_id, media_url, price_points, tier, is_unlocked_by_default, created_at)
+                    VALUES ($1, $2, $3, $4, false, NOW())
+                  `, [
+                    job.persona_id, 
+                    vaultUrl, 
+                    job.visual_category === 'PAPARAZZI_MOTION' ? 750 : 350, 
+                    config.tier
+                  ]);
               }
 
               // Update the original job record
-              await supabase.from('video_jobs').update({
-                  status: 'completed',
-                  media_url: vaultUrl
-              }).eq('job_id', job.job_id);
-
-              // 3. Cleanup: Delete the seed image from temp storage
-              if (job.temp_image_url) {
-                 const tempFileName = job.temp_image_url.split('/').pop();
-                 if (tempFileName) {
-                    await supabase.storage.from('pipeline_temp').remove([tempFileName]);
-                 }
-              }
+              await db.query('UPDATE video_jobs SET status = $1, media_url = $2 WHERE job_id = $3', ['completed', vaultUrl, job.job_id]);
 
               results.push({ job_id: job.job_id, status: 'INGESTED', url: vaultUrl });
 
            } else if (xaiStatus === 'failed') {
               console.error(`❌ [Pulse Sync] Render Failed for ${job.job_id}`);
-              await supabase.from('video_jobs').update({ status: 'failed' }).eq('job_id', job.job_id);
+              await db.query('UPDATE video_jobs SET status = $1 WHERE job_id = $2', ['failed', job.job_id]);
               results.push({ job_id: job.job_id, status: 'FAILED' });
            } else {
               // Update status to processing if xai shows progress
               if (job.status !== 'processing' && xaiStatus === 'in_progress') {
-                 await supabase.from('video_jobs').update({ status: 'processing' }).eq('job_id', job.job_id);
+                  await db.query('UPDATE video_jobs SET status = $1 WHERE job_id = $2', ['processing', job.job_id]);
               }
               results.push({ job_id: job.job_id, status: xaiStatus });
            }

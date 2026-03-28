@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 
 export const dynamic = 'force-dynamic';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
 
 /**
  * GASP x CCBILL: SECURE REVENUE NODE v1.8
@@ -23,8 +18,9 @@ export async function POST(req: Request) {
     const eventType = body.get('eventType'); // e.g. 'Approval_Post'
     const userId = body.get('X-userId') as string; // We'll pass this in our checkout link
     const packageId = body.get('X-packageId') as string;
-    const amount = body.get('accountingAmount'); // Actual USD amount (e.g. 99.99)
-    const transactionId = body.get('subscriptionId'); // CCBill unique ID
+    const amountStr = body.get('accountingAmount') as string; // Actual USD amount (e.g. 99.99)
+    const transactionId = body.get('subscriptionId') as string; // CCBill unique ID
+    const amount = Number(amountStr || '0');
 
     if (eventType !== 'Approval_Post') {
         return NextResponse.json({ success: true, message: 'Event ignored - Not an approval' });
@@ -39,40 +35,34 @@ export async function POST(req: Request) {
     const pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
     if (!pkg) throw new Error(`Invalid Package ID: ${packageId}`);
 
-    // 2. ATOMIC SYNC: Credit Wallet
-    const { data: wallet } = await supabase.from('wallets').select('id, credit_balance').eq('user_id', userId).single();
-
-    if (wallet) {
-        await supabase.from('wallets').update({
-            credit_balance: wallet.credit_balance + pkg.credits,
-            updated_at: new Date().toISOString()
-        }).eq('id', wallet.id);
-    } else {
-        await supabase.from('wallets').insert({ user_id: userId, credit_balance: pkg.credits });
-    }
+    // 2. ATOMIC SYNC: Credit Wallet in Railway
+    console.log(`💎 [CCBill Webhook] Crediting Wallet for User ${userId}...`);
+    await db.query(`
+        INSERT INTO wallets (user_id, credit_balance, updated_at)
+        VALUES ($1, $2, NOW())
+        ON CONFLICT (user_id) DO UPDATE SET 
+            credit_balance = wallets.credit_balance + EXCLUDED.credit_balance,
+            updated_at = NOW()
+    `, [userId, pkg.credits]);
 
     // 3. 🧬 THE AIRDROP LEDGER: Log $GASPAI Stake (1:1 Reserved Model)
-    console.log(`💎 [CCBill Webhook] Logging $GASPAI Stake for User ${userId}...`);
     try {
-        const { data: profile } = await supabase.from('profiles').select('total_spent_usd, credit_balance').eq('id', userId).single();
-        await supabase.from('profiles').update({
-            total_spent_usd: (profile?.total_spent_usd || 0) + Number(amount),
-            credit_balance: (profile?.credit_balance || 0) + (Number(amount) * 100), // $1 = 100 Credits
-            updated_at: new Date().toISOString()
-        }).eq('id', userId);
+        await db.query(`
+            UPDATE profiles 
+            SET total_spent_usd = total_spent_usd + $1,
+                credit_balance = credit_balance + ($1 * 100),
+                updated_at = NOW()
+            WHERE id = $2
+        `, [amount, userId]);
     } catch (e) {
         console.warn('[CCBill Airdrop] Dashboard update skipped.');
     }
 
-    // 4. Record Transaction
-    await supabase.from('transactions').insert({
-        user_id: userId,
-        amount: pkg.credits,
-        amount_usd: Number(amount),
-        type: 'purchase',
-        provider: 'ccbill',
-        external_id: transactionId
-    });
+    // 4. Record Transaction in Railway
+    await db.query(`
+        INSERT INTO transactions (user_id, amount, amount_usd, type, provider, external_id, created_at)
+        VALUES ($1, $2, $3, 'purchase', 'ccbill', $4, NOW())
+    `, [userId, pkg.credits, amount, transactionId]);
 
     console.log(`✅ [CCBill Webhook] Sync Complete. User ${userId} credited with ${pkg.credits} credits.`);
     return NextResponse.json({ success: true, message: 'Sync Complete' });

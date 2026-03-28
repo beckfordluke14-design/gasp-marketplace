@@ -1,16 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 export async function GET() {
   try {
-    const { data: personas, error: fetchErr } = await supabase.from('personas').select('*');
-    if (fetchErr) throw fetchErr;
-
+    const { rows: personas } = await db.query('SELECT * FROM personas');
+    
     const results = [];
     for (const p of personas) {
       // Basic heuristic for tags if they are missing
@@ -23,11 +17,15 @@ export async function GET() {
          p.culture
       ].filter(t => t && t !== 'undefined' && t !== 'null').map(t => t.toLowerCase());
       
-      const { error: upErr } = await supabase.from('personas').update({ tags }).eq('id', p.id);
-      results.push({ id: p.id, success: !upErr, error: upErr?.message });
+      try {
+        await db.query('UPDATE personas SET tags = $1 WHERE id = $2', [tags, p.id]);
+        results.push({ id: p.id, success: true });
+      } catch (upErr: any) {
+        results.push({ id: p.id, success: false, error: upErr.message });
+      }
     }
 
-    return NextResponse.json({ success: true, results });
+    return NextResponse.json({ success: true, results, message: 'Backfill complete on Railway.' });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

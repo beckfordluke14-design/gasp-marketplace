@@ -1,43 +1,41 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { generateBaseImage, dispatchGrokVideo } from '@/lib/videoFactory';
 
 export const dynamic = 'force-dynamic';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
-
 /**
- * THE VALENTINA TEST (Brazilian Green Eyes)
- * Objective: Generate two posts: a Still and a Video.
+ * THE VALENTINA TEST (Brazilian Green Eyes) - Railway Edition
  */
 export async function GET() {
-  console.log('⚡ [Valentina Test] Starting Double-Post Generation Pulse...');
+  console.log('⚡ [Valentina Test] Starting Double-Post Pulse on Railway...');
 
   const testPersonaId = 'valentina-lima'; 
 
   try {
-     const { data: existingPersona, error: fetchErr } = await supabase.from('personas').select('id').eq('id', testPersonaId).maybeSingle();
+     const { rows: personas } = await db.query('SELECT id FROM personas WHERE id = $1', [testPersonaId]);
+     const existingPersona = personas[0];
      
      if (!existingPersona) {
-        console.log(`🌟 [Birthing Valentina] DNA Node creation...`);
-        const { error: birthErr } = await supabase.from('personas').upsert([{
-           id: testPersonaId,
-           name: 'Valentina Lima',
-           age: 26,
-           city: 'Rio de Janeiro',
-           country: 'Brazil',
-           vibe: 'Brazilian curvy woman with thick curly hair and striking emerald green eyes.',
-           system_prompt: 'Valentina. A Brazilian bombshell with dark, thick, curly hair and striking emerald green eyes. Olive skin tone, athletic curvaceous build. Confident and unbothered smirk.',
-           is_active: true
-        }]);
-        if (birthErr) throw birthErr;
+        console.log(`🌟 [Birthing Valentina] DNA Node creation on Railway...`);
+        await db.query(`
+            INSERT INTO personas (id, name, age, city, country, vibe, system_prompt, is_active, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+            ON CONFLICT (id) DO UPDATE SET is_active = true
+        `, [
+            testPersonaId,
+            'Valentina Lima',
+            26,
+            'Rio de Janeiro',
+            'Brazil',
+            'Brazilian curvy woman with thick curly hair and striking emerald green eyes.',
+            'Valentina. A Brazilian bombshell with dark, thick, curly hair and striking emerald green eyes. Olive skin tone, athletic curvaceous build. Confident and unbothered smirk.',
+            true
+        ]);
      }
 
-     const stillCategory = 'EDITORIAL_SQUAT'; // A clean still
-     const videoCategory = 'MIRROR_MYSTERY';  // "Admiring Herself"
+     const stillCategory = 'EDITORIAL_SQUAT'; 
+     const videoCategory = 'MIRROR_MYSTERY';  
      const customOutfit = 'Neon green lace corset and black silk flare trousers';
 
      // 1. Post 1: The Still Image (Gemini Genesis)
@@ -58,10 +56,10 @@ export async function GET() {
      }
 
      // 3. Status Report
-     console.log('✅ [Valentina Test] Double-Post Pulse Successful.');
+     console.log('✅ [Valentina Test] Double-Post Pulse Successful on Railway.');
      return NextResponse.json({
         success: true,
-        summary: 'Valentina Double-Post Dispatched',
+        summary: 'Valentina Double-Post Dispatched on Railway',
         persona_id: testPersonaId,
         still_url: stillUrl,
         grok_job_id: grokJobId,
@@ -72,8 +70,7 @@ export async function GET() {
      console.error('❌ [Valentina Test Fail]:', err.message);
      return NextResponse.json({
         success: false,
-        error: err.message || 'Pipeline Disruption',
-        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        error: err.message || 'Railway Pipeline Disruption',
      }, { status: 500 });
   }
 }

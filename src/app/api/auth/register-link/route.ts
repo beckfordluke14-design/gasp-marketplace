@@ -1,10 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
 const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
@@ -16,9 +17,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Missing auth data' }, { status: 400 });
     }
 
-    console.log(`[Identity Link] Forging permanent node for ${email}...`);
+    console.log(`[Identity Link] Forging permanent node for ${email} on Railway...`);
 
-    // 1. CREATE USER VIA ADMIN
+    // 1. CREATE USER VIA ADMIN (Supabase Auth remains the source of truth for identity)
     const { data: newUser, error: createErr } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
@@ -31,44 +32,34 @@ export async function POST(req: Request) {
 
     const newUserId = newUser.user.id;
 
-    // 2. MIGRATE CHAT MEMORY
+    // 2. MIGRATE CHAT MEMORY in Railway
     if (guestId.startsWith('guest-')) {
-        await supabaseAdmin
-            .from('chat_messages')
-            .update({ user_id: newUserId })
-            .eq('user_id', guestId);
-            
-        await supabaseAdmin
-            .from('user_persona_stats')
-            .update({ user_id: newUserId })
-            .eq('user_id', guestId);
+        console.log(`[Identity Link] Migrating guest ${guestId} data to ${newUserId} on Railway...`);
+        
+        await db.query('UPDATE chat_messages SET user_id = $1 WHERE user_id = $2', [newUserId, guestId]);
+        await db.query('UPDATE user_persona_stats SET user_id = $1 WHERE user_id = $2', [newUserId, guestId]);
     }
 
     // 3. TASK 2: BONUS POINTS LOGIC (50 POINTS UPON ACCOUNT CREATION)
-    // Check if wallet history exists for the guest
-    const { data: existingWallet } = await supabaseAdmin.from('wallets').select('id, balance').eq('user_id', guestId).maybeSingle();
-    
     const startingBonus = 50;
     
-    if (existingWallet) {
-        // Update user_id to point to the new user AND add 50 bonus points
-        await supabaseAdmin.from('wallets')
-            .update({ user_id: newUserId, balance: existingWallet.balance + startingBonus })
-            .eq('id', existingWallet.id);
-    } else {
-        // Create new wallet entirely with 50 bonus points
-        await supabaseAdmin.from('wallets')
-            .insert({ user_id: newUserId, balance: startingBonus });
-    }
+    // UPSERT Wallet in Railway
+    await db.query(`
+        INSERT INTO wallets (user_id, balance, created_at, updated_at)
+        VALUES ($1, $2, NOW(), NOW())
+        ON CONFLICT (user_id) DO UPDATE SET 
+            balance = wallets.balance + EXCLUDED.balance,
+            updated_at = NOW()
+    `, [newUserId, startingBonus]);
 
     return NextResponse.json({ 
         success: true, 
-        message: 'Account linked, history merged, and 50 Breathe Points awarded.',
+        message: 'Account linked, history merged, and 50 Breathe Points awarded on Railway.',
         user_id: newUserId
     });
 
   } catch (error: any) {
-    console.error('[Identity Link] Critical Error:', error);
+    console.error('[Identity Link] Critical Error:', error.message);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

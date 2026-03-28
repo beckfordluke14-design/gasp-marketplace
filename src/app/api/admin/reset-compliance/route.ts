@@ -1,29 +1,28 @@
 import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
 const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
 export async function POST(req: Request) {
   try {
     const COMPLIANCE_EMAIL = 'compliance@alltheseflows.com';
-    const COMPLIANCE_PASS = 'review'; // Must match Supabase settings (min 6 chars)
+    const COMPLIANCE_PASS = 'review'; 
 
-    console.log('[Compliance Admin] Initiating State Reset Sequence...');
+    console.log('[Compliance Admin] Initiating Railway State Reset Sequence...');
 
-    // STEP A: CREATE OR RESET COMPLIANCE USER
+    // STEP A: CREATE OR RESET COMPLIANCE USER (Identity Node)
     let { data: { users }, error: usersErr } = await supabaseAdmin.auth.admin.listUsers();
     let complianceUser = users.find(u => u.email === COMPLIANCE_EMAIL);
 
     if (complianceUser) {
-        // Reset password just in case
         await supabaseAdmin.auth.admin.updateUserById(complianceUser.id, { password: COMPLIANCE_PASS });
     } else {
-        // Create user
         const { data: newUser, error: createErr } = await supabaseAdmin.auth.admin.createUser({
             email: COMPLIANCE_EMAIL,
             password: COMPLIANCE_PASS,
@@ -35,33 +34,20 @@ export async function POST(req: Request) {
 
     const userId = complianceUser.id;
 
-    // Optional: Make sure tables exist (user_wallets, user_unlocked_vaults)
-    // Assuming they are created. We will just attempt to UPSERT/DELETE without breaking.
-    
-    // STEP B: UPSERT WALLET BALANCE (10,000 Breathe Points)
-    const { data: existingWallet } = await supabaseAdmin.from('wallets').select('id, balance').eq('user_id', userId).maybeSingle();
-    if (!existingWallet) {
-        // Insert new wallet if they don't have one
-        const { error: insertErr } = await supabaseAdmin.from('wallets').insert({ user_id: userId, balance: 10000 });
-        if (insertErr) console.warn('[Compliance Admin] Wallet Insert Error:', insertErr);
-    } else {
-        // Update existing wallet
-        const { error: updateErr } = await supabaseAdmin.from('wallets').update({ balance: 10000 }).eq('id', existingWallet.id);
-        if (updateErr) console.warn('[Compliance Admin] Wallet Update Error:', updateErr);
-    }
+    // STEP B: UPSERT WALLET BALANCE (10,000 Breathe Points) on Railway
+    await db.query(`
+        INSERT INTO wallets (user_id, balance, updated_at)
+        VALUES ($1, 10000, NOW())
+        ON CONFLICT (user_id) DO UPDATE SET 
+            balance = 10000,
+            updated_at = NOW()
+    `, [userId]);
 
-    // STEP C: RELOCK EVERYTHING
-    const { error: relockErr } = await supabaseAdmin
-        .from('user_unlocked_vaults')
-        .delete()
-        .eq('user_id', userId);
-        
-    if (relockErr && relockErr.code !== '42P01') {
-        console.warn('[Compliance Admin] Relock Error:', relockErr);
-    }
+    // STEP C: RELOCK EVERYTHING on Railway
+    await db.query('DELETE FROM user_unlocked_vaults WHERE user_id = $1', [userId]);
 
-    // STEP D: SEED 3 MOCK VAULT ITEMS ACROSS ALL ACTIVE PERSONAS
-    const { data: allPersonas } = await supabaseAdmin.from('personas').select('id, name').eq('is_active', true);
+    // STEP D: SEED 3 MOCK VAULT ITEMS ACROSS ALL ACTIVE PERSONAS on Railway
+    const { rows: allPersonas } = await db.query('SELECT id, name FROM personas WHERE is_active = true');
     
     if (allPersonas && allPersonas.length > 0) {
         const mockPrompts = [
@@ -72,24 +58,20 @@ export async function POST(req: Request) {
 
         for (const p of allPersonas) {
             for (const item of mockPrompts) {
-                // Ensure no duplicating
-                const { data: existing } = await supabaseAdmin.from('posts').select('id').match({ 
-                    persona_id: p.id, 
-                    is_vault: true, 
-                    price: item.price 
-                }).maybeSingle();
+                // Ensure no duplicating on Railway
+                const { rows: existing } = await db.query(
+                    'SELECT id FROM posts WHERE persona_id = $1 AND is_vault = true AND price = $2',
+                    [p.id, item.price]
+                );
 
-                if (!existing) {
+                if (existing.length === 0) {
                     const encoded = encodeURIComponent(item.prompt + ' ' + p.name);
                     const drawUrl = `https://image.pollinations.ai/prompt/${encoded}?width=512&height=512&nologo=true&seed=${Math.floor(Math.random()*9999)}`;
-                    await supabaseAdmin.from('posts').insert({
-                        persona_id: p.id,
-                        content_type: 'vault',
-                        caption: item.cap,
-                        content_url: drawUrl,
-                        price: item.price,
-                        is_vault: true
-                    });
+                    
+                    await db.query(`
+                        INSERT INTO posts (persona_id, content_type, caption, content_url, price, is_vault, created_at)
+                        VALUES ($1, $2, $3, $4, $5, true, NOW())
+                    `, [p.id, 'vault', item.cap, drawUrl, item.price]);
                 }
             }
         }
@@ -97,12 +79,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ 
         success: true, 
-        message: 'Compliance Review Account successfully reset to 10,000 pts with locked vault state.',
+        message: 'Compliance Review Account successfully reset on Railway to 10,000 pts with locked vault state.',
         user_id: userId
     });
 
   } catch (error: any) {
-    console.error('[Compliance Admin] Critical Reset Error:', error);
+    console.error('[Compliance Admin] Critical Reset Error:', error.message);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

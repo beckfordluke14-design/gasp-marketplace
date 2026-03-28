@@ -1,12 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
+import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-const GOOGLE_GEMINI_KEY = '';
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+const GOOGLE_GEMINI_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
 
 const MIAMI_FASHION_SEEDS = [
   'tropical high-fashion miami clubwear 2026',
@@ -126,7 +123,7 @@ async function generateAndStoreImage(persona: any, isVault: boolean, personaId: 
     const seed = Math.floor(Math.random() * 1000000);
     const rotationMatch = CONTENT_ROTATION.find(r => r.type === shotType);
     const shotDir = rotationMatch ? rotationMatch.shotDir : 'candid fashion portrait';
-    const refDNA = persona.reference_prompt || `${persona.race} woman from ${persona.city}`;
+    const refDNA = persona.reference_prompt || `${persona.race || ''} woman from ${persona.city || ''}`;
     const fashion = MIAMI_FASHION_SEEDS[Math.floor(Math.random() * MIAMI_FASHION_SEEDS.length)];
     
     let prompt = `${refDNA}. ${shotDir}. ${fashion}. Glistening skin, high fashion, photorealistic. --seed ${seed}`;
@@ -143,7 +140,7 @@ async function generateAndStoreImage(persona: any, isVault: boolean, personaId: 
         const buffer = Buffer.from(await res.arrayBuffer());
         const path = `personas/${personaId}/studio_${Date.now()}_${seed}.jpg`;
         
-        // Push to Permanent Public Storage
+        // Push to Permanent Public Storage (Maintaining Supabase as Asset Bridge)
         const { error: uploadError } = await supabase.storage.from('chat_media').upload(path, buffer, {
             contentType: 'image/jpeg',
             cacheControl: '36000',
@@ -164,26 +161,34 @@ async function generateAndStoreImage(persona: any, isVault: boolean, personaId: 
 export async function POST(req: Request) {
     try {
         const { persona_id, content_type = 'image', custom_prompt } = await req.json();
-        const { data: persona } = await supabase.from('personas').select('*').eq('id', persona_id).single();
+        
+        // Use Railway DB for persona fetch
+        const { rows } = await db.query('SELECT * FROM personas WHERE id = $1', [persona_id]);
+        const persona = rows[0];
+        
         if (!persona) return new Response('Persona not found', { status: 404 });
 
         const cap = await generateCaption(persona, 'post');
         const img = await generateAndStoreImage(persona, false, persona_id, custom_prompt, 'casual_mirror');
 
         const isSecret = cap.toLowerCase().includes('secret');
-        const { data, error } = await supabase.from('posts').insert([{
-            persona_id,
-            content_type,
-            content_url: img,
-            caption: cap,
-            is_vault: isSecret, // ✅ Secret images automatically locked to Vault
-            scheduled_for: new Date().toISOString()
-        }]);
-
-        if (error) throw error;
+        
+        // Use Railway DB for post insertion
+        await db.query(`
+            INSERT INTO posts (persona_id, content_type, content_url, caption, is_vault, scheduled_for, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, NOW())
+        `, [
+            persona_id, 
+            content_type, 
+            img, 
+            cap, 
+            isSecret, 
+            new Date().toISOString()
+        ]);
 
         return new Response(JSON.stringify({ success: true, url: img }), { status: 200 });
     } catch (err: any) {
+        console.error('[Studio POST error]:', err.message);
         return new Response(JSON.stringify({ error: err.message }), { status: 500 });
     }
 }

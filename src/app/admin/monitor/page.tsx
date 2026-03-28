@@ -1,17 +1,9 @@
-'use client';
-
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Play, CheckCircle2, XCircle, RefreshCcw, Zap, Activity, Clock, Database, ChevronRight, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
 
 /**
  * THE FACTORY MONITOR (V2: HEARTBEAT SYNC)
@@ -26,13 +18,21 @@ export default function FactoryMonitor() {
 
   async function fetchJobs() {
     console.log('🛰️ [Monitor] Fetching Video Factories Heartbeat...');
-    const { data: dbJobs, error } = await supabase
-       .from('video_jobs')
-       .select('*')
-       .order('created_at', { ascending: false })
-       .limit(10);
-
-    if (dbJobs) setJobs(dbJobs);
+    try {
+        const res = await fetch('/api/rpc/db', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'GET_VIDEO_JOBS'
+            })
+        });
+        const data = await res.json();
+        if (Array.isArray(data)) {
+            setJobs(data);
+        }
+    } catch (e) {
+        console.error('[Monitor] Sovereign Fetch Failed:', e);
+    }
     setLoading(false);
   }
 

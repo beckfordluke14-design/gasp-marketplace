@@ -1,12 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { buildGenerationPrompt } from '@/lib/visionEngine';
 import { type VisualCategory } from '@/config/vision';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-);
 
 export async function POST(req: Request) {
   try {
@@ -16,15 +11,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'personaId and categoryId are required.' }, { status: 400 });
     }
 
-    // 1. Fetch Persona DNA from Supabase
-    const { data: persona, error } = await supabase
-      .from('personas')
-      .select('id, name, system_prompt')
-      .eq('id', personaId)
-      .maybeSingle();
+    // 1. Fetch Persona DNA from Railway DB
+    const { rows } = await db.query(
+      'SELECT id, name, system_prompt FROM personas WHERE id = $1',
+      [personaId]
+    );
+    const persona = rows[0];
 
-    if (error || !persona) {
-      console.error('[Factory Error] Persona not found:', error);
+    if (!persona) {
+      console.error('[Factory Error] Persona not found in Railway:', personaId);
       return NextResponse.json({ error: 'Persona not found' }, { status: 404 });
     }
 

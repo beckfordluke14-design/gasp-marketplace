@@ -1,12 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -15,13 +10,8 @@ export async function GET(req: Request) {
   if (!userId) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
   try {
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('credit_balance')
-      .eq('id', userId)
-      .maybeSingle();
-
-    if (error) throw error;
+    const { rows: profiles } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1 LIMIT 1', [userId]);
+    const profile = profiles[0];
     
     return NextResponse.json({ success: true, balance: profile?.credit_balance || 0 });
   } catch (error: any) {
@@ -36,17 +26,35 @@ export async function POST(req: Request) {
 
     try {
         if (action === 'starter_claim') {
-            const { data, error } = await supabase.rpc('process_spend', {
-                p_user_id: userId,
-                p_amount: -5000, 
-                p_type: 'starter_claim',
-                p_persona_id: 'system'
-            });
-            if (error) throw error;
-            return NextResponse.json({ success: true, data });
+            console.log(`🏦 [Economy] Processing Starter Claim (5000 bp) for ${userId}...`);
+            
+            // ATOMIC TRANSACTION: Claim Credits & Log Ledger
+            await db.query('BEGIN');
+            try {
+                // 1. Credit the Profile
+                await db.query(`
+                    UPDATE profiles 
+                    SET credit_balance = credit_balance + 5000,
+                        updated_at = NOW()
+                    WHERE id = $1
+                `, [userId]);
+
+                // 2. Log Transaction
+                await db.query(`
+                    INSERT INTO transactions (user_id, amount, type, provider, created_at)
+                    VALUES ($1, 5000, 'starter_claim', 'syndicate_genesis', NOW())
+                `, [userId]);
+
+                await db.query('COMMIT');
+                return NextResponse.json({ success: true, message: 'Genesis Credits Claimed' });
+            } catch (err) {
+                await db.query('ROLLBACK');
+                throw err;
+            }
         }
         return NextResponse.json({ success: false, error: 'Invalid Action' }, { status: 400 });
     } catch (e: any) {
+        console.error('[Economy] Claim Failure:', e.message);
         return NextResponse.json({ success: false, error: e.message }, { status: 500 });
     }
 }

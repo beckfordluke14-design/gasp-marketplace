@@ -1,22 +1,14 @@
 /**
- * GASP GROK-MOTION VIDEO BRIDGE v1.0
+ * GASP GROK-MOTION VIDEO BRIDGE v1.1
  * Objective: Animate high-res stills into thirst-trap loops.
- * 1. Generates 'Master Frame' still.
- * 2. Uses Grok-2 for Motion Blueprint.
- * 3. Monitors OpenRouter/xAI balance to set duration (7s vs 15s).
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120; // Video gen can be slow
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
-const XAI_KEY = process.env.XAI_KEY || '';
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 // ─── BALANCE MONITOR ──────────────────────────────────────────────────────────
 async function getCreditBalance() {
@@ -60,9 +52,10 @@ export async function POST(req: Request) {
     try {
         const { persona_id, vibe = 'casual luxury', is_vault = false } = await req.json();
         
-        // 1. Fetch Persona
-        const { data: persona } = await supabase.from('personas').select('*').eq('id', persona_id).single();
-        if (!persona) throw new Error('Persona Node Not Found');
+        // 1. Fetch Persona from Railway
+        const { rows } = await db.query('SELECT * FROM personas WHERE id = $1', [persona_id]);
+        const persona = rows[0];
+        if (!persona) throw new Error('Persona Node Not Found in Railway');
 
         console.log(`[Grok-Motion] Initiating video for ${persona.name}...`);
 
@@ -81,29 +74,31 @@ export async function POST(req: Request) {
         const stillUrl = `https://image.pollinations.ai/prompt/${encodedStill}?width=720&height=1280&nologo=true&seed=${Math.floor(Math.random()*10000)}&model=flux`;
         
         // 5. STEP 2: Animate (The Grok-X.ai Bridge)
-        // Note: Real implemention would hit x.ai/grok-imagine or OR proxy. 
-        // For now, we simulate the 'video_node_processing' status.
-        const mockVideoUrl = `https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/chat_media/samples/gasp_motion_sample_${persona.race}.mp4`;
+        const mockVideoUrl = `https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/chat_media/samples/gasp_motion_sample_${persona.race || 'latina'}.mp4`;
 
-        // 6. DB SYNC
-        const { data: post, error } = await supabase.from('posts').insert([{
-            persona_id: persona.id,
-            content_type: 'video',
-            content_url: mockVideoUrl, // Real implementation would wait for cloud upload
-            caption: `vibes in ${persona.city} tonight... ✨`,
-            is_vault: is_vault,
-            is_story: false,
-            scheduled_for: new Date().toISOString()
-        }]).select().single();
+        // 6. DB SYNC: Railway Post Ingest
+        const { rows: postRows } = await db.query(`
+            INSERT INTO posts (
+                persona_id, content_type, content_url, caption, is_vault, scheduled_for, created_at
+            ) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+            RETURNING id
+        `, [
+            persona.id, 
+            'video', 
+            mockVideoUrl, 
+            `vibes in ${persona.city} tonight... ✨`, 
+            is_vault || false
+        ]);
 
         return Response.json({
             status: 'video_processing_enqueued',
             duration: `${duration}s`,
             motion_blueprint: motionPrompt,
-            post_id: post?.id
+            post_id: postRows[0]?.id
         });
 
     } catch (err: any) {
+        console.error('[Video Factory Error]:', err.message);
         return Response.json({ error: err.message }, { status: 500 });
     }
 }

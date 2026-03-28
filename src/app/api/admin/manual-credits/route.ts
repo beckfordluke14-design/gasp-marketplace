@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 
 /**
- * 🕴️ SOVEREIGN ADMIN OVERRIDE v1.0
- * Objective: Manual Credit Injection for the Platform Owner.
- * Security: Restricted to Admin-Role Users via Supabase Auth + Ledger Audit.
+ * 🕴️ SOVEREIGN ADMIN OVERRIDE v1.1
+ * Objective: Manual Credit Injection for the Platform Owner on Railway.
  */
 export async function POST(req: Request) {
     try {
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
             return new Response(JSON.stringify({ success: false, error: 'Target ID or Credit Amount Missing.' }), { status: 400 });
         }
 
-        // 1. Initialize Service-Role Client (The Master Key)
+        // 1. Initialize Service-Role Client (Maintain for Legacy Auth Handshake)
         const supabase = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
           process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -24,50 +24,50 @@ export async function POST(req: Request) {
         const authHeader = req.headers.get('Authorization');
         if (!authHeader) return new Response(JSON.stringify({ success: false, error: 'Unauthorized.' }), { status: 401 });
 
-        // Get the user from the token
+        // Get the user from the token (Supabase Auth Node)
         const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
         if (authError || !user) return new Response(JSON.stringify({ success: false, error: 'Identity Verification Failed.' }), { status: 401 });
 
-        // Check for Admin Flag in Profile
-        const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
+        // Check for Admin Flag in Railway Profile
+        const { rows: profiles } = await db.query('SELECT is_admin FROM profiles WHERE id = $1', [user.id]);
+        const profile = profiles[0];
+        
         if (!profile?.is_admin) {
             console.warn(`[SECURITY_BREACH_ATTEMPT]: User ${user.email} tried to inject manual credits. 🛑`);
             return new Response(JSON.stringify({ success: false, error: 'Access Denied. Admiral Clearance Required.' }), { status: 403 });
         }
 
-        // 3. FULFILLMENT: Atomically inject credits
-        console.log(`[ADMIN_ACTION]: Manual Credit Injection for User ${userId}. Amount: ${amountCredits}c`);
+        // 3. FULFILLMENT: Atomically inject credits into Railway DB
+        console.log(`[ADMIN_ACTION]: Manual Credit Injection on Railway for User ${userId}. Amount: ${amountCredits}c`);
 
-        // Update Wallet Ledger
-        const { data: wallet } = await supabase.from('wallets').select('id, credit_balance').eq('user_id', userId).maybeSingle();
-        if (wallet) {
-            await supabase.from('wallets').update({ credit_balance: wallet.credit_balance + amountCredits }).eq('id', wallet.id);
-        } else {
-            await supabase.from('wallets').insert({ user_id: userId, credit_balance: amountCredits });
-        }
+        // Update Wallet Ledger (UPSERT)
+        await db.query(`
+            INSERT INTO wallets (user_id, credit_balance, updated_at)
+            VALUES ($1, $2, NOW())
+            ON CONFLICT (user_id) DO UPDATE SET 
+                credit_balance = wallets.credit_balance + EXCLUDED.credit_balance,
+                updated_at = NOW()
+        `, [userId, amountCredits]);
 
         // Update Profiles Ledger
-        const { data: userProfile } = await supabase.from('profiles').select('credit_balance').eq('id', userId).single();
-        await supabase.from('profiles').update({ 
-            credit_balance: (userProfile?.credit_balance || 0) + amountCredits 
-        }).eq('id', userId);
+        await db.query(`
+            UPDATE profiles 
+            SET credit_balance = credit_balance + $1,
+                updated_at = NOW()
+            WHERE id = $2
+        `, [amountCredits, userId]);
 
-        // 4. THE PERMANENT AUDIT TRAIL
-        await supabase.from('audit_ledger').insert({
-            user_id: userId,
-            action: 'ADMIN_MANUAL_ADJUSTMENT',
-            amount_usd: 0,
-            credits_added: amountCredits,
-            status: 'SETTLED',
-            network: 'INTERNAL',
-            external_id: `ADMIN_${user.id}_${Date.now()}`,
-            sender_wallet: 'ADMIN_OVERRIDE_HUB',
-            memo: reason || 'Manual Admin Credit Injection'
-        });
+        // 4. THE PERMANENT AUDIT TRAIL (Railway)
+        await db.query(`
+            INSERT INTO audit_ledger (
+                user_id, action, amount_usd, credits_added, status, network, external_id, sender_wallet, memo, created_at
+            ) VALUES ($1, 'ADMIN_MANUAL_ADJUSTMENT', 0, $2, 'SETTLED', 'INTERNAL', $3, 'ADMIN_OVERRIDE_HUB', $4, NOW())
+        `, [userId, amountCredits, `ADMIN_${user.id}_${Date.now()}`, reason || 'Manual Admin Credit Injection']);
 
-        return new Response(JSON.stringify({ success: true, message: `Successfully injected ${amountCredits} credits into User ${userId}.` }), { status: 200 });
+        return new Response(JSON.stringify({ success: true, message: `Successfully injected ${amountCredits} credits into User ${userId} on Railway.` }), { status: 200 });
 
     } catch (e: any) {
+        console.error('[Admin Credit Error]:', e.message);
         return new Response(JSON.stringify({ success: false, error: 'Internal Server Error.' }), { status: 500 });
     }
 }

@@ -1,28 +1,20 @@
 import { NextResponse } from 'next/server';
-import { Client } from 'pg';
+import { db } from '@/lib/db';
 
 export async function GET() {
-    // FORCE DIRECT IPv4 IP SYNC (AWS US-EAST-1 POOLER)
-    const client = new Client({
-        connectionString: 'postgresql://postgres.vvcwjlcequbkhlpmwzlc:eFfE7mXkS3Zc8V9@aws-0-us-west-2.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true',
-        ssl: {
-            rejectUnauthorized: false
-        }
-    });
+    console.log("📡 [Sovereign Bridge] Starting Neural Schema Update on Railway...");
     
     try {
-        await client.connect();
-        console.log("📡 [IPv4 DIRECT Pulse] Connected to Matrix...");
-        
-        await client.query(`
+        await db.query(`
             ALTER TABLE public.posts ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;
             ALTER TABLE public.posts ADD COLUMN IF NOT EXISTS likes_count INT DEFAULT 0;
             ALTER TABLE public.posts ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+            ALTER TABLE public.posts ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';
         `);
         
-        await client.end();
-        return NextResponse.json({ success: true, message: "🏁 Neural Schema Updated via Direct IP. is_featured Active." });
+        return NextResponse.json({ success: true, message: "🏁 Neural Schema Updated on Railway. is_featured Active." });
     } catch (e: any) {
+        console.error("❌ [Sovereign Bridge] Migration Failed:", e.message);
         return NextResponse.json({ success: false, error: e.message });
     }
 }

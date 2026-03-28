@@ -1,23 +1,16 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+import { db } from '@/lib/db';
 
 export async function POST(req: Request) {
   try {
     const ip_address = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     const user_agent = req.headers.get('user-agent') || 'unknown';
 
-    const { error } = await supabase.from('consent_logs').insert([{
-      ip_address,
-      user_agent,
-      site_version: 'v77.1_gasp_fun'
-    }]);
+    await db.query(`
+        INSERT INTO consent_logs (ip_address, user_agent, site_version, created_at)
+        VALUES ($1, $2, 'v77.1_gasp_fun', NOW())
+    `, [ip_address, user_agent]);
 
-    if (error) throw error;
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('[Consent Log Error]:', error.message);

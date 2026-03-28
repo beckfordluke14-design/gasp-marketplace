@@ -1,14 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { initialPersonas } from '@/lib/profiles';
 import { getPersonaDailyState, type PersonaMoodState } from '@/lib/masterRandomizer';
 
 export const dynamic = 'force-dynamic';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -67,10 +62,10 @@ Write ONE social media caption post (like an Instagram caption or Twitter post).
       'X-Title': 'GASP Mood Post Engine'
     },
     body: JSON.stringify({
-      model: 'x-ai/grok-4.1-fast',
+      model: 'x-ai/grok-2-1212',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 120,
-      temperature: 0.92, // High creativity for authentic variation
+      temperature: 0.92, 
     })
   });
 
@@ -80,8 +75,6 @@ Write ONE social media caption post (like an Instagram caption or Twitter post).
   return caption;
 }
 
-// GET /api/cron/mood-posts?key=<CRON_SECRET>
-// Run every 2-4 hours via Railway cron: 0 */3 * * *
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const authHeader = req.headers.get('Authorization');
@@ -95,8 +88,8 @@ export async function GET(req: Request) {
   const errors: { persona: string; error: string }[] = [];
 
   try {
-    // Fetch active DB personas too
-    const { data: dbPersonas } = await supabase.from('personas').select('*').eq('is_active', true);
+    // 1. Fetch Railway DB personas
+    const { rows: dbPersonas } = await db.query('SELECT * FROM personas WHERE is_active = true');
     const allPersonas = [...initialPersonas, ...(dbPersonas || [])];
 
     // Dedupe by ID
@@ -107,14 +100,13 @@ export async function GET(req: Request) {
       return true;
     });
 
-    // Check which personas already posted in the last 3 hours (avoid spam)
-    const threeHoursAgo = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
-    const { data: recentPosts } = await supabase
-      .from('posts')
-      .select('persona_id')
-      .eq('is_vault', false)
-      .neq('caption', null)
-      .gt('created_at', threeHoursAgo);
+    // 2. Check recent posts (last 3h) avoid spam
+    const { rows: recentPosts } = await db.query(`
+        SELECT persona_id FROM posts 
+        WHERE is_vault = false 
+        AND caption IS NOT NULL 
+        AND created_at > NOW() - INTERVAL '3 hours'
+    `);
 
     const recentPosters = new Set((recentPosts || []).map((p: any) => p.persona_id));
 
@@ -135,20 +127,23 @@ export async function GET(req: Request) {
       try {
         const caption = await generateMoodPost(persona, dailyState);
 
-        await supabase.from('posts').insert({
-          persona_id: persona.id,
-          content_type: 'text',
-          caption,
-          is_vault: false,
-          scheduled_for: new Date().toISOString(),
-          // Tag it as a mood post for filtering if needed
-          metadata: { mood: dailyState.mood, source: 'mood_engine' }
-        });
+        await db.query(`
+          INSERT INTO posts (
+            persona_id, content_type, caption, is_vault, scheduled_for, created_at, metadata
+          ) VALUES ($1, $2, $3, $4, $5, NOW(), $6)
+        `, [
+          persona.id, 
+          'text', 
+          caption, 
+          false, 
+          new Date().toISOString(),
+          JSON.stringify({ mood: dailyState.mood, source: 'mood_engine', version: 'railway-v1' })
+        ]);
 
         results.push({ persona: persona.name, caption, mood: dailyState.mood });
         console.log(`[MoodPost] ✅ ${persona.name} (${dailyState.mood}): "${caption}"`);
 
-        // Stagger calls to avoid rate limits
+        // Stagger to avoid rate limits
         await new Promise(r => setTimeout(r, 1200));
 
       } catch (err: any) {
@@ -166,6 +161,7 @@ export async function GET(req: Request) {
     });
 
   } catch (err: any) {
+    console.error('[Mood Engine Critical Failure]:', err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

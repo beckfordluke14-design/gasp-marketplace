@@ -1,18 +1,10 @@
-'use client';
-
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Search, Trash2, Zap, ArrowLeft, Loader2, Sparkles, Filter } from 'lucide-react';
 import { initialPersonas } from '@/lib/profiles';
 import Header from '@/components/Header';
 
 export const dynamic = 'force-dynamic';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
-);
 
 /**
  * THE BILLBOARD COMMANDER (V11.0)
@@ -29,38 +21,42 @@ export default function BillboardCommander() {
     async function fetchAllPosts() {
         console.log('📡 [Billboard] Fetching Global Content Matrix...');
         
-        // 1. Fetch DB Nodes
-        const { data: dbPosts } = await supabase
-            .from('posts')
-            .select('*, personas(*)')
-            .order('created_at', { ascending: false });
+        try {
+            const res = await fetch('/api/rpc/db', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'GET_BILLBOARD_DATA' })
+            });
+            const data = await res.json();
+            
+            // 1. Remap DB Nodes from SQL join structure
+            const dbPosts = (data.posts || []).map((p: any) => ({
+                ...p,
+                personas: { name: p.name, city: p.city, seed_image_url: p.seed_image_url }
+            }));
 
-        // 2. Fetch Initial Nodes (from profiles.ts)
-        const initialNodes: any[] = initialPersonas.flatMap(p => 
-            (p.broadcasts || []).map((b: any) => ({
-                id: b.id,
-                persona_id: p.id,
-                personas: { name: p.name, city: p.city, seed_image_url: p.image },
-                content_type: b.type,
-                caption: b.content,
-                content_url: b.image_url || b.video_url,
-                is_featured: b.is_featured || false,
-                is_vault: b.is_locked || false,
-                created_at: b.created_at || new Date().toISOString(),
-                is_local: true
-            }))
-        );
+            // 2. Initial Nodes (static fallback)
+            const initialNodes: any[] = initialPersonas.flatMap(p => 
+                (p.broadcasts || []).map((b: any) => ({
+                    id: b.id,
+                    persona_id: p.id,
+                    personas: { name: p.name, city: p.city, seed_image_url: p.image },
+                    content_type: b.type,
+                    caption: b.content,
+                    content_url: b.image_url || b.video_url,
+                    is_featured: b.is_featured || false,
+                    is_vault: b.is_locked || false,
+                    created_at: b.created_at || new Date().toISOString(),
+                    is_local: true
+                }))
+            );
 
-        // 3. Merged Matrix
-        const merged = [...(dbPosts || []), ...initialNodes];
-        const unique = Array.from(new Map(merged.map(p => [p.id, p])).values());
+            // 3. Merged Matrix
+            const merged = [...dbPosts, ...initialNodes];
+            const unique = Array.from(new Map(merged.map(p => [p.id, p])).values());
 
-        setPosts(unique);
-        
-        // 4. Check for Construction Nodes (Render in progress)
-        const { data: jobs } = await supabase.from('video_jobs').select('*').in('status', ['pending', 'running']);
-        if (jobs) {
-            const constructionNodes = jobs.map(j => ({
+            // 4. Construction Nodes (from jobs)
+            const constructionNodes = (data.jobs || []).map((j: any) => ({
                 id: `job-${j.job_id}`,
                 persona_id: j.persona_id,
                 personas: { name: j.persona_id.split('-')[0], city: 'Factory Node', seed_image_url: j.temp_image_url || '/v1.png' },
@@ -72,17 +68,13 @@ export default function BillboardCommander() {
                 is_rendering: true,
                 created_at: j.created_at
             }));
-            setPosts(prev => [...prev, ...constructionNodes]);
-        }
 
-        // 5. Check for Empty Personas
-        const allPers = await supabase.from('personas').select('*').eq('is_active', true);
-        if (allPers.data) {
-            const empties = allPers.data.filter(p => 
+            // 5. Empty Persona Injections
+            const empties = (data.personas || []).filter((p: any) => 
                 !unique.some(post => post.persona_id === p.id) && 
-                !jobs?.some(j => j.persona_id === p.id)
+                !data.jobs?.some((j: any) => j.persona_id === p.id)
             );
-            const newNodes = empties.map(p => ({
+            const newNodes = empties.map((p: any) => ({
                 id: `new-${p.id}`,
                 persona_id: p.id,
                 personas: { name: p.name, city: p.city, seed_image_url: p.seed_image_url || '/v1.png' },
@@ -94,9 +86,12 @@ export default function BillboardCommander() {
                 is_new_persona: true,
                 created_at: new Date().toISOString()
             }));
-            setPosts(prev => [...prev, ...newNodes]);
-        }
 
+            setPosts([...unique, ...constructionNodes, ...newNodes]);
+            
+        } catch (e) {
+            console.error('[Billboard] Sovereign Handshake Failed:', e);
+        }
         setLoading(false);
     }
 
@@ -128,22 +123,11 @@ export default function BillboardCommander() {
         setSavingId(post.id);
         const newState = !currentState;
         try {
-            // SYNDICATE V11: Neural Shadowing
-            // If it's a local post, we UPSERT it to the DB using the same ID 
-            // so the DB state always overtakes the hard-coded initial state.
-            const { error } = await supabase.from('posts').upsert([{
-                id: post.id,
-                persona_id: post.persona_id,
-                content_type: post.content_type || 'video',
-                caption: post.caption,
-                content_url: post.content_url,
-                is_featured: newState,
-                is_vault: post.is_vault || false,
-                updated_at: new Date().toISOString()
-            }]);
-
-            if (error) throw error;
-            
+            await fetch('/api/rpc/db', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'TOGGLE_POST_FEATURED', id: post.id, is_featured: newState })
+            });
             setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_featured: newState, is_local: false } : p));
         } catch (e) {
             console.error('SQL Sync Error:', e);
@@ -155,7 +139,11 @@ export default function BillboardCommander() {
     const deletePost = async (postId: string) => {
         if (!confirm('Execute DB Purge?')) return;
         try {
-            await supabase.from('posts').delete().eq('id', postId);
+            await fetch('/api/rpc/db', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'DELETE_POST', id: postId })
+            });
             setPosts(prev => prev.filter(p => p.id !== postId));
         } catch (e) { alert(e as any); }
     };

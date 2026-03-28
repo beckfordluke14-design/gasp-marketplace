@@ -1,12 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { generateBaseImage, dispatchGrokVideo } from '@/lib/videoFactory';
 import { VISION_LIBRARY, type VisualCategory } from '@/config/vision';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 export async function GET(req: Request) {
   try {
@@ -18,30 +13,24 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 1. Fetch Active Personas
-    const { data: personas, error } = await supabase
-      .from('personas')
-      .select('id, name')
-      .eq('is_active', true);
+    // 1. Fetch Active Personas from Railway
+    const { rows: personas } = await db.query('SELECT id, name FROM personas WHERE is_active = true');
 
-    if (error || !personas) {
-      throw new Error('Failed to fetch personas.');
+    if (!personas || personas.length === 0) {
+      return NextResponse.json({ success: true, message: 'No active personas found in Railway.' });
     }
 
     // 2. Fire and Forget Orchestration
-    // Objective: Return 200 OK immediately while backgrounding the generation.
     process.nextTick(async () => {
-        console.log(`[Cron] Starting daily content generation for ${personas.length} personas.`);
+        console.log(`[Cron] Starting daily generation for ${personas.length} personas on Railway.`);
         
         for (const persona of personas) {
            try {
-             // Randomly pick a category (e.g. favoring story_unlock or deep_vault for revenue)
              const categories: VisualCategory[] = ['WHALE_TRAP_BACKSIDE', 'STREET_FLASH_CANDID', 'EDITORIAL_SQUAT', 'MIRROR_MYSTERY'];
              const category = categories[Math.floor(Math.random() * categories.length)];
 
              console.log(`[Factory] Processing ${persona.name} with ${category}...`);
              
-             // CHAIN: Gemini -> Storage -> Grok -> Webhook
              const imageUrl = await generateBaseImage(persona.id, category);
              await dispatchGrokVideo(imageUrl, category, persona.id);
 
@@ -53,7 +42,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ 
         success: true, 
-        message: `Generation pipeline launched for ${personas.length} personas. Check video_jobs table for status.` 
+        message: `Generation pipeline launched for ${personas.length} personas on Railway.` 
     });
 
   } catch (err: any) {
