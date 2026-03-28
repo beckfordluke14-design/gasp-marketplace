@@ -15,6 +15,7 @@ import FreebieImageBubble from './chat/FreebieImageBubble';
 import MediaLightbox from './chat/MediaLightbox';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
 import { trackEvent } from '@/lib/telemetry';
+import InsufficientFundsModal from './economy/InsufficientFundsModal';
 
 interface ChatDrawerProps {
   profileId: string;
@@ -51,6 +52,7 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedLightboxIndex, setSelectedLightboxIndex] = useState(0);
   const [lightboxItems, setLightboxItems] = useState<any[]>([]);
+  const [showInsufficientFunds, setShowInsufficientFunds] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // 🧠 SOVEREIGN CHAT ENGINE: Custom fetch-based, bypasses AI SDK entirely
@@ -201,8 +203,7 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
         } else {
             // ⛽ RECHARGE TRIGGER: Push to store if desynced
             if (result.error?.includes('balance') || result.error?.includes('funds')) {
-               alert('Not enough credits. Top up to unlock.');
-               onOpenTopUp();
+            setShowInsufficientFunds(true);
             } else {
                alert(`Error: ${result.error || 'Connection error'}`);
             }
@@ -480,6 +481,12 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
                  </button>
              </form>
           </div>
+          {/* ⛽ INSUFFICIENT FUNDS TRIGGER */}
+          <InsufficientFundsModal 
+            isOpen={showInsufficientFunds}
+            onClose={() => setShowInsufficientFunds(false)}
+            onOpenTopUp={onOpenTopUp}
+          />
         </div>
       </>
     );

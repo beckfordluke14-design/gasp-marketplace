@@ -67,7 +67,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
            </div>
            <div>
               <h3 className="text-xl font-syncopate font-black uppercase italic text-white leading-none">
-                 $GASPAI HUB
+                 CREDIT TERMINAL
               </h3>
               <p className="text-[10px] text-[#ff6b00] uppercase font-black tracking-widest mt-2 underline decoration-[#ff6b00]/30 underline-offset-4">
                  Credit Top-Up Terminal
