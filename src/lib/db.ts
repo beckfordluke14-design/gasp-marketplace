@@ -3,7 +3,7 @@ import { Pool } from 'pg';
 
 // 🛡️ SOVEREIGN NEURAL BRIDGE: The Safe Postgres Interface
 // This singleton Pool handles all the direct database connections to Railway.
-const connectionString = "postgresql://postgres:glrVNXPAMlJbeRzeNEziqUiOfPIXDjOf@gondola.proxy.rlwy.net:54825/railway";
+const connectionString = process.env.DATABASE_URL || "postgresql://postgres:glrVNXPAMlJbeRzeNEziqUiOfPIXDjOf@gondola.proxy.rlwy.net:54825/railway";
 
 const pool = new Pool({
   connectionString,
