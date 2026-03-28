@@ -30,20 +30,23 @@ export async function POST(req: Request) {
     // 1. Pre-Check: Economy & Auth (GASP Standard: Profiles node)
     let userBalance = 0;
     
-    // 🛡️ SOVEREIGN BALANCE CHECK
-    if (finalUserId && !finalUserId.startsWith('guest-')) {
-        const profile = await SOV.getProfile(finalUserId);
-        userBalance = profile?.credit_balance || 0;
-    } else {
-        // Guest user logic - strict 3-message wall (6 messages total in array)
-        if (messages.length >= 6) {
-           return new Response('Neural Link Depleted. Sign up to continue.', { status: 402 });
-        }
-        userBalance = 999; 
-    }
+    // 🛡️ SOVEREIGN BALANCE CHECK: GENESIS TIER PROTOCOL
+    const isGuest = !finalUserId || finalUserId.startsWith('guest-');
+    const conversationLength = messages.length;
 
-    if (userBalance < 5 && !finalUserId.startsWith('guest-')) {
-       return new Response('Insufficient Balance', { status: 402 });
+    // First 3-User/3-Assistant exchanges are FREE (6 total nodes)
+    if (conversationLength >= 8) {
+        if (!isGuest) {
+            const profile = await SOV.getProfile(finalUserId);
+            userBalance = profile?.credit_balance || 0;
+            if (userBalance < 5) return new Response('Insufficient Balance', { status: 402 });
+        } else {
+            // Guests hit the wall after Genesis tier
+            return new Response('FREE CHAT DEPLETED. Sign up to continue.', { status: 402 });
+        }
+    } else {
+        // Within Genesis Tier (Free)
+        userBalance = 999; 
     }
 
     const { mood, dna } = await getMoodState(finalUserId, finalProfileId);
@@ -180,10 +183,9 @@ export async function POST(req: Request) {
             const isGuest = finalUserId.startsWith('guest-');
             const userMsgCount = messages.filter((m: any) => m.role === 'user').length;
             
-            const forceVoiceForDiscovery = isGuest && userMsgCount <= 2;
-            const moodAllowsVoice = shouldSendVoiceNote(finalProfileId, streamA_Native.length);
-            const sendVoice = shouldForceVoice || forceVoiceForDiscovery || moodAllowsVoice;
-
+            // 🛡️ VOICE IDENTITY GATE: Only authenticated users get the AI voice (save costs on guests)
+            const sendVoice = isGuest ? false : shouldSendVoiceNote(finalProfileId, streamA_Native.length);
+            
             if (sendVoice) {
               try {
                 controller.enqueue(encoder.encode(`2:${JSON.stringify({ type: 'voice_note', audioUrl: null, profileName: profileItem?.name || 'Persona' })}\n`));

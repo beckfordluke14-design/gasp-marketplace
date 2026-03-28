@@ -16,6 +16,7 @@ import MediaLightbox from './chat/MediaLightbox';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
 import { trackEvent } from '@/lib/telemetry';
 import InsufficientFundsModal from './economy/InsufficientFundsModal';
+import ChatCTA from './chat/ChatCTA';
 
 interface ChatDrawerProps {
   profileId: string;
@@ -53,6 +54,9 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
   const [selectedLightboxIndex, setSelectedLightboxIndex] = useState(0);
   const [lightboxItems, setLightboxItems] = useState<any[]>([]);
   const [showInsufficientFunds, setShowInsufficientFunds] = useState(false);
+  const [showVaultCTA, setShowVaultCTA] = useState(false);
+  const [showLimitCTA, setShowLimitCTA] = useState(false);
+  const [currentBalance, setCurrentBalance] = useState<number>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // 🧠 SOVEREIGN CHAT ENGINE: Custom fetch-based, bypasses AI SDK entirely
@@ -83,9 +87,16 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
       if (!res.ok) {
         const errText = await res.text();
         console.error('[Gasp Chat] API error:', res.status, errText);
-        // 🛡️ LIMIT TRIGGER: Show specific message for 402 (Neural Link Depleted)
-        const displayMsg = res.status === 402 ? (errText.slice(0, 80) || 'Neural Link Depleted.') : 'hold on okay , give me a sec';
-        setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: displayMsg }]);
+        // 🛡️ LIMIT TRIGGER: Show specific CTA for 402 (DEPLETED / Insufficient)
+        if (res.status === 402) {
+           if (errText.includes('DEPLETED')) {
+              setShowLimitCTA(true);
+           } else {
+              setShowVaultCTA(true);
+           }
+        } else {
+           setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: 'hold on okay , give me a sec' }]);
+        }
         return;
       }
 
@@ -163,6 +174,7 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
         if (result.success) {
            setMessages(result.data.messages || []);
            setVaultItems(result.data.vaultItems || []);
+           setCurrentBalance(result.data.balance || 0);
         }
       } catch (e) {
         console.error('[Gasp Neural Sync] Error:', e);
@@ -206,7 +218,9 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
         } else {
             // ⛽ RECHARGE TRIGGER: Push to store if desynced
             if (result.error?.includes('balance') || result.error?.includes('funds')) {
-            setShowInsufficientFunds(true);
+               setShowVaultCTA(true);
+               // Also sync current balance if possible
+               if (result.balance !== undefined) setCurrentBalance(result.balance);
             } else {
                alert(`Error: ${result.error || 'Connection error'}`);
             }
@@ -333,28 +347,15 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
                    </div>
                 )}
 
-                {/* 🎁 THE "STAY CONNECTED" SYNC INCENTIVE (Apex v5.2) */}
-                {profile?.is_guest && (
-                   <motion.div 
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="mx-2 mt-8 p-6 bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-white/10 rounded-[2.5rem] flex flex-col items-center gap-4 text-center shadow-2xl relative overflow-hidden group"
-                   >
-                      <div className="absolute inset-0 bg-gradient-to-tr from-[#ff00ff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="w-16 h-16 bg-[#ff00ff]/10 rounded-full flex items-center justify-center mb-1">
-                         <Zap size={28} className="text-[#ff00ff] animate-pulse" />
-                      </div>
-                      <div className="space-y-1 z-10">
-                         <h3 className="text-xs font-black uppercase tracking-widest text-[#ff00ff]">Stay Connected</h3>
-                         <p className="text-[10px] text-white/40 leading-relaxed max-w-[200px]">Don't let your connection with {profile?.name || 'them'} fade. Authenticate to persist your history and claim your 2K bonus.</p>
-                      </div>
-                      <button 
-                         onClick={() => login()}
-                         className="mt-2 w-full py-4 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-[#00f0ff] hover:text-black transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 z-10"
-                      >
-                         Keep Talking (+2,000 Free)
-                      </button>
-                   </motion.div>
+                {/* 🧧 CONVERSION CTA: High-status signup for guests */}
+                {showLimitCTA && (
+                   <div className="pb-10">
+                      <ChatCTA 
+                        type="signup" 
+                        onAction={() => login()} 
+                        personaName={profile?.name} 
+                      />
+                   </div>
                 )}
               </div>
             ) : (
@@ -429,6 +430,17 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
                       </div>
                     ))}
                   </div>
+                )}
+
+                {/* ⛽ TOP UP CTA: Triggered by failed purchase */}
+                {showVaultCTA && (
+                   <div className="mt-8">
+                      <ChatCTA 
+                        type="topup" 
+                        onAction={onOpenTopUp} 
+                        balance={currentBalance}
+                      />
+                   </div>
                 )}
               </div>
             )}

@@ -55,8 +55,24 @@ export async function POST(req: Request) {
 
     try {
         if (action === 'starter_claim') {
-            console.log(`🏦 [Economy] Processing Starter Claim (5000 bp) for ${userId}...`);
+            console.log(`🏦 [Economy] Processing Starter Claim (5,000 bp) for ${userId}...`);
             
+            const clientIP = req.headers.get('x-forwarded-for') || 'unknown';
+
+            // 🛡️ SYBIL PREVENTION: Check if this IP or Fingerprint has claimed in the last 24 hours
+            const { rows: claims } = await db.query(
+                `SELECT 1 FROM transactions 
+                 WHERE (user_id = $1 OR meta->>'ip' = $2) 
+                 AND type = 'starter_claim' 
+                 AND created_at > NOW() - INTERVAL '24 hours'
+                 LIMIT 1`,
+                [userId, clientIP]
+            );
+
+            if (claims && claims.length > 0) {
+               return NextResponse.json({ success: false, error: 'Genesis bonus already claimed on this device.' }, { status: 403 });
+            }
+
             // ATOMIC TRANSACTION: Claim Credits & Log Ledger
             await db.query('BEGIN');
             try {
@@ -68,11 +84,11 @@ export async function POST(req: Request) {
                     WHERE id = $1
                 `, [userId]);
 
-                // 2. Log Transaction
+                // 2. Log Transaction with IP Metadata for Fingerprinting
                 await db.query(`
-                    INSERT INTO transactions (user_id, amount, type, provider, created_at)
-                    VALUES ($1, 5000, 'starter_claim', 'syndicate_genesis', NOW())
-                `, [userId]);
+                    INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
+                    VALUES ($1, 5000, 'starter_claim', 'syndicate_genesis', $2, NOW())
+                `, [userId, JSON.stringify({ ip: clientIP })]);
 
                 await db.query('COMMIT');
                 return NextResponse.json({ success: true, message: 'Genesis Credits Claimed' });
