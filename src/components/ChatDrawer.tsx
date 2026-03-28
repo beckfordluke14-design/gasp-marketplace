@@ -5,7 +5,7 @@ import { initialProfiles, proxyImg } from '@/lib/profiles';
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { COST_VOICE_TRANSLATION, COST_VOICE_NOTE } from '@/lib/economy/constants';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabaseClient';
+
 import BondProgress from './profile/BondProgress';
 import VoiceNoteBubble from './chat/VoiceNoteBubble';
 import { motion, AnimatePresence } from 'framer-motion';

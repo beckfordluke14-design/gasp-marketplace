@@ -7,6 +7,7 @@ import Image from 'next/image';
 import {
   PlusCircle,
   MessageSquare,
+  Home,
   User,
   Settings,
   Coins,
