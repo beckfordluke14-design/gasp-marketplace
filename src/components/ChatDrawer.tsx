@@ -27,19 +27,17 @@ interface ChatDrawerProps {
 
 export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: ChatDrawerProps) {
   const { profile } = useUser();
-  const [guestId, setGuestId] = useState<string>('');
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-       let gid = localStorage.getItem('gasp_guest_id');
-       if (!gid) {
-          gid = 'guest-' + Math.random().toString(36).substring(2, 11);
-          localStorage.setItem('gasp_guest_id', gid);
-          console.log('[Neural Link]: New Guest GID Generated:', gid);
-       }
-       setGuestId(gid);
+  // 🔑 SOVEREIGN SYNC: Initialize synchronously to prevent disabled button race condition
+  const [guestId] = useState<string>(() => {
+    if (typeof window === 'undefined') return 'guest-ssr';
+    let gid = localStorage.getItem('gasp_guest_id');
+    if (!gid) {
+      gid = 'guest-' + Math.random().toString(36).substring(2, 11);
+      localStorage.setItem('gasp_guest_id', gid);
     }
-  }, []);
+    return gid;
+  });
 
   const idToUse = profile?.id || guestId;
   const [chatTab, setChatTab] = useState<'chat' | 'pics'>('chat');
@@ -117,15 +115,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
     if (e) e.preventDefault();
     const cleanInput = (input || '').trim();
     if (!cleanInput) return;
-    
-    if (!idToUse) {
-       console.error('[Gasp submission]: Identity node is missing or desynchronized.', { guestId, profileId: profile?.id });
-       return;
-    }
-
-    console.log('[Gasp submission]: Establishing link for message:', cleanInput.substring(0, 20) + '...');
     setIsTyping(true);
-    
     try {
       handleSubmit(e, { body: { userId: idToUse, personaId } });
     } catch (err) {
@@ -344,7 +334,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
                  <button 
                    type="submit" 
                    onClick={handleLocalSubmit}
-                   disabled={!(input || '').trim() || isLoading || !idToUse}
+                   disabled={!(input || '').trim() || isLoading}
                    className="w-12 h-12 rounded-full bg-[#ff00ff] flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,0,255,0.3)] hover:scale-110 active:scale-90 transition-all disabled:opacity-30 disabled:grayscale pointer-events-auto"
                  >
                     <Send size={20} className="mr-0.5" />
