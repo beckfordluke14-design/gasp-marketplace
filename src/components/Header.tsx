@@ -35,15 +35,15 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] flex flex-col pointer-events-none">
         {/* MAIN NAVIGATION BAR */}
-        <header className="h-14 md:h-16 bg-black/40 backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-6 md:px-12 pointer-events-auto">
+        <header className="h-12 md:h-14 bg-black/20 backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-6 md:px-12 pointer-events-auto transition-all">
             
             {/* LOGO SECTION */}
-            <div className="flex items-center gap-8 md:gap-12 pointer-events-auto">
+            <div className="flex items-center gap-8 md:gap-10 pointer-events-auto">
                 <motion.h1 
                   onClick={() => router.push('/')}
                   initial={{ scale: 0.8, opacity: 0, filter: 'blur(10px)' }}
                   animate={{ 
-                    scale: 1, 
+                    scale: 0.9, 
                     opacity: 1, 
                     filter: 'blur(0px)',
                     textShadow: [
@@ -60,7 +60,7 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                     textShadow: { duration: 0.4, repeat: 1 },
                     x: { duration: 0.2, repeat: 2 }
                   }}
-                  className="text-xl md:text-5xl font-black uppercase tracking-tighter text-white font-outfit italic cursor-pointer group leading-none relative shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+                  className="text-xl md:text-3xl font-black uppercase tracking-tighter text-white font-outfit italic cursor-pointer group leading-none relative shadow-[0_0_30px_rgba(255,255,255,0.1)]"
                 >
                   gasp<span className="text-[#ff00ff]">.</span>
                    
@@ -75,18 +75,18 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                 </motion.h1>
 
                 {/* DESKTOP NAV */}
-                <nav className="hidden xl:flex items-center gap-8">
+                <nav className="hidden xl:flex items-center gap-6">
                     {navItems.map((item) => (
                       <button 
                         key={item.label}
                         onClick={() => router.push(item.href || '/')}
-                        className={`text-[10px] font-black uppercase tracking-[0.4em] transition-all hover:text-white relative
+                        className={`text-[9px] font-black uppercase tracking-[0.3em] transition-all hover:text-white relative
                           ${item.active ? 'text-white' : 'text-white/30'}
                         `}
                       >
                         {item.label}
                         {item.active && (
-                           <motion.div layoutId="header-nav-active" className="absolute -bottom-4 left-0 right-0 h-0.5 bg-[#ff00ff] shadow-[0_0_15px_#ff00ff]" />
+                           <motion.div layoutId="header-nav-active" className="absolute -bottom-3 left-0 right-0 h-0.5 bg-[#ff00ff] shadow-[0_0_15px_#ff00ff]" />
                         )}
                       </button>
                     ))}
@@ -94,48 +94,48 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
             </div>
 
             {/* ACTION HUB (MOBILE & DESKTOP) */}
-            <div className="flex items-center gap-1.5 md:gap-2 pointer-events-auto">
+            <div className="flex items-center gap-1 md:gap-2 pointer-events-auto">
                 
                 {/* 🕴️ THE IDENTITY NODE (PROFESSIONAL CTA) */}
                 {user ? (
                    <div 
                      onClick={() => router.push('/vault')}
-                     className="flex items-center gap-2 md:gap-3 p-1 pr-3 md:pr-5 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all cursor-pointer group"
+                     className="flex items-center gap-2 p-1 pr-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all cursor-pointer group"
                    >
-                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full overflow-hidden border border-[#ff00ff]/40 group-hover:border-[#ff00ff] transition-all">
-                         <div className="w-full h-full bg-[#ff00ff]/20 flex items-center justify-center text-[10px] font-black italic text-[#ff00ff]">
-                            {profile?.nickname ? profile.nickname.substring(0, 1).toUpperCase() : <User size={14} />}
+                      <div className="w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-[#ff00ff]/40 group-hover:border-[#ff00ff] transition-all">
+                         <div className="w-full h-full bg-[#ff00ff]/20 flex items-center justify-center text-[8px] font-black italic text-[#ff00ff]">
+                            {profile?.nickname ? profile.nickname.substring(0, 1).toUpperCase() : <User size={12} />}
                          </div>
                       </div>
-                      <span className="hidden md:block text-[9px] font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">
+                      <span className="hidden md:block text-[8px] font-black uppercase tracking-[0.1em] text-white/40 group-hover:text-white transition-colors">
                          {profile?.nickname || 'TITAN'}
                       </span>
                    </div>
                 ) : (
                    <button 
                       onClick={() => router.push('/login')}
-                      className="h-8 md:h-12 px-4 md:px-8 bg-white/5 border border-white/10 rounded-full flex items-center justify-center gap-2 hover:bg-white/10 active:scale-95 transition-all group"
+                      className="h-7 md:h-9 px-4 bg-white/5 border border-white/10 rounded-full flex items-center justify-center gap-2 hover:bg-white/10 active:scale-95 transition-all group"
                    >
-                      <User size={12} className="text-white/40 group-hover:text-[#ff00ff] transition-colors" />
-                      <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white">Join</span>
+                      <User size={10} className="text-white/40 group-hover:text-[#ff00ff] transition-colors" />
+                      <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] text-white/40 group-hover:text-white">Join</span>
                    </button>
                 )}
 
-                {/* 🏎️💨 REVENUE HUB: ORANGE/BLACK HIGH-STATUS PROTOCOL */}
+                {/* 🏎️💨 REVENUE HUB: NEUTRAL CYAN NODES */}
                 <button 
                   onClick={() => onOpenTopUp()}
-                  className="h-8 md:h-12 px-4 md:px-8 bg-[#ff6a00] text-black text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-full hover:shadow-[0_0_30px_rgba(255,106,0,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic shadow-[0_0_15px_rgba(255,106,0,0.2)]"
+                  className="h-7 md:h-9 px-4 md:px-6 bg-[#00f0ff] text-black text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] rounded-full hover:shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic shadow-[0_0_10px_rgba(0,240,255,0.2)]"
                 >
                    ADD CREDITS
                 </button>
 
                 {/* COIN BALANCE DISPLAY */}
-                <div onClick={() => onOpenTopUp()} className="cursor-pointer hover:opacity-80 transition-all scale-75 md:scale-100 origin-right">
+                <div onClick={() => onOpenTopUp()} className="cursor-pointer hover:opacity-80 transition-all scale-[0.6] md:scale-[0.8] origin-right">
                   <CoinBalance onOpenTopUp={() => onOpenTopUp()} />
                 </div>
 
                 {/* WALLET CONNECTION HUB */}
-                <div className="flex">
+                <div className="flex scale-[0.8] origin-right">
                    <WalletConnect />
                 </div>
 
@@ -147,16 +147,16 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
                         setShowAdmin(next);
                         window.dispatchEvent(new CustomEvent('gasp_admin_toggle', { detail: next }));
                      }}
-                     className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer ${showAdmin ? 'bg-[#ffea00]/10 text-[#ffea00] shadow-[0_0_15px_#ffea0044]' : 'bg-white/5 text-white/20 hover:text-white'}`}
+                     className={`w-7 h-7 md:w-8 md:h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer ${showAdmin ? 'bg-[#ffea00]/10 text-[#ffea00] shadow-[0_0_15px_#ffea0044]' : 'bg-white/5 text-white/20 hover:text-white'}`}
                    >
-                      <Star size={16} fill={showAdmin ? 'currentColor' : 'none'} />
+                      <Star size={14} fill={showAdmin ? 'currentColor' : 'none'} />
                    </div>
                 )}
             </div>
         </header>
 
         {/* FLOATING DISCOVERY HUB (SUBBAR): DETACHED TO SHOW MORE CONTENT */}
-        <div className="absolute top-[85%] left-1/2 -translate-x-1/2 w-full max-w-[280px] md:max-w-xl px-4 flex items-center justify-center pointer-events-auto z-[90]">
+        <div className="absolute top-[105%] left-1/2 -translate-x-1/2 w-full max-w-[280px] md:max-w-xl px-4 flex items-center justify-center pointer-events-auto z-[90]">
             <div className="w-full bg-black/20 backdrop-blur-xl border border-white/5 rounded-full shadow-[0_5px_20px_rgba(0,0,0,0.3)] p-0.5">
                 <PersonaSearch deadIds={deadIds} setDeadIds={setDeadIds} />
             </div>

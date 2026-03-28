@@ -155,7 +155,7 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
   };
 
   return (
-    <aside className="hidden lg:flex w-[320px] h-screen bg-[#000000] border-r border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 font-outfit">
+    <aside className="hidden lg:flex w-[260px] h-screen bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 font-outfit transition-all">
       <div className="h-20 shrink-0" />
 
       <div className="flex-1 overflow-y-auto no-scrollbar py-6">
@@ -211,44 +211,44 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
         </div>
       </div>
 
-      <div className="p-6 border-t border-white/5 bg-black z-10 flex flex-col gap-5">
+      <div className="p-4 border-t border-white/5 bg-black/20 z-10 flex flex-col gap-4 transition-all">
            {/* CREDIT BALANCE HUB */}
-          <div className="bg-white/5 border border-white/10 rounded-[2rem] p-5 space-y-4 relative overflow-hidden group">
+          <div className="bg-white/5 border border-white/10 rounded-[1.5rem] p-3 space-y-3 relative overflow-hidden group transition-all">
             <div className="absolute inset-0 bg-gradient-to-tr from-[#00ff00]/5 to-transparent pointer-events-none" />
             
-            <div className="flex items-center justify-between relative z-10 border-b border-white/5 pb-3">
+            <div className="flex items-center justify-between relative z-10 border-b border-white/5 pb-2">
                <div className="flex flex-col">
-                  <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30 italic">ACCOUNT STATUS</span>
-                  <div className="flex items-center gap-2 mt-1">
-                     <span className="text-[#00ff00] font-black text-[12px] italic">⚡️</span>
-                     <span className="text-[12px] font-syncopate font-black italic text-white leading-none">
-                        {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[8px] text-[#00ff00] not-italic">CREDITS</span>
+                  <span className="text-[6px] font-black uppercase tracking-[0.2em] text-white/30 italic">ACCOUNT STATUS</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                     <span className="text-[#00ff00] font-black text-[10px] italic">⚡️</span>
+                     <span className="text-[10px] font-syncopate font-black italic text-white leading-none">
+                        {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[7px] text-[#00ff00] not-italic">CREDITS</span>
                      </span>
                   </div>
                </div>
-               <div className="px-2 py-0.5 rounded-full bg-[#00ff00]/10 border border-[#00ff00]/20">
-                  <span className="text-[7px] font-black text-[#00ff00] uppercase tracking-widest italic">VERIFIED</span>
+               <div className="px-1.5 py-0.5 rounded-full bg-[#00ff00]/10 border border-[#00ff00]/20">
+                  <span className="text-[6px] font-black text-[#00ff00] uppercase tracking-widest italic">VERIFIED</span>
                </div>
             </div>
 
             <div className="flex items-center justify-between relative z-10 px-1">
-               <div className="flex flex-col gap-1">
-                  <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/30">Next Update</span>
-                  <span className="text-[10px] font-black text-[#ff00ff] italic font-syncopate">48:24:12</span>
+               <div className="flex flex-col gap-0.5">
+                  <span className="text-[6px] font-black uppercase tracking-[0.1em] text-white/30">Next Update</span>
+                  <span className="text-[8px] font-black text-[#ff00ff] italic font-syncopate">48:24:12</span>
                </div>
                <div className="flex items-center gap-1">
                   <div className="w-1 h-1 rounded-full bg-green-500" />
-                  <span className="text-[6px] font-black text-white/40 uppercase tracking-widest">System Active</span>
+                  <span className="text-[5px] font-black text-white/40 uppercase tracking-widest">Active</span>
                </div>
             </div>
 
-            <Link href="/docs/about" className="block p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] transition-all group/btn">
+            <Link href="/docs/about" className="block p-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] transition-all group/btn">
                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                     <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover/btn:bg-[#ffea00]/10 transition-colors">
-                        <ArrowRight size={14} className="text-white/20 group-hover/btn:text-[#ffea00]" />
+                  <div className="flex items-center gap-2">
+                     <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center group-hover/btn:bg-[#ffea00]/10 transition-colors">
+                        <ArrowRight size={12} className="text-white/20 group-hover/btn:text-[#ffea00]" />
                      </div>
-                     <span className="text-[8px] font-black uppercase tracking-widest text-white/40 group-hover/btn:text-white transition-colors">About Gasp</span>
+                     <span className="text-[7px] font-black uppercase tracking-widest text-white/40 group-hover/btn:text-white transition-colors">GASP</span>
                   </div>
                   <div className="h-1 w-1 rounded-full bg-white/10 group-hover/btn:bg-[#ffea00] animate-pulse" />
                </div>
@@ -317,12 +317,12 @@ export default function Sidebar({ selectedPersonaId, onSelectPersona, unreadCoun
              </div>
 
           {/* STAKE CTA */}
-          <div className="space-y-3">
-             <button className="w-full h-14 bg-[#ffea00] text-black rounded-3xl flex items-center justify-center gap-3 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(255,234,0,0.25)] active:scale-95">
-                <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
-                   <Zap size={14} className="text-black" />
+          <div className="space-y-2">
+             <button className="w-full h-11 bg-[#ffea00] text-black rounded-2xl flex items-center justify-center gap-2 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(255,234,0,0.15)] active:scale-95">
+                <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center">
+                   <Zap size={10} className="text-black" />
                  </div>
-                <span className="text-[10px] font-black uppercase tracking-widest italic font-syncopate">BUY CREDITS →</span>
+                <span className="text-[8px] font-black uppercase tracking-widest italic font-syncopate">BUY CREDITS</span>
              </button>
                <div className="flex items-center justify-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />

@@ -30,7 +30,7 @@ export default function RightSidebar({ onSelectPersona, personas, deadIds, setDe
     .slice(0, 50); // High-fidelity discovery cap
 
   return (
-    <aside className="hidden lg:flex w-[280px] xl:w-[320px] 2xl:w-[380px] h-screen bg-black border-l border-white/5 flex-col shrink-0 overflow-hidden sticky top-0">
+    <aside className="hidden lg:flex w-[240px] xl:w-[280px] 2xl:w-[320px] h-screen bg-black/40 backdrop-blur-3xl border-l border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 transition-all">
       {/* 3. RIGHT SIDEBAR: DISCOVERY GALLERY */}
       <div className="h-20 shrink-0" />
 
@@ -44,13 +44,13 @@ export default function RightSidebar({ onSelectPersona, personas, deadIds, setDe
            <span className="text-[8px] font-black text-[#ffea00] uppercase italic tracking-widest animate-pulse">Live now</span>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {galleryItems.map((persona) => (
             <motion.div
               key={persona.id}
               onClick={() => onSelectPersona(persona.id)}
-              whileHover={{ scale: 1.05, y: -4 }}
-              className={`relative aspect-[3/4] rounded-3xl overflow-hidden cursor-pointer border border-white/5 group shadow-2xl ${!persona.isOnline ? 'grayscale grayscale-opacity-80' : ''}`}
+              whileHover={{ scale: 1.05, y: -2 }}
+              className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer border border-white/5 group shadow-2xl ${!persona.isOnline ? 'grayscale grayscale-opacity-80' : ''}`}
             >
               {/* Profile Image */}
               <PersonaAvatar
@@ -58,33 +58,33 @@ export default function RightSidebar({ onSelectPersona, personas, deadIds, setDe
                 alt={persona.name}
                 onImageError={() => {
                   console.warn(`[Gasp Gallery] Purging dead link node: ${persona.id} (${persona.name})`);
-                  setDeadIds(prev => new Set([...Array.from(prev), persona.id]));
+                  setDeadIds((prev: Set<string>) => new Set([...Array.from(prev), persona.id]));
                 }}
               />
               
               {/* Overlay Gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
 
               {/* Persona Metadata Overlay (Small) */}
-              <div className="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1">
-                 <div className="flex items-center gap-1.5 leading-none">
-                    <span className="text-[11px] font-bold uppercase text-white italic tracking-tighter truncate">
-                       {persona.name} {persona.age}
+              <div className="absolute inset-x-0 bottom-0 p-2 flex flex-col gap-0.5">
+                 <div className="flex items-center gap-1 leading-none">
+                    <span className="text-[9px] font-bold uppercase text-white italic tracking-tighter truncate">
+                       {persona.name}
                     </span>
-                    <div className={`w-1.5 h-1.5 rounded-full ${persona.isOnline ? 'bg-[#00ff00] shadow-[0_0_8px_#00ff00] animate-pulse' : 'bg-white/10'}`} />
+                    <div className={`w-1 h-1 rounded-full ${persona.isOnline ? 'bg-[#00ff00] shadow-[0_0_8px_#00ff00] animate-pulse' : 'bg-white/10'}`} />
                  </div>
                  <div className="flex items-center justify-between">
-                    <span className="text-[7px] font-black text-white/40 uppercase tracking-widest leading-none">{persona.city}</span>
+                    <span className="text-[6px] font-black text-white/30 uppercase tracking-widest leading-none">{persona.city}</span>
                     <Heart 
-                      size={8} 
+                      size={6} 
                       className={`transition-all ${following.includes(persona.id) ? 'text-[#ff00ff] fill-[#ff00ff] opacity-100 drop-shadow-[0_0_5px_#ff00ff]' : 'text-white/20 opacity-60'}`} 
                     />
                  </div>
               </div>
 
               {/* Status Badge */}
-              <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-black/40 backdrop-blur-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                 {persona.isOnline ? <Zap size={8} className="text-[#ffea00]" /> : <div className="text-[6px] text-white/40 font-black uppercase">Offline</div>}
+              <div className="absolute top-1.5 left-1.5 px-1 py-0.5 rounded-md bg-black/40 backdrop-blur-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity scale-75 origin-top-left">
+                 {persona.isOnline ? <Zap size={8} className="text-[#ffea00]" /> : <div className="text-[5px] text-white/40 font-black uppercase">Offline</div>}
               </div>
             </motion.div>
           ))}
