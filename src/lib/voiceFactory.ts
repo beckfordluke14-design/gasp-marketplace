@@ -229,30 +229,31 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
         const idSum = (personaId || 'default').split('').reduce((a, b) => a + b.charCodeAt(0), 0);
         
         // Clamp all values BEFORE time modifiers to avoid overflow
-        let pStability  = 0.30 + ((idSum % 20) / 100);  // 0.30 – 0.50
-        let pSimilarity = 0.72 + ((idSum % 18) / 100);  // 0.72 – 0.90
-        let pStyle      = 0.45 + ((idSum % 35) / 100);  // 0.45 – 0.80 (never exceeds 1.0)
+        // REALISM REDUCTION: High "style" forces robotic/performative reads.
+        // Keeping style < 0.15 is industry standard for human conversation.
+        let pStability  = 0.40 + ((idSum % 15) / 100);  // 0.40 – 0.55
+        let pSimilarity = 0.75 + ((idSum % 15) / 100);  // 0.75 – 0.90
+        let pStyle      = 0.02 + ((idSum % 10) / 100);  // 0.02 – 0.12
 
         // TEMPORAL CONTEXT ENGINE — subtle shifts by time of day
         const hour = new Date().getHours();
         let currentEnv = 'street_run';
 
         if (hour >= 6 && hour < 11) {
-            // Morning: more stable, calmer
-            pStability = Math.min(pStability + 0.08, 0.60);
-            pStyle     = Math.max(pStyle     - 0.08, 0.35);
+            // Morning: slightly more stable, calmer
+            pStability = Math.min(pStability + 0.05, 0.60);
             currentEnv = 'outdoor_park';
         } else if (hour >= 11 && hour < 18) {
             // Daytime: balanced
             currentEnv = 'street_run';
         } else if (hour >= 18 && hour < 23) {
             // Evening: more emotive
-            pStyle     = Math.min(pStyle     + 0.08, 0.88);
+            pStability = Math.max(pStability - 0.05, 0.35);
             currentEnv = 'vibe_check';
         } else {
-            // Late Night: breathy, intimate
-            pStability = Math.max(pStability - 0.06, 0.22);
-            pStyle     = Math.min(pStyle     + 0.12, 0.90);
+            // Late Night: breathy, intimate, highly expressive
+            pStability = Math.max(pStability - 0.10, 0.30);
+            pStyle     = Math.min(pStyle     + 0.05, 0.20);
             currentEnv = 'late_night';
             if (finalVocalScript.startsWith('... ')) {
                 finalVocalScript = '..... ' + finalVocalScript.slice(4);
@@ -262,9 +263,9 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
         // Final safety clamp on all values
         const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
         const voiceSettings = {
-            stability:        clamp(pStability,  0.20, 0.65),
-            similarity_boost: clamp(pSimilarity, 0.65, 0.95),
-            style:            clamp(pStyle,       0.40, 0.90),
+            stability:        clamp(pStability,  0.30, 0.70),
+            similarity_boost: clamp(pSimilarity, 0.70, 0.95),
+            style:            clamp(pStyle,       0.00, 0.25),
             use_speaker_boost: true,
             speed:            1.0  // Normal speech rate (0.7 = slow, 1.2 = fast)
         };

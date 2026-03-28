@@ -4,7 +4,7 @@
  * with performance tags for ElevenLabs Multilingual v2.
  */
 
-// ðŸ§¬ SYNDICATE ZONE DICTIONARY: Phonetic Slang & Accent Drivers
+// ?? SYNDICATE ZONE DICTIONARY: Phonetic Slang & Accent Drivers
 // ElevenLabs Multilingual v2 adopts the accent of the TEXT.
 const REGIONS: Record<string, Record<string, string>> = {
     'ny_dominican': { // Spanish Newark / NYC
@@ -45,7 +45,7 @@ const REGIONS: Record<string, Record<string, string>> = {
         'my love': 'mi amor',
         'well': 'pues',
         'money': 'plata',
-        'cool': 'bacÃ¡n'
+        'cool': 'bacán'
     },
     'london': {
         'going to': 'gonna',
@@ -55,31 +55,26 @@ const REGIONS: Record<string, Record<string, string>> = {
     }
 };
 
-
-// ðŸŽ­ PERFORMANCE TAGS: Force human-like stutters and inhales
+// ?? PERFORMANCE TAGS: Force human-like stutters and inhales
 const NEURAL_BREATHS = ['... (inhales) ', '... (sighs) ', '... (chuckles) ', '... '];
 
-
-// ðŸŽ€ MULTI-LINGUAL MATURE REFINEMENTS (Ages 25+)
+// ?? MULTI-LINGUAL MATURE REFINEMENTS (Ages 25+)
 const MULTI_MATURE: Record<string, Record<string, string>> = {
     'en': { 'no cap': 'honestly', 'facts': 'certainly', 'wild': 'interesting', 'lit': 'lovely' },
-    'es': { 'loco': 'increÃ­ble', 'bueno': 'fenomenal', 'mira': 'fÃ­jate', 'dime': 'escÃºchame' },
-    'pt': { 'bacÃ¡n': 'lindo', 'papai': 'querido', 'cara': 'vocÃª', 'tÃ¡': 'estÃ¡' }
+    'es': { 'loco': 'increíble', 'bueno': 'fenomenal', 'mira': 'fíjate', 'dime': 'escúchame' },
+    'pt': { 'bacán': 'lindo', 'papai': 'querido', 'cara': 'você', 'tá': 'está' }
 };
 
 const MULTI_FILLERS: Record<string, string[]> = {
     'en': ['... sweetheart', '... darling', '... babe', '... love'],
-    'es': ['... mi amor', '... cariÃ±o', '... mi vida', '... corazÃ³n'],
+    'es': ['... mi amor', '... cariño', '... mi vida', '... corazón'],
     'pt': ['... querido', '... meu bem', '... amorzinho', '... vida']
 };
-
 
 export function processVocalText(text: string, personaId: string, location: string, timeHour: number, age: number = 22, language: string = 'en'): string {
     let cleanText = text.trim();
     
     // 1a. GLOBAL BRACKET PURGE: Strip ALL [stage directions] from the text.
-    //     ElevenLabs should PERFORM the emotion via voice settings, not SPEAK the word.
-    //     This prevents "chuckles", "smiling", "sighs" from being literally pronounced.
     cleanText = cleanText.replace(/\[[^\]]{1,40}\]/g, '').trim();
 
     // 1b. LATE NIGHT WHISPER TAG: detect intent from original text BEFORE purge
@@ -115,7 +110,6 @@ export function processVocalText(text: string, personaId: string, location: stri
             newText = newText.replace(regex, mature);
         }
 
-        // Inject soft feminine prosody
         if (Math.random() > 0.75) {
             const fillers = MULTI_FILLERS[langKey] || MULTI_FILLERS['en'];
             const filler = fillers[idSum % fillers.length];
@@ -123,19 +117,26 @@ export function processVocalText(text: string, personaId: string, location: stri
         }
     }
 
-    // 5. Neural Warming & Ambient Triggers
-    // Liquid Prososity: Randomize breathing lengths to ensure non-identical acoustic renders
-    const jitter = '.'.repeat(Math.floor(Math.random() * 3) + 1);
-    newText = newText.startsWith('...') ? newText : `${jitter} ${newText}`;
+    // 5. HUMAN HESITATION ENGINE
+    // Force ElevenLabs to stutter slightly or take a breath at the start instead of reading perfectly.
+    const hesitations: Record<string, string[]> = {
+        'en': ['um... ', 'like, ', 'well... ', 'so... ', 'uh... '],
+        'es': ['este... ', 'bueno... ', 'o sea... ', 'uf... ', 'eh... '],
+        'pt': ['tipo... ', 'é... ', 'bom... ', 'hum... ', 'ah... ']
+    };
     
-    // Inject specialized "neural pulse" (nearly invisible phonemes) to force ElevenLabs to re-process differently
-    if (Math.random() > 0.5) newText = newText + ' ...';
+    let injectedHesitation = '';
+    if (Math.random() > 0.4) {
+        const langHesitations = hesitations[langKey] || hesitations['en'];
+        injectedHesitation = langHesitations[Math.floor(Math.random() * langHesitations.length)];
+    }
 
-    // Late Night "Whisper" Override (1AM-5AM) - All brackets purged; whisper via word spacing only
+    newText = newText.startsWith('...') ? newText : `... ${injectedHesitation}${newText}`;
+
+    // Late Night "Whisper" Override
     if ((timeHour >= 1 && timeHour <= 5) || whisperMode) {
         newText = newText.split(' ').join(' ... ');
     }
-
-    // FINAL ASSEMBLY: No brackets emitted â€” ElevenLabs renders emotion purely through voice settings + text tone
+    
     return newText.trim();
 }
