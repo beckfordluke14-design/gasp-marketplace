@@ -76,20 +76,30 @@ export function getPersonaName(p: any): string {
 export function proxyImg(url: any): string {
   if (!url || typeof url !== 'string') return '/v1.png';
   
-  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vvcwjlcequbkhlpmwzlc.supabase.co';
-  
   let finalUrl = (url || '').trim();
 
-  // 1. Full URLs: Return as is (Direct Loading)
-  if (finalUrl.startsWith('http')) return finalUrl;
-
-  // 2. Relative Paths (Legacy Hub Sync)
-  if (!finalUrl.startsWith('/')) {
-      // Direct load from working public bucket
-      return `${baseUrl}/storage/v1/object/public/posts/${finalUrl}`;
+  // 1. 🛡️ MASTER DOMAIN STRIPPER: 
+  // If explicitly a Supabase URL, strip the domain so we can proxy it through asset.gasp.fun
+  const supabaseHost = '.supabase.co';
+  if (finalUrl.includes(supabaseHost)) {
+      // Find where public storage path starts
+      const publicPrefix = '/storage/v1/object/public/';
+      const idx = finalUrl.indexOf(publicPrefix);
+      if (idx !== -1) {
+          finalUrl = finalUrl.substring(idx + publicPrefix.length);
+      }
   }
 
-  return finalUrl;
+  // 2. Full external URLs (non-Supabase): Keep as is (Direct Loading)
+  if (finalUrl.startsWith('http')) return finalUrl;
+
+  // 3. Local Static Assets: Keep as is
+  if (finalUrl.startsWith('/')) return finalUrl;
+
+  // 4. 💎 SOVEREIGN ASSET HUB (asset.gasp.fun):
+  // Direct Cloudflare Proxy to Supabase Storage.
+  // Zero-Egress, Zero-VPS Load, Ultra-Latency.
+  return `https://asset.gasp.fun/storage/v1/object/public/${finalUrl}`;
 }
 
 export interface Persona {
