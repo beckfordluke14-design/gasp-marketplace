@@ -1,27 +1,27 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Languages, LockOpen, Mic } from 'lucide-react';
-import Image from 'next/image';
+import { Play, Pause, Languages, Mic } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ProfileAvatar from '../profile/ProfileAvatar';
+import { formatCredits } from '@/lib/format';
 
 interface VoiceNoteBubbleProps {
-  audioUrl: string;
+  audioUrl?: string | null;
   profileImage?: string;
   profileName?: string;
   durationSeconds?: number;
   timestamp?: string;
-  translation?: string;              // Locked English translation (from DB)
-  isUnlocked?: boolean;              // Persistence: is this node already decoded?
-  onUnlockTranslation?: () => Promise<boolean>; // Returns true if spend succeeded
+  translation?: string;
+  isUnlocked?: boolean;
+  onUnlockTranslation?: () => Promise<boolean>;
 }
 
 /**
  * GASP VOICE NOTE BUBBLE
  * WhatsApp-style audio player with waveform bars + translation unlock.
  * Audio plays FREE in native language.
- * Translation = 10 credits (the core voice note monetization mechanic).
+ * Translation = 1,000 credits (the core voice note monetization mechanic).
  */
 export default function VoiceNoteBubble({
   audioUrl,
@@ -42,17 +42,25 @@ export default function VoiceNoteBubble({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animFrameRef = useRef<number>(0);
 
-  // Seeded waveform heights
+  // Seeded waveform heights: Use fallback if audioUrl is pending
   const barCount = 35;
   const bars = Array.from({ length: barCount }, (_, i) => {
-    const seed = (audioUrl.charCodeAt(i % audioUrl.length) + i * 23) % 100;
+    const seedSrc = audioUrl || 'pending';
+    const seed = (seedSrc.charCodeAt(i % seedSrc.length) + i * 23) % 100;
     return 15 + (seed / 100) * 70; // 15–85% height
   });
 
   useEffect(() => {
-    if (!audioUrl || audioUrl === '') return;
+    if (!audioUrl) return;
+    
+    // 🧬 SOVEREIGN AUDIO SYNC: Clean previous instance
+    if (audioRef.current) {
+        audioRef.current.pause();
+    }
+
     const audio = new Audio(audioUrl);
     audioRef.current = audio;
+
     audio.addEventListener('loadedmetadata', () => setDuration(audio.duration));
     audio.addEventListener('ended', () => {
       setIsPlaying(false);
@@ -60,6 +68,7 @@ export default function VoiceNoteBubble({
       setCurrentTime(0);
       cancelAnimationFrame(animFrameRef.current);
     });
+
     return () => {
       audio.pause();
       cancelAnimationFrame(animFrameRef.current);
@@ -76,17 +85,23 @@ export default function VoiceNoteBubble({
   };
 
   const togglePlay = () => {
+    if (!audioUrl) return;
+    
     const audio = audioRef.current;
     if (!audio) {
-      console.warn('⚠️ No audio tag found. audioUrl:', audioUrl);
-      return;
+      // Identity Handshake: Force initialization if missed
+      const freshAudio = new Audio(audioUrl);
+      audioRef.current = freshAudio;
     }
+
+    const activeAudio = audioRef.current!;
+
     if (isPlaying) {
-      audio.pause();
+      activeAudio.pause();
       cancelAnimationFrame(animFrameRef.current);
       setIsPlaying(false);
     } else {
-      audio.play().then(() => {
+      activeAudio.play().then(() => {
         setIsPlaying(true);
         animFrameRef.current = requestAnimationFrame(tick);
       }).catch(err => {
@@ -197,7 +212,7 @@ export default function VoiceNoteBubble({
                  <Languages size={14} className="text-[#ff00ff]" />
                  <span className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff]">DECODE WHAT SHE SAID</span>
               </div>
-              <span className="text-[10px] font-black text-[#ff00ff]">10 credits</span>
+              <span className="text-[10px] font-black text-[#ff00ff]">{formatCredits(1000)}</span>
             </button>
           )}
         </div>
