@@ -131,19 +131,7 @@ export async function POST(req: Request) {
 
         const totalCredits = pkg.credits + Math.floor(pkg.credits * 0.15); // Bonus applied
 
-        // 1. Update Premium Wallet
-        const { data: wallet } = await supabase.from('wallets').select('id, credit_balance').eq('user_id', userId).maybeSingle();
-        if (wallet) {
-            await supabase.from('wallets').update({ credit_balance: wallet.credit_balance + totalCredits }).eq('id', wallet.id);
-        } else {
-            await supabase.from('wallets').insert({ user_id: userId, credit_balance: totalCredits });
-        }
-
-        // 2. Update Credit Record in Users Table
-        const { data: userRow } = await supabase.from('users').select('credit_balance').eq('id', userId).single();
-        await supabase.from('users').update({ credit_balance: (userRow?.credit_balance || 0) + totalCredits }).eq('id', userId);
-
-        // 3. Log Audit Ledger (Airdrop Source of Truth)
+        // 1. Log Audit Ledger (Airdrop Source of Truth)
         await supabase.from('audit_ledger').insert({
             user_id: userId,
             action: 'SOVEREIGN_AUTO_SCAN_SETTLEMENT',
@@ -155,12 +143,16 @@ export async function POST(req: Request) {
             sender_wallet: senderWallet // 🧬 LOCKED FOR $GASPAI AIRDROP 🛡️
         });
 
-        // 4. Update Profile Stats (Total Spend Weight)
-        const { data: profile } = await supabase.from('profiles').select('total_spent_usd, credit_balance').eq('id', userId).single();
-        await supabase.from('profiles').update({ 
+        // 2. Update Sovereign Ledger (Profiles table)
+        // We use UPSERT to handle Guest IDs that don't have a profile row yet.
+        const { data: profile } = await supabase.from('profiles').select('total_spent_usd, credit_balance').eq('id', userId).maybeSingle();
+        
+        await supabase.from('profiles').upsert({ 
+            id: userId,
             total_spent_usd: (profile?.total_spent_usd || 0) + pkg.priceUsd,
-            credit_balance: (profile?.credit_balance || 0) + totalCredits 
-        }).eq('id', userId);
+            credit_balance: (profile?.credit_balance || 0) + totalCredits,
+            updated_at: new Date().toISOString()
+        });
 
         return new Response(JSON.stringify({ success: true, credits: totalCredits }), { status: 200 });
 

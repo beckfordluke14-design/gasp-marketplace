@@ -47,19 +47,11 @@ export async function POST(req: Request) {
           return new Response('Transaction failed: DB Sync Issue', { status: 500 });
        }
 
-        // 🧬 CNS SYNC: Update Profile node to prevent UI drift
+        // 🧬 CNS SYNC: Update Profile node with Atomic Subtraction
         if (result?.success) {
-           try {
-             const { data: profile } = await supabase.from('profiles').select('credit_balance').eq('id', userId).single();
-             if (profile) {
-                await supabase.from('profiles').update({
-                  credit_balance: Math.max(0, (profile.credit_balance || 0) - cost),
-                  updated_at: new Date().toISOString()
-                }).eq('id', userId);
-             }
-           } catch (e) {
-             console.warn('[Translate Economy] Profile sync failed.');
-           }
+           const { data: profile } = await supabase.from('profiles').select('credit_balance').eq('id', userId).maybeSingle();
+           const newBal = Math.max(0, (profile?.credit_balance || 0) - cost);
+           await supabase.from('profiles').upsert({ id: userId, credit_balance: newBal, updated_at: new Date().toISOString() });
         }
 
        return new Response(JSON.stringify(result), { headers: { 'Content-Type': 'application/json' } });
@@ -75,12 +67,12 @@ export async function POST(req: Request) {
 
     // Fallback: Try persona_vault table
     if (mediaError || !media) {
-       const { data: vaultMedia, error: vaultMediaError } = await supabase
+       const { data: vaultMedia } = await supabase
          .from('persona_vault')
          .select('id, content_url')
          .eq('id', mediaId)
-         .single();
-       media = vaultMedia;
+         .maybeSingle();
+       media = vaultMedia as any;
     }
 
     if (!media) {
@@ -122,23 +114,22 @@ export async function POST(req: Request) {
       console.error('[Economy] Transaction Collapse:', rpcError.message);
       
       // FALLBACK: Manual tx if RPC is signature mismatched
-      const { data: profile } = await supabase.from('profiles').select('credit_balance').eq('id', userId).single();
+      const { data: profile } = await supabase.from('profiles').select('credit_balance').eq('id', userId).maybeSingle();
       if ((profile?.credit_balance || 0) < cost) {
-         return new Response('Insufficient Balance', { status: 400 });
+         return new Response(JSON.stringify({ success: false, error: 'Insufficient Balance' }), { status: 400 });
       }
       
-      await supabase.from('profiles').update({ 
+      await supabase.from('profiles').upsert({ 
+         id: userId,
          credit_balance: (profile?.credit_balance || 0) - cost,
          updated_at: new Date().toISOString()
-      }).eq('id', userId);
+      });
 
-      const { error: insErr } = await supabase.from('user_vault_unlocks').insert({ 
+      await supabase.from('user_vault_unlocks').insert({ 
          user_id: userId, 
          item_id: mediaId 
       });
 
-      if (insErr) throw insErr;
-      
       return new Response(JSON.stringify({ success: true, media_url: media.content_url }), { headers: { 'Content-Type': 'application/json' } });
     }
 

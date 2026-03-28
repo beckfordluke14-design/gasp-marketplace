@@ -146,9 +146,9 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
                alert(`Sync Error: ${result.error || 'Identity desync'}`);
             }
          }
-      } catch (e) {
+      } catch (e: any) {
          console.error('[Gasp Neural Unlock] Pulse Failure:', e);
-         alert('Narrative Hub desynced. Try again.');
+         alert(`Narrative Hub desynced: ${e.message || 'Check Network'}`);
       } finally {
          setIsProcessing(false);
       }
@@ -291,7 +291,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
                              disabled={isProcessing}
                              className="w-full h-10 bg-white text-black text-[9px] font-black uppercase rounded-2xl hover:bg-[#ffea00] transition-colors disabled:opacity-50"
                            >
-                              {isProcessing ? 'SYCING...' : `UNLOCK ${item.price || 75}cr`}
+                              {isProcessing ? 'SYNCING...' : `UNLOCK ${item.price || 75}cr`}
                            </button>
                         </div>
                      )}
