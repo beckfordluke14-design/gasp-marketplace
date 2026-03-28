@@ -151,11 +151,11 @@ export default function Header({
                   </button>
                 )}
 
-                <div onClick={() => onOpenTopUp()} className="cursor-pointer hover:opacity-80 transition-all scale-[0.6] md:scale-[0.8] origin-right">
-                  <CoinBalance onOpenTopUp={() => onOpenTopUp()} />
+                <div onClick={() => onOpenTopUp()} className="cursor-pointer hover:opacity-80 transition-all">
+                   <CoinBalance onOpenTopUp={() => onOpenTopUp()} />
                 </div>
 
-                <div className="flex scale-[0.8] origin-right">
+                <div className="flex">
                    <WalletConnect />
                 </div>
 
