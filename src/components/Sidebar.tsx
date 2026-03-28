@@ -30,11 +30,25 @@ interface SidebarProps {
   onSelectProfile: (id: string) => void;
   unreadCounts?: Record<string, number>;
   profiles: any[];
+  view?: 'chats' | 'vault' | 'feed';
+  onSetView?: (view: 'chats' | 'vault' | 'feed') => void;
 }
 
-export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCounts = {}, profiles }: SidebarProps) {
+export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCounts = {}, profiles, view = 'chats', onSetView }: SidebarProps) {
   const { profile } = useUser();
   const [following, setFollowing] = useState<string[]>([]);
+  const [recentIds, setRecentIds] = useState<string[]>([]);
+
+  // 1. NAV HUB FOR SIDEBAR
+  const NavButton = ({ label, icon: Icon, targetView }: { label: string, icon: any, targetView: 'chats' | 'vault' | 'feed' }) => (
+    <button 
+        onClick={() => onSetView?.(targetView)}
+        className={`flex-1 py-3 flex flex-col items-center gap-1 transition-all border-b-2 ${view === targetView ? 'border-[#ff00ff] text-white shadow-[0_10px_10px_-10px_#ff00ff]' : 'border-transparent text-white/30'}`}
+    >
+        <Icon size={18} className={view === targetView ? 'drop-shadow-[0_0_8px_#ff00ff]' : ''} />
+        <span className="text-[7px] font-black uppercase tracking-widest">{label}</span>
+    </button>
+  );
 
   // ACCOUNT RANK LOGIC
   const getAccountRank = (points: number = 0) => {
@@ -46,6 +60,13 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
   };
 
   const rank = getAccountRank(profile?.credit_balance || 0);
+
+  useEffect(() => {
+    const storedRecent = localStorage.getItem('gasp_recent_chats');
+    if (storedRecent) {
+       try { setRecentIds(JSON.parse(storedRecent).slice(0, 5)); } catch {}
+    }
+  }, []);
 
   const syncFollows = async () => {
     const gid = profile?.id || localStorage.getItem('gasp_guest_id');
@@ -155,158 +176,149 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
 
   return (
     <aside className="flex w-full lg:w-[260px] h-screen bg-transparent backdrop-blur-xl border-r border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 font-outfit transition-all">
-      <div className="h-20 shrink-0" />
-
-      <div className="flex-1 overflow-y-auto no-scrollbar py-6">
-        {/* NEW MESSAGES */}
-        {Object.keys(unreadCounts).some(id => unreadCounts[id] > 0) && (
-            <div className="mb-8 px-4">
-                <div className="px-2 mb-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <MessageSquare size={10} className="text-[#00ff00]" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00ff00] italic">Unread Messages</span>
-                    </div>
-                </div>
-                <div className="flex flex-col">
-                    {profiles.filter(p => unreadCounts[p.id] > 0).map(p => (
-                        <motion.div key={p.id} onClick={() => onSelectProfile(p.id)} whileHover={{ x: 4 }} className="flex items-center gap-3 p-3 rounded-2xl bg-[#00f0ff]/5 border border-[#00f0ff]/10 mb-2 cursor-pointer group">
-                             <div className="w-10 h-10 rounded-full overflow-hidden border border-[#00ff00]/40 shrink-0">
-                                <ProfileAvatar src={p.image} alt={p.name} />
-                             </div>
-                             <div className="flex-1 min-w-0">
-                                <p className="text-[10px] font-black uppercase text-white truncate">{p.name}</p>
-                                <p className="text-[8px] font-bold text-[#00f0ff] uppercase tracking-widest">{unreadCounts[p.id]} new messages</p>
-                             </div>
-                             <ArrowRight size={12} className="text-[#00f0ff] opacity-40 group-hover:opacity-100" />
-                        </motion.div>
-                    ))}
-                </div>
-                <div className="h-px w-full bg-white/5 mt-4" />
-            </div>
-        )}
-
-        {followedProfiles.length > 0 && (
-            <div className="mb-8">
-                <div className="px-6 mb-4">
-                    <div className="flex items-center gap-2">
-                        <Heart size={10} className="text-[#ff00ff] fill-current" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff00ff] italic">Following</span>
-                    </div>
-                </div>
-                <div className="flex flex-col px-4">
-                    {followedProfiles.map(renderProfile)}
-                </div>
-                <div className="h-px w-full bg-white/5 mt-6" />
-            </div>
-        )}
-
-        <div className="px-6 mb-4 flex items-center gap-2">
-           <Sparkles size={10} className="text-white/40" />
-           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic">Discover</span>
-        </div>
-        
-        <div className="flex flex-col px-4">
-          {otherProfiles.map(renderProfile)}
-        </div>
+      {/* NAVIGATION BLADE (MOBILE ONLY) */}
+      <div className="flex lg:hidden bg-zinc-900/50 backdrop-blur-3xl border-b border-white/5 pt-12">
+        <NavButton label="Feed" icon={Home} targetView="feed" />
+        <NavButton label="Chats" icon={MessageSquare} targetView="chats" />
+        <NavButton label="Vault" icon={ShieldCheck} targetView="vault" />
       </div>
 
-      <div className="p-4 border-t border-white/5 bg-transparent z-10 flex flex-col gap-4 transition-all">
-           {/* MY WALLET */}
-          <div className="bg-white/5 border border-white/10 rounded-[1.5rem] p-3 space-y-3 relative overflow-hidden group transition-all">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#00ff00]/5 to-transparent pointer-events-none" />
+      <div className="hidden lg:block h-20 shrink-0" />
+
+      <div className="flex-1 overflow-y-auto no-scrollbar py-6">
+        {/* VIEW: CHATS */}
+        {view === 'chats' && (
+          <>
+            {/* NEW MESSAGES */}
+            {Object.keys(unreadCounts).some(id => unreadCounts[id] > 0) && (
+                <div className="mb-8 px-4">
+                    <div className="px-2 mb-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <MessageSquare size={10} className="text-[#00ff00]" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00ff00] italic">Unread</span>
+                        </div>
+                    </div>
+                    <div className="flex flex-col">
+                        {profiles.filter(p => unreadCounts[p.id] > 0).map(p => (
+                            <motion.div key={p.id} onClick={() => onSelectProfile(p.id)} whileHover={{ x: 4 }} className="flex items-center gap-3 p-3 rounded-2xl bg-[#00f0ff]/5 border border-[#00f0ff]/10 mb-2 cursor-pointer group">
+                                <div className="w-10 h-10 rounded-full overflow-hidden border border-[#00ff00]/40 shrink-0">
+                                    <ProfileAvatar src={p.image} alt={p.name} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[10px] font-black uppercase text-white truncate">{p.name}</p>
+                                    <p className="text-[8px] font-bold text-[#00f0ff] uppercase tracking-widest">{unreadCounts[p.id]} new</p>
+                                </div>
+                                <ArrowRight size={12} className="text-[#00f0ff] opacity-40 group-hover:opacity-100" />
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* SAVED (FOLLOWED) CHATS - AT TOP */}
+            {followedProfiles.length > 0 && (
+                <div className="mb-8">
+                    <div className="px-6 mb-4">
+                        <div className="flex items-center gap-2">
+                            <Heart size={10} className="text-[#ff00ff] fill-current" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff00ff] italic">Saved Chats</span>
+                        </div>
+                    </div>
+                    <div className="flex flex-col px-4">
+                        {followedProfiles.map(renderProfile)}
+                    </div>
+                </div>
+            )}
+
+            {/* RECENT CHATS - LAST FIVE */}
+            {recentIds.length > 0 && (
+                <div className="mb-8">
+                    <div className="px-6 mb-4">
+                        <div className="flex items-center gap-2">
+                            <Zap size={10} className="text-white/40" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic">Recent</span>
+                        </div>
+                    </div>
+                    <div className="flex flex-col px-4">
+                        {profiles.filter(p => recentIds.includes(p.id) && !following.includes(p.id)).map(renderProfile)}
+                    </div>
+                </div>
+            )}
+
+            <div className="hidden lg:flex px-6 mb-4 items-center gap-2">
+               <Sparkles size={10} className="text-white/40" />
+               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic">Discover</span>
+            </div>
             
-            <div className="flex items-center justify-between relative z-10 border-b border-white/5 pb-2">
-               <div className="flex flex-col">
-                  <span className="text-[6px] font-black uppercase tracking-[0.2em] text-white/30 italic">Wallet Balance</span>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                     <span className="text-[#00ff00] font-black text-[10px] italic">⚡️</span>
-                     <span className="text-[10px] font-syncopate font-black italic text-white leading-none">
-                        {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[7px] text-[#00ff00] not-italic">CREDITS</span>
-                     </span>
-                  </div>
-               </div>
-               <div className="px-1.5 py-0.5 rounded-full bg-[#00ff00]/10 border border-[#00ff00]/20">
-                  <span className="text-[6px] font-black text-[#00ff00] uppercase tracking-widest italic">Member</span>
-               </div>
+            <div className="hidden lg:flex flex-col px-4">
+              {otherProfiles.map(renderProfile)}
             </div>
+          </>
+        )}
 
-            <div className="flex items-center justify-between relative z-10 px-1">
-               <div className="flex flex-col gap-0.5">
-                  <span className="text-[6px] font-black uppercase tracking-[0.1em] text-white/30">Next Reward</span>
-                  <span className="text-[8px] font-black text-[#ff00ff] italic font-syncopate">48:24:12</span>
-               </div>
-               <div className="flex items-center gap-1">
-                  <div className="w-1 h-1 rounded-full bg-green-500" />
-                  <span className="text-[5px] font-black text-white/40 uppercase tracking-widest">Connected</span>
-               </div>
-            </div>
+        {/* VIEW: VAULT */}
+        {view === 'vault' && (
+           <div className="px-6 space-y-8 animate-in fade-in slide-in-from-left-4 duration-500">
+              <div className="space-y-4">
+                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Vault Node</h2>
+                 <Link href="/vault" className="block p-6 rounded-[2rem] bg-zinc-900/60 border border-white/10 hover:border-[#ff00ff]/40 transition-all text-center group">
+                    <ShieldCheck size={32} className="mx-auto text-[#ff00ff] mb-4 group-hover:scale-110 transition-transform" />
+                    <p className="text-[12px] font-black text-white uppercase italic font-syncopate">Explore Unlocks</p>
+                 </Link>
+              </div>
 
-            <Link href="/docs/about" className="block p-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] transition-all group/btn">
-               <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                     <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center group-hover/btn:bg-[#ffea00]/10 transition-colors">
-                        <ArrowRight size={12} className="text-white/20 group-hover/btn:text-[#ffea00]" />
-                     </div>
-                     <span className="text-[7px] font-black uppercase tracking-widest text-white/40 group-hover/btn:text-white transition-colors">About Gasp</span>
-                  </div>
-                  <div className="h-1 w-1 rounded-full bg-white/10 group-hover/btn:bg-[#ffea00] animate-pulse" />
-               </div>
-            </Link>
-          </div>
+              {/* RE-RENDER WALLET BALANCE HERE FOR VAULT VIEW */}
+              <div className="space-y-4">
+                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Credit Stash</h2>
+                 <div className="p-6 rounded-[2rem] bg-white/5 border border-white/10">
+                    <div className="flex flex-col items-center gap-2">
+                       <span className="text-[24px] font-black font-syncopate italic text-white leading-none">
+                          {profile?.credit_balance?.toLocaleString() || '0'}
+                       </span>
+                       <span className="text-[8px] font-black text-[#00ff00] uppercase tracking-widest italic">SYNDICATE CREDITS</span>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        )}
+      </div>
 
-          <div className="space-y-3 relative z-10">
-             <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                   <Zap size={14} className="text-[#00f0ff] animate-pulse" />
-                   <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff] italic">Member Rank</span>
-                </div>
-             </div>
-             <p className="text-[8px] font-black uppercase text-white/40 tracking-[0.2em] italic">Current Level</p>
-             <h3 className="text-[14px] font-black uppercase italic tracking-tighter text-white" style={{ textShadow: rank.shadow }}>
-                {rank.label}
-             </h3>
-             <div className="flex items-center gap-2 mt-2">
-                <div className="px-2 py-1 rounded-lg bg-white/5 border border-white/10">
-                   <span className="text-[8px] font-black text-white/60 uppercase">{rank.priority} Earnings Boost</span>
-                </div>
-             </div>
-             
-             <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mt-2">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min((profile?.credit_balance || 0) / 10000 * 100, 100)}%` }}
-                  className="h-full bg-gradient-to-r from-[#00f0ff] to-[#ffea00]" 
-                />
-             </div>
-          </div>
-
-          <div className="pt-4 border-t border-white/5 space-y-3 relative z-10">
-               <div className="flex items-center justify-between">
-                  <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30 italic">Top Supporters</span>
-                  <span className="text-[7px] font-black uppercase tracking-widest text-[#00f0ff] hover:underline cursor-pointer">Leaderboard →</span>
-               </div>
-               <div className="space-y-2">
-                  <div className="flex items-center justify-between text-[9px]">
-                     <div className="flex items-center gap-2">
-                        <span className="text-[#ffea00] font-black">#1</span>
-                        <span className="text-white/60 font-bold">Top_Supporter</span>
-                     </div>
-                     <span className="text-white font-black italic">15,400 Credits</span>
-                  </div>
-               </div>
-            </div>
-
-             <div className="flex items-center justify-between pt-1 relative z-10 border-t border-white/5 mt-3 pt-3">
-                <p className="text-[7px] font-black uppercase text-white/20 tracking-widest italic leading-relaxed">
-                   Gasp Platform v1.8 • Secure API • Account Protections Active 🛡️
-                </p>
-                <div className="flex flex-col items-end gap-1">
-                   <div className="flex items-center gap-1">
-                      <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
-                      <span className="text-[6px] font-black text-green-500 uppercase tracking-widest">Protected</span>
+      <div className="p-4 border-t border-white/5 bg-transparent z-10 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
+          <div className="hidden lg:flex flex-col gap-6">
+              <div className="bg-white/5 border border-white/10 rounded-[1.5rem] p-3 space-y-3 relative overflow-hidden group transition-all">
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#00ff00]/5 to-transparent pointer-events-none" />
+                <div className="flex items-center justify-between relative z-10 border-b border-white/5 pb-2">
+                   <div className="flex flex-col">
+                      <span className="text-[6px] font-black uppercase tracking-[0.2em] text-white/30 italic">Wallet Balance</span>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                         <span className="text-[#00ff00] font-black text-[10px] italic">⚡️</span>
+                         <span className="text-[10px] font-syncopate font-black italic text-white leading-none">
+                            {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[7px] text-[#00ff00] not-italic">CREDITS</span>
+                         </span>
+                      </div>
                    </div>
                 </div>
-             </div>
+              </div>
+
+              <div className="space-y-3 relative z-10">
+                 <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                       <Zap size={14} className="text-[#00f0ff] animate-pulse" />
+                       <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff] italic">Member Rank</span>
+                    </div>
+                 </div>
+                 <h3 className="text-[14px] font-black uppercase italic tracking-tighter text-white" style={{ textShadow: rank.shadow }}>
+                    {rank.label}
+                 </h3>
+                 <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mt-2">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min((profile?.credit_balance || 0) / 10000 * 100, 100)}%` }}
+                      className="h-full bg-gradient-to-r from-[#00f0ff] to-[#ffea00]" 
+                    />
+                 </div>
+              </div>
+          </div>
 
           <div className="space-y-2">
              <button 
@@ -318,16 +330,12 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                  </div>
                 <span className="text-[8px] font-black uppercase tracking-widest italic font-syncopate">ADD CREDITS</span>
              </button>
-               <div className="flex items-center justify-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-[#00f0ff] italic">Bonus Credits Active 🛡️</span>
-             </div>
           </div>
 
           <div className="flex flex-col gap-2 pt-2 border-t border-white/5 opacity-50">
-               <span className="text-[8px] text-white/20 uppercase font-black italic text-center">Version 1.8</span>
+             <span className="text-[8px] text-white/20 uppercase font-black italic text-center">Version 1.8</span>
           </div>
-        </div>
+      </div>
     </aside>
   );
 }

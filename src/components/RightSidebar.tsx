@@ -29,7 +29,7 @@ export default function RightSidebar({ onSelectProfile, profiles, deadIds, setDe
     .slice(0, 50); 
 
   return (
-    <aside className="hidden lg:flex w-[240px] xl:w-[280px] 2xl:w-[320px] h-screen bg-black/40 backdrop-blur-3xl border-l border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 transition-all">
+    <aside className="hidden lg:flex w-[240px] xl:w-[280px] 2xl:w-[320px] h-screen bg-transparent backdrop-blur-3xl border-l border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 transition-all">
       {/* Search Result / Discovery Gallery */}
       <div className="h-20 shrink-0" />
 

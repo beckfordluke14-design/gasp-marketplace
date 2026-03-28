@@ -8,18 +8,19 @@ import { usePathname } from 'next/navigation';
 interface BottomNavProps {
   onOpenProfileList?: () => void;
   onOpenTopUp?: () => void;
+  onSetSidebarView?: (view: 'chats' | 'vault' | 'feed') => void;
   unreadCount?: number;
 }
 
-export default function BottomNav({ onOpenProfileList, onOpenTopUp, unreadCount = 0 }: BottomNavProps) {
+export default function BottomNav({ onOpenProfileList, onOpenTopUp, onSetSidebarView, unreadCount = 0 }: BottomNavProps) {
   const pathname = usePathname();
 
   const navItems = [
-    { label: 'Home', icon: Home, href: '/', active: pathname === '/' },
-    { label: 'Profiles', icon: MessageSquare, onClick: onOpenProfileList, active: false, badge: unreadCount },
-    { label: 'Vault', icon: Shield, href: '/vault', active: pathname === '/vault' },
+    { label: 'Feed', icon: Home, href: '/', active: pathname === '/', onClick: () => { if (onSetSidebarView) onSetSidebarView('feed'); } },
+    { label: 'Chats', icon: MessageSquare, active: false, badge: unreadCount, onClick: () => { if (onOpenProfileList) onOpenProfileList(); if (onSetSidebarView) onSetSidebarView('chats'); } },
+    { label: 'Vault', icon: Shield, active: false, onClick: () => { if (onOpenProfileList) onOpenProfileList(); if (onSetSidebarView) onSetSidebarView('vault'); } },
     { label: 'Credits', icon: Zap, onClick: onOpenTopUp, active: false, highlight: true },
-    { label: 'Profile', icon: User, href: '/vault', active: false },
+    { label: 'User', icon: User, href: '/vault', active: pathname === '/vault' },
   ];
 
   return (

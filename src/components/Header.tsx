@@ -2,14 +2,14 @@
 
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Zap, Wallet, Activity, User, Star } from 'lucide-react';
+import { Zap, Wallet, Activity, User, Star, Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CoinBalance from './economy/CoinBalance';
 import ProfileSearch from './ProfileSearch';
 import { useUser } from './providers/UserProvider';
 import WalletConnect from './economy/WalletConnect';
 
-export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), setDeadIds = () => {} }: { onOpenTopUp?: () => void, deadIds?: Set<string>, setDeadIds?: (ids: any) => void }) {
+export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), setDeadIds = () => {}, onOpenMenu = () => {} }: { onOpenTopUp?: () => void, deadIds?: Set<string>, setDeadIds?: (ids: any) => void, onOpenMenu?: () => void }) {
   const router = useRouter();
   const { user, profile } = useUser();
   const [mounted, setMounted] = useState(false);
@@ -37,8 +37,14 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
         {/* Navigation Bar */}
         <header className="h-12 md:h-14 bg-transparent backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-6 md:px-12 pointer-events-auto transition-all">
             
-            {/* Logo */}
-            <div className="flex items-center gap-8 md:gap-10 pointer-events-auto">
+            {/* Logo & Mobile Menu */}
+            <div className="flex items-center gap-4 md:gap-10 pointer-events-auto">
+                <button 
+                  onClick={onOpenMenu}
+                  className="xl:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all active:scale-90"
+                >
+                   <Menu size={18} />
+                </button>
                 <motion.h1 
                   onClick={() => router.push('/')}
                   initial={{ scale: 0.8, opacity: 0, filter: 'blur(10px)' }}

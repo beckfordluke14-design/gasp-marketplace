@@ -30,6 +30,15 @@ function MarketplaceContent() {
   const [showProfileList, setShowProfileList] = useState(false);
   const [guestId, setGuestId] = useState<string | null>(null);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+  const [sidebarView, setSidebarView] = useState<'chats' | 'vault' | 'feed'>('chats');
+  
+  const handleSetSidebarView = (view: 'chats' | 'vault' | 'feed') => {
+     if (view === 'feed') {
+        setShowProfileList(false);
+     } else {
+        setSidebarView(view);
+     }
+  };
   
   const searchParams = useSearchParams();
 
@@ -153,10 +162,12 @@ function MarketplaceContent() {
           onSelectProfile={handleSelectProfile} 
           selectedProfileId={selectedProfileId} 
           profiles={randomizedProfiles} 
+          view={sidebarView}
+          onSetView={handleSetSidebarView}
        />
        
        <div className="flex-1 flex flex-col relative h-screen overflow-hidden">
-           <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} />
+           <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} onOpenMenu={() => setShowProfileList(true)} />
            
            <div className="flex-1 flex flex-col relative pt-8">
               <AnimatePresence mode="wait">
@@ -273,17 +284,15 @@ function MarketplaceContent() {
                        onSelectProfile={(id) => { handleSelectProfile(id); setShowProfileList(false); }} 
                        selectedProfileId={selectedProfileId} 
                        profiles={randomizedProfiles} 
+                       view={sidebarView}
+                       onSetView={handleSetSidebarView}
                     />
                  </div>
               </motion.div>
            )}
         </AnimatePresence>
 
-        <BottomNav 
-          onOpenProfileList={() => setShowProfileList(true)} 
-          onOpenTopUp={() => setIsTopUpOpen(true)}
-        />
-    </main>
+     </main>
   );
 }
 

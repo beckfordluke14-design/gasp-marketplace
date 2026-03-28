@@ -85,39 +85,57 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
         return;
       }
 
-      // Parse the custom stream: lines like 0:"text" or 2:{...json...}
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
-      let assistantText = '';
-      const newVoiceEvents: any[] = [];
+      let isVoiceDetected = false;
 
       while (reader) {
         const { done, value } = await reader.read();
         if (done) break;
+        
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
 
         for (const line of lines) {
           if (line.startsWith('0:')) {
-            try { assistantText = JSON.parse(line.slice(2)); } catch {}
+            try { 
+              const text = JSON.parse(line.slice(2)); 
+              setMessages(prev => {
+                const last = prev[prev.length - 1];
+                if (last?.role === 'assistant' && last.id.startsWith('ai-')) {
+                   return [...prev.slice(0, -1), { ...last, content: text }];
+                }
+                return [...prev, { id: 'ai-' + Date.now(), role: 'assistant', content: text, audio_script: isVoiceDetected ? '...' : null }];
+              });
+            } catch {}
           } else if (line.startsWith('2:')) {
             try {
               const event = JSON.parse(line.slice(2));
-              if (event?.audioUrl) newVoiceEvents.push(event);
+              if (event?.type === 'voice_note') {
+                 console.log('📡 [Sovereign Stream] Voice Event Received:', !!event.audioUrl ? 'READY' : 'PENDING');
+                 isVoiceDetected = true;
+                 if (event.audioUrl) {
+                    setLiveVoiceUrl(event.audioUrl);
+                    setChatData(prev => [...prev, event]);
+                    setMessages(prev => {
+                        const last = prev[prev.length - 1];
+                        if (last?.role === 'assistant') {
+                           return [...prev.slice(0, -1), { 
+                             ...last, 
+                             media_url: event.audioUrl, 
+                             audio_script: event.nativeScript || '...',
+                             type: 'voice' 
+                           }];
+                        }
+                        return prev;
+                    });
+                 }
+              }
             } catch {}
           }
         }
-      }
-
-      if (assistantText) {
-        const assistantMsg = { id: 'ai-' + Date.now(), role: 'assistant', content: assistantText };
-        setMessages(prev => [...prev, assistantMsg]);
-      }
-      if (newVoiceEvents.length > 0) {
-        setLiveVoiceUrl(newVoiceEvents[newVoiceEvents.length - 1].audioUrl);
-        setChatData(newVoiceEvents);
       }
     } catch (err: any) {
       console.error('[Gasp Chat] Network error:', err);
