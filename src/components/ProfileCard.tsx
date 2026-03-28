@@ -8,6 +8,7 @@ import { MapPin, MessageCircle, Play } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Profile, proxyImg } from '@/lib/profiles';
+import GlitchText from './ui/GlitchText';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -86,7 +87,7 @@ export default function ProfileCard({
         <div className="flex items-center gap-2">
           <span className="text-2xl">{flag}</span>
           <h2 className="text-2xl font-outfit font-extrabold tracking-tight text-white uppercase italic drop-shadow-lg">
-            {name}
+            <GlitchText text={name} />
           </h2>
         </div>
 

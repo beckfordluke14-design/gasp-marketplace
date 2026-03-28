@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { type Profile, type Broadcast, proxyImg } from '@/lib/profiles';
 import Image from 'next/image';
-import { Lock, Circle, MessageSquare, Image as ImageIcon } from 'lucide-react';
+import { Lock, Circle, MessageSquare, Image as ImageIcon, Heart } from 'lucide-react';
+import GlitchText from './ui/GlitchText';
 
 interface FeedItemProps {
   profile: Profile;
@@ -27,6 +28,9 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
   const cityStatus = getCityStatus(profile);
   const [isZoomed, setIsZoomed] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [showHeartAnim, setShowHeartAnim] = useState(false);
+  const [lastTap, setLastTap] = useState(0);
 
   useEffect(() => {
      const hasSeen = localStorage.getItem('gasp_zoom_hint');
@@ -36,13 +40,36 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
      }
   }, []);
 
+  const handleTap = () => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    
+    if (now - lastTap < DOUBLE_TAP_DELAY) {
+      // 💖 DOUBLE TAP TRIGGERED
+      if (!isLiked) {
+        setIsLiked(true);
+        setShowHeartAnim(true);
+        setTimeout(() => setShowHeartAnim(false), 1000);
+      } else {
+        // Toggle off if already liked? Or just show anim again?
+        // Standard IG: double tap always likes, doesn't unlike.
+        setShowHeartAnim(true);
+        setTimeout(() => setShowHeartAnim(false), 1000);
+      }
+    } else {
+      // Single tap: Zoom
+      setIsZoomed(!isZoomed);
+    }
+    setLastTap(now);
+  };
+
   return (
     <div className="border-b border-white/5 pb-12 mb-12 last:border-0">
       {/* Header */}
       <div className="flex items-center justify-between mb-6 px-4">
         <div className="flex items-center gap-3">
           <span className="text-xl font-black uppercase italic tracking-tighter text-white">
-            {profile.name}
+            <GlitchText text={profile.name} />
           </span>
           <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-bold uppercase tracking-wider text-white/40">
             {profile.city} • {cityStatus.weather}
@@ -67,7 +94,7 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
                drag={isZoomed}
                dragConstraints={{ left: -300, right: 300, top: -300, bottom: 300 }}
                animate={{ scale: isZoomed ? 2 : 1 }}
-               onTap={() => setIsZoomed(!isZoomed)}
+               onTap={handleTap}
              >
                 <Image
                   src={proxyImg(broadcast.image_url || profile.image)}
@@ -77,6 +104,29 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
                   className="object-cover"
                 />
              </motion.div>
+
+             {/* 💖 LIKE ANIMATION OVERLAY */}
+             <AnimatePresence>
+                {showHeartAnim && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0, rotate: -20 }}
+                    animate={{ scale: [0, 1.5, 1.2], opacity: [0, 1, 1], rotate: 0 }}
+                    exit={{ scale: 2, opacity: 0, filter: 'blur(10px)' }}
+                    transition={{ duration: 0.6, ease: "backOut" }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1002]"
+                  >
+                     <div className="relative">
+                        <Heart size={100} fill="#ff00ff" className="text-[#ff00ff] drop-shadow-[0_0_30px_#ff00ff]" />
+                        {/* Secondary Sparkle rings */}
+                        <motion.div 
+                          initial={{ scale: 0.8, opacity: 0.5 }}
+                          animate={{ scale: 1.5, opacity: 0 }}
+                          className="absolute inset-0 rounded-full border-4 border-[#ff00ff]"
+                        />
+                     </div>
+                  </motion.div>
+                )}
+             </AnimatePresence>
 
              {/* ✨ ZOOM HINT PULSE: NOW YOU CAN ZOOM */}
              <AnimatePresence>
@@ -92,7 +142,7 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
                            <ImageIcon className="text-[#ff00ff]" size={32} />
                         </div>
                         <div className="bg-black/80 px-4 py-2 rounded-xl border border-white/10">
-                           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white italic">IMAGE ZOOM ENABLED</span>
+                           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white italic">INTERACTION ENABLED</span>
                         </div>
                         <button 
                           onClick={(e) => { e.stopPropagation(); setShowHint(false); }}
@@ -147,6 +197,27 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
 
       {/* Action Icons (OII) */}
       <div className="flex items-center gap-8 mt-8 px-6">
+        {/* Like Button */}
+        <button 
+          onClick={() => {
+            if (!isLiked) {
+              setIsLiked(true);
+              setShowHeartAnim(true);
+              setTimeout(() => setShowHeartAnim(false), 1000);
+            } else {
+              setIsLiked(false);
+            }
+          }}
+          className="group flex flex-col items-center gap-2"
+        >
+          <div className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all shadow-xl ${isLiked ? 'border-[#ff00ff]/50 bg-[#ff00ff]/10 shadow-[#ff00ff]/20' : 'border-white/10 group-hover:border-[#ff00ff]/40'}`}>
+            <Heart size={18} className={isLiked ? 'text-[#ff00ff] fill-[#ff00ff]' : 'text-white/40 group-hover:text-[#ff00ff] transition-colors'} />
+          </div>
+          <span className={`text-[7px] font-black uppercase tracking-[0.3em] ${isLiked ? 'text-white' : 'text-white/20'}`}>
+            {broadcast.likes_count ? broadcast.likes_count + (isLiked ? 1 : 0) : (isLiked ? 1 : 'like')}
+          </span>
+        </button>
+
         {/* O: Tip */}
         <button className="group flex flex-col items-center gap-2">
           <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-[#FF007F]/50 transition-all shadow-xl group-hover:shadow-[#FF007F]/10">

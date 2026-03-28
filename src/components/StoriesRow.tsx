@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { initialProfiles, proxyImg, getProfileName } from '@/lib/profiles';
-import { X, Lock, Volume2, ChevronLeft, ChevronRight, Zap } from 'lucide-react';
+import { X, Lock, Volume2, ChevronLeft, ChevronRight, Zap, Heart } from 'lucide-react';
 import Image from 'next/image';
 import ProfileAvatar from './profile/ProfileAvatar';
 
@@ -33,10 +33,15 @@ export default function StoriesRow({ profiles, onSelectProfile }: StoriesRowProp
   const [viewedIds, setViewedIds] = useState<Set<string>>(new Set());
   const [activeStory, setActiveStory] = useState<{ bubble: StoryBubble; storyIndex: number } | null>(null);
   const [progress, setProgress] = useState(0);
+  const [showHeartAnim, setShowHeartAnim] = useState(false);
+  const [lastTap, setLastTap] = useState(0);
+  const [isLiked, setIsLiked] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem('gasp_viewed_stories') || '[]');
     setViewedIds(new Set(stored));
+    const liked = JSON.parse(localStorage.getItem('gasp_liked_stories') || '{}');
+    setIsLiked(liked);
   }, []);
 
   useEffect(() => {
@@ -111,6 +116,25 @@ export default function StoriesRow({ profiles, onSelectProfile }: StoriesRowProp
 
   const currentStory = activeStory ? activeStory.bubble.stories[activeStory.storyIndex] : null;
   const unviewedCount = storyData.filter(s => s.hasUnviewed).length;
+
+  const handleDoubleTap = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    
+    if (now - lastTap < DOUBLE_TAP_DELAY) {
+      if (currentStory) {
+        const sid = currentStory.id;
+        const newLiked = { ...isLiked, [sid]: true };
+        setIsLiked(newLiked);
+        localStorage.setItem('gasp_liked_stories', JSON.stringify(newLiked));
+        
+        setShowHeartAnim(true);
+        setTimeout(() => setShowHeartAnim(false), 1000);
+      }
+    }
+    setLastTap(now);
+  };
 
   if (storyData.length === 0) return null;
 
@@ -268,6 +292,29 @@ export default function StoriesRow({ profiles, onSelectProfile }: StoriesRowProp
               }}
             >
               <div className="relative h-full aspect-[9/16] bg-black shadow-2xl overflow-hidden group/container">
+                
+                {/* 💖 LIKE ANIMATION OVERLAY */}
+                <AnimatePresence>
+                   {showHeartAnim && (
+                     <motion.div
+                       initial={{ scale: 0, opacity: 0, rotate: -20 }}
+                       animate={{ scale: [0, 1.5, 1.2], opacity: [0, 1, 1], rotate: 0 }}
+                       exit={{ scale: 2, opacity: 0, filter: 'blur(10px)' }}
+                       transition={{ duration: 0.6, ease: "backOut" }}
+                       className="absolute inset-0 flex items-center justify-center pointer-events-none z-[2200]"
+                     >
+                        <div className="relative">
+                           <Heart size={120} fill="#ff00ff" className="text-[#ff00ff] drop-shadow-[0_0_40px_#ff00ff]" />
+                           <motion.div 
+                             initial={{ scale: 0.8, opacity: 0.5 }}
+                             animate={{ scale: 1.8, opacity: 0 }}
+                             className="absolute inset-0 rounded-full border-4 border-[#ff00ff]"
+                           />
+                        </div>
+                     </motion.div>
+                   )}
+                </AnimatePresence>
+
                 <div className="absolute inset-0 z-50 flex">
                    {/* Capture clicks for next/prev but allow the main div to handle "default next" */}
                   <div className="flex-1 cursor-pointer" onClick={(e) => {
@@ -275,15 +322,7 @@ export default function StoriesRow({ profiles, onSelectProfile }: StoriesRowProp
                     const { bubble, storyIndex } = activeStory;
                     if (storyIndex > 0) setActiveStory({ bubble, storyIndex: storyIndex - 1 });
                   }} />
-                  <div className="flex-1 cursor-pointer" onClick={(e) => {
-                    e.stopPropagation();
-                    const { bubble, storyIndex } = activeStory;
-                    if (storyIndex < bubble.stories.length - 1) {
-                      setActiveStory({ bubble, storyIndex: storyIndex + 1 });
-                    } else {
-                      setActiveStory(null);
-                    }
-                  }} />
+                  <div className="flex-1 cursor-pointer" onClick={handleDoubleTap} />
                 </div>
 
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/container:opacity-100 transition-opacity hover:bg-black/60 pointer-events-none">
@@ -336,8 +375,28 @@ export default function StoriesRow({ profiles, onSelectProfile }: StoriesRowProp
               </div>
             </div>
 
-            {/* Bottom CTA */}
-            <div className="absolute bottom-0 left-0 right-0 p-8 flex justify-center bg-gradient-to-t from-black/60 to-transparent">
+            {/* Bottom CTA & Like Button */}
+            <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col gap-4 items-center bg-gradient-to-t from-black/60 to-transparent">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (currentStory) {
+                    const sid = currentStory.id;
+                    const liked = !isLiked[sid];
+                    const newLiked = { ...isLiked, [sid]: liked };
+                    setIsLiked(newLiked);
+                    localStorage.setItem('gasp_liked_stories', JSON.stringify(newLiked));
+                    if (liked) {
+                      setShowHeartAnim(true);
+                      setTimeout(() => setShowHeartAnim(false), 1000);
+                    }
+                  }
+                }}
+                className={`w-14 h-14 rounded-full flex items-center justify-center backdrop-blur-xl border transition-all ${isLiked[currentStory.id] ? 'bg-[#ff00ff] border-[#ff00ff] shadow-[0_0_30px_#ff00ff]' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
+              >
+                <Heart size={24} className={isLiked[currentStory.id] ? 'text-white fill-white' : 'text-white/40'} />
+              </button>
+
               <button
                 onClick={(e) => { 
                   e.stopPropagation(); 
