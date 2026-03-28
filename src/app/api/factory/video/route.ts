@@ -39,7 +39,7 @@ Respond ONLY with the motion prompt text.`;
             'Authorization': `Bearer ${OPENROUTER_KEY}`
         },
         body: JSON.stringify({
-            model: 'x-ai/grok-2',
+            model: 'x-ai/grok-3',
             messages: [{ role: 'user', content: prompt }]
         })
     });

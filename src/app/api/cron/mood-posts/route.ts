@@ -62,7 +62,7 @@ Write ONE social media caption post (like an Instagram caption or Twitter post).
       'X-Title': 'GASP Mood Post Engine'
     },
     body: JSON.stringify({
-      model: 'x-ai/grok-2',
+      model: 'x-ai/grok-3',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 120,
       temperature: 0.92, 

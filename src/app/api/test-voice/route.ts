@@ -40,7 +40,7 @@ Return ONLY the spoken text, nothing else.`;
       'X-Title': 'GASP Voice Engine Test'
     },
     body: JSON.stringify({
-      model: 'x-ai/grok-2',
+      model: 'x-ai/grok-3',
       messages: [
         { role: 'user', content: prompt }
       ],
