@@ -2,15 +2,13 @@
 
 import { X, Send, Plus, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn, Diamond, MessageSquare, Circle, Image as ImageIcon, Minus as MinimizeIcon, Gift, ArrowLeftRight, Zap } from 'lucide-react';
 import { initialPersonas, proxyImg } from '@/lib/profiles';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { COST_VOICE_TRANSLATION, COST_VOICE_NOTE } from '@/lib/economy/constants';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 import BondProgress from './persona/BondProgress';
 import VoiceNoteBubble from './chat/VoiceNoteBubble';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import { useChat } from '@ai-sdk/react';
 import { useUser } from './providers/UserProvider';
 import PersonaAvatar from './persona/PersonaAvatar';
 import FreebieImageBubble from './chat/FreebieImageBubble';
@@ -55,27 +53,81 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
   const [lightboxItems, setLightboxItems] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { messages, input, handleInputChange, handleSubmit, append, setMessages, setInput, data: chatData, isLoading }: any = useChat({
-    api: '/api/chat',
-    id: personaId,
-    body: { personaId, userId: idToUse },
-    onResponse: () => {
-      setIsTyping(false);
-      setLiveVoiceUrl(null);
-    },
-    onFinish: async () => {
-      setIsTyping(false);
-      await new Promise(r => setTimeout(r, 800));
-      const res = await fetch('/api/rpc/db', {
-          method: 'POST',
-          body: JSON.stringify({ action: 'chat-context', payload: { userId: idToUse, personaId } })
+  // 🧠 SOVEREIGN CHAT ENGINE: Custom fetch-based, bypasses AI SDK entirely
+  const [messages, setMessages] = useState<any[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [chatData, setChatData] = useState<any[]>([]);
+
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || isLoading) return;
+    const userMsg = { id: Date.now().toString(), role: 'user', content: text };
+    setMessages(prev => [...prev, userMsg]);
+    setInput('');
+    setIsLoading(true);
+    setIsTyping(true);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...messages, userMsg],
+          userId: idToUse,
+          personaId,
+        }),
       });
-      const result = await res.json();
-      if (result.success && result.data.messages) {
-        setMessages(result.data.messages);
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('[Gasp Chat] API error:', res.status, errText);
+        setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: `⚠️ ${errText || 'Service temporarily unavailable. Try again.'}` }]);
+        return;
       }
+
+      // Parse the custom stream: lines like 0:"text" or 2:{...json...}
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let assistantText = '';
+      const newVoiceEvents: any[] = [];
+
+      while (reader) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('0:')) {
+            try { assistantText = JSON.parse(line.slice(2)); } catch {}
+          } else if (line.startsWith('2:')) {
+            try {
+              const event = JSON.parse(line.slice(2));
+              if (event?.audioUrl) newVoiceEvents.push(event);
+            } catch {}
+          }
+        }
+      }
+
+      if (assistantText) {
+        const assistantMsg = { id: 'ai-' + Date.now(), role: 'assistant', content: assistantText };
+        setMessages(prev => [...prev, assistantMsg]);
+      }
+      if (newVoiceEvents.length > 0) {
+        setLiveVoiceUrl(newVoiceEvents[newVoiceEvents.length - 1].audioUrl);
+        setChatData(newVoiceEvents);
+      }
+    } catch (err: any) {
+      console.error('[Gasp Chat] Network error:', err);
+      setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: '⚠️ Network issue. Check your connection.' }]);
+    } finally {
+      setIsLoading(false);
+      setIsTyping(false);
     }
-  } as any);
+  }, [messages, isLoading, idToUse, personaId]);
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -112,21 +164,10 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
     }
   }, [messages, chatData, isLoading, chatTab]);
 
-  const handleLocalSubmit = async () => {
-    const cleanInput = (input || '').trim();
-    if (!cleanInput || isLoading) return;
-    setIsTyping(true);
-    setInput('');
-    try {
-      await append(
-        { role: 'user', content: cleanInput },
-        { body: { userId: idToUse, personaId } }
-      );
-    } catch (err) {
-      console.error('[Gasp submission]: Neural desync:', err);
-      setIsTyping(false);
-    }
+  const handleLocalSubmit = () => {
+    sendMessage(input);
   };
+
 
   const unlockItem = async (item: any) => {
      setIsProcessing(true);
@@ -336,15 +377,15 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
                       <Zap size={20} />
                    </button>
                 </div>
-                 <input 
-                    type="text" 
-                    value={input} 
-                    onChange={handleInputChange} 
-                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleLocalSubmit(); } }}
-                    placeholder="send mssg..." 
-                    className="flex-1 bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
-                    disabled={isLoading}
-                 />
+                <input 
+                   type="text" 
+                   value={input} 
+                   onChange={(e) => setInput(e.target.value)}
+                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleLocalSubmit(); } }}
+                   placeholder="send mssg..." 
+                   className="flex-1 bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
+                   disabled={isLoading}
+                />
                  <button 
                    type="submit"
                    disabled={!(input || '').trim() || isLoading}
