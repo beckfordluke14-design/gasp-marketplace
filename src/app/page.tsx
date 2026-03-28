@@ -155,19 +155,21 @@ function MarketplaceContent() {
   if (!mounted) return null;
 
    return (
-    <main className="min-h-screen bg-black text-white relative flex flex-col pt-24 lg:flex-row xl:gap-0 overflow-hidden">
-       <Sidebar 
-          onSelectProfile={handleSelectProfile} 
-          selectedProfileId={selectedProfileId} 
-          profiles={randomizedProfiles} 
-          view={sidebarView}
-          onSetView={handleSetSidebarView}
-       />
+    <main className="min-[100dvh] bg-black text-white relative flex flex-col lg:flex-row xl:gap-0 overflow-hidden">
+       <div className="hidden lg:flex h-screen sticky top-0 shrink-0 z-[40]">
+           <Sidebar 
+              onSelectProfile={handleSelectProfile} 
+              selectedProfileId={selectedProfileId} 
+              profiles={randomizedProfiles} 
+              view={sidebarView}
+              onSetView={handleSetSidebarView}
+           />
+       </div>
        
        <div className="flex-1 flex flex-col relative h-screen overflow-hidden">
            <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} onOpenMenu={() => setShowProfileList(true)} />
            
-           <div className="flex-1 flex flex-col relative pt-8">
+           <div className="flex-1 flex flex-col relative pt-12 md:pt-14 mt-2">
               <AnimatePresence mode="wait">
                  {showStories && (
                     <motion.div 
