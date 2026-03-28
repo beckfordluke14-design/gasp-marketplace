@@ -55,7 +55,7 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
   const [lightboxItems, setLightboxItems] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { messages, input, handleInputChange, handleSubmit, setMessages, data: chatData, isLoading }: any = useChat({
+  const { messages, input, handleInputChange, handleSubmit, append, setMessages, setInput, data: chatData, isLoading }: any = useChat({
     api: '/api/chat',
     id: personaId,
     body: { personaId, userId: idToUse },
@@ -112,15 +112,18 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
     }
   }, [messages, chatData, isLoading, chatTab]);
 
-  const handleLocalSubmit = (e: any) => {
-    if (e) e.preventDefault();
+  const handleLocalSubmit = async () => {
     const cleanInput = (input || '').trim();
-    if (!cleanInput) return;
+    if (!cleanInput || isLoading) return;
     setIsTyping(true);
+    setInput('');
     try {
-      handleSubmit(e, { body: { userId: idToUse, personaId } });
+      await append(
+        { role: 'user', content: cleanInput },
+        { body: { userId: idToUse, personaId } }
+      );
     } catch (err) {
-      console.error('[Gasp submission]: Neural desync during handleSubmit:', err);
+      console.error('[Gasp submission]: Neural desync:', err);
       setIsTyping(false);
     }
   };
@@ -322,8 +325,8 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
                 )}
              </AnimatePresence>
 
-             <motion.form 
-               onSubmit={handleLocalSubmit} 
+             <form 
+               onSubmit={(e) => { e.preventDefault(); handleLocalSubmit(); }}
                className="bg-zinc-900/80 border border-white/5 rounded-[2.5rem] p-2 pr-2.5 pl-5 flex items-center gap-4 shadow-2xl backdrop-blur-3xl"
              >
                 <div className="flex items-center gap-5 text-white/40">
@@ -337,19 +340,19 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize, on
                     type="text" 
                     value={input} 
                     onChange={handleInputChange} 
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleLocalSubmit(); } }}
                     placeholder="send mssg..." 
                     className="flex-1 bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
                     disabled={isLoading}
                  />
                  <button 
-                   type="submit" 
-                   onClick={handleLocalSubmit}
+                   type="submit"
                    disabled={!(input || '').trim() || isLoading}
-                   className="w-12 h-12 rounded-full bg-[#ff00ff] flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,0,255,0.3)] hover:scale-110 active:scale-90 transition-all disabled:opacity-30 disabled:grayscale pointer-events-auto"
+                   className="w-12 h-12 rounded-full bg-[#ff00ff] flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,0,255,0.3)] hover:scale-110 active:scale-90 transition-all disabled:opacity-30 disabled:grayscale"
                  >
                     <Send size={20} className="mr-0.5" />
                  </button>
-             </motion.form>
+             </form>
           </div>
         </div>
       </>
