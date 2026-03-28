@@ -207,7 +207,13 @@ function MarketplaceContent() {
               return (
                 <motion.div key={sId} initial={{ x: '100%', opacity: 0 }} animate={{ x: `-${index * 12}px`, opacity: 1 }} exit={{ x: '100%', opacity: 0 }} className="h-full pointer-events-auto bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.8)]">
                    <ErrorBoundary key={sId}>
-                      <ChatDrawer personaId={sId} persona={p} onClose={() => handleCloseChat(sId)} onMinimize={() => setMinimizedIds([...minimizedIds, sId])} />
+                       <ChatDrawer 
+                         personaId={sId} 
+                         persona={p} 
+                         onClose={() => handleCloseChat(sId)} 
+                         onMinimize={() => setMinimizedIds([...minimizedIds, sId])} 
+                         onOpenTopUp={() => setIsTopUpOpen(true)}
+                       />
                    </ErrorBoundary>
                 </motion.div>
               );

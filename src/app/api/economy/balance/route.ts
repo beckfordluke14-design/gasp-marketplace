@@ -15,15 +15,15 @@ export async function GET(req: Request) {
   if (!userId) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
   try {
-    const { data: wallet, error } = await supabase
-      .from('wallets')
+    const { data: profile, error } = await supabase
+      .from('profiles')
       .select('credit_balance')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .maybeSingle();
 
     if (error) throw error;
     
-    return NextResponse.json({ success: true, balance: wallet?.credit_balance || 0 });
+    return NextResponse.json({ success: true, balance: profile?.credit_balance || 0 });
   } catch (error: any) {
     console.error('[Balance API] Pulse Failure:', error.message);
     return NextResponse.json({ success: false, balance: 0, error: error.message }, { status: 500 });

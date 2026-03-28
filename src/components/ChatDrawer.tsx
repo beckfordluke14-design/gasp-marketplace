@@ -23,9 +23,10 @@ interface ChatDrawerProps {
   persona: any;
   onClose: () => void;
   onMinimize: () => void;
+  onOpenTopUp: () => void;
 }
 
-export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: ChatDrawerProps) {
+export default function ChatDrawer({ personaId, persona, onClose, onMinimize, onOpenTopUp }: ChatDrawerProps) {
   const { profile } = useUser();
 
   // 🔑 SOVEREIGN SYNC: Initialize synchronously to prevent disabled button race condition
@@ -136,12 +137,21 @@ export default function ChatDrawer({ personaId, persona, onClose, onMinimize }: 
            setVaultItems(prev => prev.map(v => v.id === item.id || v.mediaId === item.id ? { ...v, is_unlocked: true } : v));
            // Pulse check: Sync profile credits in context if possible
            window.dispatchEvent(new CustomEvent('gasp_credits_updated'));
-        }
-     } catch (e) {
-        console.error('[Gasp Neural Unlock] Pulse Failure:', e);
-     } finally {
-        setIsProcessing(false);
-     }
+        } else {
+            // ⛽ RECHARGE TRIGGER: Push to store if desynced
+            if (result.error?.includes('balance') || result.error?.includes('funds')) {
+               alert('Neural Balance Depleted. Top up to unlock.');
+               onOpenTopUp();
+            } else {
+               alert(`Sync Error: ${result.error || 'Identity desync'}`);
+            }
+         }
+      } catch (e) {
+         console.error('[Gasp Neural Unlock] Pulse Failure:', e);
+         alert('Narrative Hub desynced. Try again.');
+      } finally {
+         setIsProcessing(false);
+      }
   };
 
    const hasVault = vaultItems.some(v => v.is_vault);
