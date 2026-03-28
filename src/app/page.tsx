@@ -167,23 +167,10 @@ function MarketplaceContent() {
        </div>
        
        <div className="flex-1 flex flex-col relative h-screen overflow-hidden">
-           <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} onOpenMenu={() => setShowProfileList(true)} />
+           <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} onOpenMenu={() => setShowProfileList(true)} profiles={randomizedProfiles} onSelectProfile={handleSelectProfile} />
            
-           <div className="flex-1 flex flex-col relative pt-12 md:pt-14 mt-2">
-              <AnimatePresence mode="wait">
-                 {showStories && (
-                    <motion.div 
-                      initial={{ y: -20, opacity: 0 }} 
-                      animate={{ y: 0, opacity: 1 }} 
-                      exit={{ y: -20, opacity: 0 }}
-                      className="absolute top-1 inset-x-0 z-[80] px-4 pointer-events-none"
-                    >
-                       <div className="max-w-2xl mx-auto py-1 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
-                          <StoriesRow profiles={randomizedProfiles} onSelectProfile={handleSelectProfile} />
-                       </div>
-                    </motion.div>
-                 )}
-              </AnimatePresence>
+           <div className="flex-1 flex flex-col relative pt-12 md:pt-14 mt-16 md:mt-24">
+              {/* 🧬 HEADER-LINKED STORIES AREA: Stories now live in the fixed Header node */}
              
               {/* STORY TOGGLE PORTAL */}
               <div className="absolute right-6 top-0 z-50 flex items-center gap-3">

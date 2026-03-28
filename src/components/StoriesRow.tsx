@@ -140,86 +140,84 @@ export default function StoriesRow({ profiles, onSelectProfile }: StoriesRowProp
 
   return (
     <>
-      <div className="w-full relative group/stories py-4 flex justify-center">
+      <div className="w-full relative group/stories py-1 md:py-4 flex justify-center pointer-events-none">
          <AnimatePresence mode="wait">
             {!isExpanded ? (
                <motion.button
                  key="bubble"
-                 initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                 initial={{ opacity: 0, y: -10, scale: 0.95 }}
                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                 exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   onClick={() => setIsExpanded(true)}
-                  className="px-3.5 py-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full flex items-center gap-2 shadow-[0_5px_20px_rgba(0,0,0,0.5)] hover:border-[#00f0ff]/40 transition-all pointer-events-auto group"
+                  className="px-4 py-1.5 bg-black/5 backdrop-blur-md border border-white/5 rounded-full flex items-center gap-2 shadow-sm hover:bg-black/20 hover:border-white/20 transition-all pointer-events-auto group"
                 >
                    <div className="flex -space-x-2.5">
                       {storyData.slice(0, 3).map((s, i) => (
-                         <div key={s.profileId} className="w-6 h-6 rounded-full p-[1.5px] bg-gradient-to-tr from-[#00f0ff] via-[#ff00ff] to-[#ffea00] relative" style={{ zIndex: 3 - i }}>
+                         <div key={s.profileId} className="w-5 h-5 md:w-6 md:h-6 rounded-full p-[1.5px] bg-gradient-to-tr from-[#00f0ff] via-[#ff00ff] to-[#ffea00] relative" style={{ zIndex: 3 - i }}>
                             <div className="w-full h-full rounded-full border border-black overflow-hidden bg-zinc-800">
                                <ProfileAvatar src={s.profileImage} alt="" />
                             </div>
                          </div>
                       ))}
                    </div>
-                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 group-hover:text-white transition-colors">
-                      {unviewedCount > 0 ? `${unviewedCount} NEW` : 'DISCOVER PROFILES'}
+                   <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-white transition-colors">
+                      {unviewedCount > 0 ? `${unviewedCount} NEW` : 'DISCOVER'}
                    </span>
-                  {unviewedCount > 0 && (
-                     <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse shadow-[0_0_10px_#00f0ff]" />
-                  )}
-               </motion.button>
+                </motion.button>
             ) : (
                <motion.div
                  key="expanded"
-                 initial={{ opacity: 0, height: 0 }}
-                 animate={{ opacity: 1, height: 'auto' }}
-                 exit={{ opacity: 0, height: 0 }}
-                 className="w-full relative flex flex-col gap-2 items-center"
+                 initial={{ opacity: 0, scale: 0.98, y: -10 }}
+                 animate={{ opacity: 1, scale: 1, y: 0 }}
+                 exit={{ opacity: 0, scale: 0.98, y: -10 }}
+                 className="w-full max-w-5xl mx-auto rounded-3xl bg-black/60 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-4 pointer-events-auto flex flex-col gap-4"
                >
-                  <div className="w-full flex items-center justify-between px-6 md:px-12 mb-2">
-                     <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20">Discovery Profiles</span>
-                     <button onClick={() => setIsExpanded(false)} className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20 hover:text-white transition-colors flex items-center gap-2">
-                        HIDE <X size={10} />
+                  <div className="w-full flex items-center justify-between px-2">
+                     <div className="flex items-center gap-4">
+                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#00f0ff]">Live Identity Feed</span>
+                        <div className="h-1 w-12 bg-gradient-to-r from-[#00f0ff] to-transparent rounded-full" />
+                     </div>
+                     <button onClick={() => setIsExpanded(false)} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all">
+                        <X size={14} />
                      </button>
                   </div>
                   
                   <div className="w-full relative">
-                     <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none opacity-0 group-hover/stories:opacity-100 transition-opacity md:w-32" />
-                     <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none opacity-0 group-hover/stories:opacity-100 transition-opacity md:w-32" />
-
-                     <div className="w-full flex items-center gap-4 px-4 pb-4 md:px-12 overflow-x-auto no-scrollbar scroll-smooth relative touch-pan-x">
+                     {/* Horizontal Scroll Area */}
+                     <div className="w-full flex items-center gap-5 px-2 pb-2 overflow-x-auto no-scrollbar scroll-smooth relative touch-pan-x cursor-grab active:cursor-grabbing select-none">
                         {storyData.map((bubble, idx) => (
                            <motion.button
-                           key={bubble.profileId}
-                           initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                           animate={{ opacity: 1, scale: 1, y: 0 }}
-                           transition={{ delay: idx * 0.05, type: 'spring', stiffness: 200 }}
-                           onClick={() => openStory(bubble)}
-                           whileHover={{ scale: 1.05 }}
-                           whileTap={{ scale: 0.95 }}
-                           className="flex flex-col items-center gap-2 shrink-0 group relative min-w-[70px] md:min-w-[90px]"
+                             key={bubble.profileId}
+                             initial={{ opacity: 0, scale: 0.5, x: 20 }}
+                             animate={{ opacity: 1, scale: 1, x: 0 }}
+                             transition={{ delay: idx * 0.03, type: 'spring', stiffness: 200 }}
+                             onClick={() => openStory(bubble)}
+                             whileHover={{ scale: 1.05 }}
+                             whileTap={{ scale: 0.95 }}
+                             className="flex flex-col items-center gap-3 shrink-0 group relative"
                            >
-                           {/* The ring */}
-                           <div className={`p-[2px] rounded-full transition-all duration-500 relative ${
-                               bubble.hasUnviewed
-                                  ? 'bg-gradient-to-br from-[#00f0ff] via-[#ff00ff] to-[#ffea00] shadow-[0_0_20px_rgba(255,0,255,0.4)]'
-                                  : 'bg-white/5 opacity-40 group-hover:opacity-100 group-hover:bg-white/10'
-                           }`}>
-                               {bubble.hasUnviewed && (
-                                  <div className="absolute inset-0 bg-[#00f0ff] animate-ping opacity-20 rounded-full pointer-events-none" />
-                               )}
-                               <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-black relative">
-                                  <ProfileAvatar
-                                     src={bubble.profileImage}
-                                     alt={bubble.profileName}
-                                  />
-                                  <div className="absolute top-1 right-1 w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00] animate-pulse" />
-                               </div>
-                            </div>
-                           <span className={`text-[10px] md:text-[11px] font-black uppercase tracking-widest truncate max-w-[80px] leading-none transition-all ${
-                               bubble.hasUnviewed ? 'text-white' : 'text-white/20'
-                           }`}>
-                               {bubble.profileName}
-                           </span>
+                              {/* Ring & Avatar */}
+                              <div className={`p-[2.5px] rounded-full transition-all duration-500 relative ${
+                                  bubble.hasUnviewed
+                                     ? 'bg-gradient-to-br from-[#00f0ff] via-[#ff00ff] to-[#ffea00] scale-105'
+                                     : 'bg-white/10 opacity-60 group-hover:opacity-100 group-hover:bg-white/20'
+                              }`}>
+                                  {bubble.hasUnviewed && (
+                                     <div className="absolute inset-0 bg-[#ff00ff] animate-ping opacity-10 rounded-full" />
+                                  )}
+                                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-black relative">
+                                     <ProfileAvatar
+                                        src={bubble.profileImage}
+                                        alt={bubble.profileName}
+                                     />
+                                     <div className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#00ff00] border-2 border-black shadow-[0_0_10px_#00ff00]" />
+                                  </div>
+                              </div>
+                              <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-center transition-all ${
+                                  bubble.hasUnviewed ? 'text-white' : 'text-white/40 group-hover:text-white'
+                              }`}>
+                                  {bubble.profileName.split(' ')[0]}
+                              </span>
                            </motion.button>
                         ))}
                      </div>

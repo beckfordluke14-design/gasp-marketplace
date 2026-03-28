@@ -8,8 +8,23 @@ import CoinBalance from './economy/CoinBalance';
 import ProfileSearch from './ProfileSearch';
 import { useUser } from './providers/UserProvider';
 import WalletConnect from './economy/WalletConnect';
+import StoriesRow from './StoriesRow';
 
-export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), setDeadIds = () => {}, onOpenMenu = () => {} }: { onOpenTopUp?: () => void, deadIds?: Set<string>, setDeadIds?: (ids: any) => void, onOpenMenu?: () => void }) {
+export default function Header({ 
+  onOpenTopUp = () => {}, 
+  deadIds = new Set(), 
+  setDeadIds = () => {}, 
+  onOpenMenu = () => {},
+  profiles = [],
+  onSelectProfile = () => {}
+}: { 
+  onOpenTopUp?: () => void, 
+  deadIds?: Set<string>, 
+  setDeadIds?: (ids: any) => void, 
+  onOpenMenu?: () => void,
+  profiles?: any[],
+  onSelectProfile?: (id: string) => void
+}) {
   const router = useRouter();
   const { user, profile } = useUser();
   const [mounted, setMounted] = useState(false);
@@ -158,10 +173,20 @@ export default function Header({ onOpenTopUp = () => {}, deadIds = new Set(), se
             </div>
         </header>
 
-         {/* Floating Search Bar - Fully Transparent / Floating Style */}
-         <div className="absolute top-[105%] left-1/2 -translate-x-1/2 w-full max-w-[280px] md:max-w-xl px-4 flex items-center justify-center pointer-events-auto z-[90]">
-             <div className="w-full bg-transparent border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.4)] p-0.5">
-                 <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
+         {/* Floating Search Bar & Stories Bridge */}
+         <div className="absolute top-[105%] left-0 right-0 flex flex-col items-center gap-4 pointer-events-auto z-[90]">
+             {/* Search Bar */}
+             <div className="w-full max-w-[280px] md:max-w-xl px-4 flex items-center justify-center">
+                 <div className="w-full bg-transparent border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.4)] p-0.5">
+                     <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
+                 </div>
+             </div>
+
+             {/* Stories Row Node: Relocated for sovereign placement */}
+             <div className="w-full">
+                 <div className="max-w-4xl mx-auto px-4 md:px-0">
+                    <StoriesRow profiles={profiles} onSelectProfile={onSelectProfile} />
+                 </div>
              </div>
          </div>
     </div>
