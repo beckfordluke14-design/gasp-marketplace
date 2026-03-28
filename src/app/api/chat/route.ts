@@ -196,9 +196,11 @@ export async function POST(req: Request) {
                 audio_script: streamA_Native,
                 audio_translation: streamA_Translation,
                 translation_locked: true,
-                price: 10,
-                type: voiceUrl ? 'voice' : 'text',
-                media_url: voiceUrl || null
+                // 💸 APEX-ELITE TAX NODE: 50cr (Text) / 2,000cr (Voice)
+                price: !!voiceUrl ? 2000 : 50,
+                type: !!voiceUrl ? 'audio' : 'text',
+                media_url: !!voiceUrl ? voiceUrl : null,
+                image_url: null
             });
 
             controller.close();

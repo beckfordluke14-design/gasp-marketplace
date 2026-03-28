@@ -25,7 +25,7 @@ interface ChatDrawerProps {
 }
 
 export default function ChatDrawer({ profileId, profile, onClose, onMinimize, onOpenTopUp }: ChatDrawerProps) {
-  const { profile: userProfile } = useUser();
+  const { profile: userProfile, login } = useUser();
 
   // 🔑 SOVEREIGN SYNC: Initialize synchronously to prevent disabled button race condition
   const [guestId] = useState<string>(() => {
@@ -310,6 +310,30 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
                       </div>
                    </div>
                 )}
+
+                {/* 🎁 THE "STAY CONNECTED" SYNC INCENTIVE (Apex v5.2) */}
+                {profile?.is_guest && (
+                   <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="mx-2 mt-8 p-6 bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-white/10 rounded-[2.5rem] flex flex-col items-center gap-4 text-center shadow-2xl relative overflow-hidden group"
+                   >
+                      <div className="absolute inset-0 bg-gradient-to-tr from-[#ff00ff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="w-16 h-16 bg-[#ff00ff]/10 rounded-full flex items-center justify-center mb-1">
+                         <Zap size={28} className="text-[#ff00ff] animate-pulse" />
+                      </div>
+                      <div className="space-y-1 z-10">
+                         <h3 className="text-xs font-black uppercase tracking-widest text-[#ff00ff]">Stay Connected</h3>
+                         <p className="text-[10px] text-white/40 leading-relaxed max-w-[200px]">Don't let your connection with {profile?.name || 'them'} fade. Authenticate to persist your history and claim your 2K bonus.</p>
+                      </div>
+                      <button 
+                         onClick={() => login()}
+                         className="mt-2 w-full py-4 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-[#00f0ff] hover:text-black transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 z-10"
+                      >
+                         Keep Talking (+2,000 Free)
+                      </button>
+                   </motion.div>
+                )}
               </div>
             ) : (
               <div className="pb-20">
@@ -369,7 +393,7 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
                               disabled={isProcessing}
                               className="w-full py-2.5 bg-white text-black text-[9px] font-black uppercase rounded-xl hover:bg-[#ffea00] transition-colors disabled:opacity-50 shadow-lg"
                             >
-                              {isProcessing ? 'SYNCING...' : `UNLOCK · ${item.price || 75}cr`}
+                              {isProcessing ? 'SYNCING...' : `UNLOCK · ${item.price_credits || item.price || 6000}cr`}
                             </button>
                           </div>
                         )}
@@ -398,10 +422,10 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
                          <button onClick={() => setShowGifts(false)} className="text-white/40 hover:text-white"><X size={14} /></button>
                       </div>
                       <div className="grid grid-cols-4 gap-4">
-                         {[ { e: '🌹', c: 10 }, { e: '🍫', c: 25 }, { e: '💎', c: 100 }, { e: '💍', c: 500 }].map(g => (
+                         {[ { e: '🌹', c: 1000 }, { e: '🍫', c: 2500 }, { e: '💎', c: 5000 }, { e: '💍', c: 10000 }].map(g => (
                             <button key={g.e} onClick={() => setShowGifts(false)} className="flex flex-col items-center gap-2 p-4 bg-black/40 border border-white/5 rounded-2xl hover:border-[#ff00ff]/50 transition-all">
                                <span className="text-2xl">{g.e}</span>
-                               <span className="text-[7px] font-black text-white/40">{g.c}cr</span>
+                               <span className="text-[7px] font-black text-white/40">{g.c >= 1000 ? (g.c/1000)+'K' : g.c}cr</span>
                             </button>
                          ))}
                       </div>

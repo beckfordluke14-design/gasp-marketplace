@@ -63,7 +63,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           .from('profiles')
           .insert({ 
             id: userId, 
-            credit_balance: 50, 
+            credit_balance: 2000, // 🎁 GENESIS BONUS
             role: 'user', 
             email: email, 
             last_active_at: new Date().toISOString() 

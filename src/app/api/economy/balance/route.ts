@@ -32,12 +32,13 @@ export async function GET(req: Request) {
        return NextResponse.json({ success: true, balance: profiles[0].credit_balance || 0 });
     }
     
-    // ⛽ Step 3: Explicit fail if node not found - force onboarding/registration
+    // 🛸 Step 3: Explicit fallback for Guest Nodes
+    // Guests start with 1,000 Credits ($1.00 Value)
     return NextResponse.json({ 
-      success: false, 
-      error: 'Neural Node not found. Re-sync required.',
-      code: 'AUTH_REQUIRED' 
-    }, { status: 404 });
+      success: true, 
+      balance: 1000,
+      is_guest: true
+    });
 
   } catch (error: any) {
     console.error('[Balance API] Pulse Failure:', error.message);

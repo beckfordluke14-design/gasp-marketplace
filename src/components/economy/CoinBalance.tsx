@@ -2,9 +2,8 @@
 
 import { Diamond, ChevronRight, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
-
-// 🛡️ SOVEREIGN SYNC: Using Economy Balance API (Service Role) instead of 'anon' client.
-// This ensures that user credit counts are reliably fetched and displayed in the HUD.
+import { useUser } from '../providers/UserProvider';
+import { formatCredits } from '@/lib/format';
 
 interface CoinBalanceProps {
   onOpenTopUp: () => void;
@@ -15,11 +14,15 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
   const [loading, setLoading] = useState(false);
 
   async function fetchBalance() {
+    // 🧬 SOVEREIGN IDENTITY SHAKE
+    const { user } = useUser();
     const guestId = localStorage.getItem('gasp_guest_id');
-    if (!guestId) return;
+    const idToUse = user?.id || guestId;
+
+    if (!idToUse) return;
 
     try {
-        const res = await fetch(`/api/economy/balance?userId=${guestId}`);
+        const res = await fetch(`/api/economy/balance?userId=${idToUse}`);
         const data = await res.json();
         if (data.success) {
             setBalance(data.balance);
@@ -38,14 +41,16 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
   }, []);
 
   const claimStarter = async () => {
+     const { user } = useUser();
      const guestId = localStorage.getItem('gasp_guest_id');
-     if (!guestId || loading) return;
+     const idToUse = user?.id || guestId;
+     if (!idToUse || loading) return;
      setLoading(true);
 
      try {
          const res = await fetch('/api/economy/balance', {
             method: 'POST',
-            body: JSON.stringify({ userId: guestId, action: 'starter_claim' })
+            body: JSON.stringify({ userId: idToUse, action: 'starter_claim' })
          });
          const data = await res.json();
          if (data.success) {
@@ -62,7 +67,7 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
       <div className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 text-white">
          <Diamond size={12} className="md:size-14 text-[#00f0ff] animate-pulse" />
          <span className="text-[12px] md:text-[14px] font-black italic tracking-tighter">
-            {balance !== null ? balance.toLocaleString() : '---'}
+            {balance !== null ? formatCredits(balance) : '---'}
          </span>
          
          {balance !== null && balance === 0 && (
