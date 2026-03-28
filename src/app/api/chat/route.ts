@@ -138,7 +138,10 @@ export async function POST(req: Request) {
     
     let syndicateOutput;
     try {
-        syndicateOutput = JSON.parse(cleanContent || '{}');
+        // Aggressively extract JSON object from Grok's output in case it includes conversational filler
+        const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+        const extractedJson = jsonMatch ? jsonMatch[0] : cleanContent;
+        syndicateOutput = JSON.parse(extractedJson || '{}');
     } catch (parseErr: any) {
         console.warn('[Brain API] Output Parse Failed:', parseErr.message, cleanContent);
         syndicateOutput = { 

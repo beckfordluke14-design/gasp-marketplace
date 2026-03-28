@@ -77,15 +77,22 @@ export default function VoiceNoteBubble({
 
   const togglePlay = () => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio) {
+      console.warn('⚠️ No audio tag found. audioUrl:', audioUrl);
+      return;
+    }
     if (isPlaying) {
       audio.pause();
       cancelAnimationFrame(animFrameRef.current);
       setIsPlaying(false);
     } else {
-      audio.play();
-      setIsPlaying(true);
-      animFrameRef.current = requestAnimationFrame(tick);
+      audio.play().then(() => {
+        setIsPlaying(true);
+        animFrameRef.current = requestAnimationFrame(tick);
+      }).catch(err => {
+        console.error('❌ Audio play failed:', err);
+        setIsPlaying(false);
+      });
     }
   };
 
@@ -121,12 +128,20 @@ export default function VoiceNoteBubble({
             {/* PLAY BUTTON PORTAL */}
             <button
               onClick={togglePlay}
-              className="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center shrink-0 transition-all active:scale-90"
+              disabled={!audioUrl}
+              className={`w-12 h-12 rounded-full border flex items-center justify-center shrink-0 transition-all active:scale-90 ${
+                !audioUrl 
+                ? 'bg-white/5 border-white/5 opacity-50 cursor-not-allowed' 
+                : 'bg-white/5 hover:bg-white/10 border-white/10'
+              }`}
             >
-              {isPlaying
-                ? <Pause size={18} className="text-white fill-current" />
-                : <Play size={18} className="text-white fill-current ml-1" />
-              }
+              {!audioUrl ? (
+                <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+              ) : isPlaying ? (
+                <Pause size={18} className="text-white fill-current" />
+              ) : (
+                <Play size={18} className="text-white fill-current ml-1" />
+              )}
             </button>
 
             {/* WAVEFORM ENGINE */}

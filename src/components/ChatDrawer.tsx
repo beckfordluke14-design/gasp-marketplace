@@ -81,7 +81,7 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
       if (!res.ok) {
         const errText = await res.text();
         console.error('[Gasp Chat] API error:', res.status, errText);
-        setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: `⚠️ ${errText || 'Service temporarily unavailable. Try again.'}` }]);
+        setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: `hold on okay , give me a sec` }]);
         return;
       }
 
@@ -138,8 +138,7 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
         }
       }
     } catch (err: any) {
-      console.error('[Gasp Chat] Network error:', err);
-      setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: '⚠️ Network issue. Check your connection.' }]);
+      setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: 'hold on okay , give me a sec' }]);
     } finally {
       setIsLoading(false);
       setIsTyping(false);
@@ -285,6 +284,7 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
                   const isAssistant = msg.role === 'assistant';
                   return (
                     <div key={msg.id || idx} className={`flex flex-col ${isAssistant ? 'items-start' : 'items-end'} gap-2`}>
+                       {/* EXCLUSIVE RENDERING LOGIC: Voice OR Text, not both */}
                        {msg.type === 'voice' || msg.audio_script ? (
                           <VoiceNoteBubble 
                              audioUrl={msg.media_url || liveVoiceUrl || ''} 
