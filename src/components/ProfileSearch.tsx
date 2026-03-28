@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, X, Zap, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ProfileAvatar from './persona/ProfileAvatar';
+import ProfileAvatar from './profile/ProfileAvatar';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
 
 export default function ProfileSearch({ deadIds, setDeadIds }: { deadIds: Set<string>, setDeadIds: (ids: any) => void }) {

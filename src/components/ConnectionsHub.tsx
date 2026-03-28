@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import ProfileAvatar from './persona/ProfileAvatar';
+import ProfileAvatar from './profile/ProfileAvatar';
 import { X, Search, Diamond, Bell, MessageSquare } from 'lucide-react';
 
 interface ConnectionsHubProps {

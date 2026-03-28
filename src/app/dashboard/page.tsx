@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { initialAgencies, initialPersonas, type Agency, type Persona } from '@/lib/profiles';
+import { initialAgencies, initialProfiles, type Agency, type Profile } from '@/lib/profiles';
 import Header from '@/components/Header';
 import { 
   Zap, 
@@ -21,11 +21,11 @@ const MASTER_UUID = "master-uuid-1"; // Hardcoded Bypass for Mi Amor Agency
 
 export default function GaspCreatorStudio() {
     const [agency] = useState<Agency>(initialAgencies[0]);
-    const [personas, setPersonas] = useState<Persona[]>(initialPersonas.filter(p => p.agency_id === agency.id));
+    const [profiles, setProfiles] = useState<Profile[]>(initialProfiles.filter(p => p.agency_id === agency.id));
     
     const isMaster = MASTER_UUID === agency.owner_id;
-    const personaLimit = 3;
-    const hasReachedLimit = !isMaster && personas.length >= personaLimit;
+    const profileLimit = 3;
+    const hasReachedLimit = !isMaster && profiles.length >= profileLimit;
 
     return (
         <main className="min-h-screen bg-black text-white selection:bg-gasp-neon selection:text-black">
@@ -38,7 +38,7 @@ export default function GaspCreatorStudio() {
                     <div className="flex flex-col gap-4 relative z-10">
                         <div className="flex items-center gap-2">
                              <div className="px-3 py-1 bg-gasp-neon/10 border border-gasp-neon/20 rounded-md text-gasp-neon text-[8px] font-black uppercase tracking-widest">
-                                Agency active
+                                 Agency active
                              </div>
                              {isMaster && (
                                 <div className="px-3 py-1 bg-neon-pink/10 border border-neon-pink/20 rounded-md text-neon-pink text-[8px] font-black uppercase tracking-widest flex items-center gap-1">
@@ -56,11 +56,11 @@ export default function GaspCreatorStudio() {
                         <div className="flex flex-col items-end">
                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 mb-1">Network Capacity</span>
                             <div className="flex items-center gap-4">
-                                <span className="text-2xl font-bold font-mono tracking-tighter">{personas.length} / {isMaster ? '∞' : personaLimit}</span>
+                                <span className="text-2xl font-bold font-mono tracking-tighter">{profiles.length} / {isMaster ? '∞' : profileLimit}</span>
                                 <div className="w-40 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
                                     <motion.div 
                                         initial={{ width: 0 }}
-                                        animate={{ width: `${(personas.length / (isMaster ? 10 : personaLimit)) * 100}%` }}
+                                        animate={{ width: `${(profiles.length / (isMaster ? 10 : profileLimit)) * 100}%` }}
                                         className="h-full bg-gasp-neon shadow-[0_0_10px_rgba(0,240,255,0.6)]" 
                                     />
                                 </div>
@@ -72,7 +72,7 @@ export default function GaspCreatorStudio() {
                 {/* 2. CREATOR GRID */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                     
-                    {/* A. NEW PERSONA SLOT (Gated) */}
+                    {/* A. NEW PROFILE SLOT (Gated) */}
                     {!hasReachedLimit ? (
                         <motion.button 
                             whileHover={{ scale: 1.02 }}
@@ -83,7 +83,7 @@ export default function GaspCreatorStudio() {
                                 <Plus size={32} className="text-white group-hover:text-gasp-neon transition-all" />
                             </div>
                             <div className="text-center group-hover:scale-105 transition-all">
-                                <h3 className="text-xl font-outfit font-black italic uppercase italic tracking-tight">Generate Persona</h3>
+                                <h3 className="text-xl font-outfit font-black italic uppercase italic tracking-tight">Generate Profile</h3>
                                 <p className="text-[9px] uppercase font-black tracking-widest text-white/20 mt-2">New Identity Uplink</p>
                             </div>
                         </motion.button>
@@ -102,12 +102,12 @@ export default function GaspCreatorStudio() {
                         </div>
                     )}
 
-                    {/* B. LISTED PERSONAS */}
-                    {personas.map((persona) => (
-                        <div key={persona.id} className="h-[500px] bg-white/5 border border-white/10 rounded-[3rem] overflow-hidden group shadow-3xl relative">
+                    {/* B. LISTED PROFILES */}
+                    {profiles.map((profileItem) => (
+                        <div key={profileItem.id} className="h-[500px] bg-white/5 border border-white/10 rounded-[3rem] overflow-hidden group shadow-3xl relative">
                             {/* Portrait */}
                             <div className="relative h-2/3 grayscale-[0.5] group-hover:grayscale-0 transition-all duration-700">
-                                <Image src={persona.image} alt="" fill className="object-cover" unoptimized />
+                                <Image src={profileItem.image} alt="" fill className="object-cover" unoptimized />
                                 <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black to-transparent" />
                                 <div className="absolute top-6 left-6 flex items-center gap-2">
                                      <div className="px-3 py-1.5 bg-black/80 backdrop-blur-xl border border-white/10 rounded-xl flex items-center gap-2">
@@ -121,10 +121,10 @@ export default function GaspCreatorStudio() {
                             <div className="p-8 flex flex-col justify-between h-1/3">
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
-                                        <h3 className="text-2xl font-outfit font-black italic uppercase tracking-tighter">{persona.name} {persona.flag}</h3>
-                                        <span className="text-[10px] font-mono font-bold text-white/40 tracking-tight">{persona.city}</span>
+                                        <h3 className="text-2xl font-outfit font-black italic uppercase tracking-tighter">{profileItem.name} {profileItem.flag}</h3>
+                                        <span className="text-[10px] font-mono font-bold text-white/40 tracking-tight">{profileItem.city}</span>
                                     </div>
-                                    <p className="text-[11px] text-white/40 italic lowercase truncate leading-none">"{persona.vibe}"</p>
+                                    <p className="text-[11px] text-white/40 italic lowercase truncate leading-none">"{profileItem.vibe}"</p>
                                 </div>
 
                                 <div className="flex items-center gap-4 pt-4 mt-auto">
@@ -146,6 +146,3 @@ export default function GaspCreatorStudio() {
         </main>
     );
 }
-
-
-

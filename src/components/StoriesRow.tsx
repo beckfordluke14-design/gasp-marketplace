@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { initialPersonas, proxyImg, getProfileName } from '@/lib/profiles';
+import { initialProfiles, proxyImg, getProfileName } from '@/lib/profiles';
 import { X, Lock, Volume2, ChevronLeft, ChevronRight, Zap } from 'lucide-react';
 import Image from 'next/image';
-import ProfileAvatar from './persona/ProfileAvatar';
+import ProfileAvatar from './profile/ProfileAvatar';
 
 // 🛡️ SOVEREIGN SYNC: Using Stories API (Service Role) instead of 'anon' client.
 

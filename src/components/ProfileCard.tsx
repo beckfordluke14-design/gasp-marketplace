@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import ProfileAvatar from './persona/ProfileAvatar';
+import ProfileAvatar from './profile/ProfileAvatar';
 import { useRouter } from 'next/navigation';
 import { MapPin, MessageCircle, Play } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';

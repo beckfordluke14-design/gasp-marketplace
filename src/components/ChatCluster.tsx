@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import ProfileAvatar from './persona/ProfileAvatar';
+import ProfileAvatar from './profile/ProfileAvatar';
 import { Eye, EyeOff, MessageSquare } from 'lucide-react';
 
 interface ChatClusterProps {

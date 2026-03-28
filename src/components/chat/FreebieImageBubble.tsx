@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Gift, X, ZoomIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ProfileAvatar from '../persona/ProfileAvatar';
+import ProfileAvatar from '../profile/ProfileAvatar';
 
 interface FreebieImageBubbleProps {
   imageUrl:     string;

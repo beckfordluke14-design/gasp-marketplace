@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { initialPersonas, type Persona } from '@/lib/profiles';
+import { initialProfiles, type Profile } from '@/lib/profiles';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRef, useEffect, useState, use } from 'react';
 import Image from 'next/image';
@@ -37,7 +37,7 @@ function getSafeSupabase() {
   return supabase;
 }
 import VoiceMessage from '@/components/chat/VoiceMessage';
-import PersonaAvatar from '@/components/persona/PersonaAvatar';
+import ProfileAvatar from '@/components/profile/ProfileAvatar';
 import { useUser } from '@/components/providers/UserProvider';
 
 function cn(...inputs: ClassValue[]) {
@@ -45,7 +45,7 @@ function cn(...inputs: ClassValue[]) {
 }
 
 // SHARED REALITY HELPER (Match Home Feed)
-const getCityStatus = (profile: Persona) => {
+const getCityStatus = (profile: Profile) => {
     const now = new Date();
     const timeFormatter = new Intl.DateTimeFormat('en-US', {
         timeZone: profile.timezone,
@@ -72,8 +72,8 @@ export default function VerdadChatPage(props: any) {
   if (!unwrappedParams) return <div className="h-screen bg-black" />;
   const id = unwrappedParams.id;
   
-  const { user: privyUser, profile, ready: authReady } = useUser();
-  const userId = profile?.id || 'guest';
+  const { user: privyUser, profile: userProfile, ready: authReady } = useUser();
+  const userId = userProfile?.id || 'guest';
 
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -85,17 +85,17 @@ export default function VerdadChatPage(props: any) {
   const [userBalance, setUserBalance] = useState(150); // MOCK BALANCE
   const [isTipModalOpen, setIsTipModalOpen] = useState(false);
   const [unlockedMedia, setUnlockedMedia] = useState<Record<string, string>>({}); // mediaId -> full_url
-  const [dbPersona, setDbPersona] = useState<any>(null);
+  const [dbProfile, setDbProfile] = useState<any>(null);
 
   // MULTI-TENANT LOOKUP: Check hardcoded fallback first, then DB
-  const staticPersona = id ? initialPersonas.find(p => p.id.toLowerCase() === id.toLowerCase()) : null;
-  const persona: any = staticPersona || dbPersona;
-  const cityStatus = persona ? getCityStatus(persona) : { time: '00:00', weather: '...' };
+  const staticProfile = id ? initialProfiles.find(p => p.id.toLowerCase() === id.toLowerCase()) : null;
+  const profile: any = staticProfile || dbProfile;
+  const cityStatus = profile ? getCityStatus(profile) : { time: '00:00', weather: '...' };
 
-  // 🧬 DB PERSONA FETCH: Load from Supabase if not in static roster
+  // 🧬 DB PROFILE FETCH: Load from Supabase if not in static roster
   useEffect(() => {
-    if (staticPersona || !id) return; // Already found statically
-    async function fetchDbPersona() {
+    if (staticProfile || !id) return; // Already found statically
+    async function fetchDbProfile() {
       // 🚑 EMERGENCY RECOVERY: Restoring 100% Baseline Chat Pulse
       const { data: p } = await supabase
         .from('personas')
@@ -105,7 +105,7 @@ export default function VerdadChatPage(props: any) {
         .single();
       
       if (p) {
-        setDbPersona({
+        setDbProfile({
           ...p,
           image: p.seed_image_url || p.image || '/icons/icon-512x512.png',
           timezone: p.timezone || 'America/New_York',
@@ -129,12 +129,12 @@ export default function VerdadChatPage(props: any) {
             price: post.price || 25,
             caption: post.caption || ''
           }));
-          setDbPersona((prev: any) => prev ? { ...prev, vault: vaultItems } : prev);
+          setDbProfile((prev: any) => prev ? { ...prev, vault: vaultItems } : prev);
         }
       }
     }
-    fetchDbPersona();
-  }, [id, staticPersona]);
+    fetchDbProfile();
+  }, [id, staticProfile]);
 
   const { messages, input, setMessages, handleInputChange, handleSubmit, isLoading, data }: any = useChat({
     api: '/api/chat',
@@ -160,7 +160,7 @@ export default function VerdadChatPage(props: any) {
   useEffect(() => {
     async function hydrateHistory() {
         try {
-            console.log(`🧠 [Brain] Resuming connection for ${persona?.name}...`);
+            console.log(`🧠 [Brain] Resuming connection for ${profile?.name}...`);
             const supabaseClient = getSafeSupabase();
             if (!supabaseClient) {
                 console.warn('[Brain] Supabase client unavailable — skipping history hydration.');
@@ -188,7 +188,7 @@ export default function VerdadChatPage(props: any) {
             console.warn('[Brain] History hydration skipped:', err);
         }
     }
-    // Hydrate once we have either a static or DB persona resolved
+    // Hydrate once we have either a static or DB profile resolved
     if (id) hydrateHistory();
   }, [id, userId, setMessages]);
 
@@ -206,12 +206,12 @@ export default function VerdadChatPage(props: any) {
             console.warn('[Brain] Read receipt sync skipped:', err);
         }
     }
-    if (id && persona && messages.length > 0) markAsRead();
-  }, [id, persona, messages]);
+    if (id && profile && messages.length > 0) markAsRead();
+  }, [id, profile, messages]);
 
   // WHALE-HUNTER REVENUE ENGINE (Atomic Database Sync)
   const handleVaultUnlock = async (itemId: string) => {
-    const item = persona?.vault?.find((i: any) => i.id === itemId);
+    const item = profile?.vault?.find((i: any) => i.id === itemId);
     if (!item) return false;
     
     try {
@@ -276,7 +276,7 @@ export default function VerdadChatPage(props: any) {
             const gratitudeMessage = {
                 id: `gt-${Date.now()}`,
                 role: 'assistant',
-                content: `parce, thank you for the gift... it's late in ${persona?.city} but you've peaked my interest. check the gallery, i've unlocked a preview for you.`,
+                content: `parce, thank you for the gift... it's late in ${profile?.city} but you've peaked my interest. check the gallery, i've unlocked a preview for you.`,
                 is_priority: true
             };
             
@@ -303,7 +303,7 @@ export default function VerdadChatPage(props: any) {
     }
   }, [messages, isTyping, isLoading, data]);
 
-  if (!persona && !id) return <div className="p-20 text-center text-white uppercase font-black opacity-10">Disconnected</div>;
+  if (!profile && !id) return <div className="p-20 text-center text-white uppercase font-black opacity-10">Disconnected</div>;
 
   return (
     <div className="flex h-screen bg-black text-white overflow-hidden font-sans relative z-10 pointer-events-auto selection:bg-neon-purple selection:text-white">
@@ -319,7 +319,7 @@ export default function VerdadChatPage(props: any) {
         </button>
 
         <div className="relative w-full aspect-[3/4] rounded-[2.5rem] overflow-hidden mb-10 border border-white/10 shadow-3xl grayscale-[0.2]">
-           <PersonaAvatar src={persona?.image || '/v1.png'} alt={persona?.name} fill className="object-cover" />
+           <ProfileAvatar src={profile?.image || '/v1.png'} alt={profile?.name} fill className="object-cover" />
            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black to-transparent" />
            <div className="absolute top-6 left-6 px-3 py-1.5 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-gasp-neon rounded-full shadow-[0_0_10px_rgba(0,240,255,1)]" />
@@ -330,12 +330,12 @@ export default function VerdadChatPage(props: any) {
         <div className="flex flex-col gap-8">
            <div className="flex flex-col">
               <h1 className="text-4xl font-outfit font-black uppercase italic tracking-tighter leading-none mb-1">
-                {persona?.name} <span className="text-gasp-neon font-not-italic">{persona?.flag}</span>
+                {profile?.name} <span className="text-gasp-neon font-not-italic">{profile?.flag}</span>
               </h1>
-              <p className="text-[10px] uppercase font-black tracking-widest text-white/30 italic">by {persona?.agency_name}</p>
+              <p className="text-[10px] uppercase font-black tracking-widest text-white/30 italic">by {profile?.agency_name}</p>
            </div>
            
-           <p className="text-white/40 text-sm leading-relaxed italic pr-6 lowercase">"{persona?.vibe}"</p>
+           <p className="text-white/40 text-sm leading-relaxed italic pr-6 lowercase">"{profile?.vibe}"</p>
 
            {/* User Wallet Info */}
            <div className="p-8 rounded-[2rem] bg-neon-purple/5 border border-neon-purple/10 shadow-xl overflow-hidden relative group cursor-pointer" onClick={() => setIsTipModalOpen(true)}>
@@ -365,11 +365,11 @@ export default function VerdadChatPage(props: any) {
                 <button onClick={() => router.push('/')} className="text-white/40 md:hidden pointer-events-auto"><ArrowLeft size={20} /></button>
                 <div className="flex flex-col">
                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-black uppercase italic tracking-tight">{persona?.name} chat active</span>
+                      <span className="text-xs font-black uppercase italic tracking-tight">{profile?.name} chat active</span>
                    </div>
                    <div className="flex items-center gap-2">
                       <Clock size={8} className="text-gasp-neon animate-pulse" />
-                      <span className="text-[8px] font-black text-white/30 uppercase italic">{persona?.city}: {cityStatus.time}</span>
+                      <span className="text-[8px] font-black text-white/30 uppercase italic">{profile?.city}: {cityStatus.time}</span>
                    </div>
                 </div>
             </div>
@@ -428,7 +428,7 @@ export default function VerdadChatPage(props: any) {
                                         <div key={msg.id} className="mr-auto w-full flex flex-col gap-2 relative z-0">
                                             <VoiceMessage 
                                                 audioUrl={msg.media_url} 
-                                                personaName={persona?.name || 'Persona'} 
+                                                profileName={profile?.name || 'Profile'} 
                                                 isLocked={false}
                                             />
                                             {displayContent && (
@@ -479,7 +479,7 @@ export default function VerdadChatPage(props: any) {
                                             <VoiceMessage 
                                                 audioUrl={d.audioUrl} 
                                                 isLocked={d.isLocked} 
-                                                personaName={persona?.name || 'Persona'}
+                                                profileName={profile?.name || 'Profile'}
                                                 onUnlock={() => handleRealUnlock(d.audioUrl)}
                                             />
                                         </div>
@@ -491,7 +491,7 @@ export default function VerdadChatPage(props: any) {
                             {(isLoading || isTyping) && (
                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mr-auto p-1 relative z-0">
                                     {data?.some((d: any) => d.type === 'voice_note' && !d.audioUrl) ? (
-                                        <VoiceMessage personaName={persona?.name || 'Persona'} />
+                                        <VoiceMessage profileName={profile?.name || 'Profile'} />
                                     ) : (
                                         <div className="px-8 py-5 rounded-3xl bg-white/[0.03] border border-white/5">
                                             <div className="flex gap-2">
@@ -513,7 +513,7 @@ export default function VerdadChatPage(props: any) {
                            <form onSubmit={handleVerdadSubmit} className="container max-w-4xl mx-auto flex items-center gap-6 pointer-events-auto">
                                 <input 
                                     type="text"
-                                    placeholder={`message ${persona?.name?.toLowerCase()}...`}
+                                    placeholder={`message ${profile?.name?.toLowerCase()}...`}
                                     value={input}
                                     onChange={handleInputChange}
                                     autoFocus
@@ -549,13 +549,13 @@ export default function VerdadChatPage(props: any) {
                         <div className="flex flex-col gap-2">
                             <h3 className="text-3xl font-outfit font-black italic uppercase italic tracking-tighter">Private <span className="text-gasp-neon">Media</span> Vault</h3>
                             <p className="text-[9px] uppercase font-black tracking-widest text-white/20 italic italic flex items-center gap-2">
-                                <History size={12} /> Exclusively hosted by {persona?.agency_name}
+                                <History size={12} /> Exclusively hosted by {profile?.agency_name}
                             </p>
                         </div>
                     </div>
                     
                     <VaultGallery 
-                        items={persona?.vault || []} 
+                        items={profile?.vault || []} 
                         userBalance={userBalance}
                         onUnlock={handleVaultUnlock} 
                     />
@@ -569,7 +569,7 @@ export default function VerdadChatPage(props: any) {
             onClose={() => setIsTipModalOpen(false)}
             onTip={handlePriorityTip}
             userBalance={userBalance}
-            personaName={persona?.name || ''}
+            profileName={profile?.name || ''}
         />
 
         {/* PAYWALL OVERLAY */}

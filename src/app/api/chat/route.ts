@@ -1,7 +1,7 @@
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { getMoodState } from '@/lib/moodEngine';
 import { generatePersonaVoice } from '@/lib/voiceFactory';
-import { initialPersonas } from '@/lib/profiles';
+import { initialProfiles } from '@/lib/profiles';
 import { MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT, GLOBAL_SYNDICATE_ZONES_V3 } from '@/lib/syndicate';
 import { getPersonaDailyState, shouldSendVoiceNote, getMoodDirective, getTypingStyleDirective } from '@/lib/masterRandomizer';
 import { db } from '@/lib/db';
@@ -16,15 +16,15 @@ const openrouter = createOpenRouter({
 
 export async function POST(req: Request) {
   try {
-    const { messages, userId, personaId, data, forceVoice } = await req.json();
+    const { messages, userId, personaId, profileId, data, forceVoice } = await req.json();
     
     // Support both direct body and AI SDK data payload
     const finalUserId = userId || data?.userId;
-    const finalPersonaId = personaId || data?.personaId;
+    const finalProfileId = profileId || personaId || data?.profileId || data?.personaId;
     const shouldForceVoice = forceVoice === true;
 
-    if (!finalUserId || !finalPersonaId) {
-      return new Response('User ID and Persona ID required', { status: 400 });
+    if (!finalUserId || !finalProfileId) {
+      return new Response('User ID and Profile ID required', { status: 400 });
     }
 
     // 1. Pre-Check: Economy & Auth (GASP Standard: Profiles node)
@@ -46,27 +46,27 @@ export async function POST(req: Request) {
        return new Response('Insufficient Balance', { status: 402 });
     }
 
-    const { mood, dna } = await getMoodState(finalUserId, finalPersonaId);
+    const { mood, dna } = await getMoodState(finalUserId, finalProfileId);
     
-    // MASTER RANDOMIZER: Daily deterministic state per persona
-    const dailyState = getPersonaDailyState(finalPersonaId);
+    // MASTER RANDOMIZER: Daily deterministic state per profile
+    const dailyState = getPersonaDailyState(finalProfileId);
     const randMoodDirective = getMoodDirective(dailyState.mood);
     const randTypingDirective = getTypingStyleDirective(dailyState.typingStyle);
 
-    // 2. Fetch Persona Identity (DB Hybrid: Initial + Factory)
-    const dbPersona = await SOV.getPersona(finalPersonaId);
-    const persona = dbPersona || initialPersonas.find(p => p.id.toLowerCase() === finalPersonaId.toLowerCase());
+    // 2. Fetch Profile Identity (DB Hybrid: Initial + Factory)
+    const dbProfile = await SOV.getPersona(finalProfileId);
+    const profileItem = dbProfile || initialProfiles.find(p => p.id.toLowerCase() === finalProfileId.toLowerCase());
     
-    if (!persona) {
-        return new Response('Persona Node Offline', { status: 404 });
+    if (!profileItem) {
+        return new Response('Profile Node Offline', { status: 404 });
     }
 
-    const emozionState = `${randMoodDirective} ${randTypingDirective} Never mention AI. Keep responses short and street-coded. ${persona.system_prompt || ''}`;
+    const emozionState = `${randMoodDirective} ${randTypingDirective} Never mention AI. Keep responses short and street-coded. ${profileItem.system_prompt || ''}`;
 
     // 🛡️ SOVEREIGN MEMORY: Pulling Profile Directly
-    const profile = await SOV.getProfile(finalUserId);
-    let nickname = profile?.nickname || null;
-    let isKnown = profile?.is_known || false;
+    const userProfile = await SOV.getProfile(finalUserId);
+    let nickname = userProfile?.nickname || null;
+    let isKnown = userProfile?.is_known || false;
 
     // 🧠 IN-SESSION NAME SCAN
     if (!isKnown) {
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
     const memoryContext = `[MEMORY]: Known: ${isKnown}. ${isKnown && nickname ? `User's name is ${nickname}. ALWAYS call them ${nickname} in your response. Do NOT ask their name again.` : "You don't know their name yet. Be flirty. If conversation allows, naturally ask what to call them. Do NOT repeat the question if you already asked."}`;
 
     // 🛡️ SOVEREIGN STATS & REVENUE: Pulling Stats Directly
-    const stats = await SOV.getUserPersonaStats(finalUserId, finalPersonaId);
+    const stats = await SOV.getUserPersonaStats(finalUserId, finalProfileId);
 
     let awarenessContext = "";
     if (stats?.is_jealous && stats.target_rival_id) {
@@ -101,10 +101,10 @@ export async function POST(req: Request) {
     const finalSystemPrompt = `${dna}\n\n${emozionState}\n\n${memoryContext}\n\n${awarenessContext}`;
 
     // 🛡️ SOVEREIGN UPDATE: Resetting Ghosting directly
-    await SOV.updateLastMessage(finalUserId, finalPersonaId);
+    await SOV.updateLastMessage(finalUserId, finalProfileId);
 
     // 3. THE BRAIN: SYNDICATE MOMENT DIRECTOR (Grok Beta)
-    const zoneKey = persona?.syndicate_zone || 'us_houston_black';
+    const zoneKey = profileItem?.syndicate_zone || 'us_houston_black';
     const zoneDictionary = GLOBAL_SYNDICATE_ZONES_V3[zoneKey];
     
     const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\nZONE DICTIONARY (${zoneKey}):\n${JSON.stringify(zoneDictionary)}\n\nMEMORY: ${memoryContext}`;
@@ -152,13 +152,13 @@ export async function POST(req: Request) {
             const userMsgCount = messages.filter((m: any) => m.role === 'user').length;
             
             const forceVoiceForDiscovery = isGuest && userMsgCount <= 2;
-            const moodAllowsVoice = shouldSendVoiceNote(finalPersonaId, streamA_Native.length);
+            const moodAllowsVoice = shouldSendVoiceNote(finalProfileId, streamA_Native.length);
             const sendVoice = shouldForceVoice || forceVoiceForDiscovery || moodAllowsVoice;
 
             if (sendVoice) {
               try {
-                controller.enqueue(encoder.encode(`2:${JSON.stringify({ type: 'voice_note', audioUrl: null, personaName: finalPersonaId })}\n`));
-                voiceUrl = await generatePersonaVoice(finalPersonaId, streamA_Native);
+                controller.enqueue(encoder.encode(`2:${JSON.stringify({ type: 'voice_note', audioUrl: null, profileName: profileItem?.name })}\n`));
+                voiceUrl = await generatePersonaVoice(finalProfileId, streamA_Native);
                 
                 controller.enqueue(encoder.encode(`2:${JSON.stringify({ 
                     type: 'voice_note', 
@@ -175,8 +175,8 @@ export async function POST(req: Request) {
             // 🛡️ SOVEREIGN PERSISTENCE: Saving History Directly
             const lastUserMessage = messages.filter((m: any) => m.role === 'user').pop();
             
-            await SOV.saveMessage(finalUserId, finalPersonaId, 'user', lastUserMessage?.content || '');
-            await SOV.saveMessage(finalUserId, finalPersonaId, 'assistant', streamB_Text, {
+            await SOV.saveMessage(finalUserId, finalProfileId, 'user', lastUserMessage?.content || '');
+            await SOV.saveMessage(finalUserId, finalProfileId, 'assistant', streamB_Text, {
                 audio_script: streamA_Native,
                 audio_translation: streamA_Translation,
                 translation_locked: true,
@@ -196,7 +196,3 @@ export async function POST(req: Request) {
     return new Response(error.message || 'Internal Server Error', { status: 500 });
   }
 }
-
-
-
-

@@ -19,7 +19,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useUser } from '@/components/providers/UserProvider';
-import ProfileAvatar from '@/components/persona/ProfileAvatar';
+import ProfileAvatar from '@/components/profile/ProfileAvatar';
 import Link from 'next/link';
 
 // 🛡️ SYSTEM SYNC: Using DB Service for reliable updates.

@@ -6,11 +6,11 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { COST_VOICE_TRANSLATION, COST_VOICE_NOTE } from '@/lib/economy/constants';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
-import BondProgress from './persona/BondProgress';
+import BondProgress from './profile/BondProgress';
 import VoiceNoteBubble from './chat/VoiceNoteBubble';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from './providers/UserProvider';
-import ProfileAvatar from './persona/ProfileAvatar';
+import ProfileAvatar from './profile/ProfileAvatar';
 import FreebieImageBubble from './chat/FreebieImageBubble';
 import MediaLightbox from './chat/MediaLightbox';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
@@ -270,8 +270,8 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
                        {msg.type === 'voice' || msg.audio_script ? (
                           <VoiceNoteBubble 
                              audioUrl={msg.media_url || liveVoiceUrl || ''} 
-                             personaImage={profile?.image}
-                             personaName={profile?.name}
+                             profileImage={profile?.image}
+                             profileName={profile?.name}
                              translation={msg.audio_translation}
                              isUnlocked={!msg.translation_locked}
                              onUnlockTranslation={async () => true}
@@ -279,8 +279,8 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
                        ) : msg.type === 'image' || msg.image_url ? (
                           <FreebieImageBubble 
                              imageUrl={proxyImg(msg.image_url || msg.media_url)} 
-                             personaImage={profile?.image} 
-                             personaName={profile?.name} 
+                             profileImage={profile?.image} 
+                             profileName={profile?.name} 
                              caption={msg.content} 
                           />
                        ) : (

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { initialPersonas, proxyImg, getProfileName } from '@/lib/profiles';
+import { initialProfiles, proxyImg, getProfileName } from '@/lib/profiles';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
@@ -16,7 +16,7 @@ import {
   Diamond
 } from 'lucide-react';
 import { useUser } from '@/components/providers/UserProvider';
-import ProfileAvatar from '@/components/persona/ProfileAvatar';
+import ProfileAvatar from '@/components/profile/ProfileAvatar';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 

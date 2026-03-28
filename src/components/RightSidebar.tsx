@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
 import Image from 'next/image';
-import ProfileAvatar from './persona/ProfileAvatar';
+import ProfileAvatar from './profile/ProfileAvatar';
 import { Zap, Heart } from 'lucide-react';
 
 export default function RightSidebar({ onSelectProfile, profiles, deadIds, setDeadIds }: { onSelectProfile: (id: string) => void, profiles: any[], deadIds: Set<string>, setDeadIds: (ids: any) => void }) {

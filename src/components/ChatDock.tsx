@@ -1,9 +1,9 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { initialPersonas, proxyImg } from '@/lib/profiles';
+import { initialProfiles, proxyImg } from '@/lib/profiles';
 import Image from 'next/image';
-import ProfileAvatar from './persona/ProfileAvatar';
+import ProfileAvatar from './profile/ProfileAvatar';
 
 interface ChatDockProps {
   minimizedIds: string[];

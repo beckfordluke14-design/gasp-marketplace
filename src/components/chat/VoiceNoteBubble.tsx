@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Languages, LockOpen, Mic } from 'lucide-react';
 import Image from 'next/image';
-import ProfileAvatar from '../persona/ProfileAvatar';
+import { motion } from 'framer-motion';
+import ProfileAvatar from '../profile/ProfileAvatar';
 
 interface VoiceNoteBubbleProps {
   audioUrl: string;
