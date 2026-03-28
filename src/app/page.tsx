@@ -169,7 +169,7 @@ function MarketplaceContent() {
        <div className="flex-1 flex flex-col relative h-screen overflow-hidden">
            <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} onOpenMenu={() => setShowProfileList(true)} profiles={randomizedProfiles} onSelectProfile={handleSelectProfile} />
            
-           <div className="flex-1 flex flex-col relative pt-12 md:pt-14 mt-16 md:mt-24">
+           <div className="flex-1 flex flex-col relative pt-12 md:pt-14 mt-4 md:mt-6">
               {/* 🧬 HEADER-LINKED STORIES AREA: Stories now live in the fixed Header node */}
              
               {/* STORY TOGGLE PORTAL */}

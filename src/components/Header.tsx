@@ -177,7 +177,7 @@ export default function Header({
          <div className="absolute top-[105%] left-0 right-0 flex flex-col items-center gap-4 pointer-events-auto z-[90]">
              {/* Search Bar */}
              <div className="w-full max-w-[280px] md:max-w-xl px-4 flex items-center justify-center">
-                 <div className="w-full bg-transparent border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.4)] p-0.5">
+                 <div className="w-full bg-black/10 backdrop-blur-2xl border border-white/5 rounded-full shadow-[0_10px_50px_rgba(0,0,0,0.5)] p-0.5 hover:bg-black/20 transition-all">
                      <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
                  </div>
              </div>
