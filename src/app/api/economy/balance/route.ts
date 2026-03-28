@@ -10,13 +10,41 @@ export async function GET(req: Request) {
   if (!userId) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
   try {
-    const { rows: profiles } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1 LIMIT 1', [userId]);
-    const profile = profiles[0];
+    // 🛡️ SOVEREIGN ACCURACY protocol: Exhaustive search for the authoritative credit node
     
-    return NextResponse.json({ success: true, balance: profile?.credit_balance || 0 });
+    // 🛸 Step 1: Check the Native Neural Wallet (Railway format)
+    const { rows: wallets } = await db.query(
+        'SELECT * FROM wallets WHERE user_id = $1 LIMIT 1', 
+        [userId]
+    );
+    if (wallets && wallets.length > 0) {
+      const w = wallets[0];
+      const balance = w.credit_balance !== undefined ? w.credit_balance : (w.balance || 0);
+      return NextResponse.json({ success: true, balance });
+    }
+
+    // 🛸 Step 2: Check the Legacy Auth Profile (Supabase/Hybrid format)
+    const { rows: profiles } = await db.query(
+        'SELECT credit_balance FROM profiles WHERE id = $1 LIMIT 1', 
+        [userId]
+    );
+    if (profiles && profiles.length > 0) {
+       return NextResponse.json({ success: true, balance: profiles[0].credit_balance || 0 });
+    }
+    
+    // ⛽ Step 3: Explicit fail if node not found - force onboarding/registration
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Neural Node not found. Re-sync required.',
+      code: 'AUTH_REQUIRED' 
+    }, { status: 404 });
+
   } catch (error: any) {
     console.error('[Balance API] Pulse Failure:', error.message);
-    return NextResponse.json({ success: false, balance: 0, error: error.message }, { status: 500 });
+    return NextResponse.json({ 
+      success: false, 
+      error: `Neural Sync Failure: ${error.message}` 
+    }, { status: 500 });
   }
 }
 

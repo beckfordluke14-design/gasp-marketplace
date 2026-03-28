@@ -20,10 +20,26 @@ export async function getUserPersonaStats(userId: string, personaId: string) {
 }
 
 export async function updateLastMessage(userId: string, personaId: string) {
-  await db.query(
-    'UPDATE user_persona_stats SET last_user_message_at = NOW(), ghosting_level = 0 WHERE user_id = $1 AND persona_id = $2',
-    [userId, personaId]
-  );
+  try {
+    await db.query(
+      `INSERT INTO user_persona_stats (user_id, persona_id, last_user_message_at, ghosting_level)
+       VALUES ($1, $2, NOW(), 0)
+       ON CONFLICT (user_id, persona_id) DO UPDATE SET 
+          last_user_message_at = EXCLUDED.last_user_message_at,
+          ghosting_level = 0`,
+      [userId, personaId]
+    );
+  } catch (err: any) {
+    if (err.message.includes('column "ghosting_level" does not exist')) {
+        // 🧪 NEURAL FAILSAFE: Column not migrated yet, falling back to basic update
+        await db.query(
+           'INSERT INTO user_persona_stats (user_id, persona_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+           [userId, personaId]
+        );
+    } else {
+        throw err;
+    }
+  }
 }
 
 export async function saveMessage(userId: string, personaId: string, role: string, content: string, extra: any = {}) {
