@@ -29,3 +29,8 @@ node_modules
 !.gitignore
 !.railwayignore
 
+
+pg_tools/
+tmp/*.js
+tmp/*.txt
+*.zip
