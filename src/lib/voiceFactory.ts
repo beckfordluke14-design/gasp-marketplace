@@ -209,13 +209,15 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
     console.log(`🧠 [Neural Trace] Input -> VocalProcessor: "${rawText.slice(0, 80)}..."`);
 
     // ──────────────────────────────────────────────────────
-    // 3. VOCAL PROCESSOR: Text → Accent-enhanced script
+    // 3. VOCAL PROCESSOR: Text → Accent-enhanced script + Mood
     // ──────────────────────────────────────────────────────
     const timeHour = new Date().getHours();
     const envZone  = persona.syndicate_zone || location;
-    let finalVocalScript = processVocalText(rawText, personaId, envZone, timeHour, persona.age || 22, persona.language || 'en');
+    const vocalResult = processVocalText(rawText, personaId, envZone, timeHour, persona.age || 22, persona.language || 'en');
+    let finalVocalScript = vocalResult.text;
+    const moodTag = vocalResult.mood;
 
-    console.log(`🎙️ [ElevenLabs Uplink] Final script: "${finalVocalScript}"`);
+    console.log(`🎙️ [ElevenLabs Uplink] Final script: "${finalVocalScript}" | Tag: ${moodTag || 'none'}`);
 
     try {
         // ──────────────────────────────────────────────────────
@@ -228,30 +230,36 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
         // ──────────────────────────────────────────────────────
         const idSum = (personaId || 'default').split('').reduce((a, b) => a + b.charCodeAt(0), 0);
         
-        // Clamp all values BEFORE time modifiers to avoid overflow
-        // REALISM REDUCTION: High "style" forces robotic/performative reads.
-        // Keeping style < 0.15 is industry standard for human conversation.
         let pStability  = 0.40 + ((idSum % 15) / 100);  // 0.40 – 0.55
         let pSimilarity = 0.75 + ((idSum % 15) / 100);  // 0.75 – 0.90
         let pStyle      = 0.02 + ((idSum % 10) / 100);  // 0.02 – 0.12
+
+        // MOOD-BASED SPECTRAL MODULATION
+        if (moodTag) {
+            if (moodTag.includes('excited') || moodTag.includes('happy')) {
+                pStability = Math.max(pStability - 0.15, 0.30); // More expressive
+                pStyle = Math.min(pStyle + 0.10, 0.25);
+            } else if (moodTag.includes('angry') || moodTag.includes('shout')) {
+                pStability = Math.min(pStability + 0.20, 0.80); // Less variable
+            } else if (moodTag.includes('whisper') || moodTag.includes('soft') || moodTag.includes('loving')) {
+                pStability = Math.max(pStability - 0.20, 0.25); // Breathy/Varied
+                pStyle = Math.min(pStyle + 0.05, 0.15);
+            }
+        }
 
         // TEMPORAL CONTEXT ENGINE — subtle shifts by time of day
         const hour = new Date().getHours();
         let currentEnv = 'street_run';
 
         if (hour >= 6 && hour < 11) {
-            // Morning: slightly more stable, calmer
             pStability = Math.min(pStability + 0.05, 0.60);
             currentEnv = 'outdoor_park';
         } else if (hour >= 11 && hour < 18) {
-            // Daytime: balanced
             currentEnv = 'street_run';
         } else if (hour >= 18 && hour < 23) {
-            // Evening: more emotive
             pStability = Math.max(pStability - 0.05, 0.35);
             currentEnv = 'vibe_check';
         } else {
-            // Late Night: breathy, intimate, highly expressive
             pStability = Math.max(pStability - 0.10, 0.30);
             pStyle     = Math.min(pStyle     + 0.05, 0.20);
             currentEnv = 'late_night';
@@ -260,14 +268,13 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
             }
         }
 
-        // Final safety clamp on all values
         const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
         const voiceSettings = {
-            stability:        clamp(pStability,  0.30, 0.70),
+            stability:        clamp(pStability,  0.25, 0.80),
             similarity_boost: clamp(pSimilarity, 0.70, 0.95),
             style:            clamp(pStyle,       0.00, 0.25),
             use_speaker_boost: true,
-            speed:            1.0  // Normal speech rate (0.7 = slow, 1.2 = fast)
+            speed:            1.0
         };
 
         console.log(`🎛️  [VoiceFactory] Settings: stability=${voiceSettings.stability.toFixed(2)} | similarity=${voiceSettings.similarity_boost.toFixed(2)} | style=${voiceSettings.style.toFixed(2)}`);

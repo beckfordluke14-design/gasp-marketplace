@@ -71,15 +71,27 @@ const MULTI_FILLERS: Record<string, string[]> = {
     'pt': ['... querido', '... meu bem', '... amorzinho', '... vida']
 };
 
-export function processVocalText(text: string, personaId: string, location: string, timeHour: number, age: number = 22, language: string = 'en'): string {
-    let cleanText = text.trim();
+export interface VocalResult {
+    text: string;
+    mood: string | null;
+}
+
+export function processVocalText(text: string, personaId: string, location: string, timeHour: number, age: number = 22, language: string = 'en'): VocalResult {
+    let rawInput = text.trim();
     
+    // 🎭 MOOD DETECTION: Extract identity from stage direction
+    let detectedMood: string | null = null;
+    const moodMatch = rawInput.match(/\[([^\]]+)\]/);
+    if (moodMatch) {
+         detectedMood = moodMatch[1].toLowerCase().split(' ')[0]; // Take first word e.g. "excited"
+    }
+
     // 1a. GLOBAL BRACKET PURGE: Strip ALL [stage directions] from the text.
-    cleanText = cleanText.replace(/\[[^\]]{1,40}\]/g, '').trim();
+    let cleanText = rawInput.replace(/\[[^\]]{1,40}\]/g, '').trim();
 
     // 1b. LATE NIGHT WHISPER TAG: detect intent from original text BEFORE purge
     let whisperMode = false;
-    const tagMatch = text.match(/^\[(whispering|whisper|soft|quiet)[^\]]*\]/i);
+    const tagMatch = rawInput.match(/^\[(whispering|whisper|soft|quiet)[^\]]*\]/i);
     if (tagMatch) whisperMode = true;
 
     let newText = cleanText.toLowerCase();
@@ -94,7 +106,7 @@ export function processVocalText(text: string, personaId: string, location: stri
     const locKey = Object.keys(REGIONS).find(k => location.toLowerCase().includes(k)) || 'us_urban';
     const dictionary = REGIONS[locKey] || {};
     
-    // 3. Regional Slang Injection
+    // 3. Regional Slang Injection (Deterministic but biased by accent intensity)
     for (const [formal, slang] of Object.entries(dictionary)) {
         if (Math.random() < accentIntensity) {
             const regex = new RegExp(`\\b${formal}\\b`, 'gi');
@@ -118,7 +130,6 @@ export function processVocalText(text: string, personaId: string, location: stri
     }
 
     // 5. HUMAN HESITATION ENGINE
-    // Force ElevenLabs to stutter slightly or take a breath at the start instead of reading perfectly.
     const hesitations: Record<string, string[]> = {
         'en': ['um... ', 'like, ', 'well... ', 'so... ', 'uh... '],
         'es': ['este... ', 'bueno... ', 'o sea... ', 'uf... ', 'eh... '],
@@ -126,7 +137,10 @@ export function processVocalText(text: string, personaId: string, location: stri
     };
     
     let injectedHesitation = '';
-    if (Math.random() > 0.4) {
+    // Scale hesitation by mood: bored/vulnerable more likely to hesitate
+    const hesitationChance = (detectedMood === 'bored' || detectedMood === 'longing') ? 0.7 : 0.4;
+    
+    if (Math.random() < hesitationChance) {
         const langHesitations = hesitations[langKey] || hesitations['en'];
         injectedHesitation = langHesitations[Math.floor(Math.random() * langHesitations.length)];
     }
@@ -138,5 +152,8 @@ export function processVocalText(text: string, personaId: string, location: stri
         newText = newText.split(' ').join(' ... ');
     }
     
-    return newText.trim();
+    return {
+        text: newText.trim(),
+        mood: detectedMood
+    };
 }

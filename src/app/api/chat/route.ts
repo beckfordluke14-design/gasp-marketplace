@@ -107,11 +107,12 @@ export async function POST(req: Request) {
       console.warn('[Chat] Ghosting update skipped:', ghostErr.message?.slice(0, 60));
     }
 
-    // 3. THE BRAIN: SYNDICATE MOMENT DIRECTOR (Grok Beta)
+    // 3. THE BRAIN: SYNDICATE MOMENT DIRECTOR (Grok 2 Flagship)
     const zoneKey = profileItem?.syndicate_zone || 'us_houston_black';
     const zoneDictionary = GLOBAL_SYNDICATE_ZONES_V3[zoneKey];
     
-    const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\nZONE DICTIONARY (${zoneKey}):\n${JSON.stringify(zoneDictionary)}\n\nMEMORY: ${memoryContext}`;
+    // Merge Persona Identity with Director Logic
+    const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\n[IDENTITY_CORE]:\n${finalSystemPrompt}\n\nZONE DICTIONARY (${zoneKey}):\n${JSON.stringify(zoneDictionary)}`;
 
     const callGrok = () => fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
@@ -122,7 +123,7 @@ export async function POST(req: Request) {
             'X-Title': 'GASP Syndicate Circuit'
         },
         body: JSON.stringify({
-            model: 'x-ai/grok-3-fast',
+            model: 'x-ai/grok-2-1212', // 🛡️ SOVEREIGN BRAIN: Flagship Grok-2
             messages: [
                 { role: 'system', content: brainPrompt },
                 ...messages.slice(-5)
