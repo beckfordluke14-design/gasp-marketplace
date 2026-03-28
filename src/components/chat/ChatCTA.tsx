@@ -32,7 +32,7 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
              CONNECTION PAUSED
            </h3>
            <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
-             You’ve Ran Out of Credits. <br /> Sign up to Continue the Conversation with <span className="text-[#ff00ff]">{personaName}</span> & get 5,000 FREE.
+             You’ve Ran Out of Credits. <br /> Sign up to Continue the Conversation with <span className="text-[#ff00ff]">{personaName}</span> & get 1,500 FREE.
            </p>
         </div>
 
@@ -40,7 +40,7 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
            onClick={() => login()}
            className="mt-2 w-full h-16 bg-white text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic rounded-2xl hover:bg-[#00f0ff] hover:text-black transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 z-10 flex items-center justify-center gap-2"
         >
-           CLAIM 5,000 FREE CREDITS
+           CLAIM 1,500 FREE CREDITS
            <ArrowRight size={14} />
         </button>
 

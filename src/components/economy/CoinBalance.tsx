@@ -1,6 +1,6 @@
 'use client';
 
-import { Diamond, ChevronRight, Zap } from 'lucide-react';
+import { Diamond, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useUser } from '../providers/UserProvider';
 import { formatCredits } from '@/lib/format';
@@ -12,10 +12,9 @@ interface CoinBalanceProps {
 export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const { user, authenticated } = useUser();
 
   async function fetchBalance() {
-    // 🧬 SOVEREIGN IDENTITY SHAKE
-    const { user } = useUser();
     const guestId = localStorage.getItem('gasp_guest_id');
     const idToUse = user?.id || guestId;
 
@@ -34,14 +33,11 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
 
   useEffect(() => {
     fetchBalance();
-    
-    // Neural polling for real-time wallet sync
     const interval = setInterval(fetchBalance, 10000);
     return () => clearInterval(interval);
   }, []);
 
   const claimStarter = async () => {
-     const { user } = useUser();
      const guestId = localStorage.getItem('gasp_guest_id');
      const idToUse = user?.id || guestId;
      if (!idToUse || loading) return;
@@ -62,6 +58,9 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
      }
      setLoading(false);
   };
+
+  // 🛡️ SILENT GUEST PROTOCOL: Invisible if not authenticated
+  if (!authenticated) return null;
 
   return (
       <div className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 text-white">

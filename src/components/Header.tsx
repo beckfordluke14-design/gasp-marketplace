@@ -26,7 +26,7 @@ export default function Header({
   onSelectProfile?: (id: string) => void
 }) {
   const router = useRouter();
-  const { user, profile } = useUser();
+  const { user, profile, authenticated } = useUser();
   const [mounted, setMounted] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
@@ -142,12 +142,14 @@ export default function Header({
                 )}
 
                 {/* Add Credits */}
-                <button 
-                  onClick={() => onOpenTopUp()}
-                  className="h-7 md:h-9 px-4 md:px-6 bg-[#00f0ff] text-black text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] rounded-full hover:shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic shadow-[0_0_10px_rgba(0,240,255,0.2)]"
-                >
-                   ADD CREDITS
-                </button>
+                {authenticated && (
+                  <button 
+                    onClick={() => onOpenTopUp()}
+                    className="h-7 md:h-9 px-4 md:px-6 bg-[#00f0ff] text-black text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] rounded-full hover:shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic shadow-[0_0_10px_rgba(0,240,255,0.2)]"
+                  >
+                     ADD CREDITS
+                  </button>
+                )}
 
                 <div onClick={() => onOpenTopUp()} className="cursor-pointer hover:opacity-80 transition-all scale-[0.6] md:scale-[0.8] origin-right">
                   <CoinBalance onOpenTopUp={() => onOpenTopUp()} />

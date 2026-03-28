@@ -79,7 +79,7 @@ export async function POST(req: Request) {
                 // 1. Credit the Profile
                 await db.query(`
                     UPDATE profiles 
-                    SET credit_balance = credit_balance + 5000,
+                    SET credit_balance = credit_balance + 1500,
                         updated_at = NOW()
                     WHERE id = $1
                 `, [userId]);
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
                 // 2. Log Transaction with IP Metadata for Fingerprinting
                 await db.query(`
                     INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
-                    VALUES ($1, 5000, 'starter_claim', 'syndicate_genesis', $2, NOW())
+                    VALUES ($1, 1500, 'starter_claim', 'syndicate_genesis', $2, NOW())
                 `, [userId, JSON.stringify({ ip: clientIP })]);
 
                 await db.query('COMMIT');

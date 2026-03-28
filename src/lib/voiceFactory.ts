@@ -215,6 +215,10 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
     const envZone  = persona.syndicate_zone || location;
     const vocalResult = processVocalText(rawText, personaId, envZone, timeHour, persona.age || 22, persona.language || 'en');
     let finalVocalScript = vocalResult.text;
+
+    // 🛡️ SYNDICATE PERFECTION: Strip [bracketed] stage directions before ElevenLabs (saves reading errors)
+    finalVocalScript = finalVocalScript.replace(/\[.*?\]/g, '').trim();
+
     const moodTag = vocalResult.mood;
 
     console.log(`🎙️ [ElevenLabs Uplink] Final script: "${finalVocalScript}" | Tag: ${moodTag || 'none'}`);

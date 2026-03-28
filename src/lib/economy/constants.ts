@@ -56,7 +56,7 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
 // RE-MAPPED BURN RATES (Apex-Elite v5.2 Protocol)
 export const COST_VAULT_UNLOCK = 6000;           // 6,000 Credits ($6.00 Apex-Entry)
 export const COST_PREMIUM_VAULT_UNLOCK = 12000; // 12,000 Credits ($12.00 Whale-Tier)
-export const COST_VOICE_NOTE = 2000;            // 2,000 Credits ($2.00 Elite Vox)
+export const COST_VOICE_NOTE = 1000;            // 1,000 Credits ($1.00 Elite Vox)
 export const COST_VOICE_TRANSLATION = 1000;     // 1,000 Credits ($1.00 Decode)
 export const COST_PRIORITY_TIP = 2000;          // 2,000 Credits ($2.00 Priority)
 export const COST_MESSAGE_TEXT = 50;            // 50 Credits ($0.05 Text Tax)
