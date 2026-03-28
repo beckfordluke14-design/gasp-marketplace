@@ -24,7 +24,7 @@ export async function generatePersonaSelfie(personaId: string, zone: string, sta
     try {
         console.log(`📡 [Visual DNA] Dispatching to Nano Banana 2 / Gemini Image Engine...`);
         // MOCK INTEGRATION: In production, call the Gemini 2.0 Flash Image generation or Imagine API
-        const mockUrl = `https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/vault/selfies/${personaId}_${Date.now()}.jpg`;
+        const mockUrl = `https://asset.gasp.fun/posts/selfies/${personaId}_${Date.now()}.jpg`;
         
         return mockUrl;
     } catch (e: any) {

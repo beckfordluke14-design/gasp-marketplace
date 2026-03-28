@@ -97,9 +97,9 @@ export function proxyImg(url: any): string {
   if (finalUrl.startsWith('/')) return finalUrl;
 
   // 4. 💎 SOVEREIGN ASSET HUB (asset.gasp.fun):
-  // Direct Cloudflare Proxy to Supabase Storage.
+  // Direct Cloudflare Proxy to R2 Storage.
   // Zero-Egress, Zero-VPS Load, Ultra-Latency.
-  return `https://asset.gasp.fun/storage/v1/object/public/${finalUrl}`;
+  return `https://asset.gasp.fun/${finalUrl}`;
 }
 
 export interface Persona {
