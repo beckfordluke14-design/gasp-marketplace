@@ -211,7 +211,23 @@ function MarketplaceContent() {
                 </motion.div>
               );
               return (
-                <motion.div key={sId} initial={{ x: '100%', opacity: 0 }} animate={{ x: `-${index * 12}px`, opacity: 1 }} exit={{ x: '100%', opacity: 0 }} className="h-full pointer-events-auto bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.8)]">
+                <motion.div 
+                   key={sId} 
+                   initial={{ x: '100%', scale: 0.95, opacity: 0 }} 
+                   animate={{ 
+                     x: `-${index * 24}px`, 
+                     scale: 1, 
+                     opacity: 1 
+                   }} 
+                   exit={{ x: '100%', scale: 0.95, opacity: 0 }} 
+                   transition={{ 
+                     type: 'spring', 
+                     damping: 25, 
+                     stiffness: 150 
+                   }}
+                   style={{ zIndex: 1000 - index }}
+                   className="h-full pointer-events-auto bg-black shadow-[-40px_0_80px_rgba(0,0,0,0.9)] origin-right"
+                >
                    <ErrorBoundary key={sId}>
                        <ChatDrawer 
                          profileId={sId} 

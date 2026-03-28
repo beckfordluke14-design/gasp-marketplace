@@ -133,11 +133,14 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
   return (
     <motion.div 
       ref={itemRef}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="relative w-full h-screen overflow-hidden bg-black flex flex-col items-center justify-center border-b border-white/5 last:border-0"
+      initial={{ opacity: 0, scale: 1 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 1.2, ease: "easeOut" }}
+      whileTap={{ scale: 0.98, transition: { duration: 0.1 } }}
+      onClick={handleInteraction}
+      className="relative w-full h-screen overflow-hidden bg-black flex flex-col items-center justify-center border-b border-white/5 last:border-0 cursor-pointer group"
     >
-       <div className="absolute inset-0 z-0 bg-black flex items-start md:items-center justify-center">
+       <div className="absolute inset-0 z-0 bg-black flex items-start md:items-center justify-center transition-all duration-1000 group-active:scale-105 group-active:opacity-80">
           {broadcast.type === 'video' ? (
              <>
                 <video src={proxyImg(broadcast.video_url)} autoPlay loop muted playsInline preload="auto" className={`absolute inset-0 w-full h-full object-cover blur-3xl opacity-30 scale-110 pointer-events-none ${broadcast.is_locked ? 'blur-[100px]' : ''}`} />
@@ -283,7 +286,10 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                                     ease: "easeInOut"
                                  }
                                }}
-                               onClick={handleInteraction}
+                               onClick={(e) => { 
+                                 e.stopPropagation(); 
+                                 onSelectProfile(profile.id); 
+                               }}
                                className="flex items-center gap-2 px-3 py-1.5 bg-[#00f0ff] rounded-full shadow-[0_0_20px_rgba(0,240,255,0.4)] cursor-pointer hover:scale-105 active:scale-95 transition-all select-none"
                              >
                                 <span className="text-[9px] font-black text-black uppercase tracking-widest whitespace-nowrap">Chat w/ {displayName}?</span>
@@ -314,9 +320,10 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                     )}
                       </div>
                       <div className="flex items-center gap-4 md:gap-6 pointer-events-auto">
-                         <button onClick={handleLike} className={`w-14 h-14 md:w-20 md:h-20 rounded-2xl backdrop-blur-3xl border flex flex-col items-center justify-center transition-all ${hasLiked ? 'bg-red-500/20 border-red-500/50 text-red-500 shadow-[0_0_30px_#ff000044]' : 'bg-black/60 border-white/10 text-white/40 hover:scale-110 hover:border-white/30'}`}><Heart size={26} className={hasLiked ? 'fill-current' : ''} /><span className="text-[8px] md:text-[10px] font-black mt-1 uppercase">{likes}</span></button>
-                         <button onClick={() => onSelectProfile(profile.id)} className="w-14 h-14 md:w-20 md:h-20 rounded-2xl bg-black/60 backdrop-blur-3xl border border-white/10 flex flex-col items-center justify-center text-[#00f0ff]/80 hover:scale-110 hover:border-[#00f0ff]/40 transition-all"><MessageSquare size={26} /><span className="text-[8px] md:text-[10px] font-black mt-1 uppercase">chat</span></button>
-                         <div className="w-14 h-14 md:w-20 md:h-20 rounded-2xl bg-[#ffea00]/10 backdrop-blur-3xl border border-[#ffea00]/20 flex flex-col items-center justify-center text-[#ffea00] animate-pulse"><Zap size={24} /><span className="text-[8px] md:text-[10px] font-black mt-1 uppercase italic font-black">elite</span></div>
+                         <button onClick={handleLike} className={`w-14 h-14 md:w-20 md:h-20 rounded-2xl backdrop-blur-3xl border flex flex-col items-center justify-center transition-all ${hasLiked ? 'bg-red-500/20 border-red-500/50 text-red-500 shadow-[0_0_30px_#ff000044]' : 'bg-black/60 border-white/10 text-white/40 hover:scale-110 hover:border-white/30'}`}>
+                            <Heart size={26} className={hasLiked ? 'fill-current' : ''} />
+                            <span className="text-[8px] md:text-[10px] font-black mt-1 uppercase">{likes}</span>
+                         </button>
                       </div>
                    </div>
              </div>
