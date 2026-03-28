@@ -38,8 +38,8 @@ function MarketplaceContent() {
     const loadPersonas = async () => {
         try {
           const [resFeed, resActive] = await Promise.all([
-             fetch('/api/admin/feed?limit=200'),
-             fetch('/api/personas')
+             fetch('/api/admin/feed?limit=200', { cache: 'no-store' }),
+             fetch('/api/personas', { cache: 'no-store' })
           ]);
           
           const jsonFeed = await resFeed.json();
