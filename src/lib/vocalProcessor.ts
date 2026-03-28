@@ -4,7 +4,7 @@
  * with performance tags for ElevenLabs Multilingual v2.
  */
 
-// ?? SYNDICATE ZONE DICTIONARY: Phonetic Slang & Accent Drivers
+// ðŸ§¬ SYNDICATE ZONE DICTIONARY: Phonetic Slang & Accent Drivers
 // ElevenLabs Multilingual v2 adopts the accent of the TEXT.
 const REGIONS: Record<string, Record<string, string>> = {
     'ny_dominican': { // Spanish Newark / NYC
@@ -45,7 +45,7 @@ const REGIONS: Record<string, Record<string, string>> = {
         'my love': 'mi amor',
         'well': 'pues',
         'money': 'plata',
-        'cool': 'bacán'
+        'cool': 'bacÃ¡n'
     },
     'london': {
         'going to': 'gonna',
@@ -55,19 +55,19 @@ const REGIONS: Record<string, Record<string, string>> = {
     }
 };
 
-// ?? PERFORMANCE TAGS: Force human-like stutters and inhales
+// ðŸŽ­ PERFORMANCE TAGS: Force human-like stutters and inhales
 const NEURAL_BREATHS = ['... (inhales) ', '... (sighs) ', '... (chuckles) ', '... '];
 
-// ?? MULTI-LINGUAL MATURE REFINEMENTS (Ages 25+)
+// ðŸŽ€ MULTI-LINGUAL MATURE REFINEMENTS (Ages 25+)
 const MULTI_MATURE: Record<string, Record<string, string>> = {
     'en': { 'no cap': 'honestly', 'facts': 'certainly', 'wild': 'interesting', 'lit': 'lovely' },
-    'es': { 'loco': 'increíble', 'bueno': 'fenomenal', 'mira': 'fíjate', 'dime': 'escúchame' },
-    'pt': { 'bacán': 'lindo', 'papai': 'querido', 'cara': 'você', 'tá': 'está' }
+    'es': { 'loco': 'increÃ­ble', 'bueno': 'fenomenal', 'mira': 'fÃ­jate', 'dime': 'escÃºchame' },
+    'pt': { 'bacÃ¡n': 'lindo', 'papai': 'querido', 'cara': 'vocÃª', 'tÃ¡': 'estÃ¡' }
 };
 
 const MULTI_FILLERS: Record<string, string[]> = {
     'en': ['... sweetheart', '... darling', '... babe', '... love'],
-    'es': ['... mi amor', '... cariño', '... mi vida', '... corazón'],
+    'es': ['... mi amor', '... cariÃ±o', '... mi vida', '... corazÃ³n'],
     'pt': ['... querido', '... meu bem', '... amorzinho', '... vida']
 };
 
@@ -122,7 +122,7 @@ export function processVocalText(text: string, personaId: string, location: stri
     const hesitations: Record<string, string[]> = {
         'en': ['um... ', 'like, ', 'well... ', 'so... ', 'uh... '],
         'es': ['este... ', 'bueno... ', 'o sea... ', 'uf... ', 'eh... '],
-        'pt': ['tipo... ', 'é... ', 'bom... ', 'hum... ', 'ah... ']
+        'pt': ['tipo... ', 'Ã©... ', 'bom... ', 'hum... ', 'ah... ']
     };
     
     let injectedHesitation = '';
