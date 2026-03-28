@@ -133,6 +133,12 @@ export async function POST(req: Request) {
 
     let orResponse = await callGrok();
     const brainJson = await orResponse.json();
+
+    if (brainJson.error) {
+        console.error('[OpenRouter API Error]:', brainJson.error);
+        throw new Error(brainJson.error.message || 'OpenRouter API failure');
+    }
+
     const contentBody = brainJson.choices?.[0]?.message?.content || "";
     const cleanContent = contentBody.replace(/```json|```/g, '').trim();
     
@@ -142,6 +148,7 @@ export async function POST(req: Request) {
         const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
         const extractedJson = jsonMatch ? jsonMatch[0] : cleanContent;
         syndicateOutput = JSON.parse(extractedJson || '{}');
+        console.log('[Brain API] Successfully parsed syndicate output:', syndicateOutput);
     } catch (parseErr: any) {
         console.warn('[Brain API] Output Parse Failed:', parseErr.message, cleanContent);
         syndicateOutput = { 

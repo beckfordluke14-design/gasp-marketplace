@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { supabase } from '@/lib/supabaseClient';
 import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs';
@@ -350,9 +351,22 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
                 .save(outputPath);
         });
 
-        // 🛡️ SOVEREIGN STORAGE: Every voice render is now logged in the new infrastructure
+        // 🛡️ SOVEREIGN STORAGE: Upload to Supabase 'posts' bucket
         const fileName = `voices/v2_${personaId}_${Date.now()}.mp3`;
-        const publicUrl = `https://asset.gasp.fun/posts/voices/${path.basename(fileName)}`;
+        
+        const { error: uploadError } = await supabase.storage
+            .from('posts')
+            .upload(fileName, finalBuffer, {
+                contentType: 'audio/mpeg',
+                upsert: true
+            });
+
+        if (uploadError) {
+            console.error('❌ [VoiceFactory] Supabase Upload Failed:', uploadError.message);
+            throw new Error('Supabase Upload Failed');
+        }
+
+        const publicUrl = `https://asset.gasp.fun/posts/${fileName}`;
 
         console.log(`✅ [VoiceFactory] SOVEREIGN render generated (R2-Ready): ${publicUrl}`);
         return publicUrl;
