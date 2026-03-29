@@ -508,27 +508,46 @@ export default function PostStudio() {
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto no-scrollbar py-1">
-            <div className="relative shrink-0">
-              <select
-                value={personaFilter}
-                onChange={e => { setPersonaFilter(e.target.value); if (filterMode === 'lost') setFilterMode('all'); }}
-                className="appearance-none bg-white/5 border border-white/10 rounded-xl px-3 py-2 pr-7 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60 outline-none cursor-pointer min-w-[120px]"
-              >
-                <option value="all">Fleet</option>
-                {personas.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
-              <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+            <div className="relative shrink-0 flex items-center gap-1">
+              <div className="relative">
+                <select
+                  value={personaFilter}
+                  onChange={e => { setPersonaFilter(e.target.value); if (filterMode === 'lost') setFilterMode('all'); }}
+                  className="appearance-none bg-white/5 border border-white/10 rounded-xl px-3 py-2 pr-7 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60 outline-none cursor-pointer min-w-[120px]"
+                >
+                  <option value="all">Fleet</option>
+                  {personas.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+                <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+              </div>
+              {personaFilter !== 'all' && (
+                <button 
+                  onClick={() => setPersonaFilter('all')}
+                  className="h-10 px-2 rounded-xl bg-white/5 border border-white/10 text-[9px] font-black uppercase text-white/20 hover:text-white hover:bg-white/10 transition-all font-outfit"
+                  title="Clear Persona Filter"
+                >
+                  Clear
+                </button>
+              )}
             </div>
 
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 focus-within:border-[#00f0ff]/50 transition-all flex-1 min-w-[140px]">
+            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 focus-within:border-[#00f0ff]/50 transition-all flex-1 min-w-[140px] relative">
               <Search size={12} className="text-white/20 shrink-0" />
               <input
                 type="text"
                 placeholder="Query..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="bg-transparent outline-none text-[10px] sm:text-[11px] font-black uppercase tracking-widest placeholder:text-white/10 w-full"
+                className="bg-transparent outline-none text-[10px] sm:text-[11px] font-black uppercase tracking-widest placeholder:text-white/10 w-full pr-8"
               />
+              {search && (
+                <button 
+                  onClick={() => setSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-all p-1"
+                >
+                  <X size={10} />
+                </button>
+              )}
             </div>
 
             <button 

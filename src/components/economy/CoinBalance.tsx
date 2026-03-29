@@ -60,9 +60,12 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
          if (data.success) {
             await fetchBalance();
             window.location.reload();
+         } else {
+            alert(`Claim Failure: ${data.error || 'Identity rejection.'}`);
          }
-     } catch (e) {
+     } catch (e: any) {
          console.error('[Claim] Pulse Failure:', e);
+         alert(`Neural Pulse Error: ${e.message}`);
      }
      setLoading(false);
   };

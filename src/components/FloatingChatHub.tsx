@@ -31,6 +31,7 @@ export default function FloatingChatHub({
   isOpen = false,
   onClose
 }: FloatingChatHubProps) {
+  if (isOpen) return null;
   const totalUnread = Object.values(unreadCounts).reduce((a, b) => a + Number(b), 0);
   
   // 🧬 DIAL STATE: Global rotation of the satellite fleet

@@ -167,6 +167,7 @@ export default function Header({
                         setShowAdmin(next);
                         window.dispatchEvent(new CustomEvent('gasp_admin_toggle', { detail: next }));
                      }}
+                     title={showAdmin ? "Deactivate Command Mode" : "Activate Command Mode"}
                      className={`w-7 h-7 md:w-8 md:h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer ${showAdmin ? 'bg-[#ffea00]/10 text-[#ffea00] shadow-[0_0_15px_#ffea0044]' : 'bg-white/5 text-white/20 hover:text-white'}`}
                    >
                       <Star size={14} fill={showAdmin ? 'currentColor' : 'none'} />
