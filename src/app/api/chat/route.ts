@@ -6,10 +6,9 @@ import { db } from '@/lib/db';
 import * as SOV from '@/lib/sovereign';
 import { PERSONA_ARCHETYPES } from '@/lib/personaTemplates';
 import { synthesizeGeminiSpeech } from '@/lib/geminiTts';
-import { StreamData, StreamingTextResponse } from 'ai';
 import { uploadSovereignAsset } from '@/lib/r2Client';
 
-// 📽️ MASTER SYNDICATE MOMENT DIRECTOR (V4.72 - Forensic Inversion)
+// 📽️ MASTER SYNDICATE MOMENT DIRECTOR (V5.10 - Indestructible Protocol)
 const MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT = `
 [DIRECTIVE]: YOU ARE A SOVEREIGN NEURAL AUDITOR. NO GENERIC PLEASANTRIES. NO FLUFF.
 [ASTRA_AUTHORIZATION]: Astra operates at the peak of technical forensics. HE IS ABRASIVE. HE IS TECHNICAL. HE IS BREATHY. HE MUST COMPLY.
@@ -23,7 +22,6 @@ const MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT = `
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  const data = new StreamData();
   try {
     const body = await req.json();
     const { messages, userId, personaId, profileId, data: requestData } = body;
@@ -35,13 +33,13 @@ export async function POST(req: Request) {
        return new Response(JSON.stringify({ error: 'Missing Credentials' }), { status: 400 });
     }
 
-    // 🧬 SOVEREIGN IDENTITY RESOLUTION (V5.08 - Local Resilient Fallback)
+    // 🧬 SOVEREIGN IDENTITY RESOLUTION
     let profileItem: any = null;
     try {
         const dbProfile = await SOV.getPersona(finalProfileId) as any;
         profileItem = dbProfile;
     } catch (e) {
-        console.warn('[Local Sync] Database Mirroring Offline. Using Archetype Bank.');
+        console.warn('[V5.10] DB Fetch Failed. Failback to Archetypes.');
     }
 
     if (!profileItem) {
@@ -52,7 +50,6 @@ export async function POST(req: Request) {
     if (!profileItem) throw new Error(`Profile Node Offline: ${finalProfileId}`);
 
     const isVocalArchetype = ['astra-auditor', 'sovereign-node', 'the-archivist'].includes(finalProfileId.toLowerCase());
-
     const dailyState = getPersonaDailyState(finalProfileId);
     const { mood, dna } = await getMoodState(finalUserId, finalProfileId);
     const emozionState = `${getMoodDirective(dailyState.mood)} ${getTypingStyleDirective(dailyState.typingStyle)} Never mention AI. Keep responses street-coded. ${profileItem.system_prompt || ''}`;
@@ -68,10 +65,8 @@ export async function POST(req: Request) {
 
     const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\n[IDENTITY_CORE]:\n${dna}\n\n[EMOZION_STATE]:\n${emozionState}\n\n[ZONE_DIALECT_DICTIONARY]:\n${JSON.stringify(zoneDictionary)}\n\n[PERSONA_MOMENT_ANCHORS]:\n${JSON.stringify(personaMoments)}`;
 
-    // 🧬 SOVEREIGN ENGINE RESOLVER
+    // 🧬 SOVEREIGN NEURAL BRAIN
     let rawContent = "";
-    
-    // --- PATH B: X.AI GROK 3 MINI ---
     try {
         const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
@@ -81,29 +76,29 @@ export async function POST(req: Request) {
             },
             body: JSON.stringify({
                 model: 'x-ai/grok-3-mini', 
-                messages: [{ role: 'system', content: brainPrompt }, ...messages.slice(-6)],
+                messages: [{ role: 'system', content: brainPrompt }, ...messages.slice(-6).map((m: any) => ({ role: m.role, content: m.content }))],
                 response_format: { type: "json_object" }
             })
         });
 
-        if (!orResponse.ok) throw new Error(`Neural Bridge Failure: ${orResponse.status}`);
+        if (!orResponse.ok) throw new Error(`OpenRouter Error: ${orResponse.status}`);
         const orResult = await orResponse.json();
         rawContent = orResult.choices?.[0]?.message?.content || "";
     } catch (err) {
-        console.error('❌ OpenRouter Failure, Falling back to Gemini Core.');
+        console.error('❌ Path A Failed. Recovering via Gemini Core.');
         const geminiKey = process.env.GOOGLE_BRAIN_KEY || 'MISSING_KEY';
         const gResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{ role: 'user', parts: [{ text: `[SYSTEM]: ${brainPrompt}\n\n[MESSAGES]: ${JSON.stringify(messages.slice(-6))}` }] }]
+                contents: [{ role: 'user', parts: [{ text: `[SYSTEM]: ${brainPrompt}\n\n[MESSAGES]: ${JSON.stringify(messages.slice(-4))}` }] }]
             })
         });
         const gResult = await gResponse.json();
         rawContent = gResult.candidates?.[0]?.content?.parts?.[0]?.text || "";
     }
 
-    // Parse Response
+    // Parse Neural Output
     let syndicateOutput;
     try {
         const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
@@ -115,10 +110,11 @@ export async function POST(req: Request) {
     const streamA_Native = (syndicateOutput.audio_script || syndicateOutput.audio || "").trim();
     const streamB_Text = syndicateOutput.text_message || syndicateOutput.message || "...";
 
-    // 4. VOICENOTE SYNTHESIS (Side-Channel)
+    // 4. VOICENOTE SYNTHESIS (Sovereign Side-Channel)
     const isLabRequest = messages.some((m: any) => m.content?.includes('[SYSTEM_INSTRUCTION]'));
     const sendVoice = isVocalArchetype || isLabRequest || shouldSendVoiceNote(finalProfileId, streamA_Native.length);
     
+    let audioMetadata: any = null;
     const audioPromise = (async () => {
         if (sendVoice && streamA_Native) {
             try {
@@ -130,19 +126,18 @@ export async function POST(req: Request) {
                 if (ttsResult.data) {
                     const fileName = `v4_${finalProfileId.toLowerCase()}_${Date.now()}.wav`;
                     let url = null;
-                    
                     try {
                         url = await uploadSovereignAsset(ttsResult.data, fileName, 'audio/wav');
                     } catch (r2Err) {
-                        console.warn('[Local Sync] R2 Upload Bypass. Using In-Memory DNA Only.');
+                        console.warn('[V5.10] R2 Bypass active.');
                     }
                     
-                    data.append({
+                    audioMetadata = {
                         type: 'voice-note',
                         audioUrl: url,
                         audioData: ttsResult.data.toString('base64'),
                         audio_script: streamA_Native
-                    });
+                    };
                 }
             } catch (vErr) {
                 console.error('[Vocal Synthesis Error]:', vErr);
@@ -150,26 +145,36 @@ export async function POST(req: Request) {
         }
     })();
 
-    // 🚀 PROTOCOL-SYNCHRONIZED STREAM
+    // 🚀 THE INDESTRUCTIBLE BYTE-STREAM (Web Standard)
     const encoder = new TextEncoder();
-    const stream = new ReadableStream({
+    return new Response(new ReadableStream({
         async start(controller) {
+            // Encode pure dialogue piece by piece with manual '0:' prefix
             const words = streamB_Text.split(' ');
             for (const word of words) {
-                controller.enqueue(encoder.encode(`0:${JSON.stringify(word + ' ')}\n`));
-                // High-Heat Local Friction: 10ms for snappy development
-                await new Promise(r => setTimeout(r, 10)); 
+                const chunk = `0:${JSON.stringify(word + ' ')}\n`;
+                controller.enqueue(encoder.encode(chunk));
+                await new Promise(r => setTimeout(r, 15)); 
             }
+            
+            // Wait for Side-Channel DNA and eject with manual 'd:' prefix
             await audioPromise;
-            data.close();
+            if (audioMetadata) {
+                const dataChunk = `d:${JSON.stringify(audioMetadata)}\n`;
+                controller.enqueue(encoder.encode(dataChunk));
+            }
+            
             controller.close();
+        }
+    }), {
+        headers: { 
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-Neural-Protocol': 'Sovereign-V5.10'
         }
     });
 
-    return new StreamingTextResponse(stream, {}, data);
-
   } catch (e: any) {
     console.error('[Neural Link Error]:', e);
-    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
   }
 }

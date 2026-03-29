@@ -20,7 +20,7 @@ export const r2Client = new S3Client({
 });
 
 export const BUCKET_NAME = "gaspy";
-export const LOST_FILES_PREFIX = "gaspy/posts/personas/lostfiles/";
+export const LOST_FILES_PREFIX = "posts/personas/lostfiles/";
 
 // 🛡️ SOVEREIGN UPLOAD HUB (V4.75)
 export async function uploadSovereignAsset(
