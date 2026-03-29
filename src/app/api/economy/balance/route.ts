@@ -40,6 +40,19 @@ export async function POST(req: Request) {
     if (!userId) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
     try {
+        // 🛡️ AUTO-MIGRATE: Ensure transactions ledger exists on first use
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS transactions (
+                id SERIAL PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                amount INTEGER NOT NULL,
+                type TEXT NOT NULL,
+                provider TEXT DEFAULT 'syndicate_core',
+                description TEXT,
+                meta JSONB DEFAULT '{}',
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        `).catch(() => {}); // Non-blocking — already exists is fine
         // ── ACTION: SPEND CREDITS ──
         if (action === 'spend') {
             if (!amount || amount <= 0) return NextResponse.json({ success: false, error: 'Invalid amount' }, { status: 400 });
@@ -81,16 +94,23 @@ export async function POST(req: Request) {
             
             const clientIP = req.headers.get('x-forwarded-for') || 'unknown';
 
-            const { rows: claims } = await db.query(
-                `SELECT 1 FROM transactions 
-                 WHERE (user_id = $1 OR meta->>'ip' = $2) 
-                 AND type = 'starter_claim' 
-                 AND created_at > NOW() - INTERVAL '24 hours'
-                 LIMIT 1`,
-                [userId, clientIP]
-            );
+            // Fault-tolerant duplicate check — table may not exist on first claim
+            let alreadyClaimed = false;
+            try {
+                const { rows: claims } = await db.query(
+                    `SELECT 1 FROM transactions 
+                     WHERE (user_id = $1 OR meta->>'ip' = $2) 
+                     AND type = 'starter_claim' 
+                     AND created_at > NOW() - INTERVAL '24 hours'
+                     LIMIT 1`,
+                    [userId, clientIP]
+                );
+                alreadyClaimed = claims && claims.length > 0;
+            } catch {
+                alreadyClaimed = false; // Table missing = no prior claims
+            }
 
-            if (claims && claims.length > 0) {
+            if (alreadyClaimed) {
                return NextResponse.json({ success: false, error: 'Genesis bonus already claimed on this device.' }, { status: 403 });
             }
 
