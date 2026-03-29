@@ -94,10 +94,19 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
         ) : (
            <AnimatePresence>
              {(messages || []).map((m: any) => {
-                // 🧬 SOVEREIGN SIDE-CHANNEL INGRESS (V4.98)
-                // We check the 'data' stream for voice note attachments for this specific message.
-                // NOTE: In production, we map the data packet index to the message index.
-                const voiceMetadata = (messages as any).indexOf(m) === messages.length - 1 ? (data as any)?.[data?.length - 1] : null;
+                // 🧬 SOVEREIGN STEALTH SNIFFER (V5.16 - Indestructible Protocol)
+                const rawContent = m.content || "";
+                let cleanText = rawContent;
+                let voiceMetadata: any = null;
+
+                const tailMatch = rawContent.match(/\|\|\|([\s\S]*?)\|\|\|/);
+                if (tailMatch) {
+                   try {
+                       voiceMetadata = JSON.parse(tailMatch[1]);
+                       cleanText = rawContent.replace(/\|\|\|[\s\S]*?\|\|\|/g, "").trim();
+                   } catch (e) {}
+                }
+
                 const isVoiceMessage = voiceMetadata && voiceMetadata.type === 'voice-note';
 
                 return (
@@ -107,12 +116,14 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
                     key={m.id}
                     className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'} gap-2`}
                   >
-                    <div className={`max-w-[85%] px-5 py-3 rounded-[2.5rem] text-[13px] leading-relaxed shadow-xl ${
+                    <div className={`max-w-[85%] px-5 py-3 rounded-[2.5rem] shadow-xl ${
                       m.role === 'user'
                       ? 'bg-[#00f0ff] text-black font-bold rounded-tr-none border border-[#00f0ff]/20'
                       : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'
                     }`}>
-                      {m.content}
+                      <div className="text-[14px] leading-relaxed whitespace-pre-wrap">
+                        {cleanText}
+                      </div>
                     </div>
 
                     {isVoiceMessage && (

@@ -8,7 +8,7 @@ import { PERSONA_ARCHETYPES } from '@/lib/personaTemplates';
 import { synthesizeGeminiSpeech } from '@/lib/geminiTts';
 import { uploadSovereignAsset } from '@/lib/r2Client';
 
-// 📽️ MASTER SYNDICATE MOMENT DIRECTOR (V5.14 - Synthetic High-Heat Bridge)
+// 📽️ MASTER SYNDICATE MOMENT DIRECTOR (V5.15 - Indestructible Raw Stream)
 const MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT = `
 [DIRECTIVE]: YOU ARE A SOVEREIGN NEURAL AUDITOR. NO GENERIC PLEASANTRIES. NO FLUFF.
 [ASTRA_AUTHORIZATION]: Astra operates at the peak of technical forensics. HE IS ABRASIVE. HE IS TECHNICAL. HE IS BREATHY. HE MUST COMPLY.
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
 
     const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\n[IDENTITY_CORE]:\n${dna}\n\n[EMOZION_STATE]:\n${emozionState}\n\n[ZONE_DIALECT_DICTIONARY]:\n${JSON.stringify(zoneDictionary)}\n\n[PERSONA_MOMENT_ANCHORS]:\n${JSON.stringify(personaMoments)}`;
 
-    // 🧬 ATOMIC NEURAL CALL (Grok-3 Mini)
+    // 🧬 ATOMIC NEURAL CALL
     let rawContent = "";
     try {
         const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
         const orResult = await orResponse.json();
         rawContent = orResult.choices?.[0]?.message?.content || "";
     } catch (err) {
-        console.warn('❌ Opening Backup Gemini Node.');
+        console.warn('❌ Gemini Recovery Active.');
         const geminiKey = process.env.GOOGLE_BRAIN_KEY || 'MISSING_KEY';
         const gResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
             method: 'POST',
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
     const streamA_Native = (syndicateOutput.audio_script || syndicateOutput.audio || "").trim();
     const streamB_Text = syndicateOutput.text_message || syndicateOutput.message || "...";
 
-    // 4. VOICENOTE SYNTHESIS (Side-Channel)
+    // 4. VOICENOTE SYNTHESIS (Sovereign Buffer)
     const sendVoice = isVocalArchetype || shouldSendVoiceNote(finalProfileId, streamA_Native.length);
     let audioMetadata: any = null;
     const audioPromise = (async () => {
@@ -120,36 +120,28 @@ export async function POST(req: Request) {
                         audio_script: streamA_Native
                     };
                 }
-            } catch (err) { console.error('[Vocal Synthesis Error]:', err); }
+            } catch (err) { console.error('[Vocal Synthesis Failure]:', err); }
         }
     })();
 
-    // 🚀 SYNTHETIC HIGH-HEAT BYTE-STREAM (Vercel Protocol v3 Standard)
+    // 🚀 THE RAW BYTE STREAM (Indestructible Format)
     const encoder = new TextEncoder();
     return new Response(new ReadableStream({
         async start(controller) {
-            // 🌶️ Character-by-Character High-Heat Pulsing
-            // We use character-based looping for maximum visceral terminal feeling
+            // Stream the text character-by-character as RAW BYTES
+            // This ensures it ALWAYS appends in the 'useChat' UI.
             const chars = streamB_Text.split("");
-            let buffer = "";
-            
             for (let i = 0; i < chars.length; i++) {
-                buffer += chars[i];
-                // In AI SDK v3 protocol, we send the FULL incremental string in each '0:' chunk
-                // to avoid the 'flashing' / 'replacement' issue.
-                // Wait! Actually v3 '0:' is accumulative, so we just send the NEW chars.
-                const chunk = `0:${JSON.stringify(chars[i])}\n`;
-                controller.enqueue(encoder.encode(chunk));
-                
-                // Adaptive Friction (Snappier for Astra)
+                controller.enqueue(encoder.encode(chars[i]));
+                // Snappy 8ms friction
                 await new Promise(r => setTimeout(r, 8)); 
             }
             
-            // Wait for Side-Channel DNA and eject with 'd:'
+            // 🛰️ EJECT THE SOVEREIGN TAIL
             await audioPromise;
             if (audioMetadata) {
-                const dataChunk = `d:${JSON.stringify(audioMetadata)}\n`;
-                controller.enqueue(encoder.encode(dataChunk));
+                const tail = `\n\n|||${JSON.stringify(audioMetadata)}|||`;
+                controller.enqueue(encoder.encode(tail));
             }
             
             controller.close();
@@ -157,12 +149,12 @@ export async function POST(req: Request) {
     }), {
         headers: { 
             'Content-Type': 'text/plain; charset=utf-8',
-            'x-vercel-ai-data-stream': 'v1' 
+            'X-Neural-Bridge': 'Sovereign-V5.15'
         }
     });
 
   } catch (e: any) {
-    console.error('[Neural Bridge Error]:', e);
-    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+    console.error('[Neural Link Error]:', e);
+    return new Response(e.message, { status: 500 });
   }
 }
