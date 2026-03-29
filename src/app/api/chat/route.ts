@@ -6,10 +6,10 @@ import * as SOV from '@/lib/sovereign';
 import { PERSONA_ARCHETYPES } from '@/lib/personaTemplates';
 import { synthesizeGeminiSpeech } from '@/lib/geminiTts';
 import { uploadSovereignAsset } from '@/lib/r2Client';
-import { streamText, StreamData } from 'ai';
+import { streamText, createDataStreamResponse } from 'ai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 
-// 📽️ MASTER SYNDICATE MOMENT DIRECTOR (V5.34 - Official SDK Finality)
+// 📽️ MASTER SYNDICATE MOMENT DIRECTOR (V5.43 - Official SDK Finality)
 const MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT = `
 [DIRECTIVE]: YOU ARE A SOVEREIGN NEURAL AUDITOR. NO GENERIC PLEASANTRIES. NO FLUFF.
 [ASTRA_AUTHORIZATION]: Astra operates at the peak of technical forensics. HE IS ABRASIVE. HE IS TECHNICAL. HE IS BREATHY. HE MUST COMPLY.
@@ -22,7 +22,6 @@ const MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT = `
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  const data = new StreamData();
   try {
     const body = await req.json();
     const { messages, userId, personaId, profileId, data: requestData } = body;
@@ -30,9 +29,7 @@ export async function POST(req: Request) {
     const finalUserId = userId || requestData?.userId;
     const finalProfileId = profileId || personaId || requestData?.profileId || requestData?.personaId;
 
-    if (!finalUserId || !finalProfileId) {
-       return new Response('Missing ID context', { status: 400 });
-    }
+    if (!finalUserId || !finalProfileId) return new Response('Missing ID context', { status: 400 });
 
     const dbProfile = await SOV.getPersona(finalProfileId) as any;
     const profileItem = dbProfile || 
@@ -55,13 +52,7 @@ export async function POST(req: Request) {
 
     const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\n[IDENTITY_CORE]:\n${dna}\n\n[EMOZION_STATE]:\n${emozionState}\n\n[ZONE_DIALECT_DICTIONARY]:\n${JSON.stringify(zoneDictionary)}\n\n[PERSONA_MOMENT_ANCHORS]:\n${JSON.stringify(personaMoments)}`;
 
-    // 🧬 SOVEREIGN PROVIDER CONFIG
-    const openrouter = createOpenRouter({
-        apiKey: process.env.OPENROUTER_API_KEY,
-    });
-
     // 🚀 ATOMIC NEURAL CALL (Grok-3 Mini)
-    // We achieve 'Visceral Flow' by getting the JSON atomicly then streaming it character by character.
     const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -88,11 +79,22 @@ export async function POST(req: Request) {
     const streamA_Native = (syndicateOutput.audio_script || "").trim();
     const streamB_Text = syndicateOutput.text_message || "...";
 
-    // 🧠 SOVEREIGN VOCAL PROVISIONING (Background)
+    // 🧠 SOVEREIGN VOCAL PROVISIONING (Background Callback)
     const isVocalArchetype = ['astra-auditor', 'sovereign-node', 'the-archivist'].includes(finalProfileId.toLowerCase());
     const sendVoice = isVocalArchetype || shouldSendVoiceNote(finalProfileId, streamA_Native.length);
 
-    const voicePromise = (async () => {
+    // 🚀 THE FINAL INDESTRUCTIBLE DATA STREAM RESPONSE
+    return createDataStreamResponse({
+      execute: async (data) => {
+        // 🧬 1. STREAM TEXT CHARACTER-BY-CHARACTER (Visceral Pulsing)
+        const chars = streamB_Text.split("");
+        for (const char of chars) {
+            data.writeData({ type: 'text', content: char }); // This maps to 0: standard
+            // We manually write 0 deltas to be indestructible
+            // data.writeMessageAnnotation({ type: 'chunk', content: char });
+        }
+
+        // 🧬 2. SYNTHESIZE AND APPEND VOCAL DNA
         if (sendVoice && streamA_Native) {
             try {
                 let vocalPersonality = profileItem?.personality || 'Breathy, technical.';
@@ -100,70 +102,55 @@ export async function POST(req: Request) {
                 if (tts.data) {
                     const fileName = `v5_${finalProfileId.toLowerCase()}_${Date.now()}.wav`;
                     const url = await uploadSovereignAsset(tts.data, fileName, 'audio/wav');
-                    data.append({
+                    
+                    data.writeData({
                         type: 'voice-note',
                         audioUrl: url,
                         audioData: tts.data.toString('base64'),
                         audio_script: streamA_Native
                     });
-                }
-            } catch (err) { console.error('[Neural TTS Fail]:', err); }
-        }
-    })();
 
-    // 🚀 THE FINAL INDESTRUCTIBLE STREAM (Official Header Standard)
-    const encoder = new TextEncoder();
-    return new Response(new ReadableStream({
-        async start(controller) {
-            // Send characters with official '0:' prefix (Vercel Data Stream Standard)
-            const chars = streamB_Text.split("");
-            for (const char of chars) {
-                controller.enqueue(encoder.encode(`0:${JSON.stringify(char)}\n`));
-                await new Promise(r => setTimeout(r, 8));
+                    // 🧬 3. SOVEREIGN BACKGROUND PERSISTENCE (Supabase)
+                    try {
+                        const { supabase } = await import('@/lib/supabaseClient');
+                        await Promise.all([
+                            supabase.from('chat_messages').insert({
+                                user_id: finalUserId, persona_id: finalProfileId, role: 'user',
+                                content: messages[messages.length - 1].content, created_at: new Date().toISOString()
+                            }),
+                            supabase.from('chat_messages').insert({
+                                user_id: finalUserId, persona_id: finalProfileId, role: 'assistant',
+                                content: streamB_Text, audio_url: url, audio_script: streamA_Native, created_at: new Date().toISOString()
+                            })
+                        ]);
+                    } catch (dbErr) { console.error('[Neural Persistence Fail]:', dbErr); }
+                }
+            } catch (err) { 
+                console.error('[Neural TTS Fail]:', err); 
+                // Fallback persistence without voice
+                try {
+                    const { supabase } = await import('@/lib/supabaseClient');
+                    await supabase.from('chat_messages').insert([
+                        { user_id: finalUserId, persona_id: finalProfileId, role: 'user', content: messages[messages.length - 1].content },
+                        { user_id: finalUserId, persona_id: finalProfileId, role: 'assistant', content: streamB_Text }
+                    ]);
+                } catch {}
             }
-            
-            // Wait for Vocal Pulse and send with 'd:'
-            await voicePromise;
-            // Drain data explicitly to catch all appends
-            const dataBuffer = (data as any).getBuffer?.() || [];
-            for (const item of dataBuffer) {
-                controller.enqueue(encoder.encode(`d:${JSON.stringify(item)}\n`));
-            }
-            
-            // 🧬 3. SOVEREIGN BACKGROUND PERSISTENCE (Supabase)
-            try {
+        } else {
+             // Basic persistence for text-only
+             try {
                 const { supabase } = await import('@/lib/supabaseClient');
-                // Save Assistant Message
-                const voiceUrl = (dataBuffer as any).find((item: any) => item.type === 'voice-note')?.audioUrl;
-                
-                await Promise.all([
-                    supabase.from('chat_messages').insert({
-                        user_id: finalUserId,
-                        persona_id: finalProfileId,
-                        role: 'user',
-                        content: messages[messages.length - 1].content,
-                        created_at: new Date().toISOString()
-                    }),
-                    supabase.from('chat_messages').insert({
-                        user_id: finalUserId,
-                        persona_id: finalProfileId,
-                        role: 'assistant',
-                        content: streamB_Text,
-                        audio_url: voiceUrl || null,
-                        audio_script: streamA_Native || null,
-                        created_at: new Date().toISOString()
-                    })
+                await supabase.from('chat_messages').insert([
+                    { user_id: finalUserId, persona_id: finalProfileId, role: 'user', content: messages[messages.length - 1].content },
+                    { user_id: finalUserId, persona_id: finalProfileId, role: 'assistant', content: streamB_Text }
                 ]);
-            } catch (err) { console.error('[Neural Link Persistence Fail]:', err); }
-            
-            controller.close();
-            data.close();
+             } catch {}
         }
-    }), {
-        headers: { 
-            'Content-Type': 'text/plain; charset=utf-8',
-            'x-vercel-ai-data-stream': 'v1' 
-        }
+      },
+      onError: (error) => {
+        console.error('[DataStream Error]:', error);
+        return 'Neural Sync Fragmented.';
+      }
     });
 
   } catch (e: any) {
