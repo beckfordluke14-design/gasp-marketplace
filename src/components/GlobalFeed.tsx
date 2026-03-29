@@ -12,6 +12,9 @@ import BrandingOverlay from '@/components/ui/BrandingOverlay';
 
 interface GlobalFeedProps {
   onSelectProfile: (id: string, initialMsg?: string) => void;
+  profiles?: any[];
+  deadIds?: Set<string>;
+  setDeadIds?: (ids: any) => void;
 }
 
 function ProfileEditor({ profile, isOpen, onClose, onSave }: { profile: Profile, isOpen: boolean, onClose: () => void, onSave: (update: any) => void }) {
@@ -158,9 +161,9 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
       transition={{ duration: 1.2, ease: "easeOut" }}
       whileTap={{ scale: 0.98, transition: { duration: 0.1 } }}
       onClick={handleInteraction}
-      className="relative w-full h-screen overflow-hidden bg-black flex flex-col items-center justify-center border-b border-white/5 last:border-0 cursor-pointer group"
+      className="relative w-full h-[100dvh] overflow-hidden bg-transparent flex flex-col items-center justify-center border-b border-white/5 last:border-0 cursor-pointer group"
     >
-       <div className="absolute inset-0 z-0 bg-black flex items-start md:items-center justify-center transition-all duration-1000 group-active:scale-105 group-active:opacity-80">
+       <div className="absolute inset-0 z-0 bg-transparent flex items-start md:items-center justify-center transition-all duration-1000 group-active:scale-105 group-active:opacity-80">
           {broadcast.type === 'video' ? (
              <>
                 <video src={proxyImg(broadcast.video_url)} autoPlay loop muted playsInline preload="auto" className={`absolute inset-0 w-full h-full object-cover blur-3xl opacity-30 scale-110 pointer-events-none ${broadcast.is_locked ? 'blur-[100px]' : ''}`} />
@@ -172,8 +175,8 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                          <Lock size={40} className="text-[#ffea00]" />
                       </div>
                       <div className="text-center space-y-4">
-                         <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter uppercase text-white drop-shadow-2xl">Lifestyle Vault</h3>
-                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">locked motion session</p>
+                         <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter uppercase text-white drop-shadow-2xl">Private Vault</h3>
+                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">locked video session</p>
                          <button 
                              onClick={(e) => { 
                                   e.stopPropagation(); 
@@ -212,8 +215,8 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                          <Lock size={40} className="text-[#ff00ff]" />
                       </div>
                       <div className="text-center space-y-4">
-                         <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter uppercase text-white drop-shadow-2xl">Vault Drop</h3>
-                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">private archive node</p>
+                         <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter uppercase text-white drop-shadow-2xl">Private Set</h3>
+                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">verified archive</p>
                          <button 
                             onClick={(e) => { 
                                  e.stopPropagation();                                 trackEvent('vault_unlock_intent', profile.id, { type: 'image', price: broadcast.lock_price || COST_VAULT_UNLOCK });
@@ -378,8 +381,10 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
 }
 
 import MobilePulseTicker from './MobilePulseTicker';
+import StoriesRow from './StoriesRow';
+import ProfileSearch from './ProfileSearch';
 
-export default function GlobalFeed({ onSelectProfile }: GlobalFeedProps) {
+export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = new Set(), setDeadIds = () => {} }: GlobalFeedProps) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -608,10 +613,20 @@ export default function GlobalFeed({ onSelectProfile }: GlobalFeedProps) {
   }, [hasMore, items.length, fetchFeed]);
 
   return (
-    <div ref={containerRef} className="flex-1 h-screen overflow-y-auto scroll-smooth no-scrollbar relative w-full touch-pan-y">
+    <div ref={containerRef} className="flex-1 h-screen overflow-y-auto scroll-smooth no-scrollbar relative w-full touch-pan-y bg-transparent">
       
-      {/* 🚀 NEURAL PULSE: Mobile News Node */}
+      {/* 📡 MARKET PULSE: Mobile News Hub */}
       <MobilePulseTicker />
+
+      {/* 📱 MOBILE NAVIGATION CLUSTER: Stories & Search integrated into scroll */}
+      <div className="lg:hidden flex flex-col gap-6 pt-16 pb-8 px-4">
+          <div className="w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl p-0.5">
+             <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
+          </div>
+          <div className="w-full">
+             <StoriesRow profiles={profiles} onSelectProfile={onSelectProfile} />
+          </div>
+      </div>
 
       {items.length > 0 ? (
         items.map((item, index) => (

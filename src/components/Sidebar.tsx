@@ -181,7 +181,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
   return (
     <aside className="flex w-full lg:w-[260px] h-screen bg-transparent backdrop-blur-xl border-r border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 font-outfit transition-all">
       {/* NAVIGATION BLADE (MOBILE ONLY) */}
-      <div className="flex lg:hidden bg-zinc-900/50 backdrop-blur-3xl border-b border-white/5 pt-12">
+      <div className="flex lg:hidden bg-white/5 backdrop-blur-3xl border-b border-white/5 pt-12">
         <NavButton label="Feed" icon={Home} targetView="feed" />
         <NavButton label="Chats" icon={MessageSquare} targetView="chats" />
         <NavButton label="Vault" icon={ShieldCheck} targetView="vault" />
@@ -193,7 +193,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
         {/* VIEW: CHATS */}
         {view === 'chats' && (
           <>
-            {/* 🛰️ NEURAL PULSE HUB: Real-time Intel Ticker */}
+            {/* 🛰️ MARKET PULSE: Real-time Intel Ticker */}
             <NeuralPulseHub />
 
             {/* NEW MESSAGES */}
@@ -202,7 +202,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                     <div className="px-2 mb-4 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <MessageSquare size={10} className="text-[#00ff00]" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00ff00] italic">Unread</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00ff00] italic">Direct Messages</span>
                         </div>
                     </div>
                     <div className="flex flex-col">
@@ -267,8 +267,8 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
         {view === 'vault' && (
            <div className="px-6 space-y-8 animate-in fade-in slide-in-from-left-4 duration-500">
               <div className="space-y-4">
-                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Vault Node</h2>
-                 <Link href="/vault" className="block p-6 rounded-[2rem] bg-zinc-900/60 border border-white/10 hover:border-[#ff00ff]/40 transition-all text-center group">
+                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Private Content</h2>
+                 <Link href="/vault" className="block p-6 rounded-[2rem] bg-white/5 backdrop-blur-3xl border border-white/10 hover:border-[#ff00ff]/40 transition-all text-center group">
                     <ShieldCheck size={32} className="mx-auto text-[#ff00ff] mb-4 group-hover:scale-110 transition-transform" />
                     <p className="text-[12px] font-black text-white uppercase italic font-syncopate">Explore Unlocks</p>
                  </Link>
@@ -276,13 +276,13 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
 
               {/* RE-RENDER WALLET BALANCE HERE FOR VAULT VIEW */}
               <div className="space-y-4">
-                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Credit Stash</h2>
+                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Your Balance</h2>
                  <div className="p-6 rounded-[2rem] bg-white/5 border border-white/10">
                     <div className="flex flex-col items-center gap-2">
-                       <span className="text-[24px] font-black font-syncopate italic text-white leading-none">
-                          {profile?.credit_balance?.toLocaleString() || '0'}
-                       </span>
-                       <span className="text-[8px] font-black text-[#00ff00] uppercase tracking-widest italic">SYNDICATE CREDITS</span>
+                        <span className="text-[24px] font-black font-syncopate italic text-white leading-none">
+                           {profile?.credit_balance?.toLocaleString() || '0'}
+                        </span>
+                        <span className="text-[8px] font-black text-[#00ff00] uppercase tracking-widest italic">Credits</span>
                     </div>
                  </div>
               </div>
@@ -311,7 +311,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                  <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
                        <Zap size={14} className="text-[#00f0ff] animate-pulse" />
-                       <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff] italic">Member Rank</span>
+                       <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff] italic">Account Tier</span>
                     </div>
                  </div>
                  <h3 className="text-[14px] font-black uppercase italic tracking-tighter text-white" style={{ textShadow: rank.shadow }}>

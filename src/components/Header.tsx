@@ -176,8 +176,8 @@ export default function Header({
             </div>
         </header>
 
-         {/* Floating Search Bar & Stories Bridge */}
-         <div className="absolute top-[120%] left-0 right-0 flex flex-col items-center gap-6 pointer-events-auto z-[90]">
+         {/* Desktop Only: Search/Stories Bridge */}
+         <div className="hidden lg:flex absolute top-[120%] left-0 right-0 flex-col items-center gap-6 pointer-events-auto z-[90]">
              {/* Search Bar */}
              <div className="w-full max-w-[320px] md:max-w-xl px-4 flex items-center justify-center">
                  <div className="w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] p-0.5 hover:bg-white/10 transition-all">

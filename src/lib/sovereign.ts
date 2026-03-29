@@ -11,6 +11,14 @@ export async function getPersona(personaId: string) {
   return rows[0] || null;
 }
 
+export async function getPersonaAssets(personaId: string, limit: number = 3) {
+  const [news, vault] = await Promise.all([
+    db.query('SELECT id, title, caption, created_at FROM posts WHERE persona_id = $1 AND is_vault = false ORDER BY created_at DESC LIMIT $2', [personaId, limit]),
+    db.query('SELECT id, caption as title, created_at, is_vault FROM posts WHERE persona_id = $1 AND is_vault = true ORDER BY created_at DESC LIMIT $2', [personaId, limit])
+  ]);
+  return { news: news.rows, vault: vault.rows };
+}
+
 export async function getUserPersonaStats(userId: string, personaId: string) {
   const { rows } = await db.query(
     'SELECT * FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2 LIMIT 1',

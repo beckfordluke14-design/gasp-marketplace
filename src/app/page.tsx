@@ -181,7 +181,7 @@ function MarketplaceContent() {
   if (!mounted) return null;
 
    return (
-    <main className="min-[100dvh] bg-black text-white relative flex flex-col lg:flex-row xl:gap-0 overflow-hidden">
+    <main className="min-[100dvh] bg-transparent text-white relative flex flex-col lg:flex-row xl:gap-0 overflow-hidden">
        <div className="hidden lg:flex h-screen sticky top-0 shrink-0 z-[40]">
            <Sidebar 
               onSelectProfile={handleSelectProfile} 
@@ -199,28 +199,38 @@ function MarketplaceContent() {
                unreadCounts={unreadCounts} 
                onSelectProfile={handleSelectProfile}
             />
-            <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} onOpenMenu={() => setShowProfileList(true)} profiles={randomizedProfiles} onSelectProfile={handleSelectProfile} />
+            <Header 
+               onOpenTopUp={() => setIsTopUpOpen(true)} 
+               deadIds={deadIds} 
+               setDeadIds={setDeadIds} 
+               onOpenMenu={() => setShowProfileList(true)} 
+               profiles={randomizedProfiles} 
+               onSelectProfile={handleSelectProfile} 
+            />
            
            <div className="flex-1 flex flex-col relative pt-12 md:pt-14 mt-4 md:mt-6">
-              {/* 🧬 HEADER-LINKED STORIES AREA: Stories now live in the fixed Header node */}
-             
               {/* STORY TOGGLE PORTAL */}
               <div className="absolute right-6 top-0 z-50 flex items-center gap-3">
                  <button 
                    onClick={() => setShowStories(!showStories)}
-                   className={`w-10 h-10 rounded-xl bg-black/40 backdrop-blur-3xl border border-white/10 flex items-center justify-center text-white/20 hover:text-[#ffea00] transition-all ${!showStories ? 'bg-[#ffea00]/10 text-[#ffea00]' : ''}`}
+                   className={`w-10 h-10 rounded-xl bg-white/5 backdrop-blur-3xl border border-white/10 flex items-center justify-center text-white/20 hover:text-[#ffea00] transition-all ${!showStories ? 'bg-[#ffea00]/10 text-[#ffea00]' : ''}`}
                  >
                     <Zap size={16} className={!showStories ? 'animate-pulse' : ''} />
                  </button>
               </div>
 
               <div className="flex-1 overflow-hidden relative">
-                 <GlobalFeed onSelectProfile={handleSelectProfile} />
+                 <GlobalFeed 
+                    onSelectProfile={handleSelectProfile} 
+                    profiles={randomizedProfiles}
+                    deadIds={deadIds}
+                    setDeadIds={setDeadIds}
+                 />
               </div>
            </div>
         </div>
 
-        {/* 3rd Column Discovery Blade */}
+        {/* 3rd Column Discovery Hub */}
         <RightSidebar 
           onSelectProfile={handleSelectProfile} 
           profiles={randomizedProfiles} 
@@ -302,7 +312,7 @@ function MarketplaceContent() {
               >
                  {/* 🚀 MAIN CONTENT HUB */}
                  <div className="pt-36 lg:pt-32 pb-32">
-                    <button onClick={() => setShowProfileList(false)} className="mb-4 text-[#00f0ff] uppercase text-[10px] font-black">← Close Deck</button>
+                    <button onClick={() => setShowProfileList(false)} className="mb-4 text-[#00f0ff] uppercase text-[10px] font-black">← Close Access</button>
                     <Sidebar 
                        onSelectProfile={(id) => { handleSelectProfile(id); setShowProfileList(false); }} 
                        selectedProfileId={selectedProfileId} 

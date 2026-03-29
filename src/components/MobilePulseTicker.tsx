@@ -46,7 +46,7 @@ export default function MobilePulseTicker() {
 
   // 🛡️ SYNDICATE GLASS: Translucent Intelligence Node
   return (
-    <div className="fixed top-[140px] left-0 right-0 z-[100] h-12 px-6 pointer-events-none">
+    <div className="fixed top-[54px] left-0 right-0 z-[100] h-12 px-6 pointer-events-none">
        <motion.div 
          whileHover={{ scale: 1.02 }}
          whileTap={{ scale: 0.95 }}
@@ -54,7 +54,7 @@ export default function MobilePulseTicker() {
             (e as any).stopPropagation();
             router.push(`/news/${current.persona_id}`);
          }}
-         className="w-full h-full bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl flex items-center justify-between px-5 pointer-events-auto relative overflow-hidden"
+         className="w-full h-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl flex items-center justify-between px-5 pointer-events-auto relative overflow-hidden shadow-[0_0_30px_#00f0ff11]"
        >
           {/* Neural Pulse Background */}
           <motion.div 
@@ -73,7 +73,7 @@ export default function MobilePulseTicker() {
                   exit={{ opacity: 0, x: -20 }}
                   className="flex flex-col gap-0.5"
                 >
-                   <p className="text-[7px] font-black uppercase tracking-[0.3em] text-[#00f0ff]/60 italic">Neural Intel Update // {current.persona_id.split('-')[0]}</p>
+                   <p className="text-[7px] font-black uppercase tracking-[0.3em] text-[#00f0ff]/60 italic">Market Intel // {current.persona_id.split('-')[0]}</p>
                    <span className="text-[10px] font-black uppercase tracking-tight text-white truncate italic leading-none">
                       {current.title}
                    </span>

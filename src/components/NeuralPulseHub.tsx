@@ -6,7 +6,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { initialProfiles } from '@/lib/profiles';
 
-export default function NeuralPulseHub() {
+interface NeuralPulseHubProps {
+  followingIds?: string[];
+  profiles?: any[];
+  unreadCounts?: Record<string, number>;
+  onSelectProfile?: (id: string, initialMsg?: string, profileObj?: any) => void;
+}
+
+export default function NeuralPulseHub({ followingIds, profiles, unreadCounts, onSelectProfile }: NeuralPulseHubProps) {
   const [news, setNews] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const router = useRouter();
@@ -60,7 +67,7 @@ export default function NeuralPulseHub() {
         
         <div className="flex items-center gap-2 mb-3">
            <Radio size={10} className="text-[#00f0ff] animate-pulse" />
-           <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#00f0ff] italic">Neural Pulse</span>
+           <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#00f0ff] italic">Market Pulse</span>
         </div>
 
         <AnimatePresence mode="wait">
@@ -75,7 +82,7 @@ export default function NeuralPulseHub() {
                  {current.title}
               </h4>
               <div className="flex items-center justify-between mt-3">
-                 <span className="text-[7px] font-black uppercase tracking-widest text-white/30 truncate max-w-[100px]">Node: {current.persona_id}</span>
+                 <span className="text-[7px] font-black uppercase tracking-widest text-white/30 truncate max-w-[100px]">Verified: {current.persona_id}</span>
                  <div className="flex items-center gap-1 text-[7px] font-black uppercase text-[#ffea00] italic">
                     Source: Intel <ChevronRight size={8} />
                  </div>

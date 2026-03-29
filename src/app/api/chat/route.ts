@@ -59,7 +59,10 @@ export async function POST(req: Request) {
         toxic: zoneDictionary.toxic?.native || zoneDictionary.greeting.native
     };
 
-    const brainPrompt = `[IDENTITY_CORE]:\n${dna}\n\n[EMOZION_STATE]:\n${emozionState}\n\n[ZONE_DIALECT_DICTIONARY]:\n${JSON.stringify(zoneDictionary)}\n\n[PERSONA_MOMENT_ANCHORS]:\n${JSON.stringify(personaMoments)}\n\n[SYSTEM]: STREET-CODED AUDITOR. { "text_message": "...", "audio_script": "..." }`;
+    const brainAssets = await SOV.getPersonaAssets(finalProfileId);
+    const assetPrompt = `[RECENT_MARKET_INTEL]:\n${JSON.stringify(brainAssets.news)}\n\n[PRIVATE_VAULT_ASSETS]:\n${JSON.stringify(brainAssets.vault)}`;
+
+    const brainPrompt = `[IDENTITY_CORE]:\n${dna}\n\n[EMOZION_STATE]:\n${emozionState}\n\n[ZONE_DIALECT_DICTIONARY]:\n${JSON.stringify(zoneDictionary)}\n\n${assetPrompt}\n\n[PERSONA_MOMENT_ANCHORS]:\n${JSON.stringify(personaMoments)}\n\n[SYSTEM]: STREET-CODED AUDITOR. Be aware of your recent intel and vault items. If the user mentions them, converse/elaborate on the "insider secrets" you've dropped. Encourage them to verify (unlock) more if they want the full story. { "text_message": "...", "audio_script": "..." }`;
 
     // 🚀 ATOMIC NEURAL CALL
     const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {

@@ -1,8 +1,8 @@
 /**
- * 🏁 NEURAL STABILIZATION (v1.0) - SITE RESTORATION
+ * 👑 SOVEREIGN PROFILES (v1.1)
  * 
- * Normalized Terminology: Persona -> Profile.
- * Backend "Personas" table remains, but Frontend uses "Profile" nomenclature.
+ * Simplified terminology: High-IQ Market Insiders.
+ * Backend "Personas" table remains, but Frontend focuses on "Profile" and "Intel".
  */
 
 export interface VaultItem {
@@ -75,8 +75,8 @@ export interface Agency {
 export const initialAgencies: Agency[] = [
   {
     id: '7c9e01f5-b3e3-4d2a-8d3e-9f0e1d2c3b4a',
-    name: 'Independent Syndicate',
-    bio: 'The default elite neural node for unmanaged talent. pure performance, zero friction.',
+    name: 'Verified Independent',
+    bio: 'Elite creators who choose to remain independent. Pure performance, zero friction.',
     owner_id: 'master-uuid-1',
     profiles: []
   }
@@ -99,8 +99,8 @@ export const initialPersonas: Profile[] = [
     culture: 'dominican',
     language: 'spanish',
     syndicate_zone: 'Caribbean',
-    vibe: 'in the penthouse.',
-    occupation: 'Neural Weaver',
+    vibe: 'at the penthouse.',
+    occupation: 'Market Insider',
     image: '/v1.png',
     status: 'online',
     lastSeen: 'just arrived.',
@@ -125,7 +125,7 @@ export function getProfileName(p: any): string {
     // Priority: Display Name -> ID-based Title Case -> Fallback
     if (p.name && p.name !== '') return p.name;
     if (p.id) return p.id.split('-')[0].charAt(0).toUpperCase() + p.id.split('-')[0].slice(1);
-    return "Archive Node";
+    return "Verified Hub";
 }
 
 export function proxyImg(url: any): string {

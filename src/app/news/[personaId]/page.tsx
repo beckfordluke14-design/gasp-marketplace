@@ -63,7 +63,7 @@ export default function NewsHub() {
     <div className="min-h-screen bg-[#050505] text-white font-outfit selection:bg-[#00f0ff] selection:text-black">
       <Header />
       
-      {/* 🚀 NEURAL HEADER: Persona Identity Node */}
+      {/* 🚀 IDENTITY HEADER: Profile Identity Hub */}
       <div className="relative h-60 md:h-80 overflow-hidden border-b border-white/5">
         <Image 
           src={profile.image} 
@@ -88,11 +88,11 @@ export default function NewsHub() {
              animate={{ opacity: 1 }}
              className="text-4xl md:text-6xl font-syncopate font-black uppercase italic tracking-tighter text-white drop-shadow-2xl"
            >
-              {profile.name}<span className="text-[#00f0ff]">.</span>INTEL
+              {profile.name}<span className="text-[#00f0ff]">.</span>PROFILE
            </motion.h1>
            <p className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.4em] text-white/40 mt-4 flex items-center gap-3">
               <Shield size={12} className="text-[#00f0ff]" /> 
-              Sovereign Node ID: {personaId.substring(0, 8)}
+              Verified Hub ID: {personaId.substring(0, 8)}
               <span className="w-1.5 h-1.5 rounded-full bg-[#00ff00] animate-pulse" />
            </p>
         </div>
@@ -110,9 +110,9 @@ export default function NewsHub() {
                   <span className="text-[10px] font-black uppercase text-[#00f0ff]">Total Reports</span>
                   <span className="text-xl font-bold leading-none">{posts.length}</span>
                </div>
-               <button className="h-10 px-6 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                  <CheckSquareIcon /> Subscribed
-               </button>
+               <div className="h-10 px-6 bg-[#00f0ff]/10 border border-[#00f0ff]/20 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-[#00f0ff]">
+                  <Zap size={14} fill="#00f0ff" /> Live Node
+               </div>
             </div>
          </div>
 
@@ -189,9 +189,9 @@ export default function NewsHub() {
             </div>
             
             <div className="space-y-3">
-               <h2 className="text-3xl md:text-5xl font-syncopate font-black uppercase italic tracking-tighter">Stay Sovereign</h2>
+               <h2 className="text-3xl md:text-5xl font-syncopate font-black uppercase italic tracking-tighter">Enter The Hub</h2>
                <p className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.4em] text-[#00f0ff] max-w-lg mx-auto leading-relaxed">
-                  Join the Syndicate premium feed for uncensored leaks and early access to {profile.name}'s Neural Vault.
+                  Gain exclusive intel access and unlock deep-dive market briefings within {profile.name}'s private Vault.
                </p>
             </div>
 
@@ -203,15 +203,15 @@ export default function NewsHub() {
                   Connect Solana Wallet
                </button>
                <button 
-                 onClick={() => router.push(`/vault`)}
+                 onClick={() => router.push(`/?profile=${personaId}&vault=true`)}
                  className="w-full md:w-auto h-14 px-10 bg-black border border-white/20 text-white rounded-2xl font-syncopate font-black uppercase italic tracking-[0.2em] text-[11px] hover:bg-white/5 transition-all active:scale-95"
                >
-                  Enter Private Vault
+                  Unlock Intelligence Vault
                </button>
             </div>
             
             <p className="text-[8px] font-black uppercase text-white/20 tracking-[0.5em] italic">
-               Verification via Phantom / Ledger / Syndicate Node
+               Verification via Phantom / Ledger / Verified Hub
             </p>
          </section>
       </main>
@@ -219,8 +219,8 @@ export default function NewsHub() {
       {/* FOOTER NODE */}
       <footer className="py-20 border-t border-white/5 text-center">
          <div className="opacity-20 hover:opacity-100 transition-opacity duration-700">
-            <span className="text-[10px] font-black uppercase tracking-[1em] text-white">GASP SYNDICATE</span>
-            <p className="text-[8px] text-white/40 mt-4 uppercase font-bold tracking-widest">© 2026 Sovereign AI Intelligence Node</p>
+            <span className="text-[10px] font-black uppercase tracking-[1em] text-white">GASP COLLECTIVE</span>
+            <p className="text-[8px] text-white/40 mt-4 uppercase font-bold tracking-widest">© 2026 Verified AI Intelligence Hub</p>
          </div>
       </footer>
     </div>

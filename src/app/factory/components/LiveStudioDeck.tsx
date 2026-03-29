@@ -83,7 +83,7 @@ export default function LiveStudioDeck({ profile, onClose }: { profile: any, onC
         <div className="flex-1 p-6 md:p-10 space-y-8 overflow-y-auto no-scrollbar border-r border-white/5">
             <div className="flex justify-between items-start">
                <div>
-                  <h3 className="text-[#ff00ff] font-syncopate font-black uppercase tracking-widest text-sm md:text-lg italic">Vision Deck</h3>
+                  <h3 className="text-[#ff00ff] font-syncopate font-black uppercase tracking-widest text-sm md:text-lg italic">Vision Hub</h3>
                   <p className="text-[9px] text-white/20 uppercase tracking-[0.4em] font-black mt-1">Multi-Stage Synthesis Engine</p>
                </div>
                <button onClick={() => setShowHowTo(!showHowTo)} className="p-2 rounded-full bg-white/5 text-white/40 hover:text-[#00f0ff] transition-all">

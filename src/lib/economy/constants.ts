@@ -3,8 +3,8 @@
  * High-End Tiered Economy with Elite Subs & Dynamic Burn Rates.
  */
 
-export const ELITE_SUBSCRIPTION_COST = 19.99; // Monthly USD
-export const ELITE_DISCOUNT_MULTIPLIER = 0.5; // 50% Off for Subscribers
+export const ELITE_WHALE_MARK = 99.99; // Threshold for Whale Status
+export const ELITE_DISCOUNT_MULTIPLIER = 0.5; // 50% Off for Whale Tier Accounts
 
 export interface CreditPackage {
   id: string;
