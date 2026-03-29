@@ -208,9 +208,16 @@ export default function VocalLabPage() {
                                         <Play size={40} className="ml-2" />
                                     </button>
                                 </div>
-                                <div className="bg-black/60 p-4 rounded-xl border border-white/5">
+                                <div className="bg-black/60 p-4 rounded-xl border border-white/5 space-y-3">
                                     <p className="text-[9px] text-white/30 font-black mb-1">DATA URI SOURCE</p>
                                     <p className="text-[8px] truncate opacity-50">{currentAudio.src}</p>
+                                    <a 
+                                      href={currentAudio.src} 
+                                      download={`vocal_audit_${Date.now()}.mp3`}
+                                      className="flex items-center justify-center gap-2 w-full py-2 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-lg text-[9px] font-black uppercase text-[#00f0ff] hover:bg-[#00f0ff] hover:text-black transition-all"
+                                    >
+                                       EXPORT NODE
+                                    </a>
                                 </div>
                             </div>
                         ) : (

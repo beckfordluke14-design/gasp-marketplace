@@ -6,6 +6,7 @@ import { MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT, GLOBAL_SYNDICATE_ZONES_V3 } fr
 import { getPersonaDailyState, shouldSendVoiceNote, getMoodDirective, getTypingStyleDirective } from '@/lib/masterRandomizer';
 import { db } from '@/lib/db';
 import * as SOV from '@/lib/sovereign';
+import { PERSONA_ARCHETYPES } from '@/lib/personaTemplates';
 
 // Force dynamic since we use headers/auth
 export const dynamic = 'force-dynamic';
@@ -56,12 +57,14 @@ export async function POST(req: Request) {
     const randMoodDirective = getMoodDirective(dailyState.mood);
     const randTypingDirective = getTypingStyleDirective(dailyState.typingStyle);
 
-    // 2. Fetch Profile Identity (DB Hybrid: Initial + Factory)
+    // 2. Fetch Profile Identity (DB Hybrid: Initial + Archetypes + Factory)
     const dbProfile = await SOV.getPersona(finalProfileId);
-    const profileItem = dbProfile || initialProfiles.find(p => p.id.toLowerCase() === finalProfileId.toLowerCase());
+    const profileItem = dbProfile || 
+                        initialProfiles.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase()) ||
+                        PERSONA_ARCHETYPES.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase());
     
     if (!profileItem) {
-        return new Response('Profile Node Offline', { status: 404 });
+        return new Response(`Profile Node Offline: ${finalProfileId}`, { status: 404 });
     }
 
     const emozionState = `${randMoodDirective} ${randTypingDirective} Never mention AI. Keep responses short and street-coded. ${profileItem.system_prompt || ''}`;

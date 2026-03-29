@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Pencil, Trash2, Star, Lock, Search,
-  RefreshCw, EyeOff, Check, X,
-  ChevronDown, Image as ImageIcon, ShieldAlert, User, MapPin, Hash, Link2,
-  Package, ExternalLink, ArrowLeftRight, Gift, Copy, UserCheck, UserPlus, Sparkles, FolderHeart
+import { 
+  ChevronDown, Search, Filter, RefreshCw, Pencil, Trash2, Star, Hash, Image as ImageIcon,
+  Settings, Lock, Unlock, EyeOff, Check, X, UserPlus, ArrowLeftRight, 
+  MapPin, Clock, ShieldAlert, Sparkles, UserCheck, Link2, Copy, Gift, FolderHeart, ExternalLink, Package, User
 } from 'lucide-react';
 import { proxyImg } from '@/lib/profiles';
 import NextLink from 'next/link';
@@ -93,7 +92,12 @@ export default function PostStudio() {
   const [mergingPost, setMergingPost]       = useState<PersonaPost | null>(null);
   const [identityTarget, setIdentityTarget] = useState<{ id: string, name: string } | null>(null);
 
-
+  // ── Sovereign Modals State ──
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createDraft, setCreateDraft] = useState({ content_url: '', persona_id: '', caption: '', is_vault: true });
+  
+  const [linkTargetNode, setLinkTargetNode] = useState<LostNode | null>(null);
+  const [linkPersonaId, setLinkPersonaId] = useState('');
   useEffect(() => { setMounted(true); }, []);
 
   const fetchPosts = useCallback(async () => {
@@ -524,15 +528,7 @@ export default function PostStudio() {
             </div>
 
             <button 
-                onClick={() => {
-                   const url = prompt('Enter File URL:');
-                   if (!url) return;
-                   const pId = prompt('Target Persona ID (e.g. santiago-papi):');
-                   if (!pId) return;
-                   const cap = prompt('Caption:');
-                   callAudit('create-post', { persona_id: pId, content_url: url, caption: cap || '', is_vault: true })
-                   .then(() => fetchPosts());
-                }}
+                onClick={() => setIsCreateModalOpen(true)}
                 className="w-10 h-10 shrink-0 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-xl flex items-center justify-center text-[#00f0ff] hover:bg-[#00f0ff] hover:text-black transition-all shadow-[0_0_20px_#00f0ff22]"
                 title="Create New Node"
             >
@@ -629,16 +625,9 @@ export default function PostStudio() {
                       <img src={node.url} alt="" className="w-full h-full object-cover opacity-60" />
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-3 p-4">
                         <button 
-                          onClick={async () => {
-                             const pId = prompt('Restoration Target Persona ID:', node.suggestedPersona);
-                             if (!pId) return;
-                             setLoading(true);
-                             const res = await callAudit('create-post', { persona_id: pId, content_url: node.url, caption: '', is_vault: true });
-                             if (res.success) {
-                               setLostNodes(prev => prev.filter(n => n.id !== node.id));
-                               alert('Neural Link Established.');
-                             }
-                             setLoading(false);
+                          onClick={() => {
+                             setLinkTargetNode(node);
+                             setLinkPersonaId(node.suggestedPersona || '');
                           }}
                           className="w-full h-11 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2"
                         >
@@ -835,63 +824,56 @@ export default function PostStudio() {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-lg px-4"
+            className="fixed bottom-6 left-4 right-4 z-[1000] flex items-center justify-center pointer-events-none"
           >
-             <div className="bg-[#0e0e0e]/95 backdrop-blur-2xl border border-[#00f0ff]/30 rounded-[2rem] p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
-                <div className="flex flex-col items-center sm:items-start pl-0 sm:pl-2">
-                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00f0ff]">{selectedIds.size} Nodes Selected</p>
-                   <button onClick={selectAll} className="text-[8px] font-black uppercase text-white/30 hover:text-white text-left transition-colors">Select Entire Grid</button>
+             <div className="bg-[#0e0e0e]/95 backdrop-blur-3xl border border-white/10 rounded-[2rem] p-3 sm:p-4 flex items-center gap-2 sm:gap-4 pointer-events-auto shadow-[0_20px_100px_rgba(0,0,0,1)]">
+                <div className="px-4 border-r border-white/10 hidden sm:flex flex-col">
+                   <span className="text-[10px] font-black text-[#00f0ff] uppercase">{selectedIds.size} NODES</span>
+                   <span className="text-[8px] font-black text-white/20 uppercase">LINK LOCKED</span>
                 </div>
-
-                <div className="flex flex-wrap items-center justify-center gap-2">
+                
+                <div className="flex items-center gap-2">
                    <button 
                      onClick={async () => {
                        const ids = Array.from(selectedIds);
-                       if (!confirm(`Mark ${ids.length} as Vault (Paid)?`)) return;
+                       if (!confirm(`Vault ${ids.length} nodes?`)) return;
                        setLoading(true);
                        for (const id of ids) await callAudit('update-post', { id, is_vault: true, is_freebie: false });
                        setPosts(prev => prev.map(p => ids.includes(p.id) ? { ...p, is_vault: true, is_freebie: false } : p));
                        cancelSelection();
                        setLoading(false);
                      }}
-                     className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase text-white/40 hover:text-[#ff00ff] hover:border-[#ff00ff]/30 transition-all active:scale-95"
+                     className="h-14 sm:h-12 px-6 sm:px-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-white/60 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest active:scale-90"
                    >
-                     Vault
+                      <Lock size={16} /> <span className="hidden sm:inline">Vault</span>
                    </button>
                    <button 
                      onClick={async () => {
                        const ids = Array.from(selectedIds);
-                       if (!confirm(`Mark ${ids.length} as Gifts (Free)?`)) return;
+                       if (!confirm(`Release ${ids.length} to Feed?`)) return;
                        setLoading(true);
-                       for (const id of ids) await callAudit('update-post', { id, is_freebie: true, is_vault: false });
-                       setPosts(prev => prev.map(p => ids.includes(p.id) ? { ...p, is_freebie: true, is_vault: false } : p));
+                       for (const id of ids) await callAudit('update-post', { id, is_freebie: false, is_vault: false });
+                       setPosts(prev => prev.map(p => ids.includes(p.id) ? { ...p, is_freebie: false, is_vault: false } : p));
                        cancelSelection();
                        setLoading(false);
                      }}
-                     className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase text-white/40 hover:text-[#ff00ff] hover:border-[#ff00ff]/30 transition-all active:scale-95"
+                     className="h-14 sm:h-12 px-6 sm:px-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-white/60 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest active:scale-90"
                    >
-                     Gift
-                   </button>
-                   <button 
-                     onClick={bulkSoftHide}
-                     className="px-4 py-2 bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white/60 hover:bg-orange-500/20 hover:text-orange-200 transition-all active:scale-95"
-                   >
-                     Toss
+                      <Unlock size={16} /> <span className="hidden sm:inline">Feed</span>
                    </button>
                    <button 
                      onClick={bulkHardDelete}
-                     className="px-4 py-2 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:scale-[1.05] transition-all active:scale-95"
+                     className="h-14 sm:h-12 px-6 sm:px-4 bg-red-600/20 border border-red-600/40 rounded-2xl flex items-center justify-center gap-2 text-red-500 hover:bg-red-600 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest active:scale-90 shadow-[0_0_20px_#dc262622]"
                    >
-                     Purge
-                   </button>
-                   <button 
-                     onClick={cancelSelection}
-                     className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-xl text-white/60 hover:text-white transition-all active:scale-95"
-                   >
-                      <X size={18} />
+                      <Trash2 size={16} /> <span className="hidden sm:inline">Purge</span>
                    </button>
                 </div>
 
+                <div className="pl-2 border-l border-white/10">
+                   <button onClick={cancelSelection} className="w-14 sm:w-12 h-14 sm:h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-white/20 hover:text-white transition-all active:scale-90" title="Cancel">
+                      <X size={20} />
+                   </button>
+                </div>
              </div>
           </motion.div>
         )}
@@ -1188,102 +1170,171 @@ export default function PostStudio() {
         )}
       </AnimatePresence>
 
-      {/* ── Solo Activation Modal ── */}
+      {/* ── Create Node Modal (V4.18) ── */}
       <AnimatePresence>
-        {showSoloModal && (
+        {isCreateModalOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[1200] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-4"
-            onClick={() => setShowSoloModal(null)}
+            onClick={() => setIsCreateModalOpen(false)}
           >
              <motion.div
-               initial={{ scale: 0.9, y: 20 }}
+               initial={{ scale: 0.9, y: 30 }}
                animate={{ scale: 1, y: 0 }}
-               exit={{ scale: 0.9, y: 20 }}
-               className="w-full max-w-lg bg-[#0e0e0e] border border-[#00f0ff]/20 rounded-[2.5rem] p-8 space-y-8 shadow-[0_30px_100px_rgba(0,0,0,1)]"
+               exit={{ scale: 0.9, y: 30 }}
+               className="w-full max-w-lg bg-[#0e0e0e] border border-white/10 rounded-[2.5rem] p-8 space-y-8 shadow-[0_30px_100px_rgba(0,0,0,1)]"
                onClick={e => e.stopPropagation()}
              >
                 <div className="flex items-center gap-4">
-                   <div className="w-16 h-16 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/20 flex items-center justify-center text-[#00f0ff]">
-                      <Sparkles size={32} />
+                   <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
+                      <UserPlus size={32} />
                    </div>
                    <div>
-                      <h3 className="text-2xl font-syncopate font-black italic uppercase tracking-tighter text-white">Neural Birth</h3>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">Consolidating node into solo identity</p>
+                      <h3 className="text-2xl font-syncopate font-black italic uppercase tracking-tighter text-white">Create Node</h3>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Manual Fleet Injection</p>
                    </div>
                 </div>
 
-                <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,240,255,0.1)]">
-                   <img src={proxyImg(showSoloModal.content_url)} alt="" className="w-full h-full object-cover opacity-60" />
-                   <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black to-transparent">
-                        <div className="flex items-center gap-2">
-                           <MapPin size={10} className="text-[#00f0ff]" />
-                           <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">{soloDraft.city || 'LOCATION PENDING'}</span>
-                        </div>
-                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-6">
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Assigned Name</label>
-                      <input 
-                        type="text" 
-                        value={soloDraft.name} 
-                        onChange={e => setSoloDraft(s => ({ ...s, name: e.target.value }))}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-black uppercase tracking-widest outline-none focus:border-[#00f0ff]/40 transition-all h-14"
-                        placeholder="VALENTINA"
-                        autoFocus
-                      />
+                       <label className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Asset URL (R2/CDN)</label>
+                       <input 
+                         type="text" 
+                         value={createDraft.content_url} 
+                         onChange={e => setCreateDraft(d => ({ ...d, content_url: e.target.value }))}
+                         className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-mono text-white/60 outline-none focus:border-white/30 transition-all"
+                         placeholder="https://asset.gasp.fun/..."
+                         autoFocus
+                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Identity Age</label>
-                      <input 
-                        type="text" 
-                        value={soloDraft.age} 
-                        onChange={e => setSoloDraft(s => ({ ...s, age: e.target.value }))}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-black uppercase tracking-widest outline-none focus:border-[#00f0ff]/40 transition-all h-14"
-                        placeholder="22"
-                      />
+                       <label className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Target Persona ID</label>
+                       <div className="relative">
+                          <select 
+                            value={createDraft.persona_id}
+                            onChange={e => setCreateDraft(d => ({ ...d, persona_id: e.target.value }))}
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-black uppercase tracking-widest text-white outline-none appearance-none"
+                          >
+                             <option value="">Select Persona</option>
+                             {personas.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                          </select>
+                          <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
+                       </div>
                    </div>
-                   <div className="col-span-2 space-y-2">
-                      <label className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Home Region (City)</label>
-                      <input 
-                        type="text" 
-                        value={soloDraft.city} 
-                        onChange={e => setSoloDraft(s => ({ ...s, city: e.target.value }))}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-black uppercase tracking-widest outline-none focus:border-[#00f0ff]/40 transition-all h-14"
-                        placeholder="RIO DE JANEIRO"
-                      />
+                   <div className="space-y-2">
+                       <label className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Initial Caption</label>
+                       <textarea 
+                         value={createDraft.caption} 
+                         onChange={e => setCreateDraft(d => ({ ...d, caption: e.target.value }))}
+                         className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-white outline-none focus:border-white/30 transition-all h-24"
+                         placeholder="What's she doing?"
+                       />
                    </div>
                 </div>
 
-                <div className="pt-4 space-y-4">
+                <div className="pt-4 flex flex-col gap-3">
                    <button 
                      onClick={async () => {
-                        if (!soloDraft.name) return alert('Name Required.');
+                        if (!createDraft.content_url || !createDraft.persona_id) return alert('Missing fields.');
                         setSaving(true);
-                        const res = await callAudit('solo-persona', { postId: showSoloModal.id, ...soloDraft });
+                        const res = await callAudit('create-post', createDraft);
                         if (res.success) {
-                           setPosts(prev => prev.filter(p => p.id !== showSoloModal.id));
-                           setShowSoloModal(null);
-                           setSoloDraft({ name: '', age: '22', city: '', vibe: 'mysterious' });
-                           alert(`Neural Activation Complete: ${soloDraft.name} has been instantiated.`);
-                        } else alert(res.error || 'Activation Failed.');
+                           setIsCreateModalOpen(false);
+                           setCreateDraft({ content_url: '', persona_id: '', caption: '', is_vault: true });
+                           fetchPosts();
+                        }
                         setSaving(false);
                      }}
-                     disabled={saving || !soloDraft.name}
-                     className="w-full h-16 bg-white text-black rounded-3xl font-syncopate font-black italic uppercase hover:bg-[#00f0ff] transition-all shadow-2xl disabled:opacity-50 flex items-center justify-center gap-3"
+                     disabled={saving || !createDraft.content_url}
+                     className="w-full h-16 bg-white text-black rounded-3xl font-syncopate font-black italic uppercase hover:bg-[#00f0ff] transition-all shadow-2xl disabled:opacity-50"
                    >
-                     {saving ? <RefreshCw className="animate-spin" /> : <><UserPlus size={22} /> Activate Solo Node</>}
+                     {saving ? 'Transmitting...' : 'Inject Node'}
                    </button>
-                   <button onClick={() => setShowSoloModal(null)} className="w-full text-[10px] font-black uppercase text-white/20 hover:text-white transition-colors">Abort Discovery Birth</button>
+                   <button onClick={() => setIsCreateModalOpen(false)} className="w-full text-[10px] font-black uppercase text-white/20 hover:text-white transition-colors">Abort Ingress</button>
                 </div>
              </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Link Lost Node Modal (V4.18) ── */}
+      <AnimatePresence>
+        {linkTargetNode && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[1200] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-4"
+            onClick={() => setLinkTargetNode(null)}
+          >
+             <motion.div
+               initial={{ scale: 0.9, y: 30 }}
+               animate={{ scale: 1, y: 0 }}
+               exit={{ scale: 0.9, y: 30 }}
+               className="w-full max-w-lg bg-[#111] border border-[#ff00ff]/20 rounded-[2.5rem] p-8 space-y-8 shadow-[0_40px_100px_rgba(0,0,0,1)]"
+               onClick={e => e.stopPropagation()}
+             >
+                <div className="flex items-center gap-4">
+                   <div className="w-14 h-14 rounded-2xl bg-[#ff00ff]/10 border border-[#ff00ff]/20 flex items-center justify-center text-[#ff00ff]">
+                      <Link2 size={28} />
+                   </div>
+                   <div>
+                      <h3 className="text-xl font-syncopate font-black italic uppercase tracking-tighter text-white">Neural Restoration</h3>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff]">Resurrecting orphaned archival media</p>
+                   </div>
+                </div>
+
+                <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(255,0,255,0.1)]">
+                   <img src={linkTargetNode.url} alt="" className="w-full h-full object-cover opacity-60" />
+                   <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                      <p className="text-[10px] font-bold text-white uppercase tracking-[0.4em] italic">{linkTargetNode.filename}</p>
+                   </div>
+                </div>
+
+                <div className="space-y-4">
+                   <div className="space-y-2">
+                       <label className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Target Identity (Persona ID)</label>
+                       <div className="relative">
+                          <select 
+                            value={linkPersonaId}
+                            onChange={e => setLinkPersonaId(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-black uppercase tracking-widest text-white outline-none appearance-none"
+                          >
+                             <option value="">Select Target Persona</option>
+                             {personas.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                          </select>
+                          <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
+                       </div>
+                   </div>
+                </div>
+
+                <div className="pt-4 flex flex-col gap-3">
+                   <button 
+                     onClick={async () => {
+                        if (!linkPersonaId) return alert('Select Persona.');
+                        setSaving(true);
+                        const res = await callAudit('create-post', { persona_id: linkPersonaId, content_url: linkTargetNode.url, caption: '', is_vault: true });
+                        if (res.success) {
+                           setLostNodes(prev => prev.filter(n => n.id !== linkTargetNode.id));
+                           setLinkTargetNode(null);
+                           setLinkPersonaId('');
+                        }
+                        setSaving(false);
+                     }}
+                     disabled={saving || !linkPersonaId}
+                     className="w-full h-16 bg-[#ff00ff] text-white rounded-3xl font-syncopate font-black italic uppercase hover:bg-white hover:text-black transition-all shadow-2xl shadow-[#ff00ff]/20"
+                   >
+                     {saving ? <RefreshCw className="animate-spin" /> : 'Re-establish Neural Link'}
+                   </button>
+                   <button onClick={() => setLinkTargetNode(null)} className="w-full text-[10px] font-black uppercase text-white/20 hover:text-white transition-colors">Abort Resonance</button>
+                </div>
+             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
