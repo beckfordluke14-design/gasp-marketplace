@@ -94,7 +94,7 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
         ) : (
            <AnimatePresence>
              {(messages || []).map((m: any) => {
-                // 🧬 SOVEREIGN STEALTH SNIFFER (V5.16 - Indestructible Protocol)
+                // 🧬 SOVEREIGN STEALTH SNIFFER (V5.17 - Indestructible Protocol)
                 const rawContent = m.content || "";
                 let cleanText = rawContent;
                 let voiceMetadata: any = null;
@@ -108,6 +108,8 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
                 }
 
                 const isVoiceMessage = voiceMetadata && voiceMetadata.type === 'voice-note';
+                // 🛰️ RECORDING STATE: If we expect a voice note but the tail hasn't arrived yet
+                const isRecording = m.role === 'assistant' && !isVoiceMessage && messages.indexOf(m) === messages.length - 1 && isLoading;
 
                 return (
                   <motion.div
@@ -126,6 +128,18 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
                       </div>
                     </div>
 
+                    {isRecording && (
+                       <motion.div 
+                         initial={{ opacity: 0, x: -10 }}
+                         animate={{ opacity: 1, x: 0 }}
+                         className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/5 w-fit"
+                       >
+                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_red]" />
+                          <Mic size={14} className="text-white/40" />
+                          <span className="text-[11px] text-white/40 italic">Recording technical pulse...</span>
+                       </motion.div>
+                    )}
+
                     {isVoiceMessage && (
                        <div className="w-full max-w-[85%]">
                           <VoiceNoteBubble 
@@ -139,7 +153,22 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
                     )}
                   </motion.div>
                 );
-             })}
+              })}
+
+              {/* 🛑 TACTILE FEEDBACK: TYPING INDICATOR (V5.17) */}
+              {isLoading && messages.length > 0 && messages[messages.length-1].role === 'user' && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex justify-start items-start gap-2"
+                >
+                   <div className="bg-white/5 border border-white/5 px-4 py-3 rounded-full flex gap-1 items-center">
+                      <div className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.3s]" />
+                      <div className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.15s]" />
+                      <div className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce" />
+                   </div>
+                </motion.div>
+              )}
            </AnimatePresence>
         )}
         {isLoading && (
