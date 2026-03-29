@@ -57,7 +57,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   }
 
   return (
-    <div className="fixed inset-0 m-auto w-[95%] md:w-[480px] h-[85dvh] md:h-screen bg-[#050505]/95 backdrop-blur-3xl border border-white/10 z-[300] shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col pointer-events-auto font-outfit transition-all duration-500 rounded-[2.5rem] overflow-hidden">
+    <div className="fixed inset-x-2 inset-y-10 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-[calc(100%-1rem)] md:w-[480px] h-[calc(100%-5rem)] md:h-[90dvh] bg-[#050505]/95 backdrop-blur-3xl border border-white/10 z-[300] shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col pointer-events-auto font-outfit transition-all duration-500 rounded-[2.5rem] overflow-hidden">
       
       {/* Header */}
       <div className="p-8 border-b border-white/5 flex items-center justify-between bg-black/40">

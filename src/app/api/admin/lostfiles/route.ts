@@ -15,7 +15,7 @@ export async function GET() {
     
     // 🧬 1. IDENTIFY ALL CLAIMED ASSETS (Sync DB)
     const claimedPosts = await db.query('SELECT content_url FROM posts');
-    const claimedUrls = new Set(claimedPosts.map((p: any) => p.content_url));
+    const claimedUrls = new Set(claimedPosts.rows.map((p: any) => p.content_url));
     console.log(`[LostFiles] Audit: Found ${claimedUrls.size} claimed posts in DB.`);
 
     // 🧬 2. SCAN R2 VAULT (Initial Prefix Scan)

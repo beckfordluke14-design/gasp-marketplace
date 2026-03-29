@@ -70,7 +70,7 @@ export default function WalletConnect() {
               initial={{ opacity: 0, scale: 0.9, y: 10, x: '-50%' }}
               animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
               exit={{ opacity: 0, scale: 0.9, y: 10, x: '-50%' }}
-              className="fixed top-20 md:top-32 left-1/2 -translate-x-1/2 z-[1001] w-[calc(100%-2rem)] md:w-80 max-w-sm bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 shadow-[0_30px_100px_rgba(0,0,0,1)] overflow-hidden"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1001] w-[calc(100%-1rem)] md:w-80 max-w-sm bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 shadow-[0_30px_100px_rgba(0,0,0,1)] overflow-hidden"
             >
               <div className="flex items-center justify-between mb-8">
                  <div className="flex flex-col gap-1">

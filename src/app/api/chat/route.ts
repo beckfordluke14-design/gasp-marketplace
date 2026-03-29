@@ -107,7 +107,7 @@ export async function POST(req: Request) {
                     [finalUserId, finalProfileId, 'user', messages[messages.length - 1].content]
                 ),
                 db.query(
-                    'INSERT INTO chat_messages (user_id, persona_id, role, content, audio_url, audio_script, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
+                    'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
                     [finalUserId, finalProfileId, 'assistant', streamB_Text, voiceUrl, streamA_Native]
                 )
             ]);

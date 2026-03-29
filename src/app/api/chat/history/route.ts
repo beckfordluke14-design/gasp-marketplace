@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     }
 
     const { rows } = await db.query(
-        'SELECT id, role, content, audio_url, audio_script, created_at FROM chat_messages WHERE user_id = $1 AND persona_id = $2 ORDER BY created_at ASC LIMIT 50',
+        'SELECT id, role, content, media_url, audio_script, created_at FROM chat_messages WHERE user_id = $1 AND persona_id = $2 ORDER BY created_at ASC LIMIT 50',
         [userId, personaId]
     );
 
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
             id: m.id,
             role: m.role,
             content: m.content,
-            audio_url: m.audio_url,
+            audio_url: m.media_url,
             audio_script: m.audio_script,
             createdAt: m.created_at
         }))
