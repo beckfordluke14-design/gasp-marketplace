@@ -63,15 +63,17 @@ export default function WalletConnect() {
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }}
               onClick={() => toggleModal(false)}
-              className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-md"
+              className="fixed inset-0 z-[5050] bg-black/80 backdrop-blur-md"
             />
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 10, x: '-50%' }}
-              animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
-              exit={{ opacity: 0, scale: 0.9, y: 10, x: '-50%' }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1001] w-[calc(100%-1rem)] md:w-80 max-w-sm bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 shadow-[0_30px_100px_rgba(0,0,0,1)] overflow-hidden"
+              initial={{ opacity: 0, scale: 0.9, y: 100 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 100 }}
+              className="fixed bottom-0 md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-[5100] w-full md:w-80 max-w-sm bg-[#0a0a0a] border-t md:border border-white/10 rounded-t-[2.5rem] md:rounded-3xl p-6 shadow-[0_-30px_100px_rgba(0,0,0,1)] md:shadow-[0_30px_100px_rgba(0,0,0,1)] overflow-hidden"
             >
+              {/* Mobile Handle */}
+              <div className="w-12 h-1.5 rounded-full bg-white/10 mx-auto mb-6 md:hidden" />
               <div className="flex items-center justify-between mb-8">
                  <div className="flex flex-col gap-1">
                     <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white/20">Payment Method</span>
