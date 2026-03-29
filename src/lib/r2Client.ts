@@ -10,7 +10,7 @@ if (!process.env.R2_ACCOUNT_ID || !process.env.R2_ACCESS_KEY || !process.env.R2_
     // Note: These should be provided by the environment, but we'll use the user's provided keys as fallbacks during build.
 }
 
-const ACCOUNT_ID = process.env.R2_ACCOUNT_ID || "4d81b267f711d29b6ff24b4000d9fac";
+const ACCOUNT_ID = process.env.R2_ACCOUNT_ID || "4d81b2676f711d29b6ff24b4000d9fac";
 const ACCESS_KEY = process.env.R2_ACCESS_KEY || "ef83ca9e7a9cd329806d3406c0574f55";
 const SECRET_KEY = process.env.R2_SECRET_KEY || "5e47dff95187bcd7d57656e9b51bd741e8ddd79c4c1d5c72b5d32ad1e4b7bc7c";
 
