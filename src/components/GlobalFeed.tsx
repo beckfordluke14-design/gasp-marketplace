@@ -171,12 +171,18 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
 
                 {broadcast.is_locked ? (
                    <div className="relative z-20 w-full h-full flex flex-col items-center justify-center p-8 bg-black/40 backdrop-blur-3xl">
-                      <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-[#ffea00]/20 border border-[#ffea00]/40 flex items-center justify-center shadow-[0_0_50px_rgba(255,234,0,0.2)] mb-8">
+                       <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-[#ffea00]/20 border border-[#ffea00]/40 flex items-center justify-center shadow-[0_0_50px_rgba(255,234,0,0.2)] mb-8 animate-pulse">
                          <Lock size={40} className="text-[#ffea00]" />
                       </div>
                       <div className="text-center space-y-4">
-                         <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter uppercase text-white drop-shadow-2xl">Private Vault</h3>
-                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">locked video session</p>
+                         <div className="flex items-center justify-center gap-2 mb-2">
+                             <div className="px-3 py-1 bg-red-500/20 border border-red-500/40 rounded-full flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                                <span className="text-[9px] font-black text-red-500 uppercase tracking-[0.2em]">Heat Level 5 // Prime Unlock</span>
+                             </div>
+                         </div>
+                         <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter uppercase text-white drop-shadow-2xl">Private Narrative Vault</h3>
+                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 italic">unfiltered personal intelligence archive</p>
                          <button 
                              onClick={(e) => { 
                                   e.stopPropagation(); 
@@ -211,12 +217,18 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                 
                 {broadcast.is_locked ? (
                    <div className="relative z-20 w-full h-full flex flex-col items-center justify-center p-8 bg-black/40 backdrop-blur-3xl">
-                      <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-[#ff00ff]/20 border border-[#ff00ff]/40 flex items-center justify-center shadow-[0_0_50px_rgba(255,0,255,0.2)] mb-8">
+                       <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-[#ff00ff]/20 border border-[#ff00ff]/40 flex items-center justify-center shadow-[0_0_50px_rgba(255,0,255,0.2)] mb-8 animate-pulse">
                          <Lock size={40} className="text-[#ff00ff]" />
                       </div>
                       <div className="text-center space-y-4">
-                         <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter uppercase text-white drop-shadow-2xl">Private Set</h3>
-                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">verified archive</p>
+                         <div className="flex items-center justify-center gap-2 mb-2">
+                             <div className="px-3 py-1 bg-[#ff00ff]/20 border border-[#ff00ff]/40 rounded-full flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#ff00ff] animate-ping" />
+                                <span className="text-[9px] font-black text-[#ff00ff] uppercase tracking-[0.2em]">Heat Level 4 // Exclusive Set</span>
+                             </div>
+                         </div>
+                         <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter uppercase text-white drop-shadow-2xl">Verified Private Set</h3>
+                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 italic">personal narrative archive leak</p>
                          <button 
                             onClick={(e) => { 
                                  e.stopPropagation();                                 trackEvent('vault_unlock_intent', profile.id, { type: 'image', price: broadcast.lock_price || COST_VAULT_UNLOCK });
@@ -619,11 +631,9 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
       <MobilePulseTicker />
 
       {/* 📱 MOBILE NAVIGATION CLUSTER: Stories & Search integrated into scroll */}
-      <div className="lg:hidden flex flex-col gap-6 pt-16 pb-8 px-4">
-          <div className="w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl p-0.5">
-             <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
-          </div>
-          <div className="w-full">
+      <div className="lg:hidden flex flex-col gap-2 pt-2 pb-4 px-4 overflow-hidden">
+          <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
+          <div className="w-full scale-95 origin-center">
              <StoriesRow profiles={profiles} onSelectProfile={onSelectProfile} />
           </div>
       </div>
@@ -670,6 +680,12 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
           onSave={handleSaveProfile} 
         />
       )}
+
+      {/* 🛡️ STRIPE-SAFE MERCHANT FOOTER */}
+      <div className="p-12 text-center opacity-20 border-t border-white/5 space-y-2">
+          <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white">AllTheseFlows Strategic Media LLC</p>
+          <p className="text-[7px] font-medium uppercase tracking-[0.2em] text-white/60">© 2026 GASP Syndicate. Digital Narrative Content Hub. All Rights Reserved.</p>
+      </div>
     </div>
   );
 }

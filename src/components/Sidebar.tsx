@@ -237,13 +237,36 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 </div>
             )}
 
+            {/* 💎 NARRATIVE INFUSION: Stripe-Safe Credit Conversion */}
+            <div className="mb-8 px-4">
+                <div className="p-5 rounded-[2rem] bg-white/5 border border-white/10 relative overflow-hidden group transition-all hover:bg-white/10">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-[#00f0ff]/5 to-transparent pointer-events-none" />
+                    <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="flex items-center gap-2">
+                             <div className="p-1.5 bg-[#00f0ff]/10 rounded-lg text-[#00f0ff]"><Zap size={14} className="animate-pulse" /></div>
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white italic">Narrative Infusion</span>
+                        </div>
+                        <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest bg-[#00f0ff]/10 px-2 py-0.5 rounded-full">L5 Priority</span>
+                    </div>
+                    <div className="space-y-3 relative z-10">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[9px] text-white/40 uppercase font-black tracking-widest">Available Credits</span>
+                            <span className="text-[12px] font-black text-white italic">0.00</span>
+                        </div>
+                        <button className="w-full py-3 bg-[#00f0ff] text-black rounded-xl text-[9px] font-black uppercase tracking-[0.2em] shadow-[0_10px_20px_rgba(0,240,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all">
+                            Infuse Hub Access
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {/* RECENT CHATS - LAST FIVE */}
             {recentIds.length > 0 && (
                 <div className="mb-8">
                     <div className="px-6 mb-4">
                         <div className="flex items-center gap-2">
                             <Zap size={10} className="text-white/40" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic">Recent</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic">Recent Sessions</span>
                         </div>
                     </div>
                     <div className="flex flex-col px-4">

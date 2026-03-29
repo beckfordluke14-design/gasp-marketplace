@@ -48,35 +48,34 @@ export default function SyncGate() {
             className="w-full max-w-md bg-white/5 border border-white/10 rounded-[3rem] p-10 flex flex-col items-center text-center space-y-8 relative z-10"
           >
             {/* Forbidden Icon */}
-            <div className="w-20 h-20 rounded-[2rem] bg-black/40 border border-[#ff00ff]/30 flex items-center justify-center shadow-[0_0_40px_rgba(255,0,255,0.2)]">
-                <ShieldCheck size={40} className="text-[#ff00ff]" />
+            <div className="w-20 h-20 rounded-[2rem] bg-black/40 border border-[#ffea00]/30 flex items-center justify-center shadow-[0_0_40px_rgba(255,234,0,0.15)]">
+                <ShieldCheck size={40} className="text-[#ffea00]" />
             </div>
 
             <div className="space-y-4">
-              <h1 className="text-3xl font-syncopate font-black uppercase italic tracking-tighter text-white">
-                Welcome to Gasp
+              <h1 className="text-2xl md:text-3xl font-syncopate font-black uppercase italic tracking-tighter text-white">
+                Syndicate Access Hub
               </h1>
-              <p className="text-[11px] text-white/40 uppercase font-black tracking-[0.2em] leading-relaxed">
-                You are entering an <span className="text-white">18+ AI Experience</span>. 
-                By proceeding, you verify you are 18+ and agree to the 
-                <Link href="/terms" target="_blank" className="text-[#00f0ff] uppercase italic hover:underline"> Terms of Service</Link> 
+              <p className="text-[11px] text-white/40 uppercase font-black tracking-[0.2em] leading-relaxed px-4">
+                You are entering a <span className="text-white">Premium Narrative Intelligence Node</span>. 
+                Verify you are 18+ and agree to the 
+                <Link href="/terms" target="_blank" className="text-[#00f0ff] uppercase italic hover:underline ml-1"> Narrative Terms</Link> 
               </p>
-              <p className="text-[9px] text-white/20 uppercase font-black tracking-widest pt-2">
-                 You acknowledge that all profiles and interactions on this platform are <span className="text-white/40">AI-generated</span> for entertainment.
+              <p className="text-[8px] text-white/20 uppercase font-black tracking-widest pt-2 px-6">
+                 All personas and intel streams are <span className="text-white/40">Sovereign AI-generated</span>. 
               </p>
             </div>
 
             <button
                onClick={handleAgree}
-               className="group w-full h-16 bg-[#ffea00] text-black rounded-2xl font-syncopate font-black uppercase italic tracking-widest text-[11px] shadow-[0_10px_40px_rgba(255,234,0,0.2)] hover:bg-white transition-all active:scale-95 flex items-center justify-center gap-3"
+               className="group w-full h-16 bg-[#00f0ff] text-black rounded-2xl font-syncopate font-black uppercase italic tracking-widest text-[11px] shadow-[0_10px_40px_rgba(0,240,255,0.2)] hover:bg-white transition-all active:scale-95 flex items-center justify-center gap-3"
             >
-               Enter Platform
+               Authorize Uplink
                <Zap size={16} className="text-black group-hover:scale-125 transition-transform" />
             </button>
 
             <div className="flex flex-col gap-2 pt-2">
-               <p className="text-[8px] text-white/20 uppercase font-black tracking-widest">AI Content Enabled</p>
-               <p className="text-[8px] text-white/20 uppercase font-black tracking-widest">© 2026 GASP.FUN LLC</p>
+               <p className="text-[8px] text-white/20 uppercase font-black tracking-widest italic opacity-40">AllTheseFlows Strategic Media LLC</p>
             </div>
           </motion.div>
         </motion.div>

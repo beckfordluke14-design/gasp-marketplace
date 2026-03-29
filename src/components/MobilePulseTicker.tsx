@@ -46,16 +46,16 @@ export default function MobilePulseTicker() {
 
   // 🛡️ SYNDICATE GLASS: Translucent Intelligence Node
   return (
-    <div className="fixed top-[54px] left-0 right-0 z-[100] h-12 px-6 pointer-events-none">
-       <motion.div 
-         whileHover={{ scale: 1.02 }}
-         whileTap={{ scale: 0.95 }}
-         onClick={(e) => {
-            (e as any).stopPropagation();
-            router.push(`/news/${current.persona_id}`);
-         }}
-         className="w-full h-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl flex items-center justify-between px-5 pointer-events-auto relative overflow-hidden shadow-[0_0_30px_#00f0ff11]"
-       >
+     <div className="fixed top-[54px] left-0 right-0 z-[100] h-10 px-6 pointer-events-none">
+        <motion.div 
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={(e) => {
+             (e as any).stopPropagation();
+             router.push(`/news/${current.persona_id}`);
+          }}
+          className="w-full h-full bg-transparent flex items-center justify-between px-2 pointer-events-auto relative overflow-hidden"
+        >
           {/* Neural Pulse Background */}
           <motion.div 
             animate={{ opacity: [0.1, 0.3, 0.1] }}
@@ -73,10 +73,10 @@ export default function MobilePulseTicker() {
                   exit={{ opacity: 0, x: -20 }}
                   className="flex flex-col gap-0.5"
                 >
-                   <p className="text-[7px] font-black uppercase tracking-[0.3em] text-[#00f0ff]/60 italic">Market Intel // {current.persona_id.split('-')[0]}</p>
-                   <span className="text-[10px] font-black uppercase tracking-tight text-white truncate italic leading-none">
-                      {current.title}
-                   </span>
+                    <p className="text-[6px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic opacity-80 leading-none">Market Intel // {current.persona_id.split('-')[0]}</p>
+                    <span className="text-[9px] font-black uppercase tracking-tight text-white/90 truncate italic leading-none pt-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                       {current.title}
+                    </span>
                 </motion.div>
              </AnimatePresence>
           </div>
