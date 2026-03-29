@@ -18,7 +18,19 @@ export async function POST(req: Request) {
 
     switch (action) {
       case 'chat-context': {
-        console.log(`📡 [Neural Sync] Decrypting context for: ${userId} <-> ${personaId}`);
+        const { guestId } = payload;
+        console.log(`📡 [Neural Sync] Decrypting context for: ${userId} <-> ${personaId} (GuestBridge: ${guestId})`);
+
+        // 🧬 NEURAL BRIDGE (IDENTITY MERGE): If a guest logs in, migrate their messages to the steady user.id
+        if (guestId && userId !== guestId && userId.startsWith('did:')) {
+           try {
+              console.log(`🧠 [Neural Bridge] Migrating Guest ${guestId} to Member ${userId}`);
+              await db.query('UPDATE chat_messages SET user_id = $1 WHERE user_id = $2', [userId, guestId]);
+              await db.query('UPDATE user_relationships SET user_id = $1 WHERE user_id = $2 ON CONFLICT DO NOTHING', [userId, guestId]);
+              // Also update balance/unlocks if needed (already handled by userId usually, but good practice)
+              await db.query('UPDATE user_vault_unlocks SET user_id = $1 WHERE user_id = $2 ON CONFLICT DO NOTHING', [userId, guestId]);
+           } catch (mergeErr) { console.warn('[Neural Bridge Fail]:', mergeErr); }
+        }
 
         // 🛡️ SOVEREIGN BRIDGE: Each query is individually fault-tolerant.
         // If legacy tables (persona_vault) don't exist on Railway, we return [] and keep going.

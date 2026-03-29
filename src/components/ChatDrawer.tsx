@@ -187,7 +187,7 @@ export default function ChatDrawer({
       try {
         const res = await fetch('/api/rpc/db', {
             method: 'POST',
-            body: JSON.stringify({ action: 'chat-context', payload: { userId: idToUse, personaId: profileId } })
+            body: JSON.stringify({ action: 'chat-context', payload: { userId: idToUse, guestId, personaId: profileId } })
         });
         const result = await res.json();
         if (result.success) {
