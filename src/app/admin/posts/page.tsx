@@ -97,7 +97,11 @@ export default function PostStudio() {
   const [createDraft, setCreateDraft] = useState({ content_url: '', persona_id: '', caption: '', is_vault: true });
   
   const [linkTargetNode, setLinkTargetNode] = useState<LostNode | null>(null);
-  const [linkPersonaId, setLinkPersonaId] = useState('');
+  const [linkPersonaId, setLinkPersonaId]   = useState('');
+  const [linkIsVault, setLinkIsVault]       = useState(true);
+  const [linkIsGallery, setLinkIsGallery]   = useState(false);
+  const [linkIsHero, setLinkIsHero]         = useState(false);
+  const [isLostPickerOpen, setIsLostPickerOpen] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
   const fetchPosts = useCallback(async () => {
@@ -610,6 +614,22 @@ export default function PostStudio() {
               </div>
             )}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+               {/* 🧬 ARCHIVAL BRIDGE: Quick-link lost files to the active persona filter */}
+               {personaFilter !== 'all' && personaFilter !== 'orphans' && (
+                 <motion.button
+                   layout
+                   onClick={() => { setFilterMode('lost'); setLinkPersonaId(personaFilter); }}
+                   className="relative aspect-[3/4] bg-[#ff00ff]/5 border-2 border-dashed border-[#ff00ff]/30 rounded-2xl flex flex-col items-center justify-center gap-3 group hover:bg-[#ff00ff]/10 hover:border-[#ff00ff]/60 transition-all p-6 text-center"
+                 >
+                   <div className="w-12 h-12 rounded-full bg-[#ff00ff]/10 flex items-center justify-center text-[#ff00ff] group-hover:scale-110 transition-transform">
+                     <Link2 size={24} />
+                   </div>
+                   <div className="space-y-1">
+                     <p className="text-[10px] font-black uppercase text-white/60 tracking-widest group-hover:text-white transition-colors">Archival Link</p>
+                     <p className="text-[8px] font-bold text-[#ff00ff]/60 uppercase tracking-wider leading-none">Add from Lost Archives</p>
+                   </div>
+                 </motion.button>
+               )}
             <AnimatePresence mode="popLayout">
               {filterMode === 'lost' ? (
                 lostNodes.map(node => (
@@ -984,13 +1004,22 @@ export default function PostStudio() {
 
                     <label className="block space-y-2">
                       <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-1.5"><Link2 size={10} />Content URL</span>
-                      <input
-                        type="text"
-                        value={draft.content_url}
-                        onChange={e => setDraft(d => d ? { ...d, content_url: e.target.value } : d)}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-3 text-xs font-mono text-white/70 focus:border-[#00f0ff]/50 outline-none transition-all"
-                        placeholder="https://asset.gasp.fun/..."
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={draft.content_url}
+                          onChange={e => setDraft(d => d ? { ...d, content_url: e.target.value } : d)}
+                          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-3 text-xs font-mono text-white/70 focus:border-[#00f0ff]/50 outline-none transition-all"
+                          placeholder="https://asset.gasp.fun/..."
+                        />
+                        <button 
+                          onClick={() => setIsLostPickerOpen(true)}
+                          className="w-16 bg-[#ff00ff]/20 border border-[#ff00ff]/30 rounded-xl flex items-center justify-center text-[#ff00ff] hover:bg-[#ff00ff]/40 transition-all shadow-[0_0_20px_rgba(255,0,255,0.1)]"
+                          title="Pick from Lost Archives"
+                        >
+                           <FolderHeart size={18} />
+                        </button>
+                      </div>
                     </label>
 
                     {/* Vault / Hero / Gift / Gallery toggles */}
@@ -1308,6 +1337,28 @@ export default function PostStudio() {
                           <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
                        </div>
                    </div>
+
+                   {/* ── Visual Status Toggles ── */}
+                   <div className="grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => { setLinkIsVault(!linkIsVault); if (!linkIsVault) setLinkIsGallery(false); }}
+                        className={`py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${linkIsVault ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border border-white/10 text-white/40'}`}
+                      >
+                        <Lock size={13} /> {linkIsVault ? 'Vault ✓' : 'Set Vault'}
+                      </button>
+                      <button
+                        onClick={() => setLinkIsHero(!linkIsHero)}
+                        className={`py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${linkIsHero ? 'bg-[#ffea00]/20 border border-[#ffea00]/40 text-[#ffea00]' : 'bg-white/5 border border-white/10 text-white/40'}`}
+                      >
+                        <Star size={13} /> {linkIsHero ? 'Hero ✓' : 'Set Hero'}
+                      </button>
+                      <button
+                        onClick={() => { setLinkIsGallery(!linkIsGallery); if (!linkIsGallery) setLinkIsVault(false); }}
+                        className={`py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex flex-col items-center justify-center gap-1 ${linkIsGallery ? 'bg-[#00f0ff]/20 border border-[#00f0ff]/40 text-[#00f0ff]' : 'bg-white/5 border border-white/10 text-white/40'}`}
+                      >
+                        <FolderHeart size={13} /> {linkIsGallery ? 'Gallery ✓' : 'Set Gallery'}
+                      </button>
+                   </div>
                 </div>
 
                 <div className="pt-4 flex flex-col gap-3">
@@ -1315,12 +1366,21 @@ export default function PostStudio() {
                      onClick={async () => {
                         if (!linkPersonaId) return alert('Select Persona.');
                         setSaving(true);
-                        const res = await callAudit('create-post', { persona_id: linkPersonaId, content_url: linkTargetNode.url, caption: '', is_vault: true });
-                        if (res.success) {
-                           setLostNodes(prev => prev.filter(n => n.id !== linkTargetNode.id));
-                           setLinkTargetNode(null);
-                           setLinkPersonaId('');
-                        }
+                        const res = await callAudit('create-post', { 
+                           persona_id: linkPersonaId, 
+                           content_url: linkTargetNode.url, 
+                           caption: '', 
+                           is_vault: linkIsVault,
+                           is_featured: linkIsHero,
+                           is_gallery: linkIsGallery
+                         });
+                         if (res.success) {
+                            setLostNodes(prev => prev.filter(n => n.id !== linkTargetNode.id));
+                            if (linkIsHero) await callAudit('update-persona', { id: linkPersonaId, seed_image_url: linkTargetNode.url });
+                            setLinkTargetNode(null);
+                            setLinkPersonaId('');
+                            fetchPosts();
+                         }
                         setSaving(false);
                      }}
                      disabled={saving || !linkPersonaId}
@@ -1423,6 +1483,69 @@ export default function PostStudio() {
                      {saving ? <RefreshCw className="animate-spin" /> : 'Start Neural Pulse'}
                    </button>
                    <button onClick={() => setShowSoloModal(null)} className="w-full text-[10px] font-black uppercase text-white/20 hover:text-white transition-colors">Abort Resonance</button>
+                </div>
+             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Archival Media Picker (V6.1) ── */}
+      <AnimatePresence>
+        {isLostPickerOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[2200] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-4 sm:p-10"
+            onClick={() => setIsLostPickerOpen(false)}
+          >
+             <motion.div
+               initial={{ scale: 0.9, y: 30 }}
+               animate={{ scale: 1, y: 0 }}
+               exit={{ scale: 0.9, y: 30 }}
+               className="w-full max-w-5xl h-full max-h-[90vh] bg-[#0e0e0e] border border-white/10 rounded-[3rem] p-6 sm:p-10 space-y-8 shadow-[0_40px_100px_rgba(0,0,0,1)] flex flex-col"
+               onClick={e => e.stopPropagation()}
+             >
+                <div className="flex items-center justify-between">
+                   <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-[#ff00ff]/10 border border-[#ff00ff]/20 flex items-center justify-center text-[#ff00ff]">
+                        <Package size={28} />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-syncopate font-black italic uppercase tracking-tighter text-white leading-none">Archival Pulse</h3>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff] mt-2">Selecting content from orphaned media R2</p>
+                      </div>
+                   </div>
+                   <button onClick={() => setIsLostPickerOpen(false)} className="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all">
+                      <X size={24} />
+                   </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto no-scrollbar pr-2">
+                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {lostNodes.map(node => (
+                         <button
+                           key={node.id}
+                           onClick={() => {
+                              if (draft) setDraft({ ...draft, content_url: node.url });
+                              setIsLostPickerOpen(false);
+                           }}
+                           className="group relative aspect-[3/4] bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden hover:border-[#ff00ff]/60 transition-all text-left"
+                         >
+                            <img src={node.url} alt="" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="absolute bottom-3 left-3 right-3 z-10 translate-y-2 group-hover:translate-y-0 transition-transform">
+                               <p className="text-[8px] font-black uppercase text-white tracking-widest truncate">{node.filename}</p>
+                               <p className="text-[7px] font-black uppercase text-[#ff00ff] tracking-widest mt-1">Select Asset</p>
+                            </div>
+                         </button>
+                      ))}
+                   </div>
+                </div>
+
+                <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+                   <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.3em]">Status: {lostNodes.length} Archival Nodes Loaded</p>
+                   <button onClick={() => setIsLostPickerOpen(false)} className="px-10 h-14 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase text-white/40 hover:text-white transition-all">Abort Selection</button>
                 </div>
              </motion.div>
           </motion.div>
