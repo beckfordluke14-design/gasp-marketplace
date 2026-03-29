@@ -64,6 +64,8 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chatData, setChatData] = useState<any[]>([]);
+  const [isRequestingVoice, setIsRequestingVoice] = useState(false);
+
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -158,6 +160,8 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
     } finally {
       setIsLoading(false);
       setIsTyping(false);
+      // 💸 Trigger instant balance refresh in the header after credit burn
+      window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
     }
   }, [messages, isLoading, idToUse, profileId]);
 
@@ -202,6 +206,44 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
     sendMessage(input);
   };
 
+  // 🎙️ VOICE NOTE REQUEST: Charges 1,000 credits and forces a voice note response
+  const requestVoiceNote = async () => {
+    if (isRequestingVoice || isLoading) return;
+    const guestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
+    const userId = idToUse;
+    if (!userId || userId.startsWith('guest-')) {
+      setShowLimitCTA(true);
+      return;
+    }
+
+    setIsRequestingVoice(true);
+    try {
+      // 1. Deduct 1,000 credits atomically
+      const spendRes = await fetch('/api/economy/balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, action: 'spend', amount: 1000, type: 'voice_note_request', meta: { personaId: profileId } })
+      });
+      const spendData = await spendRes.json();
+
+      if (!spendData.success) {
+        setShowInsufficientFunds(true);
+        return;
+      }
+
+      // 2. Refresh balance display immediately
+      window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+
+      // 3. Send a hidden trigger message that forces voice generation
+      await sendMessage('[VOICE_NOTE_REQUEST]: Send me a voice message right now. I want to hear your voice.');
+    } catch (err: any) {
+      console.error('[VoiceRequest] Failed:', err.message);
+    } finally {
+      setIsRequestingVoice(false);
+    }
+  };
+
+
 
   const unlockItem = async (item: any) => {
      setIsProcessing(true);
@@ -213,13 +255,11 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
         const result = await res.json();
         if (result.success) {
            setVaultItems(prev => prev.map(v => v.id === item.id || v.mediaId === item.id ? { ...v, is_unlocked: true } : v));
-           // Pulse check: Sync profile credits in context if possible
-           window.dispatchEvent(new CustomEvent('gasp_credits_updated'));
+           // 💸 Trigger instant balance refresh in the header
+           window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
         } else {
-            // ⛽ RECHARGE TRIGGER: Push to store if desynced
-            if (result.error?.includes('balance') || result.error?.includes('funds')) {
+            if (result.error?.includes('balance') || result.error?.includes('funds') || result.error?.includes('Insufficient')) {
                setShowVaultCTA(true);
-               // Also sync current balance if possible
                if (result.balance !== undefined) setCurrentBalance(result.balance);
             } else {
                alert(`Error: ${result.error || 'Connection error'}`);
@@ -473,7 +513,18 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
              >
                 <div className="flex items-center gap-5 text-white/40">
                    <button type="button" className="hover:text-white transition-colors"><Plus size={22} /></button>
-                   <button type="button" onClick={() => {}} className="hover:text-white transition-colors"><Mic size={22} /></button>
+                   <button 
+                     type="button" 
+                     onClick={requestVoiceNote}
+                     disabled={isRequestingVoice || isLoading}
+                     title="Request Voice Note · 1,000 credits"
+                     className={`transition-colors relative ${isRequestingVoice ? 'text-[#00f0ff] animate-pulse' : 'hover:text-[#00f0ff]'}`}
+                   >
+                     {isRequestingVoice 
+                       ? <div className="w-[22px] h-[22px] rounded-full border-2 border-[#00f0ff] border-t-transparent animate-spin" />
+                       : <Mic size={22} />
+                     }
+                   </button>
                    <button type="button" onClick={() => setShowGifts(!showGifts)} className="hover:text-[#ff00ff] transition-colors">
                       <Zap size={20} />
                    </button>

@@ -82,7 +82,24 @@ export default function VerdadChatPage(props: any) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [activeTab, setActiveTab] = useState<'chat' | 'vault'>('chat');
-  const [userBalance, setUserBalance] = useState(150); // MOCK BALANCE
+  const [userBalance, setUserBalance] = useState(0);
+
+  // Fetch real balance from the Sovereign Ledger
+  useEffect(() => {
+    if (!userId || userId === 'guest') return;
+    fetch(`/api/economy/balance?userId=${userId}`)
+      .then(r => r.json())
+      .then(d => { if (d.success) setUserBalance(d.balance); })
+      .catch(() => {});
+    const onRefresh = () => {
+      fetch(`/api/economy/balance?userId=${userId}`)
+        .then(r => r.json())
+        .then(d => { if (d.success) setUserBalance(d.balance); })
+        .catch(() => {});
+    };
+    window.addEventListener('gasp_balance_refresh', onRefresh);
+    return () => window.removeEventListener('gasp_balance_refresh', onRefresh);
+  }, [userId]);
   const [isTipModalOpen, setIsTipModalOpen] = useState(false);
   const [unlockedMedia, setUnlockedMedia] = useState<Record<string, string>>({}); // mediaId -> full_url
   const [dbProfile, setDbProfile] = useState<any>(null);
@@ -149,6 +166,7 @@ export default function VerdadChatPage(props: any) {
     },
     onFinish: () => {
         setIsTyping(false);
+        window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
     },
     onError: (err: any) => {
         setIsTyping(false);
@@ -228,8 +246,7 @@ export default function VerdadChatPage(props: any) {
         
         if (res.ok && state.success) {
             setUnlockedMedia(prev => ({ ...prev, [itemId]: item.full }));
-            // Update local balance immediately
-            setUserBalance(state.balance);
+            window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
             return true;
         } else {
             console.error('Unlock failed', state.error);

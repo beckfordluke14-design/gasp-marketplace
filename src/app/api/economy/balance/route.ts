@@ -10,20 +10,7 @@ export async function GET(req: Request) {
   if (!userId) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
   try {
-    // 🛡️ SOVEREIGN ACCURACY protocol: Exhaustive search for the authoritative credit node
-    
-    // 🛸 Step 1: Check the Native Neural Wallet (Railway format)
-    const { rows: wallets } = await db.query(
-        'SELECT * FROM wallets WHERE user_id = $1 LIMIT 1', 
-        [userId]
-    );
-    if (wallets && wallets.length > 0) {
-      const w = wallets[0];
-      const balance = w.credit_balance !== undefined ? w.credit_balance : (w.balance || 0);
-      return NextResponse.json({ success: true, balance });
-    }
-
-    // 🛸 Step 2: Check the Legacy Auth Profile (Supabase/Hybrid format)
+    // 🛡️ SINGLE SOURCE OF TRUTH: profiles table is the authoritative credit node
     const { rows: profiles } = await db.query(
         'SELECT credit_balance FROM profiles WHERE id = $1 LIMIT 1', 
         [userId]
@@ -32,11 +19,10 @@ export async function GET(req: Request) {
        return NextResponse.json({ success: true, balance: profiles[0].credit_balance || 0 });
     }
     
-    // 🛸 Step 3: Explicit fallback for Guest Nodes
-    // Guests start with 1,000 Credits ($1.00 Value)
+    // Fallback for Guest Nodes
     return NextResponse.json({ 
       success: true, 
-      balance: 1000,
+      balance: 0,
       is_guest: true
     });
 
@@ -50,16 +36,51 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-    const { userId, action } = await req.json();
+    const { userId, action, amount, type, meta } = await req.json();
     if (!userId) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
     try {
+        // ── ACTION: SPEND CREDITS ──
+        if (action === 'spend') {
+            if (!amount || amount <= 0) return NextResponse.json({ success: false, error: 'Invalid amount' }, { status: 400 });
+
+            // Atomic deduction: only succeeds if balance >= amount
+            const { rows: updated } = await db.query(`
+                UPDATE profiles 
+                SET credit_balance = credit_balance - $1, updated_at = NOW()
+                WHERE id = $2 AND credit_balance >= $1
+                RETURNING credit_balance
+            `, [amount, userId]);
+
+            if (updated.length === 0) {
+                const { rows: check } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1', [userId]);
+                const currentBal = check[0]?.credit_balance ?? 0;
+                return NextResponse.json({ 
+                    success: false, 
+                    error: 'Insufficient Balance', 
+                    balance: currentBal 
+                }, { status: 402 });
+            }
+
+            // Log transaction
+            try {
+                await db.query(`
+                    INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
+                    VALUES ($1, $2, $3, 'syndicate_core', $4, NOW())
+                `, [userId, amount, type || 'spend', JSON.stringify(meta || {})]);
+            } catch (logErr: any) {
+                console.warn('[Economy] Transaction log failed (non-blocking):', logErr.message);
+            }
+
+            return NextResponse.json({ success: true, balance: updated[0].credit_balance });
+        }
+
+        // ── ACTION: STARTER CLAIM ──
         if (action === 'starter_claim') {
-            console.log(`🏦 [Economy] Processing Starter Claim (5,000 bp) for ${userId}...`);
+            console.log(`🏦 [Economy] Processing Starter Claim (1,500 bp) for ${userId}...`);
             
             const clientIP = req.headers.get('x-forwarded-for') || 'unknown';
 
-            // 🛡️ SYBIL PREVENTION: Check if this IP or Fingerprint has claimed in the last 24 hours
             const { rows: claims } = await db.query(
                 `SELECT 1 FROM transactions 
                  WHERE (user_id = $1 OR meta->>'ip' = $2) 
@@ -73,18 +94,14 @@ export async function POST(req: Request) {
                return NextResponse.json({ success: false, error: 'Genesis bonus already claimed on this device.' }, { status: 403 });
             }
 
-            // ATOMIC TRANSACTION: Claim Credits & Log Ledger
             await db.query('BEGIN');
             try {
-                // 1. Credit the Profile
                 await db.query(`
                     UPDATE profiles 
-                    SET credit_balance = credit_balance + 1500,
-                        updated_at = NOW()
+                    SET credit_balance = credit_balance + 1500, updated_at = NOW()
                     WHERE id = $1
                 `, [userId]);
 
-                // 2. Log Transaction with IP Metadata for Fingerprinting
                 await db.query(`
                     INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
                     VALUES ($1, 1500, 'starter_claim', 'syndicate_genesis', $2, NOW())
@@ -97,9 +114,10 @@ export async function POST(req: Request) {
                 throw err;
             }
         }
+
         return NextResponse.json({ success: false, error: 'Invalid Action' }, { status: 400 });
     } catch (e: any) {
-        console.error('[Economy] Claim Failure:', e.message);
+        console.error('[Economy] Action Failure:', e.message);
         return NextResponse.json({ success: false, error: e.message }, { status: 500 });
     }
 }

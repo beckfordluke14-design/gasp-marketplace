@@ -33,9 +33,17 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
 
   useEffect(() => {
     fetchBalance();
-    const interval = setInterval(fetchBalance, 10000);
-    return () => clearInterval(interval);
-  }, []);
+    const interval = setInterval(fetchBalance, 3000); // Poll every 3s for real-time feel
+
+    // Listen for immediate refresh events after any spend
+    const onSpend = () => setTimeout(fetchBalance, 500); // slight debounce for DB to commit
+    window.addEventListener('gasp_balance_refresh', onSpend);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('gasp_balance_refresh', onSpend);
+    };
+  }, [user?.id]);
 
   const claimStarter = async () => {
      const guestId = localStorage.getItem('gasp_guest_id');

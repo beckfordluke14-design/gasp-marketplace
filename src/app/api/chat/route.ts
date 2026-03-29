@@ -184,7 +184,9 @@ export async function POST(req: Request) {
             const userMsgCount = messages.filter((m: any) => m.role === 'user').length;
             
             // 🛡️ VOICE IDENTITY GATE: Only authenticated users get the AI voice (save costs on guests)
-            const sendVoice = isGuest ? false : shouldSendVoiceNote(finalProfileId, streamA_Native.length);
+            const lastMsg = messages[messages.length - 1]?.content || '';
+            const isVoiceForced = lastMsg.includes('[VOICE_NOTE_REQUEST]');
+            const sendVoice = isGuest ? false : (isVoiceForced || shouldSendVoiceNote(finalProfileId, streamA_Native.length));
             
             if (sendVoice) {
               try {
@@ -209,10 +211,23 @@ export async function POST(req: Request) {
 
             // 🛡️ SOVEREIGN PERSISTENCE: Fire-and-forget — NEVER block the stream
             const lastUserMessage = messages.filter((m: any) => m.role === 'user').pop();
-            const burnAmount = 50; // Standard Text Burn Rate
+            const burnAmount = isGuest ? 0 : 50; // 50 credits per message for authenticated users
 
             Promise.all([
-                SOV.burnCredits(finalUserId, burnAmount, 'chat_message', { personaId: finalProfileId }),
+                // 💸 SOVEREIGN BURN: Deduct credits via the unified balance endpoint
+                !isGuest ? db.query(`
+                    UPDATE profiles 
+                    SET credit_balance = credit_balance - $1, updated_at = NOW()
+                    WHERE id = $2 AND credit_balance >= $1
+                `, [burnAmount, finalUserId]).then(result => {
+                    if (result.rowCount === 0) console.warn('[Economy] Burn failed - profile not found or insufficient balance for:', finalUserId);
+                    else {
+                        // Also log the transaction
+                        db.query(`INSERT INTO transactions (user_id, amount, type, provider, meta, created_at) VALUES ($1, $2, 'chat_message', 'syndicate_core', $3, NOW())`, 
+                            [finalUserId, burnAmount, JSON.stringify({ personaId: finalProfileId })]
+                        ).catch(() => {});
+                    }
+                }).catch((e: any) => console.warn('[Economy] Burn exception:', e.message)) : Promise.resolve(),
                 SOV.saveMessage(finalUserId, finalProfileId, 'user', lastUserMessage?.content || ''),
                 SOV.saveMessage(finalUserId, finalProfileId, 'assistant', streamB_Text, {
                     audio_script: streamA_Native,
