@@ -25,7 +25,16 @@ interface PersonaPost {
   personas?: { name: string; age?: number; city?: string };
 }
 
-type FilterMode = 'all' | 'vault' | 'hero' | 'feed' | 'orphaned' | 'hidden' | 'gallery';
+type FilterMode = 'all' | 'vault' | 'hero' | 'feed' | 'orphaned' | 'hidden' | 'gallery' | 'lost';
+
+interface LostNode {
+  id: string; // Cloudflare Key
+  url: string;
+  filename: string;
+  size: number;
+  lastModified: string;
+  suggestedPersona: string;
+}
 
 interface EditDraft {
   caption: string;
@@ -59,7 +68,21 @@ export default function PostStudio() {
   const [loadingLinked, setLoadingLinked] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   
-  // ── Bulk Selection Machine ──
+  // ── Lost Files (R2) State ──
+  const [lostNodes, setLostNodes] = useState<LostNode[]>([]);
+  const [loadingLost, setLoadingLost] = useState(false);
+
+  const fetchLostNodes = useCallback(async () => {
+     setLoadingLost(true);
+     try {
+       const res = await fetch('/api/admin/lostfiles');
+       const json = await res.json();
+       if (json.success) setLostNodes(json.nodes || []);
+     } catch (e) {
+       console.error('[PostStudio] Lost Nodes Scan Failure:', e);
+     }
+     setLoadingLost(false);
+  }, []);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set());
   const longPressTimer = useState<any>(null)[0]; // Ref-like but simple
@@ -454,6 +477,7 @@ export default function PostStudio() {
     { label: `Hero (${posts.filter(p => p.is_burner && !p.caption?.startsWith('DELETED')).length})`,    value: 'hero' },
     { label: `Orphaned (${orphanedPersonaIds.size})`,                                              value: 'orphaned', alert: orphanedPersonaIds.size > 0 },
     { label: `Hidden (${posts.filter(p => p.caption?.startsWith('DELETED')).length})`,              value: 'hidden', alert: posts.some(p => p.caption?.startsWith('DELETED')) },
+    { label: `Lost Archives (${lostNodes.length || '?'})`,                                          value: 'lost', alert: true },
   ];
 
 
@@ -469,61 +493,75 @@ export default function PostStudio() {
             </NextLink>
             <div className="min-w-0">
               <h1 className="text-lg sm:text-2xl font-syncopate font-black italic uppercase tracking-tighter">Post Studio</h1>
-              <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/20">{filtered.length} of {posts.length} nodes</p>
+              <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/20">
+                 {filterMode === 'lost' ? `${lostNodes.length} abandoned assets` : `${filtered.length} of ${posts.length} nodes`}
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto no-scrollbar py-1">
             <div className="relative shrink-0">
               <select
                 value={personaFilter}
-                onChange={e => setPersonaFilter(e.target.value)}
-                className="appearance-none bg-white/5 border border-white/10 rounded-xl px-3 py-2 pr-7 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60 outline-none cursor-pointer max-w-[130px] sm:max-w-none"
+                onChange={e => { setPersonaFilter(e.target.value); if (filterMode === 'lost') setFilterMode('all'); }}
+                className="appearance-none bg-white/5 border border-white/10 rounded-xl px-3 py-2 pr-7 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60 outline-none cursor-pointer min-w-[120px]"
               >
-                <option value="all">All Personas</option>
+                <option value="all">Fleet</option>
                 {personas.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
               <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
             </div>
 
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 focus-within:border-[#00f0ff]/50 transition-all flex-1 min-w-0">
+            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 focus-within:border-[#00f0ff]/50 transition-all flex-1 min-w-[140px]">
               <Search size={12} className="text-white/20 shrink-0" />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Query..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="bg-transparent outline-none text-[11px] font-black uppercase tracking-widest placeholder:text-white/10 w-full min-w-0"
+                className="bg-transparent outline-none text-[10px] sm:text-[11px] font-black uppercase tracking-widest placeholder:text-white/10 w-full"
               />
             </div>
 
+            <button 
+                onClick={() => {
+                   const url = prompt('Enter File URL:');
+                   if (!url) return;
+                   const pId = prompt('Target Persona ID (e.g. santiago-papi):');
+                   if (!pId) return;
+                   const cap = prompt('Caption:');
+                   callAudit('create-post', { persona_id: pId, content_url: url, caption: cap || '', is_vault: true })
+                   .then(() => fetchPosts());
+                }}
+                className="w-10 h-10 shrink-0 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-xl flex items-center justify-center text-[#00f0ff] hover:bg-[#00f0ff] hover:text-black transition-all shadow-[0_0_20px_#00f0ff22]"
+                title="Create New Node"
+            >
+               <UserPlus size={16} />
+            </button>
+
             <button
               onClick={async () => {
-                const source = prompt('Source Persona ID (to be DELETED):');
-                if (!source) return;
-                const target = prompt(`Target Persona ID (to absorb all of ${source}'s data):`);
-                if (!target) return;
-                if (!confirm(`CRITICAL: This will migrate media/stats from ${source} to ${target} and PERMANENTLY DELETE ${source}. Proceed?`)) return;
+                const source = prompt('Source ID:'); if (!source) return;
+                const target = prompt(`Target ID (absorbs ${source}):`); if (!target) return;
+                if (!confirm(`Merge ${source} → ${target}?`)) return;
                 setLoading(true);
                 const res = await callAudit('merge-persona', { sourceId: source, targetId: target });
-                if (res.success) { alert('Merge Complete.'); fetchPosts(); }
-                else alert(res.error || 'Merge failed.');
+                if (res.success) fetchPosts();
                 setLoading(false);
               }}
-              title="Consolidate Personas"
-              className="w-9 h-9 shrink-0 bg-[#ff00ff]/10 border border-[#ff00ff]/20 rounded-xl flex items-center justify-center text-[#ff00ff] hover:bg-[#ff00ff] hover:text-black transition-all"
+              className="w-10 h-10 shrink-0 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-white/40 hover:text-white transition-all"
             >
               <ArrowLeftRight size={13} />
             </button>
 
-            <button onClick={fetchPosts} className="w-9 h-9 shrink-0 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all">
-              <RefreshCw size={13} className={loading ? 'animate-spin text-[#00f0ff]' : 'text-white/40'} />
+            <button onClick={() => { fetchPosts(); if (filterMode === 'lost') fetchLostNodes(); }} className="w-10 h-10 shrink-0 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all">
+              <RefreshCw size={13} className={loading || loadingLost ? 'animate-spin text-[#00f0ff]' : 'text-white/40'} />
             </button>
             <button 
               onClick={() => { if (selectionMode) cancelSelection(); else selectAll(); }} 
-              className={`px-3 h-9 shrink-0 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectionMode ? 'bg-[#ff00ff]/20 border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border-white/10 text-white/40 hover:text-white'}`}
+              className={`px-4 h-10 shrink-0 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectionMode ? 'bg-[#ff00ff]/20 border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-white/5 border-white/10 text-white/40 hover:text-white'}`}
             >
-              {selectionMode ? `Clear` : `Select All`}
+              {selectionMode ? `Done` : `Batch`}
             </button>
           </div>
 
@@ -534,14 +572,17 @@ export default function PostStudio() {
           {filterTabs.map(tab => (
             <button
               key={tab.value}
-              onClick={() => setFilterMode(tab.value)}
+              onClick={() => {
+                 setFilterMode(tab.value);
+                 if (tab.value === 'lost') fetchLostNodes();
+              }}
               className={`relative px-3 sm:px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${
                 filterMode === tab.value
-                  ? tab.alert ? 'bg-orange-500/20 border border-orange-500/40 text-orange-400' : 'bg-white/10 border border-white/20 text-white'
-                  : tab.alert ? 'text-orange-400/60 hover:text-orange-400' : 'text-white/20 hover:text-white/60'
+                  ? tab.alert ? tab.value === 'lost' ? 'bg-[#ff00ff]/20 border border-[#ff00ff]/40 text-[#ff00ff]' : 'bg-orange-500/20 border border-orange-500/40 text-orange-400' : 'bg-white/10 border border-white/20 text-white'
+                  : tab.alert ? tab.value === 'lost' ? 'text-[#ff00ff]/60 hover:text-[#ff00ff]' : 'text-orange-400/60 hover:text-orange-400' : 'text-white/20 hover:text-white/60'
               }`}
             >
-              {tab.alert && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-orange-500 rounded-full animate-pulse" />}
+              {tab.alert && <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full animate-pulse ${tab.value === 'lost' ? 'bg-[#ff00ff]' : 'bg-orange-500'}`} />}
               {tab.label}
             </button>
           ))}
@@ -574,7 +615,53 @@ export default function PostStudio() {
             )}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
             <AnimatePresence mode="popLayout">
-              {filtered.map(post => {
+              {filterMode === 'lost' ? (
+                lostNodes.map(node => (
+                   <motion.div
+                    layout
+                    key={node.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="group relative bg-[#ff00ff]/5 border border-[#ff00ff]/20 rounded-2xl overflow-hidden active:scale-95 transition-all"
+                  >
+                    <div className="relative aspect-[3/4] bg-black">
+                      <img src={node.url} alt="" className="w-full h-full object-cover opacity-60" />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-3 p-4">
+                        <button 
+                          onClick={async () => {
+                             const pId = prompt('Restoration Target Persona ID:', node.suggestedPersona);
+                             if (!pId) return;
+                             setLoading(true);
+                             const res = await callAudit('create-post', { persona_id: pId, content_url: node.url, caption: '', is_vault: true });
+                             if (res.success) {
+                               setLostNodes(prev => prev.filter(n => n.id !== node.id));
+                               alert('Neural Link Established.');
+                             }
+                             setLoading(false);
+                          }}
+                          className="w-full h-11 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2"
+                        >
+                           <Link2 size={12} /> Link to Node
+                        </button>
+                        <button 
+                          onClick={() => {
+                             setShowSoloModal({ id: 'temp', content_url: node.url, persona_id: '' } as any);
+                          }}
+                          className="w-full h-11 bg-[#ff00ff] text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2"
+                        >
+                           <Sparkles size={12} /> Neural Birth
+                        </button>
+                      </div>
+                      <div className="absolute top-2 right-2 px-2 py-0.5 bg-red-600 text-white text-[7px] font-black uppercase rounded-full animate-pulse">Abandoned</div>
+                    </div>
+                    <div className="p-2 space-y-1">
+                       <p className="text-[8px] font-black text-white/40 uppercase tracking-widest truncate">{node.filename}</p>
+                       <p className="text-[7px] text-[#ff00ff] font-bold uppercase italic">Match: {node.suggestedPersona}</p>
+                    </div>
+                  </motion.div>
+                ))
+              ) : filtered.map(post => {
                 const showName = post.personas?.name || post.persona_id;
                 const showAge  = String(post.personas?.age  || '');
                 const showCity = post.personas?.city || '';

@@ -316,15 +316,15 @@ function MarketplaceContent() {
         </AnimatePresence>
 
          {/* 🧬 INTELLIGENT CHAT HUB: Standalone glassy orbiter for Favorites & Unreads */}
-         {openChatIds.length === 0 && (
-            <FloatingChatHub 
-               onSelectChat={() => setShowProfileList(true)} 
-               onSelectProfile={handleSelectProfile}
-               followingIds={following}
-               profiles={randomizedProfiles}
-               unreadCounts={unreadCounts}
-            />
-         )}
+         <FloatingChatHub 
+            onSelectChat={() => setShowProfileList(true)} 
+            onSelectProfile={handleSelectProfile}
+            followingIds={following}
+            profiles={randomizedProfiles}
+            unreadCounts={unreadCounts}
+            isOpen={openChatIds.length > 0}
+            onClose={() => setOpenChatIds([])}
+         />
 
      </main>
   );

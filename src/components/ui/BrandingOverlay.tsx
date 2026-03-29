@@ -18,8 +18,8 @@ const BrandingOverlay: React.FC<BrandingOverlayProps> = ({ profileName, classNam
             <div className="flex items-center gap-4 w-full">
                 {/* Visual Anchor Line */}
                 <div className="h-[1px] flex-1 bg-gradient-to-r from-[#ff00ff]/0 via-[#ff00ff]/40 to-[#ff00ff]/0" />
-                <span className="whitespace-nowrap text-[10px] md:text-sm font-syncopate font-black uppercase italic tracking-[0.6em] text-white/90 drop-shadow-[0_0_15px_rgba(255,0,255,0.6)] pr-12">
-                    FOUND ON <span className="text-[#ff00ff]">GASP.FUN</span>
+                <span className="whitespace-nowrap text-[10px] md:text-sm font-syncopate font-black uppercase italic tracking-[0.6em] text-white/95 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] pr-12">
+                    FOUND ON <span className="text-[#ff00ff] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] drop-shadow-[0_0_15px_rgba(255,0,255,0.8)]">GASP.FUN</span>
                 </span>
             </div>
         </div>

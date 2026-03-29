@@ -108,8 +108,8 @@ export default function FreebieImageBubble({
               />
               
               {/* 🛡️ SOVEREIGN WATERMARK */}
-              <div className="absolute inset-x-0 bottom-8 flex justify-center pointer-events-none select-none opacity-40 group-hover/media:opacity-60 transition-opacity">
-                 <span className="text-[14px] md:text-[18px] font-black uppercase tracking-[0.6em] text-white/50 italic drop-shadow-2xl">
+              <div className="absolute inset-x-0 bottom-8 flex justify-center pointer-events-none select-none opacity-50 group-hover/media:opacity-70 transition-opacity">
+                 <span className="text-[14px] md:text-[18px] font-black uppercase tracking-[0.6em] text-white italic drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] font-syncopate">
                     GASP.FUN
                  </span>
               </div>

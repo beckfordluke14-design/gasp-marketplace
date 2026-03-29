@@ -196,15 +196,15 @@ export default function NeuralPulseHub({
                             <Zap size={10} className="animate-pulse" />
                         </div>
                         
-                        {/* ❌ DISMISSAL BUTTON (Native Style) */}
+                        {/* ❌ DISMISSAL BUTTON (High-Visibility yellow) */}
                         <button 
                           onClick={(e) => {
                              e.stopPropagation();
                              setActiveEvent(null);
                           }}
-                          className="w-6 h-6 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-white/20 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                          className="w-7 h-7 rounded-full bg-[#ffea00]/10 border border-[#ffea00]/40 flex items-center justify-center text-[#ffea00] hover:bg-[#ffea00]/20 transition-all active:scale-95 shadow-[0_0_10px_rgba(255,234,0,0.2)]"
                         >
-                           <X size={10} />
+                           <X size={12} strokeWidth={3} />
                         </button>
                      </div>
                   </div>
