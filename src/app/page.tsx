@@ -265,6 +265,10 @@ function MarketplaceContent() {
                          onClose={() => handleCloseChat(sId)} 
                          onMinimize={() => setMinimizedIds([...minimizedIds, sId])} 
                          onOpenTopUp={() => setIsTopUpOpen(true)}
+                         followingIds={following}
+                         profiles={randomizedProfiles}
+                         unreadCounts={unreadCounts}
+                         onSelectProfile={handleSelectProfile}
                        />
                    </ErrorBoundary>
                 </motion.div>
@@ -312,7 +316,7 @@ function MarketplaceContent() {
         </AnimatePresence>
 
          {/* 🧬 INTELLIGENT CHAT HUB: Standalone glassy orbiter for Favorites & Unreads */}
-         {!selectedProfileId && (
+         {openChatIds.length === 0 && (
             <FloatingChatHub 
                onSelectChat={() => setShowProfileList(true)} 
                onSelectProfile={handleSelectProfile}
