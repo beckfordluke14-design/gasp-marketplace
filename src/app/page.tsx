@@ -17,6 +17,7 @@ import ChatDrawer from '@/components/ChatDrawer';
 import { useUser } from '@/components/providers/UserProvider';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import NeuralPulseHub from '@/components/NeuralPulseHub';
+import FloatingChatHub from '@/components/FloatingChatHub';
 import { Star } from 'lucide-react';
 
 function MarketplaceContent() {
@@ -310,15 +311,14 @@ function MarketplaceContent() {
            )}
         </AnimatePresence>
 
-         {/* 🧬 MOBILE BOTTOM DOCK: Deactivated for now per request
-         <MobileBottomNav 
+         {/* 🧬 INTELLIGENT CHAT HUB: Standalone glassy orbiter for Favorites & Unreads */}
+         <FloatingChatHub 
             onSelectChat={() => setShowProfileList(true)} 
-            onOpenTopUp={() => setIsTopUpOpen(true)} 
-            unreadCounts={unreadCounts}
+            onSelectProfile={handleSelectProfile}
             followingIds={following}
             profiles={randomizedProfiles}
-         /> 
-         */}
+            unreadCounts={unreadCounts}
+         />
 
      </main>
   );
