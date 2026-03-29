@@ -104,12 +104,18 @@ export default function FloatingChatHub({
              
              <MessageSquare 
                size={24} 
-               className={`transition-all ${totalUnread > 0 ? 'text-[#ff00ff] fill-[#ff00ff]/20 drop-shadow-[0_0_10px_#ff00ff]' : 'text-white/40 group-hover:text-white'}`} 
+               className={`transition-all ${totalUnread > 0 ? 'text-[#ff00ff] fill-[#ff00ff]/20 drop-shadow-[0_0_10px_#ff00ff]' : hasFavorites ? 'text-[#ffea00] drop-shadow-[0_0_10px_#ffea00/40]' : 'text-white/40 group-hover:text-white'}`} 
              />
 
              {totalUnread > 0 && (
                 <div className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[20px] bg-[#ff00ff] text-black text-[9px] font-black rounded-full flex items-center justify-center border-2 border-black shadow-[0_0_15px_#ff00ff] animate-bounce">
                    {totalUnread}
+                </div>
+             )}
+
+             {totalUnread === 0 && favorites.length > 0 && (
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#ffea00] text-black text-[9px] font-black rounded-full flex items-center justify-center border-2 border-black shadow-[0_0_15px_rgba(255,234,0,0.4)]">
+                   {favorites.length}
                 </div>
              )}
           </motion.button>

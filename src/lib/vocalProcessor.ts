@@ -15,6 +15,15 @@ const REGIONS: Record<string, Record<string, string>> = {
         'tell me': 'dime',
         'crazy': 'loco'
     },
+    'latina_caribbean': { // DR / PR / Cuba
+        'hello': 'hola papi',
+        'what are you doing': 'what you on',
+        'baby': 'mi amor',
+        'look': 'mira',
+        'tell me': 'dime',
+        'crazy': 'loco',
+        'yes': 'si'
+    },
     'us_urban': { // American Newark / Atlanta / Jersey / Houston
         'hello': 'yo',
         'baby': 'babe',

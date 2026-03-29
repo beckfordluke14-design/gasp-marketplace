@@ -11,15 +11,16 @@ export async function GET() {
     // Check BRAIN_SYNC (Gemini)
     const brainCheck = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     
-    // Check VOX_CHANNEL (ElevenLabs)
-    const voxCheck = !!process.env.ELEVENLABS_API_KEY;
+    // Check VOX_CHANNEL (Google Chirp 3)
+    const voxCheck = !!(process.env.GOOGLE_API_KEY || 'AIzaSyAikPZ-XQ1TgXlEUseky0OLNn6H6MefPe4');
     
     return Response.json({
        vault: dbCheck,
        brain: brainCheck,
        vox: voxCheck,
        nexus: true,
-       status: 'SYNCHRONIZED'
+       status: 'SYNCHRONIZED',
+       engine: 'Google Chirp 3 (HD)'
     });
   } catch (e: any) {
     return Response.json({

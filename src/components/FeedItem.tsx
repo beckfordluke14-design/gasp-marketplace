@@ -254,16 +254,25 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
 
       {/* Action Icons (OII) */}
       <div className="flex items-center gap-8 mt-8 px-6">
-        {/* Like Button */}
         <button 
-          onClick={() => {
-            if (!isLiked) {
-              setIsLiked(true);
+          onClick={async () => {
+            const gid = localStorage.getItem('gasp_guest_id');
+            if (!gid) return;
+
+            const next = !isLiked;
+            setIsLiked(next);
+            
+            if (next) {
               setShowHeartAnim(true);
               setTimeout(() => setShowHeartAnim(false), 1000);
-            } else {
-              setIsLiked(false);
             }
+
+            try {
+              await fetch('/api/rpc/db', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'toggle-like', payload: { userId: gid, postId: broadcast.id, isLiked: next } })
+              });
+            } catch (e) {}
           }}
           className="group flex flex-col items-center gap-2"
         >

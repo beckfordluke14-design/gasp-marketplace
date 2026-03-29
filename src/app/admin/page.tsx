@@ -27,9 +27,17 @@ interface Tool {
 
 export default function AdminHub() {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [engine, setEngine] = useState('gemini'); // Default to gemini per user request
 
   useEffect(() => {
     setIsAdmin(document.cookie.includes('admin_gasp_override=granted'));
+    
+    // Fetch current system engine config
+    fetch('/api/admin/config?key=neural_engine')
+      .then(res => res.json())
+      .then(data => {
+        if (data.value) setEngine(data.value);
+      });
   }, []);
 
   const toggleAdmin = () => {
@@ -40,6 +48,15 @@ export default function AdminHub() {
       document.cookie = 'admin_gasp_override=granted; path=/; max-age=31536000;';
       setIsAdmin(true);
     }
+  };
+
+  const setSystemEngine = async (val: string) => {
+    setEngine(val);
+    await fetch('/api/admin/config', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: 'neural_engine', value: val }) 
+    });
   };
 
   const tools: Tool[] = [
@@ -164,7 +181,7 @@ export default function AdminHub() {
           </div>
 
           {/* ── COMMAND MODE strip ── */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/10">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/10">
             <div className="flex items-center gap-3 flex-1">
               <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/40 shrink-0">
                 <LayoutDashboard size={18} />
@@ -182,6 +199,36 @@ export default function AdminHub() {
             >
               {isAdmin ? '⚡ DEACTIVATE' : 'ACTIVATE'}
             </button>
+          </div>
+
+          {/* ── NEURAL ENGINE SELECTOR ── */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 p-5 rounded-2xl bg-gradient-to-r from-[#ff00ff]/5 to-[#00f0ff]/5 border border-white/10">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="w-9 h-9 rounded-xl bg-[#ff00ff]/20 flex items-center justify-center text-[#ff00ff] shrink-0">
+                <Zap size={18} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black uppercase italic tracking-tighter">Neural Engine Architecture</h3>
+                <p className="text-[9px] text-white/30 uppercase tracking-widest">
+                  Hot-swap the LLM backend. Gemini is 50x cheaper. Grok is premium/unfiltered.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex p-1 bg-black/40 rounded-xl border border-white/10 shrink-0">
+              <button
+                onClick={() => setSystemEngine('gemini')}
+                className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${engine === 'gemini' ? 'bg-[#00f0ff] text-black shadow-[0_0_20px_rgba(0,240,255,0.4)]' : 'text-white/40 hover:text-white'}`}
+              >
+                Gemini 1.5 Flash
+              </button>
+              <button
+                onClick={() => setSystemEngine('grok')}
+                className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${engine === 'grok' ? 'bg-[#ff00ff] text-white shadow-[0_0_20px_rgba(255,0,255,0.4)]' : 'text-white/40 hover:text-white'}`}
+              >
+                Grok 3
+              </button>
+            </div>
           </div>
 
           {/* ── Tools Grid ── */}

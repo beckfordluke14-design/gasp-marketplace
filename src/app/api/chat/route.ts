@@ -110,40 +110,74 @@ export async function POST(req: Request) {
       console.warn('[Chat] Ghosting update skipped:', ghostErr.message?.slice(0, 60));
     }
 
-    // 3. THE BRAIN: SYNDICATE MOMENT DIRECTOR (Grok 2 Flagship)
+    // 3. THE BRAIN: SYNDICATE MOMENT DIRECTOR (Hot-Swappable)
     const zoneKey = profileItem?.syndicate_zone || 'us_houston_black';
     const zoneDictionary = GLOBAL_SYNDICATE_ZONES_V3[zoneKey];
     
     // Merge Persona Identity with Director Logic
     const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\n[IDENTITY_CORE]:\n${finalSystemPrompt}\n\nZONE DICTIONARY (${zoneKey}):\n${JSON.stringify(zoneDictionary)}`;
 
-    const callGrok = () => fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-            'HTTP-Referer': 'https://gasp.fun',
-            'X-Title': 'GASP Syndicate Circuit'
-        },
-        body: JSON.stringify({
-            model: 'x-ai/grok-3', // 🛡️ SOVEREIGN BRAIN: Grok-3 Platform
-            messages: [
-                { role: 'system', content: brainPrompt },
-                ...messages.slice(-5)
-            ],
-            response_format: { type: "json_object" }
-        })
-    });
+    // 🧬 SOVEREIGN ENGINE RESOLVER
+    let neuralEngine = 'gemini'; // Default
+    try {
+        const { rows: configRows } = await db.query('SELECT value FROM system_config WHERE key = $1', ['neural_engine']);
+        if (configRows[0]?.value) neuralEngine = configRows[0].value;
+    } catch (e) {}
 
-    let orResponse = await callGrok();
-    const brainJson = await orResponse.json();
+    console.log(`🧠 [Syndicate Brain] Engine: ${neuralEngine.toUpperCase()} | Persona: ${profileItem.name}`);
 
-    if (brainJson.error) {
-        console.error('[OpenRouter API Error]:', brainJson.error);
-        throw new Error(brainJson.error.message || 'OpenRouter API failure');
+    let contentBody = "";
+
+    if (neuralEngine === 'gemini') {
+        // --- PATH A: GOOGLE GEMINI (Direct) ---
+        const { GoogleGenerativeAI } = require("@google/generative-ai");
+        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_BRAIN_KEY || 'AIzaSyDi1lkyDRpoVV3l1PMrRdOpT10QP0d_jNk');
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            // 🛡️ UNCENSORED MODE: Disabling filters for raunchy content
+            safetySettings: [
+                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+            ]
+        });
+
+        const geminiMessages = [
+            { role: 'user', parts: [{ text: `[SYSTEM_INSTRUCTIONS]:\n${brainPrompt}\n\nCONVERSATION_HISTORY:\n${messages.slice(-5).map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n')}\n\nGENERATE_RESPONSE (JSON ONLY):` }] }
+        ];
+
+        const result = await model.generateContent({
+            contents: geminiMessages,
+            generationConfig: { responseMimeType: "application/json" }
+        });
+        
+        contentBody = result.response.text();
+    } else {
+        // --- PATH B: X.AI GROK 3 (OpenRouter) ---
+        const callGrok = () => fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                'HTTP-Referer': 'https://gasp.fun',
+                'X-Title': 'GASP Syndicate Circuit'
+            },
+            body: JSON.stringify({
+                model: 'x-ai/grok-3', 
+                messages: [
+                    { role: 'system', content: brainPrompt },
+                    ...messages.slice(-5)
+                ],
+                response_format: { type: "json_object" }
+            })
+        });
+
+        let orResponse = await callGrok();
+        const brainJson = await orResponse.json();
+        if (brainJson.error) throw new Error(brainJson.error.message || 'OpenRouter failure');
+        contentBody = brainJson.choices?.[0]?.message?.content || "";
     }
-
-    const contentBody = brainJson.choices?.[0]?.message?.content || "";
     const cleanContent = contentBody.replace(/```json|```/g, '').trim();
     
     let syndicateOutput;
