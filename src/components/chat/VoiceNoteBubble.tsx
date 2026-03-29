@@ -15,6 +15,7 @@ interface VoiceNoteBubbleProps {
   translation?: string;
   isUnlocked?: boolean;
   onUnlockTranslation?: () => Promise<boolean>;
+  isEnglish?: boolean;
 }
 
 /**
@@ -32,6 +33,7 @@ export default function VoiceNoteBubble({
   translation,
   isUnlocked,
   onUnlockTranslation,
+  isEnglish,
 }: VoiceNoteBubbleProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -198,9 +200,9 @@ export default function VoiceNoteBubble({
       {/* 🧬 DECODE PORTAL: MONETIZATION NODE */}
       {translation && (
         <div className="px-1 -mt-7 relative z-10 mx-4">
-          {translationUnlocked ? (
+          {(translationUnlocked || isEnglish) ? (
             <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl">
-               <p className="text-[13px] text-white leading-relaxed font-medium italic">"{translation}"</p>
+               <p className="text-[13px] text-white/60 leading-relaxed font-medium italic">"{translation}"</p>
             </motion.div>
           ) : (
             <button

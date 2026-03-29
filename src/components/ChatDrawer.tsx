@@ -442,6 +442,7 @@ export default function ChatDrawer({
                              profileName={profile?.name}
                              translation={msg.audio_translation}
                              isUnlocked={!msg.translation_locked}
+                             isEnglish={profile?.language?.startsWith('en')}
                              onUnlockTranslation={async () => true}
                           />
                        ) : msg.type === 'image' || msg.image_url ? (

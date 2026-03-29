@@ -131,7 +131,10 @@ export async function POST(req: Request) {
     if (neuralEngine === 'gemini') {
         // --- PATH A: GOOGLE GEMINI (Direct) ---
         const { GoogleGenerativeAI } = require("@google/generative-ai");
-        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_BRAIN_KEY || 'AIzaSyDi1lkyDRpoVV3l1PMrRdOpT10QP0d_jNk');
+        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_BRAIN_KEY || 'MISSING_KEY');
+        if (!process.env.GOOGLE_BRAIN_KEY) {
+            console.error('❌ [Chat API] CRITICAL: GOOGLE_BRAIN_KEY environment variable is missing.');
+        }
         const model = genAI.getGenerativeModel({ 
             model: "gemini-1.5-flash",
             // 🛡️ UNCENSORED MODE: Disabling filters for raunchy content

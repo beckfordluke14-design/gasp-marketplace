@@ -1,20 +1,23 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_BRAIN_KEY || 'AIzaSyDi1lkyDRpoVV3l1PMrRdOpT10QP0d_jNk');
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_BRAIN_KEY || 'MISSING_KEY');
+if (!process.env.GOOGLE_BRAIN_KEY) {
+    console.error('❌ [GeminiVocalProcessor] CRITICAL: GOOGLE_BRAIN_KEY environment variable is missing.');
+}
 
 export async function refineVocalTextWithGemini(
-    rawText: string, 
-    personaName: string, 
-    zone: string, 
-    mood: string | null, 
+    rawText: string,
+    personaName: string,
+    zone: string,
+    mood: string | null,
     language: string = 'en',
     vocalDna: any = null,
     slangProfile: any = null
 ) {
     console.log(`🧠 [GeminiVocalProcessor] Refining for ${personaName} in ${zone}... unique DNA active.`);
-    
+
     try {
-        const model = genAI.getGenerativeModel({ 
+        const model = genAI.getGenerativeModel({
             model: "models/gemini-1.5-flash",
             // 🛡️ UNCENSORED MODE: Disabling filters for raunchy content refinement
             safetySettings: [
@@ -26,51 +29,50 @@ export async function refineVocalTextWithGemini(
         });
 
         const prompt = `
-[SYSTEM: HEAVY HEAVY HEAVY VOICE PROMPT ENGINE - CHIRP 3 OPTIMIZER]
-You are a master of human prosody, regional dialect, and emotional subtext for the GASP SYNDICATE.
-Your task is to take a raw script and transform it into a "Biological Script" for a high-fidelity Google Chirp 3 HD TTS engine.
+[SYSTEM: GEMINI 2.5 SOVEREIGN NEURAL REFINER - THE ACTOR ENGINE]
+You are a master of human prosody for the GASP SYNDICATE.
+Your task is to transform raw text into a "Biological Script" for the Gemini 2.5 Pro Pro engine.
 
 INPUT SCRIPT: "${rawText}"
 PERSONA: ${personaName}
 SYNDICATE ZONE: ${zone}
-DETECTED MOOD: ${mood || 'natural'}
-TARGET LANGUAGE: ${language}
+MOOD: ${mood || 'natural'}
+LANGUAGE: ${language}
 
-[🧬 NEURAL DNA MARKERS]:
-- VOCAL TEXTURE: ${vocalDna?.texture || 'Smooth/Natural'}
-- PROSODY MAP: ${vocalDna?.prosody || 'Conversational'}
-- ACCENT DEPTH: ${vocalDna?.accent || 'Standard'}
-- INTIMACY LEVEL: ${vocalDna?.intimacy || 'Direct'}
-- SLANG PROTOCOL: ${slangProfile?.rules?.join(', ') || 'Standard Urban'}
+--- THE GEMINI 2.5 SOVEREIGN PROTOCOL (V4.9) ---
+1. **Biological Timing & Pacing**: Use ellipses (...) for short pauses, double ellipses (......) for deep breaths/heavy sighs. Use dashes (--) for mid-sentence corrections or shifts in energy. This is mandatory for natural human cadence.
 
---- THE GEMINI 2.5 SOVEREIGN PROTOCOL ---
-1. **Biological Timing**: Gemini 2.5 is extremely sensitive to punctuation. Use ellipses (...) for short pauses, double ellipses (......) for deep breaths/heavy sighs. Use dashes (--) for mid-sentence corrections or shifts in energy.
-2. **Human Fillers & Contextual Noise**: INTEGRATE these sounds based on the mood:
-   - Playful/Funny: Use "haha...", "hehee", "lool" (London)
-   - Thinking/Hesitating: Use "umm...", "well...", "mhm..."
-   - Frustrated/Annoyed: Use "ughh...", "tch...", "pffft"
-   - Seductive: Use "ah...", "mmh...", "wait..."
-3. **Phonetic Realism**: Do NOT use standard spelling if it kills the vibe.
-   - Use the SLANG PROTOCOL listed above.
-   - For London (UK): Heavy use of "innit", "fam", "bruv", "wagwan".
-   - For Colombia: Use "pues...", "mor...", "papi..." with breathy pauses.
-4. **Vibe Check**: This is NOT a robot. Use the INTIMACY LEVEL to guide the heat. Elongate vowels for smoky textures.
-5. **Duality**: Every convo must feel alive. If the text suggests a laugh, write "haha" as part of the spoken text.
+2. **Phonetic Realism & Decoding**:
+   - If the persona is speaking ENGLISH (US/UK): Maintain standard spelling for all words. DO NOT decode or phonetically spell English words. 
+   - FOR ALL OTHERS (Colombia/DR/etc.): Use the SLANG PROTOCOL and Phonetic Realism as indicated.
+   - For London (UK): Use standard spelling, but naturally integrate "innit", "fam", "bruv", "wagwan" as part of the text.
+
+3. **Human Fillers & Contextual Noise (MANDATORY)**: You must INTEGRATE biological noise based on context to make it feel real:
+   - Playful: "haha...", "hehee", "lool" (London)
+   - Hesitating: "umm...", "well...", "mhm..."
+   - Emotional/Seductive: "ughh...", "ah...", "wait...", "mmh..."
+
+4. **Vibe Check**: Keep the Syndicate energy. Elongate some vowels for smoky textures if requested. Every convo must feel alive. 
 
 --- OUTPUT RULES ---
 - Provide ONLY the optimized text for the TTS engine.
-- DO NOT use [stage directions] or (stage directions).
+- DO NOT use [stage directions].
 - Maximum length: 150 words.
 
 OUTPUT:
 `;
 
-        const result = await model.generateContent(prompt);
+        const result = await model.generateContent({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: {
+                temperature: 3.2
+            }
+        });
         let refinedText = result.response.text().trim();
-        
+
         // Clean up any stray quotes or "Output:" markers
         refinedText = refinedText.replace(/^Output:\s*/i, '').replace(/^"|"$/g, '');
-        
+
         console.log(`✅ [GeminiVocalProcessor] Refined text: "${refinedText.slice(0, 50)}..."`);
         return refinedText;
     } catch (err: any) {

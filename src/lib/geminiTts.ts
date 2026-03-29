@@ -1,7 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const GOOGLE_BRAIN_KEY = process.env.GOOGLE_BRAIN_KEY || 'AIzaSyDi1lkyDRpoVV3l1PMrRdOpT10QP0d_jNk';
-const genAI = new GoogleGenerativeAI(GOOGLE_BRAIN_KEY);
+const GOOGLE_BRAIN_KEY = process.env.GOOGLE_BRAIN_KEY;
+if (!GOOGLE_BRAIN_KEY) {
+    console.error('❌ [Gemini TTS] CRITICAL: GOOGLE_BRAIN_KEY environment variable is missing.');
+}
+const genAI = new GoogleGenerativeAI(GOOGLE_BRAIN_KEY || 'MISSING_KEY');
 
 /**
  * 🎙️ SYNDICATE V4.3 — GEMINI 2.5 PRO PRO PREVIEW TTS
@@ -25,7 +28,7 @@ export async function synthesizeGeminiSpeech(text: string, voiceName: string, st
                 parts: [{ text: refinedPrompt }] 
             }],
             generationConfig: {
-                temperature: 1.7,
+                temperature: 3.2,
                 // @ts-ignore
                 responseModalities: ["AUDIO"],
                 speechConfig: {
