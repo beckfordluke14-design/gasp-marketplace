@@ -44,14 +44,18 @@ export async function POST(req: Request) {
           }
         };
 
-        const [messages, unlocks, vault, galleryPosts, relationships, stats] = await Promise.all([
+        const [messages, unlocks, vault, galleryPosts, relationships, stats, msgCountRows] = await Promise.all([
             safeQuery('SELECT * FROM chat_messages WHERE user_id = $1 AND persona_id = $2 ORDER BY created_at ASC', [userId, personaId]),
             safeQuery('SELECT post_id as item_id FROM user_vault_unlocks WHERE user_id = $1', [userId]),
             safeQuery('SELECT * FROM persona_vault WHERE persona_id = $1 ORDER BY created_at DESC', [personaId]),
             safeQuery('SELECT * FROM posts WHERE persona_id = $1 AND (is_gallery = true OR is_vault = true) ORDER BY created_at DESC', [personaId]),
             safeQuery('SELECT * FROM user_relationships WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, personaId]),
-            safeQuery('SELECT bond_score FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, personaId])
+            safeQuery('SELECT bond_score FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, personaId]),
+            safeQuery('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [userId])
         ]);
+        
+        const userMsgCount = parseInt(msgCountRows[0]?.count || '0');
+        const GUEST_LIMIT = 5;
 
         const unlockedIds = unlocks.map((u: any) => u.item_id);
 
@@ -92,7 +96,9 @@ export async function POST(req: Request) {
             messages,
             vaultItems: allVaultItems,
             isFollowing: relationships.length > 0,
-            bondScore: (stats[0] as any)?.bond_score || 0
+            bondScore: (stats[0] as any)?.bond_score || 0,
+            userMsgCount,
+            isDepleted: userId.startsWith('guest-') && userMsgCount >= GUEST_LIMIT
           }
         });
       }

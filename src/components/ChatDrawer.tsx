@@ -80,6 +80,48 @@ export default function ChatDrawer({
   const [isLoading, setIsLoading] = useState(false);
   const [chatData, setChatData] = useState<any[]>([]);
   const [isRequestingVoice, setIsRequestingVoice] = useState(false);
+  const [isDepleted, setIsDepleted] = useState(false);
+
+  // 🎁 GIFT PROTOCOL: Charges credits and sends a notification
+  const sendGift = async (emoji: string, cost: number) => {
+    if (isProcessing) return;
+    
+    // 🛡️ LOCK GUEST: Guests must have credits or sign up
+    if (idToUse.startsWith('guest-') && currentBalance < cost) {
+       alert(`Insufficient credits for gifts. Please top up or join Gasp to continue showering ${profile?.name || 'her'} in rewards.`);
+       onOpenTopUp();
+       return;
+    }
+
+    if (currentBalance < cost) {
+       setShowInsufficientFunds(true);
+       return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const res = await fetch('/api/economy/balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: idToUse, action: 'spend', amount: cost, type: 'gift', meta: { gift: emoji, personaId: profileId } })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setShowGifts(false);
+        // Add local gift message
+        const giftMsg = `[SENT_GIFT]: ${emoji} (${cost}cr)`;
+        await sendMessage(giftMsg);
+        window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+      } else {
+        alert(data.error || 'Identity rejection on settlement.');
+      }
+    } catch (e: any) {
+      console.error('[Gift] Settlement Error:', e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
 
   const sendMessage = useCallback(async (text: string) => {
@@ -194,6 +236,7 @@ export default function ChatDrawer({
            setMessages(result.data.messages || []);
            setVaultItems(result.data.vaultItems || []);
            setCurrentBalance(result.data.balance || 0);
+           setIsDepleted(result.data.isDepleted || false);
 
            // Fetch following status
            const gid = localStorage.getItem('gasp_guest_id');
@@ -590,7 +633,7 @@ export default function ChatDrawer({
                       </div>
                       <div className="grid grid-cols-4 gap-4">
                          {[ { e: '🌹', c: 1000 }, { e: '🍫', c: 2500 }, { e: '💎', c: 5000 }, { e: '💍', c: 10000 }].map(g => (
-                            <button key={g.e} onClick={() => setShowGifts(false)} className="flex flex-col items-center gap-2 p-4 bg-black/40 border border-white/5 rounded-2xl hover:border-[#ff00ff]/50 transition-all">
+                            <button key={g.e} onClick={() => sendGift(g.e, g.c)} className="flex flex-col items-center gap-2 p-4 bg-black/40 border border-white/5 rounded-2xl hover:border-[#ff00ff]/50 transition-all">
                                <span className="text-2xl">{g.e}</span>
                                <span className="text-[7px] font-black text-white/40">{g.c >= 1000 ? (g.c/1000)+'K' : g.c}cr</span>
                             </button>
@@ -600,45 +643,45 @@ export default function ChatDrawer({
                 )}
              </AnimatePresence>
 
-             <form 
-               onSubmit={(e) => { e.preventDefault(); handleLocalSubmit(); }}
-               className="bg-zinc-900/80 border border-white/5 rounded-[2.5rem] p-2 pr-2.5 pl-5 flex items-center gap-4 shadow-2xl backdrop-blur-3xl"
-             >
-                <div className="flex items-center gap-5 text-white/40">
-                   <button type="button" className="hover:text-white transition-colors"><Plus size={22} /></button>
-                   <button 
-                     type="button" 
-                     onClick={requestVoiceNote}
-                     disabled={isRequestingVoice || isLoading}
-                     title="Request Voice Note · 1,000 credits"
-                     className={`transition-colors relative ${isRequestingVoice ? 'text-[#00f0ff] animate-pulse' : 'hover:text-[#00f0ff]'}`}
-                   >
-                     {isRequestingVoice 
-                       ? <div className="w-[22px] h-[22px] rounded-full border-2 border-[#00f0ff] border-t-transparent animate-spin" />
-                       : <Mic size={22} />
-                     }
-                   </button>
-                   <button type="button" onClick={() => setShowGifts(!showGifts)} className="hover:text-[#ff00ff] transition-colors">
-                      <Zap size={20} />
-                   </button>
-                </div>
-                <input 
-                   type="text" 
-                   value={input} 
-                   onChange={(e) => setInput(e.target.value)}
-                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleLocalSubmit(); } }}
-                   placeholder="send mssg..." 
-                   className="flex-1 bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
-                   disabled={isLoading}
-                />
-                 <button 
-                   type="submit"
-                   disabled={!(input || '').trim() || isLoading}
-                   className="w-12 h-12 rounded-full bg-[#ff00ff] flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,0,255,0.3)] hover:scale-110 active:scale-90 transition-all disabled:opacity-30 disabled:grayscale"
-                 >
-                    <Send size={20} className="mr-0.5" />
-                 </button>
-             </form>
+              <form 
+                onSubmit={(e) => { e.preventDefault(); handleLocalSubmit(); }}
+                className={`bg-zinc-900/80 border border-white/5 rounded-[2.5rem] p-2 pr-2.5 pl-5 flex items-center gap-4 shadow-2xl backdrop-blur-3xl transition-all ${isDepleted ? 'grayscale opacity-50' : ''}`}
+              >
+                 <div className="flex items-center gap-5 text-white/40">
+                    <button type="button" className="hover:text-white transition-colors" disabled={isDepleted}><Plus size={22} /></button>
+                    <button 
+                      type="button" 
+                      onClick={requestVoiceNote}
+                      disabled={isRequestingVoice || isLoading || isDepleted}
+                      title="Request Voice Note · 1,000 credits"
+                      className={`transition-colors relative ${isRequestingVoice ? 'text-[#00f0ff] animate-pulse' : 'hover:text-[#00f0ff]'}`}
+                    >
+                      {isRequestingVoice 
+                        ? <div className="w-[22px] h-[22px] rounded-full border-2 border-[#00f0ff] border-t-transparent animate-spin" />
+                        : <Mic size={22} />
+                      }
+                    </button>
+                    <button type="button" onClick={() => (isDepleted ? setShowLimitCTA(true) : setShowGifts(!showGifts))} className="hover:text-[#ff00ff] transition-colors">
+                       <Zap size={20} />
+                    </button>
+                 </div>
+                 <input 
+                    type="text" 
+                    value={input} 
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleLocalSubmit(); } }}
+                    placeholder={isDepleted ? "NEURAL LINK DEPLETED..." : "send mssg..."} 
+                    className="flex-1 bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
+                    disabled={isLoading || isDepleted}
+                 />
+                  <button 
+                    type="submit"
+                    disabled={!(input || '').trim() || isLoading || isDepleted}
+                    className="w-12 h-12 rounded-full bg-[#ff00ff] flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,0,255,0.3)] hover:scale-110 active:scale-90 transition-all disabled:opacity-30 disabled:grayscale"
+                  >
+                     <Send size={20} className="mr-0.5" />
+                  </button>
+              </form>
           </div>
           {/* ⛽ INSUFFICIENT FUNDS TRIGGER */}
           <InsufficientFundsModal 
