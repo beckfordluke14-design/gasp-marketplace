@@ -56,7 +56,7 @@ export default function FloatingChatHub({
 
   if (!hasFavorites && totalUnread === 0 && !isOpen) {
       return (
-        <div className="fixed bottom-6 right-6 z-[2500] pointer-events-none md:bottom-12 md:right-12">
+        <div className={`fixed bottom-6 ${isOpen ? 'left-6' : 'right-6'} z-[2500] pointer-events-none md:bottom-12 ${isOpen ? 'md:left-12' : 'md:right-12'} transition-all duration-700`}>
             <motion.button
                 onClick={handleAnchorClick}
                 initial={{ scale: 0, opacity: 0 }}
@@ -70,7 +70,7 @@ export default function FloatingChatHub({
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-[2500] pointer-events-none md:bottom-12 md:right-12">
+    <div className={`fixed bottom-6 ${isOpen ? 'left-6' : 'right-6'} z-[2500] pointer-events-none md:bottom-12 ${isOpen ? 'md:left-12' : 'md:right-12'} transition-all duration-700`}>
        <div className="relative flex items-center justify-center">
           
           {/* 🎡 THE SOVEREIGN RADIAL DIAL (V4.25) */}

@@ -24,6 +24,21 @@ export async function POST(req: Request) {
     const finalProfileId = profileId || personaId || requestData?.profileId || requestData?.personaId;
 
     if (!finalUserId || !finalProfileId) return new Response('Missing ID context', { status: 400 });
+    
+    // 🛡️ SYNDICATE GUEST DEPLETION (V5.60)
+    // Objective: Cumulative limit across all chats for the guest account.
+    if (finalUserId.startsWith('guest-')) {
+       try {
+          const { rows: msgCountRows } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [finalUserId]);
+          const userMsgCount = parseInt(msgCountRows[0].count || '0');
+          const GUEST_LIMIT = 5; // 🧪 CONFIG: Total cumulative messages before mandatory "The Hook" signup
+          
+          if (userMsgCount >= GUEST_LIMIT) {
+             console.log(`⚠️ [Neural Sync] Guest ${finalUserId} Depleted. MsgCount: ${userMsgCount}`);
+             return new Response('DEPLETED', { status: 402 });
+          }
+       } catch (limitErr) { console.error('[Gasp Limit Sync Fail]:', limitErr); }
+    }
 
     const dbProfile = await SOV.getPersona(finalProfileId) as any;
     const profileItem = dbProfile || 
