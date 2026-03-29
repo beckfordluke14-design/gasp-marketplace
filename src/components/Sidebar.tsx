@@ -25,6 +25,8 @@ import ProfileAvatar from '@/components/profile/ProfileAvatar';
 import Link from 'next/link';
 import GlitchText from './ui/GlitchText';
 
+import NeuralPulseHub from './NeuralPulseHub';
+
 // 🛡️ SYSTEM SYNC: Using DB Service for reliable updates.
 
 interface SidebarProps {
@@ -191,6 +193,9 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
         {/* VIEW: CHATS */}
         {view === 'chats' && (
           <>
+            {/* 🛰️ NEURAL PULSE HUB: Real-time Intel Ticker */}
+            <NeuralPulseHub />
+
             {/* NEW MESSAGES */}
             {Object.keys(unreadCounts).some(id => unreadCounts[id] > 0) && (
                 <div className="mb-8 px-4">

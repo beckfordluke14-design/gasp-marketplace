@@ -6,6 +6,36 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const { action, payload } = body;
 
+    if (action === 'get_latest_news') {
+        const { limit = 3 } = payload || {};
+        const { rows } = await db.query(`
+            SELECT * FROM news_posts 
+            ORDER BY created_at DESC 
+            LIMIT $1
+        `, [limit]);
+        return NextResponse.json({ success: true, posts: rows });
+    }
+
+    if (action === 'get_news') {
+        const { personaId } = payload || {};
+        const { rows } = await db.query(`
+            SELECT * FROM news_posts 
+            WHERE persona_id = $1 
+            ORDER BY created_at DESC
+        `, [personaId]);
+        return NextResponse.json({ success: true, posts: rows });
+    }
+
+    if (action === 'delete_news') {
+        const { id } = payload || {};
+        await db.query(`DELETE FROM news_posts WHERE id = $1`, [id]);
+        return NextResponse.json({ success: true, message: 'Intel Vaporized.' });
+    }
+
+    if (action === 'get_profiles') {
+      return new Response('Missing Action or Payload', { status: 400 });
+    }
+
     if (!action || !payload) {
       return new Response('Missing Action or Payload', { status: 400 });
     }

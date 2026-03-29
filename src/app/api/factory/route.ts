@@ -100,7 +100,20 @@ export async function POST(req: Request) {
                 arch.zone
             ]);
 
-            // ... (telemetry and posts remain same)
+            // 💎 Birth Assets: 1 Hero + 3 Vault Nodes
+            await db.query(`
+                INSERT INTO posts (persona_id, content_type, content_url, is_vault, caption, created_at)
+                VALUES ($1, 'image', $2, false, '', NOW())
+            `, [pid, heroUrl]);
+
+            for (let j = 0; j < 3; j++) {
+                const vaultUrl = await getSovereignUrl(pid, `v_${j}`);
+                await db.query(`
+                    INSERT INTO posts (persona_id, content_type, content_url, is_vault, caption, created_at)
+                    VALUES ($1, 'image', $2, true, '', NOW())
+                `, [pid, vaultUrl]);
+            }
+
             results.push({ name: p.name, id: pid });
         }
         return new Response(JSON.stringify({ success: true, count: results.length, personas: results }), { status: 200 });

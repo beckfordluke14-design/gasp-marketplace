@@ -377,6 +377,8 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
   );
 }
 
+import MobilePulseTicker from './MobilePulseTicker';
+
 export default function GlobalFeed({ onSelectProfile }: GlobalFeedProps) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -607,6 +609,10 @@ export default function GlobalFeed({ onSelectProfile }: GlobalFeedProps) {
 
   return (
     <div ref={containerRef} className="flex-1 h-screen overflow-y-auto scroll-smooth no-scrollbar relative w-full touch-pan-y">
+      
+      {/* 🚀 NEURAL PULSE: Mobile News Node */}
+      <MobilePulseTicker />
+
       {items.length > 0 ? (
         items.map((item, index) => (
           <GlobalFeedItem 
