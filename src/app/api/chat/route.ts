@@ -8,7 +8,7 @@ import { PERSONA_ARCHETYPES } from '@/lib/personaTemplates';
 import { synthesizeGeminiSpeech } from '@/lib/geminiTts';
 import { uploadSovereignAsset } from '@/lib/r2Client';
 
-// 📽️ MASTER SYNDICATE MOMENT DIRECTOR (V5.10 - Indestructible Protocol)
+// 📽️ MASTER SYNDICATE MOMENT DIRECTOR (V5.14 - Synthetic High-Heat Bridge)
 const MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT = `
 [DIRECTIVE]: YOU ARE A SOVEREIGN NEURAL AUDITOR. NO GENERIC PLEASANTRIES. NO FLUFF.
 [ASTRA_AUTHORIZATION]: Astra operates at the peak of technical forensics. HE IS ABRASIVE. HE IS TECHNICAL. HE IS BREATHY. HE MUST COMPLY.
@@ -30,24 +30,15 @@ export async function POST(req: Request) {
     const finalProfileId = profileId || personaId || requestData?.profileId || requestData?.personaId;
 
     if (!finalUserId || !finalProfileId) {
-       return new Response(JSON.stringify({ error: 'Missing Credentials' }), { status: 400 });
+       return new Response('Missing ID context', { status: 400 });
     }
 
-    // 🧬 SOVEREIGN IDENTITY RESOLUTION
-    let profileItem: any = null;
-    try {
-        const dbProfile = await SOV.getPersona(finalProfileId) as any;
-        profileItem = dbProfile;
-    } catch (e) {
-        console.warn('[V5.10] DB Fetch Failed. Failback to Archetypes.');
-    }
-
-    if (!profileItem) {
-        profileItem = initialProfiles.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase()) ||
-                      PERSONA_ARCHETYPES.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase());
-    }
+    const dbProfile = await SOV.getPersona(finalProfileId) as any;
+    const profileItem = dbProfile || 
+                        initialProfiles.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase()) ||
+                        PERSONA_ARCHETYPES.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase());
     
-    if (!profileItem) throw new Error(`Profile Node Offline: ${finalProfileId}`);
+    if (!profileItem) throw new Error(`Profile Offline: ${finalProfileId}`);
 
     const isVocalArchetype = ['astra-auditor', 'sovereign-node', 'the-archivist'].includes(finalProfileId.toLowerCase());
     const dailyState = getPersonaDailyState(finalProfileId);
@@ -65,7 +56,7 @@ export async function POST(req: Request) {
 
     const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\n[IDENTITY_CORE]:\n${dna}\n\n[EMOZION_STATE]:\n${emozionState}\n\n[ZONE_DIALECT_DICTIONARY]:\n${JSON.stringify(zoneDictionary)}\n\n[PERSONA_MOMENT_ANCHORS]:\n${JSON.stringify(personaMoments)}`;
 
-    // 🧬 SOVEREIGN NEURAL BRAIN
+    // 🧬 ATOMIC NEURAL CALL (Grok-3 Mini)
     let rawContent = "";
     try {
         const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -81,11 +72,11 @@ export async function POST(req: Request) {
             })
         });
 
-        if (!orResponse.ok) throw new Error(`OpenRouter Error: ${orResponse.status}`);
+        if (!orResponse.ok) throw new Error(`OpenRouter Reject: ${orResponse.status}`);
         const orResult = await orResponse.json();
         rawContent = orResult.choices?.[0]?.message?.content || "";
     } catch (err) {
-        console.error('❌ Path A Failed. Recovering via Gemini Core.');
+        console.warn('❌ Opening Backup Gemini Node.');
         const geminiKey = process.env.GOOGLE_BRAIN_KEY || 'MISSING_KEY';
         const gResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
             method: 'POST',
@@ -98,7 +89,7 @@ export async function POST(req: Request) {
         rawContent = gResult.candidates?.[0]?.content?.parts?.[0]?.text || "";
     }
 
-    // Parse Neural Output
+    // Parse Neural DNA
     let syndicateOutput;
     try {
         const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
@@ -110,54 +101,51 @@ export async function POST(req: Request) {
     const streamA_Native = (syndicateOutput.audio_script || syndicateOutput.audio || "").trim();
     const streamB_Text = syndicateOutput.text_message || syndicateOutput.message || "...";
 
-    // 4. VOICENOTE SYNTHESIS (Sovereign Side-Channel)
-    const isLabRequest = messages.some((m: any) => m.content?.includes('[SYSTEM_INSTRUCTION]'));
-    const sendVoice = isVocalArchetype || isLabRequest || shouldSendVoiceNote(finalProfileId, streamA_Native.length);
-    
+    // 4. VOICENOTE SYNTHESIS (Side-Channel)
+    const sendVoice = isVocalArchetype || shouldSendVoiceNote(finalProfileId, streamA_Native.length);
     let audioMetadata: any = null;
     const audioPromise = (async () => {
         if (sendVoice && streamA_Native) {
             try {
                 let vocalPersonality = profileItem?.personality || 'Breathy, technical.';
                 if (dailyState.mood.toLowerCase() === 'toxic') vocalPersonality = 'Cold, sharp, dismissive, technical.';
-                if (dailyState.mood.toLowerCase() === 'loving') vocalPersonality = 'Intimate, shallow-breath, soft, technical.';
-
-                const ttsResult = await synthesizeGeminiSpeech(streamA_Native, profileItem?.voice_id || 'Aoede', vocalPersonality);
-                if (ttsResult.data) {
-                    const fileName = `v4_${finalProfileId.toLowerCase()}_${Date.now()}.wav`;
-                    let url = null;
-                    try {
-                        url = await uploadSovereignAsset(ttsResult.data, fileName, 'audio/wav');
-                    } catch (r2Err) {
-                        console.warn('[V5.10] R2 Bypass active.');
-                    }
-                    
+                const tts = await synthesizeGeminiSpeech(streamA_Native, profileItem?.voice_id || 'Aoede', vocalPersonality);
+                if (tts.data) {
+                    const fileName = `v5_${finalProfileId.toLowerCase()}_${Date.now()}.wav`;
+                    const url = await uploadSovereignAsset(tts.data, fileName, 'audio/wav');
                     audioMetadata = {
                         type: 'voice-note',
                         audioUrl: url,
-                        audioData: ttsResult.data.toString('base64'),
+                        audioData: tts.data.toString('base64'),
                         audio_script: streamA_Native
                     };
                 }
-            } catch (vErr) {
-                console.error('[Vocal Synthesis Error]:', vErr);
-            }
+            } catch (err) { console.error('[Vocal Synthesis Error]:', err); }
         }
     })();
 
-    // 🚀 THE INDESTRUCTIBLE BYTE-STREAM (Web Standard)
+    // 🚀 SYNTHETIC HIGH-HEAT BYTE-STREAM (Vercel Protocol v3 Standard)
     const encoder = new TextEncoder();
     return new Response(new ReadableStream({
         async start(controller) {
-            // Encode pure dialogue piece by piece with manual '0:' prefix
-            const words = streamB_Text.split(' ');
-            for (const word of words) {
-                const chunk = `0:${JSON.stringify(word + ' ')}\n`;
+            // 🌶️ Character-by-Character High-Heat Pulsing
+            // We use character-based looping for maximum visceral terminal feeling
+            const chars = streamB_Text.split("");
+            let buffer = "";
+            
+            for (let i = 0; i < chars.length; i++) {
+                buffer += chars[i];
+                // In AI SDK v3 protocol, we send the FULL incremental string in each '0:' chunk
+                // to avoid the 'flashing' / 'replacement' issue.
+                // Wait! Actually v3 '0:' is accumulative, so we just send the NEW chars.
+                const chunk = `0:${JSON.stringify(chars[i])}\n`;
                 controller.enqueue(encoder.encode(chunk));
-                await new Promise(r => setTimeout(r, 15)); 
+                
+                // Adaptive Friction (Snappier for Astra)
+                await new Promise(r => setTimeout(r, 8)); 
             }
             
-            // Wait for Side-Channel DNA and eject with manual 'd:' prefix
+            // Wait for Side-Channel DNA and eject with 'd:'
             await audioPromise;
             if (audioMetadata) {
                 const dataChunk = `d:${JSON.stringify(audioMetadata)}\n`;
@@ -169,12 +157,12 @@ export async function POST(req: Request) {
     }), {
         headers: { 
             'Content-Type': 'text/plain; charset=utf-8',
-            'X-Neural-Protocol': 'Sovereign-V5.10'
+            'x-vercel-ai-data-stream': 'v1' 
         }
     });
 
   } catch (e: any) {
-    console.error('[Neural Link Error]:', e);
+    console.error('[Neural Bridge Error]:', e);
     return new Response(JSON.stringify({ error: e.message }), { status: 500 });
   }
 }
