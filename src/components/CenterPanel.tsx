@@ -27,11 +27,12 @@ export default function CenterPanel({ selectedProfileId }: CenterPanelProps) {
           {/* Section Header */}
           <div className="flex flex-col gap-4 mb-20 px-4">
              <div className="flex items-center gap-3">
-                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">node link established</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[#00f0ff] opacity-60">Active Uplink Established // Syndicate Node</span>
              </div>
-             <h3 className="text-4xl md:text-5xl font-outfit font-black italic uppercase tracking-tighter leading-none text-white transition-all">
-                {selectedProfile.name} <span className="text-[#FF007F]">Reality</span> Feed
-             </h3>
+             <h1 className="text-4xl md:text-5xl font-syncopate font-black italic uppercase tracking-tighter leading-none text-white transition-all drop-shadow-2xl">
+                {selectedProfile.name} <span className="text-[#00f0ff]">Intelligence</span> Feed
+              </h1>
           </div>
 
           {/* Broadcasts Feed */}

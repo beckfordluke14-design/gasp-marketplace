@@ -78,20 +78,20 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp }:
             <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-8 max-w-[280px]">
                Your current identity balance is <span className="text-white font-syncopate">{balance !== null ? formatCredits(balance) : '---'}</span>. 
                <br />
-               Push more credits to your node to keep the connection alive. 🪙🛡️
+               Push more credits to your node to keep the connection alive. 💎🛡️
             </p>
 
             <div className="w-full space-y-3">
-               <button 
-                 onClick={() => {
-                   onClose();
-                   onOpenTopUp();
-                 }}
-                 className="w-full h-16 rounded-2xl bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(0,240,255,0.3)] flex items-center justify-center gap-3"
-               >
-                  <Diamond size={14} fill="currentColor" />
-                  TOP UP NOW
-               </button>
+                <button 
+                  onClick={() => {
+                    onClose();
+                    onOpenTopUp();
+                  }}
+                  className="w-full h-16 rounded-2xl bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(0,240,255,0.3)] flex items-center justify-center gap-3"
+                >
+                   <Diamond size={14} fill="currentColor" />
+                   INFUSE CREDITS
+                </button>
                
                <button 
                  onClick={onClose}
@@ -105,7 +105,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp }:
           {/* Bottom Security Tag */}
           <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-center gap-2 opacity-20">
              <AlertCircle size={10} />
-             <span className="text-[7px] font-black uppercase tracking-widest italic">Sovereign Protocol Active</span>
+             <span className="text-[7px] font-black uppercase tracking-widest italic">AllTheseFlows Strategic Hub</span>
           </div>
         </motion.div>
       </div>

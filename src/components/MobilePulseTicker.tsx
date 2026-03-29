@@ -46,7 +46,7 @@ export default function MobilePulseTicker() {
 
   // 🛡️ SYNDICATE GLASS: Translucent Intelligence Node
   return (
-     <div className="fixed top-[54px] left-0 right-0 z-[100] h-10 px-6 pointer-events-none">
+     <div className="relative top-0 left-0 right-0 z-[100] h-10 px-6 pointer-events-none">
         <motion.div 
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.95 }}

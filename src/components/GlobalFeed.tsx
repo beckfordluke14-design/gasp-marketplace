@@ -197,7 +197,14 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                       <video src={proxyImg(broadcast.video_url)} className="absolute inset-0 w-full h-full object-cover -z-10 blur-[130px] opacity-10" />
                    </div>
                 ) : (
-                   <video src={proxyImg(broadcast.video_url)} autoPlay loop muted playsInline preload="auto" className="relative z-10 w-full h-full object-cover md:object-contain pt-16 md:pt-24 pb-8 md:pb-12 opacity-100" />
+                    <img 
+                       src={proxyImg(broadcast.image_url || profile.image)} 
+                       alt="" 
+                       referrerPolicy="no-referrer" 
+                       className="relative z-10 w-full h-full object-cover md:object-contain pt-0 pb-0 opacity-100" 
+                       loading={index < 2 ? "eager" : "lazy"}
+                       decoding="async"
+                    />
                 )}
              </>
           ) : broadcast.type === 'image' ? (
@@ -250,19 +257,20 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                    </div>
                 ) : (
                     <img 
-                      src={proxyImg(broadcast.image_url || profile.image)} 
-                      alt="" 
-                      referrerPolicy="no-referrer" 
-                      className="relative z-10 w-full h-full object-cover md:object-contain pt-16 md:pt-24 pb-8 md:pb-12 opacity-100" 
-                      loading={index < 2 ? "eager" : "lazy"}
-                      decoding="async"
+                       src={proxyImg(broadcast.image_url || profile.image)} 
+                       alt="" 
+                       referrerPolicy="no-referrer" 
+                       className="relative z-10 w-full h-full object-cover md:object-contain pt-0 pb-0 opacity-100" 
+                       loading={index < 2 ? "eager" : "lazy"}
+                       decoding="async"
                     />
                 )}
              </>
           ) : (
              <div className="w-full h-full bg-[#050505]"><BrandingOverlay profileName={profile.name} /></div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90" />
+          {/* Ghost Shield: Pure Transparency Over Content */}
+          <div className="absolute inset-0 bg-transparent opacity-100" />
        </div>
 
        {(onDeletePost || onToggleFeatured || onUpdatePost || onEditBrain) && (
@@ -296,9 +304,9 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
           </div>
        )}
 
-       <div className="relative z-10 w-full max-w-xl px-4 flex flex-col items-center justify-center min-h-screen">
-             <div className="absolute inset-0 z-50 pointer-events-none flex flex-col justify-end p-8 md:p-16">
-                   <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+        <div className="relative z-10 w-full max-w-xl px-4 flex flex-col items-center justify-center min-h-screen pointer-events-none">
+              <div className="absolute inset-0 z-50 pointer-events-none flex flex-col justify-end p-8 md:p-16 pb-32">
+                    <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-10 duration-1000">
                       <div className="flex flex-col gap-2 pointer-events-auto">
                          <div className="flex items-center gap-3 relative">
                         <span className="text-[14px] md:text-[18px] font-black uppercase italic tracking-tighter text-white/90 drop-shadow-2xl">{displayName}</span>
@@ -337,7 +345,7 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                            )}
                         </AnimatePresence>
 
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] shadow-[0_0_10px_#00f0ff]" />
+                        <div className="w-1 h-1 rounded-full bg-[#00f0ff] opacity-40" />
                      </div>
                     
                     {isEditing ? (
@@ -355,36 +363,36 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                     )}
                       </div>
                       <div className="flex items-center gap-4 md:gap-6 pointer-events-auto">
-                          <button onClick={handleLike} className={`w-14 h-14 md:w-20 md:h-20 rounded-2xl backdrop-blur-3xl border flex flex-col items-center justify-center transition-all ${hasLiked ? 'bg-red-500/20 border-red-500/50 text-red-500 shadow-[0_0_30px_#ff000044]' : 'bg-black/60 border-white/10 text-white/40 hover:scale-110 hover:border-white/30'}`}>
-                             <Heart size={26} className={hasLiked ? 'fill-current' : ''} />
-                             <span className="text-[8px] md:text-[10px] font-black mt-1 uppercase">{likes}</span>
-                          </button>
-
-                          <button 
-                             onClick={async (e) => {
-                                e.stopPropagation();
-                                const gid = localStorage.getItem('gasp_guest_id');
-                                if (!gid) return;
-
-                                const next = !isFollowing;
-                                setIsFollowing(next);
-
-                                try {
-                                  await fetch('/api/rpc/db', {
-                                    method: 'POST',
-                                    body: JSON.stringify({ action: 'toggle-follow', payload: { userId: gid, personaId: profile.id, isFollowing: !next } })
-                                  });
-                                  window.dispatchEvent(new Event('gasp_sync_follows'));
-                                } catch (err) {
-                                  setIsFollowing(!next);
-                                }
-                             }}
-                             className={`w-14 h-14 md:w-20 md:h-20 rounded-2xl backdrop-blur-3xl border flex flex-col items-center justify-center transition-all shadow-2xl ${isFollowing ? 'bg-[#ffea00]/10 border-[#ffea00]/40 text-[#ffea00] shadow-[0_0_30px_rgba(255,234,0,0.2)]' : 'bg-black/60 border-white/10 text-white/40 hover:scale-110 hover:border-[#ffea00]/40 hover:text-[#ffea00]'}`}
-                          >
-                             <Star size={26} className={isFollowing ? 'fill-[#ffea00] drop-shadow-[0_0_10px_#ffea00]' : ''} />
-                             <span className="text-[8px] md:text-[10px] font-black mt-1 uppercase">{isFollowing ? 'saved' : 'save'}</span>
-                          </button>
-                       </div>
+                           <button onClick={handleLike} className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl backdrop-blur-md border flex flex-col items-center justify-center transition-all ${hasLiked ? 'bg-red-500/10 border-red-500/40 text-red-500' : 'bg-black/10 border-white/5 text-white/30 hover:scale-110 hover:border-white/20'}`}>
+                              <Heart size={20} className={hasLiked ? 'fill-current' : ''} />
+                              <span className="text-[7px] font-black mt-0.5 uppercase">{likes}</span>
+                           </button>
+ 
+                           <button 
+                              onClick={async (e) => {
+                                 e.stopPropagation();
+                                 const gid = localStorage.getItem('gasp_guest_id');
+                                 if (!gid) return;
+ 
+                                 const next = !isFollowing;
+                                 setIsFollowing(next);
+ 
+                                 try {
+                                   await fetch('/api/rpc/db', {
+                                     method: 'POST',
+                                     body: JSON.stringify({ action: 'toggle-follow', payload: { userId: gid, personaId: profile.id, isFollowing: !next } })
+                                   });
+                                   window.dispatchEvent(new Event('gasp_sync_follows'));
+                                 } catch (err) {
+                                   setIsFollowing(!next);
+                                 }
+                              }}
+                              className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl backdrop-blur-md border flex flex-col items-center justify-center transition-all ${isFollowing ? 'bg-[#ffea00]/10 border-[#ffea00]/30 text-[#ffea00]' : 'bg-black/10 border-white/5 text-white/20 hover:scale-110'}`}
+                           >
+                              <Star size={20} className={isFollowing ? 'fill-[#ffea00]' : ''} />
+                              <span className="text-[7px] font-black mt-0.5 uppercase">{isFollowing ? 'saved' : 'save'}</span>
+                           </button>
+                        </div>
                    </div>
              </div>
        </div>
@@ -627,13 +635,17 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
   return (
     <div ref={containerRef} className="flex-1 h-screen overflow-y-auto scroll-smooth no-scrollbar relative w-full touch-pan-y bg-transparent">
       
-      {/* 📡 MARKET PULSE: Mobile News Hub */}
-      <MobilePulseTicker />
-
-      {/* 📱 MOBILE NAVIGATION CLUSTER: Stories & Search integrated into scroll */}
-      <div className="lg:hidden flex flex-col gap-2 pt-2 pb-4 px-4 overflow-hidden">
-          <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
-          <div className="w-full scale-95 origin-center">
+      {/* 📡 MARKET PULSE: Ultra-Thin Ghost Ticker */}
+      <div className="fixed top-[58px] left-0 right-0 z-[1000] scale-90 origin-top">
+         <MobilePulseTicker />
+      </div>
+      
+      {/* 📱 MOBILE NAVIGATION: Multi-Asset Ghost Loop */}
+      <div className="fixed top-[94px] left-0 right-0 z-[900] flex flex-col gap-1 px-4 overflow-hidden pointer-events-none">
+          <div className="pointer-events-auto w-full max-w-[200px] mx-auto opacity-40 hover:opacity-100 transition-opacity">
+             <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
+          </div>
+          <div className="pointer-events-auto w-full scale-[0.8] origin-top bg-transparent -mt-2">
              <StoriesRow profiles={profiles} onSelectProfile={onSelectProfile} />
           </div>
       </div>

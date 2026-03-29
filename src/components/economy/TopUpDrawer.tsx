@@ -42,9 +42,9 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
         <div className="w-24 h-24 rounded-full bg-[#ff6b00]/20 flex items-center justify-center mb-8 border border-[#ff6b00]/40 shadow-[0_0_60px_rgba(16,185,129,0.3)]">
           <Diamond size={48} className="text-[#ff6b00] animate-pulse" />
         </div>
-        <h3 className="text-3xl font-syncopate font-black uppercase italic text-white mb-4">Transfer Confirmed</h3>
+        <h3 className="text-3xl font-syncopate font-black uppercase italic text-white mb-4">Access Authorized</h3>
         <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-black leading-relaxed px-6">
-          The Blockchain Node has verified your settlement. Credits + 15% Bonus injected into your identity node. 🧬🛡️
+          The Hub has verified your digital settlement. Narrative Credits + 15% Bonus successfully infused into your active identity node. 🧬🛡️
         </p>
         <button 
           onClick={onClose}
@@ -66,12 +66,12 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
               <Diamond size={24} className="text-black" />
            </div>
            <div>
-              <h3 className="text-xl font-syncopate font-black uppercase italic text-white leading-none">
-                 CREDIT TERMINAL
-              </h3>
-              <p className="text-[10px] text-[#ff6b00] uppercase font-black tracking-widest mt-2 underline decoration-[#ff6b00]/30 underline-offset-4">
-                 Credit Top-Up Terminal
-              </p>
+               <h3 className="text-xl font-syncopate font-black uppercase italic text-white leading-none">
+                  ACCESS HUB
+               </h3>
+               <p className="text-[10px] text-[#ff6b00] uppercase font-black tracking-widest mt-2 underline decoration-[#ff6b00]/30 underline-offset-4">
+                  Syndicate Narrative Credits
+               </p>
            </div>
         </div>
         <button onClick={onClose} className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center">
@@ -108,12 +108,12 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
             <div className="p-4 md:p-5 rounded-2xl bg-[#ff6b00]/5 border border-[#ff6b00]/20 flex items-center justify-between">
                <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                     <div className="w-1 h-1 rounded-full bg-[#ff6b00] animate-pulse" />
-                     <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-[#ff6b00]">P2P Credit Logic v2.0 Active</span>
+                     <div className="w-1 h-1 rounded-full bg-[#ffea00] animate-pulse" />
+                     <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white/60">Digital Media Fulfillment v2.1 Active</span>
                   </div>
-                  <p className="text-[9px] md:text-[10px] text-white/40 font-bold italic mt-1">Bank-Free Sovereign Settlement Enabled.</p>
+                  <p className="text-[9px] md:text-[10px] text-white/40 font-bold italic mt-1">Verified Digital Content Settlement Enabled.</p>
                </div>
-               <ShieldCheck size={16} className="text-[#ff6b00]/30" />
+               <ShieldCheck size={16} className="text-[#ffea00]/30" />
             </div>
 
             {/* 🪙 CUSTOM WHALE TOP-UP */}
@@ -189,13 +189,13 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
             {/* Compliance / Info Array */}
             <div className="p-6 rounded-2xl border border-white/5 bg-white/[0.02] space-y-4">
                 <h5 className="text-[9px] font-black uppercase tracking-[0.25em] text-[#ff6b00] flex items-center gap-2">
-                    <ShieldCheck size={12} /> SECURE PROTOCOL G-V1.8
+                    <ShieldCheck size={12} /> SECURE FULFILLMENT G-V1.9
                 </h5>
                 <p className="text-[8px] text-white/10 uppercase tracking-[0.3em] mt-2 block leading-loose border-t border-white/5 pt-4 font-black italic">
-                    Decentralized P2P Settlement. Zero Chargebacks. 15% Bonus Credits Applied to every Sovereign Tier. 🪙
+                    Digital Media Credits Issued by AllTheseFlows LLC. Instant Fulfillment. 15% Bonus Applied to every Hub Tier. 💎
                 </p>
                 <p className="text-[7px] text-white/5 uppercase tracking-[0.3em] font-black italic text-center">
-                    All reservations are final and settled on the blockchain. 🧬🛡️
+                    All digital credit reservations are final and fulfilled instantly. 🧬🛡️
                 </p>
             </div>
           </div>
