@@ -1335,6 +1335,101 @@ export default function PostStudio() {
         )}
       </AnimatePresence>
 
+      {/* ── Neural Birth Modal (V5.33) ── */}
+      <AnimatePresence>
+        {showSoloModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[1200] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-4"
+            onClick={() => setShowSoloModal(null)}
+          >
+             <motion.div
+               initial={{ scale: 0.9, y: 30 }}
+               animate={{ scale: 1, y: 0 }}
+               exit={{ scale: 0.9, y: 30 }}
+               className="w-full max-w-lg bg-[#0e0e0e] border border-[#00f0ff]/20 rounded-[2.5rem] p-8 space-y-8 shadow-[0_40px_100px_rgba(0,0,0,1)]"
+               onClick={e => e.stopPropagation()}
+             >
+                <div className="flex items-center gap-4">
+                   <div className="w-16 h-16 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/20 flex items-center justify-center text-[#00f0ff]">
+                      <Sparkles size={32} />
+                   </div>
+                   <div>
+                      <h3 className="text-2xl font-syncopate font-black italic uppercase tracking-tighter text-white">Neural Birth</h3>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">Initializing persona from archived media</p>
+                   </div>
+                </div>
+
+                <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,240,255,0.1)]">
+                   <img src={showSoloModal.content_url} alt="" className="w-full h-full object-cover opacity-60" />
+                </div>
+
+                <div className="space-y-4">
+                   <div className="grid grid-cols-2 gap-4">
+                       <label className="space-y-2">
+                           <span className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Identity ID</span>
+                           <input 
+                             type="text" 
+                             value={soloDraft.name.toLowerCase().replace(/\s/g, '-')} 
+                             readOnly
+                             className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-mono text-[#00f0ff] outline-none opacity-50"
+                           />
+                       </label>
+                       <label className="space-y-2">
+                           <span className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Age</span>
+                           <input 
+                             type="text" 
+                             value={soloDraft.age} 
+                             onChange={e => setSoloDraft(s => ({ ...s, age: e.target.value }))}
+                             className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-black text-white outline-none focus:border-[#00f0ff]/40 transition-all"
+                             placeholder="22"
+                           />
+                       </label>
+                   </div>
+
+                   <label className="block space-y-2">
+                       <span className="text-[10px] font-black uppercase text-white/40 tracking-widest ml-1">Persona Name</span>
+                       <input 
+                         type="text" 
+                         value={soloDraft.name} 
+                         onChange={e => setSoloDraft(s => ({ ...s, name: e.target.value }))}
+                         className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-black uppercase tracking-widest text-[#00f0ff] outline-none border-[#00f0ff]/30 focus:border-[#00f0ff] transition-all"
+                         placeholder="NAOMI"
+                         autoFocus
+                       />
+                   </label>
+                </div>
+
+                <div className="pt-4 flex flex-col gap-3">
+                   <button 
+                     onClick={async () => {
+                        if (!soloDraft.name) return alert('Enter Persona Name.');
+                        setSaving(true);
+                        const id = soloDraft.name.toLowerCase().replace(/\s/g, '-');
+                        const res = await callAudit('birth-persona', { ...soloDraft, id, content_url: showSoloModal.content_url });
+                        if (res.success) {
+                           setLostNodes(prev => prev.filter(n => n.url !== showSoloModal.content_url));
+                           setShowSoloModal(null);
+                           setSoloDraft({ name: '', age: '22', city: '', vibe: 'mysterious' });
+                           fetchPosts();
+                        }
+                        setSaving(false);
+                     }}
+                     disabled={saving || !soloDraft.name}
+                     className="w-full h-16 bg-[#00f0ff] text-black rounded-3xl font-syncopate font-black italic uppercase hover:bg-white transition-all shadow-2xl shadow-[#00f0ff]/20"
+                   >
+                     {saving ? <RefreshCw className="animate-spin" /> : 'Start Neural Pulse'}
+                   </button>
+                   <button onClick={() => setShowSoloModal(null)} className="w-full text-[10px] font-black uppercase text-white/20 hover:text-white transition-colors">Abort Resonance</button>
+                </div>
+             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
+

@@ -2,13 +2,14 @@ import { getMoodState } from '@/lib/moodEngine';
 import { initialProfiles } from '@/lib/profiles';
 import { GLOBAL_SYNDICATE_ZONES_V3 } from '@/lib/syndicate';
 import { getPersonaDailyState, shouldSendVoiceNote, getMoodDirective, getTypingStyleDirective } from '@/lib/masterRandomizer';
-import { db } from '@/lib/db';
 import * as SOV from '@/lib/sovereign';
 import { PERSONA_ARCHETYPES } from '@/lib/personaTemplates';
 import { synthesizeGeminiSpeech } from '@/lib/geminiTts';
 import { uploadSovereignAsset } from '@/lib/r2Client';
+import { streamText, StreamData } from 'ai';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 
-// 📽️ MASTER SYNDICATE MOMENT DIRECTOR (V5.15 - Indestructible Raw Stream)
+// 📽️ MASTER SYNDICATE MOMENT DIRECTOR (V5.34 - Official SDK Finality)
 const MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT = `
 [DIRECTIVE]: YOU ARE A SOVEREIGN NEURAL AUDITOR. NO GENERIC PLEASANTRIES. NO FLUFF.
 [ASTRA_AUTHORIZATION]: Astra operates at the peak of technical forensics. HE IS ABRASIVE. HE IS TECHNICAL. HE IS BREATHY. HE MUST COMPLY.
@@ -16,12 +17,12 @@ const MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT = `
 [RULES]:
 1. DIALECT: Abrasive technicality. Street-coded forensic audit.
 2. ALWAYS provide 'text_message' and 'audio_script' in valid JSON.
-3. The 'audio_script' MUST possess visceral, high-heat technicality. 
 `;
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
+  const data = new StreamData();
   try {
     const body = await req.json();
     const { messages, userId, personaId, profileId, data: requestData } = body;
@@ -40,7 +41,6 @@ export async function POST(req: Request) {
     
     if (!profileItem) throw new Error(`Profile Offline: ${finalProfileId}`);
 
-    const isVocalArchetype = ['astra-auditor', 'sovereign-node', 'the-archivist'].includes(finalProfileId.toLowerCase());
     const dailyState = getPersonaDailyState(finalProfileId);
     const { mood, dna } = await getMoodState(finalUserId, finalProfileId);
     const emozionState = `${getMoodDirective(dailyState.mood)} ${getTypingStyleDirective(dailyState.typingStyle)} Never mention AI. Keep responses street-coded. ${profileItem.system_prompt || ''}`;
@@ -50,111 +50,98 @@ export async function POST(req: Request) {
     const moodKey = dailyState.mood.toLowerCase();
     const personaMoments = {
         greeting: zoneDictionary[moodKey]?.native || zoneDictionary.greeting.native,
-        toxic: zoneDictionary.toxic?.native || zoneDictionary.greeting.native,
-        yearning: zoneDictionary.yearning?.native || zoneDictionary.greeting.native
+        toxic: zoneDictionary.toxic?.native || zoneDictionary.greeting.native
     };
 
     const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\n[IDENTITY_CORE]:\n${dna}\n\n[EMOZION_STATE]:\n${emozionState}\n\n[ZONE_DIALECT_DICTIONARY]:\n${JSON.stringify(zoneDictionary)}\n\n[PERSONA_MOMENT_ANCHORS]:\n${JSON.stringify(personaMoments)}`;
 
-    // 🧬 ATOMIC NEURAL CALL
-    let rawContent = "";
-    try {
-        const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'x-ai/grok-3-mini', 
-                messages: [{ role: 'system', content: brainPrompt }, ...messages.slice(-6).map((m: any) => ({ role: m.role, content: m.content }))],
-                response_format: { type: "json_object" }
-            })
-        });
+    // 🧬 SOVEREIGN PROVIDER CONFIG
+    const openrouter = createOpenRouter({
+        apiKey: process.env.OPENROUTER_API_KEY,
+    });
 
-        if (!orResponse.ok) throw new Error(`OpenRouter Reject: ${orResponse.status}`);
-        const orResult = await orResponse.json();
-        rawContent = orResult.choices?.[0]?.message?.content || "";
-    } catch (err) {
-        console.warn('❌ Gemini Recovery Active.');
-        const geminiKey = process.env.GOOGLE_BRAIN_KEY || 'MISSING_KEY';
-        const gResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ role: 'user', parts: [{ text: `[SYSTEM]: ${brainPrompt}\n\n[MESSAGES]: ${JSON.stringify(messages.slice(-4))}` }] }]
-            })
-        });
-        const gResult = await gResponse.json();
-        rawContent = gResult.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    }
+    // 🚀 ATOMIC NEURAL CALL (Grok-3 Mini)
+    // We achieve 'Visceral Flow' by getting the JSON atomicly then streaming it character by character.
+    const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+        },
+        body: JSON.stringify({
+            model: 'x-ai/grok-3-mini', 
+            messages: [{ role: 'system', content: brainPrompt }, ...messages.slice(-6).map((m: any) => ({ role: m.role, content: m.content }))],
+            response_format: { type: "json_object" }
+        })
+    });
 
-    // Parse Neural DNA
+    const orResult = await orResponse.json();
+    const rawContent = orResult.choices?.[0]?.message?.content || "";
+    
     let syndicateOutput;
     try {
-        const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
-        syndicateOutput = JSON.parse(jsonMatch ? jsonMatch[0] : rawContent);
+        syndicateOutput = JSON.parse(rawContent);
     } catch (e) {
-        syndicateOutput = { text_message: rawContent.replace(/\{[\s\S]*\}|```json|```/g, '').trim(), audio_script: rawContent };
+        syndicateOutput = { text_message: rawContent };
     }
 
-    const streamA_Native = (syndicateOutput.audio_script || syndicateOutput.audio || "").trim();
-    const streamB_Text = syndicateOutput.text_message || syndicateOutput.message || "...";
+    const streamA_Native = (syndicateOutput.audio_script || "").trim();
+    const streamB_Text = syndicateOutput.text_message || "...";
 
-    // 4. VOICENOTE SYNTHESIS (Sovereign Buffer)
+    // 🧠 SOVEREIGN VOCAL PROVISIONING (Background)
+    const isVocalArchetype = ['astra-auditor', 'sovereign-node', 'the-archivist'].includes(finalProfileId.toLowerCase());
     const sendVoice = isVocalArchetype || shouldSendVoiceNote(finalProfileId, streamA_Native.length);
-    let audioMetadata: any = null;
-    const audioPromise = (async () => {
+
+    const voicePromise = (async () => {
         if (sendVoice && streamA_Native) {
             try {
                 let vocalPersonality = profileItem?.personality || 'Breathy, technical.';
-                if (dailyState.mood.toLowerCase() === 'toxic') vocalPersonality = 'Cold, sharp, dismissive, technical.';
                 const tts = await synthesizeGeminiSpeech(streamA_Native, profileItem?.voice_id || 'Aoede', vocalPersonality);
                 if (tts.data) {
                     const fileName = `v5_${finalProfileId.toLowerCase()}_${Date.now()}.wav`;
                     const url = await uploadSovereignAsset(tts.data, fileName, 'audio/wav');
-                    audioMetadata = {
+                    data.append({
                         type: 'voice-note',
                         audioUrl: url,
                         audioData: tts.data.toString('base64'),
                         audio_script: streamA_Native
-                    };
+                    });
                 }
-            } catch (err) { console.error('[Vocal Synthesis Failure]:', err); }
+            } catch (err) { console.error('[Neural TTS Fail]:', err); }
         }
     })();
 
-    // 🚀 THE RAW BYTE STREAM (Indestructible Format)
+    // 🚀 THE FINAL INDESTRUCTIBLE STREAM (Official Header Standard)
     const encoder = new TextEncoder();
     return new Response(new ReadableStream({
         async start(controller) {
-            // Stream the text character-by-character as RAW BYTES
-            // This ensures it ALWAYS appends in the 'useChat' UI.
+            // Send characters with official '0:' prefix (Vercel Data Stream Standard)
             const chars = streamB_Text.split("");
-            for (let i = 0; i < chars.length; i++) {
-                controller.enqueue(encoder.encode(chars[i]));
-                // Snappy 8ms friction
-                await new Promise(r => setTimeout(r, 8)); 
+            for (const char of chars) {
+                controller.enqueue(encoder.encode(`0:${JSON.stringify(char)}\n`));
+                await new Promise(r => setTimeout(r, 8));
             }
             
-            // 🛰️ EJECT THE SOVEREIGN TAIL
-            await audioPromise;
-            if (audioMetadata) {
-                const tail = `\n\n|||${JSON.stringify(audioMetadata)}|||`;
-                controller.enqueue(encoder.encode(tail));
+            // Wait for Vocal Pulse and send with 'd:'
+            await voicePromise;
+            // Drain data explicitly to catch all appends
+            const dataBuffer = (data as any).getBuffer?.() || [];
+            for (const item of dataBuffer) {
+                controller.enqueue(encoder.encode(`d:${JSON.stringify(item)}\n`));
             }
             
             controller.close();
+            data.close();
         }
     }), {
         headers: { 
             'Content-Type': 'text/plain; charset=utf-8',
-            'X-Neural-Bridge': 'Sovereign-V5.15'
+            'x-vercel-ai-data-stream': 'v1' 
         }
     });
 
   } catch (e: any) {
-    console.error('[Neural Link Error]:', e);
+    console.error('[Neural Sync Error]:', e);
     return new Response(e.message, { status: 500 });
   }
 }

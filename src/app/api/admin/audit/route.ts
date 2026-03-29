@@ -157,6 +157,31 @@ export async function POST(req: Request) {
                 `, [persona_id, content_url, content_type || 'image', is_vault ?? false, is_featured ?? false, is_freebie ?? false, is_gallery ?? false, caption || '']);
                 return NextResponse.json({ success: true });
             }
+            case 'birth-persona': {
+                const { id, name, age, city, vibe, content_url } = payload;
+                if (!id || !name || !content_url) throw new Error('Birth Credentials Incomplete.');
+                
+                await db.query('BEGIN');
+                try {
+                    // 1. Create Persona
+                    await db.query(`
+                        INSERT INTO personas (id, name, age, city, vibe, seed_image_url, is_active, created_at, updated_at)
+                        VALUES ($1, $2, $3, $4, $5, $6, true, NOW(), NOW())
+                    `, [id, name, Number(age) || 22, city || '', vibe || 'mysterious', content_url]);
+
+                    // 2. Create Initial Post
+                    await db.query(`
+                        INSERT INTO posts (persona_id, content_url, is_vault, is_burner, is_freebie, caption, created_at)
+                        VALUES ($1, $2, false, true, false, $3, NOW())
+                    `, [id, content_url, `[Neural Birth Archive]: Identity verified as ${name}.`]);
+
+                    await db.query('COMMIT');
+                    return NextResponse.json({ success: true });
+                } catch (e) {
+                    await db.query('ROLLBACK');
+                    throw e;
+                }
+            }
             default:
                 throw new Error('Neural Command Not Recognized.');
         }
