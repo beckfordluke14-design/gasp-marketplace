@@ -3,8 +3,7 @@
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Clock, Sparkles } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { Send, Clock, Sparkles, Mic } from 'lucide-react';
 import VoiceNoteBubble from './VoiceNoteBubble';
 
 interface ChatContainerProps {
@@ -32,30 +31,27 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
     },
   } as any);
 
-  // 2. NEURAL HYDRATION: Load historical messages from Supabase
+  // 2. NEURAL HYDRATION: Load historical messages from Railway PostgreSQL via Internal API
   useEffect(() => {
     async function loadHistory() {
       if (!guestId || !profileId) return;
       
-      const { data: dbMessages } = await supabase
-        .from('chat_messages')
-        .select('*, audio_url, audio_script') // 🧬 High-Fidelity Sync Ingress
-        .eq('user_id', guestId)
-        .eq('persona_id', profileId)
-        .order('created_at', { ascending: true })
-        .limit(20);
-
-      if (dbMessages && dbMessages.length > 0) {
-        setMessages(dbMessages.map((m: any) => ({
-          id: m.id,
-          role: m.role,
-          content: m.content,
-          createdAt: new Date(m.created_at),
-          // 🧠 DNA Persistence
-          audio_url: m.audio_url,
-          audio_script: m.audio_script
-        })));
-      }
+      try {
+        const res = await fetch(`/api/chat/history?userId=${guestId}&personaId=${profileId}`);
+        const data = await res.json();
+        
+        if (data.success && data.messages) {
+          setMessages(data.messages.map((m: any) => ({
+            id: m.id,
+            role: m.role,
+            content: m.content,
+            createdAt: new Date(m.createdAt),
+            // 🧠 DNA Persistence
+            audio_url: m.audio_url,
+            audio_script: m.audio_script
+          })));
+        }
+      } catch (err) { console.error('[Railway Hydration Fail]:', err); }
 
       setHistoryLoaded(true);
     }

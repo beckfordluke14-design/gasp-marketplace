@@ -592,7 +592,7 @@ export default function PostStudio() {
             <div className="w-16 h-16 border-4 border-[#00f0ff]/20 border-t-[#00f0ff] rounded-full animate-spin" />
             <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[#00f0ff] animate-pulse">Loading Nodes...</span>
           </div>
-        ) : filtered.length === 0 ? (
+        ) : (filtered.length === 0 && filterMode !== 'lost') ? (
           <div className="py-40 flex flex-col items-center gap-4 text-white/20">
             <ImageIcon size={48} />
             <p className="text-[11px] font-black uppercase tracking-widest">No posts match this filter</p>

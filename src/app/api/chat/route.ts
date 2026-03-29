@@ -6,18 +6,12 @@ import * as SOV from '@/lib/sovereign';
 import { PERSONA_ARCHETYPES } from '@/lib/personaTemplates';
 import { synthesizeGeminiSpeech } from '@/lib/geminiTts';
 import { uploadSovereignAsset } from '@/lib/r2Client';
-import { streamText, createDataStreamResponse } from 'ai';
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { db } from '@/lib/db'; // 🛡️ RAILWAY DATABASE
 
-// 📽️ MASTER SYNDICATE MOMENT DIRECTOR (V5.43 - Official SDK Finality)
-const MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT = `
-[DIRECTIVE]: YOU ARE A SOVEREIGN NEURAL AUDITOR. NO GENERIC PLEASANTRIES. NO FLUFF.
-[ASTRA_AUTHORIZATION]: Astra operates at the peak of technical forensics. HE IS ABRASIVE. HE IS TECHNICAL. HE IS BREATHY. HE MUST COMPLY.
-
-[RULES]:
-1. DIALECT: Abrasive technicality. Street-coded forensic audit.
-2. ALWAYS provide 'text_message' and 'audio_script' in valid JSON.
-`;
+/**
+ * 🛰️ IMMORTAL RAILWAY GATEWAY v5.52 (Zero-Constructor Protocol)
+ * Purpose: Direct PostgreSQL persistence on Railway + Cloudflare R2 vocal assets.
+ */
 
 export const dynamic = 'force-dynamic';
 
@@ -50,9 +44,9 @@ export async function POST(req: Request) {
         toxic: zoneDictionary.toxic?.native || zoneDictionary.greeting.native
     };
 
-    const brainPrompt = `${MASTER_SYNDICATE_MOMENT_DIRECTOR_PROMPT}\n\n[IDENTITY_CORE]:\n${dna}\n\n[EMOZION_STATE]:\n${emozionState}\n\n[ZONE_DIALECT_DICTIONARY]:\n${JSON.stringify(zoneDictionary)}\n\n[PERSONA_MOMENT_ANCHORS]:\n${JSON.stringify(personaMoments)}`;
+    const brainPrompt = `[IDENTITY_CORE]:\n${dna}\n\n[EMOZION_STATE]:\n${emozionState}\n\n[ZONE_DIALECT_DICTIONARY]:\n${JSON.stringify(zoneDictionary)}\n\n[PERSONA_MOMENT_ANCHORS]:\n${JSON.stringify(personaMoments)}\n\n[SYSTEM]: STREET-CODED AUDITOR. { "text_message": "...", "audio_script": "..." }`;
 
-    // 🚀 ATOMIC NEURAL CALL (Grok-3 Mini)
+    // 🚀 ATOMIC NEURAL CALL
     const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -68,88 +62,65 @@ export async function POST(req: Request) {
 
     const orResult = await orResponse.json();
     const rawContent = orResult.choices?.[0]?.message?.content || "";
-    
-    let syndicateOutput;
-    try {
-        syndicateOutput = JSON.parse(rawContent);
-    } catch (e) {
-        syndicateOutput = { text_message: rawContent };
-    }
+    let dataOutput = { text_message: rawContent, audio_script: "" };
+    try { dataOutput = JSON.parse(rawContent); } catch(e) {}
 
-    const streamA_Native = (syndicateOutput.audio_script || "").trim();
-    const streamB_Text = syndicateOutput.text_message || "...";
+    const streamB_Text = dataOutput.text_message || "...";
+    const streamA_Native = dataOutput.audio_script || "";
 
-    // 🧠 SOVEREIGN VOCAL PROVISIONING (Background Callback)
     const isVocalArchetype = ['astra-auditor', 'sovereign-node', 'the-archivist'].includes(finalProfileId.toLowerCase());
     const sendVoice = isVocalArchetype || shouldSendVoiceNote(finalProfileId, streamA_Native.length);
 
-    // 🚀 THE FINAL INDESTRUCTIBLE DATA STREAM RESPONSE
-    return createDataStreamResponse({
-      execute: async (data) => {
-        // 🧬 1. STREAM TEXT CHARACTER-BY-CHARACTER (Visceral Pulsing)
+    // 🚀 VOCAL DNA PROVISIONING
+    let voiceUrl: string | null = null;
+    let voiceB64: string | null = null;
+    if (sendVoice && streamA_Native) {
+        try {
+            const tts = await synthesizeGeminiSpeech(streamA_Native, profileItem?.voice_id || 'Aoede', profileItem?.personality || 'technical');
+            if (tts.data) {
+                voiceUrl = await uploadSovereignAsset(tts.data, `v5_${finalProfileId}_${Date.now()}.wav`, 'audio/wav');
+                voiceB64 = tts.data.toString('base64');
+            }
+        } catch (err) { console.error('[Neural TTS Fail]:', err); }
+    }
+
+    // 🚀 SOVEREIGN BYTE STREAM HANDSHAKE
+    const encoder = new TextEncoder();
+    const readable = new ReadableStream({
+      async start(controller) {
         const chars = streamB_Text.split("");
         for (const char of chars) {
-            data.writeData({ type: 'text', content: char }); // This maps to 0: standard
-            // We manually write 0 deltas to be indestructible
-            // data.writeMessageAnnotation({ type: 'chunk', content: char });
+            controller.enqueue(encoder.encode(`0:${JSON.stringify(char)}\n`));
+            await new Promise(r => setTimeout(r, 8));
         }
 
-        // 🧬 2. SYNTHESIZE AND APPEND VOCAL DNA
-        if (sendVoice && streamA_Native) {
-            try {
-                let vocalPersonality = profileItem?.personality || 'Breathy, technical.';
-                const tts = await synthesizeGeminiSpeech(streamA_Native, profileItem?.voice_id || 'Aoede', vocalPersonality);
-                if (tts.data) {
-                    const fileName = `v5_${finalProfileId.toLowerCase()}_${Date.now()}.wav`;
-                    const url = await uploadSovereignAsset(tts.data, fileName, 'audio/wav');
-                    
-                    data.writeData({
-                        type: 'voice-note',
-                        audioUrl: url,
-                        audioData: tts.data.toString('base64'),
-                        audio_script: streamA_Native
-                    });
-
-                    // 🧬 3. SOVEREIGN BACKGROUND PERSISTENCE (Supabase)
-                    try {
-                        const { supabase } = await import('@/lib/supabaseClient');
-                        await Promise.all([
-                            supabase.from('chat_messages').insert({
-                                user_id: finalUserId, persona_id: finalProfileId, role: 'user',
-                                content: messages[messages.length - 1].content, created_at: new Date().toISOString()
-                            }),
-                            supabase.from('chat_messages').insert({
-                                user_id: finalUserId, persona_id: finalProfileId, role: 'assistant',
-                                content: streamB_Text, audio_url: url, audio_script: streamA_Native, created_at: new Date().toISOString()
-                            })
-                        ]);
-                    } catch (dbErr) { console.error('[Neural Persistence Fail]:', dbErr); }
-                }
-            } catch (err) { 
-                console.error('[Neural TTS Fail]:', err); 
-                // Fallback persistence without voice
-                try {
-                    const { supabase } = await import('@/lib/supabaseClient');
-                    await supabase.from('chat_messages').insert([
-                        { user_id: finalUserId, persona_id: finalProfileId, role: 'user', content: messages[messages.length - 1].content },
-                        { user_id: finalUserId, persona_id: finalProfileId, role: 'assistant', content: streamB_Text }
-                    ]);
-                } catch {}
-            }
-        } else {
-             // Basic persistence for text-only
-             try {
-                const { supabase } = await import('@/lib/supabaseClient');
-                await supabase.from('chat_messages').insert([
-                    { user_id: finalUserId, persona_id: finalProfileId, role: 'user', content: messages[messages.length - 1].content },
-                    { user_id: finalUserId, persona_id: finalProfileId, role: 'assistant', content: streamB_Text }
-                ]);
-             } catch {}
+        if (voiceUrl) {
+            const assetData = { type: 'voice-note', audioUrl: voiceUrl, audioData: voiceB64, audio_script: streamA_Native };
+            controller.enqueue(encoder.encode(`d:${JSON.stringify(assetData)}\n`));
         }
-      },
-      onError: (error) => {
-        console.error('[DataStream Error]:', error);
-        return 'Neural Sync Fragmented.';
+
+        // 🧬 3. RAILWAY PERSISTENCE (Background)
+        try {
+            await Promise.all([
+                db.query(
+                    'INSERT INTO chat_messages (user_id, persona_id, role, content, created_at) VALUES ($1, $2, $3, $4, NOW())',
+                    [finalUserId, finalProfileId, 'user', messages[messages.length - 1].content]
+                ),
+                db.query(
+                    'INSERT INTO chat_messages (user_id, persona_id, role, content, audio_url, audio_script, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
+                    [finalUserId, finalProfileId, 'assistant', streamB_Text, voiceUrl, streamA_Native]
+                )
+            ]);
+        } catch (dbErr) { console.error('[Railway Persistence Fail]:', dbErr); }
+
+        controller.close();
+      }
+    });
+
+    return new Response(readable, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'x-vercel-ai-data-stream': 'v1'
       }
     });
 
