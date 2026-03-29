@@ -310,13 +310,15 @@ function MarketplaceContent() {
            )}
         </AnimatePresence>
 
+         {/* 🧬 MOBILE BOTTOM DOCK: Deactivated for now per request
          <MobileBottomNav 
             onSelectChat={() => setShowProfileList(true)} 
             onOpenTopUp={() => setIsTopUpOpen(true)} 
             unreadCounts={unreadCounts}
             followingIds={following}
             profiles={randomizedProfiles}
-         />
+         /> 
+         */}
 
      </main>
   );
