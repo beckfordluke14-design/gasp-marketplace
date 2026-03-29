@@ -88,11 +88,8 @@ export async function POST(req: Request) {
     const encoder = new TextEncoder();
     const readable = new ReadableStream({
       async start(controller) {
-        const chars = streamB_Text.split("");
-        for (const char of chars) {
-            controller.enqueue(encoder.encode(`0:${JSON.stringify(char)}\n`));
-            await new Promise(r => setTimeout(r, 8));
-        }
+        // 🚀 ATOMIC NEURAL HANDSHAKE: Sending full text chunk to ensure UI cohesion
+        controller.enqueue(encoder.encode(`0:${JSON.stringify(streamB_Text)}\n`));
 
         if (voiceUrl) {
             const assetData = { type: 'voice-note', audioUrl: voiceUrl, audioData: voiceB64, audio_script: streamA_Native };
