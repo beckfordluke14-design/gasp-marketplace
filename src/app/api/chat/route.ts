@@ -130,6 +130,32 @@ export async function POST(req: Request) {
                 controller.enqueue(encoder.encode(`d:${JSON.stringify(item)}\n`));
             }
             
+            // 🧬 3. SOVEREIGN BACKGROUND PERSISTENCE (Supabase)
+            try {
+                const { supabase } = await import('@/lib/supabaseClient');
+                // Save Assistant Message
+                const voiceUrl = (dataBuffer as any).find((item: any) => item.type === 'voice-note')?.audioUrl;
+                
+                await Promise.all([
+                    supabase.from('chat_messages').insert({
+                        user_id: finalUserId,
+                        persona_id: finalProfileId,
+                        role: 'user',
+                        content: messages[messages.length - 1].content,
+                        created_at: new Date().toISOString()
+                    }),
+                    supabase.from('chat_messages').insert({
+                        user_id: finalUserId,
+                        persona_id: finalProfileId,
+                        role: 'assistant',
+                        content: streamB_Text,
+                        audio_url: voiceUrl || null,
+                        audio_script: streamA_Native || null,
+                        created_at: new Date().toISOString()
+                    })
+                ]);
+            } catch (err) { console.error('[Neural Link Persistence Fail]:', err); }
+            
             controller.close();
             data.close();
         }

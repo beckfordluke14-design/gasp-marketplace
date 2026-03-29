@@ -23,7 +23,7 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // 1. USE-CHAT CIRCUIT — cast as any to survive AI SDK v3 API changes
-  const { messages, input, handleInputChange, handleSubmit, setMessages, isLoading }: any = useChat({
+  const { messages, input, handleInputChange, handleSubmit, setMessages, isLoading, data }: any = useChat({
     api: '/api/chat',
     id: `${profileId}-${guestId}`,
     body: {
@@ -39,7 +39,7 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
       
       const { data: dbMessages } = await supabase
         .from('chat_messages')
-        .select('*')
+        .select('*, audio_url, audio_script') // 🧬 High-Fidelity Sync Ingress
         .eq('user_id', guestId)
         .eq('persona_id', profileId)
         .order('created_at', { ascending: true })
@@ -51,6 +51,9 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
           role: m.role,
           content: m.content,
           createdAt: new Date(m.created_at),
+          // 🧠 DNA Persistence
+          audio_url: m.audio_url,
+          audio_script: m.audio_script
         })));
       }
 
@@ -94,21 +97,14 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
         ) : (
            <AnimatePresence>
              {(messages || []).map((m: any) => {
-                // 🧬 SOVEREIGN STEALTH SNIFFER (V5.17 - Indestructible Protocol)
-                const rawContent = m.content || "";
-                let cleanText = rawContent;
-                let voiceMetadata: any = null;
+                // 🧬 SOVEREIGN SIDE-CHANNEL INGRESS (V5.40 - Persistent Protocol)
+                // We check the 'data' stream for voice note attachments for this specific message.
+                // Priority: Use Persistent DB columns first, otherwise the ephemeral 'data' stream.
+                const voiceMetadata = m.audio_url 
+                   ? { type: 'voice-note', audioUrl: m.audio_url, audio_script: m.audio_script }
+                   : (messages as any).indexOf(m) === messages.length - 1 ? (data as any)?.[data?.length - 1] : null;
 
-                const tailMatch = rawContent.match(/\|\|\|([\s\S]*?)\|\|\|/);
-                if (tailMatch) {
-                   try {
-                       voiceMetadata = JSON.parse(tailMatch[1]);
-                       cleanText = rawContent.replace(/\|\|\|[\s\S]*?\|\|\|/g, "").trim();
-                   } catch (e) {}
-                }
-
-                const isVoiceMessage = voiceMetadata && voiceMetadata.type === 'voice-note';
-                // 🛰️ RECORDING STATE: If we expect a voice note but the tail hasn't arrived yet
+                const isVoiceMessage = voiceMetadata && (voiceMetadata.type === 'voice-note' || voiceMetadata.audioUrl);
                 const isRecording = m.role === 'assistant' && !isVoiceMessage && messages.indexOf(m) === messages.length - 1 && isLoading;
 
                 return (
@@ -124,7 +120,7 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
                       : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'
                     }`}>
                       <div className="text-[14px] leading-relaxed whitespace-pre-wrap">
-                        {cleanText}
+                        {m.content}
                       </div>
                     </div>
 
