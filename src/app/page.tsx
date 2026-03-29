@@ -16,6 +16,7 @@ import TopUpDrawer from '@/components/economy/TopUpDrawer';
 import ChatDrawer from '@/components/ChatDrawer';
 import { useUser } from '@/components/providers/UserProvider';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import NeuralPulseHub from '@/components/NeuralPulseHub';
 import { Star } from 'lucide-react';
 
 function MarketplaceContent() {
@@ -191,7 +192,13 @@ function MarketplaceContent() {
        </div>
        
        <div className="flex-1 flex flex-col relative h-screen overflow-hidden">
-           <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} onOpenMenu={() => setShowProfileList(true)} profiles={randomizedProfiles} onSelectProfile={handleSelectProfile} />
+            <NeuralPulseHub 
+               followingIds={following} 
+               profiles={randomizedProfiles} 
+               unreadCounts={unreadCounts} 
+               onSelectProfile={handleSelectProfile}
+            />
+            <Header onOpenTopUp={() => setIsTopUpOpen(true)} deadIds={deadIds} setDeadIds={setDeadIds} onOpenMenu={() => setShowProfileList(true)} profiles={randomizedProfiles} onSelectProfile={handleSelectProfile} />
            
            <div className="flex-1 flex flex-col relative pt-12 md:pt-14 mt-4 md:mt-6">
               {/* 🧬 HEADER-LINKED STORIES AREA: Stories now live in the fixed Header node */}
