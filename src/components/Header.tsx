@@ -177,16 +177,16 @@ export default function Header({
         </header>
 
          {/* Floating Search Bar & Stories Bridge */}
-         <div className="absolute top-[105%] left-0 right-0 flex flex-col items-center gap-4 pointer-events-auto z-[90]">
+         <div className="absolute top-[120%] left-0 right-0 flex flex-col items-center gap-6 pointer-events-auto z-[90]">
              {/* Search Bar */}
-             <div className="w-full max-w-[280px] md:max-w-xl px-4 flex items-center justify-center">
-                 <div className="w-full bg-black/10 backdrop-blur-2xl border border-white/5 rounded-full shadow-[0_10px_50px_rgba(0,0,0,0.5)] p-0.5 hover:bg-black/20 transition-all">
+             <div className="w-full max-w-[320px] md:max-w-xl px-4 flex items-center justify-center">
+                 <div className="w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] p-0.5 hover:bg-white/10 transition-all">
                      <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
                  </div>
              </div>
 
              {/* Stories Row Node: Relocated for sovereign placement */}
-             <div className="w-full">
+             <div className="w-full pt-2">
                  <div className="max-w-4xl mx-auto px-4 md:px-0">
                     <StoriesRow profiles={profiles} onSelectProfile={onSelectProfile} />
                  </div>

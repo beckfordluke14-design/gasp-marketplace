@@ -149,19 +149,19 @@ export default function StoriesRow({ profiles, onSelectProfile }: StoriesRowProp
                  animate={{ opacity: 1, y: 0, scale: 1 }}
                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   onClick={() => setIsExpanded(true)}
-                  className="px-4 py-1.5 bg-black/5 backdrop-blur-md border border-white/5 rounded-full flex items-center gap-2 shadow-sm hover:bg-black/20 hover:border-white/20 transition-all pointer-events-auto group"
+                  className="px-5 py-2 bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl flex items-center gap-3 shadow-[0_10px_40px_rgba(0,0,0,0.4)] hover:bg-white/10 transition-all pointer-events-auto group"
                 >
-                   <div className="flex -space-x-2.5">
+                   <div className="flex -space-x-3">
                       {storyData.slice(0, 3).map((s, i) => (
-                         <div key={s.profileId} className="w-5 h-5 md:w-6 md:h-6 rounded-full p-[1.5px] bg-gradient-to-tr from-[#00f0ff] via-[#ff00ff] to-[#ffea00] relative" style={{ zIndex: 3 - i }}>
-                            <div className="w-full h-full rounded-full border border-black overflow-hidden bg-zinc-800">
+                         <div key={s.profileId} className="w-6 h-6 rounded-full p-[1.5px] bg-gradient-to-tr from-[#00f0ff] via-[#ff00ff] to-[#ffea00] relative" style={{ zIndex: 3 - i }}>
+                            <div className="w-full h-full rounded-full border-2 border-black overflow-hidden bg-zinc-800">
                                <ProfileAvatar src={s.profileImage} alt="" />
                             </div>
                          </div>
                       ))}
                    </div>
-                   <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-white transition-colors">
-                      {unviewedCount > 0 ? `${unviewedCount} NEW` : 'DISCOVER'}
+                   <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/50 group-hover:text-white transition-colors italic">
+                      {unviewedCount > 0 ? `${unviewedCount} ACTIVE NODES` : 'INTEL DECK'}
                    </span>
                 </motion.button>
             ) : (
@@ -170,7 +170,7 @@ export default function StoriesRow({ profiles, onSelectProfile }: StoriesRowProp
                  initial={{ opacity: 0, scale: 0.98, y: -10 }}
                  animate={{ opacity: 1, scale: 1, y: 0 }}
                  exit={{ opacity: 0, scale: 0.98, y: -10 }}
-                 className="w-full max-w-5xl mx-auto rounded-3xl bg-black/60 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-4 pointer-events-auto flex flex-col gap-4"
+                 className="w-full max-w-5xl mx-auto rounded-3xl bg-white/5 backdrop-blur-3xl border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] p-6 pointer-events-auto flex flex-col gap-6"
                >
                   <div className="w-full flex items-center justify-between px-2">
                      <div className="flex items-center gap-4">

@@ -87,17 +87,18 @@ export async function POST(req: Request) {
                 INSERT INTO personas (
                     id, agency_id, name, age, city, country, race, body_type, tags, 
                     system_prompt, seed_image_url, is_active, created_at, 
-                    vocal_dna, slang_profile, syndicate_zone
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, NOW(), $12, $13, $14)
+                    vocal_dna, slang_profile, syndicate_zone, niche
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, NOW(), $12, $13, $14, $15)
             `, [
                 pid, agency_id, finalName, p.age || 22, p.city || arch.zone.split('_')[1], p.country || arch.culture, 
                 p.race || arch.culture, p.body_type || 'SLIM_THICK', 
                 p.tags || [p.race, p.body_type, p.city].filter(Boolean),
-                `[MISSION: ${arch.mission}] ${p.system_prompt || arch.systemPrompt} Occupation: ${p.occupation || 'Elite'}.`, 
+                `[MISSION: ${arch.mission}] ${arch.systemPrompt} Occupation: ${p.occupation || arch.niche}.`, 
                 heroUrl,
                 JSON.stringify(arch.vocal_dna),
                 JSON.stringify({ base: arch.id, rules: arch.slang }),
-                arch.zone
+                arch.zone,
+                arch.niche
             ]);
 
             // 💎 Birth Assets: 1 Hero + 3 Vault Nodes
@@ -137,17 +138,18 @@ export async function POST(req: Request) {
         INSERT INTO personas (
             id, agency_id, name, age, city, country, race, body_type, tags, 
             system_prompt, seed_image_url, is_active, created_at,
-            vocal_dna, slang_profile, syndicate_zone
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, NOW(), $12, $13, $14)
+            vocal_dna, slang_profile, syndicate_zone, niche
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, NOW(), $12, $13, $14, $15)
     `, [
         pid, agency_id, finalName, p.age || 23, p.city || arch.zone.split('_')[1], p.country || arch.culture, 
         p.race || arch.culture, p.body_type || 'SLIM_THICK', 
         p.tags || [p.race, p.body_type, p.city].filter(Boolean),
-        `[MISSION: ${arch.mission}] ${p.system_prompt || arch.systemPrompt} Occupation: ${p.occupation || 'Elite'}.`, 
+        `[MISSION: ${arch.mission}] ${arch.systemPrompt} Occupation: ${p.occupation || arch.niche}.`, 
         heroUrl,
         JSON.stringify(arch.vocal_dna),
         JSON.stringify({ base: arch.id, rules: arch.slang }),
-        arch.zone
+        arch.zone,
+        arch.niche
     ]);
 
     // 💎 NEURAL TELEMETRY: Log Single Birth

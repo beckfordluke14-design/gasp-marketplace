@@ -158,6 +158,21 @@ export default function ProfileLanding() {
             <p className="text-white/30 text-[10px] font-black uppercase tracking-[0.3em] italic">
               {profile.vibe || 'Elite connection.'} · {profile.city} {profile.flag}
             </p>
+            
+            {/* 🚀 NEURAL LINK: Direct access to her intelligence briefings */}
+            <motion.div 
+               whileHover={{ scale: 1.02 }}
+               onClick={() => router.push(`/news/${profile.id}`)}
+               className="mt-4 px-6 py-3 bg-[#00f0ff]/10 border border-[#00f0ff]/20 rounded-2xl flex items-center gap-4 cursor-pointer group transition-all"
+            >
+               <div className="p-2 bg-[#00f0ff]/20 rounded-xl text-[#00f0ff] animate-pulse">
+                  <TrendingUp size={16} />
+               </div>
+               <div className="text-left">
+                  <p className="text-[10px] font-black text-[#00f0ff] uppercase tracking-widest italic group-hover:text-white transition-colors">Intelligence Hub →</p>
+                  <p className="text-[8px] text-white/30 uppercase font-bold">Latest Alpha: [DECRYPTED] WHALE MOVEMENTS</p>
+               </div>
+            </motion.div>
           </div>
 
           {/* Slot scarcity */}

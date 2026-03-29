@@ -44,33 +44,46 @@ export default function MobilePulseTicker() {
 
   const current = news[currentIndex];
 
+  // 🛡️ SYNDICATE GLASS: Translucent Intelligence Node
   return (
-    <div className="fixed top-[64px] left-0 right-0 z-[100] h-10 px-4 pointer-events-none">
+    <div className="fixed top-[140px] left-0 right-0 z-[100] h-12 px-6 pointer-events-none">
        <motion.div 
+         whileHover={{ scale: 1.02 }}
+         whileTap={{ scale: 0.95 }}
          onClick={(e) => {
             (e as any).stopPropagation();
             router.push(`/news/${current.persona_id}`);
          }}
-         className="w-full h-full bg-black/40 backdrop-blur-3xl border-x border-b border-[#00f0ff]/20 rounded-b-2xl flex items-center justify-between px-4 pointer-events-auto active:scale-95 transition-all"
+         className="w-full h-full bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl flex items-center justify-between px-5 pointer-events-auto relative overflow-hidden"
        >
-          <div className="flex items-center gap-2 overflow-hidden">
-             <Radio size={12} className="text-[#00f0ff] animate-pulse shrink-0" />
+          {/* Neural Pulse Background */}
+          <motion.div 
+            animate={{ opacity: [0.1, 0.3, 0.1] }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="absolute inset-0 bg-gradient-to-r from-[#00f0ff]/10 via-transparent to-transparent pointer-events-none"
+          />
+
+          <div className="flex items-center gap-3 overflow-hidden relative z-10">
+             <div className="w-2 h-2 rounded-full bg-[#00f0ff] animate-pulse shadow-[0_0_10px_#00f0ff]" />
              <AnimatePresence mode="wait">
-                <motion.span
+                <motion.div
                   key={current.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="text-[9px] font-black uppercase tracking-widest text-white/90 truncate italic"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="flex flex-col gap-0.5"
                 >
-                   {current.title}
-                </motion.span>
+                   <p className="text-[7px] font-black uppercase tracking-[0.3em] text-[#00f0ff]/60 italic">Neural Intel Update // {current.persona_id.split('-')[0]}</p>
+                   <span className="text-[10px] font-black uppercase tracking-tight text-white truncate italic leading-none">
+                      {current.title}
+                   </span>
+                </motion.div>
              </AnimatePresence>
           </div>
           
-          <div className="flex items-center gap-2 shrink-0">
-             <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest italic">{current.persona_id.split('-')[0]}</span>
-             <Zap size={10} className="text-[#ffea00] animate-pulse" />
+          <div className="flex items-center gap-3 shrink-0 relative z-10">
+             <div className="h-6 w-[1px] bg-white/10" />
+             <Zap size={14} className="text-[#ffea00] animate-pulse" />
           </div>
        </motion.div>
     </div>

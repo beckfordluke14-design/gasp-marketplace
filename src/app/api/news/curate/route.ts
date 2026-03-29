@@ -20,13 +20,28 @@ const TRENDING_KEYWORDS = [
 ];
 
 async function getSniperTargets() {
-    // Select a random trending topic to "Snipe"
-    const keyword = TRENDING_KEYWORDS[Math.floor(Math.random() * TRENDING_KEYWORDS.length)];
-    const res = await fetch(`https://api.search.brave.com/res/v1/news/search?q=${encodeURIComponent(keyword)}&count=5`, {
-        headers: { 'Accept': 'application/json', 'X-Subscription-Token': BRAVE_API_KEY }
-    });
-    const data = await res.json();
-    return data.results || [];
+    // 💎 NEURAL SNIPE: Pivot between Macro News and Token Alpha
+    let rawNews;
+    const isDexSnipe = Math.random() > 0.5;
+
+    if (isDexSnipe) {
+        const dexRes = await fetch('https://api.dexscreener.com/token-boosts/top/v1');
+        const dexData = await dexRes.json();
+        const token = dexData[0] || {};
+        rawNews = {
+            title: `[TICKER ALERT] ${token.url?.split('/').pop()?.toUpperCase() || 'UNKNOWN'}`,
+            description: `Token is currently trending with massive social boosts. Chain: ${token.chainId}.`,
+            url: token.url || 'https://dexscreener.com'
+        };
+    } else {
+        const braveRes = await fetch(`https://api.search.brave.com/res/v1/news/search?q=crypto+solana+bitcoin&count=1`, {
+            headers: { 'X-Subscription-Token': process.env.BRAVE_API_KEY || '' }
+        });
+        const braveData = await braveRes.json();
+        rawNews = braveData.results[0];
+    }
+
+    return rawNews ? [rawNews] : [];
 }
 
 async function synthesizePost(persona: any, rawNews: any) {
@@ -35,13 +50,14 @@ async function synthesizePost(persona: any, rawNews: any) {
         VIBE: ${persona.vibe}. 
         ROLE: High-IQ Intelligence Asset.
         PERSONALITY: ${persona.personality || 'smart, sarcastic, and market-aware'}.
-        SYSTEM RULES: ${persona.systemPrompt.substring(0, 300)}.
+        NICHE: ${persona.niche || 'Market Macro'}.
         
-        MISSION: Provide a TACTICAL INTELLIGENCE BRIEFING based on this REAL news. 
-        PROVE YOUR AUTHORITY: Do not just rewrite the news; provide a high-IQ, cynical "Insider" take. 
-        Sound like you understand the technicals (TVL, Liquidations, Whale wallets, etc.) even while staying in your unique voice.
+        MISSION: Provide a TACTICAL INTELLIGENCE BRIEFING.
+        If the news is a TICKER: Analyze the 'Hype-to-Value' ratio in your voice.
+        If the news is MACRO: Provide the insider 'So What' for Whales.
+        PROVE YOUR AUTHORITY with technical terms (TVL, Liquidations, Slippage, LP Locks).
         
-        REAL NEWS: ${rawNews.title} - ${rawNews.description}
+        REAL DATA: ${rawNews.title} - ${rawNews.description}
         
         FORMAT (JSON):
         {
