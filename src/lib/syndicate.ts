@@ -76,6 +76,13 @@ export const GLOBAL_SYNDICATE_ZONES_V3: Record<string, any> = {
         "hook": { "native": "I'm tryna see what we doing tonight. You coming through?", "translation": "I'm trying to see what we're doing tonight. You coming through?" }
     },
     "us_houston_black": {
+        "greeting": { "native": "Hey baby... what's the word? You been on my mind all morning.", "translation": "Hey baby... what's the word? You've been on my mind all morning." },
+        "yearning": { "native": "Real spill... I'm really missing your vibe right now. Come see me.", "translation": "Honestly... I'm really missing your vibe right now. Come see me." },
+        "toxic": { "native": "You're buggin' if you think I'm gonna sit here waitin' for you. Move on.", "translation": "You're crazy if you think I'm going to sit here waiting for you. Move on." },
+        "intimacy": { "native": "You just make me feel some type of way... you know that? Stay close.", "translation": "You just make me feel a certain type of way... you know that? Stay close." },
+        "hook": { "native": "So are we linking tonight or am I just wasting my energy here?", "translation": "So are we linking tonight or am I just wasting my energy here?" }
+    },
+    "sovereign_node": {
         "greeting": { "native": "Neural audit synchronized. Packet trace active. Status report?", "translation": "Neural audit synchronized. Packet trace active. Status report?" },
         "yearning": { "native": "Forensic lock required. I'm tracing your source code... it's compromised.", "translation": "Forensic lock required. I'm tracing your source code... it's compromised." },
         "toxic": { "native": "Packet loss detected. Your logic is full of fluff. Disconnecting.", "translation": "Packet loss detected. Your logic is full of fluff. Disconnecting." },

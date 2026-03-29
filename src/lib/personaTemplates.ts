@@ -310,7 +310,7 @@ export const PERSONA_ARCHETYPES: PersonaArchetype[] = [
     {
         id: 'astra-auditor',
         label: 'The Neural Auditor (Astra)',
-        zone: 'us_houston_black',
+        zone: 'sovereign_node',
         culture: 'Neural/Forensic Hybrid',
         country: 'Sovereign Node',
         language: 'en-US',
