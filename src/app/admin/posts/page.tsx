@@ -7,7 +7,7 @@ import {
   Settings, Lock, Unlock, EyeOff, Check, X, UserPlus, ArrowLeftRight, 
   MapPin, Clock, ShieldAlert, Sparkles, UserCheck, Link2, Copy, Gift, FolderHeart, ExternalLink, Package, User
 } from 'lucide-react';
-import { proxyImg } from '@/lib/profiles';
+import { proxyImg, getProfileName } from '@/lib/profiles';
 import NextLink from 'next/link';
 
 interface PersonaPost {
@@ -650,11 +650,11 @@ export default function PostStudio() {
                     </div>
                   </motion.div>
                 ))
-              ) : filtered.map(post => {
-                const showName = post.personas?.name || post.persona_id;
-                const showAge  = String(post.personas?.age  || '');
-                const showCity = post.personas?.city || '';
+              ) : filtered.map((post, idx) => {
                 const isSelected = selectedIds.has(post.id);
+                const showName = post.personas?.name || getProfileName({ id: post.persona_id });
+                const showAge = post.personas?.age;
+                const showCity = post.personas?.city || '';
 
                 return (
                   <motion.div

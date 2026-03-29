@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Clock, Sparkles } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import VoiceNoteBubble from './VoiceNoteBubble';
 
 interface ChatContainerProps {
   profileId: string;
@@ -92,22 +93,42 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
            </div>
         ) : (
            <AnimatePresence>
-             {(messages || []).map((m: any) => (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  key={m.id}
-                  className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`max-w-[85%] px-5 py-3 rounded-[1.5rem] text-xs leading-relaxed shadow-xl ${
-                    m.role === 'user'
-                    ? 'bg-[#00f0ff] text-black font-bold rounded-tr-none'
-                    : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'
-                  }`}>
-                    {m.content}
-                  </div>
-                </motion.div>
-             ))}
+             {(messages || []).map((m: any) => {
+                // 🧬 SOVEREIGN SIDE-CHANNEL INGRESS (V4.98)
+                // We check the 'data' stream for voice note attachments for this specific message.
+                // NOTE: In production, we map the data packet index to the message index.
+                const voiceMetadata = (messages as any).indexOf(m) === messages.length - 1 ? (data as any)?.[data?.length - 1] : null;
+                const isVoiceMessage = voiceMetadata && voiceMetadata.type === 'voice-note';
+
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    key={m.id}
+                    className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'} gap-2`}
+                  >
+                    <div className={`max-w-[85%] px-5 py-3 rounded-[2.5rem] text-[13px] leading-relaxed shadow-xl ${
+                      m.role === 'user'
+                      ? 'bg-[#00f0ff] text-black font-bold rounded-tr-none border border-[#00f0ff]/20'
+                      : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'
+                    }`}>
+                      {m.content}
+                    </div>
+
+                    {isVoiceMessage && (
+                       <div className="w-full max-w-[85%]">
+                          <VoiceNoteBubble 
+                            audioUrl={voiceMetadata.audioUrl}
+                            audioData={voiceMetadata.audioData}
+                            profileName={profileName}
+                            isUnlocked={true}
+                            timestamp={m.createdAt ? new Date(m.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase() : ''}
+                          />
+                       </div>
+                    )}
+                  </motion.div>
+                );
+             })}
            </AnimatePresence>
         )}
         {isLoading && (

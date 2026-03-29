@@ -139,22 +139,20 @@ export default function FloatingChatHub({
 }
 
 function Orbiter({ p, index, total, rotation, onSelect, unreadCount }: { p: any, index: number, total: number, rotation: any, onSelect: () => void, unreadCount: number }) {
+    // 🧬 SOVEREIGN ORBIT ENGINE: R=85 (Syndicate Ring)
     const radius = 85;
-    const arcSpread = 320; 
+    
+    // Distribute personas on a wide 330-degree arc for global visibility
+    const arcSpread = 330; 
     const baseAngle = -90 - (arcSpread / 2) + (index / Math.max(total - 1, 1)) * arcSpread;
     
     const x = useTransform(rotation, (r: number) => Math.cos(((baseAngle + r) * Math.PI) / 180) * radius);
     const y = useTransform(rotation, (r: number) => Math.sin(((baseAngle + r) * Math.PI) / 180) * radius);
-    const opacity = useTransform(rotation, (r: number) => {
-        const angle = (baseAngle + r + 90) % 360;
-        const normalizedAngle = angle > 180 ? angle - 360 : angle < -180 ? angle + 360 : angle;
-        return Math.max(0, 1 - (Math.abs(normalizedAngle) / 140));
-    });
-    const scale = useTransform(rotation, (r: number) => {
-        const angle = (baseAngle + r + 90) % 360;
-        const normalizedAngle = angle > 180 ? angle - 360 : angle < -180 ? angle + 360 : angle;
-        return Math.max(0.4, 1.6 - (Math.abs(normalizedAngle) / 100));
-    });
+
+    // 🎇 SYNDICATE STABILITY: Every profile is 100% opaque and always in view
+    const opacity = 1;
+    const scale = 1;
+
     const zIndex = useTransform(rotation, (r: number) => {
        const angle = (baseAngle + r + 90) % 360;
        return Math.round(100 - Math.abs(angle > 180 ? angle - 360 : angle < -180 ? angle + 360 : angle));
@@ -164,13 +162,13 @@ function Orbiter({ p, index, total, rotation, onSelect, unreadCount }: { p: any,
         <motion.button
             onClick={(e) => { e.stopPropagation(); onSelect(); }}
             style={{ x, y, opacity, scale, zIndex }}
-            className="absolute left-1/2 top-1/2 -ml-6 -mt-6 pointer-events-auto w-12 h-12 rounded-full border-2 border-white/10 overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)] bg-black/40 backdrop-blur-3xl group"
+            className="absolute left-1/2 top-1/2 -ml-6 -mt-6 pointer-events-auto w-12 h-12 rounded-full border-2 border-white/20 overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)] bg-black/80 backdrop-blur-3xl group"
         >
-            <img src={p.image} className="w-full h-full object-cover group-hover:scale-125 transition-all duration-500" />
+            <img src={p.image} className="w-full h-full object-cover group-hover:scale-125 transition-all duration-300" />
             {unreadCount > 0 && (
                 <div className="absolute inset-0 rounded-full border-2 border-[#ff00ff] animate-ping opacity-50" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </motion.button>
     );
 }

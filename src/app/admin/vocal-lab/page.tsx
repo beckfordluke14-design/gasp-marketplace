@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Mic, Terminal, Settings, AlertTriangle, Play, Pause, Activity, Cpu, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { proxyImg, getProfileName } from '@/lib/profiles';
 
 /**
  * 🛰️ SOVEREIGN VOCAL AUDIT LAB (V4.11)
@@ -22,7 +23,7 @@ export default function VocalLabPage() {
 
     const addLog = (type: string, message: string, data?: any) => {
         setLogs(prev => [...prev, { 
-            id: Date.now(),
+            id: `${Date.now()}-${Math.random()}`,
             timestamp: new Date().toLocaleTimeString(),
             type, 
             message, 
@@ -56,32 +57,90 @@ export default function VocalLabPage() {
             });
 
             if (!res.ok) {
-                const errText = await res.text();
-                addLog('ERROR', `📡 API Rejection (${res.status}): ${errText}`);
+                const errorData = await res.json().catch(() => ({ error: 'Unknown Neural Rejection' }));
+                addLog('ERROR', `📡 API Rejection (${res.status}): ${errorData.error}`);
                 setIsThinking(false);
                 return;
             }
 
             const reader = res.body?.getReader();
-            const decoder = new TextDecoder();
+            const decoder = new TextEncoder().encode('\n'); // Reference for splitting
+            const textDecoder = new TextDecoder();
             
+            let pendingBuffer = ''; // 🧬 SOVEREIGN FRAGMENT BUFFER (V4.73)
+
             while (reader) {
                 const { done, value } = await reader.read();
                 if (done) break;
                 
-                const lines = decoder.decode(value).split('\n');
+                // Accumulate the current chunk into the pending buffer
+                pendingBuffer += textDecoder.decode(value, { stream: true });
+                
+                // Process each complete line (ending in \n)
+                const lines = pendingBuffer.split('\n');
+                
+                // The last element is either empty (if total ends in \n) or incomplete
+                pendingBuffer = lines.pop() || ''; 
+
                 for (const line of lines) {
-                    if (line.startsWith('0:')) {
-                        addLog('ASTRA', JSON.parse(line.slice(2)));
-                    } else if (line.startsWith('2:')) {
-                        const event = JSON.parse(line.slice(2));
-                        if (event.type === 'voice_note' && event.audioUrl) {
-                            const latency = Date.now() - start;
-                            addLog('SYNTH', `✅ Audio Node Ready (${latency}ms)`, event);
-                            handleAutoPlay(event.audioUrl);
-                        } else if (event.type === 'voice_failed') {
-                            addLog('FATAL', '❌ Synthesis Engine Timeout', event.error);
+                    if (!line.trim()) continue;
+
+                    try {
+                        if (line.startsWith('0:')) {
+                            // 🧬 SOVEREIGN ATOMIC SNIFFER (V4.77)
+                            let content = JSON.parse(line.slice(2));
+                            let voiceData: any = null;
+                            
+                            // Check if content is actually a double-stringified JSON
+                            if (typeof content === 'string' && content.trim().startsWith('{')) {
+                                try {
+                                    voiceData = JSON.parse(content);
+                                    content = voiceData.text_message || content;
+                                } catch (e) {}
+                            }
+
+                            addLog('ASTRA', content);
+
+                            // 🎙️ AUTOMATIC TRIGGER: If atomic payload contains voice, play it now
+                            if (voiceData && (voiceData.audioData || voiceData.audioUrl)) {
+                                const source = voiceData.audioData || voiceData.audioUrl;
+                                if (voiceData.audioData) {
+                                    const binaryString = window.atob(voiceData.audioData);
+                                    const bytes = new Uint8Array(binaryString.length);
+                                    for (let i = 0; i < binaryString.length; i++) {
+                                        bytes[i] = binaryString.charCodeAt(i);
+                                    }
+                                    const audioBlob = new Blob([bytes], { type: 'audio/wav' });
+                                    const url = URL.createObjectURL(audioBlob);
+                                    addLog('SYNTH', `✅ Atomic DNA Playback Ready`, voiceData);
+                                    handleAutoPlay(url);
+                                } else {
+                                    addLog('SYNTH', `✅ Persistent Asset Playback`, voiceData);
+                                    handleAutoPlay(voiceData.audioUrl);
+                                }
+                            }
+                        } else if (line.startsWith('2:')) {
+                            const event = JSON.parse(line.slice(2));
+                            if (event.type === 'voice_note' && (event.audioData || event.audioUrl)) {
+                                const source = event.audioData || event.audioUrl;
+                                let playUrl = source;
+                                if (event.audioData) {
+                                    const binaryString = window.atob(event.audioData);
+                                    const bytes = new Uint8Array(binaryString.length);
+                                    for (let i = 0; i < binaryString.length; i++) {
+                                        bytes[i] = binaryString.charCodeAt(i);
+                                    }
+                                    const audioBlob = new Blob([bytes], { type: 'audio/wav' });
+                                    playUrl = URL.createObjectURL(audioBlob);
+                                }
+                                addLog('SYNTH', `✅ External DNA Node Ready`, event);
+                                handleAutoPlay(playUrl);
+                            } else if (event.type === 'voice_failed') {
+                                addLog('FATAL', '❌ Synthesis Engine Timeout', event.error);
+                            }
                         }
+                    } catch (parseErr: any) {
+                        console.warn('[Brain API] Packet Fragment Rejection:', parseErr.message, line.slice(0, 50));
                     }
                 }
             }

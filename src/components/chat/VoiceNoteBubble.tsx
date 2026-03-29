@@ -8,6 +8,7 @@ import { formatCredits } from '@/lib/format';
 
 interface VoiceNoteBubbleProps {
   audioUrl?: string | null;
+  audioData?: string | null; // 🧬 SOVEREIGN BINARY INGRESS (V4.74)
   profileImage?: string;
   profileName?: string;
   durationSeconds?: number;
@@ -26,6 +27,7 @@ interface VoiceNoteBubbleProps {
  */
 export default function VoiceNoteBubble({
   audioUrl,
+  audioData, 
   profileImage,
   profileName,
   durationSeconds,
@@ -41,26 +43,48 @@ export default function VoiceNoteBubble({
   const [currentTime, setCurrentTime] = useState(0);
   const [translationUnlocked, setTranslationUnlocked] = useState(isUnlocked || false);
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const [internalUrl, setInternalUrl] = useState<string | null>(null); // 🛡️ IN-MEMORY BINARY BRIDGE
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animFrameRef = useRef<number>(0);
 
-  // Seeded waveform heights: Use fallback if audioUrl is pending
+  // Seeded waveform heights: Use fallback if audio source is pending
   const barCount = 35;
   const bars = Array.from({ length: barCount }, (_, i) => {
-    const seedSrc = audioUrl || 'pending';
+    const seedSrc = audioData || audioUrl || 'pending';
     const seed = (seedSrc.charCodeAt(i % seedSrc.length) + i * 23) % 100;
     return 15 + (seed / 100) * 70; // 15–85% height
   });
 
   useEffect(() => {
-    if (!audioUrl) return;
+    // 🧬 SOVEREIGN BINARY HANDSHAKE (V4.74)
+    let blobUrl = audioUrl || null;
+
+    if (audioData) {
+        try {
+            const binaryString = window.atob(audioData);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            const blob = new Blob([bytes], { type: 'audio/wav' });
+            blobUrl = URL.createObjectURL(blob);
+            setInternalUrl(blobUrl);
+            console.log('[VoiceNote] Binary Ingress Success. In-memory DNA active.');
+        } catch (err) {
+            console.error('[VoiceNote] Binary Handshake Failed:', err);
+        }
+    } else {
+        setInternalUrl(audioUrl || null);
+    }
+    
+    if (!blobUrl) return;
     
     // 🧬 SOVEREIGN AUDIO SYNC: Clean previous instance
     if (audioRef.current) {
         audioRef.current.pause();
     }
 
-    const audio = new Audio(audioUrl);
+    const audio = new Audio(blobUrl);
     audioRef.current = audio;
 
     audio.addEventListener('loadedmetadata', () => setDuration(audio.duration));
@@ -73,9 +97,10 @@ export default function VoiceNoteBubble({
 
     return () => {
       audio.pause();
+      if (audioData && blobUrl) URL.revokeObjectURL(blobUrl); // Cleanup
       cancelAnimationFrame(animFrameRef.current);
     };
-  }, [audioUrl]);
+  }, [audioUrl, audioData]);
 
   const tick = () => {
     const audio = audioRef.current;
@@ -86,32 +111,47 @@ export default function VoiceNoteBubble({
     if (!audio.paused) animFrameRef.current = requestAnimationFrame(tick);
   };
 
-  const togglePlay = () => {
-    if (!audioUrl) return;
-    
-    const audio = audioRef.current;
-    if (!audio) {
-      // Identity Handshake: Force initialization if missed
-      const freshAudio = new Audio(audioUrl);
-      audioRef.current = freshAudio;
-    }
+    const togglePlay = () => {
+        const source = internalUrl || audioUrl;
+        if (!source) return;
+        
+        const audio = audioRef.current;
+        if (!audio) {
+          const freshAudio = new Audio(source);
+          audioRef.current = freshAudio;
+        }
 
-    const activeAudio = audioRef.current!;
+        const activeAudio = audioRef.current!;
 
-    if (isPlaying) {
-      activeAudio.pause();
-      cancelAnimationFrame(animFrameRef.current);
-      setIsPlaying(false);
-    } else {
-      activeAudio.play().then(() => {
-        setIsPlaying(true);
-        animFrameRef.current = requestAnimationFrame(tick);
-      }).catch(err => {
-        console.error('❌ Audio play failed:', err);
-        setIsPlaying(false);
-      });
-    }
-  };
+        if (isPlaying) {
+          activeAudio.pause();
+          cancelAnimationFrame(animFrameRef.current);
+          setIsPlaying(false);
+        } else {
+          activeAudio.play().then(() => {
+            setIsPlaying(true);
+            animFrameRef.current = requestAnimationFrame(tick);
+          }).catch(err => {
+            console.error('❌ Audio play failed:', err);
+            setIsPlaying(false);
+          });
+        }
+    };
+
+    // 🧬 INTERACTIVE SCRUBBING CIRCUIT (V4.99)
+    const handleScrub = (e: React.MouseEvent<HTMLDivElement>) => {
+        const audio = audioRef.current;
+        if (!audio || !audio.duration) return;
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const width = rect.width;
+        const pct = Math.max(0, Math.min(1, x / width));
+        
+        audio.currentTime = pct * audio.duration;
+        setCurrentTime(audio.currentTime);
+        setProgress(pct * 100);
+    };
 
   const handleUnlockTranslation = async () => {
     if (isUnlocking || translationUnlocked) return;
@@ -163,17 +203,21 @@ export default function VoiceNoteBubble({
 
             {/* WAVEFORM ENGINE */}
             <div className="flex-1 flex flex-col gap-2">
-              <div className="flex items-end gap-[3px] h-9 relative">
-                {bars.map((h, i) => {
-                  const barProgress = (i / barCount) * 100;
-                  const isFilled = barProgress <= progress;
+              <div 
+                className="flex items-center gap-[2px] h-10 cursor-pointer"
+                onClick={handleScrub}
+              >
+                {bars.map((height, i) => {
+                  const barProgress = (i / bars.length) * 100;
+                  const isActive = barProgress < progress;
+                  
                   return (
                     <div
                       key={i}
-                      className={`flex-1 rounded-full transition-all duration-300 ${
-                        isFilled ? 'bg-[#00f0ff] shadow-[0_0_10px_#00f0ff]' : 'bg-white/10'
+                      className={`w-[2px] rounded-full transition-all duration-300 ${
+                        isActive ? 'bg-[#00f0ff]' : 'bg-white/10'
                       }`}
-                      style={{ height: `${h}%` }}
+                      style={{ height: `${height}%` }}
                     />
                   );
                 })}

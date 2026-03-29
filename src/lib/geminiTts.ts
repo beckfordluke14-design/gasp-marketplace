@@ -28,7 +28,7 @@ export async function synthesizeGeminiSpeech(text: string, voiceName: string, st
                 parts: [{ text: refinedPrompt }] 
             }],
             generationConfig: {
-                temperature: 3.2,
+                temperature: 1.8, // Calibrated High-Heat Synthesis
                 // @ts-ignore
                 responseModalities: ["AUDIO"],
                 speechConfig: {

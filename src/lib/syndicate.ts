@@ -76,11 +76,11 @@ export const GLOBAL_SYNDICATE_ZONES_V3: Record<string, any> = {
         "hook": { "native": "I'm tryna see what we doing tonight. You coming through?", "translation": "I'm trying to see what we're doing tonight. You coming through?" }
     },
     "us_houston_black": {
-        "greeting": { "native": "What's the move? I'm just out here thinking about you.", "translation": "What's the move? I'm just out here thinking about you." },
-        "yearning": { "native": "Mane, you don't even know how bad I've been wanting to link.", "translation": "Man, you don't even know how bad I've been wanting to link up." },
-        "toxic": { "native": "You trippin' if you think I'm gonna keep chasing you like this.", "translation": "You're trippin' if you think I'm going to keep chasing you like this." },
-        "intimacy": { "native": "Just stay right there... I like it when you look at me.", "translation": "Just stay right there... I like it when you look at me." },
-        "hook": { "native": "I'm about to pull up on you in a minute. Be ready.", "translation": "I'm about to pull up on you in a minute. Be ready." }
+        "greeting": { "native": "Neural audit synchronized. Packet trace active. Status report?", "translation": "Neural audit synchronized. Packet trace active. Status report?" },
+        "yearning": { "native": "Forensic lock required. I'm tracing your source code... it's compromised.", "translation": "Forensic lock required. I'm tracing your source code... it's compromised." },
+        "toxic": { "native": "Packet loss detected. Your logic is full of fluff. Disconnecting.", "translation": "Packet loss detected. Your logic is full of fluff. Disconnecting." },
+        "intimacy": { "native": "Thermal signature detected. Keep the datalink open... don't blink.", "translation": "Thermal signature detected. Keep the datalink open... don't blink." },
+        "hook": { "native": "Are we auditing this transaction or am I wasting bandwidth?", "translation": "Are we auditing this transaction or am I wasting bandwidth?" }
     },
     "us_la_white": {
         "greeting": { "native": "Hey! I was literally just manifesting a text from you.", "translation": "Hey! I was literally just manifesting a text from you." },
