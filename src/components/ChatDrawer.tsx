@@ -24,9 +24,23 @@ interface ChatDrawerProps {
   onClose: () => void;
   onMinimize: () => void;
   onOpenTopUp: () => void;
+  followingIds?: string[];
+  profiles?: any[];
+  unreadCounts?: Record<string, number>;
+  onSelectProfile?: (id: string) => void;
 }
 
-export default function ChatDrawer({ profileId, profile, onClose, onMinimize, onOpenTopUp }: ChatDrawerProps) {
+export default function ChatDrawer({ 
+  profileId, 
+  profile, 
+  onClose, 
+  onMinimize, 
+  onOpenTopUp,
+  followingIds = [],
+  profiles = [],
+  unreadCounts = {},
+  onSelectProfile = () => {}
+}: ChatDrawerProps) {
   const { profile: userProfile, login } = useUser();
 
   // 🔑 SOVEREIGN SYNC: Initialize synchronously to prevent disabled button race condition
@@ -300,6 +314,49 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
           
           {/* Header Block */}
           <div className="flex flex-col bg-black/40 backdrop-blur-3xl border-b border-white/10 shrink-0 p-6 pb-0">
+             
+             {/* 🧬 DYNAMIC FAVORITE SWITCHER (Horizontal Slide) */}
+             <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-6 pt-2 border-b border-white/5 mb-4 px-2">
+                <AnimatePresence>
+                   {profiles.filter(p => followingIds.includes(p.id) && p.id !== profileId).map((p) => {
+                      const unread = unreadCounts[p.id] || 0;
+                      return (
+                         <motion.button
+                            key={p.id}
+                            onClick={() => onSelectProfile(p.id)}
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="relative shrink-0 flex flex-col items-center gap-1.5 group"
+                         >
+                            <div className="relative">
+                               <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 p-0.5 bg-black/20 group-hover:border-[#ff00ff]/50 transition-all">
+                                  <img src={p.image} className="w-full h-full object-cover rounded-full" />
+                               </div>
+                               
+                               {/* 🧧 SMART UNREAD BADGE (99+ Logic) */}
+                               {unread > 0 && (
+                                  <div className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[18px] h-[18px] bg-[#ff00ff] text-black text-[8px] font-black rounded-full flex items-center justify-center border-2 border-black shadow-[0_0_10px_#ff00ff]">
+                                     {unread > 99 ? '99+' : unread}
+                                  </div>
+                               )}
+                            </div>
+                            <span className="text-[7px] font-black uppercase text-white/30 group-hover:text-white transition-colors">{p.name.split(' ')[0]}</span>
+                         </motion.button>
+                      );
+                   })}
+                   
+                   {/* ➕ ADD FAVORITE HINT (If room) */}
+                   {followingIds.length < 5 && (
+                      <button 
+                        onClick={() => onClose()}
+                        className="shrink-0 w-12 h-12 rounded-full border border-dashed border-white/10 flex items-center justify-center text-white/10 hover:text-white/40 hover:border-white/20 transition-all"
+                      >
+                         <Plus size={16} />
+                      </button>
+                   )}
+                </AnimatePresence>
+             </div>
+
              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
                    <div className="relative shrink-0">

@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, MessageSquare, Star, Bell, Lock, Mic } from 'lucide-react';
-import Image from 'next/image';
+import { Zap, MessageSquare, Star, Bell, Lock, Mic, X } from 'lucide-react';
 
 /**
  * 🛰️ NEURAL PULSE HUB v1.0
@@ -190,12 +189,23 @@ export default function NeuralPulseHub({
                         </p>
                      </div>
 
-                     <div className="ml-auto pl-2 relative z-10">
+                     <div className="ml-auto pl-2 flex items-center gap-2 relative z-10">
                         <div className={`p-1 rounded-md transition-all ${
                             activeEvent.type === 'message' ? 'text-[#ff00ff] opacity-40' : 'text-[#00f0ff] opacity-40'
                         }`}>
                             <Zap size={10} className="animate-pulse" />
                         </div>
+                        
+                        {/* ❌ DISMISSAL BUTTON (Native Style) */}
+                        <button 
+                          onClick={(e) => {
+                             e.stopPropagation();
+                             setActiveEvent(null);
+                          }}
+                          className="w-6 h-6 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-white/20 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                        >
+                           <X size={10} />
+                        </button>
                      </div>
                   </div>
                </div>
