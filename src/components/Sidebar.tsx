@@ -17,7 +17,8 @@ import {
   ArrowRight,
   LogOut,
   Heart,
-  Sparkles
+  Sparkles,
+  Star
 } from 'lucide-react';
 import { useUser } from '@/components/providers/UserProvider';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
@@ -216,13 +217,13 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 </div>
             )}
 
-            {/* SAVED (FOLLOWED) CHATS - AT TOP */}
+            {/* FAVORITES (FOLLOWED) CHATS - AT TOP */}
             {followedProfiles.length > 0 && (
                 <div className="mb-8">
                     <div className="px-6 mb-4">
                         <div className="flex items-center gap-2">
-                            <Heart size={10} className="text-[#ff00ff] fill-current" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff00ff] italic">Saved Chats</span>
+                            <Star size={10} className="text-[#ff00ff] fill-[#ff00ff]" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff00ff] italic">Favorites</span>
                         </div>
                     </div>
                     <div className="flex flex-col px-4">

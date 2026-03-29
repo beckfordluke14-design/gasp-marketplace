@@ -15,6 +15,8 @@ import { trackEvent } from '@/lib/telemetry';
 import TopUpDrawer from '@/components/economy/TopUpDrawer';
 import ChatDrawer from '@/components/ChatDrawer';
 import { useUser } from '@/components/providers/UserProvider';
+import MobileBottomNav from '@/components/MobileBottomNav';
+import { Star } from 'lucide-react';
 
 function MarketplaceContent() {
   const [mounted, setMounted] = useState(false);
@@ -29,6 +31,8 @@ function MarketplaceContent() {
   const [guestId, setGuestId] = useState<string | null>(null);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [sidebarView, setSidebarView] = useState<'chats' | 'vault' | 'feed'>('chats');
+  const [following, setFollowing] = useState<string[]>([]);
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   
   const handleSetSidebarView = (view: 'chats' | 'vault' | 'feed') => {
      if (view === 'feed') {
@@ -82,11 +86,28 @@ function MarketplaceContent() {
 
     const syncUnreads = () => {
        const stored = JSON.parse(localStorage.getItem('gasp_unread_counts') || '{}');
+       setUnreadCounts(stored);
        const unreadTotal = Object.values(stored).reduce((a: any, b: any) => a + Number(b), 0);
        window.dispatchEvent(new CustomEvent('gasp_unread_sync', { detail: unreadTotal }));
     };
     syncUnreads();
+
+    const syncFollows = async () => {
+        let gid = localStorage.getItem('gasp_guest_id');
+        if (!gid) return;
+        try {
+            const res = await fetch('/api/rpc/db', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'sync-follows', payload: { userId: gid } })
+            });
+            const json = await res.json();
+            if (json.success) setFollowing(json.following || []);
+        } catch (e) {}
+    };
+    syncFollows();
+
     window.addEventListener('gasp_unread_sync_trigger', syncUnreads);
+    window.addEventListener('gasp_sync_follows', syncFollows);
 
     let gId = localStorage.getItem('gasp_guest_id');
     if (!gId) {
@@ -96,9 +117,12 @@ function MarketplaceContent() {
     setGuestId(gId);
     
     const pId = searchParams.get('profile');
-    if (pId) handleSelectProfile(String(pId));
+    if (pId) handleSelectProfile(pId);
 
-    return () => window.removeEventListener('gasp_unread_sync_trigger', syncUnreads);
+    return () => {
+       window.removeEventListener('gasp_unread_sync_trigger', syncUnreads);
+       window.removeEventListener('gasp_sync_follows', syncFollows);
+    };
   }, [searchParams]);
 
   const refinedProfiles = useMemo(() => {
@@ -278,6 +302,14 @@ function MarketplaceContent() {
               </motion.div>
            )}
         </AnimatePresence>
+
+         <MobileBottomNav 
+            onSelectChat={() => setShowProfileList(true)} 
+            onOpenTopUp={() => setIsTopUpOpen(true)} 
+            unreadCounts={unreadCounts}
+            followingIds={following}
+            profiles={randomizedProfiles}
+         />
 
      </main>
   );

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { type Profile, type Broadcast, proxyImg } from '@/lib/profiles';
 import Image from 'next/image';
-import { Lock, Circle, MessageSquare, Image as ImageIcon, Heart } from 'lucide-react';
+import { Lock, Circle, MessageSquare, Image as ImageIcon, Heart, Star } from 'lucide-react';
 import GlitchText from './ui/GlitchText';
 
 interface FeedItemProps {
@@ -31,6 +31,7 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const [lastTap, setLastTap] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
      const hasSeen = localStorage.getItem('gasp_zoom_hint');
@@ -38,7 +39,25 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
         setShowHint(true);
         localStorage.setItem('gasp_zoom_hint', 'true');
      }
-  }, []);
+
+     // Sync following status
+     const sync = async () => {
+        const gid = localStorage.getItem('gasp_guest_id');
+        if (!gid) return;
+        try {
+          const res = await fetch('/api/rpc/db', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'check-follow', payload: { userId: gid, personaId: profile.id } })
+          });
+          const json = await res.json();
+          setIsFollowing(json.isFollowing);
+        } catch (e) {}
+     };
+     sync();
+
+     window.addEventListener('gasp_sync_follows', sync);
+     return () => window.removeEventListener('gasp_sync_follows', sync);
+  }, [profile.id]);
 
   const handleTap = () => {
     const now = Date.now();
@@ -163,6 +182,43 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
                     </span>
                 </div>
              )}
+
+             {/* 🌟 FAVORITE / BOOKMARK BUTTON */}
+             <button 
+                onClick={async (e) => {
+                   e.stopPropagation();
+                   const gid = localStorage.getItem('gasp_guest_id');
+                   if (!gid) return;
+
+                   // Optimistic UI
+                   const next = !isFollowing;
+                   setIsFollowing(next);
+
+                   try {
+                     await fetch('/api/rpc/db', {
+                       method: 'POST',
+                       body: JSON.stringify({ action: 'toggle-follow', payload: { userId: gid, personaId: profile.id, isFollowing: !next } })
+                     });
+                     
+                     window.dispatchEvent(new Event('gasp_sync_follows'));
+                   } catch (err) {
+                     console.error('[FeedItem] Follow Failure:', err);
+                     setIsFollowing(!next); // Revert
+                   }
+                }}
+                className={`absolute bottom-6 right-6 z-[1001] w-12 h-12 rounded-2xl backdrop-blur-3xl border transition-all flex items-center justify-center group shadow-2xl active:scale-90 ${
+                   isFollowing 
+                   ? 'bg-[#ffea00]/10 border-[#ffea00]/40 text-[#ffea00]' 
+                   : 'bg-black/40 border-white/10 text-white/40 hover:text-white hover:border-white/30'
+                }`}
+             >
+                <Star size={20} className={isFollowing ? 'fill-[#ffea00] scale-110 drop-shadow-[0_0_10px_#ffea00]' : 'group-hover:scale-110 transition-transform'} />
+                
+                {/* TOOLTIP */}
+                <div className="absolute -top-10 right-0 px-3 py-1 bg-white text-black text-[8px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                   {isFollowing ? 'Favorited' : 'Add to Favorites'}
+                </div>
+             </button>
           </div>
          )}
  

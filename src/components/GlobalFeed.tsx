@@ -71,9 +71,29 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
   };
   const [likes, setLikes] = useState(broadcast.likes_count || Math.floor(Math.random() * 500));
   const [hasLiked, setHasLiked] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [showChatBubble, setShowChatBubble] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
   const lastTapRef = useRef<number>(0);
+
+  const syncFollows = useCallback(async () => {
+     const gid = localStorage.getItem('gasp_guest_id');
+     if (!gid) return;
+     try {
+       const res = await fetch('/api/rpc/db', {
+         method: 'POST',
+         body: JSON.stringify({ action: 'check-follow', payload: { userId: gid, personaId: profile.id } })
+       });
+       const json = await res.json();
+       setIsFollowing(json.isFollowing);
+     } catch (e) {}
+  }, [profile.id]);
+
+  useEffect(() => {
+     syncFollows();
+     window.addEventListener('gasp_sync_follows', syncFollows);
+     return () => window.removeEventListener('gasp_sync_follows', syncFollows);
+  }, [syncFollows]);
 
   useEffect(() => {
     let stareTimer: any;
@@ -320,11 +340,36 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                     )}
                       </div>
                       <div className="flex items-center gap-4 md:gap-6 pointer-events-auto">
-                         <button onClick={handleLike} className={`w-14 h-14 md:w-20 md:h-20 rounded-2xl backdrop-blur-3xl border flex flex-col items-center justify-center transition-all ${hasLiked ? 'bg-red-500/20 border-red-500/50 text-red-500 shadow-[0_0_30px_#ff000044]' : 'bg-black/60 border-white/10 text-white/40 hover:scale-110 hover:border-white/30'}`}>
-                            <Heart size={26} className={hasLiked ? 'fill-current' : ''} />
-                            <span className="text-[8px] md:text-[10px] font-black mt-1 uppercase">{likes}</span>
-                         </button>
-                      </div>
+                          <button onClick={handleLike} className={`w-14 h-14 md:w-20 md:h-20 rounded-2xl backdrop-blur-3xl border flex flex-col items-center justify-center transition-all ${hasLiked ? 'bg-red-500/20 border-red-500/50 text-red-500 shadow-[0_0_30px_#ff000044]' : 'bg-black/60 border-white/10 text-white/40 hover:scale-110 hover:border-white/30'}`}>
+                             <Heart size={26} className={hasLiked ? 'fill-current' : ''} />
+                             <span className="text-[8px] md:text-[10px] font-black mt-1 uppercase">{likes}</span>
+                          </button>
+
+                          <button 
+                             onClick={async (e) => {
+                                e.stopPropagation();
+                                const gid = localStorage.getItem('gasp_guest_id');
+                                if (!gid) return;
+
+                                const next = !isFollowing;
+                                setIsFollowing(next);
+
+                                try {
+                                  await fetch('/api/rpc/db', {
+                                    method: 'POST',
+                                    body: JSON.stringify({ action: 'toggle-follow', payload: { userId: gid, personaId: profile.id, isFollowing: !next } })
+                                  });
+                                  window.dispatchEvent(new Event('gasp_sync_follows'));
+                                } catch (err) {
+                                  setIsFollowing(!next);
+                                }
+                             }}
+                             className={`w-14 h-14 md:w-20 md:h-20 rounded-2xl backdrop-blur-3xl border flex flex-col items-center justify-center transition-all shadow-2xl ${isFollowing ? 'bg-[#ffea00]/10 border-[#ffea00]/40 text-[#ffea00] shadow-[0_0_30px_rgba(255,234,0,0.2)]' : 'bg-black/60 border-white/10 text-white/40 hover:scale-110 hover:border-[#ffea00]/40 hover:text-[#ffea00]'}`}
+                          >
+                             <Star size={26} className={isFollowing ? 'fill-[#ffea00] drop-shadow-[0_0_10px_#ffea00]' : ''} />
+                             <span className="text-[8px] md:text-[10px] font-black mt-1 uppercase">{isFollowing ? 'saved' : 'save'}</span>
+                          </button>
+                       </div>
                    </div>
              </div>
        </div>

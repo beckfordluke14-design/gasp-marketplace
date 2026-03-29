@@ -8,6 +8,8 @@ interface MobileNavProps {
   onSelectChat: () => void;
   onOpenTopUp: () => void;
   unreadCounts?: Record<string, number>;
+  followingIds?: string[];
+  profiles?: any[];
 }
 
 /**
@@ -15,16 +17,18 @@ interface MobileNavProps {
  * Objective: Thumb-Optimized Revenue Conversion.
  * Placement: Fixed Bottom Inset.
  */
-export default function MobileBottomNav({ onSelectChat, onOpenTopUp, unreadCounts = {} }: MobileNavProps) {
+export default function MobileBottomNav({ onSelectChat, onOpenTopUp, unreadCounts = {}, followingIds = [], profiles = [] }: MobileNavProps) {
   const router = useRouter();
   const totalUnread = Object.values(unreadCounts).reduce((a, b) => a + b, 0);
+
+  const favProfiles = profiles.filter(p => followingIds.includes(p.id)).slice(0, 3);
 
   const items = [
     { icon: Home, label: 'Feed', active: true, action: () => router.push('/') },
     { icon: Compass, label: 'Discover', active: false, action: () => router.push('/') },
     // 🧬 THE CENTER STAKE PILLAR
     { icon: Zap, label: 'STAKE', active: false, isSpecial: true, action: () => onOpenTopUp() },
-    { icon: MessageSquare, label: 'Chats', active: false, action: () => onSelectChat(), badge: totalUnread }, 
+    { icon: MessageSquare, label: 'Chats', active: false, action: () => onSelectChat(), badge: totalUnread, hasFavorites: favProfiles.length > 0 }, 
     { icon: User, label: 'Vault', active: false, action: () => router.push('/vault') },
   ];
 
@@ -52,7 +56,27 @@ export default function MobileBottomNav({ onSelectChat, onOpenTopUp, unreadCount
               ${item.active ? 'text-white' : 'text-white/30'}
             `}
           >
-            <item.icon size={20} className={item.active ? 'drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] text-white' : ''} />
+            <div className="relative">
+              <item.icon size={20} className={item.active ? 'drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] text-white' : ''} />
+              
+              {/* 🧬 FAVORITES HUB ATTACHMENT */}
+              {item.hasFavorites && (
+                 <div className="absolute -top-3 -right-3 flex -space-x-1.5">
+                    {favProfiles.map((p, i) => (
+                       <motion.div 
+                         key={p.id}
+                         initial={{ scale: 0, y: 10 }}
+                         animate={{ scale: 1, y: 0 }}
+                         transition={{ delay: i * 0.1 }}
+                         className="w-3.5 h-3.5 rounded-full border border-black overflow-hidden bg-zinc-800 shadow-[0_0_5px_rgba(0,0,0,0.5)]"
+                       >
+                          <img src={p.image} className="w-full h-full object-cover" />
+                       </motion.div>
+                    ))}
+                 </div>
+              )}
+            </div>
+
             <span className="text-[8px] font-black uppercase tracking-[0.1em] leading-none">{item.label}</span>
             
             {item.active && (

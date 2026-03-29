@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Send, Plus, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn, Diamond, MessageSquare, Circle, Image as ImageIcon, Minus as MinimizeIcon, Gift, ArrowLeftRight, Zap } from 'lucide-react';
+import { X, Send, Plus, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn, Diamond, MessageSquare, Circle, Image as ImageIcon, Minus as MinimizeIcon, Gift, ArrowLeftRight, Zap, Star } from 'lucide-react';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { COST_VOICE_TRANSLATION, COST_VOICE_NOTE } from '@/lib/economy/constants';
@@ -48,6 +48,7 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
   const [activeGift, setActiveGift] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [dbLoaded, setDbLoaded] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [liveVoiceUrl, setLiveVoiceUrl] = useState<string | null>(null);
   
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -179,6 +180,17 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
            setMessages(result.data.messages || []);
            setVaultItems(result.data.vaultItems || []);
            setCurrentBalance(result.data.balance || 0);
+
+           // Fetch following status
+           const gid = localStorage.getItem('gasp_guest_id');
+           if (gid) {
+             const fRes = await fetch('/api/rpc/db', {
+               method: 'POST',
+               body: JSON.stringify({ action: 'check-follow', payload: { userId: gid, personaId: profileId } })
+             });
+             const fJson = await fRes.json();
+             if (fJson.success) setIsFollowing(fJson.isFollowing);
+           }
         }
       } catch (e) {
         console.error('[Gasp Neural Sync] Error:', e);
@@ -311,6 +323,29 @@ export default function ChatDrawer({ profileId, profile, onClose, onMinimize, on
                 </div>
 
                 <div className="flex items-center gap-3 text-white/40">
+                   <button 
+                      onClick={async (e) => {
+                         e.stopPropagation();
+                         const gid = localStorage.getItem('gasp_guest_id');
+                         if (!gid) return;
+
+                         const next = !isFollowing;
+                         setIsFollowing(next);
+
+                         try {
+                           await fetch('/api/rpc/db', {
+                             method: 'POST',
+                             body: JSON.stringify({ action: 'toggle-follow', payload: { userId: gid, personaId: profileId, isFollowing: !next } })
+                           });
+                           window.dispatchEvent(new Event('gasp_sync_follows'));
+                         } catch (err) {
+                           setIsFollowing(!next);
+                         }
+                      }}
+                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all border ${isFollowing ? 'bg-[#ffea00]/10 border-[#ffea00]/40 text-[#ffea00] shadow-[0_0_15px_rgba(255,234,0,0.2)]' : 'bg-white/5 border-white/10 hover:text-white'}`}
+                   >
+                      <Star size={16} fill={isFollowing ? 'currentColor' : 'none'} />
+                   </button>
                    <button className="relative group hover:text-white transition-colors">
                       <ShoppingBag size={18} />
                       {hasVault && (
