@@ -116,9 +116,9 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                <ShieldCheck size={16} className="text-[#ffea00]/30" />
             </div>
 
-            {/* 🪙 CUSTOM WHALE TOP-UP */}
+            {/* 🪙 CUSTOM WHALE TERMINAL UPLINK */}
             <div className="space-y-4">
-               <h4 className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b00] italic">Custom Whale Top-Up</h4>
+               <h4 className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b00] italic">Custom Terminal Uplink</h4>
                <div className="flex flex-col gap-3 group">
                   <div className="relative flex-1">
                      <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
@@ -128,7 +128,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                        type="number"
                        value={customAmount}
                        onChange={(e) => setCustomAmount(e.target.value)}
-                       placeholder="Enter USD Amount (e.g. 5000)"
+                       placeholder="Enter USD Amount (min. $250.00)"
                        className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 text-xl font-black text-white focus:outline-none focus:border-[#ff6b00]/40 transition-all placeholder:text-white/10"
                      />
                   </div>
@@ -140,7 +140,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                   </button>
                </div>
                <p className="text-[7px] text-white/20 uppercase tracking-[0.2em] font-black ml-1">
-                  Custom amounts qualify for the 1.15x Multiplier. 🛡️
+                  Custom amounts qualify for the 1.15x Sovereign Multiplier. 🛡️
                </p>
             </div>
 

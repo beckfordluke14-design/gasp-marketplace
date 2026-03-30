@@ -54,7 +54,7 @@ export default function SyncGate() {
 
             <div className="space-y-4">
               <h1 className="text-2xl md:text-3xl font-syncopate font-black uppercase italic tracking-tighter text-white">
-                Syndicate Access Hub
+                Syndicate Operations Terminal
               </h1>
               <p className="text-[11px] text-white/40 uppercase font-black tracking-[0.2em] leading-relaxed px-4">
                 You are entering a <span className="text-white">Premium Narrative Intelligence Node</span>. 
@@ -75,7 +75,7 @@ export default function SyncGate() {
             </button>
 
             <div className="flex flex-col gap-2 pt-2">
-               <p className="text-[8px] text-white/20 uppercase font-black tracking-widest italic opacity-40">AllTheseFlows Strategic Media LLC</p>
+               <p className="text-[8px] text-white/20 uppercase font-black tracking-widest italic opacity-40">AllTheseFlows LLC d.b.a. AllTheseFlows Strategic Media</p>
             </div>
           </motion.div>
         </motion.div>

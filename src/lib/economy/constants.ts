@@ -1,6 +1,6 @@
 /**
- * GASP COLLECTIVE: HYBRID SOVEREIGN TOKENOMICS v2
- * High-End Tiered Economy with Elite Subs & Dynamic Burn Rates.
+ * GASP OPERATIONS TERMINAL: HYBRID SOVEREIGN TOKENOMICS v2
+ * Institutional Tiered Economy with Enterprise Assets & Data Burn Rates.
  */
 
 export const ELITE_WHALE_MARK = 99.99; // Threshold for Whale Status
@@ -23,14 +23,14 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
     id: 'tier_impulse', 
     priceUsd: 4.99,  
     credits: 5000,   
-    label: 'The Impulse',
+    label: 'Standard Node Uplink',
     helioPayLink: 'https://hel.io/sh/REPLACE_WITH_IMPULSE_LINK'
   },
   { 
     id: 'tier_taste',   
     priceUsd: 9.99,  
     credits: 10000,  
-    label: 'The Taste', 
+    label: 'Strategic Data Sync', 
     bonus: '+10%',
     helioPayLink: 'https://hel.io/sh/REPLACE_WITH_TASTE_LINK'
   },
@@ -38,7 +38,7 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
     id: 'tier_weekend', 
     priceUsd: 24.99, 
     credits: 28000, // +3K Bonus
-    label: 'The Weekend', 
+    label: 'Operational Prime Link', 
     isPopular: true, 
     bonus: '+20%',
     helioPayLink: 'https://hel.io/sh/REPLACE_WITH_WEEKEND_LINK'
@@ -47,7 +47,7 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
     id: 'tier_whale',   
     priceUsd: 99.99, 
     credits: 150000, // +50K Bonus
-    label: 'The Whale', 
+    label: 'Enterprise Archive Node', 
     bonus: '+50%',
     helioPayLink: 'https://hel.io/sh/REPLACE_WITH_WHALE_LINK'
   }

@@ -30,7 +30,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
   const isCustom = packageId.startsWith('custom_');
   const customVal = isCustom ? parseFloat(packageId.split('_')[1]) : 0;
   const pkg = isCustom 
-    ? { id: packageId, priceUsd: customVal, credits: customVal * 15, label: 'Custom Hub Infusion' }
+    ? { id: packageId, priceUsd: customVal, credits: customVal * 15, label: 'Custom Terminal Infusion' }
     : (CREDIT_PACKAGES.find(p => p.id === packageId) || CREDIT_PACKAGES[0]);
 
   const cryptoBonus = method === 'crypto' ? Math.floor(pkg.credits * 0.15) : 0;
@@ -38,7 +38,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
 
   const handleStripeCheckout = async () => {
     setIsVerifying(true);
-    // 🛡️ STRIPE REDIRECT: Digital Media Hub Logic
+    // 🛡️ STRIPE REDIRECT: Digital Media Terminal Logic
     try {
         const res = await fetch('/api/economy/stripe/create-session', {
             method: 'POST',
@@ -73,7 +73,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                     <CreditCard size={32} />
                 </div>
                 <div>
-                   <h4 className="text-xl font-bold text-white uppercase italic">Digital Hub Access</h4>
+                   <h4 className="text-xl font-bold text-white uppercase italic">Digital Terminal Access</h4>
                    <p className="text-[9px] text-white/40 uppercase font-black tracking-widest mt-2 px-4 leading-relaxed">Cards / Apple Pay / Google Pay. Fulfilled by AllTheseFlows LLC.</p>
                 </div>
                 <div className="flex items-center gap-2 pt-2 grayscale opacity-30">
@@ -151,10 +151,10 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                      className="w-full h-16 rounded-2xl bg-white text-black text-[11px] font-black uppercase tracking-[0.25em] flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all"
                    >
                      {isVerifying ? <Loader2 size={24} className="animate-spin" /> : <Zap size={20} fill="black" />}
-                     {isVerifying ? 'Initializing Hub...' : 'Finalize Hub Infusion'}
+                     {isVerifying ? 'Initializing Terminal...' : 'Finalize Terminal Infusion'}
                    </button>
                    <p className="text-[7px] text-white/20 uppercase tracking-[0.2em] font-black text-center italic">
-                      Fulfilled by AllTheseFlows Strategic Media LLC. Secure SSL Digital Settlement.
+                      Fulfilled by AllTheseFlows LLC d.b.a. AllTheseFlows Strategic Media. Secure SSL Digital Settlement.
                    </p>
                 </div>
               ) : (
@@ -168,9 +168,18 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                            <code className="text-[8px] text-white/40 truncate group-hover:text-white">{MERCHANT_WALLETS[network]}</code>
                            <Copy size={12} className="text-white/20 shrink-0 ml-2" />
                         </div>
-                        <button className="w-full h-16 rounded-2xl bg-[#ff6b00] text-black text-[11px] font-black uppercase tracking-[0.25em] flex items-center justify-center gap-3">
-                            <WalletIcon size={20} /> Sovereign Stake
-                        </button>
+                   <button 
+                      onClick={() => {
+                         if (pkg.helioPayLink && pkg.helioPayLink !== 'https://hel.io/sh/REPLACE_WITH_IMPULSE_LINK') {
+                            window.location.href = pkg.helioPayLink;
+                         } else {
+                            alert('Sovereign Bridge Initializing. Connect Wallet directly for P2P.');
+                         }
+                      }}
+                      className="w-full h-16 rounded-2xl bg-[#ff6b00] text-black text-[11px] font-black uppercase tracking-[0.25em] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(255,107,0,0.3)]"
+                   >
+                       <WalletIcon size={20} /> Finalize Sovereign Infusion
+                   </button>
                     </div>
                 </div>
               )}

@@ -309,12 +309,12 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                     <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-10 duration-1000">
                       <div className="flex flex-col gap-2 pointer-events-auto">
                          <div className="flex items-center gap-3 relative">
-                        <div className="flex flex-col gap-1.5 mb-2 pointer-events-auto">
+                         <div className="flex flex-col gap-1.5 mb-2 pointer-events-auto">
                            <div className="flex items-center gap-2">
                               <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
-                              <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#00f0ff] opacity-80 italic">Field Analyst // Secure Uplink</span>
+                              <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[#00f0ff] opacity-60 italic whitespace-nowrap">Field Analyst // Secure Uplink</span>
                            </div>
-                           <span className="text-[14px] md:text-[18px] font-black uppercase italic tracking-tighter text-white/90 drop-shadow-2xl">{displayName}</span>
+                           <span className="text-[12px] font-black uppercase italic tracking-tighter text-white/90 drop-shadow-2xl">{displayName}</span>
                         </div>
                         
                         <AnimatePresence>
@@ -338,20 +338,15 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                                onClick={(e) => { 
                                  e.stopPropagation(); 
                                  onSelectProfile(profile.id); 
-                               }}
-                               className="flex items-center gap-2 px-3 py-1.5 bg-[#00f0ff] rounded-full shadow-[0_0_20px_rgba(0,240,255,0.4)] cursor-pointer hover:scale-105 active:scale-95 transition-all select-none"
+                                }}
+                               className="flex items-center gap-2 px-3 py-1 bg-[#00f0ff] rounded-full shadow-[0_0_20px_rgba(0,240,255,0.4)] cursor-pointer hover:scale-105 active:scale-95 transition-all select-none"
                              >
-                                <span className="text-[9px] font-black text-black uppercase tracking-widest whitespace-nowrap">Sync w/ {displayName}?</span>
-                                <motion.div 
-                                  animate={{ opacity: [1, 0] }}
-                                  transition={{ repeat: Infinity, duration: 0.8 }}
-                                  className="w-[2px] h-3 bg-black/40"
-                                />
+                                <span className="text-[8px] font-black text-black uppercase tracking-widest whitespace-nowrap">Sync Signal?</span>
                              </motion.div>
                            )}
                         </AnimatePresence>
 
-                        <div className="w-1 h-1 rounded-full bg-[#00f0ff] opacity-40" />
+                        <div className="w-1 h-1 rounded-full bg-[#00f0ff] opacity-40 ml-2" />
                      </div>
                     
                      {isEditing ? (
@@ -359,11 +354,11 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                            value={editedCaption}
                            onChange={(e) => setEditedCaption(e.target.value)}
                            onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); }}
-                           className="w-full bg-white/10 border border-white/20 rounded-2xl p-4 text-[20px] md:text-[28px] lg:text-[36px] font-black tracking-tighter text-white italic lowercase leading-[1.1] selection:bg-[#ff00ff] outline-none"
+                           className="w-full bg-white/10 border border-white/20 rounded-2xl p-4 text-[12px] font-black tracking-tighter text-white italic lowercase selection:bg-[#ff00ff] outline-none"
                            autoFocus
                         />
                      ) : (
-                        <h2 className="text-[20px] md:text-[28px] lg:text-[36px] font-black tracking-tighter text-white italic lowercase leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+                        <h2 className="text-[9px] md:text-[10px] font-black tracking-[0.2em] text-white/40 uppercase leading-relaxed italic drop-shadow-2xl max-w-[80%]">
                            {broadcast.content}
                         </h2>
                      )}
@@ -703,8 +698,8 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
 
       {/* 🛡️ STRIPE-SAFE MERCHANT FOOTER */}
        <div className="p-12 text-center opacity-20 border-t border-white/5 space-y-2">
-          <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white">AllTheseFlows Strategic Media Asset Mgmt</p>
-          <p className="text-[7px] font-medium uppercase tracking-[0.2em] text-white/60">© 2026 GASP Syndicate. Strategic Intelligence & Data Hub. All Rights Reserved.</p>
+          <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white">AllTheseFlows LLC d.b.a. AllTheseFlows Strategic Media</p>
+          <p className="text-[7px] font-medium uppercase tracking-[0.2em] text-white/60">© 2026 GASP Syndicate. Strategic Operations Terminal. All Rights Reserved.</p>
       </div>
     </div>
   );

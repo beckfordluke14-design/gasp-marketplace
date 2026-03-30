@@ -33,7 +33,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string, privyUser: any) => {
-    // 🛡️ SOVEREIGN BALANCE HUB: Fetching from Railway instead of Supabase
+    // 🛡️ SOVEREIGN BALANCE TERMINAL: Fetching from Railway instead of Supabase
     try {
         const res = await fetch(`/api/economy/balance?userId=${userId}`);
         const data = await res.json();
@@ -57,7 +57,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     if (authenticated && user) {
        // Identity Handshake
        fetchProfile(user.id, user);
-      fetchProfile(user.id, user);
     } else {
        setProfile(null);
     }
@@ -87,6 +86,3 @@ export const useUser = () => {
   }
   return context;
 };
-
-
-
