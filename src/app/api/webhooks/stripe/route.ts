@@ -36,6 +36,19 @@ export async function POST(req: Request) {
                 console.log(`🏦 [Onramp] Fulfilling Crypto Settlement: ${credits} BP for User ${userId}`);
                 try {
                     await db.query('BEGIN');
+                    
+                    // 🛡️ IDEMPOTENCY CHECK: Prevent double-minting if Stripe resends the webhook
+                    const { rowCount } = await db.query(
+                       `SELECT 1 FROM transactions WHERE meta->>'session_id' = $1`,
+                       [onrampSession.id]
+                    );
+
+                    if (rowCount && rowCount > 0) {
+                        await db.query('ROLLBACK');
+                        console.log(`⚠️ [Onramp] Idempotency catch: Session ${onrampSession.id} already fulfilled.`);
+                        return NextResponse.json({ received: true });
+                    }
+
                     await db.query(
                         'UPDATE profiles SET credit_balance = credit_balance + $1, updated_at = NOW() WHERE id = $2',
                         [credits, userId]

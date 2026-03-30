@@ -28,17 +28,33 @@ export async function POST(req: Request) {
         // 🛡️ ATOMIC SYNC: Universal Ledger Update in Railway
         console.log(`📡 [HELIO WEBHOOK] Processing deposit for user ${userId}...`);
 
-        // --- 2A. Update Wallet Ledger ---
-        await db.query(`
-            INSERT INTO wallets (user_id, credit_balance, created_at, updated_at)
-            VALUES ($1, $2, NOW(), NOW())
-            ON CONFLICT (user_id) DO UPDATE SET 
-                credit_balance = wallets.credit_balance + EXCLUDED.credit_balance,
-                updated_at = NOW()
-        `, [userId, totalDeposit]);
-
-        // --- 2B. Update Profile (Airdrop Stake Ledger) ---
         try {
+            await db.query('BEGIN');
+
+            const externalId = body.transactionReference || body.id || 'HELIO_MISSING_ID_' + Date.now();
+
+            // 🛡️ IDEMPOTENCY CHECK: Prevent double-minting if Helio resends the webhook
+            const { rowCount } = await db.query(
+                `SELECT 1 FROM transactions WHERE external_id = $1`,
+                [externalId]
+            );
+
+            if (rowCount && rowCount > 0) {
+                await db.query('ROLLBACK');
+                console.log(`⚠️ [HELIO] Idempotency catch: Transaction ${externalId} already fulfilled.`);
+                return new Response('Already Settled', { status: 200 });
+            }
+
+            // --- 2A. Update Wallet Ledger ---
+            await db.query(`
+                INSERT INTO wallets (user_id, credit_balance, created_at, updated_at)
+                VALUES ($1, $2, NOW(), NOW())
+                ON CONFLICT (user_id) DO UPDATE SET 
+                    credit_balance = wallets.credit_balance + EXCLUDED.credit_balance,
+                    updated_at = NOW()
+            `, [userId, totalDeposit]);
+
+            // --- 2B. Update Profile (Airdrop Stake Ledger) ---
             await db.query(`
                 UPDATE profiles SET 
                     total_spent_usd = total_spent_usd + $1,
@@ -46,26 +62,29 @@ export async function POST(req: Request) {
                     updated_at = NOW()
                 WHERE id = $3
             `, [pkg.priceUsd, totalDeposit, userId]);
+            // 3. Update Public User Table (Legacy Sync)
+            await db.query('UPDATE users SET credit_balance = credit_balance + $1 WHERE id = $2', [totalDeposit, userId]);
+
+            // 4. Record Transaction & Audit Ledger
+            await db.query(`
+                INSERT INTO transactions (user_id, amount, amount_usd, type, provider, external_id, created_at)
+                VALUES ($1, $2, $3, 'purchase', 'helio', $4, NOW())
+            `, [userId, totalDeposit, pkg.priceUsd, externalId]);
+
+            await db.query(`
+                INSERT INTO audit_ledger (user_id, action, amount_usd, credits_added, bonus_applied, status, created_at)
+                VALUES ($1, 'HELIO_DEPOSIT_v2.0', $2, $3, true, 'SETTLED', NOW())
+            `, [userId, pkg.priceUsd, totalDeposit]);
+
+            await db.query('COMMIT');
+            console.log(`✅ [HELIO WEBHOOK]: Sync Complete. User ${userId} credited with ${totalDeposit} credits. 🛡️`);
+            return new Response('Settled', { status: 200 });
+
         } catch (e) {
-            console.warn('[HELIO WEBHOOK]: Profile sync failed.', e);
+            await db.query('ROLLBACK');
+            console.warn('[HELIO WEBHOOK]: Atomic sync failed. Rolled back.', e);
+            return new Response('Sync Error', { status: 500 });
         }
-
-        // 3. Update Public User Table (Legacy Sync)
-        await db.query('UPDATE users SET credit_balance = credit_balance + $1 WHERE id = $2', [totalDeposit, userId]);
-
-        // 4. Record Transaction & Audit Ledger
-        await db.query(`
-            INSERT INTO transactions (user_id, amount, amount_usd, type, provider, external_id, created_at)
-            VALUES ($1, $2, $3, 'purchase', 'helio', $4, NOW())
-        `, [userId, totalDeposit, pkg.priceUsd, body.transactionReference || 'SOLANA_MAINNET_SYNC']);
-
-        await db.query(`
-            INSERT INTO audit_ledger (user_id, action, amount_usd, credits_added, bonus_applied, status, created_at)
-            VALUES ($1, 'HELIO_DEPOSIT_v2.0', $2, $3, true, 'SETTLED', NOW())
-        `, [userId, pkg.priceUsd, totalDeposit]);
-
-        console.log(`✅ [HELIO WEBHOOK]: Sync Complete. User ${userId} credited with ${totalDeposit} credits. 🛡️`);
-        return new Response('Settled', { status: 200 });
 
     } catch (error: any) {
         console.error('[HELIO WEBHOOK]: Fatal Error:', error.message);

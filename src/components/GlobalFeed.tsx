@@ -30,7 +30,7 @@ function GlobalFeedItem({
   index 
 }: { 
   profile: Profile; 
-  broadcast: Broadcast; 
+  broadcast: any; 
   onSelectProfile: (id: string, initialMsg?: string) => void; 
   onDeletePost?: (id: string) => void; 
   onToggleFeatured?: (id: string, state: boolean) => void; 
@@ -39,8 +39,12 @@ function GlobalFeedItem({
   onEditBrain?: (profile: Profile) => void; 
   index: number 
 }) {
+  const postType = broadcast.content_type || broadcast.type || 'text';
+  const postUrl = broadcast.content_url || broadcast.media_url || broadcast.image_url || broadcast.video_url;
+  const postText = broadcast.caption || broadcast.content || '';
+
   const [isEditing, setIsEditing] = useState(false);
-  const [editedCaption, setEditedCaption] = useState(broadcast.content || '');
+  const [editedCaption, setEditedCaption] = useState(postText);
   const [likes, setLikes] = useState(broadcast.likes_count || Math.floor(Math.random() * 500));
   const [hasLiked, setHasLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -112,7 +116,7 @@ function GlobalFeedItem({
   const handleLike = async () => {
     if (hasLiked) return;
     setHasLiked(true);
-    setLikes(prev => prev + 1);
+    setLikes((prev: number) => prev + 1);
     const localLikes = JSON.parse(localStorage.getItem('gasp_liked_ids') || '[]');
     localLikes.push(broadcast.id);
     localStorage.setItem('gasp_liked_ids', JSON.stringify(localLikes));
@@ -131,14 +135,14 @@ function GlobalFeedItem({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className={`relative w-full ${broadcast.type === 'text' ? 'h-auto py-12' : 'h-[100dvh]'} overflow-hidden bg-transparent flex flex-col items-center justify-center border-b border-white/5 last:border-0 cursor-pointer`}
+      className={`relative w-full ${postType === 'text' ? 'h-auto py-12' : 'h-[100dvh]'} overflow-hidden bg-transparent flex flex-col items-center justify-center border-b border-white/5 last:border-0 cursor-pointer`}
       onClick={handleInteraction}
     >
        {/* CONTENT LAYER */}
        <div className="absolute inset-0 z-0 bg-transparent flex items-center justify-center">
-          {broadcast.type === 'video' ? (
+          {postType === 'video' ? (
              <>
-                <video src={proxyImg(broadcast.video_url)} autoPlay loop muted playsInline className={`absolute inset-0 w-full h-full object-cover blur-3xl opacity-30 ${broadcast.is_locked ? 'blur-[100px]' : ''}`} />
+                <video src={proxyImg(postUrl)} autoPlay loop muted playsInline className={`absolute inset-0 w-full h-full object-cover blur-3xl opacity-30 ${broadcast.is_locked ? 'blur-[100px]' : ''}`} />
                 <BrandingOverlay profileName={profile.name} />
                 {broadcast.is_locked ? (
                    <div className="relative z-20 w-full h-full flex flex-col items-center justify-center p-8 bg-black/40 backdrop-blur-3xl">
@@ -146,12 +150,12 @@ function GlobalFeedItem({
                        <button onClick={(e) => { e.stopPropagation(); onSelectProfile(profile.id); }} className="px-8 py-4 bg-[#ffea00] text-black rounded-2xl text-[10px] font-black uppercase tracking-widest">Unlock {broadcast.lock_price || COST_PREMIUM_VAULT_UNLOCK} BP</button>
                    </div>
                 ) : (
-                    <img src={proxyImg(broadcast.image_url || profile.image)} alt="" className="relative z-10 w-full h-full object-cover" />
+                    <video src={proxyImg(postUrl)} autoPlay loop muted playsInline className="relative z-10 w-full h-full object-cover md:object-contain" />
                 )}
              </>
-          ) : broadcast.type === 'image' ? (
+          ) : postType === 'image' ? (
              <>
-                <img src={proxyImg(broadcast.image_url || profile.image)} alt="" className={`absolute inset-0 w-full h-full object-cover blur-3xl opacity-30 ${broadcast.is_locked ? 'blur-[100px]' : ''}`} />
+                <img src={proxyImg(postUrl || profile.image)} alt="" className={`absolute inset-0 w-full h-full object-cover blur-3xl opacity-30 ${broadcast.is_locked ? 'blur-[100px]' : ''}`} />
                 <BrandingOverlay profileName={profile.name} />
                 {broadcast.is_locked ? (
                    <div className="relative z-20 w-full h-full flex flex-col items-center justify-center p-8 bg-black/40 backdrop-blur-3xl">
@@ -159,7 +163,7 @@ function GlobalFeedItem({
                        <button onClick={(e) => { e.stopPropagation(); onSelectProfile(profile.id); }} className="px-8 py-4 bg-[#ff00ff] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest">Unlock {broadcast.lock_price || COST_VAULT_UNLOCK} BP</button>
                    </div>
                 ) : (
-                    <img src={proxyImg(broadcast.image_url || profile.image)} alt="" className="relative z-10 w-full h-full object-cover" />
+                    <img src={proxyImg(postUrl || profile.image)} alt="" className="relative z-10 w-full h-full object-cover md:object-contain" />
                 )}
              </>
           ) : (
@@ -174,7 +178,7 @@ function GlobalFeedItem({
                             <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">FIELD ANALYST</span>
                          </div>
                       </div>
-                      <p className="text-xs md:text-sm font-bold text-white uppercase tracking-tight leading-relaxed font-mono">{broadcast.content}</p>
+                      <p className="text-xs md:text-sm font-bold text-white uppercase tracking-tight leading-relaxed font-mono whitespace-pre-wrap">{postText}</p>
                       <div className="flex items-center justify-between pt-4 border-t border-white/5 opacity-50">
                          <span className="text-[6px] font-black text-white/40 uppercase tracking-widest">Verified // Institutional Grade</span>
                          <span className="text-[6px] font-black text-[#ffea00] uppercase tracking-widest italic">Found on GASP.FUN</span>
@@ -193,8 +197,8 @@ function GlobalFeedItem({
           </div>
        )}
 
-       {/* INTERACTION OVERLAY (HIDDEN FOR TEXT) */}
-       {broadcast.type !== 'text' && (
+       {/* INTERACTION OVERLAY (HIDDEN FOR TEXT OR WEATHER LOGS) */}
+       {postType !== 'text' && (
           <div className="relative z-10 w-full h-full flex flex-col justify-end p-8 md:p-16 pb-32 pointer-events-none">
               <div className="space-y-6 pointer-events-auto">
                  <div className="flex items-center gap-4">
@@ -233,7 +237,25 @@ export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFee
       try {
         const res = await fetch('/api/admin/feed');
         const data = await res.json();
-        setItems(data.posts || []);
+        const posts = data.posts || [];
+        
+        // 🧬 SOVEREIGN WEAVE: Alternate 2 Text <-> 2 Media Posts
+        const texts = posts.filter((p: any) => p.content_type === 'text' || p.type === 'text');
+        const media = posts.filter((p: any) => p.content_type !== 'text' && p.type !== 'text');
+        
+        const woven = [];
+        let tIndex = 0;
+        let mIndex = 0;
+
+        while (tIndex < texts.length || mIndex < media.length) {
+            if (tIndex < texts.length) woven.push(texts[tIndex++]);
+            if (tIndex < texts.length) woven.push(texts[tIndex++]);
+            
+            if (mIndex < media.length) woven.push(media[mIndex++]);
+            if (mIndex < media.length) woven.push(media[mIndex++]);
+        }
+
+        setItems(woven);
       } catch (e) {
         console.error('Feed load fail:', e);
       } finally {
