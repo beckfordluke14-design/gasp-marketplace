@@ -266,6 +266,32 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                     />
                 )}
              </>
+          ) : broadcast.type === 'text' ? (
+             <div className="relative z-10 w-full h-full flex items-center justify-center p-12 bg-[#050505]">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#00f0ff]/5 to-transparent pointer-events-none" />
+                <div className="max-w-md w-full p-8 rounded-[2rem] bg-black/40 border border-white/5 backdrop-blur-3xl relative group/card">
+                   <div className="absolute -top-3 -left-3 px-3 py-1 bg-[#ffea00] text-black text-[8px] font-black uppercase italic rounded-lg shadow-[0_0_20px_#ffea0033]">
+                      Sector Intelligence Briefing
+                   </div>
+                   <div className="space-y-6">
+                      <div className="flex items-center gap-2 opacity-40">
+                         <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
+                         <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white">Neural Sink Active // Log: {broadcast.id.slice(0,8)}</span>
+                      </div>
+                      <p className="text-[14px] md:text-lg font-black text-white italic tracking-tighter leading-relaxed drop-shadow-2xl">
+                         "{broadcast.content}"
+                      </p>
+                      <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                         <div className="flex items-center gap-1.5">
+                            <Star size={10} className="text-[#ffea00]/40" />
+                            <span className="text-[7px] font-black uppercase text-white/20 tracking-widest italic">Strategic Asset Class</span>
+                         </div>
+                         <Zap size={14} className="text-[#00f0ff]/40 animate-pulse" />
+                      </div>
+                   </div>
+                </div>
+                <BrandingOverlay profileName={profile.name} />
+             </div>
           ) : (
              <div className="w-full h-full bg-[#050505]"><BrandingOverlay profileName={profile.name} /></div>
           )}
@@ -546,7 +572,8 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
         if (dbPosts.length < 20) setHasMore(false);
 
         mergedItems = dbPosts.map((p: any) => {
-           if (!p || !p.content_url) return null;
+           if (!p) return null;
+           const isBriefing = !p.content_url;
            const pDataRaw = (Array.isArray(p.personas) ? p.personas[0] : p.personas) || {};
            const fallback = (initialProfiles.find(i => i.id === p.persona_id) || {}) as any;
            const finalProfile = { 
@@ -560,11 +587,11 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
                profile: finalProfile,
                broadcast: { 
                  id: p.id, 
-                 type: p.content_type || 'image',
                  content: p.caption || '', 
                  is_featured: p.is_burner || false, 
                  image_url: p.content_url, 
-                 video_url: p.content_url, 
+                 video_url: p.content_url,
+                 type: p.content_url ? (p.content_type || 'image') : 'text', 
                  is_locked: p.is_vault || false, 
                  likes_count: p.likes_count || 0,
                  created_at: p.created_at || new Date().toISOString() 
