@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Radio, Zap, ChevronRight, TrendingUp } from 'lucide-react';
+import { Radio, Zap, ChevronRight, Activity } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { initialProfiles } from '@/lib/profiles';
@@ -18,32 +18,35 @@ export default function NeuralPulseHub({ followingIds, profiles, unreadCounts, o
   const [currentIndex, setCurrentIndex] = useState(0);
   const router = useRouter();
 
-  useEffect(() => {
-    async function fetchLatest() {
-        try {
-            const res = await fetch('/api/rpc/db', {
-                method: 'POST',
-                body: JSON.stringify({ action: 'get_latest_news', payload: { limit: 5 } })
-            });
-            const data = await res.json();
-            if (data.success && data.posts.length > 0) {
-                setNews(data.posts);
-            } else {
-                // Mocking for testing if DB is empty - Using REAL IDs from initialProfiles
-                const firstId = initialProfiles[0]?.id || 'syndicate-node';
-                setNews([
-                    { id: '1', persona_id: firstId, title: 'ALPHA NODE BREACH: SECTOR 07 // HIGH-HEAT', heat: 'High' },
-                    { id: '2', persona_id: firstId, title: 'SECURE DATA UPLINK: CLASSIFIED BROADCAST LEAK', heat: 'Critical' },
-                    { id: '3', persona_id: firstId, title: 'TARGET NODE ACTIVITY SPIKE: REGION 12', heat: 'Standard' }
-                ]);
-            }
-        } catch (e) {
-            console.error('Pulse Fetch Failure:', e);
+  async function fetchLatest() {
+    try {
+        const res = await fetch('/api/rpc/db', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'get_latest_news', payload: { limit: 5 } })
+        });
+        const data = await res.json();
+        if (data.success && data.posts.length > 0) {
+            setNews(data.posts);
+        } else {
+            // Mocking for testing if DB is empty - Using REAL IDs from initialProfiles
+            const firstId = initialProfiles[0]?.id || 'syndicate-node';
+            setNews([
+                { id: '1', persona_id: firstId, title: 'ALPHA NODE BREACH: SECTOR 07 // HIGH-HEAT', heat: 'High' },
+                { id: '2', persona_id: firstId, title: 'SECURE DATA UPLINK: CLASSIFIED BROADCAST LEAK', heat: 'Critical' },
+                { id: '3', persona_id: firstId, title: 'TARGET NODE ACTIVITY SPIKE: REGION 12', heat: 'Standard' }
+            ]);
         }
+    } catch (e) {
+        console.error('Pulse Fetch Failure:', e);
     }
+  }
+
+  useEffect(() => {
     fetchLatest();
     const inv = setInterval(fetchLatest, 30000); // 30s updates
-    return () => clearInterval(inv);
+    return () => {
+      clearInterval(inv);
+    };
   }, []);
 
   useEffect(() => {
@@ -55,6 +58,15 @@ export default function NeuralPulseHub({ followingIds, profiles, unreadCounts, o
   }, [news]);
 
   if (news.length === 0) return null;
+    const handleHardSync = async () => {
+        try {
+            await fetch('/api/admin/sync-intel');
+            setNews([]); // Cloud Flush
+            fetchLatest();
+        } catch (e) {
+            console.error('❌ HUB SYNC FAILURE:', e);
+        }
+    };
 
   const current = news[currentIndex];
 

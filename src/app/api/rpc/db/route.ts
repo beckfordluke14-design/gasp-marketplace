@@ -62,10 +62,25 @@ export async function POST(req: Request) {
         if (guestId && userId !== guestId && userId.startsWith('did:')) {
            try {
               console.log(`🧠 [Neural Bridge] Migrating Guest ${guestId} to Member ${userId}`);
+              
+              // 1. Move messages (No conflict risk)
               await db.query('UPDATE chat_messages SET user_id = $1 WHERE user_id = $2', [userId, guestId]);
-              await db.query('UPDATE user_relationships SET user_id = $1 WHERE user_id = $2 ON CONFLICT DO NOTHING', [userId, guestId]);
-              // Also update balance/unlocks if needed (already handled by userId usually, but good practice)
-              await db.query('UPDATE user_vault_unlocks SET user_id = $1 WHERE user_id = $2 ON CONFLICT DO NOTHING', [userId, guestId]);
+              
+              // 2. Safe Relationship Merge (Handle duplicates)
+              await db.query(`
+                INSERT INTO user_relationships (user_id, persona_id, affinity_score)
+                SELECT $1, persona_id, affinity_score FROM user_relationships WHERE user_id = $2
+                ON CONFLICT (user_id, persona_id) DO NOTHING;
+              `, [userId, guestId]);
+              await db.query('DELETE FROM user_relationships WHERE user_id = $2', [guestId]);
+
+              // 3. Safe Unlocks Merge
+              await db.query(`
+                INSERT INTO user_vault_unlocks (user_id, post_id, created_at)
+                SELECT $1, post_id, created_at FROM user_vault_unlocks WHERE user_id = $2
+                ON CONFLICT (user_id, post_id) DO NOTHING;
+              `, [userId, guestId]);
+              await db.query('DELETE FROM user_vault_unlocks WHERE user_id = $2', [guestId]);
            } catch (mergeErr) { console.warn('[Neural Bridge Fail]:', mergeErr); }
         }
 

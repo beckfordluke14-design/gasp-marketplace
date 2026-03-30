@@ -446,13 +446,19 @@ export default function ChatDrawer({
                    >
                       <Star size={16} fill={isFollowing ? 'currentColor' : 'none'} />
                    </button>
-                   <button className="relative group hover:text-white transition-colors">
-                      <ShoppingBag size={18} />
-                      {hasVault && (
-                         <span className="absolute -top-1.5 -right-1.5 text-[10px] animate-jalapeño">🌶️</span>
-                      )}
-                   </button>
-                   <button className="hover:text-white transition-colors"><Trophy size={18} /></button>
+                    <button onClick={() => setChatTab('pics')} className={`relative group transition-colors ${chatTab === 'pics' ? 'text-[#ff00ff]' : 'text-white/40 hover:text-white'}`}>
+                       <ShieldAlert size={18} />
+                       {hasVault && (
+                          <span className="absolute -top-1.5 -right-1.5 text-[7px] font-black bg-[#ff00ff] text-white px-1 rounded animate-pulse shadow-[0_0_10px_#ff00ff]">
+                            !!
+                          </span>
+                       )}
+                       {/* TOOLTIP */}
+                       <div className="absolute -bottom-8 right-0 px-2 py-1 bg-black border border-white/10 text-[6px] font-black uppercase tracking-widest rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                          Restricted Intel Archive
+                       </div>
+                    </button>
+                   <button className="hover:text-white transition-colors opacity-30"><Trophy size={18} /></button>
                    <button onClick={onClose} className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors border border-white/10"><X size={16} /></button>
                 </div>
              </div>
@@ -530,12 +536,45 @@ export default function ChatDrawer({
                     </div>
                   );
                 })}
-                {(isLoading || isTyping) && (
-                   <div className="flex items-start gap-2">
-                      <div className="px-4 py-3 bg-zinc-900 rounded-full flex gap-1.5 items-center">
-                         <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.3s]" />
-                         <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.15s]" />
-                         <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce" />
+                {/* 🦾 NEURAL SYNC HAPTICS (THE MAIN MEAT) */}
+                {(isLoading || isTyping || isRequestingVoice) && (
+                   <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                      <div className="flex items-center gap-2 px-2">
+                         <div className={`w-1 h-1 rounded-full ${isRequestingVoice ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'} animate-pulse`} />
+                         <span className={`text-[7px] font-black uppercase tracking-widest ${isRequestingVoice ? 'text-[#ff00ff]' : 'text-[#00f0ff]'} italic`}>
+                            {isRequestingVoice ? 'Synthesizing Vocal DNA Node...' : 'Syncing Node Signal...'}
+                         </span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                         <div className="px-4 py-3 bg-white/5 backdrop-blur-3xl border border-white/5 rounded-full flex gap-1.5 items-center">
+                            {isRequestingVoice ? (
+                               <div className="flex items-center gap-3 pr-2">
+                                  <motion.div 
+                                    animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
+                                    transition={{ repeat: Infinity, duration: 1 }}
+                                    className="text-[#ff00ff]"
+                                  >
+                                     <Mic size={16} />
+                                  </motion.div>
+                                  <div className="flex gap-1 items-end h-3">
+                                     {[0, 1, 2, 3, 4].map(i => (
+                                        <motion.div 
+                                          key={i}
+                                          animate={{ height: [4, 12, 4] }}
+                                          transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.1 }}
+                                          className="w-0.5 bg-[#ff00ff]/60 rounded-full"
+                                        />
+                                     ))}
+                                  </div>
+                               </div>
+                            ) : (
+                               <>
+                                  <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_8px_#00f0ff]" />
+                                  <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_8px_#00f0ff]" />
+                                  <span className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-bounce shadow-[0_0_8px_#00f0ff]" />
+                               </>
+                            )}
+                         </div>
                       </div>
                    </div>
                 )}
@@ -659,6 +698,20 @@ export default function ChatDrawer({
                    </motion.div>
                 )}
              </AnimatePresence>
+
+              {/* 🦾 NEURAL SYNC HAPTICS (THE MAIN MEAT) */}
+              <div className="flex items-center justify-between mb-4 px-6 opacity-40">
+                 <div className="flex items-center gap-3">
+                    <div className="p-1.5 bg-[#00ff00]/10 rounded border border-[#00ff00]/20">
+                       <Activity size={10} className="text-[#00ff00] animate-pulse" />
+                    </div>
+                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white">Neural Sync: Established</span>
+                 </div>
+                 <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#00ff00] shadow-[0_0_8px_#00ff00] animate-pulse" />
+                    <span className="text-[7px] font-black uppercase tracking-widest text-white/40 italic">Link Stable</span>
+                 </div>
+              </div>
 
               <form 
                 onSubmit={(e) => { e.preventDefault(); handleLocalSubmit(); }}
