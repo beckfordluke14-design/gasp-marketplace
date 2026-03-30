@@ -75,22 +75,22 @@ export default function ContactSupport() {
 
                     {/* 🕵️‍♂️ AUDIT NODES: Institutional Social Proof */}
                     <div className="pt-6 border-t border-white/5 space-y-4">
-                        <a href="https://alltheseflows.shop" target="_blank" className="flex items-center gap-4 group">
+                        <a href="https://GASP Syndicate.shop" target="_blank" className="flex items-center gap-4 group">
                             <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center border border-white/10 group-hover:border-[#00f0ff]/40 transition-all">
                                 <ShoppingBag size={14} className="text-white/40 group-hover:text-[#00f0ff]" />
                             </div>
                             <div>
                                 <p className="text-[7px] font-black uppercase text-white/20 tracking-widest">Verified Strategic Shop</p>
-                                <p className="text-xs font-bold text-white/60 group-hover:text-white transition-colors">alltheseflows.shop</p>
+                                <p className="text-xs font-bold text-white/60 group-hover:text-white transition-colors">GASP Syndicate.shop</p>
                             </div>
                         </a>
-                        <a href="https://instagram.com/alltheseflowsxx" target="_blank" className="flex items-center gap-4 group">
+                        <a href="https://instagram.com/GASP Syndicatexx" target="_blank" className="flex items-center gap-4 group">
                             <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center border border-white/10 group-hover:border-[#ff00ff]/40 transition-all">
                                 <Instagram size={14} className="text-white/40 group-hover:text-[#ff00ff]" />
                             </div>
                             <div>
                                 <p className="text-[7px] font-black uppercase text-white/20 tracking-widest">Strategic Signal Node</p>
-                                <p className="text-xs font-bold text-white/60 group-hover:text-white transition-colors">@alltheseflowsxx</p>
+                                <p className="text-xs font-bold text-white/60 group-hover:text-white transition-colors">@GASP Syndicatexx</p>
                             </div>
                         </a>
                     </div>

@@ -122,9 +122,9 @@ function LoginForm() {
                  </button>
 
                 <div className="pt-6 border-t border-white/5 mt-8 items-center flex flex-col gap-4">
-                   <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-white/5 rounded-full ring-1 ring-white/5">
-                      <UserCheck size={12} className="text-[#00f0ff]" />
-                      <span className="text-[8px] uppercase font-black tracking-[0.2em] text-white/40">Privacy Protected by Privy v1.0</span>
+                   <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-[#00f0ff]/20 rounded-full ring-1 ring-white/5 shadow-[0_0_20px_rgba(0,240,255,0.1)]">
+                      <ShieldAlert size={12} className="text-[#00f0ff]" />
+                      <span className="text-[8px] uppercase font-black tracking-[0.2em] text-[#00f0ff]">Genesis Bonus: 1,500 BP Credits Enabled</span>
                    </div>
                    
                    <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.15em] italic text-center leading-relaxed">

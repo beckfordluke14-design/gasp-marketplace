@@ -777,7 +777,6 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
         />
       )}
 
-      {/* 🛡️ STRIPE-SAFE MERCHANT FOOTER */}
        <div className="p-12 text-center opacity-20 border-t border-white/5 space-y-2">
           <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white">AllTheseFlows LLC d.b.a. AllTheseFlows Strategic Media</p>
           <p className="text-[7px] font-medium uppercase tracking-[0.2em] text-white/60">© 2026 GASP Syndicate. Strategic Operations Terminal. All Rights Reserved.</p>

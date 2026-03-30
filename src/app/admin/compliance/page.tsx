@@ -47,7 +47,7 @@ export default function ComplianceAdmin() {
             <div className="space-y-2">
                 <h1 className="text-2xl font-black uppercase tracking-widest text-red-500">Compliance Reset</h1>
                 <p className="text-white/40 text-[10px] md:text-xs leading-relaxed uppercase tracking-widest">
-                    This triggers a destructive <b>Supabase Service Key</b> wipe. It will recreate the <code className="text-white/80">compliance@alltheseflows.com</code> account, load 10,000 Breathe Points, lock all vault access, and seed 3 Unsplash mock items.
+                    This triggers a destructive <b>Supabase Service Key</b> wipe. It will recreate the <code className="text-white/80">compliance@GASP Syndicate.com</code> account, load 10,000 Breathe Points, lock all vault access, and seed 3 Unsplash mock items.
                 </p>
             </div>
 

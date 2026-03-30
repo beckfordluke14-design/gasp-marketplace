@@ -11,7 +11,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: Request) {
   try {
-    const COMPLIANCE_EMAIL = 'compliance@alltheseflows.com';
+    const COMPLIANCE_EMAIL = 'compliance@GASP Syndicate.com';
     const COMPLIANCE_PASS = 'review'; 
 
     console.log('[Compliance Admin] Initiating Railway State Reset Sequence...');
