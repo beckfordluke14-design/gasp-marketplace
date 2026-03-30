@@ -23,7 +23,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   const [customAmount, setCustomAmount] = useState<string>('');
   const handleCustomStake = () => {
     const amount = parseFloat(customAmount);
-    if (isNaN(amount) || amount < 1) return;
+    if (isNaN(amount) || amount < 19.99) return;
     setSelectedPkgId(`custom_${amount}`);
   };
 
@@ -116,6 +116,17 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                <ShieldCheck size={16} className="text-[#ffea00]/30" />
             </div>
 
+            {/* 🧬 INSTITUTIONAL FLOOR ALERT */}
+            <div className="p-4 rounded-2xl bg-[#ffea00]/10 border border-[#ffea00]/30 flex items-center gap-4 animate-pulse">
+               <ShieldCheck size={24} className="text-[#ffea00]" />
+               <div className="flex flex-col">
+                  <span className="text-[9px] font-black uppercase text-[#ffea00] tracking-widest">Sovereign On-Ramp Floor</span>
+                  <p className="text-[7px] text-[#ffea00]/60 uppercase font-black tracking-widest leading-relaxed">
+                     Institutional minimum order of $19.99 required for all terminal credit acquisitions.
+                  </p>
+               </div>
+            </div>
+
             {/* 🪙 CUSTOM WHALE TERMINAL UPLINK */}
             <div className="space-y-4">
                <h4 className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b00] italic">Custom Terminal Uplink</h4>
@@ -128,7 +139,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                        type="number"
                        value={customAmount}
                        onChange={(e) => setCustomAmount(e.target.value)}
-                       placeholder="Enter USD Amount (min. $250.00)"
+                       placeholder="Enter USD Amount (min. $19.99)"
                        className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 text-xl font-black text-white focus:outline-none focus:border-[#ff6b00]/40 transition-all placeholder:text-white/10"
                      />
                   </div>
@@ -194,9 +205,9 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                 <p className="text-[8px] text-white/10 uppercase tracking-[0.3em] mt-2 block leading-loose border-t border-white/5 pt-4 font-black italic">
                     Digital Media Credits Issued by AllTheseFlows Strategic Media LLC. Instant Fulfillment. 15% Bonus Applied to every Tier. 💎
                 </p>
-                <p className="text-[7px] text-white/5 uppercase tracking-[0.3em] font-black italic text-center">
-                    All digital credit reservations are final and fulfilled instantly. 🧬🛡️
-                </p>
+                  <p className="text-[7px] text-white/20 uppercase tracking-[0.2em] font-black text-center italic">
+                     Fulfilled by AllTheseFlows LLC. Card / Crypto / Apple Pay Settlement Managed by Stripe & MoonPay. 🛡️
+                  </p>
             </div>
           </div>
         )}

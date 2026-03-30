@@ -23,15 +23,24 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
 
   const totalCredits = pkg.credits;
 
-  // 🛡️ INSTITUTIONAL SETTLEMENT: Unified Gate Protocol
+  // 🛡️ INSTITUTIONAL SETTLEMENT: Stripe-First Priority Hub
   const handleSovereignCheckout = async () => {
     setIsVerifying(true);
+    
+    // 🥇 Priority 1: Institutional Stripe Bridge (Higher Conversion)
+    if (pkg.stripeLink) {
+        window.location.href = pkg.stripeLink;
+        return;
+    }
+
+    // 🥈 Priority 2: Legacy Helio Crypto Bridge (Native Native)
     if (pkg.helioPayLink) {
         window.location.href = pkg.helioPayLink;
-    } else {
-        alert('Sovereign Bridge Synchronizing. Attempt Standard Tier Infusion.');
-        setIsVerifying(false);
+        return;
     }
+
+    alert('Sovereign Bridge Synchronizing. Attempt Institutional Tier Infusion.');
+    setIsVerifying(false);
   };
 
   return (

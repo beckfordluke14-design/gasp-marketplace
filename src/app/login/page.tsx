@@ -6,10 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Disc, ShieldAlert, KeyRound, UserCheck } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
 import { useUser } from '@/components/providers/UserProvider';
 
 function LoginForm() {
-  const { login, authenticated, ready, user } = useUser();
+  const { login, ready: privyReady } = usePrivy();
+  const { authenticated, ready, user } = useUser();
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -17,11 +20,14 @@ function LoginForm() {
   const nextPath = personaAnchor ? `/?persona=${personaAnchor}` : '/';
 
   useEffect(() => {
-    if (ready && authenticated) {
-        console.log('[Login] Identity verified. Synchronizing node to:', nextPath);
-        router.push(nextPath);
+    if (ready && authenticated && !isRedirecting) {
+        setIsRedirecting(true);
+        console.log('🚀 [Sovereign Login] Identity verified. Synchronizing node to:', nextPath);
+        
+        // Force immediate redirect
+        window.location.href = nextPath;
     }
-  }, [ready, authenticated, router, nextPath]);
+  }, [ready, authenticated, nextPath, isRedirecting]);
 
   // Handle specific login types with fallback
   const handleLogin = (method?: string) => {
@@ -38,11 +44,13 @@ function LoginForm() {
     }
   };
 
-  if (!ready) {
+  if (!privyReady || isRedirecting) {
     return (
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 border-2 border-t-[#ff00ff] border-r-transparent border-b-[#00f0ff] border-l-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(255,0,255,0.2)]" />
-        <div className="text-white/20 font-syncopate text-[8px] uppercase tracking-[0.5em] animate-pulse">Synchronizing Neural Node...</div>
+        <div className="text-white/20 font-syncopate text-[8px] uppercase tracking-[0.5em] animate-pulse">
+           {isRedirecting ? 'Identity Verified. Resynchronizing Node...' : 'Synchronizing Neural Mode...'}
+        </div>
       </div>
     );
   }

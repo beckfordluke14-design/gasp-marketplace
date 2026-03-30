@@ -6,6 +6,7 @@ import { Zap, Wallet, Activity, User, Star, Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CoinBalance from './economy/CoinBalance';
 import ProfileSearch from './ProfileSearch';
+import { usePrivy } from '@privy-io/react-auth';
 import { useUser } from './providers/UserProvider';
 import StoriesRow from './StoriesRow';
 
@@ -25,7 +26,8 @@ export default function Header({
   onSelectProfile?: (id: string) => void
 }) {
   const router = useRouter();
-  const { user, profile, authenticated, login } = useUser();
+  const { login, authenticated } = usePrivy();
+  const { user, profile } = useUser();
   const [mounted, setMounted] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
