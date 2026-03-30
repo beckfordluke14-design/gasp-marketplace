@@ -66,8 +66,8 @@ export default function WhitepaperPage() {
                {[
                  { node: 'Node 01: The Soft Launch', status: 'ACTIVE', desc: 'Gasp Reserve Protocol v1.7 Activated. Internal Genesis Ledger is recording all user spending 1:1. No wallet connection required to accumulate stakeholder status.' },
                  { node: 'Node 02: Neural Expansion (April)', status: 'PENDING', desc: 'AI Persona "Deep Sync" engine launch. Multi-influencer onboarding surge.' },
-                 { node: 'Node 03: The Institutional TGE (June 1st)', status: 'UPCOMING', desc: 'Final audit of the Genesis Ledger. Public Token Generation Event for $GASPAI with Institutional Liquidity Influx from $USD revenue pool to ensure ecosystem stability.' },
-                 { node: 'Node 04: The Utility Nexus (August)', status: 'UPCOMING', desc: 'Neural Staking enabled. Users must stake $GASPAI to unlock Tier-1 "Deep Sync" creators. Deflationary Burn Protocol Activated: 2% of all protocol fees permanently removed from circulation.' },
+                 { node: 'Node 03: The Institutional TGE (July 1st)', status: 'UPCOMING', desc: 'Final audit of the Genesis Ledger. Public Token Generation Event for $GASPAI with Institutional Liquidity Influx from fiat revenue pool to ensure ecosystem stability.' },
+                 { node: 'Node 04: The Utility Nexus (September)', status: 'UPCOMING', desc: 'Neural Staking enabled. Users must stake $GASPAI to unlock Tier-1 "Deep Sync" creators. Deflationary Burn Protocol Activated: 2% of all protocol fees permanently removed from circulation.' },
                ].map((step, i) => (
                   <div key={i} className="flex items-start gap-8 p-10 border-b border-white/5 hover:bg-white/[0.02] transition-all group">
                      <span className="text-[#ffea00] font-syncopate font-black text-2xl italic opacity-50 group-hover:opacity-100 italic">0{i+1}</span>
@@ -89,7 +89,7 @@ export default function WhitepaperPage() {
                <div className="flex flex-col gap-1 relative z-10 text-left">
                   <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#00f0ff]">Founders Treasury Node</span>
                   <p className="text-[10px] text-white/40 font-bold italic leading-relaxed">
-                     Total Revenue Settled in <span className="text-white underline decoration-[#00f0ff]/30">USDC Stablecoin</span>. Immediate Liquidity Protocol Enabled for Institutional Swaps (BTC/ETH/USD). 🛡️
+                     Total Revenue Settled in <span className="text-white underline decoration-[#00f0ff]/30">USDC Stablecoin</span>. Immediate Liquidity Protocol Enabled for Institutional Swaps (Digital Assets / USD). 🛡️
                   </p>
                </div>
                <ShieldCheck size={32} className="text-[#00f0ff]/20 group-hover:text-[#00f0ff]/40 transition-all group-hover:scale-110" />
