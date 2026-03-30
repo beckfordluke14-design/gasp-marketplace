@@ -27,19 +27,40 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
   const handleSovereignCheckout = async () => {
     setIsVerifying(true);
     
-    // 🥇 Priority 1: Institutional Stripe Bridge (Higher Conversion)
+    // 🥇 Priority 1: Institutional Stripe API Bridge (Dynamic Settlement)
+    try {
+        console.log('🏁 [Settlement] Handshaking with Stripe Bridge...');
+        const res = await fetch('/api/economy/stripe/create-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ packageId, userId })
+        });
+        const data = await res.json();
+        
+        if (data.success && data.url) {
+            console.log('✅ [Settlement] Session Verified. Redirecting to Secure Hub...');
+            window.location.href = data.url;
+            return;
+        } else if (data.error) {
+            console.warn('[Settlement] Bridge Error:', data.error);
+        }
+    } catch (err) {
+        console.error('[Settlement] Bridge Protocol Fault:', err);
+    }
+
+    // 🥈 Priority 2: Legacy Stripe Link (Static Archive)
     if (pkg.stripeLink) {
         window.location.href = pkg.stripeLink;
         return;
     }
 
-    // 🥈 Priority 2: Legacy Helio Crypto Bridge (Native Native)
+    // 🥉 Priority 3: Legacy Helio Crypto Bridge (Native Native)
     if (pkg.helioPayLink) {
         window.location.href = pkg.helioPayLink;
         return;
     }
 
-    alert('Sovereign Bridge Synchronizing. Attempt Institutional Tier Infusion.');
+    alert('Sovereign Bridge Offline. Critical Configuration Required.');
     setIsVerifying(false);
   };
 
