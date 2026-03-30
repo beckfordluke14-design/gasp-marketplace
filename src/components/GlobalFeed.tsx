@@ -289,7 +289,7 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                                <img 
                                   src={profile.image && profile.image.length > 5 ? proxyImg(profile.image) : `https://api.dicebear.com/7.x/micah/svg?seed=${profile.name}`} 
                                   alt="" 
-                                  className="w-full h-full object-cover object-top grayscale brightness-125 opacity-90 transition-all duration-700" 
+                                  className="w-full h-full object-cover object-top opacity-100 transition-all duration-700" 
                                />
                             </div>
                          </div>
