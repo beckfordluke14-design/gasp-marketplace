@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { ChevronDown, Radio } from 'lucide-react';
 import Image from 'next/image';
+import { useUser } from './providers/UserProvider';
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -15,6 +16,7 @@ export default function Hero() {
   const y1 = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
+  const { login } = useUser();
 
   return (
     <section ref={containerRef} className="relative h-[25vh] w-full flex items-center justify-center overflow-hidden bg-obsidian border-b border-white/5">
@@ -48,6 +50,7 @@ export default function Hero() {
             <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => login()}
                 className="px-8 py-4 rounded-xl bg-white text-black font-outfit font-black uppercase tracking-widest text-[10px]"
             >
                 Join Club

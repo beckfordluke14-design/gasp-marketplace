@@ -25,7 +25,7 @@ export default function Header({
   onSelectProfile?: (id: string) => void
 }) {
   const router = useRouter();
-  const { user, profile, authenticated } = useUser();
+  const { user, profile, authenticated, login } = useUser();
   const [mounted, setMounted] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
@@ -130,7 +130,7 @@ export default function Header({
                    </div>
                 ) : (
                    <button 
-                      onClick={() => router.push('/login')}
+                      onClick={() => login()}
                       className="h-7 md:h-9 px-4 bg-white/5 border border-white/10 rounded-full flex items-center justify-center gap-2 hover:bg-white/10 active:scale-95 transition-all group"
                    >
                       <User size={10} className="text-white/40 group-hover:text-[#ff00ff] transition-colors" />
