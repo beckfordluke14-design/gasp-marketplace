@@ -666,25 +666,35 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
         });
         const unique = Array.from(registry.values());
         
-        // 🧬 SOVEREIGN 2:2 INTERLEAVING (STRICT CADENCE)
-        const text = unique.filter(i => !i.broadcast.image_url);
-        const media = unique.filter(i => i.broadcast.image_url);
-        
-        if (media.length === 0) return unique.sort((a, b) => new Date(b.broadcast.created_at).getTime() - new Date(a.broadcast.created_at).getTime());
+        // 🧬 SOVEREIGN 2:2 INTERLEAVING (STRICT CADENCE: 2 text → 2 image → repeat)
+        const textPosts = unique.filter(i => i.broadcast.type === 'text');
+        const mediaPosts = unique.filter(i => i.broadcast.type === 'image' || i.broadcast.type === 'video');
+
+        // If no media at all, just return text sorted by recency
+        if (mediaPosts.length === 0) return unique.sort((a, b) => new Date(b.broadcast.created_at).getTime() - new Date(a.broadcast.created_at).getTime());
+        // If no text, just return media
+        if (textPosts.length === 0) return mediaPosts;
 
         const interleaved: any[] = [];
         let t = 0;
         let m = 0;
-        
-        // Continue until text is exhausted to maintain freshness
-        while (t < text.length) {
-          // 2x Text
-          for (let i = 0; i < 2 && t < text.length; i++) interleaved.push(text[t++]);
-          // 2x Media (Looping if media pool is shallow)
+        const totalSlots = Math.max(textPosts.length, mediaPosts.length) * 2;
+        let slots = 0;
+
+        while (slots < totalSlots && (t < textPosts.length || m < mediaPosts.length)) {
+          // 2x Text (loop if exhausted)
           for (let i = 0; i < 2; i++) {
-            interleaved.push(media[m % media.length]);
+            interleaved.push(textPosts[t % textPosts.length]);
+            t++;
+          }
+          // 2x Media (loop if exhausted)
+          for (let i = 0; i < 2; i++) {
+            interleaved.push(mediaPosts[m % mediaPosts.length]);
             m++;
           }
+          slots += 4;
+          // Stop after cycling each pool once
+          if (t >= textPosts.length && m >= mediaPosts.length) break;
         }
 
         return interleaved;
