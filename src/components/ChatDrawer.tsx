@@ -510,10 +510,10 @@ export default function ChatDrawer({
                         ) : (
                            <div className={`max-w-[85%] flex flex-col gap-2`}>
                               {isAssistant && (
-                                 <div className="flex items-center gap-1.5 px-2">
-                                    <div className="w-1 h-1 rounded-full bg-[#ffea00] animate-pulse" />
-                                    <span className="text-[8px] font-black uppercase tracking-widest text-[#ffea00] italic">Decrypted Briefing // Source: Node</span>
-                                 </div>
+                                  <div className="flex items-center gap-1.5 px-2 opacity-50 hover:opacity-100 transition-opacity">
+                                     <div className="w-1 h-1 rounded-full bg-[#ffea00] animate-pulse" />
+                                     <span className="text-[8px] font-black uppercase tracking-widest text-[#ffea00]/40 italic">Decrypted Briefing // Source: Node</span>
+                                  </div>
                               )}
                               <div className={`px-5 py-3.5 rounded-[2rem] text-[14px] leading-relaxed tracking-tight ${
                                  isAssistant 

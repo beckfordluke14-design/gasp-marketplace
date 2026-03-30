@@ -12,7 +12,7 @@ import { useState, useMemo, useEffect } from 'react';
  * Interaction: Swipe/Rotate to cycle through all favorited identities.
  */
 
-interface FloatingChatHubProps {
+interface FloatingChatTerminalProps {
   onSelectChat: () => void;
   onSelectProfile: (id: string) => void;
   followingIds: string[];
@@ -22,7 +22,7 @@ interface FloatingChatHubProps {
   onClose?: () => void;
 }
 
-export default function FloatingChatHub({ 
+export default function FloatingChatTerminal({ 
   onSelectChat, 
   onSelectProfile,
   followingIds = [], 
@@ -30,7 +30,7 @@ export default function FloatingChatHub({
   unreadCounts = {},
   isOpen = false,
   onClose
-}: FloatingChatHubProps) {
+}: FloatingChatTerminalProps) {
   if (isOpen) return null;
   const totalUnread = Object.values(unreadCounts).reduce((a, b) => a + Number(b), 0);
   

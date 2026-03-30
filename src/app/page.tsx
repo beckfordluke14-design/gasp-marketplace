@@ -16,8 +16,8 @@ import TopUpDrawer from '@/components/economy/TopUpDrawer';
 import ChatDrawer from '@/components/ChatDrawer';
 import { useUser } from '@/components/providers/UserProvider';
 import MobileBottomNav from '@/components/MobileBottomNav';
-import NeuralPulseHub from '@/components/NeuralPulseHub';
-import FloatingChatHub from '@/components/FloatingChatHub';
+import NeuralPulseTerminal from '@/components/NeuralPulseTerminal';
+import FloatingChatTerminal from '@/components/FloatingChatTerminal';
 import { Star } from 'lucide-react';
 
 function MarketplaceContent() {
@@ -224,7 +224,7 @@ function MarketplaceContent() {
            </div>
         </div>
 
-        {/* 3rd Column Discovery Hub */}
+        {/* 3rd Column Discovery Center */}
         <RightSidebar 
           onSelectProfile={handleSelectProfile} 
           profiles={randomizedProfiles} 
@@ -240,7 +240,7 @@ function MarketplaceContent() {
                 <motion.div key={sId} initial={{ x: '100%', opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: '100%', opacity: 0 }} className="h-full pointer-events-auto bg-black border-l border-white/5 shadow-2xl">
                     <div className="flex flex-col items-center justify-center h-full p-10 text-center gap-6">
                        <Zap className="text-[#ffea00] animate-pulse" size={40} />
-                       <p className="text-[10px] text-white/40 uppercase tracking-[0.4em]">establishing link...</p>
+                       <span className="text-[10px] font-black uppercase tracking-[0.2em]">Return to Terminal</span>
                     </div>
                 </motion.div>
               );
@@ -304,7 +304,7 @@ function MarketplaceContent() {
                 exit={{ x: '-100%' }}
                 className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-3xl lg:hidden overflow-y-auto"
               >
-                 {/* 🚀 MAIN CONTENT HUB */}
+                 {/* 🚀 MAIN OPERATIONS CENTER */}
                  <div className="pt-36 lg:pt-32 pb-32">
                     <button onClick={() => setShowProfileList(false)} className="mb-4 text-[#00f0ff] uppercase text-[10px] font-black">← Close Access</button>
                     <Sidebar 
@@ -319,8 +319,8 @@ function MarketplaceContent() {
            )}
         </AnimatePresence>
 
-         {/* 🧬 INTELLIGENT CHAT HUB: Standalone glassy orbiter for Favorites & Unreads */}
-         <FloatingChatHub 
+         {/* 🧬 INTELLIGENT CHAT TERMINAL: Standalone glassy orbiter for Favorites & Unreads */}
+         <FloatingChatTerminal 
             onSelectChat={() => setShowProfileList(true)} 
             onSelectProfile={handleSelectProfile}
             followingIds={following}

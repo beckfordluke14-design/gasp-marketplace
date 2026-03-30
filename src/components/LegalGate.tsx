@@ -64,7 +64,7 @@ export default function LegalGate() {
 
                <div className="space-y-4 text-white/50 text-[11px] leading-relaxed font-bold italic text-left">
                   <p>
-                     GASP.FUN is an <span className="text-white">Institutional Strategic Media Hub</span> providing an encrypted uplink for <span className="text-[#00f0ff]">Digital Asset Retrieval and Neural Signal Synchronization</span>. By entering the Hub, you acknowledge the service as a provider of strategic intelligence and media management.
+                     GASP.FUN is an <span className="text-white">Institutional Strategic Operations Terminal</span> providing an encrypted uplink for <span className="text-[#00f0ff]">Digital Asset Retrieval and Neural Signal Synchronization</span>. By entering the Interface, you acknowledge the service as a provider of strategic intelligence and media management.
                   </p>
                   <p>
                      All interactions are subject to the <span className="text-white">Sovereign Data Protocol</span>. Access to restricted archival assets requires valid System Credits. Consumption of intelligence is at your own discretion.

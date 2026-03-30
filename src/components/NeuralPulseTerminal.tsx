@@ -6,14 +6,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { initialProfiles } from '@/lib/profiles';
 
-interface NeuralPulseHubProps {
+interface NeuralPulseTerminalProps {
   followingIds?: string[];
   profiles?: any[];
   unreadCounts?: Record<string, number>;
   onSelectProfile?: (id: string, initialMsg?: string, profileObj?: any) => void;
 }
 
-export default function NeuralPulseHub({ followingIds, profiles, unreadCounts, onSelectProfile }: NeuralPulseHubProps) {
+export default function NeuralPulseTerminal({ followingIds, profiles, unreadCounts, onSelectProfile }: NeuralPulseTerminalProps) {
   const [news, setNews] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const router = useRouter();
