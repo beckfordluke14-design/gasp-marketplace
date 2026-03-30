@@ -40,7 +40,6 @@ export async function GET(req: Request) {
       conditions.push("p.is_vault = false");
       conditions.push("p.is_freebie = false");
       conditions.push("p.is_gallery = false");
-      conditions.push("p.content_url IS NOT NULL");
       conditions.push("p.caption NOT LIKE 'DELETED%'");
     }
 
