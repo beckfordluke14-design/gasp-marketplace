@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Send, Plus, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn, Diamond, MessageSquare, Circle, Image as ImageIcon, Minus as MinimizeIcon, Gift, ArrowLeftRight, Zap, Star } from 'lucide-react';
+import { X, Send, Plus, Minus, Trophy, HeartPulse, Trash2, ShoppingBag, Clock, Lock, Check, CheckCheck, Mic, Heart, Images, ZoomIn, Diamond, MessageSquare, Circle, Image as ImageIcon, Minus as MinimizeIcon, Gift, ArrowLeftRight, Zap, Star, ShieldAlert, Activity } from 'lucide-react';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { COST_VOICE_TRANSLATION, COST_VOICE_NOTE } from '@/lib/economy/constants';

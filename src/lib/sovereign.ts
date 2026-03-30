@@ -13,8 +13,8 @@ export async function getPersona(personaId: string) {
 
 export async function getPersonaAssets(personaId: string, limit: number = 3) {
   const [news, vault] = await Promise.all([
-    db.query('SELECT id, title, caption, created_at FROM posts WHERE persona_id = $1 AND is_vault = false ORDER BY created_at DESC LIMIT $2', [personaId, limit]),
-    db.query('SELECT id, caption as title, created_at, is_vault FROM posts WHERE persona_id = $1 AND is_vault = true ORDER BY created_at DESC LIMIT $2', [personaId, limit])
+    db.query('SELECT id, caption, created_at FROM posts WHERE persona_id = $1 AND is_vault = false ORDER BY created_at DESC LIMIT $2', [personaId, limit]),
+    db.query('SELECT id, caption, created_at, is_vault FROM posts WHERE persona_id = $1 AND is_vault = true ORDER BY created_at DESC LIMIT $2', [personaId, limit])
   ]);
   return { news: news.rows, vault: vault.rows };
 }
@@ -88,10 +88,10 @@ export async function burnCredits(userId: string, amount: number, type: string =
   try {
      const { rows } = await db.query(`
         UPDATE profiles 
-        SET credit_balance = credit_balance - $1, 
+        SET credits = CASE WHEN credits >= $1 THEN credits - $1 ELSE credits END, 
             updated_at = NOW() 
-        WHERE id = $2 AND credit_balance >= $1 
-        RETURNING credit_balance
+        WHERE id = $2
+        RETURNING credits as credit_balance
      `, [amount, userId]);
      
      if (rows.length > 0) {

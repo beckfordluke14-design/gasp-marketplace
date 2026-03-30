@@ -15,8 +15,8 @@ const syncopate = Syncopate({ subsets: ["latin"], weight: ["400", "700"], variab
 const SITE_URL = 'https://gasp.fun';
 
 export const metadata: Metadata = {
-  title: "GASP | AI Creator Companions",
-  description: "Meet GASP — the most immersive AI creator platform. Chat, connect, and unlock exclusive content from the world's most captivating AI personas. Powered by $GASPAI.",
+  title: "GASP | Strategic Intelligence Hub",
+  description: "Sovereign Institutional Interface for Digital Media Asset Management and Neural Signal Sync.",
   manifest: "/manifest.json",
   metadataBase: new URL(SITE_URL),
   alternates: {
