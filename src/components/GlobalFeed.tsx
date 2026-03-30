@@ -515,7 +515,26 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
 
         setItems(prev => {
            const next = prev.map(item => item.broadcast.id === postId ? { ...item, broadcast: { ...item.broadcast, is_featured: newState } } : item);
-           return next.sort((a, b) => {
+           const filteredPosts = useMemo(() => {
+              const base = next;
+              
+              // 🧬 SOVEREIGN 2:2 INTERLEAVING (2 TEXT : 2 MEDIA)
+              const textPosts = base.filter(p => !p.broadcast.image_url || p.broadcast.image_url === '');
+              const mediaPosts = base.filter(p => p.broadcast.image_url && p.broadcast.image_url.length > 5);
+              const combined: any[] = [];
+              
+              let tIdx = 0, mIdx = 0;
+              while (tIdx < textPosts.length || mIdx < mediaPosts.length) {
+                // Add up to 2 Text
+                for (let i = 0; i < 2 && tIdx < textPosts.length; i++) combined.push(textPosts[tIdx++]);
+                // Add up to 2 Media
+                for (let i = 0; i < 2 && mIdx < mediaPosts.length; i++) combined.push(mediaPosts[mIdx++]);
+                // Safety break
+                if (tIdx >= textPosts.length && mIdx >= mediaPosts.length) break;
+              }
+              return combined;
+            }, [next]);
+           return filteredPosts.sort((a, b) => {
               if (a.broadcast.is_featured && !b.broadcast.is_featured) return -1;
               if (!a.broadcast.is_featured && b.broadcast.is_featured) return 1;
               return new Date(b.broadcast.created_at).getTime() - new Date(a.broadcast.created_at).getTime();
@@ -667,12 +686,21 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
            }
         });
         const unique = Array.from(registry.values());
-        return unique.sort((a, b) => {
-            if (a.broadcast.is_featured && !b.broadcast.is_featured) return -1;
-            if (!a.broadcast.is_featured && b.broadcast.is_featured) return 1;
-            return new Date(b.broadcast.created_at).getTime() - new Date(a.broadcast.created_at).getTime();
-        });
-    });
+        
+        // 🧬 SOVEREIGN 2:2 INTERLEAVING
+        const text = unique.filter(i => !i.broadcast.image_url);
+        const media = unique.filter(i => i.broadcast.image_url);
+        const interleaved: any[] = [];
+        let t = 0, m = 0;
+        
+        while (t < text.length || m < media.length) {
+          for (let i = 0; i < 2 && t < text.length; i++) interleaved.push(text[t++]);
+          for (let i = 0; i < 2 && m < media.length; i++) interleaved.push(media[m++]);
+          if (t >= text.length && m >= media.length) break;
+        }
+
+        return interleaved;
+      });
     setLoading(false);
     isFetching.current = false;
   }, []);
