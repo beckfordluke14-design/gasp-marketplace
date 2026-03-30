@@ -5,6 +5,7 @@
 
 export const ELITE_WHALE_MARK = 99.99; // Threshold for Whale Status
 export const ELITE_DISCOUNT_MULTIPLIER = 0.5; // 50% Off for Whale Tier Accounts
+export const ELITE_SUBSCRIPTION_COST = 29.99; // Monthly Elite Tier Access
 
 export interface CreditPackage {
   id: string;

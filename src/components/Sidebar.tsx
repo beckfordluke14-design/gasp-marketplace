@@ -26,6 +26,7 @@ import Link from 'next/link';
 import GlitchText from './ui/GlitchText';
 
 import NeuralPulseTerminal from './NeuralPulseTerminal';
+import MarketPulseTerminal from './intel/MarketPulseTerminal';
 
 // 🛡️ SYSTEM SYNC: Using DB Service for reliable updates.
 
@@ -193,6 +194,9 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
         {/* VIEW: CHATS */}
         {view === 'chats' && (
           <>
+            {/* 🛰️ MARKET PULSE: WeatherX & Polymarket Sentiment Indicator */}
+            <MarketPulseTerminal />
+
             {/* 🛰️ MARKET PULSE: Real-time Intel Ticker */}
             <NeuralPulseTerminal />
 

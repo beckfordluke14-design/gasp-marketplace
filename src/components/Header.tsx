@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react';
 import CoinBalance from './economy/CoinBalance';
 import ProfileSearch from './ProfileSearch';
 import { useUser } from './providers/UserProvider';
-import WalletConnect from './economy/WalletConnect';
 import StoriesRow from './StoriesRow';
 
 export default function Header({ 
@@ -153,10 +152,6 @@ export default function Header({
                    <CoinBalance onOpenTopUp={() => onOpenTopUp()} />
                 </div>
 
-                <div className="flex scale-90 sm:scale-100 origin-right">
-                   <WalletConnect />
-                </div>
-
                 {/* Admin Toggle */}
                 {isAdmin && (
                    <div 
@@ -173,6 +168,7 @@ export default function Header({
                 )}
             </div>
         </header>
+
     </div>
   );
 }
