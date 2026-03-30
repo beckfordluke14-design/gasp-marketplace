@@ -139,7 +139,7 @@ function GlobalFeedItem({
       onClick={handleInteraction}
     >
        {/* CONTENT LAYER */}
-       <div className="absolute inset-0 z-0 bg-transparent flex items-center justify-center">
+       <div className={`z-0 bg-transparent flex items-center justify-center ${postType === 'text' ? 'relative w-full' : 'absolute inset-0'}`}>
           {postType === 'video' ? (
              <>
                 <video src={proxyImg(postUrl)} autoPlay loop muted playsInline className={`absolute inset-0 w-full h-full object-cover blur-3xl opacity-30 ${broadcast.is_locked ? 'blur-[100px]' : ''}`} />
@@ -235,7 +235,7 @@ export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFee
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/admin/feed');
+        const res = await fetch('/api/admin/feed?limit=100');
         const data = await res.json();
         const posts = data.posts || [];
         
