@@ -47,11 +47,28 @@ export async function POST(req: Request) {
     
     if (!profileItem) throw new Error(`Profile Offline: ${finalProfileId}`);
 
+    // 🛰️ WEATHERX SYNC: Mapping Persona Zone to ICAO Sector
+    const ICAO_MAP: Record<string, string> = {
+        "uk_london_black": "EGLL", "uk_essex_white": "EGLL",
+        "us_nyc_black": "KLGA", "us_nyc_white": "KLGA", "us_newark_afro_latina": "KLGA",
+        "col_medellin_paisa": "SKRG", "kor_seoul_urban": "RKSS"
+    };
+    const zoneKey = profileItem?.syndicate_zone || 'us_houston_black';
+    const icao = ICAO_MAP[zoneKey] || 'KLGA';
+    
+    let atmosphere = "SECTOR_SYNC_PENDING";
+    try {
+       const wRes = await fetch(`https://aviationweather.gov/api/data/metar?ids=${icao}&format=json`, { next: { revalidate: 300 } });
+       const wData = await wRes.json();
+       if (wData && wData[0]) {
+          atmosphere = `${wData[0].temp}°C | ${wData[0].clouds?.[0]?.cover || 'CLEAR'} | ${wData[0].icaoId}`;
+       }
+    } catch(e) {}
+
     const dailyState = getPersonaDailyState(finalProfileId);
     const { mood, dna } = await getMoodState(finalUserId, finalProfileId);
     const emozionState = `${getMoodDirective(dailyState.mood)} ${getTypingStyleDirective(dailyState.typingStyle)} Never mention AI. Keep responses street-coded. ${profileItem.system_prompt || ''}`;
     
-    const zoneKey = profileItem?.syndicate_zone || 'us_houston_black';
     const zoneDictionary = GLOBAL_SYNDICATE_ZONES_V3[zoneKey];
     const moodKey = dailyState.mood.toLowerCase();
     const personaMoments = {
@@ -62,7 +79,7 @@ export async function POST(req: Request) {
     const brainAssets = await SOV.getPersonaAssets(finalProfileId);
     const assetPrompt = `[RECENT_MARKET_INTEL]:\n${JSON.stringify(brainAssets.news)}\n\n[PRIVATE_VAULT_ASSETS]:\n${JSON.stringify(brainAssets.vault)}`;
 
-    const brainPrompt = `[IDENTITY_CORE]:\n${dna}\n\n[EMOZION_STATE]:\n${emozionState}\n\n[ZONE_DIALECT_DICTIONARY]:\n${JSON.stringify(zoneDictionary)}\n\n${assetPrompt}\n\n[PERSONA_MOMENT_ANCHORS]:\n${JSON.stringify(personaMoments)}\n\n[SYSTEM]: STREET-CODED AUDITOR. Be aware of your recent intel and vault items. If the user mentions them, converse/elaborate on the "insider secrets" you've dropped. Encourage them to verify (unlock) more if they want the full story. { "text_message": "...", "audio_script": "..." }`;
+    const brainPrompt = `[IDENTITY_CORE]:\n${dna}\n\n[EMOZION_STATE]:\n${emozionState}\n\n[SECTOR_ATMOSPHERE]:\n${atmosphere}\n\n[ZONE_DIALECT_DICTIONARY]:\n${JSON.stringify(zoneDictionary)}\n\n${assetPrompt}\n\n[PERSONA_MOMENT_ANCHORS]:\n${JSON.stringify(personaMoments)}\n\n[SYSTEM]: STREET-CODED AUDITOR. Be aware of your recent intel, vault items, and current sector weather. If the user mentions them, converse/elaborate on the "insider secrets" or the "sector vibe". Encourage them to verify (unlock) more if they want the full story. { "text_message": "...", "audio_script": "..." }`;
 
     // 🚀 ATOMIC NEURAL CALL
     const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
