@@ -32,9 +32,9 @@ export default function NeuralPulseHub({ followingIds, profiles, unreadCounts, o
                 // Mocking for testing if DB is empty - Using REAL IDs from initialProfiles
                 const firstId = initialProfiles[0]?.id || 'syndicate-node';
                 setNews([
-                    { id: '1', persona_id: firstId, title: 'SOLANA RESISTANCE CRACKED', heat: 'High' },
-                    { id: '2', persona_id: firstId, title: 'LEAKED BASE L2 PROTOCOL', heat: 'Critical' },
-                    { id: '3', persona_id: firstId, title: 'WHALE ACCUMULATION TRACKED', heat: 'Standard' }
+                    { id: '1', persona_id: firstId, title: 'ALPHA NODE BREACH: SECTOR 07 // HIGH-HEAT', heat: 'High' },
+                    { id: '2', persona_id: firstId, title: 'SECURE DATA UPLINK: CLASSIFIED BROADCAST LEAK', heat: 'Critical' },
+                    { id: '3', persona_id: firstId, title: 'TARGET NODE ACTIVITY SPIKE: REGION 12', heat: 'Standard' }
                 ]);
             }
         } catch (e) {

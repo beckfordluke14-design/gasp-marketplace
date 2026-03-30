@@ -341,7 +341,7 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                                }}
                                className="flex items-center gap-2 px-3 py-1.5 bg-[#00f0ff] rounded-full shadow-[0_0_20px_rgba(0,240,255,0.4)] cursor-pointer hover:scale-105 active:scale-95 transition-all select-none"
                              >
-                                <span className="text-[9px] font-black text-black uppercase tracking-widest whitespace-nowrap">Chat w/ {displayName}?</span>
+                                <span className="text-[9px] font-black text-black uppercase tracking-widest whitespace-nowrap">Sync w/ {displayName}?</span>
                                 <motion.div 
                                   animate={{ opacity: [1, 0] }}
                                   transition={{ repeat: Infinity, duration: 0.8 }}
@@ -371,7 +371,7 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                        <div className="flex items-center gap-4 md:gap-6 pointer-events-auto">
                            <button onClick={handleLike} className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl backdrop-blur-md border flex flex-col items-center justify-center transition-all ${hasLiked ? 'bg-red-500/10 border-red-500/40 text-red-500' : 'bg-black/10 border-white/5 text-white/30 hover:scale-110 hover:border-white/20'}`}>
                               <Heart size={20} className={hasLiked ? 'fill-current' : ''} />
-                              <span className="text-[7px] font-black mt-0.5 uppercase">{likes}</span>
+                              <span className="text-[7px] font-black mt-0.5 uppercase tracking-widest">{likes > 0 ? likes : 'heat'}</span>
                            </button>
  
                            <button 
@@ -396,7 +396,7 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                               className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl backdrop-blur-md border flex flex-col items-center justify-center transition-all ${isFollowing ? 'bg-[#ffea00]/10 border-[#ffea00]/30 text-[#ffea00]' : 'bg-black/10 border-white/5 text-white/20 hover:scale-110'}`}
                            >
                               <Star size={20} className={isFollowing ? 'fill-[#ffea00]' : ''} />
-                              <span className="text-[7px] font-black mt-0.5 uppercase">{isFollowing ? 'saved' : 'save'}</span>
+                              <span className="text-[7px] font-black mt-0.5 uppercase tracking-widest">{isFollowing ? 'secured' : 'secure'}</span>
                            </button>
                         </div>
                    </div>
@@ -641,7 +641,7 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
   return (
     <div ref={containerRef} className="flex-1 h-screen overflow-y-auto scroll-smooth no-scrollbar relative w-full touch-pan-y bg-transparent">
       
-      <div className="fixed top-14 left-0 right-0 z-[1000] flex flex-col gap-0 pointer-events-none bg-transparent px-4">
+      <div className="fixed top-14 left-0 right-0 z-[1000] flex flex-col gap-0 pointer-events-none bg-transparent px-4 md:hidden">
           {/* Market Pulse Ticker */}
           <div className="scale-90 origin-top h-10">
              <MobilePulseTicker />

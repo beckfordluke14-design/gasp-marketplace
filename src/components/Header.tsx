@@ -39,10 +39,10 @@ export default function Header({
   }, []);
   
   const navItems = [
-    { label: 'Feed', active: true, href: '/' },
+    { label: 'Pulse', active: true, href: '/' },
     ...(isAdmin ? [{ label: 'Admin Panel', active: false, href: '/admin/audit' }] : []),
-    { label: 'Collection', active: false, href: '/vault' },
-    { label: 'Explore', active: false, href: '/' },
+    { label: 'Archive', active: false, href: '/vault' },
+    { label: 'Strategy', active: false, href: '/' },
   ];
 
   if (!mounted) return null;

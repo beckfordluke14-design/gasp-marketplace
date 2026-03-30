@@ -59,11 +59,14 @@ export default function TipModal({ isOpen, onClose, onTip, userBalance, profileN
                             </div>
 
                             <div className="space-y-4">
-                                <h2 className="text-4xl font-outfit font-black italic uppercase tracking-tighter leading-none">
-                                    Priority <span className="text-neon-purple">Infusion</span>
+                                <h2 className="text-2xl font-syncopate font-black italic uppercase tracking-tighter text-white">
+                                    Infuse Node
                                 </h2>
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic mt-1">
+                                    Boost Signal Priority for {profileName}
+                                </p>
                                 <p className="text-sm text-white/40 italic leading-relaxed px-6">
-                                    Send a gift to <span className="text-white">{profileName}</span>. Priority messages bypass the agency buffer and trigger an immediate response.
+                                    Inject a data boost to <span className="text-white">{profileName}</span>. Priority signals bypass the agency buffer and trigger an immediate response.
                                 </p>
                             </div>
 

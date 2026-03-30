@@ -56,11 +56,11 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
 
   // ACCOUNT RANK LOGIC
   const getAccountRank = (points: number = 0) => {
-    if (points >= 10000) return { label: 'Diamond Member 💎', color: '#00f0ff', priority: '10x', shadow: '0 0 20px #00f0ff44', icon: <Trophy size={12} /> };
-    if (points >= 5000) return { label: 'Platinum Member ⚡️', color: '#ff00ff', priority: '5x', shadow: '0 0 20px #ff00ff44', icon: <Zap size={12} /> };
-    if (points >= 2000) return { label: 'Gold Member 🟡', color: '#ffea00', priority: '2x', shadow: '0 0 20px #ffea0044', icon: <ShieldCheck size={12} /> };
-    if (points >= 500) return { label: 'Silver Member 🔘', color: '#e5e7eb', priority: '1.5x', shadow: '0 0 20px #ffffff22', icon: <Zap size={12} /> };
-    return { label: 'Bronze Member 🟠', color: '#cd7f32', priority: '1x', shadow: 'none', icon: <Zap size={12} /> };
+    if (points >= 10000) return { label: 'Sovereign Node [Level 5] 💎', color: '#00f0ff', priority: '10x', shadow: '0 0 20px #00f0ff44', icon: <Trophy size={12} /> };
+    if (points >= 5000) return { label: 'Elite Operative [Level 4] ⚡️', color: '#ff00ff', priority: '5x', shadow: '0 0 20px #ff00ff44', icon: <Zap size={12} /> };
+    if (points >= 2000) return { label: 'Field Analyst [Level 3] 🟡', color: '#ffea00', priority: '2x', shadow: '0 0 20px #ffea0044', icon: <ShieldCheck size={12} /> };
+    if (points >= 500) return { label: 'Verified Scout [Level 2] 🔘', color: '#e5e7eb', priority: '1.5x', shadow: '0 0 20px #ffffff22', icon: <Zap size={12} /> };
+    return { label: 'Entry Node [Level 1] 🟠', color: '#cd7f32', priority: '1x', shadow: 'none', icon: <Zap size={12} /> };
   };
 
   const rank = getAccountRank(profile?.credit_balance || 0);
