@@ -5,6 +5,7 @@ import { initialProfiles, proxyImg, getProfileName, type Profile, type Broadcast
 import { MessageSquare, Zap, Lock, Heart, Trash2, Star, Brain, X, Save, Pencil, Check } from 'lucide-react';
 import { trackEvent } from '@/lib/telemetry';
 import { useUser } from '@/components/providers/UserProvider';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
@@ -287,9 +288,12 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                    </div>
 
                    <div className="space-y-6 relative z-10 pt-4">
-                      {/* 👤 NEURAL HEADER NODE */}
+                      {/* 👤 NEURAL HEADER NODE (LINKED) */}
                       <div className="flex items-center gap-4 md:gap-6">
-                         <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-[#00f0ff]/40 shadow-[0_0_30px_rgba(0,240,255,0.2)] p-0.5 bg-black/40">
+                         <Link 
+                            href={`/${profile.id}`}
+                            className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-[#00f0ff]/40 shadow-[0_0_30px_rgba(0,240,255,0.2)] p-0.5 bg-black/40 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer group/avatar"
+                         >
                             <div className="w-full h-full rounded-full overflow-hidden">
                                <img 
                                   src={profile.image && profile.image.length > 5 ? proxyImg(profile.image) : `https://api.dicebear.com/7.x/micah/svg?seed=${profile.name}`} 
@@ -297,32 +301,34 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                                   className="w-full h-full object-cover object-top opacity-100 transition-all duration-700" 
                                />
                             </div>
-                         </div>
-                         <div className="flex flex-col gap-1.5">
-                            <span className="text-sm md:text-lg font-black italic tracking-tighter text-white uppercase leading-none">{profile.name} {profile.flag}</span>
+                         </Link>
+                         <div className="flex flex-col gap-1.5 grow">
+                            <div className="flex items-center justify-between gap-4">
+                               <span className="text-sm md:text-lg font-black italic tracking-tighter text-white uppercase leading-none">{profile.name} {profile.flag}</span>
+                               <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/40">log: ad0d-{broadcast.id.slice(0,4)}</span>
+                            </div>
                             <div className="flex items-center gap-2">
                                <div className="px-2 py-0.5 bg-[#00f0ff]/10 rounded border border-[#00f0ff]/20">
                                   <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest italic">FIELD ANALYST</span>
                                </div>
                                <div className="w-1 h-1 rounded-full bg-white/20" />
-                               <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/40">Neural Sink Log: AD0D-{broadcast.id.slice(0,4)}</span>
+                               <span className="text-[7px] font-black uppercase text-[#ffea00] italic tracking-widest animate-pulse">Live Alpha Ingestion</span>
                             </div>
                          </div>
                       </div>
 
-                      {/* 📄 INTELLIGENCE SIGNAL */}
+                      {/* 📄 CONSOLIDATED INTELLIGENCE SIGNAL */}
                       <div className="space-y-4">
-                         <p className="text-xl md:text-3xl font-black text-white italic tracking-tighter leading-[1.1] drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+                         <p className="text-xl md:text-2xl font-black text-white italic tracking-tighter leading-[1.2] drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
                             "{broadcast.content}"
                          </p>
 
-                         <div className="flex items-center gap-4 pt-4 border-t border-white/5">
+                         <div className="flex items-center justify-between pt-4 border-t border-white/5">
                             <div className="flex items-center gap-2">
                                <div className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-ping" />
                                <span className="text-[9px] font-black uppercase text-[#ffea00] tracking-widest italic">Strategic Asset Class</span>
                             </div>
-                            <div className="w-1 h-1 rounded-full bg-white/10" />
-                            <span className="text-[8px] font-black uppercase text-white/30 tracking-widest italic">Signal Confirmed // 100% Market Accuracy</span>
+                            <span className="text-[8px] font-black uppercase text-white/30 tracking-widest italic hidden md:block">Verified Signal // 100% Market Accuracy</span>
                          </div>
                       </div>
                    </div>
