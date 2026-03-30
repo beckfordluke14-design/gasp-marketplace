@@ -1,12 +1,12 @@
 {
-  "name": "Gasp Collective",
+  "name": "GASP Strategic Terminal",
   "short_name": "GASP",
-  "description": "Neural Directory: Shared Reality Interface",
+  "description": "Institutional Digital Media & Archival Intelligence Fulfillment Node.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0a0a0a",
-  "theme_color": "#0a0a0a",
+  "background_color": "#050505",
+  "theme_color": "#050505",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
