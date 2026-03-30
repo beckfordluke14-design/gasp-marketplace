@@ -267,26 +267,53 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                 )}
              </>
           ) : broadcast.type === 'text' ? (
-             <div className="relative z-10 w-full h-full flex items-center justify-center p-12 bg-[#050505]">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#00f0ff]/5 to-transparent pointer-events-none" />
-                <div className="max-w-md w-full p-8 rounded-[2rem] bg-black/40 border border-white/5 backdrop-blur-3xl relative group/card">
-                   <div className="absolute -top-3 -left-3 px-3 py-1 bg-[#ffea00] text-black text-[8px] font-black uppercase italic rounded-lg shadow-[0_0_20px_#ffea0033]">
-                      Sector Intelligence Briefing
+             <div className="relative z-10 w-full h-full flex items-center justify-center p-6 md:p-12 bg-[#050505]">
+                {/* 🛡️ GHOST INFRASTRUCTURE */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(0,240,255,0.05)_0%,_transparent_70%)] pointer-events-none" />
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+                
+                <div className="max-w-xl w-full p-4 md:p-10 rounded-[2.5rem] bg-black/60 border border-white/5 backdrop-blur-3xl relative group/card overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+                   {/* 🎞️ SCANLINE EFFECT */}
+                   <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-white/[0.02] to-transparent h-[200%] animate-[scan_8s_linear_infinite]" />
+                   
+                   <div className="absolute -top-3 -left-3 px-4 py-1.5 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-xl shadow-[0_0_30px_rgba(255,234,0,0.3)] z-50">
+                      Sector Intelligence // High-Heat Node
                    </div>
-                   <div className="space-y-6">
-                      <div className="flex items-center gap-2 opacity-40">
-                         <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                         <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white">Neural Sink Active // Log: {broadcast.id.slice(0,8)}</span>
-                      </div>
-                      <p className="text-[14px] md:text-lg font-black text-white italic tracking-tighter leading-relaxed drop-shadow-2xl">
-                         "{broadcast.content}"
-                      </p>
-                      <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                         <div className="flex items-center gap-1.5">
-                            <Star size={10} className="text-[#ffea00]/40" />
-                            <span className="text-[7px] font-black uppercase text-white/20 tracking-widest italic">Strategic Asset Class</span>
+
+                   <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 relative z-10">
+                      {/* 👤 NEURAL AVATAR NODE */}
+                      <div className="relative shrink-0">
+                         <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl overflow-hidden border-2 border-[#00f0ff]/20 shadow-[0_0_40px_rgba(0,240,255,0.1)] group-hover/card:scale-105 transition-transform duration-700">
+                            <img 
+                               src={proxyImg(profile.image)} 
+                               alt="" 
+                               className="w-full h-full object-cover grayscale brightness-125 opacity-80 group-hover/card:grayscale-0 group-hover/card:opacity-100 transition-all duration-700" 
+                            />
                          </div>
-                         <Zap size={14} className="text-[#00f0ff]/40 animate-pulse" />
+                         <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-black border border-[#00f0ff]/40 flex items-center justify-center animate-pulse">
+                            <Zap size={14} className="text-[#00f0ff]" />
+                         </div>
+                      </div>
+
+                      <div className="flex-1 space-y-6 text-center md:text-left">
+                         <div className="flex items-center justify-center md:justify-start gap-2 opacity-50">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-ping" />
+                            <span className="text-[8px] font-black uppercase tracking-[0.5em] text-white/60">Neural Sink log: ad0d-{broadcast.id.slice(0,4)}</span>
+                         </div>
+                         
+                         <p className="text-[16px] md:text-2xl font-black text-white italic tracking-tighter leading-[1.2] drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+                            "{broadcast.content}"
+                         </p>
+
+                         <div className="flex items-center justify-center md:justify-start gap-4 pt-4 border-t border-white/5">
+                            <div className="flex items-center gap-2">
+                               <div className="px-3 py-1 bg-white/5 rounded-lg border border-white/10">
+                                  <span className="text-[8px] font-black uppercase text-[#ffea00] tracking-widest italic">{profile.name} // ANALYST</span>
+                               </div>
+                            </div>
+                            <div className="w-1 h-1 rounded-full bg-white/20" />
+                            <span className="text-[8px] font-black uppercase text-white/20 tracking-widest italic">Strategic Asset Class</span>
+                         </div>
                       </div>
                    </div>
                 </div>
