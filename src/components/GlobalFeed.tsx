@@ -287,48 +287,47 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                       Sector Intelligence Hub // High-Heat Node
                    </div>
 
-                   <div className="space-y-6 relative z-10 pt-4">
+                   <div className="space-y-3 relative z-10 pt-2 pb-0">
                       {/* 👤 NEURAL HEADER NODE (LINKED) */}
-                      <div className="flex items-center gap-4 md:gap-6">
+                      <div className="flex items-center gap-3">
                          <Link 
                             href={`/${profile.id}`}
-                            className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-[#00f0ff]/40 shadow-[0_0_30px_rgba(0,240,255,0.2)] p-0.5 bg-black/40 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer group/avatar"
+                            className="w-12 h-12 rounded-full overflow-hidden border border-[#00f0ff]/40 shadow-[0_0_20px_rgba(0,240,255,0.1)] p-0.5 bg-black/40 hover:scale-105 transition-all duration-300 cursor-pointer group/avatar"
                          >
                             <div className="w-full h-full rounded-full overflow-hidden">
                                <img 
                                   src={profile.image && profile.image.length > 5 ? proxyImg(profile.image) : `https://api.dicebear.com/7.x/micah/svg?seed=${profile.name}`} 
                                   alt="" 
-                                  className="w-full h-full object-cover object-top opacity-100 transition-all duration-700" 
+                                  className="w-full h-full object-cover object-top" 
                                />
                             </div>
                          </Link>
-                         <div className="flex flex-col gap-1.5 grow">
-                            <div className="flex items-center justify-between gap-4">
-                               <span className="text-sm md:text-lg font-black italic tracking-tighter text-white uppercase leading-none">{profile.name} {profile.flag}</span>
-                               <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/40">log: ad0d-{broadcast.id.slice(0,4)}</span>
+                         <div className="flex flex-col grow">
+                            <div className="flex items-center justify-between">
+                               <span className="text-[10px] md:text-sm font-black italic tracking-tighter text-white uppercase leading-none">{profile.name}</span>
+                               <span className="text-[6px] font-black uppercase text-white/20 tracking-widest">{new Date(broadcast.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                               <div className="px-2 py-0.5 bg-[#00f0ff]/10 rounded border border-[#00f0ff]/20">
-                                  <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest italic">FIELD ANALYST</span>
+                            <div className="flex items-center gap-2 mt-0.5">
+                               <div className="px-1.5 py-0.2 bg-[#00f0ff]/10 rounded border border-[#00f0ff]/20">
+                                  <span className="text-[6px] font-black text-[#00f0ff] uppercase tracking-widest italic">FIELD ANALYST</span>
                                </div>
-                               <div className="w-1 h-1 rounded-full bg-white/20" />
-                               <span className="text-[7px] font-black uppercase text-[#ffea00] italic tracking-widest animate-pulse">Live Alpha Ingestion</span>
+                               <span className="text-[6px] font-black uppercase text-[#ffea00] italic tracking-widest animate-pulse">Live Alpha</span>
                             </div>
                          </div>
                       </div>
 
-                      {/* 📄 CONSOLIDATED INTELLIGENCE SIGNAL */}
-                      <div className="space-y-4">
-                         <p className="text-xl md:text-2xl font-black text-white italic tracking-tighter leading-[1.2] drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
-                            "{broadcast.content}"
-                         </p>
+                      {/* 📄 CONSOLIDATED SIGNAL HUBS */}
+                      <div className="space-y-2 pt-1">
+                         <div className="flex items-start gap-2">
+                           <div className="w-1 h-1 rounded-full bg-[#ffea00] mt-1 shrink-0" />
+                           <p className="text-[10px] md:text-xs font-bold text-white uppercase tracking-tight leading-tight opacity-90 font-mono">
+                              {broadcast.content}
+                           </p>
+                         </div>
 
-                         <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                            <div className="flex items-center gap-2">
-                               <div className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-ping" />
-                               <span className="text-[9px] font-black uppercase text-[#ffea00] tracking-widest italic">Strategic Asset Class</span>
-                            </div>
-                            <span className="text-[8px] font-black uppercase text-white/30 tracking-widest italic hidden md:block">Verified Signal // 100% Market Accuracy</span>
+                         <div className="flex items-center justify-between pt-2 border-t border-white/5 opacity-50">
+                            <span className="text-[6px] font-black uppercase text-white/40 tracking-[0.2em]">Verified // 100% Accuracy</span>
+                            <span className="text-[6px] font-black uppercase text-[#ffea00] tracking-widest italic">STRATEGIC ASSET CLASS</span>
                          </div>
                       </div>
                    </div>
