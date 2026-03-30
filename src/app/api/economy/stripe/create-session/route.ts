@@ -1,16 +1,12 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 
 /**
  * 🛡️ SOVEREIGN STRIPE ONRAMP BRIDGE (Production-Ready)
  * Identity: AllTheseFlows LLC (d.b.a. AllTheseFlows Strategic Media)
  * Objective: High-Speed Settlement of Institutional Media Credits
+ * NOTE: Stripe is lazily initialized at runtime to avoid build-time failures.
  */
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2022-11-15' as any,
-});
 
 export async function POST(req: Request) {
   try {
@@ -19,6 +15,12 @@ export async function POST(req: Request) {
     if (!process.env.STRIPE_SECRET_KEY) {
         return NextResponse.json({ error: 'Uplink Disconnected (Missing API Key)' }, { status: 500 });
     }
+
+    // 🛡️ LAZY INIT: Initialize at runtime only, not build time
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2022-11-15' as any,
+    });
 
     // Identify the package/metadata
     const pkg = CREDIT_PACKAGES.find(p => p.id === packageId);

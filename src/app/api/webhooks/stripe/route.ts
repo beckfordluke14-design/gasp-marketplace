@@ -1,24 +1,25 @@
 import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2022-11-15' as any,
-});
-
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+import type Stripe from 'stripe';
 
 export async function POST(req: Request) {
     const payload = await req.text();
     const sig = req.headers.get('stripe-signature');
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!process.env.STRIPE_SECRET_KEY || !endpointSecret || !sig) {
+        console.error('[Stripe Webhook] Missing signature or secret');
+        return NextResponse.json({ error: 'Uplink Error' }, { status: 400 });
+    }
+
+    // 🛡️ LAZY INIT: Runtime only
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2022-11-15' as any,
+    });
 
     let event;
-
     try {
-        if (!sig || !endpointSecret) {
-            console.error('[Stripe Webhook] Missing signature or secret');
-            return NextResponse.json({ error: 'Uplink Error' }, { status: 400 });
-        }
         event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
     } catch (err: any) {
         console.error(`[Stripe Webhook] Error: ${err.message}`);
