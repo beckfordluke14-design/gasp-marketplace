@@ -237,25 +237,25 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 </div>
             )}
 
-            {/* 💎 TERMINAL UPLINK: Stripe-Safe Power Conversion */}
+            {/* 💎 TERMINAL UPLINK: Sovereign Power Conversion */}
             <div className="mb-8 px-4">
                 <div className="p-5 rounded-[2rem] bg-white/5 border border-white/10 relative overflow-hidden group transition-all hover:bg-white/10">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-[#39FF14]/5 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-[#00f0ff]/5 to-transparent pointer-events-none" />
                     <div className="flex items-center justify-between mb-4 relative z-10">
                         <div className="flex items-center gap-2">
-                             <div className="p-1.5 bg-[#39FF14]/10 rounded-lg text-[#39FF14]"><Zap size={14} className="animate-pulse" /></div>
+                             <div className="p-1.5 bg-[#00f0ff]/10 rounded-lg text-[#00f0ff]"><Zap size={14} className="animate-pulse" /></div>
                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white italic">Terminal Uplink</span>
                         </div>
-                        <span className="text-[8px] font-black text-[#39FF14] uppercase tracking-widest bg-[#39FF14]/10 px-2 py-0.5 rounded-full">Active Node</span>
+                        <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest bg-[#00f0ff]/10 px-2 py-0.5 rounded-full">Active Node</span>
                     </div>
                     <div className="space-y-3 relative z-10">
                         <div className="flex items-center justify-between">
                             <span className="text-[9px] text-white/40 uppercase font-black tracking-widest">Uplink Power</span>
-                            <span className="text-[12px] font-black text-[#39FF14] italic">{profile?.credit_balance?.toLocaleString() || '0'}</span>
+                            <span className="text-[12px] font-black text-white italic">{profile?.credit_balance?.toLocaleString() || '0'}</span>
                         </div>
                         <button 
                             onClick={() => (window as any).openTopUp?.()}
-                            className="w-full py-3 bg-[#39FF14] text-black rounded-xl text-[9px] font-black uppercase tracking-[0.2em] shadow-[0_10px_20px_rgba(57,255,20,0.2)] hover:scale-[1.02] active:scale-95 transition-all"
+                            className="w-full py-3 bg-[#00f0ff] text-black rounded-xl text-[9px] font-black uppercase tracking-[0.2em] shadow-[0_10px_20px_rgba(0,240,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all"
                         >
                             Finalize Infusion
                         </button>
@@ -312,8 +312,8 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                     </div>
                  </div>
                   <button 
-                    onClick={onOpenTopUp}
-                    className="flex-1 w-full py-3 bg-[#39FF14] text-black text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-white transition-all shadow-[0_0_20px_rgba(57,255,20,0.3)]"
+                    onClick={() => (window as any).openTopUp?.()}
+                    className="flex-1 w-full py-3 bg-[#00f0ff] text-black text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-white transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)]"
                   >
                     TOP UP
                   </button>
@@ -362,7 +362,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
           <div className="space-y-2">
              <button 
                 onClick={() => (window as any).openTopUp?.()}
-                className="w-full h-11 bg-[#39FF14] text-black rounded-2xl flex items-center justify-center gap-2 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(57,255,20,0.15)] active:scale-95 border-none"
+                className="w-full h-11 bg-[#00f0ff] text-black rounded-2xl flex items-center justify-center gap-2 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(0,240,255,0.15)] active:scale-95 border-none"
              >
                 <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center">
                    <Zap size={10} className="text-black" />

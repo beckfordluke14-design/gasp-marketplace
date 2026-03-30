@@ -24,32 +24,43 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
     priceUsd: 4.99,  
     credits: 5000,   
     label: 'Standard Node Uplink',
-    helioPayLink: 'https://hel.io/sh/REPLACE_WITH_IMPULSE_LINK'
+    helioPayLink: 'https://moonpay.hel.io/pay/69ca471eec1f737b060ec098'
   },
   { 
     id: 'tier_taste',   
     priceUsd: 9.99,  
-    credits: 10000,  
+    credits: 11000,  
     label: 'Strategic Data Sync', 
-    bonus: '+10%',
-    helioPayLink: 'https://hel.io/sh/REPLACE_WITH_TASTE_LINK'
+    helioPayLink: 'https://moonpay.hel.io/pay/69ca493b6858b763c861473d'
   },
   { 
-    id: 'tier_weekend', 
+    id: 'tier_session', 
     priceUsd: 24.99, 
-    credits: 28000, // +3K Bonus
+    credits: 30000, 
     label: 'Operational Prime Link', 
     isPopular: true, 
-    bonus: '+20%',
-    helioPayLink: 'https://hel.io/sh/REPLACE_WITH_WEEKEND_LINK'
+    helioPayLink: 'https://moonpay.hel.io/pay/69ca499a00ba8a6f4a64973e'
   },
   { 
-    id: 'tier_whale',   
-    priceUsd: 99.99, 
-    credits: 150000, // +50K Bonus
-    label: 'Enterprise Archive Node', 
-    bonus: '+50%',
-    helioPayLink: 'https://hel.io/sh/REPLACE_WITH_WHALE_LINK'
+    id: 'tier_whale', 
+    priceUsd: 99.99,  
+    credits: 120000, 
+    label: 'Enterprise Archive Node',
+    helioPayLink: 'https://moonpay.hel.io/pay/69ca49e727ac0ea87fc7ea46'
+  },
+  { 
+    id: 'tier_reserve', 
+    priceUsd: 249.99,  
+    credits: 350000, 
+    label: 'Strategic Reserve Node',
+    helioPayLink: 'https://moonpay.hel.io/pay/69ca4aa9034fcd42d6dc3220'
+  },
+  { 
+    id: 'tier_master', 
+    priceUsd: 999.99,  
+    credits: 1500000, 
+    label: 'Elite Terminal Master',
+    helioPayLink: 'https://moonpay.hel.io/pay/69ca4b3b27ac0ea87fc7f1e5'
   }
 ];
 
