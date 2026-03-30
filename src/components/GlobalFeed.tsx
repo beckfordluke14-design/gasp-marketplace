@@ -276,48 +276,48 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                    {/* 🎞️ SCANLINE EFFECT */}
                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-white/[0.02] to-transparent h-[200%] animate-[scan_8s_linear_infinite]" />
                    
-                   <div className="absolute top-3 left-3 px-4 py-1.5 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-xl shadow-[0_0_30px_rgba(255,234,0,0.3)] z-50">
-                      Sector Intelligence // High-Heat Node
+                   {/* 🏷️ YELLOW STRATEGIC TAG */}
+                   <div className="absolute top-0 left-6 px-4 py-1 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-b-lg shadow-[0_5px_15px_rgba(255,234,0,0.2)] z-50">
+                      Sector Intelligence Hub // High-Heat Node
                    </div>
 
-                   <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 relative z-10">
-                      {/* 👤 STORY-STYLE NEURAL NODE */}
-                      <div className="flex flex-col items-center gap-4 shrink-0">
-                         <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden border-2 border-[#00f0ff]/40 shadow-[0_0_50px_rgba(0,240,255,0.2)] group-hover/card:scale-110 transition-all duration-700 p-1 bg-black/40">
+                   <div className="space-y-6 relative z-10 pt-4">
+                      {/* 👤 NEURAL HEADER NODE */}
+                      <div className="flex items-center gap-4 md:gap-6">
+                         <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-[#00f0ff]/40 shadow-[0_0_30px_rgba(0,240,255,0.2)] p-0.5 bg-black/40">
                             <div className="w-full h-full rounded-full overflow-hidden">
                                <img 
                                   src={profile.image && profile.image.length > 5 ? proxyImg(profile.image) : `https://api.dicebear.com/7.x/micah/svg?seed=${profile.name}`} 
                                   alt="" 
-                                  className="w-full h-full object-cover object-top grayscale brightness-125 opacity-90 group-hover/card:grayscale-0 group-hover/card:opacity-100 transition-all duration-700" 
+                                  className="w-full h-full object-cover object-top grayscale brightness-125 opacity-90 transition-all duration-700" 
                                />
                             </div>
                          </div>
-                         <div className="flex flex-col items-center gap-1">
-                            <span className="text-[10px] font-black italic tracking-tighter text-white/90 uppercase">{profile.name} {profile.flag}</span>
-                            <div className="px-2 py-0.5 bg-[#00f0ff]/10 rounded-full border border-[#00f0ff]/20">
-                               <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest italic">FIELD ANALYST</span>
+                         <div className="flex flex-col gap-1.5">
+                            <span className="text-sm md:text-lg font-black italic tracking-tighter text-white uppercase leading-none">{profile.name} {profile.flag}</span>
+                            <div className="flex items-center gap-2">
+                               <div className="px-2 py-0.5 bg-[#00f0ff]/10 rounded border border-[#00f0ff]/20">
+                                  <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest italic">FIELD ANALYST</span>
+                               </div>
+                               <div className="w-1 h-1 rounded-full bg-white/20" />
+                               <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/40">Neural Sink Log: AD0D-{broadcast.id.slice(0,4)}</span>
                             </div>
                          </div>
                       </div>
 
-                      <div className="flex-1 space-y-6 text-center md:text-left">
-                         <div className="flex items-center justify-center md:justify-start gap-2 opacity-50">
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-ping" />
-                            <span className="text-[8px] font-black uppercase tracking-[0.5em] text-white/60">Neural Sink log: ad0d-{broadcast.id.slice(0,4)}</span>
-                         </div>
-                         
-                         <p className="text-[16px] md:text-2xl font-black text-white italic tracking-tighter leading-[1.2] drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+                      {/* 📄 INTELLIGENCE SIGNAL */}
+                      <div className="space-y-4">
+                         <p className="text-xl md:text-3xl font-black text-white italic tracking-tighter leading-[1.1] drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
                             "{broadcast.content}"
                          </p>
 
-                         <div className="flex items-center justify-center md:justify-start gap-4 pt-4 border-t border-white/5">
+                         <div className="flex items-center gap-4 pt-4 border-t border-white/5">
                             <div className="flex items-center gap-2">
-                               <div className="px-3 py-1 bg-white/5 rounded-lg border border-white/10">
-                                  <span className="text-[8px] font-black uppercase text-[#ffea00] tracking-widest italic">Strategic Asset Class</span>
-                               </div>
+                               <div className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-ping" />
+                               <span className="text-[9px] font-black uppercase text-[#ffea00] tracking-widest italic">Strategic Asset Class</span>
                             </div>
-                            <div className="w-1 h-1 rounded-full bg-white/20" />
-                            <span className="text-[8px] font-black uppercase text-[#00f0ff] animate-pulse tracking-widest italic">Signal Confirmed // 100% Verified</span>
+                            <div className="w-1 h-1 rounded-full bg-white/10" />
+                            <span className="text-[8px] font-black uppercase text-white/30 tracking-widest italic">Signal Confirmed // 100% Market Accuracy</span>
                          </div>
                       </div>
                    </div>
