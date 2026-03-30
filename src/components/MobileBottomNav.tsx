@@ -24,12 +24,12 @@ export default function MobileBottomNav({ onSelectChat, onOpenTopUp, unreadCount
   const favProfiles = profiles.filter(p => followingIds.includes(p.id)).slice(0, 3);
 
   const items = [
-    { icon: Home, label: 'Feed', active: true, action: () => router.push('/') },
-    { icon: Compass, label: 'Discover', active: false, action: () => router.push('/') },
+    { icon: Home, label: 'Pulse', active: true, action: () => router.push('/') },
+    { icon: Compass, label: 'Strategy', active: false, action: () => router.push('/') },
     // 🧬 THE CENTER STAKE PILLAR
     { icon: Zap, label: 'STAKE', active: false, isSpecial: true, action: () => onOpenTopUp() },
-    { icon: MessageSquare, label: 'Chats', active: false, action: () => onSelectChat(), badge: totalUnread, hasFavorites: favProfiles.length > 0 }, 
-    { icon: User, label: 'Vault', active: false, action: () => router.push('/vault') },
+    { icon: MessageSquare, label: 'Comms', active: false, action: () => onSelectChat(), badge: totalUnread, hasFavorites: favProfiles.length > 0 }, 
+    { icon: User, label: 'Archive', active: false, action: () => router.push('/vault') },
   ];
 
   return (

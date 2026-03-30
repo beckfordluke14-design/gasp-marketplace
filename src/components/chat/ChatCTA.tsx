@@ -32,7 +32,7 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
              CONNECTION PAUSED
            </h3>
            <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
-             You’ve Ran Out of Credits. <br /> Sign up to Continue the Conversation with <span className="text-[#ff00ff]">{personaName}</span> & get 1,500 FREE.
+             You’ve Ran Out of Credits. <br /> Sign up to Continue the Strategy Session with <span className="text-[#ff00ff]">{personaName}</span> & get 1,500 FREE.
            </p>
         </div>
 
@@ -69,7 +69,7 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
            OUT OF CREDITS
          </h3>
          <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
-           You currently have <span className="text-white font-syncopate">{balance !== undefined ? balance.toLocaleString() : '---'}</span>. <br /> Top up to Continue the Conversation.
+           You currently have <span className="text-white font-syncopate">{balance !== undefined ? balance.toLocaleString() : '---'}</span>. <br /> Top up to maintain Sync Lock.
          </p>
       </div>
 

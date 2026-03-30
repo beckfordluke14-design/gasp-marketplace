@@ -459,11 +459,11 @@ export default function ChatDrawer({
 
              <div className="flex gap-8">
                 <button onClick={() => setChatTab('chat')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'chat' ? 'text-white' : 'text-white/30'}`}>
-                   <Send size={12} className={chatTab === 'chat' ? 'rotate-[-20deg]' : ''} /> CHAT
+                   <Send size={12} className={chatTab === 'chat' ? 'rotate-[-20deg]' : ''} /> UPLINK
                    {chatTab === 'chat' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
                 </button>
                 <button onClick={() => setChatTab('pics')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
-                   PICS
+                   INTEL
                    {chatTab === 'pics' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
                 </button>
              </div>
@@ -687,7 +687,7 @@ export default function ChatDrawer({
                     value={input} 
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleLocalSubmit(); } }}
-                    placeholder={isDepleted ? "NEURAL LINK DEPLETED..." : "send mssg..."} 
+                    placeholder={isDepleted ? "NEURAL LINK DEPLETED..." : "transmit briefing..."} 
                     className="flex-1 bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
                     disabled={isLoading || isDepleted}
                  />
