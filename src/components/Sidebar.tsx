@@ -198,105 +198,54 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
 
             {/* NEW MESSAGES */}
             {Object.keys(unreadCounts).some(id => unreadCounts[id] > 0) && (
-                <div className="mb-8 px-4">
-                    <div className="px-2 mb-4 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <MessageSquare size={10} className="text-[#00ff00]" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00ff00] italic">Direct Messages</span>
-                        </div>
-                    </div>
-                    <div className="flex flex-col">
-                        {profiles.filter(p => unreadCounts[p.id] > 0).map(p => (
-                            <motion.div key={p.id} onClick={() => onSelectProfile(p.id)} whileHover={{ x: 4 }} className="flex items-center gap-3 p-3 rounded-2xl bg-[#00f0ff]/5 border border-[#00f0ff]/10 mb-2 cursor-pointer group">
-                                <div className="w-10 h-10 rounded-full overflow-hidden border border-[#00ff00]/40 shrink-0">
-                                    <ProfileAvatar src={p.image} alt={p.name} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-[10px] font-black uppercase text-white truncate">{p.name}</p>
-                                    <p className="text-[8px] font-bold text-[#00f0ff] uppercase tracking-widest">{unreadCounts[p.id]} new</p>
-                                </div>
-                                <ArrowRight size={12} className="text-[#00f0ff] opacity-40 group-hover:opacity-100" />
-                            </motion.div>
-                        ))}
-                    </div>
+              <div className="px-6 mb-8 mt-4">
+                <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-[#ff00ff] mb-4 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#ff00ff] animate-ping" />
+                  Priority Uplinks
+                </h2>
+                <div className="space-y-1">
+                  {profiles.filter(p => unreadCounts[p.id] > 0).map(renderProfile)}
                 </div>
+              </div>
             )}
 
-            {/* FAVORITES (FOLLOWED) CHATS - AT TOP */}
+            {/* FAVORITES */}
             {followedProfiles.length > 0 && (
-                <div className="mb-8">
-                    <div className="px-6 mb-4">
-                        <div className="flex items-center gap-2">
-                            <Star size={10} className="text-[#ff00ff] fill-[#ff00ff]" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff00ff] italic">Favorites</span>
-                        </div>
-                    </div>
-                    <div className="flex flex-col px-4">
-                        {followedProfiles.map(renderProfile)}
-                    </div>
+              <div className="px-6 mb-8">
+                <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 mb-4 italic">Shadow Syndicate</h2>
+                <div className="space-y-1">
+                  {followedProfiles.map(renderProfile)}
                 </div>
+              </div>
             )}
 
-            {/* 💎 TERMINAL UPLINK: Sovereign Power Conversion */}
-            <div className="mb-8 px-4">
-                <div className="p-5 rounded-[2rem] bg-white/5 border border-white/10 relative overflow-hidden group transition-all hover:bg-white/10">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-[#00f0ff]/5 to-transparent pointer-events-none" />
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <div className="flex items-center gap-2">
-                             <div className="p-1.5 bg-[#00f0ff]/10 rounded-lg text-[#00f0ff]"><Zap size={14} className="animate-pulse" /></div>
-                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white italic">Terminal Uplink</span>
-                        </div>
-                        <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest bg-[#00f0ff]/10 px-2 py-0.5 rounded-full">Active Node</span>
-                    </div>
-                    <div className="space-y-3 relative z-10">
-                        <div className="flex items-center justify-between">
-                            <span className="text-[9px] text-white/40 uppercase font-black tracking-widest">Uplink Power</span>
-                            <span className="text-[12px] font-black text-white italic">{profile?.credit_balance?.toLocaleString() || '0'}</span>
-                        </div>
-                        <button 
-                            onClick={() => (window as any).openTopUp?.()}
-                            className="w-full py-3 bg-[#00f0ff] text-black rounded-xl text-[9px] font-black uppercase tracking-[0.2em] shadow-[0_10px_20px_rgba(0,240,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all"
-                        >
-                            Finalize Infusion
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* RECENT CHATS - LAST FIVE */}
-            {recentIds.length > 0 && (
-                <div className="mb-8">
-                    <div className="px-6 mb-4">
-                        <div className="flex items-center gap-2">
-                            <Zap size={10} className="text-white/40" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic">Recent Sessions</span>
-                        </div>
-                    </div>
-                    <div className="flex flex-col px-4">
-                        {profiles.filter(p => recentIds.includes(p.id) && !following.includes(p.id)).map(renderProfile)}
-                    </div>
-                </div>
-            )}
-
-            <div className="hidden lg:flex px-6 mb-4 items-center gap-2">
-               <Sparkles size={10} className="text-white/40" />
-               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic">Discover</span>
-            </div>
-            
-            <div className="hidden lg:flex flex-col px-4">
-              {otherProfiles.map(renderProfile)}
+            {/* DISCOVERY */}
+            <div className="px-6 pb-20">
+              <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-white/20 mb-4 italic">Neural Discovery</h2>
+              <div className="space-y-1">
+                {otherProfiles.map(renderProfile)}
+              </div>
             </div>
           </>
         )}
 
         {/* VIEW: VAULT */}
         {view === 'vault' && (
-           <div className="px-6 space-y-8 animate-in fade-in slide-in-from-left-4 duration-500">
-              <div className="space-y-4">
-                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Private Content</h2>
-                 <Link href="/vault" className="block p-6 rounded-[2rem] bg-white/5 backdrop-blur-3xl border border-white/10 hover:border-[#ff00ff]/40 transition-all text-center group">
-                    <ShieldCheck size={32} className="mx-auto text-[#ff00ff] mb-4 group-hover:scale-110 transition-transform" />
-                    <p className="text-[12px] font-black text-white uppercase italic font-syncopate">Explore Unlocks</p>
+           <div className="px-8 py-10 space-y-10 animate-in fade-in slide-in-from-left-4 duration-500">
+              <div className="space-y-2">
+                 <span className="text-[9px] font-black uppercase text-[#ff00ff] tracking-[0.4em]">Vault Access Node</span>
+                 <h2 className="text-3xl font-syncopate font-black italic uppercase text-white">Archives</h2>
+              </div>
+              
+              <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 flex flex-col gap-6 group">
+                 <div className="w-12 h-12 rounded-2xl bg-[#ff00ff]/10 border border-[#ff00ff]/30 flex items-center justify-center text-[#ff00ff]">
+                    <ShieldCheck size={24} />
+                 </div>
+                 <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-loose">
+                    Your institutional credit balance authorizes access to restricted archival assets. Use credits to unlock high-heat personas and private dispatches.
+                 </p>
+                 <Link href="/vault" className="w-full py-4 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-xl text-center hover:scale-[1.02] transition-all">
+                    Open Private Hub
                  </Link>
               </div>
 
@@ -308,7 +257,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                         <span className="text-[24px] font-black font-syncopate italic text-white leading-none">
                            {profile?.credit_balance?.toLocaleString() || '0'}
                         </span>
-                        <span className="text-[8px] font-black text-[#39FF14] uppercase tracking-widest italic">Terminal Credits</span>
+                        <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">Terminal Credits</span>
                     </div>
                  </div>
                   <button 
@@ -325,14 +274,14 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
       <div className="p-4 border-t border-white/5 bg-transparent z-10 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
           <div className="hidden lg:flex flex-col gap-6">
               <div className="bg-white/5 border border-white/10 rounded-[1.5rem] p-3 space-y-3 relative overflow-hidden group transition-all">
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#00ff00]/5 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#00f0ff]/5 to-transparent pointer-events-none" />
                 <div className="flex items-center justify-between relative z-10 border-b border-white/5 pb-2">
                    <div className="flex flex-col">
                       <span className="text-[6px] font-black uppercase tracking-[0.2em] text-white/30 italic">Wallet Balance</span>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                         <span className="text-[#00ff00] font-black text-[10px] italic">⚡️</span>
+                         <span className="text-[#00f0ff] font-black text-[10px] italic">⚡️</span>
                          <span className="text-[10px] font-syncopate font-black italic text-white leading-none">
-                            {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[7px] text-[#00ff00] not-italic">POWER</span>
+                            {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[7px] text-[#00f0ff] not-italic">POWER</span>
                          </span>
                       </div>
                    </div>

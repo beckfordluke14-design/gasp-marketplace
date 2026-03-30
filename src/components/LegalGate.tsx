@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { ShieldCheck } from 'lucide-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function LegalGate() {
+  const router = useRouter();
   const [showGate, setShowGate] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [fadingOut, setFadingOut] = useState(false);
@@ -32,6 +33,10 @@ export default function LegalGate() {
     setTimeout(() => {
       setShowGate(false);
     }, 500); // Wait for the 500ms fade-out transition
+  };
+
+  const navigateTo = (path: string) => {
+    router.push(path);
   };
 
   return (
@@ -73,9 +78,9 @@ export default function LegalGate() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-6 text-[8px] font-black uppercase text-white/30 tracking-widest relative z-10 pt-4 border-t border-white/5">
-                <Link href="/terms" className="hover:text-white transition-colors">Terms of Uplink</Link>
-                <Link href="/privacy" className="hover:text-white transition-colors">Data Privacy Node</Link>
-                <Link href="/contact" className="hover:text-white transition-colors">Support Interface</Link>
+                <button onClick={() => navigateTo('/terms')} className="hover:text-white transition-colors">Terms of Uplink</button>
+                <button onClick={() => navigateTo('/privacy')} className="hover:text-white transition-colors">Data Privacy Node</button>
+                <button onClick={() => navigateTo('/contact')} className="hover:text-white transition-colors">Support Interface</button>
             </div>
           </div>
         </div>
