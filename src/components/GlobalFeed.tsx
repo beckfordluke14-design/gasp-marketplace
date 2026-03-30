@@ -181,8 +181,8 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                                 <span className="text-[9px] font-black text-red-500 uppercase tracking-[0.2em]">Heat Level 5 // Prime Unlock</span>
                              </div>
                          </div>
-                         <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter uppercase text-white drop-shadow-2xl">Private Narrative Vault</h3>
-                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 italic">unfiltered personal intelligence archive</p>
+                         <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter uppercase text-white drop-shadow-2xl">Operational Intelligence Archive</h3>
+                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 italic">restricted field intelligence sync</p>
                          <button 
                              onClick={(e) => { 
                                   e.stopPropagation(); 
@@ -234,8 +234,8 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                                 <span className="text-[9px] font-black text-[#ff00ff] uppercase tracking-[0.2em]">Heat Level 4 // Exclusive Set</span>
                              </div>
                          </div>
-                         <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter uppercase text-white drop-shadow-2xl">Verified Private Set</h3>
-                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 italic">personal narrative archive leak</p>
+                         <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter uppercase text-white drop-shadow-2xl">Secure Data Uplink</h3>
+                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 italic">classified operational briefing</p>
                          <button 
                             onClick={(e) => { 
                                  e.stopPropagation();                                 trackEvent('vault_unlock_intent', profile.id, { type: 'image', price: broadcast.lock_price || COST_VAULT_UNLOCK });
@@ -702,9 +702,9 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
       )}
 
       {/* 🛡️ STRIPE-SAFE MERCHANT FOOTER */}
-      <div className="p-12 text-center opacity-20 border-t border-white/5 space-y-2">
-          <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white">AllTheseFlows Strategic Media LLC</p>
-          <p className="text-[7px] font-medium uppercase tracking-[0.2em] text-white/60">© 2026 GASP Syndicate. Digital Narrative Content Hub. All Rights Reserved.</p>
+       <div className="p-12 text-center opacity-20 border-t border-white/5 space-y-2">
+          <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white">AllTheseFlows Strategic Media Asset Mgmt</p>
+          <p className="text-[7px] font-medium uppercase tracking-[0.2em] text-white/60">© 2026 GASP Syndicate. Strategic Intelligence & Data Hub. All Rights Reserved.</p>
       </div>
     </div>
   );

@@ -62,6 +62,7 @@ export interface Profile {
   };
   systemPrompt: string;
   broadcasts: Broadcast[];
+  security_clearance?: 'LEVEL 1' | 'LEVEL 2' | 'LEVEL 3' | 'LEVEL 4' | 'LEVEL 5' | 'TOP SECRET' | 'SOVEREIGN';
 }
 
 export interface Agency {
@@ -109,7 +110,8 @@ export const initialPersonas: Profile[] = [
        rules: ['use parce sparingly', 'use mi amor often', 'focus on class']
     },
     systemPrompt: 'You are Valentina Lima...',
-    broadcasts: []
+    broadcasts: [],
+    security_clearance: 'LEVEL 4'
   }
 ];
 

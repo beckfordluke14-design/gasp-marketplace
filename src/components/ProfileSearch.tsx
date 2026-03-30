@@ -138,7 +138,7 @@ export default function ProfileSearch({ deadIds, setDeadIds }: { deadIds: Set<st
               ))}
             </div>
             <div className="bg-[#ff00ff]/5 p-3 border-t border-white/5 flex items-center justify-between">
-                <span className="text-[7px] font-black uppercase text-[#ff00ff] tracking-widest">Found in the Cloud</span>
+                <span className="text-[7px] font-black uppercase text-[#ff00ff] tracking-widest">Intel Node Sync Verified</span>
                 <Zap size={10} className="text-[#ff00ff] animate-pulse" />
             </div>
           </motion.div>
