@@ -354,21 +354,21 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                         <div className="w-1 h-1 rounded-full bg-[#00f0ff] opacity-40" />
                      </div>
                     
-                    {isEditing ? (
-                       <textarea 
-                          value={editedCaption}
-                          onChange={(e) => setEditedCaption(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); }}
-                          className="w-full bg-white/10 border border-white/20 rounded-2xl p-4 text-[20px] md:text-[28px] lg:text-[36px] font-black tracking-tighter text-white italic lowercase leading-[1.1] selection:bg-[#ff00ff] outline-none"
-                          autoFocus
-                       />
-                    ) : (
-                       <h2 className="text-[20px] md:text-[28px] lg:text-[36px] font-black tracking-tighter text-white italic lowercase leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
-                          {broadcast.content}
-                       </h2>
-                    )}
-                      </div>
-                      <div className="flex items-center gap-4 md:gap-6 pointer-events-auto">
+                     {isEditing ? (
+                        <textarea 
+                           value={editedCaption}
+                           onChange={(e) => setEditedCaption(e.target.value)}
+                           onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); }}
+                           className="w-full bg-white/10 border border-white/20 rounded-2xl p-4 text-[20px] md:text-[28px] lg:text-[36px] font-black tracking-tighter text-white italic lowercase leading-[1.1] selection:bg-[#ff00ff] outline-none"
+                           autoFocus
+                        />
+                     ) : (
+                        <h2 className="text-[20px] md:text-[28px] lg:text-[36px] font-black tracking-tighter text-white italic lowercase leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+                           {broadcast.content}
+                        </h2>
+                     )}
+                       </div>
+                       <div className="flex items-center gap-4 md:gap-6 pointer-events-auto">
                            <button onClick={handleLike} className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl backdrop-blur-md border flex flex-col items-center justify-center transition-all ${hasLiked ? 'bg-red-500/10 border-red-500/40 text-red-500' : 'bg-black/10 border-white/5 text-white/30 hover:scale-110 hover:border-white/20'}`}>
                               <Heart size={20} className={hasLiked ? 'fill-current' : ''} />
                               <span className="text-[7px] font-black mt-0.5 uppercase">{likes}</span>
@@ -641,8 +641,7 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
   return (
     <div ref={containerRef} className="flex-1 h-screen overflow-y-auto scroll-smooth no-scrollbar relative w-full touch-pan-y bg-transparent">
       
-      {/* 📡 SYNDICATE TOP-FLIGHT: Ghost Overlay Hub */}
-      <div className="fixed top-0 left-0 right-0 z-[1000] flex flex-col gap-0 pointer-events-none bg-transparent">
+      <div className="fixed top-14 left-0 right-0 z-[1000] flex flex-col gap-0 pointer-events-none bg-transparent px-4">
           {/* Market Pulse Ticker */}
           <div className="scale-90 origin-top h-10">
              <MobilePulseTicker />
@@ -654,7 +653,7 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
           </div>
 
           {/* Neural Search Hub */}
-          <div className="max-w-[180px] mx-auto scale-75 origin-top -mt-4 opacity-40 hover:opacity-100 transition-opacity pointer-events-auto">
+          <div className="max-w-[200px] mx-auto scale-90 origin-top -mt-2 opacity-100 transition-opacity pointer-events-auto">
              <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
           </div>
       </div>

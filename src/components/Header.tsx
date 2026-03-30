@@ -50,7 +50,7 @@ export default function Header({
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] flex flex-col pointer-events-none">
         {/* Navigation Bar */}
-        <header className="h-12 md:h-14 bg-transparent flex items-center justify-between px-6 md:px-12 pointer-events-auto transition-all">
+        <header className="h-12 md:h-14 bg-black flex items-center justify-between px-6 md:px-12 pointer-events-auto transition-all">
             
             {/* Logo & Mobile Menu */}
             <div className="flex items-center gap-4 md:gap-10 pointer-events-auto">

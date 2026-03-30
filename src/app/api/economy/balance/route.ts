@@ -40,19 +40,6 @@ export async function POST(req: Request) {
     if (!userId) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
     try {
-        // 🛡️ AUTO-MIGRATE: Ensure transactions ledger exists on first use
-        await db.query(`
-            CREATE TABLE IF NOT EXISTS transactions (
-                id SERIAL PRIMARY KEY,
-                user_id TEXT NOT NULL,
-                amount INTEGER NOT NULL,
-                type TEXT NOT NULL,
-                provider TEXT DEFAULT 'syndicate_core',
-                description TEXT,
-                meta JSONB DEFAULT '{}',
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-            )
-        `).catch(() => {}); // Non-blocking — already exists is fine
         // ── ACTION: SPEND CREDITS ──
         if (action === 'spend') {
             if (!amount || amount <= 0) return NextResponse.json({ success: false, error: 'Invalid amount' }, { status: 400 });

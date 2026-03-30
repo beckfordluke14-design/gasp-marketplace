@@ -1,35 +1,42 @@
 import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
+
+async function getNews(searchParams: URLSearchParams) {
+  const action = searchParams.get('action');
+  if (action === 'get_latest_news') {
+     const limit = parseInt(searchParams.get('limit') || '3');
+     const { rows } = await db.query(`SELECT * FROM news_posts ORDER BY created_at DESC LIMIT $1`, [limit]);
+     return NextResponse.json({ success: true, posts: rows });
+  }
+  if (action === 'get_news') {
+     const personaId = searchParams.get('persona_id') || searchParams.get('personaId');
+     if (!personaId) return new Response('Missing Persona ID', { status: 400 });
+     const { rows } = await db.query(`SELECT * FROM news_posts WHERE persona_id = $1 ORDER BY created_at DESC`, [personaId]);
+     return NextResponse.json({ success: true, posts: rows });
+  }
+  return new Response('Invalid GET Action', { status: 400 });
+}
+
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    return await getNews(searchParams);
+  } catch (e: any) {
+    return new Response(e.message, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
     const { action, payload } = body;
 
+    // Support for POST-based news fetch (Legacy/Hub Support)
     if (action === 'get_latest_news') {
-        const { limit = 3 } = payload || {};
-        const { rows } = await db.query(`
-            SELECT * FROM news_posts 
-            ORDER BY created_at DESC 
-            LIMIT $1
-        `, [limit]);
-        return NextResponse.json({ success: true, posts: rows });
-    }
-
-    if (action === 'get_news') {
-        const { personaId } = payload || {};
-        const { rows } = await db.query(`
-            SELECT * FROM news_posts 
-            WHERE persona_id = $1 
-            ORDER BY created_at DESC
-        `, [personaId]);
-        return NextResponse.json({ success: true, posts: rows });
-    }
-
-    if (action === 'delete_news') {
-        const { id } = payload || {};
-        await db.query(`DELETE FROM news_posts WHERE id = $1`, [id]);
-        return NextResponse.json({ success: true, message: 'Intel Vaporized.' });
+       const { limit = 3 } = payload || {};
+       const { rows } = await db.query(`SELECT * FROM news_posts ORDER BY created_at DESC LIMIT $1`, [limit]);
+       return NextResponse.json({ success: true, posts: rows });
     }
 
     if (action === 'get_profiles') {

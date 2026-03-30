@@ -193,12 +193,6 @@ function MarketplaceContent() {
        </div>
        
        <div className="flex-1 flex flex-col relative h-screen overflow-hidden">
-            <NeuralPulseHub 
-               followingIds={following} 
-               profiles={randomizedProfiles} 
-               unreadCounts={unreadCounts} 
-               onSelectProfile={handleSelectProfile}
-            />
             <Header 
                onOpenTopUp={() => setIsTopUpOpen(true)} 
                deadIds={deadIds} 

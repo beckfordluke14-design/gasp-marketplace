@@ -149,7 +149,7 @@ export default function StoriesRow({ profiles, onSelectProfile }: StoriesRowProp
                  animate={{ opacity: 1, y: 0, scale: 1 }}
                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   onClick={() => setIsExpanded(true)}
-                  className="px-5 py-2 bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl flex items-center gap-3 shadow-[0_10px_40px_rgba(0,0,0,0.4)] hover:bg-white/10 transition-all pointer-events-auto group"
+                  className="px-5 py-2 bg-transparent border border-white/10 rounded-2xl flex items-center gap-3 hover:bg-white/5 transition-all pointer-events-auto group"
                 >
                    <div className="flex -space-x-3">
                       {storyData.slice(0, 3).map((s, i) => (

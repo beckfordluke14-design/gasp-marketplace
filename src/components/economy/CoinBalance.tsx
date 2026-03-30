@@ -45,7 +45,7 @@ export default function CoinBalance({ onOpenTopUp }: CoinBalanceProps) {
 
   useEffect(() => {
     fetchBalance();
-    const interval = setInterval(fetchBalance, 3000); // Poll every 3s for real-time feel
+    const interval = setInterval(fetchBalance, 10000); // 🛡️ Reduced polling pressure for High-Status uptime
 
     // Listen for immediate refresh events after any spend
     const onSpend = () => setTimeout(fetchBalance, 500); // slight debounce for DB to commit
