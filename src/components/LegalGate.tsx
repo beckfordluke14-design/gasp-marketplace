@@ -45,7 +45,7 @@ export default function LegalGate() {
          {/* 🧬 THE SYNDICATE SHIELD: DAO / MANAGED INTERFACE */}
          <div className="text-center space-y-3 mb-12">
             <h2 className="text-xl font-syncopate font-black uppercase italic tracking-tighter text-white">Neural Uplink Interface</h2>
-            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 italic">A Managed Service provided by AllTheseFlows Strategic Media LLC</p>
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 italic">A Managed Service provided by AllTheseFlows LLC d.b.a. AllTheseFlows Strategic Media</p>
          </div>
 
          <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 space-y-10 shadow-2xl backdrop-blur-3xl relative overflow-hidden group">

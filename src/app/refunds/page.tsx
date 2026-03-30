@@ -20,6 +20,10 @@ export default function RefundPolicy() {
                 <AlertTriangle size={16} />
                 <span className="text-[10px] font-black uppercase tracking-widest">Strict Financial Covenant</span>
             </div>
+            <div>
+                 <p className="text-[12px] font-black uppercase text-white/50 tracking-widest mb-1 italic">Legal Identity</p>
+                 <p className="text-[14px] font-black uppercase text-white tracking-widest font-syncopate italic">AllTheseFlows LLC d.b.a. AllTheseFlows Strategic Media</p>
+            </div>
             <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-white font-syncopate">Refund & Cancellation Policy</h1>
             <p className="text-[10px] uppercase tracking-widest text-[#ff00ff] font-bold">Last Updated: March 20, 2026</p>
         </div>
@@ -30,13 +34,13 @@ export default function RefundPolicy() {
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">1. Final Sale Guarantee</h2>
                 <div className="p-6 border-l-4 border-red-500 bg-white/5 rounded-r-2xl">
                     <p className="font-bold text-white text-base">All sales of System Credits are strictly final.</p>
-                    <p className="mt-3 text-white/70">Because System Credits are digital assets that are instantly allocated to your sovereign node and are accessible immediately upon purchase for strategic intelligence retrieval, <strong>AllTheseFlows Strategic Media LLC does not offer refunds, partial refunds, or chargeback authorizations once a transaction successfully processes.</strong> We fulfill our service instantly via automated synchronization protocols.</p>
+                    <p className="mt-3 text-white/70">Because System Credits are digital assets that are instantly allocated to your sovereign node and are accessible immediately upon purchase for strategic intelligence retrieval, <strong>AllTheseFlows LLC d.b.a. AllTheseFlows Strategic Media does not offer refunds, partial refunds, or chargeback authorizations once a transaction successfully processes.</strong> We fulfill our service instantly via automated synchronization protocols.</p>
                 </div>
             </section>
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">2. Chargeback Policy</h2>
-                <p>By engaging in a transaction with AllTheseFlows Strategic Media LLC, you legally agree that the product is a consumable, 100% digital service delivered immediately upon successful payment confirmation. Fraudulent chargeback disputes initiated through your bank for legitimately delivered System Credits will result in a permanent blacklist of your identity and access node across our entire strategic network.</p>
+                <p>Welcome to Gasp.fun, operated by AllTheseFlows LLC d.b.a. AllTheseFlows Strategic Media ("we," "us," or "our"). All sales made through the Terminal are final. By engaging in a transaction with us, you legally agree that the product is a consumable, 100% digital service delivered immediately upon successful payment confirmation. Fraudulent chargeback disputes initiated through your bank for legitimately delivered System Credits will result in a permanent blacklist of your identity and access node across our entire strategic network.</p>
             </section>
 
             <section className="space-y-3">

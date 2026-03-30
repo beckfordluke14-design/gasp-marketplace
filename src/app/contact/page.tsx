@@ -25,7 +25,7 @@ export default function ContactSupport() {
       <div className="fixed top-0 inset-x-0 h-20 bg-black/60 backdrop-blur-3xl border-b border-white/5 z-50 flex items-center px-6 md:px-12">
         <Link href="/" className="flex items-center gap-2 text-white/50 hover:text-white transition-colors group">
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Return to Hub</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Return to Terminal</span>
         </Link>
       </div>
 
@@ -68,7 +68,7 @@ export default function ContactSupport() {
                         </div>
                         <div>
                             <p className="font-bold text-[10px] uppercase tracking-[0.2em] text-white/40 mb-1">Corporate Infrastructure</p>
-                            <p className="text-sm font-bold text-white mb-0.5">AllTheseFlows Strategic Media LLC</p>
+                            <p className="text-sm font-bold text-white mb-0.5">AllTheseFlows LLC d.b.a. AllTheseFlows Strategic Media</p>
                             <p className="text-[10px] text-white/30 uppercase tracking-widest mt-1">Sovereign Data Operations // USA</p>
                         </div>
                     </div>

@@ -24,7 +24,7 @@ export default function PrivacyPolicy() {
             
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">1. Who We Are</h2>
-                <p>This Privacy Policy explains how AllTheseFlows Strategic Media LLC ("we," "us," or "our") collects, uses, protects, and discloses information when you use Gasp.fun and our associated strategic intelligence services.</p>
+                <p>This Privacy Policy explains how AllTheseFlows LLC d.b.a. AllTheseFlows Strategic Media ("we," "us," or "our") collects, uses, protects, and discloses information when you use Gasp.fun and our associated strategic intelligence services.</p>
             </section>
 
             <section className="space-y-3">
@@ -44,7 +44,7 @@ export default function PrivacyPolicy() {
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">4. Data Usage and Non-Sale Covenant</h2>
-                <p>We use your information exclusively to provide, maintain, and improve the strategic media experience on Gasp.fun. <strong>AllTheseFlows Strategic Media LLC strictly does not sell your personal data, synchronization behavior, identity, or emails to third-party data brokers or advertisers.</strong></p>
+                <p>We use your information exclusively to provide, maintain, and improve the strategic media experience on Gasp.fun. <strong>AllTheseFlows LLC d.b.a. AllTheseFlows Strategic Media strictly does not sell your personal data, synchronization behavior, identity, or emails to third-party data brokers or advertisers.</strong></p>
             </section>
 
             <section className="space-y-3">
