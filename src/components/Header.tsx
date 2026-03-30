@@ -130,7 +130,10 @@ export default function Header({
                    </div>
                 ) : (
                    <button 
-                      onClick={() => login()}
+                      onClick={() => {
+                         console.log("🏁 [Sovereign] Initializing Social Pop-up Node...");
+                         login();
+                      }}
                       className="h-7 md:h-9 px-4 bg-white/5 border border-white/10 rounded-full flex items-center justify-center gap-2 hover:bg-white/10 active:scale-95 transition-all group"
                    >
                       <User size={10} className="text-white/40 group-hover:text-[#ff00ff] transition-colors" />

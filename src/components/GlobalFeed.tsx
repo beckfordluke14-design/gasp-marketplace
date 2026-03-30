@@ -290,9 +290,9 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                    <div className="space-y-3 relative z-10 pt-2 pb-0">
                       {/* 👤 NEURAL HEADER NODE (LINKED) */}
                       <div className="flex items-center gap-3">
-                         <Link 
-                            href={`/${profile.id}`}
-                            className="w-12 h-12 rounded-full overflow-hidden border border-[#00f0ff]/40 shadow-[0_0_20px_rgba(0,240,255,0.1)] p-0.5 bg-black/40 hover:scale-105 transition-all duration-300 cursor-pointer group/avatar"
+                         <div 
+                            onClick={() => onSelectProfile(profile.id)}
+                            className="w-12 h-12 rounded-full overflow-hidden border border-[#00f0ff]/40 shadow-[0_0_20px_rgba(0,240,255,0.1)] p-0.5 bg-black/40 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer group/avatar"
                          >
                             <div className="w-full h-full rounded-full overflow-hidden">
                                <img 
@@ -301,10 +301,10 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                                   className="w-full h-full object-cover object-top" 
                                />
                             </div>
-                         </Link>
+                         </div>
                          <div className="flex flex-col grow">
-                            <div className="flex items-center justify-between">
-                               <span className="text-[10px] md:text-sm font-black italic tracking-tighter text-white uppercase leading-none">{profile.name}</span>
+                            <div className="flex items-center justify-between" onClick={() => onSelectProfile(profile.id)}>
+                               <span className="text-[10px] md:text-sm font-black italic tracking-tighter text-white uppercase leading-none cursor-pointer hover:text-[#00f0ff] transition-colors">{profile.name}</span>
                                <span className="text-[6px] font-black uppercase text-white/20 tracking-widest">{new Date(broadcast.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <div className="flex items-center gap-2 mt-0.5">
@@ -667,16 +667,25 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
         });
         const unique = Array.from(registry.values());
         
-        // 🧬 SOVEREIGN 2:2 INTERLEAVING
+        // 🧬 SOVEREIGN 2:2 INTERLEAVING (STRICT CADENCE)
         const text = unique.filter(i => !i.broadcast.image_url);
         const media = unique.filter(i => i.broadcast.image_url);
-        const interleaved: any[] = [];
-        let t = 0, m = 0;
         
-        while (t < text.length || m < media.length) {
+        if (media.length === 0) return unique.sort((a, b) => new Date(b.broadcast.created_at).getTime() - new Date(a.broadcast.created_at).getTime());
+
+        const interleaved: any[] = [];
+        let t = 0;
+        let m = 0;
+        
+        // Continue until text is exhausted to maintain freshness
+        while (t < text.length) {
+          // 2x Text
           for (let i = 0; i < 2 && t < text.length; i++) interleaved.push(text[t++]);
-          for (let i = 0; i < 2 && m < media.length; i++) interleaved.push(media[m++]);
-          if (t >= text.length && m >= media.length) break;
+          // 2x Media (Looping if media pool is shallow)
+          for (let i = 0; i < 2; i++) {
+            interleaved.push(media[m % media.length]);
+            m++;
+          }
         }
 
         return interleaved;

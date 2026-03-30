@@ -329,7 +329,6 @@ function MarketplaceContent() {
             isOpen={openChatIds.length > 0}
             onClose={() => setOpenChatIds([])}
          />
-
      </main>
   );
 }

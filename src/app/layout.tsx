@@ -51,6 +51,8 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
+import { PrivyProvider } from "@privy-io/react-auth";
+
 export default function RootLayout({
   children,
 }: {
@@ -62,9 +64,30 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className="bg-black overflow-x-hidden antialiased selection:bg-[#ff00ff]/30 selection:text-white">
-        <UserProvider>
-          {children}
-        </UserProvider>
+        <PrivyProvider
+          appId="cm1is5rpg00is4qonf00ndkki"
+          config={{
+            loginMethods: ['google', 'twitter', 'discord', 'email', 'wallet'],
+            appearance: {
+              theme: 'dark',
+              accentColor: '#ff00ff',
+              showWalletLoginFirst: false,
+              logo: 'https://asset.gasp.fun/logo.png',
+            },
+            embeddedWallets: {
+              ethereum: {
+                createOnLogin: 'users-without-wallets',
+              },
+              solana: {
+                createOnLogin: 'users-without-wallets',
+              },
+            },
+          }}
+        >
+          <UserProvider>
+            {children}
+          </UserProvider>
+        </PrivyProvider>
       </body>
     </html>
   );
