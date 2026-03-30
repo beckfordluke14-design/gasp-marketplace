@@ -1,6 +1,5 @@
 import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
-import type Stripe from 'stripe';
 
 export async function POST(req: Request) {
     const payload = await req.text();
@@ -26,38 +25,32 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
     }
 
-    // 🛡️ INSTITUTIONAL FULFILLMENT: Settling Credits in Railway
-    if (event.type === 'checkout.session.completed') {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const metadata = session.metadata;
-
-        if (metadata && metadata.userId && metadata.credits) {
-            const userId = metadata.userId;
-            const credits = parseInt(metadata.credits, 10);
-
-            console.log(`🏦 [Economy] Fulfilling Settlement: ${credits} BP for User ${userId}`);
-
-            try {
-                await db.query('BEGIN');
-                
-                // Atomic balance infusion
-                await db.query(
-                    'UPDATE profiles SET credit_balance = credit_balance + $1, updated_at = NOW() WHERE id = $2',
-                    [credits, userId]
-                );
-
-                // Transaction logging
-                await db.query(
-                    'INSERT INTO transactions (user_id, amount, type, provider, meta, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
-                    [userId, credits, 'deposit', 'stripe', JSON.stringify({ session_id: session.id, packageId: metadata.packageId })]
-                );
-
-                await db.query('COMMIT');
-                console.log(`✅ [Economy] Settlement Verified & Credits Unleashed: ${userId}`);
-            } catch (dbErr) {
-                await db.query('ROLLBACK');
-                console.error('[Economy] Settlement Fulfillment Failure:', dbErr);
-                return NextResponse.json({ error: 'Database Synchronization Error' }, { status: 500 });
+    // 🛡️ CRYPTO ONRAMP FULFILLMENT: Fiat-to-Crypto Settlement via Embedded Onramp
+    if ((event.type as string) === 'crypto.onramp_session.updated') {
+        const onrampSession = event.data.object as any;
+        if (onrampSession.status === 'fulfilled') {
+            const metadata = onrampSession.metadata;
+            if (metadata?.userId && metadata?.credits) {
+                const userId = metadata.userId;
+                const credits = parseInt(metadata.credits, 10);
+                console.log(`🏦 [Onramp] Fulfilling Crypto Settlement: ${credits} BP for User ${userId}`);
+                try {
+                    await db.query('BEGIN');
+                    await db.query(
+                        'UPDATE profiles SET credit_balance = credit_balance + $1, updated_at = NOW() WHERE id = $2',
+                        [credits, userId]
+                    );
+                    await db.query(
+                        'INSERT INTO transactions (user_id, amount, type, provider, meta, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
+                        [userId, credits, 'deposit', 'stripe_onramp', JSON.stringify({ session_id: onrampSession.id, packageId: metadata.packageId })]
+                    );
+                    await db.query('COMMIT');
+                    console.log(`✅ [Onramp] Crypto Settlement Complete: ${userId} +${credits} BP`);
+                } catch (dbErr) {
+                    await db.query('ROLLBACK');
+                    console.error('[Onramp] Settlement Failure:', dbErr);
+                    return NextResponse.json({ error: 'Database Sync Error' }, { status: 500 });
+                }
             }
         }
     }
