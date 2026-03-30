@@ -135,22 +135,22 @@ export function proxyImg(url: any): string {
   
   let finalUrl = (url || '').trim();
 
-  // 1. 🛡️ MASTER DOMAIN STRIPPER: 
-  const supabaseHost = '.supabase.co';
-  if (finalUrl.includes(supabaseHost)) {
-      const publicPrefix = '/storage/v1/object/public/';
-      const idx = finalUrl.indexOf(publicPrefix);
-      if (idx !== -1) {
-          finalUrl = finalUrl.substring(idx + publicPrefix.length);
-      }
-  }
+   // 1. 🛡️ SOVEREIGN CLOUDFLARE R2 BRIDGE:
+   const supabasePrefix = 'https://asset.gasp.fun/';
+   
+   if (finalUrl.includes('supabase.co')) {
+       const idx = finalUrl.indexOf('/public/');
+       if (idx !== -1) {
+           finalUrl = finalUrl.substring(idx + 8); // Strip up to and including /public/
+       }
+   }
 
-  // 2. Full external URLs (non-Supabase): Keep as is (Direct Loading)
-  if (finalUrl.startsWith('http')) return finalUrl;
+   // 2. Full external non-Sovereign URLs: Keep as is
+   if (finalUrl.startsWith('http')) return finalUrl;
 
-  // 3. Local Static Assets: Keep as is
-  if (finalUrl.startsWith('/')) return finalUrl;
+   // 3. Local Static Assets: Keep as is
+   if (finalUrl.startsWith('/')) return finalUrl;
 
-  // 4. 💎 SOVEREIGN ASSET HUB (asset.gasp.fun):
-  return `https://asset.gasp.fun/${finalUrl}`;
+   // 4. 💎 CLOUDFLARE ASSET HUB (asset.gasp.fun):
+   return `https://asset.gasp.fun/${finalUrl}`;
 }

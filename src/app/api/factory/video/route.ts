@@ -74,7 +74,7 @@ export async function POST(req: Request) {
         const stillUrl = `https://image.pollinations.ai/prompt/${encodedStill}?width=720&height=1280&nologo=true&seed=${Math.floor(Math.random()*10000)}&model=flux`;
         
         // 5. STEP 2: Animate (The Grok-X.ai Bridge)
-        const mockVideoUrl = `https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/chat_media/samples/gasp_motion_sample_${persona.race || 'latina'}.mp4`;
+        const mockVideoUrl = `https://asset.gasp.fun/chat_media/samples/gasp_motion_sample_${persona.race || 'latina'}.mp4`;
 
         // 6. DB SYNC: Railway Post Ingest
         const { rows: postRows } = await db.query(`

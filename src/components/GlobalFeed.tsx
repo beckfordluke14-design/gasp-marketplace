@@ -276,7 +276,7 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                    {/* 🎞️ SCANLINE EFFECT */}
                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-white/[0.02] to-transparent h-[200%] animate-[scan_8s_linear_infinite]" />
                    
-                   <div className="absolute -top-3 -left-3 px-4 py-1.5 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-xl shadow-[0_0_30px_rgba(255,234,0,0.3)] z-50">
+                   <div className="absolute top-3 left-3 px-4 py-1.5 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-xl shadow-[0_0_30px_rgba(255,234,0,0.3)] z-50">
                       Sector Intelligence // High-Heat Node
                    </div>
 

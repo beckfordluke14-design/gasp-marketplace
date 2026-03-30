@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     // Security: only allow known safe image/video sources (Add Unsplash for Premium Fallbacks)
     const allowedHosts = [
         'image.pollinations.ai', 'pollinations.ai', 
-        'picsum.photos', 'vvcwjlcequbkhlpmwzlc.supabase.co', 
+        'picsum.photos', 'asset.gasp.fun', 
         'assets.mixkit.co', 'mixkit.co', 'images.unsplash.com', 'unsplash.com'
     ];
     const urlObj = new URL(decoded);

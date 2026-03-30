@@ -167,7 +167,7 @@ export default function BillboardCommander() {
     const proxyImg = (url?: string | null) => {
         if (!url) return '/v1.png';
         if (!url.startsWith('http')) {
-            return `https://vvcwjlcequbkhlpmwzlc.supabase.co/storage/v1/object/public/posts/${url}`;
+            return `https://asset.gasp.fun/posts/${url}`;
         }
         return url;
     };

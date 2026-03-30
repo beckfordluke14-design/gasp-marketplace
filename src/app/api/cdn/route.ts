@@ -10,17 +10,18 @@ export async function GET(req: NextRequest) {
     return new NextResponse('Missing path', { status: 400 });
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vvcwjlcequbkhlpmwzlc.supabase.co';
-  const targetUrl = `${supabaseUrl}/storage/v1/object/public/${path}`;
-
-  try {
-    const response = await fetch(targetUrl, {
-      next: { revalidate: 31536000 } // Cache for 1 year in Next.js/Cloudflare
-    });
-
-    if (!response.ok) {
-      return new NextResponse('Not found', { status: 404 });
-    }
+   // 🛡️ SOVEREIGN R2 HUB: asset.gasp.fun
+   const targetUrl = `https://asset.gasp.fun/${path}`;
+ 
+   try {
+     const response = await fetch(targetUrl, {
+       next: { revalidate: 31536000 } // Cache for 1 year
+     });
+ 
+     if (!response.ok) {
+       console.log(`[R2 Fetch Miss]: ${targetUrl}`);
+       return new NextResponse('Not found', { status: 404 });
+     }
 
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
     const buffer = await response.arrayBuffer();
