@@ -23,7 +23,6 @@ const BrandingOverlay: React.FC<BrandingOverlayProps> = ({ profileName, classNam
                 </span>
             </div>
         </div>
-
         {/* Minimalist Corner Glyph */}
         <div className="absolute bottom-10 left-10 border-l border-b border-[#00f0ff]/20 w-8 h-8 rounded-bl-xl z-50 pointer-events-none" />
     </div>

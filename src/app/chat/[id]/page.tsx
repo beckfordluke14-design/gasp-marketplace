@@ -30,12 +30,7 @@ import { twMerge } from 'tailwind-merge';
 import VaultGallery from '@/components/chat/VaultGallery';
 import TipModal from '@/components/chat/TipModal';
 import ChatVaultItem from '@/components/chat/ChatVaultItem';
-import { supabase } from '@/lib/supabaseClient';
 
-// 🛡️ SAFE CLIENT: Centralized bridge
-function getSafeSupabase() {
-  return supabase;
-}
 import VoiceMessage from '@/components/chat/VoiceMessage';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
 import { useUser } from '@/components/providers/UserProvider';
@@ -109,48 +104,22 @@ export default function VerdadChatPage(props: any) {
   const profile: any = staticProfile || dbProfile;
   const cityStatus = profile ? getCityStatus(profile) : { time: '00:00', weather: '...' };
 
-  // 🧬 DB PROFILE FETCH: Load from Supabase if not in static roster
+  // 🧬 DB PROFILE FETCH: Load from Railway API if not in static roster
   useEffect(() => {
-    if (staticProfile || !id) return; // Already found statically
-    async function fetchDbProfile() {
-      // 🚑 EMERGENCY RECOVERY: Restoring 100% Baseline Chat Pulse
-      const { data: p } = await supabase
-        .from('personas')
-        .select('*')
-        .eq('id', id)
-        .eq('is_active', true)
-        .single();
-      
-      if (p) {
-        setDbProfile({
-          ...p,
-          image: p.seed_image_url || p.image || '/icons/icon-512x512.png',
-          timezone: p.timezone || 'America/New_York',
-          vault: [] // Load separately to prevent crash
-        });
-
-        // Standalone Vault Fetch (Pulse 2)
-        const { data: vItems } = await supabase
-          .from('posts')
-          .select('*')
-          .eq('persona_id', id)
-          .eq('is_vault', true);
-        
-        if (vItems) {
-          const vaultItems = vItems.map((post: any) => ({
-            id: post.id,
-            type: post.content_type === 'video' ? 'video' : 'image',
-            blurred_url: post.content_url,
-            full_url: post.content_url,
-            niche_tag: 'EDITORIAL',
-            price: post.price || 25,
-            caption: post.caption || ''
-          }));
-          setDbProfile((prev: any) => prev ? { ...prev, vault: vaultItems } : prev);
+    if (staticProfile || !id) return; 
+    fetch(`/api/admin/persona/${id}`)
+      .then(r => r.json())
+      .then(p => {
+        if (p && p.id) {
+          setDbProfile({
+            ...p,
+            image: p.seed_image_url || p.image || '/icons/icon-512x512.png',
+            timezone: p.timezone || 'America/New_York',
+            vault: [] 
+          });
         }
-      }
-    }
-    fetchDbProfile();
+      })
+      .catch(() => {});
   }, [id, staticProfile]);
 
   const { messages, input, setMessages, handleInputChange, handleSubmit, isLoading, data }: any = useChat({
@@ -174,58 +143,35 @@ export default function VerdadChatPage(props: any) {
     }
   } as any);
 
-  // 🧊 NEURAL HYDRATION: Load historical nodes
+  // 🧊 NEURAL HYDRATION: Load historical nodes from Railway API
   useEffect(() => {
     async function hydrateHistory() {
         try {
-            console.log(`🧠 [Brain] Resuming connection for ${profile?.name}...`);
-            const supabaseClient = getSafeSupabase();
-            if (!supabaseClient) {
-                console.warn('[Brain] Supabase client unavailable — skipping history hydration.');
-                return;
-            }
+            console.log(`🧠 [Brain] Syncing neural history for ${profile?.name || 'persona'}...`);
+            const res = await fetch(`/api/chat/history?userId=${userId}&personaId=${id}`);
+            const data = await res.json();
 
-            const { data: dbMessages } = await supabaseClient
-                .from('chat_messages')
-                .select('*')
-                .eq('user_id', userId)
-                .eq('persona_id', id)
-                .order('created_at', { ascending: true });
-
-            if (dbMessages && dbMessages.length > 0) {
-                setMessages(dbMessages.map((m: any) => ({
+            if (data.success && data.messages) {
+                setMessages(data.messages.map((m: any) => ({
                     id: m.id,
-                    role: m.role as any,
+                    role: m.role,
                     content: m.content,
-                    createdAt: new Date(m.created_at),
+                    createdAt: new Date(m.createdAt),
                     content_type: m.content_type,
-                    media_url: m.media_url
+                    media_url: m.audio_url || m.media_url
                 })));
             }
         } catch (err) {
-            console.warn('[Brain] History hydration skipped:', err);
+            console.warn('[Brain] History hydration fail:', err);
         }
     }
-    // Hydrate once we have either a static or DB profile resolved
-    if (id) hydrateHistory();
+    if (id && userId !== 'guest') hydrateHistory();
   }, [id, userId, setMessages]);
 
-  // SYNDICATE: MARK AS READ (Read Receipt Sync)
+  // SYNDICATE: MARK AS READ (Handled via API in v2.1 Railway)
   useEffect(() => {
-    async function markAsRead() {
-        try {
-            const supabaseClient = getSafeSupabase();
-            if (!supabaseClient) return;
-            await supabaseClient
-                .from('chat_messages')
-                .update({ is_read: true })
-                .match({ user_id: userId, persona_id: id, role: 'assistant', is_read: false });
-        } catch (err) {
-            console.warn('[Brain] Read receipt sync skipped:', err);
-        }
-    }
-    if (id && profile && messages.length > 0) markAsRead();
-  }, [id, profile, messages]);
+    // Legacy Supabase Sync removed.
+  }, [id, messages]);
 
   // WHALE-HUNTER REVENUE ENGINE (Atomic Database Sync)
   const handleVaultUnlock = async (itemId: string) => {

@@ -6,7 +6,7 @@ import { MessageSquare, Zap, Lock, Heart, Trash2, Star, Brain, X, Save, Pencil, 
 import { trackEvent } from '@/lib/telemetry';
 import { useUser } from '@/components/providers/UserProvider';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
 import BrandingOverlay from '@/components/ui/BrandingOverlay';
@@ -281,7 +281,6 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                    <span className="text-[10px] md:text-[14px] font-black italic tracking-widest text-[#ff00ff] opacity-20 absolute bottom-2 right-4 whitespace-nowrap z-0 pointer-events-none">
                       FOUND ON GASP.FUN
                    </span>
-
                    {/* 🏷️ YELLOW STRATEGIC TAG */}
                    <div className="absolute top-0 left-6 px-4 py-1 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-b-lg shadow-[0_5px_15px_rgba(255,234,0,0.2)] z-50">
                       Sector Intelligence Hub // High-Heat Node
@@ -332,7 +331,7 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                       </div>
                    </div>
                 </div>
-                <BrandingOverlay profileName={profile.name} />
+
              </div>
           ) : (
              <div className="w-full h-full bg-[#050505]"><BrandingOverlay profileName={profile.name} /></div>
@@ -425,11 +424,11 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                            className="w-full bg-white/10 border border-white/20 rounded-2xl p-4 text-[12px] font-black tracking-tighter text-white italic lowercase selection:bg-[#ff00ff] outline-none"
                            autoFocus
                         />
-                     ) : (
+                     ) : broadcast.type !== 'text' ? (
                         <h2 className="text-[9px] md:text-[10px] font-black tracking-[0.2em] text-white/40 uppercase leading-relaxed italic drop-shadow-2xl max-w-[80%]">
                            {broadcast.content}
                         </h2>
-                     )}
+                     ) : null}
                        </div>
                        <div className="flex items-center gap-4 md:gap-6 pointer-events-auto">
                            <button onClick={handleLike} className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl backdrop-blur-md border flex flex-col items-center justify-center transition-all ${hasLiked ? 'bg-red-500/10 border-red-500/40 text-red-500' : 'bg-black/10 border-white/5 text-white/30 hover:scale-110 hover:border-white/20'}`}>
@@ -696,12 +695,7 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
 
   useEffect(() => {
     fetchFeed(0);
-    const channel = supabase.channel('public:posts-and-personas')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => fetchFeed(0))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'personas' }, () => fetchFeed(0))
-      .subscribe();
-      
-    return () => { supabase.removeChannel(channel); };
+
   }, [fetchFeed]);
 
   useEffect(() => {

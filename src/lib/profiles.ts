@@ -136,16 +136,9 @@ export function proxyImg(url: any): string {
   let finalUrl = (url || '').trim();
 
    // 1. 🛡️ SOVEREIGN CLOUDFLARE R2 BRIDGE:
-   const supabasePrefix = 'https://asset.gasp.fun/';
-   
-   if (finalUrl.includes('supabase.co')) {
-       const idx = finalUrl.indexOf('/public/');
-       if (idx !== -1) {
-           finalUrl = finalUrl.substring(idx + 8); // Strip up to and including /public/
-       }
-   }
+   // We prioritize asset.gasp.fun as our root storage bridge.
 
-   // 2. Full external non-Sovereign URLs: Keep as is
+   // 2. Full external URLs: Keep as is
    if (finalUrl.startsWith('http')) return finalUrl;
 
    // 3. Local Static Assets: Keep as is

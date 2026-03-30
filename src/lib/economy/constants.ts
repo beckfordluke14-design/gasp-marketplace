@@ -59,13 +59,11 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
   }
 ];
 
-// RE-MAPPED BURN RATES (Apex-Elite v5.8 Recommendation)
-// Balanced Loop: $20 provides 20,000 Credits / 6-7 Full Media Hub Unlocks.
-export const COST_VAULT_UNLOCK = 3000;           // 3,000 Credits ($3.00 High-Heat Access)
-export const COST_PREMIUM_VAULT_UNLOCK = 7500;  // 7,500 Credits ($7.50 Sovereign-Node)
+// RE-MAPPED BURN RATES (Apex-Elite v6.8 Master Protocol)
+// High-Status Revenue Node: $20 provides 20,000 Credits.
+export const COST_VAULT_UNLOCK = 6000;           // 6,000 Credits ($6.00 Apex-Entry)
+export const COST_PREMIUM_VAULT_UNLOCK = 12000; // 12,000 Credits ($12.00 Whale-Tier)
 export const COST_VOICE_NOTE = 1000;            // 1,000 Credits ($1.00 Elite Vox)
 export const COST_VOICE_TRANSLATION = 1000;     // 1,000 Credits ($1.00 Decode)
 export const COST_PRIORITY_TIP = 2000;          // 2,000 Credits ($2.00 Priority)
 export const COST_MESSAGE_TEXT = 50;            // 50 Credits ($0.05 Signal)
-
-

@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { supabase } from '@/lib/supabaseClient';
+
 import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs';

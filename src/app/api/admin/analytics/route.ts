@@ -1,10 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 export const dynamic = 'force-dynamic';
 
@@ -15,16 +10,15 @@ export async function GET() {
         const past24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
 
         // 1. Total Event Pulses (Last 24h)
-        const { count: totalEvents } = await supabase
-            .from('neural_telemetry')
-            .select('*', { count: 'exact', head: true })
-            .gte('created_at', past24h);
+        const { rows: eventCountRows } = await db.query(`
+            SELECT COUNT(*) FROM neural_telemetry WHERE created_at >= $1
+        `, [past24h]);
+        const totalEvents = parseInt(eventCountRows[0].count);
 
         // 2. Conversion Funnel (The Million-Dollar Funnel)
-        const { data: funnelData } = await supabase
-            .from('neural_telemetry')
-            .select('event_type')
-            .gte('created_at', past24h);
+        const { rows: funnelData } = await db.query(`
+            SELECT event_type FROM neural_telemetry WHERE created_at >= $1
+        `, [past24h]);
             
         const funnel = {
             app_load: funnelData?.filter(e => e.event_type === 'app_load').length || 0,
@@ -34,11 +28,10 @@ export async function GET() {
         };
 
         // 3. Top Personas (By Magnetic Pull)
-        const { data: personaStats } = await supabase
-            .from('neural_telemetry')
-            .select('persona_id')
-            .not('persona_id', 'is', null)
-            .gte('created_at', past24h);
+        const { rows: personaStats } = await db.query(`
+            SELECT persona_id FROM neural_telemetry 
+            WHERE created_at >= $1 AND persona_id IS NOT NULL
+        `, [past24h]);
 
         const leaderBoard: Record<string, number> = {};
         personaStats?.forEach(s => {

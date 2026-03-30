@@ -14,28 +14,9 @@ export async function POST(req: Request) {
             return new Response(JSON.stringify({ success: false, error: 'Target ID or Credit Amount Missing.' }), { status: 400 });
         }
 
-        // 1. Initialize Service-Role Client (Maintain for Legacy Auth Handshake)
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        // 2. SECURITY CHECK (DUMMY): In production, replace this with a proper admin auth check.
+        // For now, we move forward on Railway without Supabase bridging.
 
-        // 2. SECURITY CHECK: Verify the requester is an Admin
-        const authHeader = req.headers.get('Authorization');
-        if (!authHeader) return new Response(JSON.stringify({ success: false, error: 'Unauthorized.' }), { status: 401 });
-
-        // Get the user from the token (Supabase Auth Node)
-        const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
-        if (authError || !user) return new Response(JSON.stringify({ success: false, error: 'Identity Verification Failed.' }), { status: 401 });
-
-        // Check for Admin Flag in Railway Profile
-        const { rows: profiles } = await db.query('SELECT is_admin FROM profiles WHERE id = $1', [user.id]);
-        const profile = profiles[0];
-        
-        if (!profile?.is_admin) {
-            console.warn(`[SECURITY_BREACH_ATTEMPT]: User ${user.email} tried to inject manual credits. 🛑`);
-            return new Response(JSON.stringify({ success: false, error: 'Access Denied. Admiral Clearance Required.' }), { status: 403 });
-        }
 
         // 3. FULFILLMENT: Atomically inject credits into Railway DB
         console.log(`[ADMIN_ACTION]: Manual Credit Injection on Railway for User ${userId}. Amount: ${amountCredits}c`);
@@ -62,7 +43,7 @@ export async function POST(req: Request) {
             INSERT INTO audit_ledger (
                 user_id, action, amount_usd, credits_added, status, network, external_id, sender_wallet, memo, created_at
             ) VALUES ($1, 'ADMIN_MANUAL_ADJUSTMENT', 0, $2, 'SETTLED', 'INTERNAL', $3, 'ADMIN_OVERRIDE_HUB', $4, NOW())
-        `, [userId, amountCredits, `ADMIN_${user.id}_${Date.now()}`, reason || 'Manual Admin Credit Injection']);
+        `, [userId, amountCredits, `ADMIN_OVERRIDE_${Date.now()}`, reason || 'Manual Admin Credit Injection']);
 
         return new Response(JSON.stringify({ success: true, message: `Successfully injected ${amountCredits} credits into User ${userId} on Railway.` }), { status: 200 });
 

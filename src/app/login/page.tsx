@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { Disc, ShieldAlert, KeyRound, UserCheck } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
