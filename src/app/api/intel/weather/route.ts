@@ -49,8 +49,8 @@ export async function GET() {
             const cityName = cityInfo?.city || 'Unknown Sector';
 
             const matchingMarkets = Array.isArray(polyData) ? polyData.filter((e: any) => 
-                e.title.toLowerCase().includes(cityName.toLowerCase()) && 
-                e.title.toLowerCase().includes('temperature')
+                (e.title.toLowerCase().includes(cityName.toLowerCase()) || e.title.toLowerCase().includes('global')) && 
+                (e.title.toLowerCase().includes('temperature') || e.title.toLowerCase().includes('heat') || e.title.toLowerCase().includes('warming') || e.title.toLowerCase().includes('weather'))
             ) : [];
 
             const activePrice = matchingMarkets[0]?.markets?.[0]?.outcomePrices 

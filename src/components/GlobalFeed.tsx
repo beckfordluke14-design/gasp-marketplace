@@ -281,17 +281,22 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                    </div>
 
                    <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 relative z-10">
-                      {/* 👤 NEURAL AVATAR NODE */}
-                      <div className="relative shrink-0">
-                         <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl overflow-hidden border-2 border-[#00f0ff]/20 shadow-[0_0_40px_rgba(0,240,255,0.1)] group-hover/card:scale-105 transition-transform duration-700">
-                            <img 
-                               src={proxyImg(profile.image)} 
-                               alt="" 
-                               className="w-full h-full object-cover grayscale brightness-125 opacity-80 group-hover/card:grayscale-0 group-hover/card:opacity-100 transition-all duration-700" 
-                            />
+                      {/* 👤 STORY-STYLE NEURAL NODE */}
+                      <div className="flex flex-col items-center gap-4 shrink-0">
+                         <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden border-2 border-[#00f0ff]/40 shadow-[0_0_50px_rgba(0,240,255,0.2)] group-hover/card:scale-110 transition-all duration-700 p-1 bg-black/40">
+                            <div className="w-full h-full rounded-full overflow-hidden">
+                               <img 
+                                  src={profile.image && profile.image.length > 5 ? proxyImg(profile.image) : `https://api.dicebear.com/7.x/micah/svg?seed=${profile.name}`} 
+                                  alt="" 
+                                  className="w-full h-full object-cover object-top grayscale brightness-125 opacity-90 group-hover/card:grayscale-0 group-hover/card:opacity-100 transition-all duration-700" 
+                               />
+                            </div>
                          </div>
-                         <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-black border border-[#00f0ff]/40 flex items-center justify-center animate-pulse">
-                            <Zap size={14} className="text-[#00f0ff]" />
+                         <div className="flex flex-col items-center gap-1">
+                            <span className="text-[10px] font-black italic tracking-tighter text-white/90 uppercase">{profile.name} {profile.flag}</span>
+                            <div className="px-2 py-0.5 bg-[#00f0ff]/10 rounded-full border border-[#00f0ff]/20">
+                               <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest italic">FIELD ANALYST</span>
+                            </div>
                          </div>
                       </div>
 
@@ -308,11 +313,11 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                          <div className="flex items-center justify-center md:justify-start gap-4 pt-4 border-t border-white/5">
                             <div className="flex items-center gap-2">
                                <div className="px-3 py-1 bg-white/5 rounded-lg border border-white/10">
-                                  <span className="text-[8px] font-black uppercase text-[#ffea00] tracking-widest italic">{profile.name} // ANALYST</span>
+                                  <span className="text-[8px] font-black uppercase text-[#ffea00] tracking-widest italic">Strategic Asset Class</span>
                                </div>
                             </div>
                             <div className="w-1 h-1 rounded-full bg-white/20" />
-                            <span className="text-[8px] font-black uppercase text-white/20 tracking-widest italic">Strategic Asset Class</span>
+                            <span className="text-[8px] font-black uppercase text-[#00f0ff] animate-pulse tracking-widest italic">Signal Confirmed // 100% Verified</span>
                          </div>
                       </div>
                    </div>

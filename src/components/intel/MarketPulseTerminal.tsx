@@ -85,10 +85,10 @@ export default function MarketPulseTerminal() {
 
              <div className="flex items-center justify-between pt-3 border-t border-white/5 relative z-10">
                 <div className="flex items-center gap-2">
-                   <Gauge size={12} className="text-[#00f0ff]" />
-                   <span className="text-xs font-black text-white italic">{current.prediction} Confidence</span>
+                   <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-ping" />
+                   <span className="text-[10px] font-black text-white italic tracking-tighter">Signal Accuracy: <span className="text-[#00f0ff]">{current.prediction}%</span></span>
                 </div>
-                <span className="text-[8px] font-black text-white/30 uppercase tracking-widest italic">{current.vibe}</span>
+                <span className="text-[8px] font-black text-[#ffea00] uppercase tracking-widest italic animate-pulse">Live Alpha</span>
              </div>
           </motion.div>
        </AnimatePresence>
