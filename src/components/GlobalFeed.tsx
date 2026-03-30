@@ -309,7 +309,13 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                     <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-10 duration-1000">
                       <div className="flex flex-col gap-2 pointer-events-auto">
                          <div className="flex items-center gap-3 relative">
-                        <span className="text-[14px] md:text-[18px] font-black uppercase italic tracking-tighter text-white/90 drop-shadow-2xl">{displayName}</span>
+                        <div className="flex flex-col gap-1.5 mb-2 pointer-events-auto">
+                           <div className="flex items-center gap-2">
+                              <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
+                              <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#00f0ff] opacity-80 italic">Field Analyst // Secure Uplink</span>
+                           </div>
+                           <span className="text-[14px] md:text-[18px] font-black uppercase italic tracking-tighter text-white/90 drop-shadow-2xl">{displayName}</span>
+                        </div>
                         
                         <AnimatePresence>
                            {showChatBubble && (
@@ -635,18 +641,21 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], deadIds = n
   return (
     <div ref={containerRef} className="flex-1 h-screen overflow-y-auto scroll-smooth no-scrollbar relative w-full touch-pan-y bg-transparent">
       
-      {/* 📡 MARKET PULSE: Ultra-Thin Ghost Ticker */}
-      <div className="fixed top-[58px] left-0 right-0 z-[1000] scale-90 origin-top">
-         <MobilePulseTicker />
-      </div>
-      
-      {/* 📱 MOBILE NAVIGATION: Multi-Asset Ghost Loop */}
-      <div className="fixed top-[94px] left-0 right-0 z-[900] flex flex-col gap-1 px-4 overflow-hidden pointer-events-none">
-          <div className="pointer-events-auto w-full max-w-[200px] mx-auto opacity-40 hover:opacity-100 transition-opacity">
-             <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
+      {/* 📡 SYNDICATE TOP-FLIGHT: Ghost Overlay Hub */}
+      <div className="fixed top-0 left-0 right-0 z-[1000] flex flex-col gap-0 pointer-events-none bg-transparent">
+          {/* Market Pulse Ticker */}
+          <div className="scale-90 origin-top h-10">
+             <MobilePulseTicker />
           </div>
-          <div className="pointer-events-auto w-full scale-[0.8] origin-top bg-transparent -mt-2">
-             <StoriesRow profiles={profiles} onSelectProfile={onSelectProfile} />
+          
+          {/* Stories Node Uplink: Ultra-Thin Ghost Flow */}
+          <div className="scale-[0.85] origin-top -mt-2 opacity-100 hover:opacity-100 transition-opacity">
+              <StoriesRow profiles={profiles} onSelectProfile={onSelectProfile} />
+          </div>
+
+          {/* Neural Search Hub */}
+          <div className="max-w-[180px] mx-auto scale-75 origin-top -mt-4 opacity-40 hover:opacity-100 transition-opacity pointer-events-auto">
+             <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
           </div>
       </div>
 

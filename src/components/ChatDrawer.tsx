@@ -473,6 +473,12 @@ export default function ChatDrawer({
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8 no-scrollbar scroll-smooth bg-transparent">
             {chatTab === 'chat' ? (
               <div className="space-y-8">
+                {/* 📟 SYSTEM UPLINK: The 'Leaker' Perspective Anchor */}
+                <div className="flex flex-col items-center justify-center gap-3 py-6 border-b border-white/5 opacity-40">
+                   <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
+                   <p className="text-[8px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">Neural Uplink Established // Secure Channel</p>
+                </div>
+
                 {messages.map((msg: any, idx: number) => {
                   const isAssistant = msg.role === 'assistant';
                   return (
@@ -496,13 +502,24 @@ export default function ChatDrawer({
                              caption={msg.content} 
                           />
                         ) : (
-                          <div className={`max-w-[85%] px-5 py-3.5 rounded-[2rem] text-[14px] leading-relaxed tracking-tight ${
-                             isAssistant 
-                             ? 'bg-white/10 backdrop-blur-xl text-white font-medium border border-white/10 shadow-xl' 
-                             : 'bg-[#ff00ff]/90 backdrop-blur-xl text-white font-black shadow-[0_15px_40px_rgba(255,0,255,0.4)]'
-                          }`}>
-                             {msg.content}
-                          </div>
+                           <div className={`max-w-[85%] flex flex-col gap-2`}>
+                              {isAssistant && (
+                                 <div className="flex items-center gap-1.5 px-2">
+                                    <div className="w-1 h-1 rounded-full bg-[#ffea00] animate-pulse" />
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-[#ffea00] italic">Decrypted Briefing // Source: Node</span>
+                                 </div>
+                              )}
+                              <div className={`px-5 py-3.5 rounded-[2rem] text-[14px] leading-relaxed tracking-tight ${
+                                 isAssistant 
+                                 ? 'bg-white/5 backdrop-blur-3xl text-white/90 font-medium border border-white/10 shadow-2xl relative overflow-hidden group' 
+                                 : 'bg-[#ff00ff]/90 backdrop-blur-xl text-white font-black shadow-[0_15px_40px_rgba(255,0,255,0.4)]'
+                              }`}>
+                                 {isAssistant && (
+                                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#ffea00]/30 to-transparent" />
+                                 )}
+                                 {msg.content}
+                              </div>
+                           </div>
                         )}
                        {!isAssistant && (
                           <div className="flex items-center gap-1 px-1">

@@ -208,7 +208,7 @@ function MarketplaceContent() {
                onSelectProfile={handleSelectProfile} 
             />
            
-           <div className="flex-1 flex flex-col relative pt-12 md:pt-14 mt-4 md:mt-6">
+           <div className="flex-1 flex flex-col relative bg-transparent">
               {/* STORY TOGGLE PORTAL */}
               <div className="absolute right-6 top-0 z-50 flex items-center gap-3">
                  <button 

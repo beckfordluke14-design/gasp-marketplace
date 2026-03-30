@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ShieldCheck } from 'lucide-react';
 
 export default function LegalGate() {
   const [showGate, setShowGate] = useState(false);
@@ -41,17 +42,36 @@ export default function LegalGate() {
         {/* Holographic VIP Glow */}
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-[#ff00ff]/10 via-transparent to-[#00f0ff]/10 opacity-50 pointer-events-none" />
 
-         <div className="space-y-1 relative z-10 w-full">
-            <p className="text-[9px] text-[#00f0ff] uppercase tracking-[0.3em] font-black animate-pulse shadow-[#00f0ff]">Entry Verification</p>
-            <h2 className="text-white font-syncopate font-black uppercase italic tracking-tighter text-3xl md:text-4xl drop-shadow-lg">
-              Enter Gasp
-            </h2>
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent pt-4" />
+         {/* 🧬 THE SYNDICATE SHIELD: DAO / MANAGED INTERFACE */}
+         <div className="text-center space-y-3 mb-12">
+            <h2 className="text-xl font-syncopate font-black uppercase italic tracking-tighter text-white">Neural Uplink Interface</h2>
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 italic">A Managed Service provided by AllTheseFlows Strategic Media LLC</p>
          </div>
-         
-         <p className="text-white/70 font-outfit text-xs md:text-sm leading-relaxed relative z-10 pt-2">
-           This is an <span className="text-white font-bold tracking-wide">18+ AI Platform.</span> By entering, you confirm you are 18 years or older and agree to the Terms of Service provided by Zoinkz. You acknowledge that all profiles, media, and interactions on this platform are fictional assets generated for entertainment.
-         </p>
+
+         <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 space-y-10 shadow-2xl backdrop-blur-3xl relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-b from-[#00f0ff]/5 to-transparent pointer-events-none" />
+            
+            <div className="space-y-6 relative z-10">
+               <div className="flex items-center gap-4 text-[#ffea00]">
+                  <div className="p-3 bg-[#ffea00]/10 rounded-2xl border border-[#ffea00]/30 animate-pulse">
+                     <ShieldCheck size={32} />
+                  </div>
+                  <div>
+                     <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-none">Protocol Guardian</h3>
+                     <p className="text-[10px] font-black tracking-widest text-[#ffea00]/60 uppercase">Node Access Verified</p>
+                  </div>
+               </div>
+
+               <div className="space-y-4 text-white/50 text-[11px] leading-relaxed font-bold italic">
+                  <p>
+                     GASP.FUN is a <span className="text-white">Managed Interface</span> providing an encrypted uplink to the <span className="text-[#00f0ff]">Syndicate Intelligence Network</span>. By entering the Hub, you acknowledge the decentralized nature of the Protocol and your role as a Governance Stakeholder.
+                  </p>
+                  <p>
+                     All interactions within the Node are logged to the <span className="text-white">Genesis Ledger</span>. Consumption is Accumulation. Sovereign custody of intelligence is maintained via ATF Founder Vaults.
+                  </p>
+               </div>
+            </div>
+         </div>
 
         <button 
           onClick={handleEnter}

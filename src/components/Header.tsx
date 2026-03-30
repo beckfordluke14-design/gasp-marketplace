@@ -50,7 +50,7 @@ export default function Header({
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] flex flex-col pointer-events-none">
         {/* Navigation Bar */}
-        <header className="h-12 md:h-14 bg-transparent backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-6 md:px-12 pointer-events-auto transition-all">
+        <header className="h-12 md:h-14 bg-transparent flex items-center justify-between px-6 md:px-12 pointer-events-auto transition-all">
             
             {/* Logo & Mobile Menu */}
             <div className="flex items-center gap-4 md:gap-10 pointer-events-auto">
@@ -175,23 +175,6 @@ export default function Header({
                 )}
             </div>
         </header>
-
-         {/* Desktop Only: Search/Stories Bridge */}
-         <div className="hidden lg:flex absolute top-[120%] left-0 right-0 flex-col items-center gap-6 pointer-events-auto z-[90]">
-             {/* Search Bar */}
-             <div className="w-full max-w-[320px] md:max-w-xl px-4 flex items-center justify-center">
-                 <div className="w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] p-0.5 hover:bg-white/10 transition-all">
-                     <ProfileSearch deadIds={deadIds} setDeadIds={setDeadIds} />
-                 </div>
-             </div>
-
-             {/* Stories Row Node: Relocated for sovereign placement */}
-             <div className="w-full pt-2">
-                 <div className="max-w-4xl mx-auto px-4 md:px-0">
-                    <StoriesRow profiles={profiles} onSelectProfile={onSelectProfile} />
-                 </div>
-             </div>
-         </div>
     </div>
   );
 }
