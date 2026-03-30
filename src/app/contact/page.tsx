@@ -41,9 +41,9 @@ export default function ContactSupport() {
             {/* Contact Details */}
             <div className="space-y-10">
                 <section className="space-y-4">
-                    <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">Network Reach</h2>
+                    <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">National & Global Reach</h2>
                     <p className="text-sm leading-relaxed text-white/70">
-                        Our engineering and legal team monitors this channel 24/7 strictly to manage technical discrepancies regarding Breathe Points, urgent account deletions, and data compliance requests under CCPA or GDPR requirements.
+                        Our strategic operations center monitors this channel 24/7 to manage technical discrepancies regarding System Credits, urgent account removals, and data compliance requests under CCPA/GDPR requirements.
                     </p>
                 </section>
 
@@ -54,9 +54,9 @@ export default function ContactSupport() {
                             <Mail size={20} className="text-[#ff00ff]" />
                         </div>
                         <div>
-                            <p className="font-bold text-[10px] uppercase tracking-[0.2em] text-white/40 mb-1">Direct Priority Transmission</p>
-                            <a href="mailto:support@alltheseflows.com" className="text-base md:text-lg font-black tracking-tighter text-white hover:text-[#ff00ff] transition-colors hover:underline">
-                                support@alltheseflows.com
+                            <p className="font-bold text-[10px] uppercase tracking-[0.2em] text-white/40 mb-1">Priority Signal Transmission</p>
+                            <a href="mailto:support@gasp.fun" className="text-base md:text-lg font-black tracking-tighter text-white hover:text-[#00f0ff] transition-colors hover:underline">
+                                support@gasp.fun
                             </a>
                         </div>
                     </div>
@@ -68,8 +68,8 @@ export default function ContactSupport() {
                         </div>
                         <div>
                             <p className="font-bold text-[10px] uppercase tracking-[0.2em] text-white/40 mb-1">Corporate Infrastructure</p>
-                            <p className="text-sm font-bold text-white mb-0.5">AllTheseFlows LLC</p>
-                            <p className="text-[10px] text-white/30 uppercase tracking-widest mt-1">United States of America</p>
+                            <p className="text-sm font-bold text-white mb-0.5">AllTheseFlows Strategic Media LLC</p>
+                            <p className="text-[10px] text-white/30 uppercase tracking-widest mt-1">Sovereign Data Operations // USA</p>
                         </div>
                     </div>
                 </div>
@@ -116,12 +116,12 @@ export default function ContactSupport() {
                             <label className="block text-[9px] uppercase font-black tracking-[0.3em] text-white/40 mb-2 ml-4">Subject Vector</label>
                             <select 
                                 required
-                                className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-sm text-white outline-none focus:border-[#ff00ff]/50 transition-colors appearance-none"
+                                className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-sm text-white outline-none focus:border-[#00f0ff]/50 transition-colors appearance-none"
                             >
                                 <option className="bg-[#050505]" value="General Support">General Support</option>
-                                <option className="bg-[#050505]" value="Breathe Points Not Credited">Breathe Points Not Credited</option>
-                                <option className="bg-[#050505]" value="Delete Data / GDPR">Delete Neural Fingerprint (GDPR/CCPA)</option>
-                                <option className="bg-[#050505]" value="Bug Report">Critical Bug Report</option>
+                                <option className="bg-[#050505]" value="Credits Not Credited">System Credits Not Allocated</option>
+                                <option className="bg-[#050505]" value="Delete Data / GDPR">Delete Neural Data (GDPR/CCPA)</option>
+                                <option className="bg-[#050505]" value="Bug Report">Critical Signal Discrepancy</option>
                             </select>
                         </div>
 

@@ -67,18 +67,18 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp }:
           </button>
 
           <div className="flex flex-col items-center text-center">
-            <div className="w-20 h-20 rounded-full bg-[#ff00ff]/10 border border-[#ff00ff]/20 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(255,0,255,0.15)]">
-               <Zap size={32} className="text-[#ff00ff] animate-pulse" />
+            <div className="w-20 h-20 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(0,240,255,0.15)]">
+               <Zap size={32} className="text-[#00f0ff] animate-pulse" />
             </div>
 
             <h3 className="text-2xl font-syncopate font-black uppercase italic text-white tracking-tighter mb-2">
-               NOT ENOUGH CREDITS
+               LINK BREAK: SIGNAL WEAK
             </h3>
             
             <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-8 max-w-[280px]">
-               Your current identity balance is <span className="text-white font-syncopate">{balance !== null ? formatCredits(balance) : '---'}</span>. 
+               The Neural Bridge is fading. 
                <br />
-               Push more credits to your node to keep the connection alive. 💎🛡️
+               Allocate more <span className="text-[#00f0ff]">System Credits</span> to maintain the Synchronized Uplink. 🛡️🛰️
             </p>
 
             <div className="w-full space-y-3">
@@ -90,7 +90,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp }:
                   className="w-full h-16 rounded-2xl bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(0,240,255,0.3)] flex items-center justify-center gap-3"
                 >
                    <Diamond size={14} fill="currentColor" />
-                   INFUSE CREDITS
+                   INFUSE NODE ENERGY
                 </button>
                
                <button 
@@ -105,7 +105,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp }:
           {/* Bottom Security Tag */}
           <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-center gap-2 opacity-20">
              <AlertCircle size={10} />
-             <span className="text-[7px] font-black uppercase tracking-widest italic">AllTheseFlows Strategic Hub</span>
+             <span className="text-[7px] font-black uppercase tracking-widest italic">Sovereign Strategic Media Hub // Secure Interface</span>
           </div>
         </motion.div>
       </div>

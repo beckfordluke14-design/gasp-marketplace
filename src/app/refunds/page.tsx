@@ -29,31 +29,31 @@ export default function RefundPolicy() {
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">1. Final Sale Guarantee</h2>
                 <div className="p-6 border-l-4 border-red-500 bg-white/5 rounded-r-2xl">
-                    <p className="font-bold text-white text-base">All sales of Breathe Points are strictly final.</p>
-                    <p className="mt-3 text-white/70">Because Breathe Points act as digital credits that are instantly injected into your blockchain wallet and are accessible immediately upon purchase, <strong>AllTheseFlows LLC does not offer refunds, partial refunds, or chargeback authorizations once a transaction successfully processes.</strong> We fulfill our service instantly via fully automated protocols.</p>
+                    <p className="font-bold text-white text-base">All sales of System Credits are strictly final.</p>
+                    <p className="mt-3 text-white/70">Because System Credits are digital assets that are instantly allocated to your sovereign node and are accessible immediately upon purchase for strategic intelligence retrieval, <strong>AllTheseFlows Strategic Media LLC does not offer refunds, partial refunds, or chargeback authorizations once a transaction successfully processes.</strong> We fulfill our service instantly via automated synchronization protocols.</p>
                 </div>
             </section>
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">2. Chargeback Policy</h2>
-                <p>By engaging in a transaction with AllTheseFlows LLC, you legally agree that the product is a consumable, 100% digital service delivered immediately upon successful payment confirmation. Fraudulent chargeback disputes initiated through your bank or high-risk processors (like CCBill) for legitimately rendered and delivered Breathe Points will result in a permanent blacklist of your identity, IP array, and card structures across our entire network.</p>
+                <p>By engaging in a transaction with AllTheseFlows Strategic Media LLC, you legally agree that the product is a consumable, 100% digital service delivered immediately upon successful payment confirmation. Fraudulent chargeback disputes initiated through your bank for legitimately delivered System Credits will result in a permanent blacklist of your identity and access node across our entire strategic network.</p>
             </section>
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">3. Transaction Discrepancies & Technical Errors</h2>
-                <p>We recognize that payment gateways and API architectures occasionally experience latency or fatal packet losses. If an algorithmic drop occurs and your funds execute without crediting your virtual balance:</p>
+                <p>We recognize that payment gateways and API architectures occasionally experience latency or fatal packet losses. If an algorithmic drop occurs and your funds execute without crediting your system balance:</p>
                 <div className="p-5 border border-white/10 rounded-2xl bg-black mt-3">
                     <ul className="list-disc pl-5 space-y-2 text-white/70">
-                        <li><strong className="text-white">Do not issue a chargeback immediately.</strong> Doing so will lock the funds in a 30-day clearing delay sequence.</li>
-                        <li><strong>Initiate Technical Review:</strong> You must directly email <a href="mailto:support@alltheseflows.com" className="text-[#ff00ff] hover:underline transition-all">support@alltheseflows.com</a> with your Guest ID or registered email address, along with the specific transaction receipt ID or timestamp.</li>
+                        <li><strong className="text-white">Do not issue a chargeback immediately.</strong> Doing so will lock the funds in a processing delay sequence.</li>
+                        <li><strong>Initiate Institutional Review:</strong> You must directly email <a href="mailto:support@gasp.fun" className="text-[#00f0ff] hover:underline transition-all">support@gasp.fun</a> with your node ID or registered email address, along with the specific transaction receipt ID or timestamp.</li>
                     </ul>
                 </div>
-                <p className="mt-3">If our backend diagnostics confirm the discrepancy, we will instantly force an overriding wallet injection to credit your missing Breathe Points. If we cannot credit your account due to systemic failure, we will issue a direct, authorized refund back to your original payment method.</p>
+                <p className="mt-3">If our diagnostics confirm the discrepancy, we will instantly force an overriding node injection to credit your missing System Credits. If we cannot credit your account due to systemic failure, we will issue a direct, authorized refund back to your original payment method.</p>
             </section>
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">4. Termination and Void Context</h2>
-                <p>If AllTheseFlows LLC detects severe manipulation, bots, scraping, or behavior that violates the Terms of Service, we reserve the right to immediately terminate the account. Upon termination, any remaining, unspent Breathe Points inside your ecosystem wallet are forfeited and immediately voided with zero compensation or right to refund.</p>
+                <p>If AllTheseFlows Strategic Media LLC detects severe manipulation, bots, scraping, or behavior that violates the Terms of Service, we reserve the right to immediately terminate the account node. Upon termination, any remaining, unspent System Credits are forfeited and immediately voided with zero compensation or right to refund.</p>
             </section>
 
         </div>

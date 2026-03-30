@@ -122,14 +122,12 @@ export default function Header({
                      onClick={() => router.push('/vault')}
                      className="flex items-center gap-2 p-1 pr-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all cursor-pointer group"
                    >
-                      <div className="w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-[#ff00ff]/40 group-hover:border-[#ff00ff] transition-all">
-                         <div className="w-full h-full bg-[#ff00ff]/20 flex items-center justify-center text-[8px] font-black italic text-[#ff00ff]">
-                            {profile?.nickname ? profile.nickname.substring(0, 1).toUpperCase() : <User size={12} />}
-                         </div>
-                      </div>
-                      <span className="hidden md:block text-[8px] font-black uppercase tracking-[0.1em] text-white/40 group-hover:text-white transition-colors">
-                         {profile?.nickname || 'ACCOUNT'}
-                      </span>
+                       <div className="w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-[#00f0ff]/40 group-hover:border-[#00f0ff] transition-all bg-black flex items-center justify-center shrink-0">
+                          <User size={12} className="text-[#00f0ff]" />
+                       </div>
+                       <span className="hidden md:block text-[8px] font-black uppercase tracking-[0.1em] text-white/40 group-hover:text-white transition-colors truncate max-w-[100px]">
+                          {profile?.nickname || 'ACCOUNT'}
+                       </span>
                    </div>
                 ) : (
                    <button 
@@ -147,7 +145,7 @@ export default function Header({
                     onClick={() => onOpenTopUp()}
                     className="hidden lg:flex h-9 px-6 bg-[#00f0ff] text-black text-[8px] font-black uppercase tracking-[0.1em] rounded-full hover:shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic shadow-[0_0_10px_rgba(0,240,255,0.2)]"
                   >
-                     ADD CREDITS
+                     TOP UP
                   </button>
                 )}
 

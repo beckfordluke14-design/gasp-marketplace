@@ -62,12 +62,12 @@ export default function LegalGate() {
                   </div>
                </div>
 
-               <div className="space-y-4 text-white/50 text-[11px] leading-relaxed font-bold italic">
+               <div className="space-y-4 text-white/50 text-[11px] leading-relaxed font-bold italic text-left">
                   <p>
-                     GASP.FUN is a <span className="text-white">Managed Interface</span> providing an encrypted uplink to the <span className="text-[#00f0ff]">Syndicate Intelligence Network</span>. By entering the Hub, you acknowledge the decentralized nature of the Protocol and your role as a Governance Stakeholder.
+                     GASP.FUN is an <span className="text-white">Institutional Strategic Media Hub</span> providing an encrypted uplink for <span className="text-[#00f0ff]">Digital Asset Retrieval and Neural Signal Synchronization</span>. By entering the Hub, you acknowledge the service as a provider of strategic intelligence and media management.
                   </p>
                   <p>
-                     All interactions within the Node are logged to the <span className="text-white">Genesis Ledger</span>. Consumption is Accumulation. Sovereign custody of intelligence is maintained via ATF Founder Vaults.
+                     All interactions are subject to the <span className="text-white">Sovereign Data Protocol</span>. Access to restricted archival assets requires valid System Credits. Consumption of intelligence is at your own discretion.
                   </p>
                </div>
             </div>

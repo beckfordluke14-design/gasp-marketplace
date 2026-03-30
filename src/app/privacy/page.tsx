@@ -24,27 +24,27 @@ export default function PrivacyPolicy() {
             
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">1. Who We Are</h2>
-                <p>This Privacy Policy explains how AllTheseFlows LLC ("we," "us," or "our") collects, uses, protects, and discloses information when you use Gasp.fun and our associated services.</p>
+                <p>This Privacy Policy explains how AllTheseFlows Strategic Media LLC ("we," "us," or "our") collects, uses, protects, and discloses information when you use Gasp.fun and our associated strategic intelligence services.</p>
             </section>
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">2. Information Collection</h2>
-                <p>We may collect several types of data during your time interacting with our platform, including:</p>
+                <p>We may collect several types of data during your synchronized uplinks with our hub, including:</p>
                 <ul className="list-disc pl-5 mt-3 space-y-2 text-white/60">
-                    <li><strong className="text-white">Account Information:</strong> If you register or migrate your guest ID, we collect your email address and encrypted password state through standard OAuth/Email procedures.</li>
-                    <li><strong className="text-white">Transaction Data:</strong> If you purchase Breathe Points, payment details are collected directly by secure, high-risk payment processors (like Stripe or CCBill). We only retain secure billing tokens and successful invoice IDs; we never access raw credit card numbers.</li>
-                    <li><strong className="text-white">Usage & Communication Logs:</strong> We collect hardware session data, clickstreams, and the text of chat messages sent between you and our neural engines to maintain contextual reality continuity.</li>
+                    <li><strong className="text-white">Node Identity Information:</strong> If you register or migrate your guest ID, we collect your email address and encrypted password state through standard OAuth/Email procedures.</li>
+                    <li><strong className="text-white">Transaction Data:</strong> If you purchase System Credits, payment details are collected directly by secure, institutional payment processors (like Stripe). We only retain secure billing tokens and successful invoice IDs; we never access raw credit card numbers.</li>
+                    <li><strong className="text-white">Synchronization Logs:</strong> We collect hardware session data, clickstreams, and the text of neural signal transmissions (chats) sent between you and our intelligence nodes to maintain contextual continuity.</li>
                 </ul>
             </section>
 
             <section className="space-y-3">
-                <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">3. AI Integration & Google Gemini API</h2>
-                <p>Because our platform heavily utilizes dynamic artificial intelligence to generate chat responses and parse contextual identity, the chat dialogue you submit to a persona is processed through the <strong>Google Gemini API infrastructure</strong> (and equivalent LLM pipelines). Any conversation data processed by these engines is utilized strictly to formulate character responses and maintain your specific user-bonding session memory. We strongly advise users never to transmit highly sensitive personally identifiable information (PII) to an AI node.</p>
+                <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">3. AI Integration & Neural Pipelines</h2>
+                <p>Because our platform utilizes dynamic artificial intelligence nodes to produce strategic responses, the data you submit to a node is processed through the <strong>Google Gemini API infrastructure</strong> (and equivalent LLM pipelines). Any signal data processed by these engines is utilized strictly to formulate character responses and maintain your specific user-bonding session memory. All data is handled according to our secure sovereign protocol.</p>
             </section>
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">4. Data Usage and Non-Sale Covenant</h2>
-                <p>We use your information exclusively to provide, maintain, and improve the AI entertainment experience on Gasp.fun. We also use contact structures (like Resend) to trigger engagement notifications. <strong>AllTheseFlows LLC strictly does not sell your personal data, chat behavior, identity, or emails to third-party data brokers or advertisers.</strong></p>
+                <p>We use your information exclusively to provide, maintain, and improve the strategic media experience on Gasp.fun. <strong>AllTheseFlows Strategic Media LLC strictly does not sell your personal data, synchronization behavior, identity, or emails to third-party data brokers or advertisers.</strong></p>
             </section>
 
             <section className="space-y-3">
@@ -53,8 +53,8 @@ export default function PrivacyPolicy() {
             </section>
 
             <section className="space-y-3">
-                <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">6. Cookie Usage</h2>
-                <p>Gasp.fun utilizes standard internet cookies, localStorage (such as `gasp_guest_id`), and tracking pixels to maintain your authentication state across the decentralized environment, remember your user preferences, and securely authorize your wallet when executing the purchase of Breathe Points. By continuing to use our platform, you consent to our foundational cookie architecture.</p>
+                <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">6. System Token Usage</h2>
+                <p>Gasp.fun utilizes standard internet cookies and local system storage (such as `gasp_guest_id`) to maintain your authentication state across our strategic environment, remember your user settings, and securely authorize your node when executing the purchase of System Credits. By continuing to use our platform, you consent to our foundational data architecture.</p>
             </section>
 
             <section className="space-y-3">

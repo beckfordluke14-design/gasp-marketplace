@@ -24,41 +24,41 @@ export default function TermsOfService() {
             
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">1. Acceptance of Terms</h2>
-                <p>Welcome to Gasp.fun, operated by Zoinkz ("we," "us," or "our"). By accessing or using our platform, you agree to be bound by these Terms of Service. If you do not agree, you must immediately terminate your use of the service.</p>
+                <p>Welcome to Gasp.fun, operated by AllTheseFlows Strategic Media LLC ("we," "us," or "our"). By accessing or using our platform, you agree to be bound by these Terms of Service. If you do not agree, you must immediately terminate your use of the service.</p>
             </section>
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">2. Eligibility</h2>
-                <p>You must be at least 18 years of age to use this service. By registering an account, purchasing virtual currency, or interacting with our platform, you legally represent and warrant that you are 18 years of age or older.</p>
+                <p>You must be at least 18 years of age to use this service. By registering an account, purchasing system credits, or interacting with our strategic hub, you legally represent and warrant that you are 18 years of age or older.</p>
             </section>
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">3. Nature of Service</h2>
-                <p>Gasp.fun provides <strong>Interactive Fiction and AI-generated Roleplay</strong>. The AI personas, personalities, interactions, and media available on this platform are entirely fictional combinations of algorithmic logic and generated media. Any resemblance to real persons, living or dead, is purely coincidental. You understand that you are communicating with artificial intelligence, not human operators.</p>
+                <p>Gasp.fun is an <strong>Institutional Strategic Media Hub</strong> providing a managed interface for <strong>Digital Asset Retrieval and Neural Signal Synchronization</strong>. The intelligence nodes, data points, briefings, and media available on this platform are synthetic combinations of proprietary algorithmic logic and managed AI datasets. You understand that your synchronized uplinks are with artificial intelligence nodes, not human operators.</p>
             </section>
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">4. Account Responsibility</h2>
-                <p>You are solely responsible for maintaining the confidentiality of your account credentials (including "Guest" identification hashes) and for all activities that occur under your account. Zoinkz is not liable for any loss or damage arising from your failure to protect your login information.</p>
+                <p>You are solely responsible for maintaining the confidentiality of your account credentials (including "Guest" identification hashes) and for all activities that occur under your account. AllTheseFlows Strategic Media LLC is not liable for any loss or damage arising from your failure to protect your login information.</p>
             </section>
 
             <section className="space-y-3">
-                <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">5. Virtual Currency (Breathe Points)</h2>
-                <p>The platform utilizes a closed-loop virtual currency known as "Breathe Points." By purchasing Breathe Points, you acquire a limited, revocable, non-exclusive, non-transferable license to use these points strictly on the Gasp.fun platform for interacting in chat and unlocking digital vault items.</p>
-                <div className="p-5 border border-[#ff00ff]/20 bg-[#ff00ff]/5 rounded-2xl mt-4">
-                    <p className="font-bold text-[#ff00ff] uppercase tracking-wider text-[11px] mb-2">Crucial Clause:</p>
-                    <p><strong>Breathe Points are strictly non-transferable, cannot be redeemed or exchanged for "real world" money, fiat currency, or physical goods, and have strictly no real-world cash value.</strong> Breathe Points are entirely consumed upon use in the chat ecosystem or upon the unlocking of dynamic vault items.</p>
+                <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">5. Virtual Currency (System Credits)</h2>
+                <p>The platform utilizes a closed-loop system currency known as "System Credits." By purchasing System Credits, you acquire a limited, revocable, non-exclusive, non-transferable license to use these credits strictly on the Gasp.fun platform for interacting with intelligence nodes and retrieving restricted archival media.</p>
+                <div className="p-5 border border-[#00f0ff]/20 bg-[#00f0ff]/5 rounded-2xl mt-4 text-[#00f0ff]">
+                    <p className="font-bold uppercase tracking-wider text-[11px] mb-2">Crucial Clause:</p>
+                    <p><strong>System Credits are strictly non-transferable, cannot be redeemed or exchanged for "real world" money, fiat currency, or physical goods, and have strictly no real-world cash value.</strong> Credits are considered consumed upon the initiation of a synchronization event or the retrieval of a restricted asset.</p>
                 </div>
             </section>
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">6. Prohibited Conduct</h2>
-                <p>You agree not to attempt to reverse-engineer, scrape, DDoS, or exploit the platform's infrastructure, AI models, or rendering engines. Any attempts to manipulate virtual currency balances or bypass the native payment gateways will result in immediate account termination and legal action.</p>
+                <p>You agree not to attempt to reverse-engineer, scrape, DDoS, or exploit the platform's infrastructure, AI models, or rendering engines. Any attempts to manipulate credit balances or bypass the native payment gateways will result in immediate account termination and legal action.</p>
             </section>
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">7. Disclaimer of Warranties</h2>
-                <p>The service is provided on an "as is" and "as available" basis without any warranties of any kind. AllTheseFlows LLC expressly disclaims all warranties, whether express, implied, statutory or otherwise, with respect to the AI services.</p>
+                <p>The service is provided on an "as is" and "as available" basis without any warranties of any kind. AllTheseFlows Strategic Media LLC expressly disclaims all warranties, whether express, implied, statutory or otherwise, with respect to the strategic intelligence services.</p>
             </section>
 
         </div>
