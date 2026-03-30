@@ -276,6 +276,11 @@ function GlobalFeedItem({ profile, broadcast, onSelectProfile, onDeletePost, onT
                    {/* 🎞️ SCANLINE EFFECT */}
                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-white/[0.02] to-transparent h-[200%] animate-[scan_8s_linear_infinite]" />
                    
+                   {/* 💎 MINIMALIST CORNER WATERMARK */}
+                   <span className="text-[10px] md:text-[14px] font-black italic tracking-widest text-[#ff00ff] opacity-20 absolute bottom-2 right-4 whitespace-nowrap z-0 pointer-events-none">
+                      FOUND ON GASP.FUN
+                   </span>
+
                    {/* 🏷️ YELLOW STRATEGIC TAG */}
                    <div className="absolute top-0 left-6 px-4 py-1 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-b-lg shadow-[0_5px_15px_rgba(255,234,0,0.2)] z-50">
                       Sector Intelligence Hub // High-Heat Node
