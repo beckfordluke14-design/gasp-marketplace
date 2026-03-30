@@ -12,7 +12,7 @@ interface TopUpDrawerProps {
 }
 
 /**
- * ⛽ CREDIT TOP-UP HUB v2.0
+ * ⛽ TERMINAL TOP-UP v2.0
  * Objective: 100% Bank-Free Revenue via Direct P2P Crypto Settlement.
  */
 export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
@@ -27,7 +27,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
     setSelectedPkgId(`custom_${amount}`);
   };
 
-  // 🧬 RECOVERY HUB: Check for unsaved stakes
+  // 🧬 RECOVERY PORTAL: Check for unsaved stakes
   const [activeStake, setActiveStake] = useState<any>(null);
   useEffect(() => {
     const stored = localStorage.getItem('gasp_active_stake');
@@ -44,7 +44,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
         </div>
         <h3 className="text-3xl font-syncopate font-black uppercase italic text-white mb-4">Access Authorized</h3>
         <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-black leading-relaxed px-6">
-          The Hub has verified your digital settlement. Narrative Credits + 15% Bonus successfully infused into your active identity node. 🧬🛡️
+          The Terminal has verified your digital settlement. System Credits + 15% Bonus successfully infused into your active identity node. 🧬🛡️
         </p>
         <button 
           onClick={onClose}
@@ -67,10 +67,10 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
            </div>
            <div>
                <h3 className="text-xl font-syncopate font-black uppercase italic text-white leading-none">
-                  ACCESS HUB
+                  ACCESS TERMINAL
                </h3>
                <p className="text-[10px] text-[#ff6b00] uppercase font-black tracking-widest mt-2 underline decoration-[#ff6b00]/30 underline-offset-4">
-                  Syndicate Narrative Credits
+                  Syndicate System Credits
                </p>
            </div>
         </div>
@@ -91,7 +91,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
           />
         ) : (
           <div className="p-5 md:p-8 space-y-6 md:space-y-8 animate-in fade-in duration-500">
-            {/* 🧬 RECOVERY HUB INDICATOR */}
+            {/* 🧬 RECOVERY PORTAL INDICATOR */}
             {activeStake && activeStake.packageId && (
                <button 
                  onClick={() => setSelectedPkgId(activeStake.packageId)}
@@ -136,7 +136,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     onClick={handleCustomStake}
                     className="w-full h-14 rounded-2xl bg-[#ff6b00] text-black text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)]"
                   >
-                     Add Credits
+                     TOP UP
                   </button>
                </div>
                <p className="text-[7px] text-white/20 uppercase tracking-[0.2em] font-black ml-1">
@@ -192,7 +192,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     <ShieldCheck size={12} /> SECURE FULFILLMENT G-V1.9
                 </h5>
                 <p className="text-[8px] text-white/10 uppercase tracking-[0.3em] mt-2 block leading-loose border-t border-white/5 pt-4 font-black italic">
-                    Digital Media Credits Issued by AllTheseFlows LLC. Instant Fulfillment. 15% Bonus Applied to every Hub Tier. 💎
+                    Digital Media Credits Issued by AllTheseFlows Strategic Media LLC. Instant Fulfillment. 15% Bonus Applied to every Tier. 💎
                 </p>
                 <p className="text-[7px] text-white/5 uppercase tracking-[0.3em] font-black italic text-center">
                     All digital credit reservations are final and fulfilled instantly. 🧬🛡️

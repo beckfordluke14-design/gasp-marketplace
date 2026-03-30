@@ -25,7 +25,7 @@ import ProfileAvatar from '@/components/profile/ProfileAvatar';
 import Link from 'next/link';
 import GlitchText from './ui/GlitchText';
 
-import NeuralPulseHub from './NeuralPulseHub';
+import NeuralPulseTerminal from './NeuralPulseTerminal';
 
 // 🛡️ SYSTEM SYNC: Using DB Service for reliable updates.
 
@@ -194,7 +194,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
         {view === 'chats' && (
           <>
             {/* 🛰️ MARKET PULSE: Real-time Intel Ticker */}
-            <NeuralPulseHub />
+            <NeuralPulseTerminal />
 
             {/* NEW MESSAGES */}
             {Object.keys(unreadCounts).some(id => unreadCounts[id] > 0) && (
@@ -254,7 +254,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                             <span className="text-[12px] font-black text-white italic">0.00</span>
                         </div>
                         <button className="w-full py-3 bg-[#00f0ff] text-black rounded-xl text-[9px] font-black uppercase tracking-[0.2em] shadow-[0_10px_20px_rgba(0,240,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all">
-                            Infuse Hub Access
+                            Infuse Terminal Link
                         </button>
                     </div>
                 </div>
@@ -305,7 +305,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                         <span className="text-[24px] font-black font-syncopate italic text-white leading-none">
                            {profile?.credit_balance?.toLocaleString() || '0'}
                         </span>
-                        <span className="text-[8px] font-black text-[#00ff00] uppercase tracking-widest italic">Credits</span>
+                        <span className="text-[8px] font-black text-[#00ff00] uppercase tracking-widest italic">Uplink Power</span>
                     </div>
                  </div>
               </div>
@@ -323,7 +323,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                       <div className="flex items-center gap-1.5 mt-0.5">
                          <span className="text-[#00ff00] font-black text-[10px] italic">⚡️</span>
                          <span className="text-[10px] font-syncopate font-black italic text-white leading-none">
-                            {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[7px] text-[#00ff00] not-italic">CREDITS</span>
+                            {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[7px] text-[#00ff00] not-italic">POWER</span>
                          </span>
                       </div>
                    </div>
@@ -358,7 +358,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center">
                    <Zap size={10} className="text-black" />
                  </div>
-                <span className="text-[8px] font-black uppercase tracking-widest italic font-syncopate">ADD CREDITS</span>
+                <span className="text-[8px] font-black uppercase tracking-widest italic font-syncopate">TOP UP</span>
              </button>
           </div>
 
