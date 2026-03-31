@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, MessageSquare } from 'lucide-react';
 import GlobalFeed from '@/components/GlobalFeed';
+import WeatherFeed from '@/components/WeatherFeed';
+import NewsFeed from '@/components/NewsFeed';
 import RightSidebar from '@/components/RightSidebar';
 import StoriesRow from '@/components/StoriesRow';
 import Sidebar from '@/components/Sidebar';
@@ -33,6 +35,7 @@ function MarketplaceContent() {
   const [guestId, setGuestId] = useState<string | null>(null);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [sidebarView, setSidebarView] = useState<'chats' | 'vault' | 'feed'>('chats');
+  const [activeTab, setActiveTab] = useState<'feed' | 'weather' | 'news'>('feed');
   const [following, setFollowing] = useState<string[]>([]);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   
@@ -203,8 +206,30 @@ function MarketplaceContent() {
             />
            
            <div className="flex-1 flex flex-col relative bg-transparent">
+              {/* DOMINANT TAB NAVIGATION */}
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-1 p-1 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-full shadow-2xl">
+                  <button 
+                     onClick={() => setActiveTab('feed')} 
+                     className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'feed' ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.4)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                  >
+                     Global Feed
+                  </button>
+                  <button 
+                     onClick={() => setActiveTab('weather')} 
+                     className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'weather' ? 'bg-[#00f0ff] text-black shadow-[0_0_20px_rgba(0,240,255,0.6)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                  >
+                     Weather X
+                  </button>
+                  <button 
+                     onClick={() => setActiveTab('news')} 
+                     className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'news' ? 'bg-[#ff00ff] text-white shadow-[0_0_20px_rgba(255,0,255,0.6)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                  >
+                     News
+                  </button>
+              </div>
+
               {/* STORY TOGGLE PORTAL */}
-              <div className="absolute right-6 top-0 z-50 flex items-center gap-3">
+              <div className="absolute right-6 top-4 z-50 flex items-center gap-3">
                  <button 
                    onClick={() => setShowStories(!showStories)}
                    className={`w-10 h-10 rounded-xl bg-white/5 backdrop-blur-3xl border border-white/10 flex items-center justify-center text-white/20 hover:text-[#ffea00] transition-all ${!showStories ? 'bg-[#ffea00]/10 text-[#ffea00]' : ''}`}
@@ -214,12 +239,20 @@ function MarketplaceContent() {
               </div>
 
               <div className="flex-1 overflow-hidden relative">
-                 <GlobalFeed 
-                    onSelectProfile={handleSelectProfile} 
-                    profiles={randomizedProfiles}
-                    deadIds={deadIds}
-                    setDeadIds={setDeadIds}
-                 />
+                 {activeTab === 'feed' && (
+                     <GlobalFeed 
+                        onSelectProfile={handleSelectProfile} 
+                        profiles={randomizedProfiles}
+                        deadIds={deadIds}
+                        setDeadIds={setDeadIds}
+                     />
+                 )}
+                 {activeTab === 'weather' && (
+                     <WeatherFeed onOpenTopUp={() => setIsTopUpOpen(true)} />
+                 )}
+                 {activeTab === 'news' && (
+                     <NewsFeed />
+                 )}
               </div>
            </div>
         </div>
