@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Unlock, Eye, RefreshCcw, Activity, AlertTriangle, Clock, Loader2 } from 'lucide-react';
+import { Lock, Unlock, Eye, RefreshCcw, Activity, AlertTriangle, Clock, Loader2, ShieldCheck, Flame, Share2 } from 'lucide-react';
 import { useUser } from '@/components/providers/UserProvider';
 
 interface PolymarketEvent {
@@ -167,11 +167,52 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                 </div>
             </header>
 
+            {/* 🛰️ NEURAL SCANNER EMPTY STATE */}
             {buckets.length === 0 && !isFetching && (
-                <div className="flex flex-col items-center justify-center py-20 text-white/30 gap-4">
-                    <AlertTriangle size={32} />
-                    <span className="text-xs uppercase tracking-widest font-black">Intel Feed Offline</span>
-                </div>
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex-1 flex flex-col items-center justify-center p-8 text-center"
+                >
+                    <div className="max-w-xl w-full bg-white/5 border border-white/10 rounded-[3rem] p-12 backdrop-blur-xl relative overflow-hidden group">
+                        {/* Recursive Scanning Visual */}
+                        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10 group-hover:opacity-20 transition-opacity" />
+                        
+                        <div className="relative z-10 flex flex-col items-center gap-8">
+                            <div className="w-24 h-24 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20 flex items-center justify-center relative">
+                                <Activity size={40} className="text-[#00f0ff] animate-pulse" />
+                                <div className="absolute inset-0 rounded-full border-2 border-[#00f0ff]/20 animate-ping" />
+                            </div>
+
+                            <div className="space-y-4">
+                                <h2 className="text-3xl font-syncopate font-black italic tracking-tighter uppercase text-white">
+                                    Scanners <span className="text-[#00f0ff]">Active</span>
+                                </h2>
+                                <p className="text-white/40 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] leading-loose">
+                                    Our neural scanners are monitoring global temperature fluctuations. 
+                                    no high-value anomalies detected in the current 24h window. 
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col items-center gap-4 pt-8 border-t border-white/5 w-full">
+                                <div className="flex items-center gap-3">
+                                    <ShieldCheck size={16} className="text-green-500" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-green-500">Handshake Verified // Global Stability</span>
+                                </div>
+                                <p className="text-[9px] text-white/20 italic uppercase tracking-widest">
+                                    Check back hourly for fresh arbitrage signals
+                                </p>
+                                
+                                <button 
+                                    onClick={fetchMarkets}
+                                    className="mt-4 px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                >
+                                    Force Deep Scan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative">
@@ -365,6 +406,21 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                     );
                 })}
             </div>
+            {/* 🛡️ INSTITUTIONAL RISK DISCLOSURE */}
+            <footer className="mt-20 p-8 border border-white/5 rounded-[2rem] bg-black/40 backdrop-blur-3xl text-center">
+                 <div className="flex flex-col items-center gap-4 max-w-4xl mx-auto">
+                    <div className="flex items-center gap-2 text-white/40 uppercase font-black text-[9px] tracking-[0.3em]">
+                        <ShieldCheck size={14} className="text-[#00f0ff]" />
+                        Intelligence Protocol Disclaimer
+                    </div>
+                    <p className="text-[9px] md:text-[10px] text-white/20 font-outfit uppercase tracking-widest leading-relaxed">
+                        Risk Disclosure: All signals provided via the Weather X terminal are for informational and research purposes only. 
+                        The Syndicate is not a financial advisor. Prediction market participation involves significant risk of loss. 
+                        Users take full responsibility for all executions conducted based on terminal scanner scans. 
+                        Handshake verified signals are not guarantees of future market outcomes.
+                    </p>
+                 </div>
+            </footer>
         </div>
     );
 }
