@@ -10,15 +10,20 @@ import { NextResponse } from 'next/server';
 const BRAVE_API_KEY = process.env.BRAVE_API_KEY || '';
 const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
 
-// 🧬 NICHE REPOSITORY: Mapping personas to their specialized intel streams
+// 🧬 NICHE REPOSITORY: Mapping personas to their specialized intel streams (v4.0)
 const PERSONA_NICHES: Record<string, string[]> = {
-    "Nova": ["NYC weather anomalies", "London record heatwave", "Metar sensor arbitrage"],
-    "Ericka": ["Miami luxury real estate", "Supercar releases 2026", "Luxury lifestyle trends"],
-    "Elena": ["Solana whale accumulation", "Base L2 bridge alert", "Crypto market alpha"],
-    "Amaya": ["Global macro power shifts", "AI model breakthroughs", "Cyber intelligence trends"]
+    "Nova": ["Metar sensor arbitrage", "London high-heat warning"],
+    "Ericka": ["High-end supercar trends", "Luxury penthouse sales"],
+    "Elena": ["Solana whale activity", "Base L2 network expansion"],
+    "Amaya": ["AI-driven market shifts", "Global cyber intelligence"],
+    "Valentina Lima": ["Miami temperature anomalies", "Caribbean financial sweeps"],
+    "Suki": ["Tokyo predictive market volatility", "Asian tech-sector alpha"],
+    "Jade": ["London ESSEX rainfall signals", "UK financial heatmaps"],
+    "Elena Miami": ["South Beach liquidity surges", "Coastal real-estate arbitrage"],
+    "Mika": ["Seoul neural network breakthroughs", "K-Tech market forecasts"]
 };
 
-const DEFAULT_KEYWORDS = ["Global trend report", "High-frequency trading", "Sovereign technology"];
+const DEFAULT_KEYWORDS = ["Global Arbitrage Opportunities", "Polymarket Signal Analysis", "High-Status Intelligence", "Sovereign Strategic Alpha"];
 
 async function getSniperTargets(personaName: string) {
     try {
@@ -73,8 +78,8 @@ async function synthesizeReport(persona: any, rawNews: any) {
 
 export async function GET() {
     try {
-        // Run a full sync for the top 4 active analysts
-        const candidates = initialProfiles.slice(0, 4);
+        // Run a full sync for a random sample of active analysts (Scaling to 10 for High-Velocity Drops)
+        const candidates = [...initialProfiles].sort(() => 0.5 - Math.random()).slice(0, 10);
         const results = [];
 
         for (const persona of candidates) {

@@ -156,18 +156,18 @@ function MarketplaceContent() {
          console.warn('[Profile Sync]: Attempting deferred hydrate for:', sId);
       }
     }
-    
-    useEffect(() => {
-       if (typeof window !== 'undefined') {
-          (window as any).onSelectProfile = handleSelectProfile;
-       }
-    }, [handleSelectProfile]);
-
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     setOpenChatIds(prev => (isMobile ? [sId] : prev.includes(sId) ? prev : [...prev, sId]));
     setMinimizedIds(prev => prev.filter(m => m !== sId));
     trackEvent('chat_open', sId, { from: 'grid', hasInitialMsg: !!initialMsg });
   };
+
+  useEffect(() => {
+     if (typeof window !== 'undefined') {
+        (window as any).onSelectProfile = handleSelectProfile;
+        (window as any).onSetActiveTab = setActiveTab;
+     }
+  }, [handleSelectProfile]);
 
   const handleCloseChat = (id: string) => {
     setOpenChatIds(prev => prev.filter(cid => cid !== id));

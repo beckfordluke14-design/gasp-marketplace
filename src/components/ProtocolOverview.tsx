@@ -40,10 +40,6 @@ export default function ProtocolOverview() {
     useEffect(() => {
         if (stats?.globalBurn) {
             setDisplayBurn(stats.globalBurn);
-            const interval = setInterval(() => {
-                setDisplayBurn(prev => prev + Math.floor(Math.random() * 5));
-            }, 5000);
-            return () => clearInterval(interval);
         }
     }, [stats?.globalBurn]);
     
@@ -217,48 +213,39 @@ export default function ProtocolOverview() {
     );
 }
 
-/** 🧬 THE GHOST PULSE ENGINE */
+/** 🧬 THE SIGNAL PULSE ENGINE: Real-Time Intelligence Reports */
 function NetworkActivityPulse() {
-    const [logs, setLogs] = useState<string[]>([]);
+    const [reports, setReports] = useState<any[]>([]);
     
     useEffect(() => {
-        const events = [
-            "SCANNER_UPLINK: {CITY}_NODE_SCAN_INITIALIZED",
-            "SHADOW BURN TICK: OPERATIONAL OVERHEAD COMMITTED",
-            "NEURAL_ALGORITHM: WEATHER_X_PROBABILITY_SYNC",
-            "NODE_HEARTBEAT: {CITY}_REGION_VERIFIED",
-            "DEFLATIONARY_ENGINE: IDLE_ACTIVITY_SYNCED",
-            "DATA_BRIDGE: CLOB_API_HANDSHAKE_COMPLETE",
-            "SENTINEL_PROTOCOL: STANDBY_MODE_ACTIVE",
-            "UPLINK_SYNC: GLOBAL_CONSENSUS_VERIFIED"
-        ];
-        
-        const interval = setInterval(() => {
-            const ev = events[Math.floor(Math.random() * events.length)];
-            const id = Math.floor(1000 + Math.random() * 9000);
-            const val = [500, 1000, 5000, 2500, 100][Math.floor(Math.random() * 5)];
-            const city = ["NYC", "LONDON", "TOKYO", "PARIS", "SEOUL", "MIAMI"][Math.floor(Math.random() * 6)];
-            
-            const logMsg = `[${new Date().toLocaleTimeString()}] ${ev.replace("{ID}", id.toString()).replace("{VALUE}", val.toString()).replace("{CITY}", city)}`;
-            
-            setLogs(prev => [logMsg, ...prev].slice(0, 8));
-        }, 3000);
-
+        const fetchLatest = async () => {
+           try {
+              const res = await fetch('/api/news');
+              const data = await res.json();
+              setReports(Array.isArray(data) ? data.slice(0, 5) : []);
+           } catch(e) {}
+        };
+        fetchLatest();
+        const interval = setInterval(fetchLatest, 30000); // 30s Sync
         return () => clearInterval(interval);
     }, []);
 
     return (
         <div className="space-y-4">
             <AnimatePresence>
-                {logs.map((log, i) => (
+                {reports.length === 0 ? (
+                    <div className="text-white/20 uppercase tracking-widest text-[8px] animate-pulse">Syncing Intelligence Core...</div>
+                ) : reports.map((rpt, i) => (
                     <motion.div 
-                        key={log + i}
+                        key={rpt.id + i}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className={`flex items-center gap-4 ${i === 0 ? 'text-[#00f0ff]' : 'text-white/20'}`}
+                        onClick={() => (window as any).onSetActiveTab?.('reports')}
+                        className={`flex items-center gap-4 cursor-pointer group ${i === 0 ? 'text-[#00f0ff]' : 'text-white/20 hover:text-white/40'}`}
                     >
+                        <span className="shrink-0 font-mono text-[7px] opacity-40">[{new Date(rpt.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}]</span>
                         <span className="shrink-0">{i === 0 ? '►' : '  '}</span>
-                        <span className="uppercase tracking-widest leading-none">{log}</span>
+                        <span className="uppercase tracking-widest leading-none truncate group-hover:underline">{rpt.title}</span>
                     </motion.div>
                 ))}
             </AnimatePresence>

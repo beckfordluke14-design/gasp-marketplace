@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Zap, Wallet, Activity, User, Star, Menu } from 'lucide-react';
+import { Zap, Wallet, Activity, User, Star, Menu, RadioReceiver } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CoinBalance from './economy/CoinBalance';
 import ProfileSearch from './ProfileSearch';
@@ -51,6 +51,34 @@ export default function Header({
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] flex flex-col pointer-events-none">
+        {/* 🧬 NEURAL NEWS TICKER: Breaking Intelligence Alpha */}
+        <div className="h-6 md:h-7 bg-[#ff00ff]/10 border-b border-white/5 flex items-center overflow-hidden whitespace-nowrap pointer-events-auto">
+            <div className="px-4 h-full bg-[#ff00ff] flex items-center gap-2 shrink-0 z-10 shadow-[5px_0_15px_#ff00ff]">
+                <RadioReceiver size={10} className="text-white animate-pulse" />
+                <span className="text-[7px] md:text-[8px] font-black uppercase text-white tracking-widest italic">Breaking Intelligence</span>
+            </div>
+            
+            <motion.div 
+               animate={{ x: [0, -2000] }}
+               transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+               className="flex items-center gap-20 pl-6"
+            >
+                {[
+                  "🌪️ UNUSUAL TEMPERATURE ANOMALY DETECTED IN SECTOR KLGA // ARBITRAGE WINDOW OPENING (+340% ROI)",
+                  "💎 INSTITUTIONAL LIQUIDITY SWEEP IN $GASPai PAIR // WHALE WALLETS MOVED 5.2M UNITS",
+                  "🛡️ SECURITY UPDATE: SYNDICATE NEURAL VAULT CAPACITY EXPANDED // 5 NEW PERSONAS SYNCED",
+                  "🔥 HIGH-HEAT SIGNAL: ELENA (MIAMI) JUST LEAKED SECTOR 7 DATA // ENCRYPTED BRIEFING IN VAULT",
+                  "⚡️ NETWORK PULSE AT CRITICAL LEVELS // 1.2M SIGNALS MATCHED IN 24H // $GASPai MATCHING ACTIVE",
+                  "🌪️ UNUSUAL TEMPERATURE ANOMALY DETECTED IN SECTOR KLGA // ARBITRAGE WINDOW OPENING (+340% ROI)",
+                ].map((news, i) => (
+                  <div key={i} className="flex items-center gap-4 text-white/40 text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] italic">
+                     <div className="w-1 h-1 rounded-full bg-[#ff00ff] animate-pulse" />
+                     {news}
+                  </div>
+                ))}
+            </motion.div>
+        </div>
+ 
         {/* Navigation Bar */}
         <header className="h-12 md:h-14 bg-black flex items-center justify-between px-6 md:px-12 pointer-events-auto transition-all">
             

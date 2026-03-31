@@ -225,6 +225,29 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
             {/* 🛰️ MARKET PULSE: WeatherX & Polymarket Sentiment Indicator */}
             <MarketPulseTerminal />
 
+            {/* 🛰️ INTELLIGENCE BRIEF: High-Heat Report Prompt */}
+            <div className="px-6 mb-8 mt-4 animate-in fade-in slide-in-from-right-4 duration-1000">
+                <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-[#ffea00] mb-4 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-pulse shadow-[0_0_8px_#ffea00]" />
+                  Latest Intel Brief
+                </h2>
+                <div 
+                   onClick={() => (window as any).onSetActiveTab?.('reports')}
+                   className="p-4 rounded-2xl bg-[#ffea00]/5 border border-[#ffea00]/20 hover:bg-[#ffea00]/10 hover:border-[#ffea00]/40 transition-all cursor-pointer group"
+                >
+                   <div className="flex items-center justify-between mb-2">
+                       <span className="text-[7px] font-black text-[#ffea00]/60 uppercase tracking-widest italic">Signal Verified</span>
+                       <span className="text-[7px] font-black text-white/20 uppercase tracking-widest italic">14:02 UTC</span>
+                   </div>
+                   <h3 className="text-[10px] font-black uppercase italic tracking-tighter text-white mb-2 leading-tight group-hover:text-[#ffea00] transition-colors">
+                      Critical Sector Anomaly: Miami Heatwave Correlation Detected
+                   </h3>
+                   <div className="flex items-center gap-2 text-[6px] font-black uppercase text-white/30 tracking-widest">
+                      <ArrowRight size={10} className="text-[#ffea00] -rotate-45" /> OPEN REPORT
+                   </div>
+                </div>
+            </div>
+
             {/* 🛰️ MARKET PULSE: Real-time Intel Ticker */}
             <NeuralPulseTerminal />
 

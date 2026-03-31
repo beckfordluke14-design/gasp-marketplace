@@ -16,6 +16,7 @@ interface NewsPost {
         heat?: 'Standard' | 'High' | 'Critical';
         source?: string;
         city?: string;
+        persona_note?: string;
     };
 }
 
@@ -102,11 +103,18 @@ export default function NewsFeed() {
                                 </div>
                             </div>
 
-                            <h2 className="text-3xl md:text-5xl font-outfit font-black italic uppercase tracking-tighter mb-8 group-hover:text-white transition-colors">
+                            <div className="flex flex-col mb-8 p-6 bg-[#ff00ff]/5 border-l-2 border-[#ff00ff] rounded-r-2xl">
+                                <span className="text-[8px] font-black uppercase text-[#ff00ff] tracking-[.4em] mb-2 font-syncopate italic">Tactical Briefing Notes // {item.persona_name}</span>
+                                <p className="text-white text-base font-outfit italic font-medium leading-relaxed">
+                                    "{item.meta?.persona_note || "I've analyzed the following signal. This has direct correlation to our current Syndicate targets. Decode the data below."}"
+                                </p>
+                            </div>
+
+                            <h2 className="text-2xl md:text-4xl font-syncopate font-black italic uppercase tracking-tighter mb-6 group-hover:text-white transition-colors leading-tight">
                                 {item.title}
                             </h2>
                             
-                            <p className="text-white/70 text-base md:text-lg font-mono leading-relaxed mb-10 whitespace-pre-wrap max-w-3xl">
+                            <p className="text-white/50 text-sm md:text-base font-outfit leading-relaxed mb-10 whitespace-pre-wrap max-w-3xl border-l border-white/10 pl-6">
                                 {item.content}
                             </p>
 
@@ -124,7 +132,10 @@ export default function NewsFeed() {
                                     <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-[#ff00ff]/20 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#ff00ff] transition-all">
                                         <Share2 size={16} />
                                     </button>
-                                    <button className="px-6 py-2.5 bg-[#ff00ff] text-white rounded-full flex items-center gap-2 text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-105 transition-all">
+                                    <button 
+                                       onClick={() => (window as any).onSelectProfile?.(item.persona_id)}
+                                       className="px-6 py-2.5 bg-[#ff00ff] text-white rounded-full flex items-center gap-2 text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-105 transition-all"
+                                    >
                                         Analyze Arbitrage <CornerRightUp size={14} />
                                     </button>
                                 </div>
