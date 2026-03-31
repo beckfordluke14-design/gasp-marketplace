@@ -144,7 +144,7 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
     };
 
     return (
-        <div className="h-full w-full overflow-y-auto overflow-x-hidden hide-scrollbar scroll-smooth flex flex-col pt-20 px-4 md:px-8 pb-32 relative">
+        <div className="h-full w-full overflow-y-auto overflow-x-hidden scroll-smooth flex flex-col pt-20 px-4 md:px-8 pb-32 relative">
             
             <header className="mb-10 text-center md:text-left flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                 <div>

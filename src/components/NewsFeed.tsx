@@ -12,7 +12,7 @@ const NEWS_ITEMS = [
 
 export default function NewsFeed() {
     return (
-        <div className="h-full w-full overflow-y-auto overflow-x-hidden hide-scrollbar flex flex-col pt-20 px-4 md:px-8 pb-32">
+        <div className="h-full w-full overflow-y-auto overflow-x-hidden flex flex-col pt-20 px-4 md:px-8 pb-32">
              <header className="mb-10 text-center md:text-left flex items-center justify-between">
                 <div>
                    <h1 className="text-4xl md:text-5xl font-outfit font-black italic uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#ff00ff] to-white/50 flex items-center gap-4">

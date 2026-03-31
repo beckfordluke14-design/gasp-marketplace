@@ -277,7 +277,7 @@ export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFee
   );
 
   return (
-    <div className="w-full h-full overflow-y-auto no-scrollbar snap-y snap-mandatory md:snap-none bg-black">
+    <div className="w-full h-full overflow-y-auto bg-black">
       {items.map((broadcast, i) => {
         const profile = profiles.find(p => p.id === broadcast.persona_id) || initialProfiles[0];
         return (

@@ -184,7 +184,7 @@ function MarketplaceContent() {
   if (!mounted) return null;
 
    return (
-    <main className="min-[100dvh] bg-transparent text-white relative flex flex-col lg:flex-row xl:gap-0 overflow-hidden">
+    <main className="min-h-screen bg-transparent text-white relative flex flex-col lg:flex-row xl:gap-0">
        <div className="hidden lg:flex h-screen sticky top-0 shrink-0 z-[40]">
            <Sidebar 
               onSelectProfile={handleSelectProfile} 
@@ -195,7 +195,7 @@ function MarketplaceContent() {
            />
        </div>
        
-       <div className="flex-1 flex flex-col relative h-screen overflow-hidden">
+       <div className="flex-1 flex flex-col relative h-full">
             <Header 
                onOpenTopUp={() => setIsTopUpOpen(true)} 
                deadIds={deadIds} 
@@ -238,7 +238,7 @@ function MarketplaceContent() {
                  </button>
               </div>
 
-              <div className="flex-1 overflow-hidden relative">
+              <div className="flex-1 relative">
                  {activeTab === 'feed' && (
                      <GlobalFeed 
                         onSelectProfile={handleSelectProfile} 
