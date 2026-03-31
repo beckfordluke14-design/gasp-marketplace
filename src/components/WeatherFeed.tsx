@@ -19,6 +19,8 @@ interface PolymarketEvent {
     currentTempStr?: string;
     recommendedPrice?: number;
     recommendedPriceStr?: string;
+    fallbackPrice?: number;
+    fallbackPriceStr?: string;
     isUnlockedByDB?: boolean;
     roiPct?: number;
 }
@@ -65,7 +67,9 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                     recommendedPrice: ev.recommendedPrice,
                     recommendedPriceStr: ev.recommendedPriceStr,
                     isUnlockedByDB: ev.isUnlockedByDB,
-                    roiPct: ev.roiPct
+                    roiPct: ev.roiPct,
+                    fallbackPrice: ev.fallbackPrice,
+                    fallbackPriceStr: ev.fallbackPriceStr
                 });
             });
             
@@ -186,9 +190,11 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                         }
                     }
 
-                    const displayPrice = bucket.recommendedPrice !== undefined && bucket.recommendedPrice !== null 
+                    const displayPrice = (bucket.recommendedPrice !== undefined && bucket.recommendedPrice !== null)
                         ? (bucket.recommendedPrice * 100).toFixed(1) 
-                        : (bucket.price * 100).toFixed(1);
+                        : (bucket.fallbackPrice !== undefined && bucket.fallbackPrice !== null)
+                            ? (bucket.fallbackPrice * 100).toFixed(1)
+                            : (bucket.price * 100).toFixed(1);
 
                     return (
                         <motion.div
