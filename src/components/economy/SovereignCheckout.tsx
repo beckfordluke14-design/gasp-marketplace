@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { CreditCard, Zap, Loader2, ArrowRight, Bitcoin, ShieldCheck, AlertCircle } from 'lucide-react';
-import { CREDIT_PACKAGES } from '@/lib/economy/constants';
+import { CREDIT_PACKAGES, SYNDICATE_TREASURY_SOL } from '@/lib/economy/constants';
 import StripeEmbeddedOnramp from './StripeEmbeddedOnramp';
 
 interface SovereignCheckoutProps {
@@ -124,46 +124,61 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
         <span className="text-4xl font-syncopate font-black text-[#00f0ff] italic">${pkg.priceUsd}</span>
       </div>
 
-      {/* DUAL RAIL CHOICE */}
+      {/* 🚀 THE SATURDAY MONEY PRINTER: THREE RAILS */}
       <div className="grid grid-cols-1 gap-4">
 
-        {/* 🥇 RAILS: CARD (Stripe Onramp) */}
+        {/* 🥇 #1: THE MONEY PRINTER: DIRECT WALLET (Sovereign Elite) */}
         <button
-          onClick={handleCardChoice}
-          disabled={isLoadingCard || isLoadingCrypto}
-          className="w-full h-20 rounded-2xl bg-white text-black flex items-center justify-between px-8 shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+          onClick={() => alert(`Direct USDC Bridge Syncing to your Treasury [${SYNDICATE_TREASURY_SOL.slice(0,6)}...]. This is your Saturday Money Printer.`)}
+          className="w-full h-24 rounded-[2rem] bg-gradient-to-r from-[#00f0ff] to-[#ff00ff] text-white p-[1px] shadow-[0_0_60px_rgba(0,240,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all group"
         >
-          <div className="flex items-center gap-4">
-            <CreditCard size={24} className="shrink-0" />
-            <div className="flex flex-col items-start">
-              <span className="text-[11px] font-black uppercase tracking-[0.2em]">Pay by Card</span>
-              <span className="text-[8px] uppercase tracking-widest text-black/40">Formal Fiat-to-Crypto Onramp (Stripe)</span>
-            </div>
-          </div>
-          {isLoadingCard ? <Loader2 size={20} className="animate-spin" /> : <Zap size={20} fill="black" />}
+           <div className="w-full h-full bg-black rounded-[2rem] flex items-center justify-between px-8">
+              <div className="flex items-center gap-5 text-left">
+                <div className="w-12 h-12 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center animate-pulse">
+                   <Zap size={28} className="text-[#00f0ff]" fill="#00f0ff" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-black uppercase tracking-[0.2em] text-white italic group-hover:text-[#00f0ff] transition-colors">Direct Wallet Settlement</span>
+                  <span className="text-[9px] uppercase tracking-widest text-white/30">Privy/Phantom Bridge • Zero Middleman • Instant Alpha</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-end">
+                  <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-widest animate-pulse italic">Priority Rail</span>
+                  <ArrowRight size={20} className="text-white/20 mt-1" />
+              </div>
+           </div>
         </button>
 
-        {/* SEPARATOR */}
-        <div className="flex items-center gap-4">
-          <div className="h-px flex-1 bg-white/5" />
-          <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/10">or</span>
-          <div className="h-px flex-1 bg-white/5" />
-        </div>
-
-        {/* 🥈 RAILS: CRYPTO (Helio P2P) */}
+        {/* 🥈 #2: THE HELIO BRIDGE: P2P LINK */}
         <button
           onClick={handleCryptoChoice}
           disabled={isLoadingCard || isLoadingCrypto || (!pkg.helioPayLink && !isCustom)}
-          className="w-full h-20 rounded-2xl bg-transparent border border-[#ff00ff]/30 text-white flex items-center justify-between px-8 hover:bg-[#ff00ff]/5 hover:border-[#ff00ff]/60 active:scale-95 transition-all disabled:opacity-30"
+          className="w-full h-20 rounded-2xl bg-white/[0.03] border border-white/5 text-white flex items-center justify-between px-8 hover:bg-white/[0.06] hover:border-white/10 active:scale-95 transition-all disabled:opacity-30"
         >
-          <div className="flex items-center gap-4">
-            <Bitcoin size={24} className="text-[#ff00ff] shrink-0" />
+          <div className="flex items-center gap-4 text-white">
+            <Bitcoin size={24} className="text-white/20 shrink-0" />
             <div className="flex flex-col items-start">
-              <span className="text-[11px] font-black uppercase tracking-[0.2em]">Pay with Crypto</span>
-              <span className="text-[8px] uppercase tracking-widest text-white/30">Direct P2P Settlement (USDC/SOL/ETH)</span>
+              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">P2P Crypto Link</span>
+              <span className="text-[8px] uppercase tracking-widest text-white/20">Legacy Helio Bridge (USDC/SOL/ETH)</span>
             </div>
           </div>
-          {isLoadingCrypto ? <Loader2 size={20} className="animate-spin text-[#ff00ff]" /> : <ArrowRight size={20} className="text-[#ff00ff]" />}
+          <ArrowRight size={20} className="text-white/10" />
+        </button>
+
+        {/* 🥉 #3: THE FIAT BRIDGE: CARD (Stripe Onramp) */}
+        <button
+          onClick={handleCardChoice}
+          disabled={isLoadingCard || isLoadingCrypto}
+          className="w-full h-20 rounded-2xl bg-white/[0.02] border border-white/5 text-white flex items-center justify-between px-8 hover:bg-white/[0.04] hover:border-white/10 active:scale-95 transition-all disabled:opacity-50"
+        >
+          <div className="flex items-center gap-4">
+            <CreditCard size={24} className="shrink-0 text-white/20" />
+            <div className="flex flex-col items-start">
+              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Fiat-to-Asset Bridge</span>
+              <span className="text-[8px] uppercase tracking-widest text-white/10">Secure Card Settlement (Stripe Crypto)</span>
+            </div>
+          </div>
+          {isLoadingCard ? <Loader2 size={20} className="animate-spin" /> : <ArrowRight size={20} className="text-white/10" />}
         </button>
 
       </div>

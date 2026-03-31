@@ -59,6 +59,10 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
   }
 ];
 
+// SOVEREIGN TREASURY: Destination for Saturday "Money Printer" Rails
+export const SYNDICATE_TREASURY_SOL = 'H7BvF9o1yWh7ZBej7N3y5K27vY6LqzE7S6jXF8A9Z1K1'; // Replace with actual
+export const USDC_MINT_SOL = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
 // RE-MAPPED BURN RATES (Apex-Elite v6.8 Master Protocol)
 // High-Status Revenue Node: $20 provides 20,000 Credits.
 export const COST_VAULT_UNLOCK = 6000;           // 6,000 Credits ($6.00 Apex-Entry)
