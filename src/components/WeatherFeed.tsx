@@ -337,6 +337,28 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                                            </div>
                                         </div>
                                     )}
+
+                                    {/* 🛰️ VIRAL SHARE ENGINE */}
+                                    <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between gap-4">
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const shareText = `🚨 [${bucket.city?.toUpperCase()} SIGNAL]: Live ground-sensor hit ${bucket.currentTempStr || 'anomaly'}. 🌪️ Mispriced bucket detected with +${bucket.roiPct || '350'}% ROI TARGET. \n\nDECODE THE SIGNAL: ${window.location.origin}\n\n#$GASPai #Arbitrage #Polymarket #WeatherX`;
+                                                const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+                                                window.open(xUrl, '_blank');
+                                            }}
+                                            className="flex-1 py-4 px-4 bg-white/5 hover:bg-[#00f0ff]/20 text-white/40 hover:text-[#00f0ff] rounded-2xl border border-white/10 hover:border-[#00f0ff]/40 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all shadow-xl"
+                                        >
+                                            <Share2 size={16} /> Share Intelligence
+                                        </button>
+                                        
+                                        <div className="flex flex-col items-end opacity-20 hover:opacity-100 transition-opacity">
+                                             <span className="text-[7px] font-mono text-white/40 uppercase tracking-widest mb-1">NODE_ID</span>
+                                             <span className="text-[8px] font-mono text-white uppercase tracking-widest font-black">
+                                                 {bucket.id.slice(0, 8)}
+                                             </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
