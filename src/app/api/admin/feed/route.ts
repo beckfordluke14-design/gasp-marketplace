@@ -9,6 +9,7 @@ export async function GET(req: Request) {
   const limit = parseInt(searchParams.get('limit') || '20', 10);
   const personaIdFilter = searchParams.get('persona_id');
   const allMode = searchParams.get('all') === 'true';
+  const typeFilter = searchParams.get('type');
   
   try {
     const offset = page * limit;
@@ -41,6 +42,12 @@ export async function GET(req: Request) {
       conditions.push("p.is_freebie = false");
       conditions.push("p.is_gallery = false");
       conditions.push("p.caption NOT LIKE 'DELETED%'");
+    }
+
+    if (typeFilter === 'text') {
+      conditions.push("p.content_type = 'text'");
+    } else if (typeFilter === 'media') {
+      conditions.push("(p.content_type = 'image' OR p.content_type = 'video' OR p.content_url IS NOT NULL)");
     }
 
     if (conditions.length > 0) {

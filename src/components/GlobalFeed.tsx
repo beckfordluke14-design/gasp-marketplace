@@ -235,13 +235,17 @@ export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFee
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/admin/feed?limit=100');
-        const data = await res.json();
-        const posts = data.posts || [];
+        // 🛡️ DUAL FETCH: Guarantee both Text logs and Full-Bleed Media are pulled regardless of recent frequency
+        const [textRes, mediaRes] = await Promise.all([
+           fetch('/api/admin/feed?limit=50&type=text'),
+           fetch('/api/admin/feed?limit=50&type=media')
+        ]);
         
-        // 🧬 SOVEREIGN WEAVE: Alternate 2 Text <-> 2 Media Posts
-        const texts = posts.filter((p: any) => p.content_type === 'text' || p.type === 'text');
-        const media = posts.filter((p: any) => p.content_type !== 'text' && p.type !== 'text');
+        const textData = await textRes.json();
+        const mediaData = await mediaRes.json();
+        
+        const texts = textData.posts || [];
+        const media = mediaData.posts || [];
         
         const woven = [];
         let tIndex = 0;
