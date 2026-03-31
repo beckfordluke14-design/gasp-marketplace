@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { type VaultItem } from '@/lib/profiles';
-import { Lock, Eye, Zap, CheckCircle2, Play } from 'lucide-react';
+import { Lock, Eye, Zap, CheckCircle2, Play, Loader2, ArrowRight, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 
 interface VaultGalleryProps {
@@ -54,41 +54,49 @@ export default function VaultGallery({ items, userBalance, onUnlock }: VaultGall
                                 >
                                     <Image src={item.blurred_url} alt="" fill unoptimized className="object-cover blur-2xl scale-110 grayscale opacity-40 transition-all duration-700 group-hover:blur-xl" />
                                     
+                                    {/* Signal Scramble Overlay */}
+                                    <div className="absolute inset-0 bg-[#ff00ff]/5 pointer-events-none mix-blend-overlay" />
+                                    
                                     {/* Glass Overlay */}
-                                    <div className="absolute inset-x-4 top-4 bottom-4 glass-vault rounded-[2rem] flex flex-col items-center justify-center text-center p-6 border border-white/10 backdrop-blur-md shadow-3xl">
-                                        <div className="w-16 h-16 rounded-[1.5rem] bg-white/5 border border-white/10 flex items-center justify-center mb-6">
-                                            <Lock size={24} className="text-white/40" />
+                                    <div className="absolute inset-x-2 top-2 bottom-2 bg-black/60 backdrop-blur-3xl rounded-[2.2rem] flex flex-col items-center justify-center text-center p-6 border border-white/10 shadow-2xl overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#ff00ff] to-transparent animate-scan" />
+                                        
+                                        <div className="w-20 h-20 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center mb-6 relative group-hover:scale-110 transition-transform">
+                                            <div className="absolute inset-0 bg-[#ff00ff]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <Lock size={28} className="text-white/40 group-hover:text-white transition-colors z-10" />
                                         </div>
                                         
-                                        <div className="space-y-4">
-                                            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-white/40 mb-2">Private Vault Content</h4>
-                                            <div className="flex items-center justify-center gap-3 py-4">
-                                                <Zap size={18} className="text-gasp-neon" />
-                                                <span className="text-2xl font-outfit font-black tracking-tighter italic">{item.price} <span className="text-[10px] uppercase tracking-widest text-white/20 not-italic ml-2">Credits</span></span>
+                                        <div className="space-y-4 relative z-10">
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-[10px] font-black uppercase text-[#ff00ff] tracking-[0.4em] mb-1 italic animate-pulse">Restricted Media Node</span>
+                                                <h4 className="text-[8px] font-black uppercase tracking-[0.2em] text-white/20">High-Fidelity Visual Asset</h4>
+                                            </div>
+
+                                            <div className="flex items-center justify-center gap-3 py-6 border-y border-white/5 my-4">
+                                                <Zap size={20} className="text-[#ffea00]" />
+                                                <span className="text-4xl font-syncopate font-black tracking-tighter italic text-white">{item.price} <span className="text-[10px] uppercase font-outfit font-black tracking-widest text-white/20 not-italic ml-2">CR</span></span>
                                             </div>
                                             
                                             <button 
                                                 onClick={() => handleUnlockRequest(item)}
                                                 disabled={isUnlocking || !canAfford}
-                                                className={`w-full py-4 rounded-2xl flex items-center justify-center gap-3 font-outfit font-black uppercase text-[10px] tracking-[0.2em] transition-all transform active:scale-95 ${
+                                                className={`w-full h-16 rounded-2xl flex items-center justify-center gap-4 font-outfit font-black uppercase text-[12px] tracking-[0.25em] transition-all transform active:scale-95 ${
                                                     canAfford 
-                                                    ? 'bg-gasp-neon text-black shadow-[0_0_40px_rgba(0,240,255,0.3)] hover:scale-[1.02]' 
-                                                    : 'bg-white/5 text-white/20 cursor-not-allowed grayscale'
+                                                    ? 'bg-white text-black shadow-[0_0_50px_rgba(255,255,255,0.2)] hover:scale-[1.02]' 
+                                                    : 'bg-white/5 text-white/20 cursor-not-allowed border border-white/10'
                                                 }`}
                                             >
                                                 {isUnlocking ? (
-                                                    <span className="flex gap-1">
-                                                        <span className="w-1 h-1 bg-black rounded-full animate-bounce" />
-                                                        <span className="w-1 h-1 bg-black rounded-full animate-bounce [animation-delay:-0.15s]" />
-                                                        <span className="w-1 h-1 bg-black rounded-full animate-bounce [animation-delay:-0.3s]" />
-                                                    </span>
+                                                    <Loader2 size={24} className="animate-spin" />
                                                 ) : (
-                                                    <>UNMUTE FEED <Eye size={16} /></>
+                                                    <>DEPLOY ACCESS <ArrowRight size={20} /></>
                                                 )}
                                             </button>
                                             
                                             {!canAfford && (
-                                                <p className="text-[8px] uppercase font-black tracking-widest text-neon-pink/60 mt-4 animate-pulse">Insufficient Balance</p>
+                                                <p className="text-[8px] uppercase font-black tracking-widest text-[#ff00ff] mt-4 flex items-center justify-center gap-2">
+                                                    <AlertCircle size={10} /> Insufficient Pulse Credits
+                                                </p>
                                             )}
                                         </div>
                                     </div>

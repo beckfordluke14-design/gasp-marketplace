@@ -65,10 +65,10 @@ export default function Header({
             >
                 {[
                   "🌪️ UNUSUAL TEMPERATURE ANOMALY DETECTED IN SECTOR KLGA // ARBITRAGE WINDOW OPENING (+340% ROI)",
-                  "💎 INSTITUTIONAL LIQUIDITY SWEEP IN $GASPai PAIR // WHALE WALLETS MOVED 5.2M UNITS",
+                  "💎 INSTITUTIONAL LIQUIDITY SWEEP IN GASP PAIR // WHALE WALLETS MOVED 5.2M UNITS",
                   "🛡️ SECURITY UPDATE: SYNDICATE NEURAL VAULT CAPACITY EXPANDED // 5 NEW PERSONAS SYNCED",
                   "🔥 HIGH-HEAT SIGNAL: ELENA (MIAMI) JUST LEAKED SECTOR 7 DATA // ENCRYPTED BRIEFING IN VAULT",
-                  "⚡️ NETWORK PULSE AT CRITICAL LEVELS // 1.2M SIGNALS MATCHED IN 24H // $GASPai MATCHING ACTIVE",
+                  "⚡️ NETWORK PULSE AT CRITICAL LEVELS // 1.2M SIGNALS MATCHED IN 24H // GASP MATCHING ACTIVE",
                   "🌪️ UNUSUAL TEMPERATURE ANOMALY DETECTED IN SECTOR KLGA // ARBITRAGE WINDOW OPENING (+340% ROI)",
                 ].map((news, i) => (
                   <div key={i} className="flex items-center gap-4 text-white/40 text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] italic">
@@ -114,14 +114,14 @@ export default function Header({
                     }}
                     className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white font-outfit italic cursor-pointer group leading-none relative shadow-[0_0_30px_rgba(255,255,255,0.1)]"
                   >
-                    $GASPai<span className="text-[#ff00ff]">.</span>
+                    GASP<span className="text-[#ff00ff]">.</span>
                      
                      <motion.span 
                        animate={{ opacity: [0, 0.4, 0], x: [-10, 10, -10] }}
                        transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
                        className="absolute inset-0 text-[#00f0ff] mix-blend-screen pointer-events-none select-none opacity-0"
                      >
-                       $GASPai.
+                       GASP.
                      </motion.span>
                   </motion.h1>
                   <p className="hidden md:block text-[6px] font-black uppercase text-[#00f0ff] tracking-[0.4em] mt-0.5 animate-pulse ml-1 italic">Strategic Intelligence Node</p>

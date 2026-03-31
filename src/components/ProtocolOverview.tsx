@@ -53,7 +53,7 @@ export default function ProtocolOverview() {
                         <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#00f0ff]">Syndicate Intelligence Consensus 🛡️</span>
                     </div>
                     <h1 className="text-4xl md:text-7xl font-syncopate font-black italic tracking-tighter uppercase leading-none">
-                        $GASPai <span className="text-[#ffea00]">PROTOCOL</span>
+                        GASP <span className="text-[#ffea00]">PROTOCOL</span>
                     </h1>
                     <p className="text-white/40 max-w-xl text-xs md:text-sm font-outfit uppercase tracking-widest font-black leading-relaxed">
                         The world’s first collaborative intelligence network. 
@@ -82,9 +82,9 @@ export default function ProtocolOverview() {
                             <Zap size={24} className="text-[#00f0ff] animate-pulse" />
                         </div>
                         <div>
-                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">Total $GASPai Supply</p>
+                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">Total GASP Supply</p>
                             <h3 className="text-xl md:text-3xl font-syncopate font-black italic tracking-tighter">
-                                {(1000000000).toLocaleString()} <span className="text-xs text-white/20">$GASPai</span>
+                                {(1000000000).toLocaleString()} <span className="text-xs text-white/20">GASP</span>
                             </h3>
                             <div className="flex items-center gap-2 mt-1">
                                 <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />

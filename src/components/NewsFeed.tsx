@@ -114,9 +114,18 @@ export default function NewsFeed() {
                                 {item.title}
                             </h2>
                             
-                            <p className="text-white/50 text-sm md:text-base font-outfit leading-relaxed mb-10 whitespace-pre-wrap max-w-3xl border-l border-white/10 pl-6">
+                            <p className="text-white/50 text-sm md:text-base font-outfit leading-relaxed mb-6 whitespace-pre-wrap max-w-3xl border-l border-white/10 pl-6">
                                 {item.content}
                             </p>
+
+                            <button 
+                                onClick={() => (window as any).onSelectProfile?.(item.persona_id)}
+                                className="group/btn flex items-center gap-3 mb-10 pl-6 text-[#ff00ff] hover:text-white transition-all cursor-pointer"
+                            >
+                                <Zap size={14} className="animate-pulse" />
+                                <span className="text-[11px] font-black uppercase tracking-[0.2em] italic underline decoration-[#ff00ff]/30 underline-offset-8 group-hover/btn:decoration-white transition-all">Connect with {item.persona_name} for deep-dive analysis</span>
+                                <CornerRightUp size={14} className="group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
+                            </button>
 
                             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pt-10 border-t border-white/5">
                                 <div className="flex items-center gap-4">
@@ -128,16 +137,32 @@ export default function NewsFeed() {
                                     </a>
                                 </div>
                                 
-                                <div className="flex items-center gap-3">
-                                    <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-[#ff00ff]/20 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#ff00ff] transition-all">
-                                        <Share2 size={16} />
-                                    </button>
-                                    <button 
-                                       onClick={() => (window as any).onSelectProfile?.(item.persona_id)}
-                                       className="px-6 py-2.5 bg-[#ff00ff] text-white rounded-full flex items-center gap-2 text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-105 transition-all"
-                                    >
-                                        Analyze Arbitrage <CornerRightUp size={14} />
-                                    </button>
+                                <div className="flex flex-col items-end gap-3">
+                                    <div className="flex flex-col items-end gap-1.5 w-48">
+                                       <div className="flex items-center justify-between w-full px-1">
+                                          <span className="text-[7px] font-black uppercase text-[#ffea00] tracking-widest italic animate-pulse">Signal Alpha Decay</span>
+                                          <span className="text-[7px] font-mono text-white/40">94.2%</span>
+                                       </div>
+                                       <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                                          <motion.div 
+                                             initial={{ width: "100%" }}
+                                             animate={{ width: "94.2%" }}
+                                             className="h-full bg-gradient-to-r from-[#ffea00] to-[#ff00ff]"
+                                          />
+                                       </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-[#ff00ff]/20 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#ff00ff] transition-all">
+                                            <Share2 size={16} />
+                                        </button>
+                                        <button 
+                                           onClick={() => (window as any).onSelectProfile?.(item.persona_id)}
+                                           className="px-6 py-2.5 bg-[#ff00ff] text-white rounded-full flex items-center gap-2 text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-105 transition-all"
+                                        >
+                                            Open Terminal <CornerRightUp size={14} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
