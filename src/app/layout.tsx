@@ -10,8 +10,8 @@ const syncopate = Syncopate({ subsets: ["latin"], weight: ['400', '700'], variab
 const SITE_URL = 'https://gasp.fun';
 
 export const metadata: Metadata = {
-  title: "$GASPai | Strategic Intelligence Terminal",
-  description: "The world's first collaborative intelligence network. Fueling the sovereign weather board through direct utility matching and $GASPai rewards.",
+  title: 'GASP // Synthetic Influencer Archive Terminal',
+  description: 'Institutional Managed Interface for High-Heat Neural Signal Synchronization and Restricted Archival Retrieval.',
   manifest: "/manifest.json",
   metadataBase: new URL(SITE_URL),
   alternates: {
