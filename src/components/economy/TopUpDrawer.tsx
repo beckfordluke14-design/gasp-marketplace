@@ -116,49 +116,11 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                <ShieldCheck size={16} className="text-[#ffea00]/30" />
             </div>
 
-            {/* 🧬 INSTITUTIONAL FLOOR ALERT */}
-            <div className="p-4 rounded-2xl bg-[#ffea00]/10 border border-[#ffea00]/30 flex items-center gap-4 animate-pulse">
-               <ShieldCheck size={24} className="text-[#ffea00]" />
-               <div className="flex flex-col">
-                  <span className="text-[9px] font-black uppercase text-[#ffea00] tracking-widest">Sovereign On-Ramp Floor</span>
-                  <p className="text-[7px] text-[#ffea00]/60 uppercase font-black tracking-widest leading-relaxed">
-                     Institutional minimum order of $19.99 required for all terminal credit acquisitions.
-                  </p>
-               </div>
-            </div>
-
-            {/* 🪙 CUSTOM WHALE TERMINAL UPLINK */}
-            <div className="space-y-4">
-               <h4 className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b00] italic">Custom Terminal Uplink</h4>
-               <div className="flex flex-col gap-3 group">
-                  <div className="relative flex-1">
-                     <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                        <span className="text-lg font-black text-[#ff6b00]">💎</span>
-                     </div>
-                     <input 
-                       type="number"
-                       value={customAmount}
-                       onChange={(e) => setCustomAmount(e.target.value)}
-                       placeholder="Enter USD Amount (min. $19.99)"
-                       className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 text-xl font-black text-white focus:outline-none focus:border-[#ff6b00]/40 transition-all placeholder:text-white/10"
-                     />
-                  </div>
-                  <button 
-                    onClick={handleCustomStake}
-                    className="w-full h-14 rounded-2xl bg-[#ff6b00] text-black text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)]"
-                  >
-                     TOP UP
-                  </button>
-               </div>
-               <p className="text-[7px] text-white/20 uppercase tracking-[0.2em] font-black ml-1">
-                  Custom amounts qualify for the 1.15x Sovereign Multiplier. 🛡️
-               </p>
-            </div>
-
-            <div className="space-y-4">
-               <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white/40 italic">Select Your Tier</h4>
-               <div className="grid gap-4">
-                  {CREDIT_PACKAGES.map((pkg) => (
+            {/* 🧬 SIMPLIFIED TIER SELECTION */}
+            <div className="space-y-4 pt-4">
+               <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white/40 italic">Select Your Access Tier</h4>
+               <div className="grid gap-3">
+                  {CREDIT_PACKAGES.filter(p => ['tier_entry', 'tier_whale', 'tier_master'].includes(p.id)).map((pkg) => (
                     <button
                       key={pkg.id}
                       onClick={() => setSelectedPkgId(pkg.id)}
@@ -171,13 +133,15 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                       `}
                     >
                       <div className="flex flex-col items-start gap-1 relative z-10 text-left">
-                        {pkg.isPopular && (
+                        {pkg.id === 'tier_master' && (
                             <span className="text-[9px] font-black uppercase text-[#ff6b00] tracking-[0.2em] mb-3 flex items-center gap-2">
                                 <Diamond size={10} fill="#ff6b00" />
-                                Sovereign Genesis Tier
+                                Syndicate Elite
                             </span>
                         )}
-                        <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">{pkg.label}</span>
+                        <span className="text-[10px] font-black uppercase text-white/40 tracking-widest leading-none">
+                            {pkg.id === 'tier_entry' ? 'Starter Access' : pkg.id === 'tier_whale' ? 'Professional Tier' : 'Master Syndicate'}
+                        </span>
                         <span className="text-3xl font-syncopate font-bold text-white mt-1 italic leading-none">
                             {Math.floor(pkg.credits * 1.15).toLocaleString()}
                             <span className="text-[10px] uppercase font-black text-white/20 tracking-widest not-italic ml-2">credits</span>

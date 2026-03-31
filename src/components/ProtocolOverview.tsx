@@ -97,34 +97,8 @@ export default function ProtocolOverview() {
                 </div>
             </div>
 
-            {/* 🧬 THE 3-PHASE EVOLUTION (RESPONSIVE GRID) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                {[
-                    { phase: 'Phase 1', title: 'Double Allocation', desc: 'Secure 1:1 $GASPai Points (Equity) for every credit purchased. You keep 100% of your terminal utility while securing your primary 2026 TGE allocation.', icon: Zap, color: '#00f0ff', label: '1:1 Match Active' },
-                    { phase: 'Phase 2', title: 'Commit', desc: 'Revenue-triggered matching. Every dollar of purchase instantly commits a matching credit volume to the Strategic Pulse protocol.', icon: Fuel, color: '#ffea00', label: 'Revenue Pulse Live' },
-                    { phase: 'Phase 3', title: 'Govern', desc: 'At TGE, $GASPai Points convert 1:1 to $GASPai Tokens. Hold for voting power on the Weather Alpha Board.', icon: LayoutGrid, color: '#ff00ff', label: 'Launch 2026' }
-                ].map((p, idx) => (
-                    <motion.div 
-                        key={idx}
-                        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}
-                        className="bg-zinc-900/40 border border-white/5 rounded-[2.5rem] p-8 hover:border-white/10 transition-all group relative overflow-hidden"
-                    >
-                        <div className="flex justify-between items-start mb-8 relative z-10">
-                            <div className="space-y-1">
-                                <span className="text-[10px] font-black uppercase text-white/20 tracking-tighter">{p.phase}</span>
-                                <h3 style={{ color: p.color }} className="text-2xl font-syncopate font-black italic tracking-tighter uppercase">{p.title}</h3>
-                            </div>
-                            <div style={{ borderColor: p.color }} className="px-3 py-1 rounded-full border border-dashed text-[8px] font-black uppercase tracking-widest text-white/60">{p.label}</div>
-                        </div>
-                        <p className="text-white/40 text-sm font-outfit leading-relaxed relative z-10 line-clamp-3">{p.desc}</p>
-                        
-                        <div style={{ backgroundColor: p.color }} className="absolute -bottom-10 -right-10 w-32 h-32 blur-[60px] opacity-10 group-hover:opacity-20 transition-opacity" />
-                    </motion.div>
-                ))}
-            </div>
-
             {/* 🐋 YOUR SYNDICATE STANDING */}
-            <div className="bg-gradient-to-br from-white/5 to-transparent border border-white/10 rounded-[3rem] p-8 md:p-12 overflow-hidden relative group">
+            <div className="bg-gradient-to-br from-white/5 to-transparent border border-white/10 rounded-[3rem] p-8 md:p-12 overflow-hidden relative group mb-12">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
                     <div className="space-y-6 text-center md:text-left">
                         <div className="flex items-center justify-center md:justify-start gap-4">
@@ -157,30 +131,6 @@ export default function ProtocolOverview() {
                 </div>
             </div>
 
-            {/* 🛡️ PROTOCOL MECHANICS: HOW IT WORKS */}
-            <div className="mt-12 mb-12">
-                <div className="flex items-center gap-4 mb-8">
-                    <LayoutGrid size={24} className="text-[#ffea00]" />
-                    <h2 className="text-3xl font-syncopate font-black italic tracking-tighter uppercase">Protocol <span className="text-[#ffea00]">Mechanics</span></h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[
-                        { step: '01', title: 'Capital Entry', desc: 'Secure institutional credits via Stripe or Helio (Crypto). Every dollar of revenue is the primary protocol trigger.', icon: Fuel },
-                        { step: '02', title: 'Global Match', desc: '100% of purchase volume is matched with $GASPai Points (Sovereign Governance Weight) instantly.', icon: Zap },
-                        { step: '03', title: 'Pulse Committal', desc: 'Matching volume is committed to the Strategic Revenue protocol—strengthening the future TGE market depth.', icon: Activity }
-                    ].map((m, idx) => (
-                        <div key={idx} className="p-8 border border-white/5 rounded-3xl bg-white/5 space-y-4">
-                            <span className="text-[10px] font-black text-white/20 tracking-widest uppercase">{m.step} // Settlement</span>
-                            <div className="flex items-center gap-3">
-                                <m.icon size={18} className="text-[#ffea00]" />
-                                <h4 className="text-lg font-syncopate font-black italic tracking-tighter uppercase">{m.title}</h4>
-                            </div>
-                            <p className="text-[10px] text-white/40 font-outfit uppercase tracking-widest leading-loose">{m.desc}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
 
             {/* 🛰️ NETWORK ACTIVITY PULSE: THE INSTITUTIONAL ILLUSION */}
             <div className="mt-12 bg-black border border-white/5 rounded-3xl overflow-hidden shadow-2xl relative group">
