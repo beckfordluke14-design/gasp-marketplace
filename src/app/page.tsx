@@ -11,6 +11,7 @@ import RightSidebar from '@/components/RightSidebar';
 import StoriesRow from '@/components/StoriesRow';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
+import ProtocolOverview from '@/components/ProtocolOverview';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
 import { trackEvent } from '@/lib/telemetry';
@@ -35,7 +36,7 @@ function MarketplaceContent() {
   const [guestId, setGuestId] = useState<string | null>(null);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [sidebarView, setSidebarView] = useState<'chats' | 'vault' | 'feed'>('chats');
-  const [activeTab, setActiveTab] = useState<'feed' | 'weather' | 'news'>('feed');
+  const [activeTab, setActiveTab] = useState<'feed' | 'weather' | 'reports' | 'protocol'>('feed');
   const [following, setFollowing] = useState<string[]>([]);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   
@@ -221,10 +222,16 @@ function MarketplaceContent() {
                      Weather X
                   </button>
                   <button 
-                     onClick={() => setActiveTab('news')} 
-                     className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'news' ? 'bg-[#ff00ff] text-white shadow-[0_0_20px_rgba(255,0,255,0.6)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                     onClick={() => setActiveTab('reports')} 
+                     className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'reports' ? 'bg-[#ff00ff] text-white shadow-[0_0_20px_rgba(255,0,255,0.6)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
                   >
-                     News
+                     Reports
+                  </button>
+                  <button 
+                     onClick={() => setActiveTab('protocol')} 
+                     className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'protocol' ? 'bg-[#ffea00] text-black shadow-[0_0_20px_rgba(255,234,0,0.6)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                  >
+                     Protocol
                   </button>
               </div>
 
@@ -250,8 +257,11 @@ function MarketplaceContent() {
                  {activeTab === 'weather' && (
                      <WeatherFeed onOpenTopUp={() => setIsTopUpOpen(true)} />
                  )}
-                 {activeTab === 'news' && (
+                 {activeTab === 'reports' && (
                      <NewsFeed />
+                 )}
+                 {activeTab === 'protocol' && (
+                     <ProtocolOverview />
                  )}
               </div>
            </div>
