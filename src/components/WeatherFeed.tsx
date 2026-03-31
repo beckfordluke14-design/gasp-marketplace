@@ -26,8 +26,8 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
 
     const fetchMarkets = async () => {
         try {
-            // Fetch live polymarket active events
-            const res = await fetch('https://gamma-api.polymarket.com/events?limit=12&active=true&closed=false');
+            // Fetch live polymarket active events via proxy
+            const res = await fetch('/api/weather?limit=12&active=true&closed=false');
             if (!res.ok) return;
             const data = await res.json();
             

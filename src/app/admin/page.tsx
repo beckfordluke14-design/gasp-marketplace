@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ShieldAlert, Zap, Star, Trash2, LayoutDashboard, Baby, Activity,
-  ArrowRight, Film, Users, BarChart2, ClipboardList, Camera, FileCheck
+  ArrowRight, Film, Users, BarChart2, ClipboardList, Camera, FileCheck, Layers
 } from 'lucide-react';
 import Header from '@/components/Header';
 
@@ -62,12 +62,22 @@ export default function AdminHub() {
   const tools: Tool[] = [
     {
       label: 'Post Studio',
-      description: 'Manage every post: toggle vault/hero, edit captions, aliases, and manage linked sibling assets from a single view.',
+      description: 'Manage every post: toggle vault/hero, edit captions, merge posts together to attach text to media, and manage visibility.',
       href: '/admin/posts',
       icon: <Film size={20} />,
       color: 'text-[#00f0ff]',
       glow: 'from-[#00f0ff]/10 to-[#00f0ff]/5 border-[#00f0ff]/20',
       cta: 'Open Studio',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
+      label: 'News Intel Editor',
+      description: 'Strategic oversight: Curate the weather feed, snipe news articles, and manage reality transmissions.',
+      href: '/admin/news',
+      icon: <Layers size={20} />,
+      color: 'text-[#ff00ff]',
+      glow: 'from-[#ff00ff]/10 to-[#ff00ff]/5 border-[#ff00ff]/20',
+      cta: 'Manage Intel',
       ctaIcon: <ArrowRight size={14} />,
     },
     {

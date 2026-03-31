@@ -207,7 +207,7 @@ function MarketplaceContent() {
            
            <div className="flex-1 flex flex-col relative bg-transparent">
               {/* DOMINANT TAB NAVIGATION */}
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-1 p-1 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-full shadow-2xl">
+              <div className="absolute top-16 md:top-20 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-1 p-1 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-full shadow-2xl pointer-events-auto">
                   <button 
                      onClick={() => setActiveTab('feed')} 
                      className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'feed' ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.4)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}

@@ -135,7 +135,7 @@ function GlobalFeedItem({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className={`relative w-full ${postType === 'text' ? 'h-auto py-12' : 'h-[100dvh]'} overflow-hidden bg-transparent flex flex-col items-center justify-center border-b border-white/5 last:border-0 cursor-pointer`}
+      className={`relative w-full ${postType === 'text' ? 'h-auto py-12' : 'h-[100dvh] md:h-[100vh]'} overflow-hidden bg-transparent flex flex-col items-center justify-center border-b border-white/5 last:border-0 cursor-pointer`}
       onClick={handleInteraction}
     >
        {/* CONTENT LAYER */}
@@ -277,7 +277,7 @@ export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFee
   );
 
   return (
-    <div className="w-full h-full overflow-y-auto no-scrollbar snap-y snap-mandatory bg-black">
+    <div className="w-full h-full overflow-y-auto no-scrollbar snap-y snap-mandatory md:snap-none bg-black">
       {items.map((broadcast, i) => {
         const profile = profiles.find(p => p.id === broadcast.persona_id) || initialProfiles[0];
         return (
