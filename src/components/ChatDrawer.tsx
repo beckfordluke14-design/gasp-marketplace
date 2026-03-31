@@ -126,6 +126,14 @@ export default function ChatDrawer({
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
+
+    // 🛡️ FRONTEND CREDIT ENFORCEMENT: Block transmit if balance is depleted
+    const COST_MESSAGE_TEXT = 50;
+    if (!idToUse.startsWith('guest-') && currentBalance < COST_MESSAGE_TEXT) {
+       setShowVaultCTA(true);
+       return;
+    }
+
     const userMsg = { id: Date.now().toString(), role: 'user', content: text };
     setMessages(prev => [...prev, userMsg]);
     setInput('');

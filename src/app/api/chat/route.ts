@@ -25,19 +25,31 @@ export async function POST(req: Request) {
 
     if (!finalUserId || !finalProfileId) return new Response('Missing ID context', { status: 400 });
     
-    // 🛡️ SYNDICATE GUEST DEPLETION (V5.60)
-    // Objective: Cumulative limit across all chats for the guest account.
+    // 🛡️ SYNDICATE GUEST & CREDIT ENFORCEMENT (V5.70)
+    // Objective: Cumulative limit for guests, credit burn for authenticated users.
+    const COST_MESSAGE_TEXT = 50; 
+
     if (finalUserId.startsWith('guest-')) {
+       // GUEST LIMIT ENFORCEMENT
        try {
           const { rows: msgCountRows } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [finalUserId]);
           const userMsgCount = parseInt(msgCountRows[0].count || '0');
-          const GUEST_LIMIT = 5; // 🧪 CONFIG: Total cumulative messages before mandatory "The Hook" signup
+          const GUEST_LIMIT = 5; 
           
           if (userMsgCount >= GUEST_LIMIT) {
              console.log(`⚠️ [Neural Sync] Guest ${finalUserId} Depleted. MsgCount: ${userMsgCount}`);
              return new Response('DEPLETED', { status: 402 });
           }
        } catch (limitErr) { console.error('[Gasp Limit Sync Fail]:', limitErr); }
+    } else {
+       // AUTHENTICATED CREDIT ENFORCEMENT
+       try {
+          const { rows: userRows } = await db.query('SELECT credit_balance FROM users WHERE id = $1', [finalUserId]);
+          if (!userRows[0] || parseInt(userRows[0].credit_balance || '0') < COST_MESSAGE_TEXT) {
+             console.log(`⚠️ [Neural Sync] User ${finalUserId} Insufficient Balance.`);
+             return new Response('INSUFFICIENT_FUNDS', { status: 402 });
+          }
+       } catch (creditErr) { console.error('[Gasp Credit Sync Fail]:', creditErr); }
     }
 
     const dbProfile = await SOV.getPersona(finalProfileId) as any;
@@ -174,7 +186,7 @@ Focus 20% on data and 80% on intimate, private life details. You are officially 
 
         // 🧬 3. RAILWAY PERSISTENCE (Background)
         try {
-            await Promise.all([
+            const queries = [
                 db.query(
                     'INSERT INTO chat_messages (user_id, persona_id, role, content, created_at) VALUES ($1, $2, $3, $4, NOW())',
                     [finalUserId, finalProfileId, 'user', messages[messages.length - 1].content]
@@ -183,7 +195,16 @@ Focus 20% on data and 80% on intimate, private life details. You are officially 
                     'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
                     [finalUserId, finalProfileId, 'assistant', streamB_Text, voiceUrl, streamA_Native]
                 )
-            ]);
+            ];
+
+            // 💸 SOVEREIGN AUTO-BURN: Deduct 50 credits for the transmission
+            if (!finalUserId.startsWith('guest-')) {
+               queries.push(
+                  db.query('UPDATE users SET credit_balance = credit_balance - $2 WHERE id = $1', [finalUserId, COST_MESSAGE_TEXT])
+               );
+            }
+
+            await Promise.all(queries);
         } catch (dbErr) { console.error('[Railway Persistence Fail]:', dbErr); }
 
         controller.close();
