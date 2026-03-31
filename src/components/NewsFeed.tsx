@@ -83,10 +83,10 @@ export default function NewsFeed() {
                             transition={{ delay: i * 0.1 }}
                             className="group relative bg-white/5 border border-white/10 p-8 md:p-12 rounded-[2.5rem] hover:bg-white/10 hover:border-[#ff00ff]/30 transition-all duration-500"
                         >
-                            {/* Heat level badge */}
+                            {/* Priority level badge */}
                             <div className="absolute top-8 right-8 flex items-center gap-2">
                                 <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${item.meta?.heat === 'Critical' ? 'bg-red-500/20 text-red-500 border-red-500/30' : item.meta?.heat === 'High' ? 'bg-[#ff00ff]/20 text-[#ff00ff] border-[#ff00ff]/30' : 'bg-white/10 text-white/40 border-white/20'}`}>
-                                    {item.meta?.heat || 'Standard'} Priority
+                                    {item.meta?.heat === 'Critical' ? 'BREAKING' : item.meta?.heat === 'High' ? 'TRENDING' : 'VERIFIED'}
                                 </div>
                             </div>
 
@@ -140,7 +140,7 @@ export default function NewsFeed() {
                                 <div className="flex flex-col items-end gap-3">
                                     <div className="flex flex-col items-end gap-1.5 w-48">
                                        <div className="flex items-center justify-between w-full px-1">
-                                          <span className="text-[7px] font-black uppercase text-[#ffea00] tracking-widest italic animate-pulse">Signal Alpha Decay</span>
+                                          <span className="text-[7px] font-black uppercase text-[#ffea00] tracking-widest italic animate-pulse">Trending Alpha Signal</span>
                                           <span className="text-[7px] font-mono text-white/40">94.2%</span>
                                        </div>
                                        <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">

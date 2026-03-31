@@ -55,7 +55,7 @@ export default function Header({
         <div className="h-6 md:h-7 bg-[#ff00ff]/10 border-b border-white/5 flex items-center overflow-hidden whitespace-nowrap pointer-events-auto">
             <div className="px-4 h-full bg-[#ff00ff] flex items-center gap-2 shrink-0 z-10 shadow-[5px_0_15px_#ff00ff]">
                 <RadioReceiver size={10} className="text-white animate-pulse" />
-                <span className="text-[7px] md:text-[8px] font-black uppercase text-white tracking-widest italic">Breaking Intelligence</span>
+                <span className="text-[7px] md:text-[8px] font-black uppercase text-white tracking-widest italic">Trending Intelligence</span>
             </div>
             
             <motion.div 
