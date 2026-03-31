@@ -39,9 +39,10 @@ interface SidebarProps {
   profiles: any[];
   view?: 'chats' | 'vault' | 'feed';
   onSetView?: (view: 'chats' | 'vault' | 'feed') => void;
+  onOpenTopUp?: () => void;
 }
 
-export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCounts = {}, profiles, view = 'chats', onSetView }: SidebarProps) {
+export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCounts = {}, profiles, view = 'chats', onSetView, onOpenTopUp }: SidebarProps) {
   const { profile } = useUser();
   const [following, setFollowing] = useState<string[]>([]);
   const [recentIds, setRecentIds] = useState<string[]>([]);
@@ -316,7 +317,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                     </div>
                  </div>
                   <button 
-                    onClick={() => (window as any).openTopUp?.()}
+                    onClick={() => onOpenTopUp ? onOpenTopUp() : (window as any).openTopUp?.()}
                     className="flex-1 w-full py-3 bg-[#00f0ff] text-black text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-white transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)]"
                   >
                     TOP UP
@@ -371,7 +372,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
 
           <div className="space-y-2">
              <button 
-                onClick={() => (window as any).openTopUp?.()}
+                onClick={() => onOpenTopUp ? onOpenTopUp() : (window as any).openTopUp?.()}
                 className="w-full h-11 bg-[#00f0ff] text-black rounded-2xl flex items-center justify-center gap-2 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(0,240,255,0.15)] active:scale-95 border-none"
              >
                 <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center">

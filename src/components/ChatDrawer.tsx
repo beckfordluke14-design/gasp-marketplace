@@ -88,8 +88,7 @@ export default function ChatDrawer({
     
     // 🛡️ LOCK GUEST: Guests must have credits or sign up
     if (idToUse.startsWith('guest-') && currentBalance < cost) {
-       alert(`Insufficient credits for gifts. Please top up or join Gasp to continue showering ${profile?.name || 'her'} in rewards.`);
-       onOpenTopUp();
+       setShowInsufficientFunds(true);
        return;
     }
 
@@ -130,7 +129,7 @@ export default function ChatDrawer({
     // 🛡️ FRONTEND CREDIT ENFORCEMENT: Block transmit if balance is depleted
     const COST_MESSAGE_TEXT = 50;
     if (!idToUse.startsWith('guest-') && currentBalance < COST_MESSAGE_TEXT) {
-       setShowVaultCTA(true);
+       setShowInsufficientFunds(true);
        return;
     }
 
@@ -158,9 +157,9 @@ export default function ChatDrawer({
         if (res.status === 402) {
            if (errText.includes('DEPLETED')) {
               setShowLimitCTA(true);
-           } else {
-              setShowVaultCTA(true);
-           }
+            } else {
+               setShowInsufficientFunds(true);
+            }
         } else {
            setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: 'hold on okay , give me a sec' }]);
         }
@@ -755,6 +754,7 @@ export default function ChatDrawer({
             isOpen={showInsufficientFunds}
             onClose={() => setShowInsufficientFunds(false)}
             onOpenTopUp={onOpenTopUp}
+            personaName={profile?.name}
           />
         </div>
       </>

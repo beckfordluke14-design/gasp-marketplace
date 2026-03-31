@@ -171,6 +171,7 @@ function MarketplaceContent() {
      if (typeof window !== 'undefined') {
         (window as any).onSelectProfile = handleSelectProfile;
         (window as any).onSetActiveTab = setActiveTab;
+        (window as any).openTopUp = () => setIsTopUpOpen(true);
      }
   }, [handleSelectProfile]);
 
@@ -204,6 +205,7 @@ function MarketplaceContent() {
               profiles={randomizedProfiles} 
               view={sidebarView}
               onSetView={handleSetSidebarView}
+              onOpenTopUp={() => setIsTopUpOpen(true)}
            />
        </div>
        

@@ -10,9 +10,10 @@ interface InsufficientFundsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenTopUp: () => void;
+  personaName?: string;
 }
 
-export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp }: InsufficientFundsModalProps) {
+export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, personaName }: InsufficientFundsModalProps) {
   const { profile } = useUser();
   const [balance, setBalance] = useState<number | null>(null);
 
@@ -57,7 +58,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp }:
           className="relative w-full max-w-[400px] bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-8 shadow-[0_20px_100px_rgba(0,0,0,0.8)] overflow-hidden"
         >
           {/* Decorative Glitch Background */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#ff00ff] to-transparent opacity-50" />
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#ffea00] to-transparent opacity-50" />
           
           <button 
             onClick={onClose}
@@ -67,18 +68,20 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp }:
           </button>
 
           <div className="flex flex-col items-center text-center">
-            <div className="w-20 h-20 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(0,240,255,0.15)]">
-               <Zap size={32} className="text-[#00f0ff] animate-pulse" />
+            <div className="w-20 h-20 rounded-full bg-[#ffea00]/10 border border-[#ffea00]/20 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(255,234,0,0.15)]">
+               <Zap size={32} className="text-[#ffea00] animate-pulse" />
             </div>
 
             <h3 className="text-2xl font-syncopate font-black uppercase italic text-white tracking-tighter mb-2">
-               LINK BREAK: SIGNAL WEAK
+               OUT OF CREDITS
             </h3>
             
-            <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-8 max-w-[280px]">
-               The Neural Bridge is fading. 
-               <br />
-               Allocate more <span className="text-[#00f0ff]">System Credits</span> to maintain the Synchronized Uplink. 🛡️🛰️
+            <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-8 max-w-[320px]">
+               {personaName ? (
+                   <>You're out of credits. Maintain your high-heat uplink with <span className="text-[#ffea00]">{personaName}</span>. Top up to continue the conversation. 🛡️🛰️</>
+               ) : (
+                   <>The Neural Bridge is fading. Allocate more <span className="text-[#ffea00]">System Credits</span> to maintain the Synchronized Uplink. 🛡️🛰️</>
+               )}
             </p>
 
             <div className="w-full space-y-3">
@@ -87,7 +90,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp }:
                     onClose();
                     onOpenTopUp();
                   }}
-                  className="w-full h-16 rounded-2xl bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(0,240,255,0.3)] flex items-center justify-center gap-3"
+                  className="w-full h-16 rounded-2xl bg-[#ffea00] text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(255,234,0,0.3)] flex items-center justify-center gap-3"
                 >
                    <Diamond size={14} fill="currentColor" />
                    INFUSE NODE ENERGY
