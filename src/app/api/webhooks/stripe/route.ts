@@ -1,6 +1,10 @@
 import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
+/**
+ * ⛽ STRIPE CRYPTO ONRAMP NODE: Unified Settlement Unit
+ * Strategy: Fast-track fiat-to-crypto settlements with 1:1 GASP Point matching.
+ */
 export async function POST(req: Request) {
     const payload = await req.text();
     const sig = req.headers.get('stripe-signature');
@@ -25,7 +29,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
     }
 
-    // 🛡️ CRYPTO ONRAMP FULFILLMENT: Fiat-to-Crypto Settlement via Embedded Onramp
+    // 🛡️ CRYPTO ONRAMP FULFILLMENT: Fiat-to-Crypto Settlement
     if ((event.type as string) === 'crypto.onramp_session.updated') {
         const onrampSession = event.data.object as any;
         if (onrampSession.status === 'fulfilled') {
@@ -33,41 +37,48 @@ export async function POST(req: Request) {
             if (metadata?.userId && metadata?.credits) {
                 const userId = metadata.userId;
                 const credits = parseInt(metadata.credits, 10);
-                console.log(`🏦 [Onramp] Fulfilling Crypto Settlement: ${credits} BP for User ${userId}`);
+                
+                const client = await db.connect();
                 try {
-                    await db.query('BEGIN');
+                    await client.query('BEGIN');
                     
-                    // 🛡️ IDEMPOTENCY CHECK: Prevent double-minting if Stripe resends the webhook
-                    const { rowCount } = await db.query(
+                    // 🛡️ IDEMPOTENCY CHECK: Prevent double-minting
+                    const { rowCount } = await client.query(
                        `SELECT 1 FROM transactions WHERE meta->>'session_id' = $1`,
                        [onrampSession.id]
                     );
 
                     if (rowCount && rowCount > 0) {
-                        await db.query('ROLLBACK');
+                        await client.query('ROLLBACK');
                         console.log(`⚠️ [Onramp] Idempotency catch: Session ${onrampSession.id} already fulfilled.`);
                         return NextResponse.json({ received: true });
                     }
 
-                    await db.query(
+                    // 1. Update Core Profile
+                    await client.query(
                         'UPDATE profiles SET credit_balance = credit_balance + $1, updated_at = NOW() WHERE id = $2',
                         [credits, userId]
                     );
 
                     // 🔥 SYNDICATE 1:1 MATCH & SHADOW BURN
+                    // This is atomic - both point matching and burn stats updated here.
                     const { recordShadowBurn } = await import('@/lib/db');
-                    await recordShadowBurn(userId, credits);
+                    await recordShadowBurn(userId, credits, client);
 
-                    await db.query(
+                    // 2. Record Transaction
+                    await client.query(
                         'INSERT INTO transactions (user_id, amount, type, provider, meta, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
                         [userId, credits, 'deposit', 'stripe_onramp', JSON.stringify({ session_id: onrampSession.id, packageId: metadata.packageId })]
                     );
-                    await db.query('COMMIT');
+
+                    await client.query('COMMIT');
                     console.log(`✅ [Onramp] Crypto Settlement Complete: ${userId} +${credits} BP`);
                 } catch (dbErr) {
-                    await db.query('ROLLBACK');
+                    if (client) await client.query('ROLLBACK');
                     console.error('[Onramp] Settlement Failure:', dbErr);
                     return NextResponse.json({ error: 'Database Sync Error' }, { status: 500 });
+                } finally {
+                    client.release();
                 }
             }
         }

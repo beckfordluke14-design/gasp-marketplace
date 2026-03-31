@@ -37,15 +37,10 @@ export async function POST(req: Request) {
                 SET expires_at = EXCLUDED.expires_at, created_at = NOW()
             `, [userId, eventId, expiresAt]);
 
-            // 3. Optional: Log transaction
             await db.query(`
                 INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
                 VALUES ($1, $2, 'weather_unlock', 'syndicate_intel', $3, NOW())
             `, [userId, costAmount, JSON.stringify({ event_id: eventId })]);
-
-            // 🔥 ACTIVATE SHADOW BURN & POINTS MATCHING
-            const { recordShadowBurn } = await import('@/lib/db');
-            await recordShadowBurn(userId, costAmount);
 
             await db.query('COMMIT');
             

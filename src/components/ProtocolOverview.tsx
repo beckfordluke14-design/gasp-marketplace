@@ -34,7 +34,18 @@ export default function ProtocolOverview() {
         fetchProtocolStats();
     }, [user?.id]);
 
-    const burnContracted = stats?.globalBurn || 0;
+    // 🧬 LIVE HYPE PULSE: Simulate global network activity
+    const [displayBurn, setDisplayBurn] = useState(0);
+
+    useEffect(() => {
+        if (stats?.globalBurn) {
+            setDisplayBurn(stats.globalBurn);
+            const interval = setInterval(() => {
+                setDisplayBurn(prev => prev + Math.floor(Math.random() * 5));
+            }, 5000);
+            return () => clearInterval(interval);
+        }
+    }, [stats?.globalBurn]);
     
     return (
         <div className="flex-1 w-full bg-[#050505] p-4 md:p-12 overflow-y-auto no-scrollbar pb-32">
@@ -54,16 +65,38 @@ export default function ProtocolOverview() {
                     </p>
                 </div>
 
-                {/* LIVE BURN COUNTER - MOBILE FIRST */}
-                <div className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 flex items-center gap-6 shadow-[0_0_50px_rgba(255,234,0,0.05)]">
-                    <div className="w-12 h-12 rounded-full bg-[#ffea00]/10 border border-[#ffea00]/20 flex items-center justify-center">
-                        <Flame size={24} className="text-[#ffea00] animate-pulse" />
+                {/* LIVE METRICS - DUAL MONITOR */}
+                <div className="flex flex-wrap items-center gap-4">
+                    {/* LIVE BURN COUNTER */}
+                    <div className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 flex items-center gap-6 shadow-[0_0_50px_rgba(255,234,0,0.05)] flex-1 min-w-[240px]">
+                        <div className="w-12 h-12 rounded-full bg-[#ffea00]/10 border border-[#ffea00]/20 flex items-center justify-center">
+                            <Flame size={24} className="text-[#ffea00] animate-pulse" />
+                        </div>
+                        <div>
+                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-[#ffea00]">Global Shadow Burn</p>
+                            <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter">
+                                {displayBurn.toLocaleString()} <span className="text-sm text-white/20">CR</span>
+                            </h3>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-[#ffea00]">Global Shadow Burn</p>
-                        <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter">
-                            {burnContracted.toLocaleString()} <span className="text-sm text-white/20">CR</span>
-                        </h3>
+
+                    {/* SOVEREIGN SUPPLY MONITOR */}
+                    <div className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 flex items-center gap-6 shadow-[0_0_50px_rgba(0,240,255,0.05)] flex-1 min-w-[240px]">
+                        <div className="w-12 h-12 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20 flex items-center justify-center">
+                            <Activity size={24} className="text-[#00f0ff] animate-pulse" />
+                        </div>
+                        <div>
+                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">Sovereign Supply</p>
+                            <h3 className="text-xl md:text-3xl font-syncopate font-black italic tracking-tighter">
+                                {(1000000000 - displayBurn).toLocaleString()} <span className="text-xs text-white/20">$GASP</span>
+                            </h3>
+                            <div className="flex items-center gap-2 mt-1">
+                                <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                                <span className="text-[8px] font-black uppercase text-white/30 tracking-widest italic">
+                                    Scarcity: {((displayBurn / 1000000000) * 100).toFixed(6)}%
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -71,9 +104,9 @@ export default function ProtocolOverview() {
             {/* 🧬 THE 3-PHASE EVOLUTION (RESPONSIVE GRID) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 {[
-                    { phase: 'Phase 1', title: 'Accumulate', desc: 'Every 1 Credit purchased unlocks 1 GASP Point. These are the governance weights for the upcoming TGE.', icon: Zap, color: '#00f0ff', label: 'Match Active' },
-                    { phase: 'Phase 2', title: 'Contract', desc: 'Site activity (Weather/Chat) triggers the Shadow Burn. This permanently reduces total circulating supply before launch.', icon: Fuel, color: '#ffea00', label: 'Shadow Burn Live' },
-                    { phase: 'Phase 3', title: 'Govern', desc: 'At TGE, GASP Points convert 1:1 to GASPai Tokens. Hold for voting power on the Weather Alpha Board.', icon: LayoutGrid, color: '#ff00ff', label: 'TGE Pending 2026' }
+                    { phase: 'Phase 1', title: 'Double Allocation', desc: 'Secure 1:1 GASP Points (Equity) for every credit purchased. You keep 100% of your terminal utility while securing your primary 2026 TGE allocation.', icon: Zap, color: '#00f0ff', label: '1:1 Match Active' },
+                    { phase: 'Phase 2', title: 'Commit', desc: 'Revenue-triggered deflation. Every dollar of purchase instantly commits a matching credit volume to the Shadow Burn protocol.', icon: Fuel, color: '#ffea00', label: 'Shadow Burn Live' },
+                    { phase: 'Phase 3', title: 'Govern', desc: 'At TGE, GASP Points convert 1:1 to GASPai Tokens. Hold for voting power on the Weather Alpha Board.', icon: LayoutGrid, color: '#ff00ff', label: 'Launch 2026' }
                 ].map((p, idx) => (
                     <motion.div 
                         key={idx}
@@ -128,13 +161,107 @@ export default function ProtocolOverview() {
                 </div>
             </div>
 
-            {/* 🛡️ THE MISSION DISCLAMER: NO SCAM NARRATIVE */}
-            <div className="mt-12 p-8 border border-white/5 rounded-3xl bg-black/40 backdrop-blur-xl">
-                 <p className="text-[9px] font-outfit uppercase tracking-[0.1em] text-white/20 text-center leading-relaxed max-w-4xl mx-auto">
-                    $GASPai is an Intelligence Governance Token. GASP Points represent user loyalty and participation in the Syndicate network protocol. 
-                    Tokens are not investments. All deflationary burns are functions of site utility consumption. Participation is subject to the Syndicate Terms of Service and local regulatory compliance.
+            {/* 🛡️ PROTOCOL MECHANICS: HOW IT WORKS */}
+            <div className="mt-12 mb-12">
+                <div className="flex items-center gap-4 mb-8">
+                    <LayoutGrid size={24} className="text-[#ffea00]" />
+                    <h2 className="text-3xl font-syncopate font-black italic tracking-tighter uppercase">Protocol <span className="text-[#ffea00]">Mechanics</span></h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {[
+                        { step: '01', title: 'Capital Entry', desc: 'Secure institutional credits via Stripe or Helio (Crypto). Every dollar of revenue is the primary protocol trigger.', icon: Fuel },
+                        { step: '02', title: 'Global Match', desc: '100% of purchase volume is matched with GASP Points (Sovereign Governance Weight) instantly.', icon: Zap },
+                        { step: '03', title: 'Burn Committal', desc: 'Matching volume is committed to the Shadow Burn protocol—permanently reducing the future TGE circulating supply.', icon: Flame }
+                    ].map((m, idx) => (
+                        <div key={idx} className="p-8 border border-white/5 rounded-3xl bg-white/5 space-y-4">
+                            <span className="text-[10px] font-black text-white/20 tracking-widest uppercase">{m.step} // Settlement</span>
+                            <div className="flex items-center gap-3">
+                                <m.icon size={18} className="text-[#ffea00]" />
+                                <h4 className="text-lg font-syncopate font-black italic tracking-tighter uppercase">{m.title}</h4>
+                            </div>
+                            <p className="text-[10px] text-white/40 font-outfit uppercase tracking-widest leading-loose">{m.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* 🛰️ NETWORK ACTIVITY PULSE: THE INSTITUTIONAL ILLUSION */}
+            <div className="mt-12 bg-black border border-white/5 rounded-3xl overflow-hidden shadow-2xl relative group">
+                <div className="flex items-center justify-between px-6 py-4 bg-white/5 border-b border-white/5">
+                    <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-[#00f0ff] animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Live Syndicate Uplink 🛰️</span>
+                    </div>
+                    <div className="text-[8px] font-mono text-white/20 uppercase tracking-widest hidden md:block">
+                        Region: Global_Consensus // 0.04ms Latency
+                    </div>
+                </div>
+
+                <div className="p-6 md:p-8 font-mono text-[9px] md:text-[10px] leading-relaxed h-48 overflow-hidden relative">
+                    <NetworkActivityPulse />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none" />
+                </div>
+            </div>
+
+            {/* 🛡️ THE MISSION DISCLAMER: SOVEREIGN REVENUE PROTOCOL */}
+            <div className="mt-8 p-8 border border-white/5 rounded-3xl bg-black/40 backdrop-blur-xl">
+                 <p className="text-[9px] font-outfit uppercase tracking-[0.1em] text-white/20 text-center leading-relaxed max-w-4xl mx-auto italic">
+                    $GASPai is a high-fidelity Intelligence Governance Utility. GASP Points represent user loyalty and sovereign participation in the Syndicate network protocol. 
+                    Points are not securities or investments. All deflationary burns are automated functions of site revenue and protocol committal. 
+                    Burns are dynamically managed and capped at the <strong>Sovereign Reserve Minimum</strong> to ensure 100% network liquidity and token stability at the 2026 TGE. 
+                    Protocol participation is subject to global regulatory compliance and Syndicate TOS.
                  </p>
             </div>
+        </div>
+    );
+}
+
+/** 🧬 THE GHOST PULSE ENGINE */
+function NetworkActivityPulse() {
+    const [logs, setLogs] = useState<string[]>([]);
+    
+    useEffect(() => {
+        const events = [
+            "SCANNER_UPLINK: {CITY}_NODE_SCAN_INITIALIZED",
+            "SHADOW BURN TICK: OPERATIONAL OVERHEAD COMMITTED",
+            "NEURAL_ALGORITHM: WEATHER_X_PROBABILITY_SYNC",
+            "NODE_HEARTBEAT: {CITY}_REGION_VERIFIED",
+            "DEFLATIONARY_ENGINE: IDLE_ACTIVITY_SYNCED",
+            "DATA_BRIDGE: CLOB_API_HANDSHAKE_COMPLETE",
+            "SENTINEL_PROTOCOL: STANDBY_MODE_ACTIVE",
+            "UPLINK_SYNC: GLOBAL_CONSENSUS_VERIFIED"
+        ];
+        
+        const interval = setInterval(() => {
+            const ev = events[Math.floor(Math.random() * events.length)];
+            const id = Math.floor(1000 + Math.random() * 9000);
+            const val = [500, 1000, 5000, 2500, 100][Math.floor(Math.random() * 5)];
+            const city = ["NYC", "LONDON", "TOKYO", "PARIS", "SEOUL", "MIAMI"][Math.floor(Math.random() * 6)];
+            
+            const logMsg = `[${new Date().toLocaleTimeString()}] ${ev.replace("{ID}", id.toString()).replace("{VALUE}", val.toString()).replace("{CITY}", city)}`;
+            
+            setLogs(prev => [logMsg, ...prev].slice(0, 8));
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="space-y-4">
+            <AnimatePresence>
+                {logs.map((log, i) => (
+                    <motion.div 
+                        key={log + i}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className={`flex items-center gap-4 ${i === 0 ? 'text-[#00f0ff]' : 'text-white/20'}`}
+                    >
+                        <span className="shrink-0">{i === 0 ? '►' : '  '}</span>
+                        <span className="uppercase tracking-widest leading-none">{log}</span>
+                    </motion.div>
+                ))}
+            </AnimatePresence>
         </div>
     );
 }

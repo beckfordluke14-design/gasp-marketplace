@@ -24,16 +24,21 @@ if (process.env.NODE_ENV !== 'production') globalForPool.pool = pool;
 
 export const db = {
   query: (text: string, params?: any[]) => pool.query(text, params),
+  connect: () => pool.connect(),
 };
 
 /**
- * 🔥 AUTOMATED SHADOW BURN & GASP POINTS MATCHING
+ * 🔥 AUTOMATED SHADOW BURN & GASP POINTS MATCHING (Atomic Edition)
  * Mission: Execute the 1:1 match and update global deflationary stats.
+ * This function can accept a transaction client to ensure atomic integrity with sales.
  */
-export async function recordShadowBurn(userId: string, credits: number) {
+export async function recordShadowBurn(userId: string, credits: number, client?: any) {
     const pointsMatched = credits; // 1:1 Matching Logic
+    const q = client || db;
+
     try {
-        await db.query(`
+        // 1. Update User's Syndicate Points (1:1 Match)
+        await q.query(`
             INSERT INTO syndicate_points (user_id, points, total_spent_credits)
             VALUES ($1, $2, $3)
             ON CONFLICT (user_id) DO UPDATE SET 
@@ -42,14 +47,20 @@ export async function recordShadowBurn(userId: string, credits: number) {
                 last_updated = NOW()
         `, [userId, pointsMatched, credits]);
 
-        await db.query(`
-            UPDATE global_burn_stats 
-            SET total_burned_credits = total_burned_credits + $1,
-                total_points_issued = total_points_issued + $2
-            WHERE id = 1
+        // 2. Update Global Burn Stats (Dynamic Tally)
+        // Self-Healing UPSERT ensures ID 1 always exists
+        await q.query(`
+            INSERT INTO global_burn_stats (id, total_burned_credits, total_points_issued, last_updated)
+            VALUES (1, $1, $2, NOW())
+            ON CONFLICT (id) DO UPDATE SET 
+                total_burned_credits = global_burn_stats.total_burned_credits + $1,
+                total_points_issued = global_burn_stats.total_points_issued + $2,
+                last_updated = NOW()
         `, [credits, pointsMatched]);
+        
     } catch (e) {
-        console.error('Shadow Burn Logic Failure:', e);
+        console.error('🔥 [CRITICAL] Shadow Burn Logic Failure:', e);
+        throw e; // Throw so parent transactions can ROLLBACK
     }
 }
 

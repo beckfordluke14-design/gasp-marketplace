@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { usePrivy } from '@privy-io/react-auth';
 
 interface UserContextType {
   user: any | null; // Privy User
@@ -25,15 +25,16 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// 💎 SOVEREIGN PROVIDER: Railway Core Sync
-
+/**
+ * 💎 SOVEREIGN PROVIDER: Railway Core Sync
+ * High-Velocity terminal for real-time credit & points tracking.
+ */
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const { ready, authenticated, user, logout, login } = usePrivy();
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string, privyUser: any) => {
-    // 🛡️ SOVEREIGN BALANCE TERMINAL: Fetching from Railway instead of Supabase
     try {
         const res = await fetch(`/api/economy/balance?userId=${userId}`);
         const data = await res.json();
@@ -57,14 +58,21 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     if (authenticated && user) {
        // Identity Handshake
        fetchProfile(user.id, user);
+
+       // 🛰️ HIGH-VELOCITY BALANCE SYNC: Instant Revenue Capture
+       const interval = setInterval(() => {
+          fetchProfile(user.id, user);
+       }, 10000); // 10s Polling during launch window
+       
+       return () => clearInterval(interval);
     } else {
        setProfile(null);
+       setLoading(false);
     }
-    setLoading(false);
-  }, [ready, authenticated, user]);
+  }, [ready, authenticated, user?.id]);
 
   const refreshProfile = async () => {
-    if (authenticated && user) await fetchProfile(user.id, user);
+    if (authenticated && user?.id) await fetchProfile(user.id, user);
   };
 
   const signOut = async () => {

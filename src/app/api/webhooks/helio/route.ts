@@ -3,6 +3,7 @@ import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 
 /**
  * ⛽ HELIO SECURE REVENUE NODE (Sovereign Edition)
+ * Strategy: Direct crypto settlement with 1:1 GASP Point matching.
  */
 export async function POST(req: Request) {
     try {
@@ -25,28 +26,37 @@ export async function POST(req: Request) {
         const cryptoBonus = Math.floor(baseCredits * 0.15); // 15% Bonus for Sovereign Settlement
         const totalDeposit = baseCredits + cryptoBonus;
 
-        // 🛡️ ATOMIC SYNC: Universal Ledger Update in Railway
         console.log(`📡 [HELIO WEBHOOK] Processing deposit for user ${userId}...`);
 
+        const client = await db.connect();
         try {
-            await db.query('BEGIN');
+            await client.query('BEGIN');
 
             const externalId = body.transactionReference || body.id || 'HELIO_MISSING_ID_' + Date.now();
 
-            // 🛡️ IDEMPOTENCY CHECK: Prevent double-minting if Helio resends the webhook
-            const { rowCount } = await db.query(
+            // 🛡️ IDEMPOTENCY CHECK: Prevent double-minting
+            const { rowCount } = await client.query(
                 `SELECT 1 FROM transactions WHERE external_id = $1`,
                 [externalId]
             );
 
             if (rowCount && rowCount > 0) {
-                await db.query('ROLLBACK');
+                await client.query('ROLLBACK');
                 console.log(`⚠️ [HELIO] Idempotency catch: Transaction ${externalId} already fulfilled.`);
                 return new Response('Already Settled', { status: 200 });
             }
 
-            // --- 2A. Update Wallet Ledger ---
-            await db.query(`
+            // 1. Update Profile (Central Ledger)
+            await client.query(`
+                UPDATE profiles SET 
+                    total_spent_usd = total_spent_usd + $1,
+                    credit_balance = credit_balance + $2,
+                    updated_at = NOW()
+                WHERE id = $3
+            `, [pkg.priceUsd, totalDeposit, userId]);
+
+            // 2. Sync Legacy Tables (Redundant but safe)
+            await client.query(`
                 INSERT INTO wallets (user_id, credit_balance, created_at, updated_at)
                 VALUES ($1, $2, NOW(), NOW())
                 ON CONFLICT (user_id) DO UPDATE SET 
@@ -54,40 +64,28 @@ export async function POST(req: Request) {
                     updated_at = NOW()
             `, [userId, totalDeposit]);
 
-            // --- 2B. Update Profile (Airdrop Stake Ledger) ---
-            await db.query(`
-                UPDATE profiles SET 
-                    total_spent_usd = total_spent_usd + $1,
-                    credit_balance = credit_balance + $2,
-                    updated_at = NOW()
-                WHERE id = $3
-            `, [pkg.priceUsd, totalDeposit, userId]);
-            // 3. Update Public User Table (Legacy Sync)
-            await db.query('UPDATE users SET credit_balance = credit_balance + $1 WHERE id = $2', [totalDeposit, userId]);
+            await client.query('UPDATE users SET credit_balance = credit_balance + $1 WHERE id = $2', [totalDeposit, userId]);
             
             // 🔥 SYNDICATE 1:1 MATCH & SHADOW BURN
             const { recordShadowBurn } = await import('@/lib/db');
-            await recordShadowBurn(userId, totalDeposit);
+            await recordShadowBurn(userId, totalDeposit, client);
 
-            // 4. Record Transaction & Audit Ledger
-            await db.query(`
+            // 3. Record Audit Ledger
+            await client.query(`
                 INSERT INTO transactions (user_id, amount, amount_usd, type, provider, external_id, created_at)
                 VALUES ($1, $2, $3, 'purchase', 'helio', $4, NOW())
             `, [userId, totalDeposit, pkg.priceUsd, externalId]);
 
-            await db.query(`
-                INSERT INTO audit_ledger (user_id, action, amount_usd, credits_added, bonus_applied, status, created_at)
-                VALUES ($1, 'HELIO_DEPOSIT_v2.0', $2, $3, true, 'SETTLED', NOW())
-            `, [userId, pkg.priceUsd, totalDeposit]);
-
-            await db.query('COMMIT');
-            console.log(`✅ [HELIO WEBHOOK]: Sync Complete. User ${userId} credited with ${totalDeposit} credits. 🛡️`);
+            await client.query('COMMIT');
+            console.log(`✅ [HELIO WEBHOOK]: Sync Complete. User ${userId} +${totalDeposit} credits.`);
             return new Response('Settled', { status: 200 });
 
         } catch (e) {
-            await db.query('ROLLBACK');
-            console.warn('[HELIO WEBHOOK]: Atomic sync failed. Rolled back.', e);
+            if (client) await client.query('ROLLBACK');
+            console.error('[HELIO WEBHOOK]: Atomic Sync Failure:', e);
             return new Response('Sync Error', { status: 500 });
+        } finally {
+            client.release();
         }
 
     } catch (error: any) {
