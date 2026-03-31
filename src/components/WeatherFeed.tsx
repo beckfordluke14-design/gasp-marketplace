@@ -14,6 +14,10 @@ interface PolymarketEvent {
     isFree: boolean;
     unlockCost: number;
     endDate?: string;
+    recommendedBucket?: string;
+    currentTempStr?: string;
+    recommendedPrice?: number;
+    recommendedPriceStr?: string;
 }
 
 export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }) {
@@ -51,7 +55,11 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                     description: ev.description || '',
                     isFree: i < 2, // First 2 are free
                     unlockCost: 50 + (i * 25),
-                    endDate: ev.endDate || ev.closedTime || market.endDate
+                    endDate: ev.endDate || ev.closedTime || market.endDate,
+                    recommendedBucket: ev.recommendedBucket,
+                    currentTempStr: ev.currentTempStr,
+                    recommendedPrice: ev.recommendedPrice,
+                    recommendedPriceStr: ev.recommendedPriceStr
                 });
             });
             
@@ -212,6 +220,57 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                                             <Activity className={`${isAccessible ? flash === 'up' ? 'text-green-400' : flash === 'down' ? 'text-red-400' : 'text-[#00f0ff]' : 'text-white/10'}`} size={24} />
                                         </div>
                                     </div>
+                                    
+                                    {isAccessible && bucket.recommendedBucket && (
+                                        <div className="mt-4 p-3 bg-gradient-to-t from-green-500/20 to-black/80 border border-green-500/40 rounded-xl relative overflow-hidden group/bucket shadow-[0_0_20px_rgba(0,255,0,0.1)]">
+                                           <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10" />
+                                           <div className="relative z-10 flex flex-col gap-2">
+                                              
+                                              {/* Ground Source & Opportunity Header */}
+                                              <div className="flex justify-between items-start">
+                                                  <div className="flex flex-col">
+                                                      <span className="text-[8px] uppercase font-mono tracking-widest text-[#00f0ff] mb-0.5 opacity-60">Live Ground Sensor</span>
+                                                      <span className="text-[10px] uppercase font-mono font-black tracking-widest text-green-400 flex items-center gap-1">
+                                                          <Activity size={10} className="animate-pulse" /> {bucket.currentTempStr}
+                                                      </span>
+                                                  </div>
+                                                  
+                                                  {bucket.recommendedPrice && bucket.recommendedPrice > 0 && bucket.recommendedPrice < 1 && (
+                                                      <div className="flex flex-col items-end">
+                                                          <span className="text-[7px] uppercase font-mono tracking-widest text-green-400/50">Upside Margin</span>
+                                                          <span className="text-[11px] font-black italic tracking-tighter text-[#00f0ff] drop-shadow-[0_0_8px_rgba(0,240,255,0.6)]">
+                                                              +{((1 - bucket.recommendedPrice) / bucket.recommendedPrice * 100).toFixed(0)}% ROI
+                                                          </span>
+                                                      </div>
+                                                  )}
+                                              </div>
+                                              
+                                              {/* Action Payload */}
+                                              <div className="bg-black/40 border border-green-500/20 rounded p-2 mt-1 flex justify-between items-center backdrop-blur-md">
+                                                 <div className="flex flex-col">
+                                                     <span className="text-white/40 font-mono text-[7px] tracking-widest mb-0.5">TARGET BUCKET:</span>
+                                                     <span className="text-xs uppercase font-black italic tracking-widest text-white">
+                                                         {bucket.recommendedBucket}
+                                                     </span>
+                                                 </div>
+                                                 
+                                                 {bucket.recommendedPriceStr && (
+                                                     <div className="flex flex-col items-end">
+                                                         <span className="text-[7px] font-mono text-red-400/80 mb-0.5 line-through decoration-red-500/50">Market: 100¢</span>
+                                                         <span className="text-green-400 font-mono text-[11px] font-bold bg-green-500/10 px-1.5 py-0.5 rounded border border-green-500/20">
+                                                             BUY @ {bucket.recommendedPriceStr}¢
+                                                         </span>
+                                                     </div>
+                                                 )}
+                                              </div>
+                                              
+                                              {/* Temporal Warning */}
+                                              <div className="text-[6px] text-white/30 font-mono text-center mt-1 uppercase tracking-widest">
+                                                  // Confirm Peak Heating Time before snipe //
+                                              </div>
+                                           </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </motion.div>
