@@ -111,10 +111,16 @@ export default function SovereignDashboard() {
                             </div>
                         </div>
 
-                        <a href="/?tab=weather" className="w-full flex items-center justify-between p-8 bg-white text-black rounded-[2.5rem] hover:scale-105 active:scale-95 transition-all shadow-2xl group">
+                        <button 
+                           onClick={() => {
+                              if ((window as any).onSetActiveTab) (window as any).onSetActiveTab('weather');
+                              else window.location.href = '/?tab=weather';
+                           }}
+                           className="w-full flex items-center justify-between p-8 bg-white text-black rounded-[2.5rem] hover:scale-105 active:scale-95 transition-all shadow-2xl group"
+                        >
                             <span className="text-xs font-black uppercase tracking-[0.2em]">Secure This Allocation ►</span>
                             <Zap size={24} className="group-hover:rotate-12 transition-transform" />
-                        </a>
+                        </button>
                     </div>
 
                     <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-[#ffea00]/10 blur-[80px] rounded-full pointer-events-none" />

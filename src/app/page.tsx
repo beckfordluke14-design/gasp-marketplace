@@ -125,6 +125,11 @@ function MarketplaceContent() {
     const pId = searchParams.get('profile');
     if (pId) handleSelectProfile(pId);
 
+    const tab = searchParams.get('tab');
+    if (tab && ['feed', 'weather', 'reports', 'protocol'].includes(tab)) {
+       setActiveTab(tab as any);
+    }
+
     return () => {
        window.removeEventListener('gasp_unread_sync_trigger', syncUnreads);
        window.removeEventListener('gasp_sync_follows', syncFollows);
@@ -377,6 +382,14 @@ function MarketplaceContent() {
             unreadCounts={unreadCounts}
             isOpen={openChatIds.length > 0}
             onClose={() => setOpenChatIds([])}
+         />
+
+         <MobileBottomNav 
+            onOpenTopUp={() => setIsTopUpOpen(true)}
+            onSelectChat={() => setShowProfileList(true)}
+            followingIds={following}
+            unreadCounts={unreadCounts}
+            profiles={randomizedProfiles}
          />
      </main>
   );

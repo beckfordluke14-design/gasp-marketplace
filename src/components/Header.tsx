@@ -185,9 +185,13 @@ export default function Header({
                   </button>
                 )}
 
-                <div onClick={() => onOpenTopUp()} className="cursor-pointer hover:opacity-80 transition-all">
+                <motion.div 
+                   onClick={() => onOpenTopUp()} 
+                   whileTap={{ scale: 0.95 }}
+                   className="cursor-pointer hover:bg-white/5 active:bg-white/10 rounded-2xl px-2 py-1 transition-all flex items-center"
+                >
                    <CoinBalance onOpenTopUp={() => onOpenTopUp()} />
-                </div>
+                </motion.div>
 
                 {/* Admin Toggle */}
                 {isAdmin && (

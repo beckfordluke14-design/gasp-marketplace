@@ -86,15 +86,15 @@ export default function ProtocolOverview() {
                             <h3 className="text-xl md:text-3xl font-syncopate font-black italic tracking-tighter">
                                 {(1000000000).toLocaleString()} <span className="text-xs text-white/20">GASP</span>
                             </h3>
-                            <div className="flex items-center gap-2 mt-1">
-                                <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
-                                <span className="text-[8px] font-black uppercase text-white/30 tracking-widest italic">
-                                    Network Capacity: 100%
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                             <div className="flex items-center gap-2 mt-1">
+                                 <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                                 <span className="text-[8px] font-black uppercase text-white/30 tracking-widest italic">
+                                     Network Capacity: 100%
+                                 </span>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
             </div>
 
             {/* 🐋 YOUR SYNDICATE STANDING */}
@@ -121,9 +121,15 @@ export default function ProtocolOverview() {
                         </div>
                     </div>
 
-                    <a href="/?tab=weather" className="px-10 py-5 bg-white text-black rounded-3xl text-[12px] font-black uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-2xl flex items-center gap-4">
+                    <button 
+                       onClick={() => {
+                          if ((window as any).onSetActiveTab) (window as any).onSetActiveTab('weather');
+                          else window.location.href = '/?tab=weather';
+                       }}
+                       className="px-10 py-5 bg-white text-black rounded-3xl text-[12px] font-black uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-2xl flex items-center gap-4"
+                    >
                         Grow Your Weight <ChevronRight size={18} />
-                    </a>
+                    </button>
                 </div>
 
                 <div className="absolute top-0 right-0 w-full h-full pointer-events-none opacity-20 group-hover:opacity-30 transition-opacity">

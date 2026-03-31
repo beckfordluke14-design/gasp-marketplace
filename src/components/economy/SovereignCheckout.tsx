@@ -106,45 +106,67 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
 
       {/* ERROR FEEDBACK */}
       {error && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-[9px] uppercase font-black tracking-widest flex items-center gap-3 animate-in shake-in">
-            <AlertCircle size={16} />
-            {error}
+        <div className="p-6 rounded-[2rem] bg-red-500/10 border border-red-500/30 text-red-500 flex flex-col gap-3 animate-in shake-in shadow-[0_0_40px_rgba(239,68,68,0.1)]">
+            <div className="flex items-center gap-3">
+                <AlertCircle size={20} className="shrink-0" />
+                <span className="text-xs font-black uppercase tracking-widest">{error}</span>
+            </div>
+            {error.includes('Missing API Key') && (
+                <p className="text-[9px] uppercase tracking-widest text-red-500/60 leading-relaxed font-black italic border-t border-red-500/20 pt-3">
+                   SYSTEM ALERT: STRIPE_SECRET_KEY is required in your environmental core to enable institutional fiat-to-asset settlement. 🛡️
+                </p>
+            )}
         </div>
       )}
 
       {/* PACKAGE SUMMARY */}
-      <div className="p-6 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-between">
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase font-black text-white/40 tracking-widest italic">{pkg.label}</span>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-syncopate font-black text-white italic">{totalCredits.toLocaleString()}</span>
-            <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Breathe Points</span>
+      <div className="p-6 md:p-8 rounded-[2.5rem] bg-white/5 border border-white/10 flex items-center justify-between shadow-2xl relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#00f0ff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="flex flex-col gap-1 relative z-10">
+          <span className="text-[10px] md:text-[11px] uppercase font-black text-white/40 tracking-[0.3em] italic mb-1">Terminal Tier: {pkg.label}</span>
+          <div className="flex items-baseline gap-3">
+            <span className="text-3xl md:text-5xl font-syncopate font-black text-white italic drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">{totalCredits.toLocaleString()}</span>
+            <span className="text-[10px] md:text-xs font-black text-[#00f0ff] uppercase tracking-[0.4em] italic animate-pulse">Breathe Points</span>
           </div>
         </div>
-        <span className="text-4xl font-syncopate font-black text-[#00f0ff] italic">${pkg.priceUsd}</span>
+        <div className="flex flex-col items-end relative z-10 text-right">
+            <span className="text-[9px] font-black uppercase tracking-widest text-white/20 mb-1">Total Stake</span>
+            <span className="text-4xl md:text-5xl font-syncopate font-black text-[#ffea00] italic underline decoration-[#ffea00]/30 underline-offset-8 decoration-wavy transition-all group-hover:text-white">${pkg.priceUsd}</span>
+        </div>
       </div>
 
       {/* 🚀 THE SATURDAY MONEY PRINTER: THREE RAILS */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-5">
 
         {/* 🥇 #1: THE MONEY PRINTER: DIRECT WALLET (Sovereign Elite) */}
         <button
-          onClick={() => alert(`Direct USDC Bridge Syncing to your Treasury [${SYNDICATE_TREASURY_SOL.slice(0,6)}...]. This is your Saturday Money Printer.`)}
-          className="w-full h-24 rounded-[2rem] bg-gradient-to-r from-[#00f0ff] to-[#ff00ff] text-white p-[1px] shadow-[0_0_60px_rgba(0,240,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all group"
+          onClick={() => {
+             setError(null);
+             const address = SYNDICATE_TREASURY_SOL;
+             const amountRaw = pkg.priceUsd;
+             // 🧬 SIMULATE BRIDGE LINK (Redirect to wallet/pay-link or show deep-link)
+             console.log(`[Elite Rail] Initializing direct bridge to: ${address}`);
+             window.open(`https://solscan.io/account/${address}`, '_blank');
+             alert(`DIRECT RAILS INITIALIZED:\n\nTransfer ${amountRaw} USDC to:\n${address}\n\nYour Credits will be infused automatically once the Syndicate node detects the handshake.`);
+          }}
+          className="w-full h-24 rounded-[2.5rem] bg-gradient-to-r from-[#00f0ff] via-[#ff00ff] to-[#ffea00] text-white p-[1.5px] shadow-[0_20px_60px_rgba(0,240,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all group overflow-hidden"
         >
-           <div className="w-full h-full bg-black rounded-[2rem] flex items-center justify-between px-8">
-              <div className="flex items-center gap-5 text-left">
-                <div className="w-12 h-12 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center animate-pulse">
-                   <Zap size={28} className="text-[#00f0ff]" fill="#00f0ff" />
+           <div className="w-full h-full bg-black rounded-[2.5rem] flex items-center justify-between px-8 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#00f0ff]/10 to-transparent pointer-events-none" />
+              <div className="flex items-center gap-6 text-left relative z-10">
+                <div className="w-14 h-14 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center animate-pulse group-hover:bg-[#00f0ff]/20 transition-all">
+                   <Zap size={32} className="text-[#00f0ff]" fill="#00f0ff" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[13px] font-black uppercase tracking-[0.2em] text-white italic group-hover:text-[#00f0ff] transition-colors">Direct Wallet Settlement</span>
-                  <span className="text-[9px] uppercase tracking-widest text-white/30">Privy/Phantom Bridge • Zero Middleman • Instant Alpha</span>
+                  <span className="text-[14px] font-black uppercase tracking-[0.25em] text-white italic group-hover:text-[#00f0ff] transition-colors">Direct Wallet Settlement</span>
+                  <span className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold group-hover:text-white/60 transition-colors mt-1">Privy/Phantom Bridge • Zero Middleman • Instant Alpha</span>
                 </div>
               </div>
-              <div className="flex flex-col items-end">
-                  <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-widest animate-pulse italic">Priority Rail</span>
-                  <ArrowRight size={20} className="text-white/20 mt-1" />
+              <div className="flex flex-col items-end relative z-10">
+                  <div className="px-3 py-1 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-lg">
+                    <span className="text-[9px] font-black text-[#ffea00] uppercase tracking-widest animate-pulse italic">Priority Rail</span>
+                  </div>
+                  <ArrowRight size={24} className="text-white/20 mt-2 group-hover:text-white group-hover:translate-x-2 transition-all" />
               </div>
            </div>
         </button>
@@ -153,32 +175,32 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
         <button
           onClick={handleCryptoChoice}
           disabled={isLoadingCard || isLoadingCrypto || (!pkg.helioPayLink && !isCustom)}
-          className="w-full h-20 rounded-2xl bg-white/[0.03] border border-white/5 text-white flex items-center justify-between px-8 hover:bg-white/[0.06] hover:border-white/10 active:scale-95 transition-all disabled:opacity-30"
+          className="w-full h-20 rounded-3xl bg-white/[0.03] border border-white/5 text-white flex items-center justify-between px-8 hover:bg-white/[0.06] hover:border-[#ffea00]/40 active:scale-95 transition-all disabled:opacity-30 group"
         >
-          <div className="flex items-center gap-4 text-white">
-            <Bitcoin size={24} className="text-white/20 shrink-0" />
-            <div className="flex flex-col items-start">
-              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">P2P Crypto Link</span>
-              <span className="text-[8px] uppercase tracking-widest text-white/20">Legacy Helio Bridge (USDC/SOL/ETH)</span>
+          <div className="flex items-center gap-5 text-white">
+            <Bitcoin size={28} className="text-white/20 shrink-0 group-hover:text-[#ffea00] transition-colors" />
+            <div className="flex flex-col items-start text-left">
+              <span className="text-[12px] font-black uppercase tracking-[0.25em] text-white/60 group-hover:text-white transition-colors">P2P Crypto Link</span>
+              <span className="text-[9px] uppercase tracking-[0.3em] text-white/20 font-bold">Legacy Helio Bridge (USDC/SOL/ETH)</span>
             </div>
           </div>
-          <ArrowRight size={20} className="text-white/10" />
+          <ArrowRight size={20} className="text-white/10 group-hover:text-white group-hover:translate-x-1 transition-all" />
         </button>
 
         {/* 🥉 #3: THE FIAT BRIDGE: CARD (Stripe Onramp) */}
         <button
           onClick={handleCardChoice}
           disabled={isLoadingCard || isLoadingCrypto}
-          className="w-full h-20 rounded-2xl bg-white/[0.02] border border-white/5 text-white flex items-center justify-between px-8 hover:bg-white/[0.04] hover:border-white/10 active:scale-95 transition-all disabled:opacity-50"
+          className="w-full h-20 rounded-3xl bg-white/[0.02] border border-white/5 text-white flex items-center justify-between px-8 hover:bg-[#00f0ff]/10 hover:border-[#00f0ff]/40 active:scale-95 transition-all disabled:opacity-50 group"
         >
-          <div className="flex items-center gap-4">
-            <CreditCard size={24} className="shrink-0 text-white/20" />
-            <div className="flex flex-col items-start">
-              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Fiat-to-Asset Bridge</span>
-              <span className="text-[8px] uppercase tracking-widest text-white/10">Secure Card Settlement (Stripe Crypto)</span>
+          <div className="flex items-center gap-5">
+            <CreditCard size={28} className="shrink-0 text-white/20 group-hover:text-[#00f0ff] transition-colors" />
+            <div className="flex flex-col items-start text-left">
+              <span className="text-[12px] font-black uppercase tracking-[0.25em] text-white/40 group-hover:text-white transition-colors">Fiat-to-Asset Bridge</span>
+              <span className="text-[9px] uppercase tracking-[0.3em] text-white/10 font-bold">Secure Card Settlement (Stripe Crypto)</span>
             </div>
           </div>
-          {isLoadingCard ? <Loader2 size={20} className="animate-spin" /> : <ArrowRight size={20} className="text-white/10" />}
+          {isLoadingCard ? <Loader2 size={24} className="animate-spin text-[#00f0ff]" /> : <ArrowRight size={20} className="text-white/10 group-hover:text-white group-hover:translate-x-1 transition-all" />}
         </button>
 
       </div>
