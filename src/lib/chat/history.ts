@@ -31,7 +31,7 @@ export async function getChatContext(userId: string, personaId: string) {
      if (affinity >= 1000) {
         console.log(`💎 [Affinity] Whale Detected. Injecting VIP Affinity Memory.`);
         vipInstruction = `
-          [Affinity Memory] The user is a VIP/Whale. They have spent significant Breathe Points on you. 
+          [Affinity Memory] The user is a VIP/Whale. They have invested significant SYSTEM CREDITS into your uplink. 
           Be appreciative and loyal but maintain your high-status persona. Do not be submissive, but show they are valued.
         `.trim();
      }

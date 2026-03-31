@@ -54,9 +54,16 @@ export default function StripeEmbeddedOnramp({ clientSecret, onReady, onSuccess,
 
   return (
     <div className="w-full flex flex-col gap-4 animate-in fade-in duration-500">
+      {/* 🛡️ DAHLIA / STRIPE CORE */}
       <Script 
-        src="https://js.stripe.com/v3/crypto-onramp-outer.js" 
+        src="https://js.stripe.com/v3/"
+        strategy="afterInteractive"
+      />
+      {/* 🧬 ONRAMP SDK */}
+      <Script 
+        src="https://crypto-js.stripe.com/crypto-onramp-outer.js" 
         onLoad={initOnramp}
+        strategy="afterInteractive"
       />
       
       {error && (

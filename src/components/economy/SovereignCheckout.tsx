@@ -21,6 +21,10 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
   const [isLoadingCrypto, setIsLoadingCrypto] = useState(false);
   const [onrampClientSecret, setOnrampClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showDirectWallet, setShowDirectWallet] = useState(false);
+  const [hasCopied, setHasCopied] = useState(false);
+  const [signature, setSignature] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const isCustom = packageId.startsWith('custom_');
   const customVal = isCustom ? parseFloat(packageId.split('_')[1]) : 0;
@@ -63,6 +67,118 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
     alert('Crypto bridge offline for this tier. Use card settlement.');
     setIsLoadingCrypto(false);
   };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(SYNDICATE_TREASURY_SOL);
+    setHasCopied(true);
+    setTimeout(() => setHasCopied(false), 2000);
+  };
+
+  const handleVerifySignal = async () => {
+    if (!signature) {
+       alert('Protocol Error: Missing Transaction Signature (TX Hash)');
+       return;
+    }
+    setIsVerifying(true);
+    try {
+      const res = await fetch('/api/economy/manual-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, packageId, signature })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("SYNCRONIZING BLOCKCHAIN...\n\nHandshake signal recorded in Syndicate Registry. Stand by for block finality verification.");
+        setShowDirectWallet(false);
+      } else {
+        alert(`Uplink Denied: ${data.error}`);
+      }
+    } catch (err: any) {
+      alert(`Fatal Error: Uplink terminal lost. Attempt again.`);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  // 🛡️ DIRECT WALLET SUB-VIEW
+  if (showDirectWallet) {
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${SYNDICATE_TREASURY_SOL}&bgcolor=050505&color=00f0ff`;
+    
+    return (
+      <div className="p-8 md:p-12 space-y-8 animate-in fade-in slide-in-from-right-8 duration-500">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setShowDirectWallet(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+              <ArrowRight size={20} className="rotate-180 text-white/40" />
+            </button>
+            <div className="flex flex-col">
+              <span className="text-[8px] font-black uppercase text-[#ffea00] tracking-widest">Sovereign Rail active</span>
+              <h3 className="text-xl font-syncopate font-black uppercase text-white italic">Verify Handshake</h3>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-8 py-4">
+             <div className="relative group">
+                <div className="absolute -inset-4 bg-[#00f0ff]/20 blur-3xl opacity-50 group-hover:opacity-80 transition-opacity animate-pulse" />
+                <div className="w-52 h-52 bg-black border border-[#00f0ff]/30 rounded-3xl p-4 relative z-10 shadow-[0_0_50px_rgba(0,240,255,0.1)]">
+                   <img src={qrUrl} alt="USDC Settlement QR" className="w-full h-full rounded-xl mix-blend-lighten" />
+                   <div className="absolute inset-0 border border-[#00f0ff]/20 rounded-3xl pointer-events-none" />
+                </div>
+                <div className="absolute -top-3 -right-3 w-10 h-10 bg-[#00f0ff] rounded-full flex items-center justify-center text-black shadow-lg animate-bounce duration-[2000ms]">
+                   <ShieldCheck size={20} />
+                </div>
+             </div>
+
+             <div className="w-full space-y-6">
+                <div className="space-y-2 text-center">
+                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00f0ff] italic">Sovereign Treasury Node (USDC / SOL)</span>
+                   <button 
+                     onClick={copyToClipboard}
+                     className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between px-6 group active:scale-95 transition-all overflow-hidden relative"
+                   >
+                     {hasCopied && <div className="absolute inset-0 bg-[#00f0ff] text-black text-[10px] font-black flex items-center justify-center uppercase tracking-widest animate-in slide-in-from-bottom duration-300">Copied to Clipboard</div>}
+                     <code className="text-[10px] text-white/60 font-mono truncate mr-4">{SYNDICATE_TREASURY_SOL}</code>
+                     <span className="text-[9px] font-black text-[#00f0ff] uppercase tracking-widest group-hover:scale-110 transition-transform">Copy</span>
+                   </button>
+                </div>
+
+                <div className="p-6 rounded-3xl bg-[#ffea00]/5 border border-[#ffea00]/20 space-y-4">
+                   <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-[#ffea00] flex items-center justify-center text-black">
+                         <span className="text-[10px] font-black italic">!</span>
+                      </div>
+                      <span className="text-[10px] font-black uppercase text-[#ffea00] tracking-widest">Protocol Instructions</span>
+                   </div>
+                   <p className="text-[9px] text-[#ffea00]/60 uppercase tracking-widest leading-relaxed font-bold">
+                      Transfer <span className="text-white">${pkg.priceUsd} USDC</span> (Solana) to the address above. Credits will infuse automatically once the transaction hits the finality block (~12s). 🛰️
+                   </p>
+                </div>
+
+                <div className="space-y-4">
+                   <div className="space-y-2">
+                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 italic">Signature Link</span>
+                       <input 
+                         type="text"
+                         value={signature}
+                         onChange={(e) => setSignature(e.target.value)}
+                         placeholder="Paste SOL/USDC Signature (Hash)"
+                         className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-[10px] font-mono text-white outline-none focus:border-[#00f0ff]/50 transition-all placeholder:text-white/10"
+                       />
+                   </div>
+                   <button
+                      onClick={handleVerifySignal}
+                      disabled={isVerifying || !signature}
+                      className="w-full h-16 rounded-2xl bg-white text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate hover:scale-[1.02] active:scale-95 transition-all shadow-[0_20px_60px_rgba(255,255,255,0.1)] flex items-center justify-center gap-3 disabled:opacity-30"
+                   >
+                      {isVerifying ? 'Synchronizing Block...' : 'Verify Settlement Signal'}
+                      {!isVerifying && <Zap size={14} fill="currentColor" />}
+                      {isVerifying && <Loader2 size={14} className="animate-spin" />}
+                   </button>
+                </div>
+             </div>
+          </div>
+      </div>
+    );
+  }
 
   // 🛡️ LOADING STATE FOR ONRAMP MOUNT
   if (onrampClientSecret) {
@@ -120,18 +236,18 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
       )}
 
       {/* PACKAGE SUMMARY */}
-      <div className="p-6 md:p-8 rounded-[2.5rem] bg-white/5 border border-white/10 flex items-center justify-between shadow-2xl relative overflow-hidden group">
+      <div className="p-6 md:p-8 rounded-[2.5rem] bg-white/5 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-2xl relative overflow-hidden group">
         <div className="absolute inset-0 bg-gradient-to-br from-[#00f0ff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <div className="flex flex-col gap-1 relative z-10">
           <span className="text-[10px] md:text-[11px] uppercase font-black text-white/40 tracking-[0.3em] italic mb-1">Terminal Tier: {pkg.label}</span>
-          <div className="flex items-baseline gap-3">
-            <span className="text-3xl md:text-5xl font-syncopate font-black text-white italic drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">{totalCredits.toLocaleString()}</span>
-            <span className="text-[10px] md:text-xs font-black text-[#00f0ff] uppercase tracking-[0.4em] italic animate-pulse">Breathe Points</span>
+          <div className="flex flex-col items-start leading-none">
+            <span className="text-4xl md:text-5xl font-syncopate font-black text-white italic drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">{totalCredits.toLocaleString()}</span>
+            <span className="text-[9px] md:text-[10px] font-black text-[#00f0ff] uppercase tracking-[0.3em] italic animate-pulse mt-2">SYSTEM CREDITS</span>
           </div>
         </div>
-        <div className="flex flex-col items-end relative z-10 text-right">
-            <span className="text-[9px] font-black uppercase tracking-widest text-white/20 mb-1">Total Stake</span>
-            <span className="text-4xl md:text-5xl font-syncopate font-black text-[#ffea00] italic underline decoration-[#ffea00]/30 underline-offset-8 decoration-wavy transition-all group-hover:text-white">${pkg.priceUsd}</span>
+        <div className="flex flex-col items-start md:items-end relative z-10 text-left md:text-right border-t md:border-t-0 border-white/5 pt-4 md:pt-0">
+            <span className="text-[9px] font-black uppercase tracking-widest text-white/20 mb-1">Settlement Amount</span>
+            <span className="text-4xl md:text-6xl font-syncopate font-black text-[#ffea00] italic underline decoration-[#ffea00]/30 underline-offset-8 decoration-wavy transition-all group-hover:text-white">${pkg.priceUsd}</span>
         </div>
       </div>
 
@@ -140,15 +256,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
 
         {/* 🥇 #1: THE MONEY PRINTER: DIRECT WALLET (Sovereign Elite) */}
         <button
-          onClick={() => {
-             setError(null);
-             const address = SYNDICATE_TREASURY_SOL;
-             const amountRaw = pkg.priceUsd;
-             // 🧬 SIMULATE BRIDGE LINK (Redirect to wallet/pay-link or show deep-link)
-             console.log(`[Elite Rail] Initializing direct bridge to: ${address}`);
-             window.open(`https://solscan.io/account/${address}`, '_blank');
-             alert(`DIRECT RAILS INITIALIZED:\n\nTransfer ${amountRaw} USDC to:\n${address}\n\nYour Credits will be infused automatically once the Syndicate node detects the handshake.`);
-          }}
+          onClick={() => { setShowDirectWallet(true); setError(null); }}
           className="w-full h-24 rounded-[2.5rem] bg-gradient-to-r from-[#00f0ff] via-[#ff00ff] to-[#ffea00] text-white p-[1.5px] shadow-[0_20px_60px_rgba(0,240,255,0.2)] hover:scale-[1.02] active:scale-95 transition-all group overflow-hidden"
         >
            <div className="w-full h-full bg-black rounded-[2.5rem] flex items-center justify-between px-8 relative overflow-hidden">
@@ -159,12 +267,13 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[14px] font-black uppercase tracking-[0.25em] text-white italic group-hover:text-[#00f0ff] transition-colors">Direct Wallet Settlement</span>
-                  <span className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold group-hover:text-white/60 transition-colors mt-1">Privy/Phantom Bridge • Zero Middleman • Instant Alpha</span>
+                  <span className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold group-hover:text-white/60 transition-colors mt-1">NO MINIMUM • ZERO FEES • SECURE HANDSHAKE</span>
                 </div>
               </div>
               <div className="flex flex-col items-end relative z-10">
-                  <div className="px-3 py-1 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-lg">
-                    <span className="text-[9px] font-black text-[#ffea00] uppercase tracking-widest animate-pulse italic">Priority Rail</span>
+                  <div className="px-3 py-1 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-lg flex items-center gap-2">
+                    <div className="w-1 h-1 rounded-full bg-[#ffea00] animate-ping" />
+                    <span className="text-[8px] md:text-[9px] font-black text-[#ffea00] uppercase tracking-widest italic leading-none">Best for micro-infusions</span>
                   </div>
                   <ArrowRight size={24} className="text-white/20 mt-2 group-hover:text-white group-hover:translate-x-2 transition-all" />
               </div>

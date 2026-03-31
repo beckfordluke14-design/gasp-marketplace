@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       userId = newUser[0].id;
     }
 
-    // STEP B: Reset credit balance to 10,000 Breathe Points
+    // STEP B: Reset credit balance to 10,000 SYSTEM CREDITS
     await db.query(
       'UPDATE profiles SET credit_balance = 10000, updated_at = NOW() WHERE id = $1', [userId]
     );
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Compliance Review Account reset on Railway: 10,000 BP with locked vault state.',
+      message: 'Compliance Review Account reset on Railway: 10,000 Credits with locked vault state.',
       user_id: userId
     });
 

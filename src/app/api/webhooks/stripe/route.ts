@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 /**
  * ⛽ STRIPE CRYPTO ONRAMP NODE: Unified Settlement Unit
- * Strategy: Fast-track fiat-to-crypto settlements with 1:1 GASP Point matching.
+ * Strategy: Fast-track fiat-to-crypto settlements with 1:1 Syndicate Credit matching.
  */
 export async function POST(req: Request) {
     const payload = await req.text();

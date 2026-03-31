@@ -19,16 +19,17 @@ export async function POST(req: Request) {
     const pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
     if (!pkg) return NextResponse.json({ error: 'Sector Intel Missing (Invalid Package)' }, { status: 400 });
 
-    // 🧬 ONRAMP SESSION CREATE (Manual Fetch - SDK Missing Crypto Bindings)
+    // 🧬 ONRAMP SESSION CREATE (Manual Fetch - Corrected Params)
     // identity: AllTheseFlows LLC
+    // Strategy: Direct Treasury Infusion (Merchant-Owned Address)
+    const treasury = 'H7BvF9o1yWh7ZBej7N3y5K27vY6LqzE7S6jXF8A9Z1K1'; // 🔱 GLOBAL TREASURY NODE
+
     const params = new URLSearchParams();
-    params.append('transaction_details[destination_currency]', 'usdc');
-    params.append('transaction_details[destination_network]', 'solana');
-    params.append('transaction_details[destination_wallet_address]', walletAddress || 'placeholder_address_check_docs');
-    params.append('transaction_details[source_amount]', pkg.priceUsd.toString());
-    params.append('transaction_details[source_currency]', 'usd');
-    params.append('transaction_details[supported_destination_currencies][0]', 'usdc');
-    params.append('transaction_details[supported_destination_networks][0]', 'solana');
+    params.append('source_amount', pkg.priceUsd.toString());
+    params.append('source_currency', 'usd');
+    params.append('destination_currencies[0]', 'usdc');
+    params.append('destination_networks[0]', 'solana');
+    params.append('wallet_addresses[solana]', treasury);
     params.append('customer_ip_address', req.headers.get('x-forwarded-for') || '127.0.0.1');
     params.append('metadata[userId]', userId);
     params.append('metadata[packageId]', packageId);

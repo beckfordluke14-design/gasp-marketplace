@@ -92,8 +92,8 @@ export default function TopSponsors({ profileId }: TopSponsorsProps) {
                  <span className={`text-[13px] font-black tracking-tighter ${i === 0 ? 'text-[#ff00ff]' : 'text-white'}`}>
                     {s.total_discovery_spent.toLocaleString()}
                  </span>
-                 <span className="text-[8px] font-black uppercase tracking-widest text-white/20">
-                    Breathe Points
+                 <span className="text-[8px] font-black uppercase tracking-widest text-[#ff00ff]/60">
+                    SYSTEM CREDITS
                  </span>
               </div>
             </div>

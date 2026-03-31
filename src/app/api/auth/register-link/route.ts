@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       await db.query('UPDATE user_persona_stats SET user_id = $1 WHERE user_id = $2', [userId, guestId]);
     }
 
-    // 2. UPSERT PROFILE with Genesis Bonus (1,500 Breathe Points)
+    // 2. UPSERT PROFILE with Genesis Bonus (1,500 SYSTEM CREDITS)
     await db.query(`
       INSERT INTO profiles (id, credit_balance, created_at, updated_at)
       VALUES ($1, 1500, NOW(), NOW())
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Identity linked, history merged, 1,500 Genesis BP provisioned.',
+      message: 'Identity linked, history merged, 1,500 Genesis Credits provisioned.',
       user_id: userId
     });
 

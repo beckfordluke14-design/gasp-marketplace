@@ -159,6 +159,30 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     </button>
                   ))}
                </div>
+
+                {/* 🧬 CUSTOM INFUSION INPUT */}
+                <div className="mt-8 pt-8 border-t border-white/5 space-y-4">
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white/40 italic">Custom Node Infusion</h4>
+                    <div className="flex gap-3">
+                        <div className="flex-1 relative">
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-white/40 font-black text-lg">$</div>
+                            <input 
+                              type="number"
+                              value={customAmount}
+                              onChange={(e) => setCustomAmount(e.target.value)}
+                              placeholder="Min. 20.00"
+                              className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl px-12 text-xl font-black text-white outline-none focus:border-[#ff6b00]/50 transition-all placeholder:text-white/10"
+                            />
+                        </div>
+                        <button 
+                          onClick={handleCustomStake}
+                          disabled={!customAmount || parseFloat(customAmount) < 19.99}
+                          className="h-16 px-8 rounded-2xl bg-[#ff6b00] disabled:bg-white/5 disabled:text-white/20 text-black font-black uppercase text-[10px] tracking-widest transition-all hover:scale-105 active:scale-95"
+                        >
+                            Infuse
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Compliance / Info Array */}
