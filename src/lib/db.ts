@@ -6,7 +6,11 @@ import { Pool } from 'pg';
  * We use the global object to persist the pool across Next.js hot-reloads.
  */
 
-const connectionString = process.env.DATABASE_URL || "postgresql://postgres:glrVNXPAMlJbeRzeNEziqUiOfPIXDjOf@gondola.proxy.rlwy.net:54825/railway";
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error('DATABASE_URL is missing from environment variables.');
+}
 
 const globalForPool = global as unknown as { pool: Pool };
 

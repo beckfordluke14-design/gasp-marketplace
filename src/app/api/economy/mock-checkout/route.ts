@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
+import { isAdminRequest, unauthorizedResponse } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,10 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(req: Request) {
   try {
+    // 🛡️ SYNDICATE SECURITY: Mock endpoints require Admin clearance
+    const isAuthorized = await isAdminRequest(req);
+    if (!isAuthorized) return unauthorizedResponse();
+
     const { userId, packageId } = await req.json();
     const pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
 

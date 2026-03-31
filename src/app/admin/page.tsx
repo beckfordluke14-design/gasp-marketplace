@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ShieldAlert, Zap, Star, Trash2, LayoutDashboard, Baby, Activity,
-  ArrowRight, Film, Users, BarChart2, ClipboardList, Camera, FileCheck, Layers
+  ArrowRight, Film, Users, BarChart2, ClipboardList, Camera, FileCheck, Layers, Fuel
 } from 'lucide-react';
 import Header from '@/components/Header';
 
@@ -51,12 +51,21 @@ export default function AdminHub() {
   };
 
   const setSystemEngine = async (val: string) => {
+    const adminKey = localStorage.getItem('admin_gasp_key');
     setEngine(val);
     await fetch('/api/admin/config', { 
       method: 'POST', 
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-admin-key': adminKey || ''
+      },
       body: JSON.stringify({ key: 'neural_engine', value: val }) 
     });
+  };
+
+  const saveAdminKey = (key: string) => {
+    localStorage.setItem('admin_gasp_key', key);
+    // Refresh the page or state if needed
   };
 
   const tools: Tool[] = [
@@ -151,6 +160,26 @@ export default function AdminHub() {
       ctaIcon: <ArrowRight size={14} />,
     },
     {
+      label: 'Credit Command',
+      description: 'Manual credit dispatch, user grant management, and shadow burn activation for testing and support.',
+      href: '/admin/credits',
+      icon: <Fuel size={20} className="text-[#ffea00]" />,
+      color: 'text-[#ffea00]',
+      glow: 'from-[#ffea00]/10 to-[#ffea00]/5 border-[#ffea00]/20',
+      cta: 'Uplink Credits',
+      ctaIcon: <Zap size={14} />,
+    },
+    {
+      label: 'System Vitals',
+      description: 'Real-time monitoring of Shadow Burn deflationary statistics, Global supply, and Database health.',
+      href: '/admin/vitals',
+      icon: <Activity size={20} className="text-red-500" />,
+      color: 'text-red-500',
+      glow: 'from-red-500/10 to-red-500/5 border-red-500/20',
+      cta: 'View Vitals',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
       label: 'Compliance',
       description: 'Content moderation controls, tombstoned nodes, and DELETED_NODE tracking.',
       href: '/admin/compliance',
@@ -211,6 +240,28 @@ export default function AdminHub() {
             </button>
           </div>
 
+          {/* ── ADMIN IDENTITY KEY (Required for API Access) ── */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/10">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
+                <ShieldAlert size={18} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black uppercase italic tracking-tighter text-red-500">Master Secret Key</h3>
+                <p className="text-[9px] text-white/30 uppercase tracking-widest">
+                  Required to authenticate destructive admin actions (Delete, Rename, Credits). Stored locally.
+                </p>
+              </div>
+            </div>
+            <input
+              type="password"
+              placeholder="••••••••••••••••"
+              defaultValue={typeof window !== 'undefined' ? localStorage.getItem('admin_gasp_key') || '' : ''}
+              onChange={(e) => saveAdminKey(e.target.value)}
+              className="bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-xs font-mono text-white/60 focus:border-red-500/50 outline-none w-full sm:w-64"
+            />
+          </div>
+
           {/* ── NEURAL ENGINE SELECTOR ── */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 p-5 rounded-2xl bg-gradient-to-r from-[#ff00ff]/5 to-[#00f0ff]/5 border border-white/10">
             <div className="flex items-center gap-3 flex-1">
@@ -269,6 +320,63 @@ export default function AdminHub() {
                 </div>
               </motion.div>
             ))}
+          </div>
+
+          {/* ── Sovereign Handbook ── */}
+          <div className="space-y-8">
+            <div className="flex items-center gap-3">
+              <ClipboardList size={24} className="text-[#00f0ff]" />
+              <h2 className="text-2xl font-syncopate font-black italic uppercase tracking-tighter">Sovereign Protocols: Operational Handbook</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                {
+                  title: "Identity Handshake",
+                  steps: [
+                    "Sign in with beckfordluke14@gmail.com or lukexwayne34@gmail.com.",
+                    "The system will automatically grant admin flags in the database.",
+                    "Ensure 'Command Mode' is activated in the Hub to see Stars on the live feed."
+                  ]
+                },
+                {
+                  title: "Economy & Credits",
+                  steps: [
+                    "Enter the Master Secret Key to unlock the 'Credit Command'.",
+                    "Use 'Credit Command' to manually top-up user balances.",
+                    "Toggle 'Trigger Burn' to sync 1:1 reward matching (Points)."
+                  ]
+                },
+                {
+                  title: "Post & Billboard Logic",
+                  steps: [
+                    "Use 'Post Studio' to toggle 'Vault' (Private) or 'Hero' (Featured) status.",
+                    "Pin the top 5 conversion assets to the homepage using the Gold Star.",
+                    "Merge text captions with media assets for high-fidelity storytelling."
+                  ]
+                },
+                {
+                  title: "Neural Engine Management",
+                  steps: [
+                    "Switch to 'Gemini 1.5 Flash' for 50x lower operational costs.",
+                    "Switch to 'Grok 3' for premium, unfiltered persona interactions.",
+                    "Sync Pulse in 'System Vitals' to verify revenue matching integrity."
+                  ]
+                }
+              ].map((section, idx) => (
+                <div key={idx} className="p-8 rounded-[2rem] bg-white/[0.03] border border-white/10 space-y-4">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-[#00f0ff] italic">0{idx + 1}. {section.title}</h3>
+                  <ul className="space-y-3">
+                    {section.steps.map((step, sidx) => (
+                      <li key={sidx} className="flex gap-3 text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">
+                        <span className="text-[#ff00ff]">►</span>
+                        {step}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Billboard Protocol */}

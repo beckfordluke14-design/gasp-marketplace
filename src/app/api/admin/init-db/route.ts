@@ -1,5 +1,6 @@
 // VERSION: 1.1.0 - RAILWAY SOVEREIGN SYNC
 import { db } from '@/lib/db';
+import { isAdminRequest, unauthorizedResponse } from '@/lib/auth';
 
 const INITIAL_SQL = `
 -- 1. Agencies (Friendly ID)
@@ -65,7 +66,11 @@ ON CONFLICT DO NOTHING;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS likes_count INTEGER DEFAULT 0;
 `;
 
-export async function GET() {
+export async function GET(req: Request) {
+    // 🛡️ SYNDICATE SECURITY: Verify Sovereign Admin Clearance
+    const isAuthorized = await isAdminRequest(req);
+    if (!isAuthorized) return unauthorizedResponse();
+
     console.log('[Sovereign Sync] Initializing Railway Neural Schema...');
     
     try {

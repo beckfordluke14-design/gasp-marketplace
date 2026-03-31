@@ -1,8 +1,13 @@
 import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { isAdminRequest, unauthorizedResponse } from '@/lib/auth';
 
 export async function POST(req: Request) {
     try {
+        // 🛡️ SYNDICATE SECURITY: Verify Admin Clearance
+        const isAuthorized = await isAdminRequest(req);
+        if (!isAuthorized) return unauthorizedResponse();
+
         const { action, payload } = await req.json();
         console.log(`[Neural Command Pulse]: Action=${action}`, payload);
 

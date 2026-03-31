@@ -20,10 +20,10 @@ export async function middleware(req: NextRequest) {
     return response;
   }
 
-  // Protected Paths (Simple Logic for Railway Migration)
+  // Protected Paths: Redirect to /login if no valid token is found
   if (!isAuthed && !url.pathname.startsWith('/login') && url.pathname !== '/') {
-    // return NextResponse.redirect(new URL('/login', req.url));
-    // For now, allow passage to ensure build doesn't break on missing sessions during pre-generation
+     console.log('🛡️ [Middleware] Redirecting unauthenticated user to /login');
+     return NextResponse.redirect(new URL('/login', req.url));
   }
 
   return response;

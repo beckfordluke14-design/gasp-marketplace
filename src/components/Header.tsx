@@ -41,7 +41,8 @@ export default function Header({
   
   const navItems = [
     { label: 'Pulse', active: true, href: '/' },
-    ...(isAdmin ? [{ label: 'Admin Panel', active: false, href: '/admin/audit' }] : []),
+    ...(isAdmin ? [{ label: 'Admin Panel', active: false, href: '/admin' }] : []),
+    { label: 'How-To', active: false, href: '/how-to' },
     { label: 'Archive', active: false, href: '/vault' },
     { label: 'Strategy', active: false, href: '/' },
   ];

@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { isAdminRequest, unauthorizedResponse } from '@/lib/auth';
 
 /**
  * 🕴️ SOVEREIGN ADMIN OVERRIDE v1.1
@@ -6,15 +7,16 @@ import { db } from '@/lib/db';
  */
 export async function POST(req: Request) {
     try {
+        // 🔒 SECURITY CHECK: Verify Sovereign Admin Clearance
+        const isAuthorized = await isAdminRequest(req);
+        if (!isAuthorized) return unauthorizedResponse();
+
         const body = await req.json();
         const { userId, amountCredits, reason } = body;
 
         if (!userId || !amountCredits) {
             return new Response(JSON.stringify({ success: false, error: 'Target ID or Credit Amount Missing.' }), { status: 400 });
         }
-
-        // 2. SECURITY CHECK (DUMMY): In production, replace this with a proper admin auth check.
-        // For now, we move forward on Railway without Supabase bridging.
 
 
         // 3. FULFILLMENT: Atomically inject credits into Railway DB

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Fuel, Zap, Flame, ShieldCheck, Search, Users, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Fuel, Zap, Flame, ShieldCheck, Search, Users, ChevronRight, AlertTriangle, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 /**
  * ⛽ SYNDICATE ADMIN: Credit Command Center
@@ -26,9 +27,13 @@ export default function AdminCredits() {
         setStatus(null);
         
         try {
+            const adminKey = localStorage.getItem('admin_gasp_key');
             const res = await fetch('/api/admin/credits', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-admin-key': adminKey || ''
+                },
                 body: JSON.stringify({ userId, credits: amount, triggerBurn })
             });
             const data = await res.json();
@@ -51,6 +56,10 @@ export default function AdminCredits() {
                 {/* 🛡️ ADMIN HEADER */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12 border-b border-white/10">
                     <div className="space-y-4">
+                        <Link href="/admin" className="flex items-center gap-2 text-white/40 hover:text-[#ffea00] transition-colors text-[10px] font-black uppercase tracking-widest underline decoration-[#ffea00]/20 mb-4">
+                            <ArrowLeft size={12} />
+                            Back to Hub
+                        </Link>
                         <div className="flex items-center gap-3">
                             <ShieldCheck size={16} className="text-[#ffea00]" />
                             <span className="text-[10px] font-black text-[#ffea00]">Admin Protocol Interface 🛡️</span>

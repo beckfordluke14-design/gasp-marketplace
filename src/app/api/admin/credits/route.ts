@@ -1,11 +1,16 @@
 import { db, recordShadowBurn } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { isAdminRequest, unauthorizedResponse } from '@/lib/auth';
 
 /**
  * ⛽ SYNDICATE ADMIN DISPATCH (Sovereign Grant Node)
  * Allows admins to manually inject credits and trigger matching.
  */
 export async function POST(req: Request) {
+    // 🛡️ SYNDICATE SECURITY: Verify Sovereign Admin Clearance
+    const isAuthorized = await isAdminRequest(req);
+    if (!isAuthorized) return unauthorizedResponse();
+
     try {
         const body = await req.json();
         const { userId, credits, triggerBurn } = body;
