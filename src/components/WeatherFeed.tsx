@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Unlock, Eye, RefreshCcw, Activity, AlertTriangle } from 'lucide-react';
+import { Lock, Unlock, Eye, RefreshCcw, Activity, AlertTriangle, Clock } from 'lucide-react';
 
 interface PolymarketEvent {
     id: string;
@@ -13,6 +13,7 @@ interface PolymarketEvent {
     description: string;
     isFree: boolean;
     unlockCost: number;
+    endDate?: string;
 }
 
 export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }) {
@@ -49,7 +50,8 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                     volume: parseInt(market.volume || '0', 10),
                     description: ev.description || '',
                     isFree: i < 2, // First 2 are free
-                    unlockCost: 50 + (i * 25)
+                    unlockCost: 50 + (i * 25),
+                    endDate: ev.endDate || ev.closedTime || market.endDate
                 });
             });
             
@@ -126,6 +128,18 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                     const flash = priceFlashes[bucket.id];
                     const priceFormatted = (bucket.price * 100).toFixed(1);
 
+                    let expiringString = '';
+                    if (bucket.endDate) {
+                        const date = new Date(bucket.endDate);
+                        if (date.getTime() < Date.now()) {
+                            expiringString = 'ALREADY ENDED';
+                        } else {
+                            expiringString = `ENDS: ${date.toLocaleDateString()}`;
+                        }
+                    } else {
+                        expiringString = 'LIVE ONGOING';
+                    }
+
                     return (
                         <motion.div
                             key={bucket.id}
@@ -173,6 +187,11 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
 
                             {/* Content Details */}
                             <div className="p-6 md:p-8 flex-1 flex flex-col justify-between relative z-20 bg-black/80 backdrop-blur-xl">
+                                
+                                <div className={`text-[9px] uppercase font-mono tracking-widest font-black mb-3 flex items-center gap-2 ${expiringString === 'ALREADY ENDED' ? 'text-red-500' : 'text-[#ffea00]'}`}>
+                                    <Clock size={10} /> {expiringString}
+                                </div>
+
                                 <h3 className="text-lg md:text-xl font-outfit font-black italic uppercase tracking-tighter leading-tight mb-4 drop-shadow-lg text-white/90">
                                     {bucket.title}
                                 </h3>

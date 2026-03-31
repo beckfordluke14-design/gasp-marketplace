@@ -3,25 +3,65 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
-        const limit = searchParams.get('limit') || '12';
-        const active = searchParams.get('active') || 'true';
-        const closed = searchParams.get('closed') || 'false';
+        const limit = parseInt(searchParams.get('limit') || '20', 10);
+        
+        // 1. Fetch specific tag
+        const tagRes = await fetch(`https://gamma-api.polymarket.com/events?limit=50&active=true&closed=false&tag_slug=weather`, {
+            headers: { 'Accept': 'application/json' },
+            next: { revalidate: 60 }
+        });
+        
+        // 2. Fetch recent general active markets to find daily temperature/hurricane bets
+        // (Polymarket places daily highs in the first few hundred active events)
+        const fetchPage = async (offset: number) => {
+            try {
+                const r = await fetch(`https://gamma-api.polymarket.com/events?limit=100&active=true&closed=false&offset=${offset}`, {
+                    headers: { 'Accept': 'application/json' },
+                    next: { revalidate: 60 }
+                });
+                return await r.json();
+            } catch (e) {
+                return [];
+            }
+        };
 
-        const res = await fetch(`https://gamma-api.polymarket.com/events?limit=${limit}&active=${active}&closed=${closed}&tag_slug=weather`, {
-            headers: {
-                'Accept': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-            },
-            next: { revalidate: 3 } // Very short cache to simulate live
+        const pages = await Promise.all([
+            fetchPage(0), fetchPage(100), fetchPage(200), fetchPage(300), fetchPage(400)
+        ]);
+        
+        let allEvents: any[] = [];
+        if (tagRes.ok) {
+            allEvents = await tagRes.json();
+        }
+        
+        pages.forEach(page => {
+            if (Array.isArray(page)) {
+                allEvents = allEvents.concat(page);
+            }
         });
 
-        if (!res.ok) {
-            console.error('Proxy failed to fetch Polymarket API:', res.status, res.statusText);
-            return NextResponse.json({ error: 'Upstream failed' }, { status: 502 });
-        }
+        // Unique by ID
+        const uniqueEvents = new Map();
+        allEvents.forEach((e: any) => {
+            if (e && e.id && !uniqueEvents.has(e.id)) {
+                uniqueEvents.set(e.id, e);
+            }
+        });
 
-        const data = await res.json();
-        return NextResponse.json(data);
+        // Filter: We want genuine Weather (from tag) OR Temperature events
+        const weatherNodes = Array.from(uniqueEvents.values()).filter(e => {
+            const t = (e.title || '').toLowerCase();
+            const isTemp = t.includes('temperature') || t.includes('weather') || t.includes('snow') || t.includes('rain') || t.includes('hurricane') || t.includes('flood') || t.includes('volcano');
+            const hasTag = e.tags && e.tags.some((tag: any) => tag.slug === 'weather' || tag.slug === 'climate');
+            
+            return (isTemp || hasTag) && !t.includes('coin') && !t.includes('solana') && !t.includes('bitcoin');
+        });
+
+        // Sort by trading volume so the most liquid bets show up first
+        weatherNodes.sort((a, b) => ((b.volume || b.volume24hr || 0) - (a.volume || a.volume24hr || 0)));
+
+        return NextResponse.json(weatherNodes.slice(0, limit));
+        
     } catch (error) {
         console.error('Polymarket Proxy Error:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
