@@ -360,7 +360,7 @@ export default function AdminHub() {
                   steps: [
                     "Switch to 'Gemini 1.5 Flash' for 50x lower operational costs.",
                     "Switch to 'Grok 3' for premium, unfiltered persona interactions.",
-                    "Sync Pulse in 'System Vitals' to verify revenue matching integrity."
+                    "Sync Pulse in 'System Vitals' to verify $GASPai matching integrity."
                   ]
                 }
               ].map((section, idx) => (

@@ -92,9 +92,9 @@ export default function AdminVitals() {
             {/* Grid Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                    { label: 'Total Burned Credits', val: data.burn.total_burned_credits.toLocaleString(), icon: <Flame className="text-orange-500" />, blur: 'bg-orange-500/10 border-orange-500/20' },
-                    { label: 'Total Points Issued', val: data.burn.total_points_issued.toLocaleString(), icon: <Zap className="text-[#00f0ff]" />, blur: 'bg-[#00f0ff]/10 border-[#00f0ff]/20' },
-                    { label: 'Points in Circulation', val: data.totalPointsInCirculation.toLocaleString(), icon: <TrendingDown className="text-purple-500" />, blur: 'bg-purple-500/10 border-purple-500/20' },
+                    { label: 'Total Inflow Pulse', val: data.burn.total_burned_credits.toLocaleString(), icon: <Flame className="text-orange-500" />, blur: 'bg-orange-500/10 border-orange-500/20' },
+                    { label: 'Total $GASPai Issued', val: data.burn.total_points_issued.toLocaleString(), icon: <Zap className="text-[#00f0ff]" />, blur: 'bg-[#00f0ff]/10 border-[#00f0ff]/20' },
+                    { label: '$GASPai in Circulation', val: data.totalPointsInCirculation.toLocaleString(), icon: <TrendingDown className="text-purple-500" />, blur: 'bg-purple-500/10 border-purple-500/20' },
                     { label: 'Total Identities', val: data.totalUsers.toLocaleString(), icon: <Users className="text-[#ff00ff]" />, blur: 'bg-[#ff00ff]/10 border-[#ff00ff]/20' }
                 ].map((stat, i) => (
                     <motion.div 

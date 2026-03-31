@@ -156,7 +156,7 @@ export default function AdminCredits() {
                                 {[
                                     { t: 'User ID Retrieval', d: 'Retrieve the Operative ID from your Supabase/Railway Auth logs.' },
                                     { t: 'Atomic Sync', d: 'Grants are synchronized across Wallets, Profiles, and Legacy User tables instantly.' },
-                                    { t: 'Manual Burn', d: 'If Trigger Burn is active, the global deflationary counter will tick up live for all users.' }
+                                    { t: 'Manual Match', d: 'If Trigger Burn is active, the $GASPai matching counter will tick up live for all users.' }
                                 ].map((item, idx) => (
                                     <li key={idx} className="space-y-2">
                                         <h4 className="text-[10px] font-black tracking-widest text-white/50">{item.t}</h4>

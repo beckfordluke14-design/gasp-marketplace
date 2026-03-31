@@ -15,11 +15,11 @@ export default function ProtocolOverview() {
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    // 📡 FETCH LIVE BURN & POINT DATA
+    // 📡 FETCH LIVE REVENUE & POINT DATA
     const fetchProtocolStats = async () => {
-        if (!user?.id) return;
         try {
-            const res = await fetch(`/api/user/points?userId=${user.id}`);
+            const url = user?.id ? `/api/user/points?userId=${user.id}` : `/api/user/points`;
+            const res = await fetch(url);
             const data = await res.json();
             if (data.success) {
                 setStats(data.data);
@@ -57,11 +57,11 @@ export default function ProtocolOverview() {
                         <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#00f0ff]">Syndicate Intelligence Consensus 🛡️</span>
                     </div>
                     <h1 className="text-4xl md:text-7xl font-syncopate font-black italic tracking-tighter uppercase leading-none">
-                        GASPai <span className="text-[#ffea00]">PROTOCOL</span>
+                        $GASPai <span className="text-[#ffea00]">PROTOCOL</span>
                     </h1>
                     <p className="text-white/40 max-w-xl text-xs md:text-sm font-outfit uppercase tracking-widest font-black leading-relaxed">
-                        The world’s first deflationary intelligence network. 
-                        Fueling the sovereign weather board through direct utility contraction.
+                        The world’s first collaborative intelligence network. 
+                        Fueling the sovereign weather board through direct utility matching.
                     </p>
                 </div>
 
@@ -70,10 +70,10 @@ export default function ProtocolOverview() {
                     {/* LIVE BURN COUNTER */}
                     <div className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 flex items-center gap-6 shadow-[0_0_50px_rgba(255,234,0,0.05)] flex-1 min-w-[240px]">
                         <div className="w-12 h-12 rounded-full bg-[#ffea00]/10 border border-[#ffea00]/20 flex items-center justify-center">
-                            <Flame size={24} className="text-[#ffea00] animate-pulse" />
+                            <Activity size={24} className="text-[#ffea00] animate-pulse" />
                         </div>
                         <div>
-                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-[#ffea00]">Global Shadow Burn</p>
+                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-[#ffea00]">Global Revenue Pulse</p>
                             <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter">
                                 {displayBurn.toLocaleString()} <span className="text-sm text-white/20">CR</span>
                             </h3>
@@ -83,17 +83,17 @@ export default function ProtocolOverview() {
                     {/* SOVEREIGN SUPPLY MONITOR */}
                     <div className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 flex items-center gap-6 shadow-[0_0_50px_rgba(0,240,255,0.05)] flex-1 min-w-[240px]">
                         <div className="w-12 h-12 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20 flex items-center justify-center">
-                            <Activity size={24} className="text-[#00f0ff] animate-pulse" />
+                            <Zap size={24} className="text-[#00f0ff] animate-pulse" />
                         </div>
                         <div>
-                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">Sovereign Supply</p>
+                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">Total $GASPai Supply</p>
                             <h3 className="text-xl md:text-3xl font-syncopate font-black italic tracking-tighter">
-                                {(1000000000 - displayBurn).toLocaleString()} <span className="text-xs text-white/20">$GASP</span>
+                                {(1000000000).toLocaleString()} <span className="text-xs text-white/20">$GASPai</span>
                             </h3>
                             <div className="flex items-center gap-2 mt-1">
                                 <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
                                 <span className="text-[8px] font-black uppercase text-white/30 tracking-widest italic">
-                                    Scarcity: {((displayBurn / 1000000000) * 100).toFixed(6)}%
+                                    Network Capacity: 100%
                                 </span>
                             </div>
                         </div>
@@ -104,9 +104,9 @@ export default function ProtocolOverview() {
             {/* 🧬 THE 3-PHASE EVOLUTION (RESPONSIVE GRID) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 {[
-                    { phase: 'Phase 1', title: 'Double Allocation', desc: 'Secure 1:1 GASP Points (Equity) for every credit purchased. You keep 100% of your terminal utility while securing your primary 2026 TGE allocation.', icon: Zap, color: '#00f0ff', label: '1:1 Match Active' },
-                    { phase: 'Phase 2', title: 'Commit', desc: 'Revenue-triggered deflation. Every dollar of purchase instantly commits a matching credit volume to the Shadow Burn protocol.', icon: Fuel, color: '#ffea00', label: 'Shadow Burn Live' },
-                    { phase: 'Phase 3', title: 'Govern', desc: 'At TGE, GASP Points convert 1:1 to GASPai Tokens. Hold for voting power on the Weather Alpha Board.', icon: LayoutGrid, color: '#ff00ff', label: 'Launch 2026' }
+                    { phase: 'Phase 1', title: 'Double Allocation', desc: 'Secure 1:1 $GASPai Points (Equity) for every credit purchased. You keep 100% of your terminal utility while securing your primary 2026 TGE allocation.', icon: Zap, color: '#00f0ff', label: '1:1 Match Active' },
+                    { phase: 'Phase 2', title: 'Commit', desc: 'Revenue-triggered matching. Every dollar of purchase instantly commits a matching credit volume to the Strategic Pulse protocol.', icon: Fuel, color: '#ffea00', label: 'Revenue Pulse Live' },
+                    { phase: 'Phase 3', title: 'Govern', desc: 'At TGE, $GASPai Points convert 1:1 to $GASPai Tokens. Hold for voting power on the Weather Alpha Board.', icon: LayoutGrid, color: '#ff00ff', label: 'Launch 2026' }
                 ].map((p, idx) => (
                     <motion.div 
                         key={idx}
@@ -136,14 +136,14 @@ export default function ProtocolOverview() {
                             <h2 className="text-3xl font-syncopate font-black italic tracking-tighter uppercase">Your Protocol <span className="text-[#00f0ff]">Weight</span></h2>
                         </div>
                         <div className="flex flex-wrap justify-center md:justify-start gap-12">
-                             <div className="space-y-2">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-white/30">GASP Points (Match)</p>
+                              <div className="space-y-2">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-white/30">$GASPai Points (Match)</p>
                                 <h4 className="text-3xl md:text-5xl font-syncopate font-black italic tracking-tighter text-[#00f0ff]">
                                     {(stats?.balance || 0).toLocaleString()} <span className="text-xs text-white/20">PTS</span>
                                 </h4>
                              </div>
                              <div className="space-y-2">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Total Burn Contribution</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Total Pulse Contribution</p>
                                 <h4 className="text-3xl md:text-5xl font-syncopate font-black italic tracking-tighter text-[#ffea00]">
                                     {(stats?.totalSpent || 0).toLocaleString()} <span className="text-xs text-white/20">CR</span>
                                 </h4>
@@ -171,8 +171,8 @@ export default function ProtocolOverview() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
                         { step: '01', title: 'Capital Entry', desc: 'Secure institutional credits via Stripe or Helio (Crypto). Every dollar of revenue is the primary protocol trigger.', icon: Fuel },
-                        { step: '02', title: 'Global Match', desc: '100% of purchase volume is matched with GASP Points (Sovereign Governance Weight) instantly.', icon: Zap },
-                        { step: '03', title: 'Burn Committal', desc: 'Matching volume is committed to the Shadow Burn protocol—permanently reducing the future TGE circulating supply.', icon: Flame }
+                        { step: '02', title: 'Global Match', desc: '100% of purchase volume is matched with $GASPai Points (Sovereign Governance Weight) instantly.', icon: Zap },
+                        { step: '03', title: 'Pulse Committal', desc: 'Matching volume is committed to the Strategic Revenue protocol—strengthening the future TGE market depth.', icon: Activity }
                     ].map((m, idx) => (
                         <div key={idx} className="p-8 border border-white/5 rounded-3xl bg-white/5 space-y-4">
                             <span className="text-[10px] font-black text-white/20 tracking-widest uppercase">{m.step} // Settlement</span>

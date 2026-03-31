@@ -36,9 +36,9 @@ export default function CustomerGuide() {
             color: 'border-red-500/20 bg-red-500/5'
         },
         {
-            title: 'GASP Match Protocol',
+            title: '$GASPai Match Protocol',
             icon: <Zap size={24} className="text-[#ff9d00]" />,
-            description: 'Every credit spent is matched 1:1 with GASP Points. These rewards track your contribution to the system and grant future access.',
+            description: 'Every credit spent is matched 1:1 with $GASPai. These rewards track your contribution to the system and grant future access.',
             color: 'border-[#ff9d00]/20 bg-[#ff9d00]/5'
         }
     ];
@@ -112,7 +112,7 @@ export default function CustomerGuide() {
                         <Activity size={24} className="text-[#ff00ff]" />
                         <h4 className="text-sm font-syncopate font-black uppercase italic italic">The Revenue Pulse</h4>
                         <p className="text-[10px] text-white/30 uppercase tracking-widest leading-relaxed italic">
-                            The platform tracks Cumulative Match Volume. No tokens are burned—simply matched 1:1 into your governance layer.
+                            The platform tracks Cumulative Match Volume. No tokens are burned—simply matched 1:1 into your $GASPai governance layer.
                         </p>
                     </div>
                     <div className="p-8 bg-white/[0.03] border border-white/10 rounded-[2rem] space-y-4">
@@ -138,8 +138,8 @@ export default function CustomerGuide() {
                                 a: "Credits are the native fuel of the platform. Use them to unlock 'Vault' content, initiate high-fidelity chats, and access exclusive broadcasts from your followed personas."
                             },
                             {
-                                q: "How do I earn GASP Points?",
-                                a: "Every single credit you spend on the platform is matched 1:1 with GASP Points. These are awarded automatically to your profile as a reward for contributing to the system's growth."
+                                q: "How do I earn $GASPai?",
+                                a: "Every single credit you spend on the platform is matched 1:1 with $GASPai. These are awarded automatically to your profile as a reward for contributing to the system's growth."
                             },
                             {
                                 q: "Is my identity and data secure?",
