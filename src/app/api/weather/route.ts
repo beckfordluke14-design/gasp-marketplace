@@ -9,26 +9,25 @@ const CITY_TO_ICAO: Record<string, string> = {
     "BUENOS AIRES": "SAEZ", "ANKARA": "LTAC", "ISTANBUL": "LTFM", "RIYADH": "OERK"
 };
 
-// 🛡️ CLOB PRICE SNIPER: Resolve real-time midpoint from Polymarket Orderbook
+// 🛡️ INDESTRUCTIBLE CLOB SNIPER
 async function fetchClobPrices(tokenIds: string[]): Promise<Record<string, number>> {
     if (!tokenIds.length) return {};
     try {
-        const query = tokenIds.join(',');
+        const query = [...new Set(tokenIds)].join(',');
         const res = await fetch(`https://clob.polymarket.com/prices?token_ids=${query}`, {
-            next: { revalidate: 15 } // High-frequency revalidation
+            next: { revalidate: 10 } 
         });
         const data = await res.json();
         const priceMap: Record<string, number> = {};
-        
-        // Clob API returns map of tokenId -> price string
         if (data && typeof data === 'object') {
             Object.entries(data).forEach(([tid, price]) => {
-               priceMap[tid] = parseFloat(String(price));
+               const p = parseFloat(String(price));
+               if (!isNaN(p)) priceMap[tid] = p;
             });
         }
         return priceMap;
     } catch (e) {
-        console.error('CLOB Fetch Fail:', e);
+        console.error('CLOB Fatal:', e);
         return {};
     }
 }
@@ -50,7 +49,12 @@ async function resolveIcao(city: string, description: string): Promise<string | 
 }
 
 function isToday(title: string) {
-    return /March\s+31/i.test(title);
+    const d = new Date();
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const month = months[d.getMonth()];
+    const day = d.getDate();
+    const regex = new RegExp(`${month}\\s+${day}`, 'i');
+    return regex.test(title) || title.toLowerCase().includes('today');
 }
 
 function seedShuffle(array: any[], seed: number) {
@@ -76,8 +80,8 @@ function checkBucketMatch(temp: number, bucketTitle: string) {
     if (!numMatches) return false;
     const nums = numMatches.map(n => parseInt(n, 10));
     const t = bucketTitle.toLowerCase();
-    if (t.includes('higher') || t.includes('above')) return temp >= nums[0];
-    if (t.includes('lower') || t.includes('below')) return temp <= nums[0];
+    if (t.includes('higher') || t.includes('above') || t.includes('more')) return temp >= nums[0];
+    if (t.includes('lower') || t.includes('below') || t.includes('under')) return temp <= nums[0];
     if (nums.length === 2) return temp >= nums[0] && temp <= nums[1];
     return temp === nums[0];
 }
@@ -94,40 +98,53 @@ export async function GET(request: Request) {
             unlocks.forEach(r => unlockedIds.add(r.event_id));
         }
 
-        // 🛰️ FETCH METADATA
         const tagRes = await fetch(`https://gamma-api.polymarket.com/events?limit=40&active=true&closed=false&tag_slug=weather`, {
             headers: { 'Accept': 'application/json' },
             next: { revalidate: 60 }
         });
         if (!tagRes.ok) return NextResponse.json([]);
-        const weatherNodes = (await tagRes.json()).filter((e: any) => {
+        const rawEvents = await tagRes.json();
+        
+        const weatherNodes = rawEvents.filter((e: any) => {
             const t = (e.title || '').toLowerCase();
-            return /\b(temperature|hottest|degrees)\b/.test(t) && isToday(t);
+            return /\b(temperature|hottest|degrees|highest)\b/.test(t) && isToday(t);
         });
 
-        // 🧬 COLLECT ALL TOKEN IDs FOR CLOB BATCH FETCH
+        // 🧠 DEEP TOKEN SCAN: Handle both string and array formats
         const allTokenIds: string[] = [];
         weatherNodes.forEach((e: any) => {
             e.markets?.forEach((m: any) => {
-                const yesTokenIds = JSON.parse(m.clobTokenIds || '[]');
-                if (yesTokenIds[0]) allTokenIds.push(yesTokenIds[0]);
+                try {
+                    let tids = [];
+                    if (typeof m.clobTokenIds === 'string') tids = JSON.parse(m.clobTokenIds);
+                    else if (Array.isArray(m.clobTokenIds)) tids = m.clobTokenIds;
+                    if (tids && tids[0]) allTokenIds.push(tids[0]);
+                } catch(err) {}
             });
         });
 
-        // ⚡ FETCH REAL CLOB PRICES
         const liveClobPrices = await fetchClobPrices(allTokenIds);
 
         const enriched = await Promise.all(weatherNodes.map(async (e: any) => {
             let recommendedBucket = null, currentTempStr = null, recommendedPrice = null, recommendedPriceStr = null, roiPct = 0;
             let fallbackPrice = 0, fallbackPriceStr = "0.0";
             
-            // 🔎 FIND CLOB FALLBACK (Highest Prob in Node)
             if (e.markets) {
                 let maxP = -1;
                 e.markets.forEach((m: any) => {
-                    const tokenIds = JSON.parse(m.clobTokenIds || '[]');
-                    const p = liveClobPrices[tokenIds[0]] || 0;
-                    if (p > maxP) { maxP = p; fallbackPrice = p; fallbackPriceStr = (p * 100).toFixed(1); }
+                    try {
+                        let tids = [];
+                        if (typeof m.clobTokenIds === 'string') tids = JSON.parse(m.clobTokenIds);
+                        else if (Array.isArray(m.clobTokenIds)) tids = m.clobTokenIds;
+                        
+                        // CLOB First, Gamma Second
+                        const p = liveClobPrices[tids[0]] || parseFloat(m.outcomePrices?.[0] || '0');
+                        if (p > maxP && p > 0) { 
+                            maxP = p; 
+                            fallbackPrice = p; 
+                            fallbackPriceStr = (p * 100).toFixed(1); 
+                        }
+                    } catch(err) {}
                 });
             }
 
@@ -147,10 +164,15 @@ export async function GET(request: Request) {
                             const bucketName = m.groupItemTitle || m.question || '';
                             if (checkBucketMatch(activeTemp, bucketName)) {
                                 recommendedBucket = bucketName;
-                                const tokenIds = JSON.parse(m.clobTokenIds || '[]');
-                                recommendedPrice = liveClobPrices[tokenIds[0]] || 0;
-                                recommendedPriceStr = (recommendedPrice * 100).toFixed(1);
-                                if (recommendedPrice > 0 && recommendedPrice < 1) roiPct = Math.round(((1 - recommendedPrice) / recommendedPrice) * 100);
+                                try {
+                                    let tids = [];
+                                    if (typeof m.clobTokenIds === 'string') tids = JSON.parse(m.clobTokenIds || '[]');
+                                    else if (Array.isArray(m.clobTokenIds)) tids = m.clobTokenIds;
+                                    
+                                    recommendedPrice = liveClobPrices[tids[0]] || parseFloat(m.outcomePrices?.[0] || '0');
+                                    recommendedPriceStr = (recommendedPrice * 100).toFixed(1);
+                                    if (recommendedPrice > 0 && recommendedPrice < 1) roiPct = Math.round(((1 - recommendedPrice) / recommendedPrice) * 100);
+                                } catch(err) {}
                                 break;
                             }
                         }
@@ -165,13 +187,12 @@ export async function GET(request: Request) {
             };
         }));
 
-        const filteredEnriched = enriched.filter((n, i) => (i < 2 || n.isUnlockedByDB || (n.recommendedBucket && n.roiPct >= 5)));
         const hourSeed = Math.floor(Date.now() / (1000 * 60 * 60));
-        const finalResults = seedShuffle([...filteredEnriched], hourSeed); 
+        const finalResults = seedShuffle(enriched.filter(n => n.fallbackPrice > 0), hourSeed);
 
         return NextResponse.json(finalResults.slice(0, limit));
     } catch (error) {
-        console.error('CLOB Logic Failure:', error);
+        console.error('Final Logic Failure:', error);
         return NextResponse.json([]);
     }
 }
