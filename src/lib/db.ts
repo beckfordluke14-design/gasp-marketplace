@@ -26,4 +26,32 @@ export const db = {
   query: (text: string, params?: any[]) => pool.query(text, params),
 };
 
+/**
+ * 🔥 AUTOMATED SHADOW BURN & GASP POINTS MATCHING
+ * Mission: Execute the 1:1 match and update global deflationary stats.
+ */
+export async function recordShadowBurn(userId: string, credits: number) {
+    const pointsMatched = credits; // 1:1 Matching Logic
+    try {
+        await db.query(`
+            INSERT INTO syndicate_points (user_id, points, total_spent_credits)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (user_id) DO UPDATE SET 
+                points = syndicate_points.points + $2,
+                total_spent_credits = syndicate_points.total_spent_credits + $3,
+                last_updated = NOW()
+        `, [userId, pointsMatched, credits]);
+
+        await db.query(`
+            UPDATE global_burn_stats 
+            SET total_burned_credits = total_burned_credits + $1,
+                total_points_issued = total_points_issued + $2
+            WHERE id = 1
+        `, [credits, pointsMatched]);
+    } catch (e) {
+        console.error('Shadow Burn Logic Failure:', e);
+    }
+}
+
+
 export default db;

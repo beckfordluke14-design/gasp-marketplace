@@ -18,7 +18,8 @@ import {
   LogOut,
   Heart,
   Sparkles,
-  Star
+  Star,
+  Flame
 } from 'lucide-react';
 import { useUser } from '@/components/providers/UserProvider';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
@@ -101,6 +102,32 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
   }, [profile]);
 
   const [shuffledOthers, setShuffledOthers] = useState<any[]>([]);
+  const [pointsStats, setPointsStats] = useState({ balance: 0, totalSpent: 0 });
+
+  // 🛰️ SYNDICATE POINTS SYNC: Fetch matching rewards in real-time
+  const fetchPoints = async () => {
+    const gid = profile?.id || localStorage.getItem('gasp_guest_id');
+    if (!gid) return;
+    try {
+      const res = await fetch(`/api/user/points?userId=${gid}`);
+      const data = await res.json();
+      if (data.success) {
+        setPointsStats(data.data);
+      }
+    } catch (e) {
+      console.error('[Sidebar] Points Sync Error:', e);
+    }
+  };
+
+  useEffect(() => {
+    fetchPoints();
+    const interval = setInterval(fetchPoints, 30000); // Sync every 30s
+    window.addEventListener('gasp_points_update', fetchPoints);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('gasp_points_update', fetchPoints);
+    };
+  }, [profile?.id]);
 
   useEffect(() => {
     const followedIds = following;
@@ -281,34 +308,40 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#00f0ff]/5 to-transparent pointer-events-none" />
                 <div className="flex items-center justify-between relative z-10 border-b border-white/5 pb-2">
                    <div className="flex flex-col">
-                      <span className="text-[6px] font-black uppercase tracking-[0.2em] text-white/30 italic">Wallet Balance</span>
+                      <span className="text-[6px] font-black uppercase tracking-[0.2em] text-white/30 italic">Syndicate Points</span>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                         <span className="text-[#00f0ff] font-black text-[10px] italic">⚡️</span>
+                         <span className="text-[#00f0ff] font-black text-[10px] italic animate-pulse">⚡️</span>
                          <span className="text-[10px] font-syncopate font-black italic text-white leading-none">
-                            {profile?.credit_balance?.toLocaleString() || '0'} <span className="text-[7px] text-[#00f0ff] not-italic">POWER</span>
+                            {(pointsStats?.balance || 0).toLocaleString()} <span className="text-[7px] text-[#00f0ff] not-italic">POINTS</span>
                          </span>
                       </div>
+                   </div>
+                   <div className="px-2 py-0.5 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20 text-[6px] font-black text-[#00f0ff] uppercase tracking-widest">Matched 🛡️</div>
+                </div>
+
+                <div className="relative z-10">
+                   <div className="flex justify-between items-center mb-1.5">
+                      <span className="text-[7px] font-black text-white/40 uppercase tracking-widest italic">Shadow Burn Weight</span>
+                      <span className="text-[7px] font-black text-[#ffea00] uppercase tracking-widest">{(pointsStats?.totalSpent || 0).toLocaleString()} CR</span>
+                   </div>
+                   <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min((pointsStats?.totalSpent || 0) / 10000 * 100, 100)}%` }}
+                        className="h-full bg-gradient-to-r from-[#00f0ff] to-[#ffea00]" 
+                      />
                    </div>
                 </div>
               </div>
 
-              <div className="space-y-3 relative z-10">
-                 <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                       <Zap size={14} className="text-[#00f0ff] animate-pulse" />
-                       <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff] italic">Account Tier</span>
-                    </div>
+              <div className="space-y-1 relative z-10 px-1">
+                 <div className="flex items-center gap-2 mb-1">
+                    <Flame size={12} className="text-[#ffea00]" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#ffea00] italic">Network Power</span>
                  </div>
-                 <h3 className="text-[14px] font-black uppercase italic tracking-tighter text-white" style={{ textShadow: rank.shadow }}>
-                    {rank.label}
+                 <h3 className="text-[12px] font-black uppercase italic tracking-tighter text-white">
+                    {pointsStats.balance >= 10000 ? 'Sovereign Node 💎' : pointsStats.balance >= 1000 ? 'Syndicate Overseer ⚡️' : 'Recruit Analyst 🟠'}
                  </h3>
-                 <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mt-2">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min((profile?.credit_balance || 0) / 10000 * 100, 100)}%` }}
-                      className="h-full bg-gradient-to-r from-[#00f0ff] to-[#ffea00]" 
-                    />
-                 </div>
               </div>
           </div>
 

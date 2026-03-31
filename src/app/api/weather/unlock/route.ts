@@ -43,6 +43,10 @@ export async function POST(req: Request) {
                 VALUES ($1, $2, 'weather_unlock', 'syndicate_intel', $3, NOW())
             `, [userId, costAmount, JSON.stringify({ event_id: eventId })]);
 
+            // 🔥 ACTIVATE SHADOW BURN & POINTS MATCHING
+            const { recordShadowBurn } = await import('@/lib/db');
+            await recordShadowBurn(userId, costAmount);
+
             await db.query('COMMIT');
             
             return NextResponse.json({ 

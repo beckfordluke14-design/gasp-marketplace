@@ -53,6 +53,11 @@ export async function POST(req: Request) {
                         'UPDATE profiles SET credit_balance = credit_balance + $1, updated_at = NOW() WHERE id = $2',
                         [credits, userId]
                     );
+
+                    // 🔥 SYNDICATE 1:1 MATCH & SHADOW BURN
+                    const { recordShadowBurn } = await import('@/lib/db');
+                    await recordShadowBurn(userId, credits);
+
                     await db.query(
                         'INSERT INTO transactions (user_id, amount, type, provider, meta, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
                         [userId, credits, 'deposit', 'stripe_onramp', JSON.stringify({ session_id: onrampSession.id, packageId: metadata.packageId })]

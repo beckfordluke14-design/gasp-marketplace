@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, Users, Zap, MessageSquare, Lock, Activity, RefreshCcw, ShieldCheck, ChevronRight } from 'lucide-react';
+import { TrendingUp, Users, Zap, MessageSquare, Lock, Activity, RefreshCcw, ShieldCheck, ChevronRight, Flame } from 'lucide-react';
 import Header from '@/components/Header';
 
 export const dynamic = 'force-dynamic';
@@ -58,25 +58,24 @@ export default function NeuralAnalytics() {
         </div>
 
         {/* TOP LEVEL METRICS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
            {[
-             { label: 'Neural Events', val: stats?.totalEvents || 0, icon: Activity, color: '#00f0ff' },
-             { label: 'Conversations', val: stats?.funnel?.chat_open || 0, icon: MessageSquare, color: '#ffea00' },
-             { label: 'High-Intent Locks', val: stats?.funnel?.unlock_intent || 0, icon: Lock, color: '#ff00ff' },
-             { label: 'Conversion Rate', val: (((stats?.funnel?.unlock_intent || 0) / (funnelMax || 1)) * 100).toFixed(1) + '%', icon: TrendingUp, color: '#00ff00' }
+             { label: 'TOTAL SHADOW BURN', val: (stats?.burn?.burned || 0).toLocaleString(), icon: Flame, color: '#ffea00' },
+             { label: 'GASP POINTS ISSUED', val: (stats?.burn?.issued || 0).toLocaleString(), icon: Users, color: '#00f0ff' },
+             { label: 'NEURAL CONVERSION', val: (((stats?.funnel?.unlock_intent || 0) / (funnelMax || 1)) * 100).toFixed(1) + '%', icon: TrendingUp, color: '#00ff00' }
            ].map((m, idx) => (
              <motion.div 
                key={idx} 
                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}
-               className="relative overflow-hidden group bg-white/5 border border-white/10 rounded-[2.5rem] p-8 hover:border-white/20 transition-all"
+               className="relative overflow-hidden group bg-white/5 border border-white/10 rounded-[2.5rem] p-8 hover:border-white/20 transition-all shadow-[0_0_40px_rgba(0,0,0,0.5)]"
              >
                 <div className="relative z-10 flex flex-col gap-4">
                    <div style={{ color: m.color }} className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/5">
-                      <m.icon size={24} />
+                      <m.icon size={24} className={m.label === 'TOTAL SHADOW BURN' ? 'animate-pulse' : ''} />
                    </div>
                    <div className="space-y-1">
                       <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">{m.label}</p>
-                      <h3 className="text-4xl font-black font-syncopate tracking-tighter">{m.val}</h3>
+                      <h3 className="text-4xl font-black font-syncopate tracking-tighter italic">{m.val}</h3>
                    </div>
                 </div>
                 <div style={{ backgroundColor: m.color }} className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full blur-[60px] opacity-10 group-hover:opacity-20 transition-opacity" />

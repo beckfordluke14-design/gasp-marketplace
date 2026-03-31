@@ -1,149 +1,139 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Shield, Zap, Flame, Cpu, Users, BarChart3, ArrowUpRight, Lock, Network } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Flame, ShieldCheck, Zap, Users, ChevronRight, Fuel, LayoutGrid, Activity } from 'lucide-react';
+import { useUser } from './providers/UserProvider';
 
+/**
+ * ⛽ THE SYNDICATE PROTOCOL: Intelligence-First Governance Hub
+ * Strategy: Reward users for activity, burn supply through utility, 
+ * and govern through sovereign GASPai tokens.
+ */
 export default function ProtocolOverview() {
+    const { user } = useUser();
+    const [stats, setStats] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    // 📡 FETCH LIVE BURN & POINT DATA
+    const fetchProtocolStats = async () => {
+        if (!user?.id) return;
+        try {
+            const res = await fetch(`/api/user/points?userId=${user.id}`);
+            const data = await res.json();
+            if (data.success) {
+                setStats(data.data);
+            }
+        } catch (e) {
+            console.error('[Protocol] Metrics Failure', e);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        fetchProtocolStats();
+    }, [user?.id]);
+
+    const burnContracted = stats?.globalBurn || 0;
+    
     return (
-        <div className="h-full w-full overflow-y-auto overflow-x-hidden flex flex-col pt-20 px-4 md:px-8 pb-32">
-            <header className="mb-16 text-center md:text-left">
-                <motion.div 
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center justify-center md:justify-start gap-4 mb-4"
-                >
-                    <div className="px-4 py-1.5 bg-[#ffea00]/20 text-[#ffea00] text-[10px] font-black uppercase tracking-[0.4em] rounded-full border border-[#ffea00]/30 shadow-[0_0_20px_rgba(255,234,0,0.2)]">
-                        Strategic Assets
+        <div className="flex-1 w-full bg-[#050505] p-4 md:p-12 overflow-y-auto no-scrollbar pb-32">
+            {/* 🛡️ SOVEREIGN PROTOCOL HEADER */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                        <ShieldCheck size={16} className="text-[#00f0ff]" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#00f0ff]">Syndicate Intelligence Consensus 🛡️</span>
                     </div>
-                </motion.div>
-                <h1 className="text-5xl md:text-7xl font-outfit font-black italic uppercase tracking-tighter text-white leading-none">
-                    The $GASP<span className="text-[#ffea00]">ai</span> Plan
-                </h1>
-                <p className="text-white/40 text-[10px] font-mono mt-4 uppercase tracking-[0.5em] flex items-center justify-center md:justify-start gap-2">
-                    <Network size={14} className="text-[#ffea00]" /> Intelligence Meets Real Money
-                </p>
-            </header>
-
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto w-full">
-                
-                {/* 🧬 THE BURN CORE - SIMPLE MODE */}
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="xl:col-span-2 relative p-8 md:p-12 rounded-[3rem] bg-black border border-white/5 overflow-hidden group"
-                >
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#ffea00]/5 via-transparent to-transparent" />
-                    
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-8">
-                            <div className="w-10 h-10 rounded-2xl bg-[#ffea00]/20 flex items-center justify-center text-[#ffea00] border border-[#ffea00]/30">
-                                <Flame size={20} />
-                            </div>
-                            <span className="text-xs font-black uppercase tracking-widest text-[#ffea00]">How the Coin Burns</span>
-                        </div>
-
-                        <h2 className="text-3xl md:text-6xl font-outfit font-black italic uppercase tracking-tighter mb-8 leading-tight">
-                            The Coin That <span className="text-white/40 italic">Eats Itself</span>
-                        </h2>
-
-                        {/* 📋 THE 3-STEP FOR DUMMIES */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                             <div className="flex flex-col gap-4">
-                                 <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white/20 text-xl font-black">1</div>
-                                 <p className="text-white text-sm font-black uppercase tracking-tight italic">You use the intel tools (Chat & Weather)</p>
-                             </div>
-                             <div className="flex flex-col gap-4">
-                                 <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-[#ffea00] text-xl font-black italic">2</div>
-                                 <p className="text-[#ffea00] text-sm font-black uppercase tracking-tight italic">The site takes a cut of every credit spent</p>
-                             </div>
-                             <div className="flex flex-col gap-4">
-                                 <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-green-500 text-xl font-black italic">3</div>
-                                 <p className="text-green-500 text-sm font-black uppercase tracking-tight italic">We use that cut to Buy & Burn $GASPai forever</p>
-                             </div>
-                        </div>
-
-                        <p className="text-white/60 text-base font-mono leading-relaxed mb-10 max-w-2xl">
-                            $GASPai isn't just a token. It's the "Gasoline" for the entire Syndicate. The more people use the site to make money on Weather Arbitrage, the more coins are permanently removed from the supply. Simple as that.
-                        </p>
-
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                            <div className="p-6 rounded-3xl bg-white/5 border border-white/10 text-center md:text-left">
-                                <span className="text-[8px] uppercase font-black text-white/30 tracking-widest block mb-1">Burn Action</span>
-                                <span className="text-2xl font-black text-[#ffea00]">AUTOMATIC</span>
-                            </div>
-                            <div className="p-6 rounded-3xl bg-white/5 border border-white/10 text-center md:text-left">
-                                <span className="text-[8px] uppercase font-black text-white/30 tracking-widest block mb-1">Syndicate Cut</span>
-                                <span className="text-2xl font-black text-white italic">1.0%</span>
-                            </div>
-                            <div className="hidden md:flex p-6 rounded-3xl bg-white/5 border border-white/10 items-center justify-center">
-                                <Zap size={24} className="text-[#ffea00] animate-pulse" />
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-
-                {/* 🛰️ STATUS MONITOR */}
-                <motion.div 
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="p-8 rounded-[3rem] bg-white/5 border border-white/10 flex flex-col justify-between"
-                >
-                    <div className="text-center md:text-left">
-                        <div className="flex items-center justify-between mb-10">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-white/40 italic">Launch Date</span>
-                            <div className="px-2 py-1 bg-[#ffea00]/20 text-[#ffea00] text-[8px] font-black uppercase rounded border border-[#ffea00]/30 animate-pulse">
-                                INCOMING
-                            </div>
-                        </div>
-
-                        <div className="py-10">
-                            <span className="text-[2.5rem] md:text-[3.5rem] font-black italic text-white tracking-widest leading-none">PENDING<br/><span className="text-[#ffea00]">2026</span></span>
-                            <span className="text-[10px] font-mono text-white/20 mt-6 block uppercase tracking-[0.2em]">The $GASPai Mainnet is in Staging. Be ready.</span>
-                        </div>
-                    </div>
-
-                    <button className="w-full py-4 bg-white/10 hover:bg-white text-white hover:text-black rounded-2xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-                        <BarChart3 size={14} /> Join the Waitlist
-                    </button>
-                </motion.div>
-
-                {/* 🗓️ ROADMAP */}
-                <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-                    {[
-                        { title: 'Alpha Node Launch', date: 'March 2026', status: 'Completed', icon: <Zap /> },
-                        { title: 'Arbitrage Intelligence v2', date: 'April 2026', status: 'Active', icon: <BarChart3 /> },
-                        { title: 'Neural Burn Mainnet', date: 'May/June 2026', status: 'Pending', icon: <Flame /> },
-                        { title: 'TGE: $GASPai Launch', date: 'STAGED DISPATCH', status: 'Coming Soon', icon: <Users /> }
-                    ].map((step, i) => (
-                        <div key={i} className="p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 relative overflow-hidden group">
-                            <div className={`absolute top-0 right-0 w-2 h-2 m-4 rounded-full ${step.status === 'Completed' ? 'bg-green-500' : step.status === 'Active' ? 'bg-[#ffea00] animate-pulse' : 'bg-white/10'}`} />
-                            <div className="text-white/20 mb-6 group-hover:text-white transition-colors">
-                                {step.icon}
-                            </div>
-                            <h3 className="text-lg font-black uppercase italic tracking-tighter mb-2">{step.title}</h3>
-                            <div className="flex flex-col gap-1">
-                                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">{step.date}</span>
-                                <span className={`text-[8px] font-black uppercase tracking-widest ${step.status === 'Completed' ? 'text-green-500' : step.status === 'Active' ? 'text-[#ffea00]' : 'text-white/20'}`}>
-                                    {step.status}
-                                </span>
-                            </div>
-                        </div>
-                    ))}
+                    <h1 className="text-4xl md:text-7xl font-syncopate font-black italic tracking-tighter uppercase leading-none">
+                        GASPai <span className="text-[#ffea00]">PROTOCOL</span>
+                    </h1>
+                    <p className="text-white/40 max-w-xl text-xs md:text-sm font-outfit uppercase tracking-widest font-black leading-relaxed">
+                        The world’s first deflationary intelligence network. 
+                        Fueling the sovereign weather board through direct utility contraction.
+                    </p>
                 </div>
 
-                {/* 🛡️ NJ / LEGAL AIR GAP */}
-                <div className="xl:col-span-3 mt-12 p-8 border border-white/5 rounded-3xl bg-black/40">
-                   <div className="flex items-start gap-4">
-                       <Shield size={20} className="text-white/20 shrink-0 mt-1" />
-                       <div>
-                           <h4 className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-2">Syndicate Disclaimer (Sovereign Infrastructure)</h4>
-                           <p className="text-[9px] font-mono text-white/20 leading-relaxed uppercase">
-                               The $GASPai tokens are strictly intended for network governance and infrastructure fuel purposes. Holders participate in the decentralized decision-making process of the Syndicate Neural Core. Participation in the burn protocol is a direct byproduct of network utility and does not constitute a financial security. Regional laws (NJ/USA) apply. Consult your local legal oracle before deployment.
-                           </p>
-                       </div>
-                   </div>
+                {/* LIVE BURN COUNTER - MOBILE FIRST */}
+                <div className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 flex items-center gap-6 shadow-[0_0_50px_rgba(255,234,0,0.05)]">
+                    <div className="w-12 h-12 rounded-full bg-[#ffea00]/10 border border-[#ffea00]/20 flex items-center justify-center">
+                        <Flame size={24} className="text-[#ffea00] animate-pulse" />
+                    </div>
+                    <div>
+                        <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-[#ffea00]">Global Shadow Burn</p>
+                        <h3 className="text-2xl md:text-4xl font-syncopate font-black italic tracking-tighter">
+                            {burnContracted.toLocaleString()} <span className="text-sm text-white/20">CR</span>
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            {/* 🧬 THE 3-PHASE EVOLUTION (RESPONSIVE GRID) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                {[
+                    { phase: 'Phase 1', title: 'Accumulate', desc: 'Every 1 Credit purchased unlocks 1 GASP Point. These are the governance weights for the upcoming TGE.', icon: Zap, color: '#00f0ff', label: 'Match Active' },
+                    { phase: 'Phase 2', title: 'Contract', desc: 'Site activity (Weather/Chat) triggers the Shadow Burn. This permanently reduces total circulating supply before launch.', icon: Fuel, color: '#ffea00', label: 'Shadow Burn Live' },
+                    { phase: 'Phase 3', title: 'Govern', desc: 'At TGE, GASP Points convert 1:1 to GASPai Tokens. Hold for voting power on the Weather Alpha Board.', icon: LayoutGrid, color: '#ff00ff', label: 'TGE Pending 2026' }
+                ].map((p, idx) => (
+                    <motion.div 
+                        key={idx}
+                        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}
+                        className="bg-zinc-900/40 border border-white/5 rounded-[2.5rem] p-8 hover:border-white/10 transition-all group relative overflow-hidden"
+                    >
+                        <div className="flex justify-between items-start mb-8 relative z-10">
+                            <div className="space-y-1">
+                                <span className="text-[10px] font-black uppercase text-white/20 tracking-tighter">{p.phase}</span>
+                                <h3 style={{ color: p.color }} className="text-2xl font-syncopate font-black italic tracking-tighter uppercase">{p.title}</h3>
+                            </div>
+                            <div style={{ borderColor: p.color }} className="px-3 py-1 rounded-full border border-dashed text-[8px] font-black uppercase tracking-widest text-white/60">{p.label}</div>
+                        </div>
+                        <p className="text-white/40 text-sm font-outfit leading-relaxed relative z-10 line-clamp-3">{p.desc}</p>
+                        
+                        <div style={{ backgroundColor: p.color }} className="absolute -bottom-10 -right-10 w-32 h-32 blur-[60px] opacity-10 group-hover:opacity-20 transition-opacity" />
+                    </motion.div>
+                ))}
+            </div>
+
+            {/* 🐋 YOUR SYNDICATE STANDING */}
+            <div className="bg-gradient-to-br from-white/5 to-transparent border border-white/10 rounded-[3rem] p-8 md:p-12 overflow-hidden relative group">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                    <div className="space-y-6 text-center md:text-left">
+                        <div className="flex items-center justify-center md:justify-start gap-4">
+                            <Activity size={24} className="text-[#00f0ff]" />
+                            <h2 className="text-3xl font-syncopate font-black italic tracking-tighter uppercase">Your Protocol <span className="text-[#00f0ff]">Weight</span></h2>
+                        </div>
+                        <div className="flex flex-wrap justify-center md:justify-start gap-12">
+                             <div className="space-y-2">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-white/30">GASP Points (Match)</p>
+                                <h4 className="text-3xl md:text-5xl font-syncopate font-black italic tracking-tighter text-[#00f0ff]">
+                                    {(stats?.balance || 0).toLocaleString()} <span className="text-xs text-white/20">PTS</span>
+                                </h4>
+                             </div>
+                             <div className="space-y-2">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Total Burn Contribution</p>
+                                <h4 className="text-3xl md:text-5xl font-syncopate font-black italic tracking-tighter text-[#ffea00]">
+                                    {(stats?.totalSpent || 0).toLocaleString()} <span className="text-xs text-white/20">CR</span>
+                                </h4>
+                             </div>
+                        </div>
+                    </div>
+
+                    <a href="/?tab=weather" className="px-10 py-5 bg-white text-black rounded-3xl text-[12px] font-black uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-2xl flex items-center gap-4">
+                        Grow Your Weight <ChevronRight size={18} />
+                    </a>
                 </div>
 
+                <div className="absolute top-0 right-0 w-full h-full pointer-events-none opacity-20 group-hover:opacity-30 transition-opacity">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#00f0ff]/10 blur-[120px] rounded-full" />
+                </div>
+            </div>
+
+            {/* 🛡️ THE MISSION DISCLAMER: NO SCAM NARRATIVE */}
+            <div className="mt-12 p-8 border border-white/5 rounded-3xl bg-black/40 backdrop-blur-xl">
+                 <p className="text-[9px] font-outfit uppercase tracking-[0.1em] text-white/20 text-center leading-relaxed max-w-4xl mx-auto">
+                    $GASPai is an Intelligence Governance Token. GASP Points represent user loyalty and participation in the Syndicate network protocol. 
+                    Tokens are not investments. All deflationary burns are functions of site utility consumption. Participation is subject to the Syndicate Terms of Service and local regulatory compliance.
+                 </p>
             </div>
         </div>
     );

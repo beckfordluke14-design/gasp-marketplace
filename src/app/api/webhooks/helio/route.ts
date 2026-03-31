@@ -64,6 +64,10 @@ export async function POST(req: Request) {
             `, [pkg.priceUsd, totalDeposit, userId]);
             // 3. Update Public User Table (Legacy Sync)
             await db.query('UPDATE users SET credit_balance = credit_balance + $1 WHERE id = $2', [totalDeposit, userId]);
+            
+            // 🔥 SYNDICATE 1:1 MATCH & SHADOW BURN
+            const { recordShadowBurn } = await import('@/lib/db');
+            await recordShadowBurn(userId, totalDeposit);
 
             // 4. Record Transaction & Audit Ledger
             await db.query(`

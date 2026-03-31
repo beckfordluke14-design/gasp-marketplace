@@ -43,12 +43,20 @@ export async function GET() {
             .slice(0, 5)
             .map(([id, count]) => ({ id, count }));
 
+        // 4. 🔥 SYNDICATE SHADOW BURN (DAO CORE)
+        const { rows: burnStats } = await db.query('SELECT * FROM global_burn_stats WHERE id = 1 LIMIT 1');
+        const burn = burnStats[0] || { total_burned_credits: 0, total_points_issued: 0 };
+
         return NextResponse.json({
             success: true,
             stats: {
                 totalEvents,
                 funnel,
                 leaders: sortedLeaders,
+                burn: {
+                    burned: parseInt(burn.total_burned_credits),
+                    issued: parseInt(burn.total_points_issued)
+                },
                 lastUpdated: now.toISOString()
             }
         });
