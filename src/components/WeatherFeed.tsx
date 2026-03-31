@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Unlock, Eye, RefreshCcw, Activity, AlertTriangle, Clock } from 'lucide-react';
+import { Lock, Unlock, Eye, RefreshCcw, Activity, AlertTriangle, Clock, Loader2 } from 'lucide-react';
+import { useUser } from '@/components/providers/UserProvider';
 
 interface PolymarketEvent {
     id: string;
@@ -18,12 +19,15 @@ interface PolymarketEvent {
     currentTempStr?: string;
     recommendedPrice?: number;
     recommendedPriceStr?: string;
+    isUnlockedByDB?: boolean;
+    roiPct?: number;
 }
 
 export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }) {
+    const { profile, refreshProfile } = useUser();
     const [buckets, setBuckets] = useState<PolymarketEvent[]>([]);
-    const [unlockedBuckets, setUnlockedBuckets] = useState<Set<string>>(new Set());
     const [isFetching, setIsFetching] = useState(true);
+    const [isPurchasing, setIsPurchasing] = useState<string | null>(null);
     
     // Track previous prices to show red/green flash on live fluctuation
     const prevPricesRef = useRef<Record<string, number>>({});
@@ -32,7 +36,7 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
     const fetchMarkets = async () => {
         try {
             // Fetch live polymarket active events via proxy
-            const res = await fetch('/api/weather?limit=12&active=true&closed=false');
+            const res = await fetch(`/api/weather?limit=20&userId=${profile?.id || ''}`);
             if (!res.ok) return;
             const data = await res.json();
             
@@ -59,7 +63,9 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                     recommendedBucket: ev.recommendedBucket,
                     currentTempStr: ev.currentTempStr,
                     recommendedPrice: ev.recommendedPrice,
-                    recommendedPriceStr: ev.recommendedPriceStr
+                    recommendedPriceStr: ev.recommendedPriceStr,
+                    isUnlockedByDB: ev.isUnlockedByDB,
+                    roiPct: ev.roiPct
                 });
             });
             
@@ -98,9 +104,43 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
         return () => clearInterval(interval);
     }, []);
 
-    const handleUnlock = (b: PolymarketEvent) => {
-        if (b.isFree || unlockedBuckets.has(b.id)) return;
-        onOpenTopUp();
+    const handleUnlock = async (b: PolymarketEvent) => {
+        if (b.isFree || b.isUnlockedByDB) return;
+        
+        if (!profile) {
+            onOpenTopUp(); // Fallback to login/topup
+            return;
+        }
+
+        if ((profile?.credit_balance || 0) < b.unlockCost) {
+            onOpenTopUp();
+            return;
+        }
+
+        try {
+            setIsPurchasing(b.id);
+            const res = await fetch('/api/weather/unlock', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: profile.id,
+                    eventId: b.id,
+                    cost: b.unlockCost
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                await refreshProfile();
+                await fetchMarkets(); // Refresh UI to show unlocked state
+            } else {
+                alert(data.error || 'Identity Sync Failed');
+            }
+        } catch (e) {
+            console.error('Unlock error', e);
+        } finally {
+            setIsPurchasing(null);
+        }
     };
 
     return (
@@ -132,21 +172,23 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative">
                 {buckets.map((bucket, i) => {
-                    const isAccessible = bucket.isFree || unlockedBuckets.has(bucket.id);
+                    const isAccessible = bucket.isFree || bucket.isUnlockedByDB;
                     const flash = priceFlashes[bucket.id];
                     const priceFormatted = (bucket.price * 100).toFixed(1);
 
-                    let expiringString = '';
+                    let expiringString = 'RESOLVES TODAY';
                     if (bucket.endDate) {
                         const date = new Date(bucket.endDate);
-                        if (date.getTime() < Date.now()) {
-                            expiringString = 'ALREADY ENDED';
-                        } else {
+                        if (date.getTime() > Date.now() + 86400000) {
                             expiringString = `ENDS: ${date.toLocaleDateString()}`;
+                        } else {
+                            expiringString = 'RESOLVES TODAY';
                         }
-                    } else {
-                        expiringString = 'LIVE ONGOING';
                     }
+
+                    const displayPrice = bucket.recommendedPrice !== undefined && bucket.recommendedPrice !== null 
+                        ? (bucket.recommendedPrice * 100).toFixed(1) 
+                        : (bucket.price * 100).toFixed(1);
 
                     return (
                         <motion.div
@@ -179,16 +221,34 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                                  )}
                                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
                                  <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10" />
-                                 
-                                 {!isAccessible && (
-                                     <div className="absolute inset-0 backdrop-blur-3xl bg-black/40 flex flex-col items-center justify-center z-30 transition-all duration-500 group-hover:bg-black/20">
-                                        <Lock size={36} className="text-white/20 mb-3 drop-shadow-2xl" />
-                                        <button 
-                                            onClick={() => handleUnlock(bucket)}
-                                            className="px-6 py-2.5 bg-white/10 hover:bg-[#00f0ff]/20 border border-white/20 hover:border-[#00f0ff]/50 rounded-full flex items-center gap-2 text-[10px] uppercase font-black tracking-widest transition-all text-white hover:text-[#00f0ff] shadow-2xl"
-                                        >
-                                            <Unlock size={14} /> Decode ({bucket.unlockCost} CR)
-                                        </button>
+                                                                  {!isAccessible && (
+                                     <div className="absolute inset-0 backdrop-blur-3xl bg-black/40 flex flex-col items-center justify-center z-30 transition-all duration-500 group-hover:bg-black/20 pb-4">
+                                         
+                                         {bucket.roiPct !== undefined && bucket.roiPct > 0 && (
+                                             <div className="mb-6 flex flex-col items-center">
+                                                 <span className="text-[7px] uppercase font-mono tracking-widest text-[#00f0ff]/60 mb-1">Classified Signal Strength</span>
+                                                 <span className="text-2xl font-black italic tracking-tighter text-[#00f0ff] animate-pulse drop-shadow-[0_0_10px_#00f0ff]">
+                                                     +{bucket.roiPct}% ROI TARGET
+                                                 </span>
+                                             </div>
+                                         )}
+
+                                         <Lock size={36} className="text-white/20 mb-3 drop-shadow-2xl" />
+                                         <button 
+                                             onClick={() => handleUnlock(bucket)}
+                                             disabled={isPurchasing !== null}
+                                             className="px-6 py-2.5 bg-white/10 hover:bg-[#00f0ff]/20 border border-white/20 hover:border-[#00f0ff]/50 rounded-full flex items-center gap-2 text-[10px] uppercase font-black tracking-widest transition-all text-white hover:text-[#00f0ff] shadow-2xl relative overflow-hidden"
+                                         >
+                                             {isPurchasing === bucket.id ? (
+                                                 <Loader2 size={14} className="animate-spin" />
+                                             ) : (
+                                                 <Unlock size={14} />
+                                             )}
+                                             <span>DECODE NODE ({bucket.unlockCost} CR)</span>
+                                             
+                                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                                         </button>
+                                         <span className="text-[7px] text-white/30 uppercase tracking-[0.2em] font-mono mt-3">24H Intelligence Protocol Access</span>
                                      </div>
                                  )}
                             </div>
@@ -196,7 +256,7 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                             {/* Content Details */}
                             <div className="p-6 md:p-8 flex-1 flex flex-col justify-between relative z-20 bg-black/80 backdrop-blur-xl">
                                 
-                                <div className={`text-[9px] uppercase font-mono tracking-widest font-black mb-3 flex items-center gap-2 ${expiringString === 'ALREADY ENDED' ? 'text-red-500' : 'text-[#ffea00]'}`}>
+                                <div className={`text-[9px] uppercase font-mono tracking-widest font-black mb-3 flex items-center gap-2 ${expiringString === 'RESOLVES TODAY' ? 'text-[#00f0ff]' : 'text-[#ffea00]'}`}>
                                     <Clock size={10} /> {expiringString}
                                 </div>
 
@@ -210,7 +270,7 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                                             <span className="text-[9px] uppercase font-mono tracking-widest text-white/40 mb-1">Live Probability</span>
                                             <div className="flex items-center gap-2">
                                                 <span className={`text-4xl font-outfit font-black italic tracking-tighter transition-colors duration-300 ${isAccessible ? flash === 'up' ? 'text-green-400 drop-shadow-[0_0_15px_rgba(0,255,0,0.5)]' : flash === 'down' ? 'text-red-400 drop-shadow-[0_0_15px_rgba(255,0,0,0.5)]' : 'text-white' : 'text-white/10'}`}>
-                                                    {isAccessible ? priceFormatted : 'XX.X'}
+                                                    {isAccessible ? displayPrice : 'XX.X'}
                                                 </span>
                                                 <span className={`text-xl font-outfit font-black italic opacity-50 ${isAccessible ? 'text-white' : 'text-white/10'}`}>¢</span>
                                             </div>
@@ -235,11 +295,11 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                                                       </span>
                                                   </div>
                                                   
-                                                  {bucket.recommendedPrice && bucket.recommendedPrice > 0 && bucket.recommendedPrice < 1 && (
+                                                  {bucket.roiPct !== undefined && bucket.roiPct > 0 && (
                                                       <div className="flex flex-col items-end">
                                                           <span className="text-[7px] uppercase font-mono tracking-widest text-green-400/50">Upside Margin</span>
                                                           <span className="text-[11px] font-black italic tracking-tighter text-[#00f0ff] drop-shadow-[0_0_8px_rgba(0,240,255,0.6)]">
-                                                              +{((1 - bucket.recommendedPrice) / bucket.recommendedPrice * 100).toFixed(0)}% ROI
+                                                              +{bucket.roiPct}% ROI
                                                           </span>
                                                       </div>
                                                   )}
