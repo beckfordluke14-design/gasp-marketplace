@@ -48,13 +48,12 @@ export async function GET(request: Request) {
             }
         });
 
-        // Filter: We want genuine Weather (from tag) OR Temperature events
+        // Filter: We want ONLY Temperature events based strictly on TITLE
         const weatherNodes = Array.from(uniqueEvents.values()).filter(e => {
             const t = (e.title || '').toLowerCase();
-            const isTemp = t.includes('temperature') || t.includes('weather') || t.includes('snow') || t.includes('rain') || t.includes('hurricane') || t.includes('flood') || t.includes('volcano');
-            const hasTag = e.tags && e.tags.some((tag: any) => tag.slug === 'weather' || tag.slug === 'climate');
-            
-            return (isTemp || hasTag) && !t.includes('coin') && !t.includes('solana') && !t.includes('bitcoin');
+            // Use regex boundaries for strictly temperature-related markets
+            const isTemp = /\b(temperature|hottest|degrees)\b/.test(t);
+            return isTemp && !/\b(coin|solana|bitcoin|crypto|eth|token)\b/.test(t);
         });
 
         // Sort by trading volume so the most liquid bets show up first
