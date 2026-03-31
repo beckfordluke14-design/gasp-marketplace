@@ -157,6 +157,12 @@ function MarketplaceContent() {
       }
     }
     
+    useEffect(() => {
+       if (typeof window !== 'undefined') {
+          (window as any).onSelectProfile = handleSelectProfile;
+       }
+    }, [handleSelectProfile]);
+
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     setOpenChatIds(prev => (isMobile ? [sId] : prev.includes(sId) ? prev : [...prev, sId]));
     setMinimizedIds(prev => prev.filter(m => m !== sId));

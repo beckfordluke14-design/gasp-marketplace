@@ -384,7 +384,7 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                                         <button 
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                const shareText = `🚨 [${bucket.city?.toUpperCase()} SIGNAL]: Live ground-sensor hit ${bucket.currentTempStr || 'anomaly'}. 🌪️ Mispriced bucket detected with +${bucket.roiPct || '350'}% ROI TARGET. \n\nDECODE THE SIGNAL: ${window.location.origin}\n\n#$GASPai #Arbitrage #Polymarket #WeatherX`;
+                                                const shareText = `🚨 [${(bucket as any).city?.toUpperCase() || 'GLOBAL'} SIGNAL]: Live ground-sensor hit ${bucket.currentTempStr || 'anomaly'}. 🌪️ Mispriced bucket detected with +${bucket.roiPct || '350'}% ROI TARGET. \n\nDECODE THE SIGNAL: ${window.location.origin}\n\n#$GASPai #Arbitrage #Polymarket #WeatherX`;
                                                 const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
                                                 window.open(xUrl, '_blank');
                                             }}
@@ -405,6 +405,54 @@ export default function WeatherFeed({ onOpenTopUp }: { onOpenTopUp: () => void }
                         </motion.div>
                     );
                 })}
+            </div>
+            {/* 🧬 FEATURED PERSONAS: Promotional Discovery Hub */}
+            <div className="mt-24 space-y-10">
+                <div className="flex items-center justify-between px-2">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                            <Flame size={16} className="text-[#ff00ff]" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#ff00ff]">Featured Operatives 🧬</span>
+                        </div>
+                        <h2 className="text-3xl font-syncopate font-black italic uppercase tracking-tighter text-white">
+                            High-Heat <span className="text-[#ff00ff]">Vaults</span>
+                        </h2>
+                    </div>
+                </div>
+
+                <div className="flex gap-6 overflow-x-auto no-scrollbar pb-10 px-2 min-h-[400px]">
+                    {[
+                        { id: '3', name: 'Suki', city: 'Tokyo', vibe: 'Vault Unlocked', image: 'https://gateway.pinata.cloud/ipfs/QmZ2z8L5A9DkR8y1m7D6G8W3L4X5Y6Z7A8B9C1D2E3F4G5' },
+                        { id: '5', name: 'Elena', city: 'Miami', vibe: 'High-Heat Intel', image: 'https://gateway.pinata.cloud/ipfs/QmPz1G2H3I4J5K6L7M8N9O0P1Q2R3S4T5U6V7W8X9Y0Z' },
+                        { id: '12', name: 'Jade', city: 'London', vibe: 'Elite Archives', image: 'https://gateway.pinata.cloud/ipfs/QmT7U8V9W0X1Y2Z3A4B5C6D7E8F9G0H1I2J3K4L5M6' },
+                        { id: '8', name: 'Zara', city: 'Berlin', vibe: 'Strategic Discovery', image: 'https://gateway.pinata.cloud/ipfs/QmN1O2P3Q4R5S6T7U8V9W0X1Y2Z3A4B5C6D7E8F9G0H' },
+                        { id: '2', name: 'Mika', city: 'Seoul', vibe: 'Neural Dispatch', image: 'https://gateway.pinata.cloud/ipfs/QmJ1K2L3M4N5O6P7Q8R9S0T1U2V3W4X5Y6Z7A8B9C1' }
+                    ].map((p, idx) => (
+                        <motion.div 
+                            key={idx}
+                            whileHover={{ y: -10 }}
+                            onClick={() => (window as any).onSelectProfile?.(p.id)}
+                            className="min-w-[280px] group cursor-pointer relative"
+                        >
+                            <div className="aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-white/5 bg-zinc-900 shadow-2xl relative">
+                                <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-60" />
+                                
+                                <div className="absolute top-6 left-6 flex items-center gap-2">
+                                    <div className="px-3 py-1 bg-black/60 backdrop-blur-md border border-[#ff00ff]/30 rounded-full text-[8px] font-black uppercase text-[#ff00ff] tracking-widest italic">Vault Ready</div>
+                                </div>
+
+                                <div className="absolute bottom-10 left-10 right-10 flex flex-col gap-1">
+                                    <h4 className="text-2xl font-syncopate font-black italic uppercase tracking-tighter text-white drop-shadow-2xl">{p.name}</h4>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">{p.city}</span>
+                                        <span className="text-[10px] text-[#00f0ff] uppercase font-black tracking-widest animate-pulse">{p.vibe}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
             </div>
             {/* 🛡️ INSTITUTIONAL RISK DISCLOSURE */}
             <footer className="mt-20 p-8 border border-white/5 rounded-[2rem] bg-black/40 backdrop-blur-3xl text-center">

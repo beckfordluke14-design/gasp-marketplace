@@ -62,39 +62,42 @@ export default function Header({
                 >
                    <Menu size={18} />
                 </button>
-                <motion.h1 
-                  onClick={() => router.push('/')}
-                  initial={{ scale: 0.8, opacity: 0, filter: 'blur(10px)' }}
-                  animate={{ 
-                    scale: 0.9, 
-                    opacity: 1, 
-                    filter: 'blur(0px)',
-                    textShadow: [
-                      "0 0 0px #fff",
-                      "5px 0 10px #ff00ff",
-                      "-5px 0 10px #00f0ff",
-                      "0 0 0px #fff"
-                    ],
-                    x: [0, -2, 2, -1, 0]
-                  }}
-                  transition={{ 
-                    duration: 0.8, 
-                    ease: "easeOut",
-                    textShadow: { duration: 0.4, repeat: 1 },
-                    x: { duration: 0.2, repeat: 2 }
-                  }}
-                  className="text-xl md:text-3xl font-black uppercase tracking-tighter text-white font-outfit italic cursor-pointer group leading-none relative shadow-[0_0_30px_rgba(255,255,255,0.1)]"
-                >
-                  gasp<span className="text-[#ff00ff]">.</span>
-                   
-                   <motion.span 
-                     animate={{ opacity: [0, 0.4, 0], x: [-10, 10, -10] }}
-                     transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                     className="absolute inset-0 text-[#00f0ff] mix-blend-screen pointer-events-none select-none opacity-0"
-                   >
-                     gasp.
-                   </motion.span>
-                </motion.h1>
+                <div className="flex flex-col">
+                  <motion.h1 
+                    onClick={() => router.push('/')}
+                    initial={{ scale: 0.8, opacity: 0, filter: 'blur(10px)' }}
+                    animate={{ 
+                      scale: 0.9, 
+                      opacity: 1, 
+                      filter: 'blur(0px)',
+                      textShadow: [
+                        "0 0 0px #fff",
+                        "5px 0 10px #ff00ff",
+                        "-5px 0 10px #00f0ff",
+                        "0 0 0px #fff"
+                      ],
+                      x: [0, -2, 2, -1, 0]
+                    }}
+                    transition={{ 
+                      duration: 0.8, 
+                      ease: "easeOut",
+                      textShadow: { duration: 0.4, repeat: 1 },
+                      x: { duration: 0.2, repeat: 2 }
+                    }}
+                    className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white font-outfit italic cursor-pointer group leading-none relative shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+                  >
+                    $GASPai<span className="text-[#ff00ff]">.</span>
+                     
+                     <motion.span 
+                       animate={{ opacity: [0, 0.4, 0], x: [-10, 10, -10] }}
+                       transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                       className="absolute inset-0 text-[#00f0ff] mix-blend-screen pointer-events-none select-none opacity-0"
+                     >
+                       $GASPai.
+                     </motion.span>
+                  </motion.h1>
+                  <p className="hidden md:block text-[6px] font-black uppercase text-[#00f0ff] tracking-[0.4em] mt-0.5 animate-pulse ml-1 italic">Strategic Intelligence Node</p>
+                </div>
 
                 {/* Main Nav */}
                 <nav className="hidden xl:flex items-center gap-6">

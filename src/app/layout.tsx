@@ -10,18 +10,18 @@ const syncopate = Syncopate({ subsets: ["latin"], weight: ['400', '700'], variab
 const SITE_URL = 'https://gasp.fun';
 
 export const metadata: Metadata = {
-  title: "GASP | Strategic Intelligence Terminal",
-  description: "Managed Operations Terminal for Digital Asset Retrieval and Neural Signal Synchronization.",
+  title: "$GASPai | Strategic Intelligence Terminal",
+  description: "The world's first collaborative intelligence network. Fueling the sovereign weather board through direct utility matching and $GASPai rewards.",
   manifest: "/manifest.json",
   metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'GASP | Strategic Intelligence Terminal',
-    description: 'Managed Operations Terminal for Digital Asset Retrieval and Neural Signal Synchronization.',
+    title: '$GASPai | Strategic Intelligence Terminal',
+    description: "The world's first collaborative intelligence network. Fueling the sovereign weather board through direct utility matching and $GASPai rewards.",
     url: SITE_URL,
-    siteName: 'GASP',
+    siteName: '$GASPai',
     images: [
       {
         url: '/og-image.png',
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GASP | Strategic Intelligence Terminal',
-    description: 'Managed Operations Terminal for Digital Asset Retrieval and Neural Signal Synchronization.',
+    title: '$GASPai | Strategic Intelligence Terminal',
+    description: "The world's first collaborative intelligence network. Fueling the sovereign weather board through direct utility matching and $GASPai rewards.",
     images: ['/og-image.png'],
   },
   icons: {

@@ -19,7 +19,8 @@ import {
   Heart,
   Sparkles,
   Star,
-  Flame
+  Flame,
+  Share
 } from 'lucide-react';
 import { useUser } from '@/components/providers/UserProvider';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
@@ -357,8 +358,25 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
              </button>
           </div>
 
-          <div className="flex flex-col gap-2 pt-2 border-t border-white/5 opacity-50">
-             <span className="text-[8px] text-white/20 uppercase font-black italic text-center">Version 1.8 // Sovereign Terminal</span>
+          <div className="flex flex-col gap-3 pt-2 border-t border-white/5">
+             <button 
+                onClick={() => {
+                   navigator.clipboard.writeText('https://gasp.fun');
+                   alert('Sovereign Link Copied to Clipboard.');
+                }}
+                className="w-full flex items-center justify-center gap-2 py-2 text-[8px] font-black uppercase text-white/40 hover:text-[#00f0ff] transition-colors tracking-widest italic"
+             >
+                <Share size={10} />
+                <span>Copy Invite Link</span>
+             </button>
+             
+             <div className="flex items-center justify-center gap-4 text-[7px] font-black uppercase text-white/20 tracking-[0.2em]">
+                <Link href="/how-to" className="hover:text-white transition-colors">How-To</Link>
+                <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+                <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+             </div>
+             
+             <span className="text-[8px] text-white/10 uppercase font-black italic text-center">Version 1.8 // Sovereign Terminal</span>
           </div>
       </div>
     </aside>

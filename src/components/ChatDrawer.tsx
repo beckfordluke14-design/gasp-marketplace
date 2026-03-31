@@ -465,7 +465,7 @@ export default function ChatDrawer({
 
              <div className="flex gap-8">
                 <button onClick={() => setChatTab('chat')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'chat' ? 'text-white' : 'text-white/30'}`}>
-                   <Send size={12} className={chatTab === 'chat' ? 'rotate-[-20deg]' : ''} /> UPLINK
+                   <MessageSquare size={12} className={chatTab === 'chat' ? 'text-[#00f0ff]' : ''} /> CHAT w/ {profile?.name.split(' ')[0]}
                    {chatTab === 'chat' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
                 </button>
                 <button onClick={() => setChatTab('pics')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
@@ -481,8 +481,7 @@ export default function ChatDrawer({
               <div className="space-y-8">
                 {/* 📟 SYSTEM UPLINK: The 'Leaker' Perspective Anchor */}
                 <div className="flex flex-col items-center justify-center gap-3 py-6 border-b border-white/5 opacity-40">
-                   <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                   <p className="text-[8px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">Neural Uplink Established // Secure Channel</p>
+                   <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/40 italic">Secure Encrypted Chat</p>
                 </div>
 
                 {messages.map((msg: any, idx: number) => {
@@ -510,9 +509,8 @@ export default function ChatDrawer({
                         ) : (
                            <div className={`max-w-[85%] flex flex-col gap-2`}>
                               {isAssistant && (
-                                  <div className="flex items-center gap-1.5 px-2 opacity-50 hover:opacity-100 transition-opacity">
-                                     <div className="w-1 h-1 rounded-full bg-[#ffea00] animate-pulse" />
-                                     <span className="text-[8px] font-black uppercase tracking-widest text-[#ffea00]/40 italic">Decrypted Briefing // Source: Node</span>
+                                  <div className="flex items-center gap-1.5 px-2 opacity-50">
+                                     <span className="text-[8px] font-black uppercase tracking-widest text-white/40 italic">{profile?.name}</span>
                                   </div>
                               )}
                               <div className={`px-5 py-3.5 rounded-[2rem] text-[14px] leading-relaxed tracking-tight ${
@@ -542,7 +540,7 @@ export default function ChatDrawer({
                       <div className="flex items-center gap-2 px-2">
                          <div className={`w-1 h-1 rounded-full ${isRequestingVoice ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'} animate-pulse`} />
                          <span className={`text-[7px] font-black uppercase tracking-widest ${isRequestingVoice ? 'text-[#ff00ff]' : 'text-[#00f0ff]'} italic`}>
-                            {isRequestingVoice ? 'Synthesizing Vocal DNA Node...' : 'Syncing Node Signal...'}
+                            {isRequestingVoice ? 'Generating Voice...' : `Chatting with ${profile?.name}...`}
                          </span>
                       </div>
                       <div className="flex items-start gap-2">
@@ -699,23 +697,7 @@ export default function ChatDrawer({
                 )}
              </AnimatePresence>
 
-              {/* 🦾 NEURAL SYNC HAPTICS (THE MAIN MEAT) */}
-              <div className="flex items-center justify-between mb-4 px-6 opacity-40">
-                 <div className="flex items-center gap-3">
-                    <div className="p-1.5 bg-[#00ff00]/10 rounded border border-[#00ff00]/20">
-                       <Activity size={10} className="text-[#00ff00] animate-pulse" />
-                    </div>
-                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white">Neural Sync: Established</span>
-                 </div>
-                 <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#00ff00] shadow-[0_0_8px_#00ff00] animate-pulse" />
-                    <span className="text-[7px] font-black uppercase tracking-widest text-white/40 italic">Link Stable</span>
-                 </div>
-              </div>
-
-              <div className="relative group/input p-[1px] rounded-[2.5rem] overflow-hidden">
-                 {/* 🧬 NEURAL MARQUEE: TARGET LOCKED */}
-                 <div className="absolute inset-[-200%] bg-[conic-gradient(#00ff00_20deg,transparent_120deg)] animate-[spin_4s_linear_infinite] opacity-40 group-focus-within/input:opacity-100 group-focus-within/input:animate-[spin_2s_linear_infinite] transition-all duration-500" />
+              <div className="relative group/input p-[1px] rounded-[2.5rem] overflow-hidden border border-white/10 focus-within:border-[#00f0ff]/50 transition-all">
                  
                  <form 
                    onSubmit={(e) => { e.preventDefault(); handleLocalSubmit(); }}
@@ -745,14 +727,10 @@ export default function ChatDrawer({
                           value={input} 
                           onChange={(e) => setInput(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleLocalSubmit(); } }}
-                          placeholder={isDepleted ? "NEURAL LINK DEPLETED..." : "transmit briefing..."} 
+                          placeholder={isDepleted ? "MESSAGING DISABLED..." : `Message ${profile?.name}...`} 
                           className="w-full bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
                           disabled={isLoading || isDepleted}
                        />
-                       {/* 📟 BLINKING CURSOR Node */}
-                       {!input && !isDepleted && (
-                          <div className="absolute left-[110px] w-1.5 h-4 bg-[#00ff00] animate-pulse shadow-[0_0_10px_#00ff00] pointer-events-none" />
-                       )}
                     </div>
                     <button 
                       type="submit"
