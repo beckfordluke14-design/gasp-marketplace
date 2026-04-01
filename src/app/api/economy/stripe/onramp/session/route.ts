@@ -43,17 +43,15 @@ export async function POST(req: Request) {
     const params = new URLSearchParams();
     params.append('customer_ip_address', clientIp);
     
-    // 🛡️ PROTOCOL ALIGNMENT: Using standard array brackets for reliable node handshake
-    params.append('transaction_details[destination_currencies][]', 'usdc');
-    params.append('transaction_details[destination_networks][]', 'solana');
+    // 🛡️ SINGULAR PROTOCOL ALIGNMENT: 1:1 match with your account's Node requirements
+    params.append('transaction_details[destination_currency]', 'usdc');
+    params.append('transaction_details[destination_network]', 'solana');
     params.append('transaction_details[wallet_addresses][solana]', treasury);
-    params.append('transaction_details[supported_destination_currencies][]', 'usdc');
-    params.append('transaction_details[supported_destination_networks][]', 'solana');
     
-    // 🛡️ CENTS CONVERSION: High-precision integer units required
+    // 🛡️ EXCHANGE ALPHA: High-precision integer units required for exchange settlement
     const cents = Math.round(pkg.priceUsd * 100);
-    params.append('transaction_details[source_amount]', cents.toString());
-    params.append('transaction_details[source_currency]', 'usd');
+    params.append('transaction_details[source_exchange_amount]', cents.toString());
+    params.append('transaction_details[source_exchange_currency]', 'usd');
 
     params.append('metadata[userId]', userId);
     params.append('metadata[packageId]', packageId);
