@@ -211,6 +211,19 @@ function GlobalFeedItem({
                     )}
                  </div>
                  <div className="flex items-center gap-4">
+                    {/* 🏮 HEAT: The Like Signal */}
+                    <button 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        handleLike(); 
+                      }} 
+                      className={`w-16 h-16 rounded-2xl border flex flex-col items-center justify-center backdrop-blur-md transition-all active:scale-90 ${hasLiked ? 'bg-red-500/10 border-red-500/40 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'bg-black/20 border-white/10 text-white/40 hover:border-red-500/50 hover:text-white'}`}
+                    >
+                       <Heart size={22} fill={hasLiked ? 'currentColor' : 'none'} />
+                       <span className="text-[7px] font-black uppercase tracking-widest mt-1">Heat</span>
+                    </button>
+
+                    {/* 🛰️ FAVORITE: The Shadow Syndicate Signal */}
                     <button 
                       onClick={(e) => { 
                         e.stopPropagation(); 
@@ -221,16 +234,16 @@ function GlobalFeedItem({
                           detail: { personaId: profile.id, isFollowing: newState } 
                         }));
                         
-                        // Persist to DB (Mock logic or actual RPC)
+                        // Persist to DB
                         fetch('/api/rpc/db', {
                           method: 'POST',
                           body: JSON.stringify({ action: 'toggle-follow', payload: { personaId: profile.id, userId: localStorage.getItem('gasp_guest_id') } })
                         });
                       }} 
-                      className={`h-16 px-8 rounded-2xl border flex items-center justify-center gap-3 backdrop-blur-md transition-all active:scale-90 ${isFollowing ? 'bg-[#ffea00] text-black border-[#ffea00] shadow-[0_0_30px_#ffea00]/30' : 'bg-black/20 border-white/10 text-white/40 hover:border-[#ffea00]/50 hover:text-white'}`}
+                      className={`h-16 px-6 rounded-2xl border flex items-center justify-center gap-3 backdrop-blur-md transition-all active:scale-90 ${isFollowing ? 'bg-[#ffea00] text-black border-[#ffea00] shadow-[0_0_30px_#ffea00]/30' : 'bg-black/20 border-white/10 text-white/40 hover:border-[#ffea00]/50 hover:text-white'}`}
                     >
                        <Star size={20} fill={isFollowing ? 'currentColor' : 'none'} />
-                       <span className="text-[10px] font-black uppercase tracking-widest">{isFollowing ? 'Favorited' : 'Favorite Analyst'}</span>
+                       <span className="text-[9px] font-black uppercase tracking-widest leading-none">{isFollowing ? 'Favorited' : 'Favorite'}</span>
                     </button>
                  </div>
               </div>
