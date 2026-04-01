@@ -188,7 +188,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                    <button 
                      onClick={() => {
                        const amt = parseFloat(customAmount);
-                       const baseUrl = 'https://moonpay.hel.io/pay/69cd2241a5eae8db13eba8f9';
+                       const baseUrl = 'https://hel.io/pay/69cd2e9c8a77d8d75027d9ce';
                        const url = amt > 0 ? `${baseUrl}?amount=${amt.toFixed(2)}` : baseUrl;
                        window.open(url, '_blank');
                      }}
