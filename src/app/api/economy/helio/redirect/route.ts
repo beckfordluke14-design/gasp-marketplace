@@ -14,12 +14,29 @@ export async function GET(req: Request) {
   const userId = searchParams.get('userId');
   const packageId = searchParams.get('packageId');
 
+  // 🛡️ Guard against missing critical identifiers
   if (!userId || !packageId) {
     return NextResponse.redirect(new URL('/?error=missing_params', req.url));
   }
 
   const pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
-  if (!pkg || !pkg.helioPayLink) {
+  let helioPayLink = pkg?.helioPayLink;
+  let priceUsd = pkg?.priceUsd || 0;
+  let credits = pkg?.credits || 0;
+
+  // 🔱 CUSTOM WHALE INJECTION: Handle amounts like custom_99999
+  if (!pkg && packageId.startsWith('custom_')) {
+     const amtStr = packageId.split('_')[1];
+     const amount = parseFloat(amtStr);
+     if (!isNaN(amount)) {
+        priceUsd = amount;
+        credits = Math.floor(amount * 1000); // 1,000 credits per $1.00
+        // Use the default Helio link for custom payments (Tier Entry link as base)
+        helioPayLink = CREDIT_PACKAGES.find(p => p.id === 'tier_standard')?.helioPayLink || CREDIT_PACKAGES[0].helioPayLink;
+     }
+  }
+
+  if (!helioPayLink) {
     return NextResponse.redirect(new URL('/?error=invalid_package', req.url));
   }
 
@@ -29,18 +46,18 @@ export async function GET(req: Request) {
       `INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
        VALUES ($1, 0, 'pending_helio', 'helio', $2, NOW())
        ON CONFLICT DO NOTHING`,
-      [userId, JSON.stringify({ packageId, expectedAmount: pkg.priceUsd, expectedCredits: pkg.credits })]
+      [userId, JSON.stringify({ packageId, expectedAmount: priceUsd, expectedCredits: credits })]
     );
   } catch (err: any) {
     console.error('[HelioRedirect] Failed to store pending payment:', err.message);
     // Non-blocking — still redirect
   }
 
-  // Append userId and amount to Helio URL so it identifies the user AND charges the correct price
-  const helioUrl = new URL(pkg.helioPayLink);
-  helioUrl.searchParams.set('ref', userId);
-  helioUrl.searchParams.set('customerId', userId);
-  helioUrl.searchParams.set('amount', pkg.priceUsd.toString()); // 🔱 DYNAMIC PRICE LOCK
+  // Append identifiers to Helio URL
+  const helioUrl = new URL(helioPayLink);
+  helioUrl.searchParams.set('ref', userId || 'anon');
+  helioUrl.searchParams.set('customerId', userId || 'anon');
+  helioUrl.searchParams.set('amount', priceUsd.toString()); // 🔱 DYNAMIC PRICE LOCK 🛰️
 
   return NextResponse.redirect(helioUrl.toString());
 }

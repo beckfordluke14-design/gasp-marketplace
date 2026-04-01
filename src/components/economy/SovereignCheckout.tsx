@@ -118,27 +118,21 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
         {/* CARD: Stripe Onramp — always shown */}
         <button 
           onClick={handleCardChoice}
-          disabled={isLoadingCard || parseFloat(pkg.priceUsd.toString()) > 2000}
-          className={`group p-6 md:p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:border-[#ff00ff]/40 hover:bg-[#ff00ff]/5 transition-all flex flex-col items-center justify-center text-center gap-4 relative overflow-hidden shadow-2xl ${parseFloat(pkg.priceUsd.toString()) > 2000 ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
+          disabled={isLoadingCard}
+          className="group p-6 md:p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:border-[#ff00ff]/40 hover:bg-[#ff00ff]/5 transition-all flex flex-col items-center justify-center text-center gap-4 relative overflow-hidden shadow-2xl"
         >
           <div className="flex flex-col gap-1">
              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Option 01</span>
              <span className="text-sm font-syncopate font-black uppercase text-white italic">Card Bridge</span>
           </div>
 
-          {parseFloat(pkg.priceUsd.toString()) > 2000 ? (
-            <div className="text-[8px] font-black uppercase text-red-500 tracking-widest bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20">
-               Limit: $2000 Max (Use Crypto)
-            </div>
-          ) : (
-            <div className="flex gap-2">
-               <div className="px-2 py-1 bg-white/10 rounded flex items-center gap-1.5 grayscale opacity-50"><CreditCard size={10} /> <span className="text-[8px] font-black">VISA</span></div>
-               <div className="px-2 py-1 bg-white/10 rounded flex items-center gap-1.5 grayscale opacity-50"><CreditCard size={10} /> <span className="text-[8px] font-black">MC</span></div>
-            </div>
-          )}
+          <div className="flex gap-2">
+             <div className="px-2 py-1 bg-white/10 rounded flex items-center gap-1.5 grayscale opacity-50"><CreditCard size={10} /> <span className="text-[8px] font-black">VISA</span></div>
+             <div className="px-2 py-1 bg-white/10 rounded flex items-center gap-1.5 grayscale opacity-50"><CreditCard size={10} /> <span className="text-[8px] font-black">MC</span></div>
+          </div>
         </button>
 
-        {/* CRYPTO: Helio P2P — only for tiers with a helioPayLink */}
+        {/* CRYPTO: Helio P2P + Onramp — Universal choice rail */}
         {pkg.helioPayLink && (
         <button 
           onClick={handleCryptoChoice}
@@ -147,11 +141,19 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
           <Globe size={32} className="text-[#00f0ff] group-hover:scale-110 transition-transform duration-500" />
           <div className="flex flex-col gap-1">
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Option 02</span>
-            <span className="text-sm font-syncopate font-black uppercase text-white italic">Crypto Link</span>
+            <span className="text-sm font-syncopate font-black uppercase text-white italic">Crypto Universal</span>
+            <span className="text-[7px] font-black uppercase text-white/30 tracking-widest">P2P + HELIO ONRAMP</span>
           </div>
-          <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20 text-[#00f0ff] text-[8px] font-black uppercase tracking-widest italic group-hover:bg-[#00f0ff] group-hover:text-black transition-colors">
-            P2P Active
-          </div>
+
+          {parseFloat(pkg.priceUsd.toString()) < 19.99 ? (
+             <div className="text-[7px] font-black uppercase text-amber-500 tracking-widest bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
+                P2P Ready · Onramp $19.99+
+             </div>
+          ) : (
+            <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20 text-[#00f0ff] text-[8px] font-black uppercase tracking-widest italic group-hover:bg-[#00f0ff] group-hover:text-black transition-colors">
+              Liquid Whale Rail
+            </div>
+          )}
         </button>
         )}
 

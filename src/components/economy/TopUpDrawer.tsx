@@ -193,6 +193,15 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                               className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl px-12 text-xl font-black text-white outline-none focus:border-[#ff6b00]/50 transition-all placeholder:text-white/10"
                             />
                         </div>
+                        
+                        {parseFloat(customAmount) > 30000 && (
+                          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-2xl mb-4">
+                             <p className="text-[9px] font-black uppercase text-[#ffea00] tracking-widest leading-loose">
+                                🏮 WHALE ALERT: LARGE INFUSION DETECTED. WE RECOMMEND USING "CRYPTO LINK" FOR AMOUNTS OVER $30,000 TO AVOID REJECTION.
+                             </p>
+                          </motion.div>
+                        )}
+
                         <button 
                           onClick={handleCustomStake}
                           disabled={!customAmount || parseFloat(customAmount) < 4.99}
