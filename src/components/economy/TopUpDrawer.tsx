@@ -135,9 +135,49 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                <ShieldCheck size={16} className="text-[#ffea00]/30" />
             </div>
 
+            {/* 🧬 CUSTOM INFUSION INPUT (PRIORITY) */}
+            <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-6 shadow-2xl relative overflow-hidden group">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#ff6b00]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="flex items-center justify-between">
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b00] italic">Custom Node Infusion</h4>
+                    <span className="text-[7px] font-black uppercase text-white/20 tracking-widest italic">Institutional Grade</span>
+                </div>
+                
+                <div className="flex flex-col gap-4">
+                    <div className="flex gap-3">
+                        <div className="flex-1 relative">
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-white/40 font-black text-xl">$</div>
+                            <input 
+                              type="number"
+                              value={customAmount}
+                              onChange={(e) => setCustomAmount(e.target.value)}
+                              placeholder="Min. $4.99"
+                              className="w-full h-16 bg-black/40 border border-white/10 rounded-2xl px-12 text-xl font-black text-white outline-none focus:border-[#ff6b00]/50 transition-all placeholder:text-white/10"
+                            />
+                        </div>
+
+                        <button 
+                          onClick={handleCustomStake}
+                          disabled={!customAmount || parseFloat(customAmount) < 4.99}
+                          className="h-16 px-8 rounded-2xl bg-[#ff6b00] disabled:bg-white/5 disabled:text-white/20 text-black font-black uppercase text-[10px] tracking-widest transition-all hover:scale-105 active:scale-95 shadow-[0_10px_30px_rgba(255,107,0,0.2)]"
+                        >
+                            Infuse
+                        </button>
+                    </div>
+
+                    {parseFloat(customAmount) > 30000 && (
+                      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-4 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-2xl mt-2 animate-pulse">
+                         <p className="text-[9px] font-black uppercase text-[#ffea00] tracking-widest leading-loose text-center">
+                            🏮 WHALE ALERT: LARGE INFUSION DETECTED. WE RECOMMEND USING "CRYPTO LINK" FOR AMOUNTS OVER $30,000 TO AVOID REJECTION.
+                         </p>
+                      </motion.div>
+                    )}
+                </div>
+            </div>
+
             {/* 🧬 SIMPLIFIED TIER SELECTION */}
             <div className="space-y-4 pt-4">
-               <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white/40 italic">Select Your Access Tier</h4>
+               <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white/40 italic">Or Select Asset Tier</h4>
                <div className="grid gap-3">
                   {CREDIT_PACKAGES.filter(p => ['tier_starter', 'tier_entry', 'tier_whale', 'tier_master'].includes(p.id)).map((pkg) => (
                     <button
@@ -178,39 +218,6 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     </button>
                   ))}
                </div>
-
-                {/* 🧬 CUSTOM INFUSION INPUT */}
-                <div className="mt-8 pt-8 border-t border-white/5 space-y-4">
-                    <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white/40 italic">Custom Node Infusion</h4>
-                    <div className="flex gap-3">
-                        <div className="flex-1 relative">
-                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-white/40 font-black text-lg">$</div>
-                            <input 
-                              type="number"
-                              value={customAmount}
-                              onChange={(e) => setCustomAmount(e.target.value)}
-                              placeholder="Min. $4.99"
-                              className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl px-12 text-xl font-black text-white outline-none focus:border-[#ff6b00]/50 transition-all placeholder:text-white/10"
-                            />
-                        </div>
-                        
-                        {parseFloat(customAmount) > 30000 && (
-                          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-2xl mb-4">
-                             <p className="text-[9px] font-black uppercase text-[#ffea00] tracking-widest leading-loose">
-                                🏮 WHALE ALERT: LARGE INFUSION DETECTED. WE RECOMMEND USING "CRYPTO LINK" FOR AMOUNTS OVER $30,000 TO AVOID REJECTION.
-                             </p>
-                          </motion.div>
-                        )}
-
-                        <button 
-                          onClick={handleCustomStake}
-                          disabled={!customAmount || parseFloat(customAmount) < 4.99}
-                          className="h-16 px-8 rounded-2xl bg-[#ff6b00] disabled:bg-white/5 disabled:text-white/20 text-black font-black uppercase text-[10px] tracking-widest transition-all hover:scale-105 active:scale-95"
-                        >
-                            Infuse
-                        </button>
-                    </div>
-                </div>
             </div>
 
             {/* 🧬 PAYMENT HISTORY */}
