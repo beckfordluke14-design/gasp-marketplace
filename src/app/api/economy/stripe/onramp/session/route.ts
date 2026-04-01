@@ -42,13 +42,15 @@ export async function POST(req: Request) {
 
     const params = new URLSearchParams();
     params.append('customer_ip_address', clientIp);
-    params.append('transaction_details[destination_currencies][0]', 'usdc');
-    params.append('transaction_details[destination_networks][0]', 'solana');
-    params.append('transaction_details[wallet_addresses][solana]', treasury);
-    params.append('transaction_details[supported_destination_currencies][0]', 'usdc');
-    params.append('transaction_details[supported_destination_networks][0]', 'solana');
     
-    // 🛡️ CENTS CONVERSION: Stripe expects integer cents for USD nodes
+    // 🛡️ PROTOCOL ALIGNMENT: Using standard array brackets for reliable node handshake
+    params.append('transaction_details[destination_currencies][]', 'usdc');
+    params.append('transaction_details[destination_networks][]', 'solana');
+    params.append('transaction_details[wallet_addresses][solana]', treasury);
+    params.append('transaction_details[supported_destination_currencies][]', 'usdc');
+    params.append('transaction_details[supported_destination_networks][]', 'solana');
+    
+    // 🛡️ CENTS CONVERSION: High-precision integer units required
     const cents = Math.round(pkg.priceUsd * 100);
     params.append('transaction_details[source_amount]', cents.toString());
     params.append('transaction_details[source_currency]', 'usd');
@@ -67,8 +69,15 @@ export async function POST(req: Request) {
     });
 
     if (!response.ok) {
-      console.error('[Stripe Onramp] Create Session Fail:', await response.text());
-      return NextResponse.json({ success: false, error: 'Uplink Terminal Denied by Stripe Node.' }, { status: 500 });
+        const errorData = await response.json();
+        console.error('[Stripe Onramp] Create Session Fail:', errorData);
+        
+        // 🔱 SOVEREIGN FEEDBACK: Relaying the exact node error for diagnostic resolution
+        const nodeError = errorData.error?.message || 'Uplink Terminal Denied by Stripe Node.';
+        return NextResponse.json({ 
+            success: false, 
+            error: `STRIPE_REJECTION: ${nodeError}` 
+        }, { status: 500 });
     }
 
     const data = await response.json();
