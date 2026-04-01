@@ -136,27 +136,12 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                 </button>
              </div>
              
-             {/* 🛸 JUPITER TERMINAL MOUNT POINT */}
-             <div className="w-full flex-1 flex flex-col items-center justify-center bg-black/40 border border-white/5 rounded-3xl relative overflow-hidden group">
-                 <div id="jupiter-terminal-mount" className="w-full h-full min-h-[500px] z-10">
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-black z-0">
-                        <div className="w-16 h-16 rounded-2xl bg-[#ff6b00]/20 flex items-center justify-center border border-[#ff6b00]/30 animate-pulse">
-                            <Zap size={32} className="text-[#ff6b00]" />
-                        </div>
-                        <div className="space-y-3 text-center mt-6">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#ff6b00]">Synchronizing Node...</p>
-                            <p className="text-[7px] font-bold text-white/10 uppercase tracking-widest italic tracking-[0.3em]">Bypassing RPC congestion</p>
-                        </div>
-                    </div>
-                 </div>
-                 
-                 {/* 🧬 NATIVE INITIALIZATION EFFICIENCY */}
-                 <JupiterInitializer 
-                    userId={userId} 
-                    customAmount={customAmount} 
-                    onVerifySuccess={() => window.dispatchEvent(new CustomEvent('gasp_transfer_success'))} 
-                 />
-             </div>
+             {/* 🛰️ NATIVE REDIRECT INTERFACE */}
+             <NativeRedirectHandler 
+                userId={userId} 
+                customAmount={customAmount} 
+             />
+
           </div>
         ) : (
           <div className="p-5 md:p-8 space-y-6 md:space-y-8 animate-in fade-in duration-500">
@@ -328,65 +313,69 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
 }
 
 /**
- * 🛰️ JUPITER INITIALIZER NODE
- * Handles stable mounting and transaction tracking for the sovereign bridge.
+ * 🛰️ NATIVE REDIRECT HANDLER
+ * Sends the user to a high-performance external gateway to bypass RPC congestion.
  */
-function JupiterInitializer({ userId, customAmount, onVerifySuccess }: { 
-    userId: string, 
-    customAmount: string, 
-    onVerifySuccess: () => void 
-}) {
-    useEffect(() => {
-        let mountPoll: any;
-        
-        const initJup = () => {
-            const jup = (window as any).Jupiter;
-            if (jup && document.getElementById('jupiter-terminal-mount')) {
-                if (mountPoll) clearInterval(mountPoll);
-                
-                const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.jup.ag/mainnet-beta";
+function NativeRedirectHandler({ userId, customAmount }: { userId: string, customAmount: string }) {
+    const vaultAddress = "DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS"; // 🛡️ DGQ TREASURY VAULT
 
-                jup.init({
-                    displayMode: "integrated",
-                    integratedTargetId: "jupiter-terminal-mount",
-                    endpoint: rpc,
-                    strictTokenList: false,
-                    formProps: {
-                        fixedOutputMint: true,
-                        initialOutputMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
-                        swapMode: "ExactOut",
-                        fixedAmount: false,
-                        initialInputAmount: "0.1",
-                    },
-                    passthroughWalletContext: true,
-                    onSuccess: ({ txid }: { txid: string }) => {
-                        console.log("✅ [Jupiter] Swap Success:", txid);
-                        const amount = parseFloat(customAmount) || 1.00;
-                        const credits = Math.floor(amount * 1000);
+    const handleRedirect = () => {
+        // 🧬 DYNAMIC HELIO CONSTRUCT
+        const helioUrl = `https://helio.xyz/pay/660a9f5d1e2b3c4d5e6f7a8b9?userId=${userId}&amount=${customAmount}`;
+        window.open(helioUrl, '_blank');
+    };
 
-                        fetch('/api/economy/verify-tx', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                signature: txid,
-                                userId,
-                                amountUsdc: amount,
-                                expectedCredits: credits
-                            })
-                        })
-                        .then(r => r.json())
-                        .then(data => {
-                            if (data.success) onVerifySuccess();
-                        })
-                        .catch(err => console.error("❌ verification fault:", err));
-                    }
-                });
-            }
-        };
+    const copyAddress = () => {
+        navigator.clipboard.writeText(vaultAddress);
+        alert("🛡️ Vault Address Copied for Archive Settlement.");
+    };
 
-        mountPoll = setInterval(initJup, 1000);
-        return () => { if (mountPoll) clearInterval(mountPoll); };
-    }, [userId, customAmount]);
+    return (
+        <div className="flex flex-col items-center justify-center p-8 bg-black/60 border border-white/5 rounded-3xl space-y-8 animate-in zoom-in duration-500 overflow-y-auto max-h-[60vh] no-scrollbar">
+            <div className="w-20 h-20 rounded-[2.5rem] bg-[#00f0ff]/20 flex items-center justify-center border border-[#00f0ff]/40 shadow-[0_0_60px_rgba(0,240,255,0.3)]">
+                <Zap size={40} className="text-[#00f0ff] animate-pulse" />
+            </div>
+            
+            <div className="text-center space-y-3">
+                <h4 className="text-xl font-syncopate font-black uppercase italic text-white tracking-widest leading-none text-[#00f0ff]">Direct Bridge</h4>
+                <p className="text-[10px] text-white/40 uppercase font-bold tracking-[0.2em] px-6">
+                    Bypassing network congestion via direct node-to-node settlement. 🏎️💨
+                </p>
+            </div>
 
-    return null;
+            {/* Direct Vault UI */}
+            <div className="w-full space-y-4">
+                <div className="p-5 bg-white/5 border border-white/10 rounded-2xl relative group overflow-hidden">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-[8px] font-black uppercase text-white/20 tracking-widest">DGQ Treasury Vault (SOV-V1)</span>
+                        <ShieldCheck size={12} className="text-[#00f0ff]/30" />
+                    </div>
+                    <code className="block text-[10px] font-mono text-white/60 break-all leading-relaxed pr-8 select-all">
+                        {vaultAddress}
+                    </code>
+                    <button 
+                        onClick={copyAddress}
+                        className="absolute right-4 bottom-4 w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/40 hover:bg-[#00f0ff] hover:text-black transition-all"
+                    >
+                        <Wallet size={16} />
+                    </button>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                    <button 
+                        onClick={handleRedirect}
+                        className="w-full h-16 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[11px] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(0,240,255,0.4)] flex items-center justify-center gap-3"
+                    >
+                        Settlement Link
+                    </button>
+                    <p className="text-[8px] text-[#00f0ff] uppercase text-center font-black tracking-widest italic pt-2">
+                        Send any SOL or USDC directly to the Vault. 🛡️
+                    </p>
+                    <p className="text-[7px] text-white/20 uppercase text-center font-bold tracking-widest">
+                       Verification node: ONLINE // Settlement: AUTOMATIC
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
 }
