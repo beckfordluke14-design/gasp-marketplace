@@ -140,11 +140,11 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
              <div className="w-full flex-1 flex flex-col items-center justify-center bg-black/40 border border-white/5 rounded-3xl relative overflow-hidden group">
                  <div id="jupiter-terminal-mount" className="w-full h-full min-h-[500px] z-10">
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-black z-0">
-                        <div className="w-16 h-16 rounded-2xl bg-[#00f0ff]/20 flex items-center justify-center border border-[#00f0ff]/30 animate-pulse">
-                            <Zap size={32} className="text-[#00f0ff]" />
+                        <div className="w-16 h-16 rounded-2xl bg-[#ff6b00]/20 flex items-center justify-center border border-[#ff6b00]/30 animate-pulse">
+                            <Zap size={32} className="text-[#ff6b00]" />
                         </div>
                         <div className="space-y-3 text-center mt-6">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff]">Synchronizing Node...</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#ff6b00]">Synchronizing Node...</p>
                             <p className="text-[7px] font-bold text-white/10 uppercase tracking-widest italic tracking-[0.3em]">Bypassing RPC congestion</p>
                         </div>
                     </div>
@@ -344,7 +344,7 @@ function JupiterInitializer({ userId, customAmount, onVerifySuccess }: {
             if (jup && document.getElementById('jupiter-terminal-mount')) {
                 if (mountPoll) clearInterval(mountPoll);
                 
-                const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://rpc.ankr.com/solana";
+                const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.jup.ag/mainnet-beta";
 
                 jup.init({
                     displayMode: "integrated",
