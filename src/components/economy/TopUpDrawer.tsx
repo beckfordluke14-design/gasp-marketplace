@@ -23,7 +23,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   const [customAmount, setCustomAmount] = useState<string>('');
   const handleCustomStake = () => {
     const amount = parseFloat(customAmount);
-    if (isNaN(amount) || amount < 19.99) return;
+    if (isNaN(amount) || amount < 4.99) return;
     setSelectedPkgId(`custom_${amount}`);
   };
 
@@ -120,7 +120,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
             <div className="space-y-4 pt-4">
                <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white/40 italic">Select Your Access Tier</h4>
                <div className="grid gap-3">
-                  {CREDIT_PACKAGES.filter(p => ['tier_entry', 'tier_whale', 'tier_master'].includes(p.id)).map((pkg) => (
+                  {CREDIT_PACKAGES.filter(p => ['tier_starter', 'tier_entry', 'tier_whale', 'tier_master'].includes(p.id)).map((pkg) => (
                     <button
                       key={pkg.id}
                       onClick={() => setSelectedPkgId(pkg.id)}
@@ -140,7 +140,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                             </span>
                         )}
                         <span className="text-[10px] font-black uppercase text-white/40 tracking-widest leading-none">
-                            {pkg.id === 'tier_entry' ? 'Starter Access' : pkg.id === 'tier_whale' ? 'Professional Tier' : 'Master Syndicate'}
+                            {pkg.id === 'tier_starter' ? 'Starter Access' : pkg.id === 'tier_entry' ? 'Standard Entry' : pkg.id === 'tier_whale' ? 'Professional Tier' : 'Master Syndicate'}
                         </span>
                         <span className="text-3xl font-syncopate font-bold text-white mt-1 italic leading-none">
                             {Math.floor(pkg.credits * 1.15).toLocaleString()}
@@ -170,13 +170,13 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                               type="number"
                               value={customAmount}
                               onChange={(e) => setCustomAmount(e.target.value)}
-                              placeholder="Min. 20.00"
+                              placeholder="Min. $4.99"
                               className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl px-12 text-xl font-black text-white outline-none focus:border-[#ff6b00]/50 transition-all placeholder:text-white/10"
                             />
                         </div>
                         <button 
                           onClick={handleCustomStake}
-                          disabled={!customAmount || parseFloat(customAmount) < 19.99}
+                          disabled={!customAmount || parseFloat(customAmount) < 4.99}
                           className="h-16 px-8 rounded-2xl bg-[#ff6b00] disabled:bg-white/5 disabled:text-white/20 text-black font-black uppercase text-[10px] tracking-widest transition-all hover:scale-105 active:scale-95"
                         >
                             Infuse

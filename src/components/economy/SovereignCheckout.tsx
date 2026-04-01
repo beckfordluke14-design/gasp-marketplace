@@ -113,9 +113,9 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
       </div>
 
       {/* SETTLEMENT RAILS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+      <div className={`grid grid-cols-1 ${pkg.helioPayLink ? 'md:grid-cols-2' : ''} gap-4 md:gap-6`}>
         
-        {/* CARD: Stripe Crypto Onramp */}
+        {/* CARD: Stripe Onramp — always shown */}
         <button 
           onClick={handleCardChoice}
           disabled={isLoadingCard}
@@ -133,7 +133,8 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
           )}
         </button>
 
-        {/* CRYPTO: Helio P2P */}
+        {/* CRYPTO: Helio P2P — only for tiers with a helioPayLink */}
+        {pkg.helioPayLink && (
         <button 
           onClick={handleCryptoChoice}
           className="group p-6 md:p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:border-[#00f0ff]/40 hover:bg-[#00f0ff]/5 transition-all flex flex-col items-center justify-center text-center gap-4 relative overflow-hidden shadow-2xl"
@@ -147,6 +148,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
             P2P Active
           </div>
         </button>
+        )}
 
       </div>
 

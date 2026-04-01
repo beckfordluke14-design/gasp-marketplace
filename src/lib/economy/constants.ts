@@ -21,6 +21,13 @@ export interface CreditPackage {
 // GASP CREDIT MATRIX: USD -> CREDITS (Apex v5.7)
 // 1,000 Credits = $1.00 USD (Institutional Floor: $19.31 + $0.68 Safety Margin)
 export const CREDIT_PACKAGES: CreditPackage[] = [
+  {
+    id: 'tier_starter',
+    priceUsd: 4.99,
+    credits: 5000,
+    label: 'Starter Access Node',
+    // No helioPayLink — Helio minimum is too high for this tier. Card Bridge only.
+  },
   { 
     id: 'tier_entry', 
     priceUsd: 19.99, 
