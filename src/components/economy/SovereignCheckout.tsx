@@ -121,7 +121,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
         {/* 🥈 OPTION 2: HELIO CRYPTO RAIL */}
         <button 
           onClick={() => {
-            trackEvent('p2p_open', packageId);
+            trackEvent('vault_unlock_intent', packageId);
             const link = HELIO_LINKS[packageId as keyof typeof HELIO_LINKS] || HELIO_LINKS['19.99'];
             window.location.href = link;
           }}

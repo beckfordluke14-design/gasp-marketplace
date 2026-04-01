@@ -61,26 +61,32 @@ export async function POST(req: Request) {
       body: params,
     });
 
+    const rawResult = await response.text();
+
     if (!response.ok) {
-        const errorData = await response.json();
-        console.error('[Stripe Onramp] Create Session Fail:', errorData);
+        console.error('[Stripe Onramp] Create Session Fail:', rawResult);
         
-        // 🔱 SOVEREIGN FEEDBACK: Relaying the exact node error for diagnostic resolution
-        const nodeError = errorData.error?.message || 'Uplink Terminal Denied by Stripe Node.';
+        // 🔱 SOVEREIGN FEEDBACK: Forced reflection of the raw node signal
+        let detailedError = rawResult;
+        try {
+            const parsed = JSON.parse(rawResult);
+            detailedError = parsed.error?.message || rawResult;
+        } catch (e) {}
+
         return NextResponse.json({ 
             success: false, 
-            error: `STRIPE_REJECTION: ${nodeError}` 
+            error: `STRIPENODE_REJECTION: ${detailedError}` 
         }, { status: 500 });
     }
 
-    const data = await response.json();
+    const data = JSON.parse(rawResult);
     return NextResponse.json({ 
       success: true, 
-      onrampUrl: data.onramp_url // 🔱 THE BULLETPROOF REDIRECT URL
+      onrampUrl: data.onramp_url
     });
 
   } catch (err: any) {
     console.error('[OnrampBridge] Fatal Fault:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: `UPLINK_FAULT: ${err.message}` }, { status: 500 });
   }
 }
