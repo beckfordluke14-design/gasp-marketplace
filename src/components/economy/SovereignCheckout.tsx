@@ -49,15 +49,16 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
         });
       }
 
-      // Exact pattern from Stripe docs — pre-fills amount, currency, network, and treasury destination
-      const standaloneOnramp = (window as any).StripeOnramp.Standalone({
-        source_currency: 'usd',
-        amount: { source_amount: pkg.priceUsd.toString() },
-        destination_currency: 'usdc',
-        destination_network: 'solana',
-        destination_wallet_address: 'DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS', 
-      });
-      window.location.href = standaloneOnramp.getUrl();
+      // 🛡️ REVENUE-GATE: Construct direct session URL with "Force-Lock" params
+      const onrampUrl = new URL('https://crypto.link.com/');
+      onrampUrl.searchParams.set('destination_currency', 'usdc');
+      onrampUrl.searchParams.set('destination_network', 'solana');
+      onrampUrl.searchParams.set('source_currency', 'usd');
+      onrampUrl.searchParams.set('source_amount', pkg.priceUsd.toString());
+      onrampUrl.searchParams.set('wallet_address', 'DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS');
+      onrampUrl.searchParams.set('lock_wallet_address', 'true');
+      
+      window.location.href = onrampUrl.toString();
 
     } catch (err: any) {
       setError(`Fault: ${err.message}`);
@@ -107,9 +108,9 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
             <span className="text-[8px] md:text-[10px] font-black text-[#00f0ff] uppercase tracking-[0.3em] italic animate-pulse mt-1 md:mt-2">CREDITS</span>
           </div>
         </div>
-        <div className="flex flex-col items-start md:items-end relative z-10 border-t md:border-t-0 border-white/5 pt-4 md:pt-0 shrink-0">
+        <div className="flex flex-col items-start md:items-end relative z-10 border-t md:border-t-0 border-white/5 pt-4 md:pt-0 shrink-0 overflow-hidden">
           <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white/20 mb-1">Total Due</span>
-          <span className="text-2xl md:text-5xl font-syncopate font-black text-[#ffea00] italic whitespace-nowrap tracking-tighter group-hover:text-white transition-all">${pkg.priceUsd}</span>
+          <span className="text-2xl md:text-3xl lg:text-4xl font-syncopate font-black text-[#ffea00] italic whitespace-nowrap tracking-tighter group-hover:text-white transition-all">${pkg.priceUsd}</span>
         </div>
       </div>
 
