@@ -78,7 +78,8 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   }
 
   return (
-    <div className="fixed inset-x-2 inset-y-10 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-[calc(100%-1rem)] md:w-[480px] h-[calc(100%-5rem)] md:h-[90dvh] bg-[#050505]/95 backdrop-blur-3xl border border-white/10 z-[300] shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col pointer-events-auto font-outfit transition-all duration-500 rounded-[2.5rem] overflow-hidden">
+    <div className="fixed inset-0 z-[300] flex items-start justify-center pt-[8vh] px-4 pointer-events-none">
+    <div className="w-full max-w-[480px] h-[84dvh] max-h-[750px] bg-[#050505]/95 backdrop-blur-3xl border border-white/10 shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col font-outfit rounded-[2.5rem] overflow-hidden pointer-events-auto">
       
       {/* Header */}
       <div className="p-8 border-b border-white/5 flex items-center justify-between bg-black/40">
@@ -101,7 +102,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto no-scrollbar">
+      <div className={`flex-1 ${showHelio ? 'overflow-hidden' : 'overflow-y-auto no-scrollbar'} flex flex-col`}>
         
         {selectedPkgId ? (
           <SovereignCheckout 
@@ -111,7 +112,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
             onCancel={() => setSelectedPkgId(null)}
           />
         ) : showHelio ? (
-          <div className="w-full h-full p-5 md:p-6 animate-in fade-in duration-500 flex flex-col">
+          <div className="w-full h-full flex flex-col p-5 md:p-6 animate-in fade-in duration-300">
              <div className="w-full flex justify-between items-center mb-4 shrink-0">
                 <span className="text-[9px] font-black uppercase tracking-widest text-[#00f0ff] italic flex items-center gap-2">
                    <Zap size={14} className="animate-pulse" /> P2P Bridge Authorized
@@ -123,22 +124,20 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                    Return
                 </button>
              </div>
-             <div className="w-full flex-1 bg-black/40 rounded-3xl overflow-hidden shadow-2xl border border-white/5 relative">
-               <div className="absolute inset-0">
-                 <HelioCheckout 
-                    config={{
-                      paylinkId: "69cd404d41511ff6dc103455",
-                      theme: { themeMode: "dark" },
-                      primaryColor: "#00f0ff",
-                      neutralColor: "#111111",
-                      amount: (parseFloat(customAmount) > 0 ? customAmount : "1.00") as any,
-                      onSuccess: () => {
-                         setShowHelio(false);
-                         window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
-                      }
-                    }}
-                  />
-               </div>
+             <div className="w-full flex-1 overflow-y-auto rounded-3xl bg-black/40 border border-white/5 shadow-2xl">
+               <HelioCheckout 
+                  config={{
+                    paylinkId: "69cd404d41511ff6dc103455",
+                    theme: { themeMode: "dark" },
+                    primaryColor: "#00f0ff",
+                    neutralColor: "#111111",
+                    amount: (parseFloat(customAmount) > 0 ? customAmount : "1.00") as any,
+                    onSuccess: () => {
+                       setShowHelio(false);
+                       window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+                    }
+                  }}
+                />
              </div>
           </div>
         ) : (
@@ -331,6 +330,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }
