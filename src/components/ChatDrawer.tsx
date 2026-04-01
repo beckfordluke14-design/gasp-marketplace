@@ -495,7 +495,7 @@ export default function ChatDrawer({
                        )}
                        {/* TOOLTIP */}
                        <div className="absolute -bottom-8 right-0 px-2 py-1 bg-black border border-white/10 text-[6px] font-black uppercase tracking-widest rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                          Restricted Intel Archive
+                          Restricted Archive
                        </div>
                     </button>
                    <button className="hover:text-white transition-colors opacity-30"><Trophy size={18} /></button>
@@ -509,7 +509,7 @@ export default function ChatDrawer({
                    {chatTab === 'chat' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
                 </button>
                 <button onClick={() => setChatTab('pics')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
-                   INTEL
+                   ARCHIVE
                    {chatTab === 'pics' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
                 </button>
              </div>
