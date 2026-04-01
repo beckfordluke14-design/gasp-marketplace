@@ -136,10 +136,11 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                 </button>
              </div>
              
-             {/* 🛰️ NATIVE REDIRECT INTERFACE */}
-             <NativeRedirectHandler 
+             {/* 🛰️ INSTITUTIONAL CASHIER GATEWAY */}
+             <InstitutionalCashier 
                 userId={userId} 
                 customAmount={customAmount} 
+                onStepBack={() => setShowHelio(false)}
              />
 
           </div>
@@ -316,69 +317,81 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
  * 🛰️ NATIVE REDIRECT HANDLER
  * Sends the user to a high-performance external gateway to bypass RPC congestion.
  */
-function NativeRedirectHandler({ userId, customAmount }: { userId: string, customAmount: string }) {
-    const vaultAddress = "DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS"; // 🛡️ DGQ TREASURY VAULT
+function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: string, customAmount: string, onStepBack: () => void }) {
+    const vaultAddress = "DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS";
 
-    const handleRedirect = () => {
-        // 🧬 UNIVERSAL INSTITUTIONAL GATEWAY
-        // Guarantees load across all browsers/OS. 
-        // Bypasses protocol failures while pre-filling USDC settlement.
-        const jupDirectUrl = `https://jup.ag/swap/SOL-USDC?outputAmount=${customAmount}&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&recipient=${vaultAddress}`;
-        window.open(jupDirectUrl, '_blank');
-    };
-
-    const copyAddress = () => {
-        navigator.clipboard.writeText(vaultAddress);
-        alert("🛡️ Vault Address Copied for Archive Settlement.");
+    const handleCryptoRedirect = () => {
+        // 🧬 HOSTED SOVEREIGN GATEWAY
+        // Using a hosted payment page ensures high-performance load and pre-filled data.
+        const hostedPayUrl = `https://helio.xyz/pay/66fb942488a0e0be96fc785a?userId=${userId}&amount=${customAmount}`;
+        window.open(hostedPayUrl, '_blank');
     };
 
     return (
-        <div className="flex flex-col items-center justify-center p-8 bg-black/60 border border-white/5 rounded-3xl space-y-8 animate-in zoom-in duration-500 overflow-y-auto max-h-[60vh] no-scrollbar">
-            <div className="w-20 h-20 rounded-[2.5rem] bg-[#00f0ff]/20 flex items-center justify-center border border-[#00f0ff]/40 shadow-[0_0_60px_rgba(0,240,255,0.3)]">
-                <Zap size={40} className="text-[#00f0ff] animate-pulse" />
-            </div>
-            
-            <div className="text-center space-y-3">
-                <h4 className="text-xl font-syncopate font-black uppercase italic text-white tracking-widest leading-none text-[#00f0ff]">Direct Bridge</h4>
-                <p className="text-[10px] text-white/40 uppercase font-bold tracking-[0.2em] px-6">
-                    Bypassing network congestion via direct node-to-node settlement. 🏎️💨
-                </p>
+        <div className="flex-1 flex flex-col p-6 md:p-8 space-y-6 animate-in slide-in-from-bottom-4 duration-500 overflow-y-auto no-scrollbar">
+            {/* 🧬 HEADER STATUS */}
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] font-black uppercase tracking-widest text-[#ff6b00] italic flex items-center gap-2">
+                   <ShieldCheck size={12} className="animate-pulse" /> Strategic Cashier v2.9 Active
+                </span>
+                <button onClick={onStepBack} className="text-[9px] text-white/40 uppercase font-black tracking-widest hover:text-white transition-colors">Return</button>
             </div>
 
-            {/* Direct Vault UI */}
-            <div className="w-full space-y-4">
-                <div className="p-5 bg-white/5 border border-white/10 rounded-2xl relative group overflow-hidden">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-[8px] font-black uppercase text-white/20 tracking-widest">DGQ Treasury Vault (SOV-V1)</span>
-                        <ShieldCheck size={12} className="text-[#00f0ff]/30" />
+            {/* 🧬 OPTION 1: PREMIUM CARD ACCESS */}
+            <div className="group relative p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-4 hover:bg-white/[0.08] hover:border-[#ff6b00]/40 transition-all cursor-pointer shadow-2xl">
+                <div className="flex items-center justify-between">
+                    <div className="w-12 h-12 rounded-2xl bg-[#ff6b00]/20 flex items-center justify-center border border-[#ff6b00]/40">
+                        <CreditCard size={24} className="text-[#ff6b00]" />
                     </div>
-                    <code className="block text-[10px] font-mono text-white/60 break-all leading-relaxed pr-8 select-all">
-                        {vaultAddress}
-                    </code>
-                    <button 
-                        onClick={copyAddress}
-                        className="absolute right-4 bottom-4 w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/40 hover:bg-[#00f0ff] hover:text-black transition-all"
-                    >
-                        <Wallet size={16} />
-                    </button>
+                    <span className="text-[7px] font-black uppercase text-white/20 tracking-[0.3em]">SECURE // PCI-READY</span>
                 </div>
-
-                <div className="flex flex-col gap-3">
+                <div>
+                   <h4 className="text-lg font-syncopate font-black uppercase italic text-white leading-tight">Card Refuel</h4>
+                   <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">Stripe Institutional Onramp</p>
+                </div>
+                <div className="pt-4">
                     <button 
-                        onClick={handleRedirect}
-                        className="w-full h-16 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[11px] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(0,240,255,0.4)] flex items-center justify-center gap-3"
+                        onClick={() => window.open(`/api/onramp?userId=${userId}&amount=${customAmount}`, '_blank')}
+                        className="w-full h-14 rounded-2xl bg-[#ff6b00] text-black font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(255,107,0,0.3)]"
                     >
-                        <Zap size={18} />
-                        One-Click Settlement
+                        Initiate Card Checkout
                     </button>
-                    <p className="text-[8px] text-[#00f0ff] uppercase text-center font-black tracking-widest italic pt-2">
-                        Send any SOL or USDC directly to the Vault. 🛡️
-                    </p>
-                    <p className="text-[7px] text-white/20 uppercase text-center font-bold tracking-widest">
-                       Verification node: ONLINE // Settlement: AUTOMATIC
-                    </p>
                 </div>
             </div>
+
+            {/* 🧬 OPTION 2: SOVEREIGN P2P BRIDGE */}
+            <div className="group relative p-8 bg-[#00f0ff]/5 border border-[#00f0ff]/20 rounded-[2.5rem] space-y-4 hover:bg-[#00f0ff]/10 hover:border-[#00f0ff]/40 transition-all cursor-pointer shadow-2xl">
+                 <div className="flex items-center justify-between">
+                    <div className="w-12 h-12 rounded-2xl bg-[#00f0ff]/20 flex items-center justify-center border border-[#00f0ff]/40 shadow-[0_0_30px_rgba(0,240,255,0.2)]">
+                        <Zap size={24} className="text-[#00f0ff] animate-pulse" />
+                    </div>
+                    <span className="text-[7px] font-black uppercase text-white/20 tracking-[0.3em]">NATIVE // GASLESS</span>
+                </div>
+                <div>
+                   <h4 className="text-lg font-syncopate font-black uppercase italic text-white leading-tight text-[#00f0ff]">P2P Bridge</h4>
+                   <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">Sovereign Crypto Settlement</p>
+                </div>
+                <div className="pt-4">
+                    <button 
+                        onClick={handleCryptoRedirect}
+                        className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(0,240,255,0.3)] flex items-center justify-center gap-2"
+                    >
+                        <Wallet size={16} /> Open Crypto Checkout
+                    </button>
+                </div>
+            </div>
+
+            {/* 🧬 OPTION 3: DIRECT VAULT COPY (FOOTER) */}
+            <div className="p-6 bg-black/40 border border-white/5 rounded-3xl space-y-3">
+                <span className="text-[7px] font-black uppercase text-white/20 tracking-widest block text-center">Protocol Vault Address (Manual)</span>
+                <code className="block text-[8px] font-mono text-white/30 break-all text-center leading-relaxed px-4">
+                    {vaultAddress}
+                </code>
+            </div>
+
+            <p className="text-[7px] text-white/20 text-center font-black uppercase tracking-widest leading-loose pb-8 italic">
+                Strategic Digital Assets Issued By AllTheseFlows LLC. Settlement strictly via DGQ Treasury Vault. 🧿🛡️
+            </p>
         </div>
     );
 }
