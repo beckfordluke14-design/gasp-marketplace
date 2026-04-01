@@ -111,32 +111,34 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
             onCancel={() => setSelectedPkgId(null)}
           />
         ) : showHelio ? (
-          <div className="p-5 md:p-6 animate-in fade-in duration-500 flex flex-col min-h-[450px]">
-             <div className="w-full flex justify-between items-center mb-6">
+          <div className="w-full h-full p-5 md:p-6 animate-in fade-in duration-500 flex flex-col">
+             <div className="w-full flex justify-between items-center mb-4 shrink-0">
                 <span className="text-[9px] font-black uppercase tracking-widest text-[#00f0ff] italic flex items-center gap-2">
                    <Zap size={14} className="animate-pulse" /> P2P Bridge Authorized
                 </span>
                 <button 
                    onClick={() => setShowHelio(false)} 
-                   className="text-[9px] text-white/40 hover:text-white uppercase font-black tracking-widest px-4 py-2 rounded-full hover:bg-white/5 transition-all border border-white/5"
+                   className="text-[9px] text-white/40 hover:text-white uppercase font-black tracking-widest px-4 py-2 rounded-full hover:bg-white/5 border border-transparent hover:border-white/10 transition-all"
                 >
                    Return
                 </button>
              </div>
-             <div className="w-full flex-1 bg-black/40 rounded-3xl overflow-hidden shadow-2xl">
-               <HelioCheckout 
-                  config={{
-                    paylinkId: "69cd404d41511ff6dc103455",
-                    theme: { themeMode: "dark" },
-                    primaryColor: "#00f0ff",
-                    neutralColor: "#111111",
-                    amount: (parseFloat(customAmount) > 0 ? customAmount : "1.00") as any,
-                    onSuccess: () => {
-                       setShowHelio(false);
-                       window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
-                    }
-                  }}
-                />
+             <div className="w-full flex-1 bg-black/40 rounded-3xl overflow-hidden shadow-2xl border border-white/5 relative">
+               <div className="absolute inset-0">
+                 <HelioCheckout 
+                    config={{
+                      paylinkId: "69cd404d41511ff6dc103455",
+                      theme: { themeMode: "dark" },
+                      primaryColor: "#00f0ff",
+                      neutralColor: "#111111",
+                      amount: (parseFloat(customAmount) > 0 ? customAmount : "1.00") as any,
+                      onSuccess: () => {
+                         setShowHelio(false);
+                         window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+                      }
+                    }}
+                  />
+               </div>
              </div>
           </div>
         ) : (
