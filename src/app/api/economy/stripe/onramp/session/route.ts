@@ -53,18 +53,15 @@ export async function POST(req: Request) {
       body: params,
     });
 
-    const onrampSession = await response.json();
-
-    if (onrampSession.error) {
-       console.error('[OnrampBridge] Stripe Error:', onrampSession.error);
-       return NextResponse.json({ error: onrampSession.error.message }, { status: 400 });
+    if (!response.ok) {
+      console.error('[Stripe Onramp] Create Session Fail:', await response.text());
+      return NextResponse.json({ success: false, error: 'Uplink Terminal Denied by Stripe Node.' }, { status: 500 });
     }
 
-    return NextResponse.json({
-        success: true,
-        clientSecret: onrampSession.client_secret,
-        sessionId: onrampSession.id,
-        merchant: 'AllTheseFlows LLC'
+    const data = await response.json();
+    return NextResponse.json({ 
+      success: true, 
+      onrampUrl: data.onramp_url // 🔱 THE BULLETPROOF REDIRECT URL
     });
 
   } catch (err: any) {
