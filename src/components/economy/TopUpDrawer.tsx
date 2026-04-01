@@ -197,9 +197,9 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                           config={{
                             paylinkId: "69cd404d41511ff6dc103455",
                             theme: { themeMode: "dark" },
-                            primaryColor: "#ff00ff",
+                            primaryColor: "#00f0ff",
                             neutralColor: "#111111",
-                            amount: (parseFloat(customAmount) > 0 ? customAmount : undefined) as any,
+                            amount: (parseFloat(customAmount) > 0 ? customAmount : "1.00") as any,
                             onSuccess: () => {
                                setShowHelio(false);
                                window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
