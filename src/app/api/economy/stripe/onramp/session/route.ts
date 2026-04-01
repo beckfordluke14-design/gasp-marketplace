@@ -48,10 +48,10 @@ export async function POST(req: Request) {
     params.append('transaction_details[destination_network]', 'solana');
     params.append('transaction_details[wallet_addresses][solana]', treasury);
     
-    // 🛡️ EXCHANGE ALPHA: High-precision integer units required for exchange settlement
+    // 🛡️ HYBRID SIGNAL: Using the requested exchange amount with the accepted source currency
     const cents = Math.round(pkg.priceUsd * 100);
     params.append('transaction_details[source_exchange_amount]', cents.toString());
-    params.append('transaction_details[source_exchange_currency]', 'usd');
+    params.append('transaction_details[source_currency]', 'usd');
 
     params.append('metadata[userId]', userId);
     params.append('metadata[packageId]', packageId);
