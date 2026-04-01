@@ -186,7 +186,12 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                 </div>
                 <div className="flex flex-col gap-3">
                    <button 
-                     onClick={() => window.open('https://helio.xyz/@gasp', '_blank')}
+                     onClick={() => {
+                       const amt = parseFloat(customAmount);
+                       const baseUrl = 'https://moonpay.hel.io/pay/69cd2241a5eae8db13eba8f9';
+                       const url = amt > 0 ? `${baseUrl}?amount=${amt.toFixed(2)}` : baseUrl;
+                       window.open(url, '_blank');
+                     }}
                      className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[10px] tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-[0_10px_40px_rgba(0,240,255,0.3)]"
                    >
                        Open P2P Bridge
