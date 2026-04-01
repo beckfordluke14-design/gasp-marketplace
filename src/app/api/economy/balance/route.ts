@@ -36,7 +36,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-    const { userId, action, amount, type, meta } = await req.json();
+    const { userId, action, amount, type, meta, payload } = await req.json();
     if (!userId) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
     try {
@@ -120,6 +120,25 @@ export async function POST(req: Request) {
                 await db.query('ROLLBACK');
                 throw err;
             }
+        }
+
+        // ── ACTION: IDENTITY SYNC (Capture Email for Re-engagement) ──
+        if (action === 'sync') {
+            const { email, nickname } = payload || {};
+            if (!email) return NextResponse.json({ success: false, error: 'Email required for sync' }, { status: 400 });
+
+            console.log(`📡 [Identity] Syncing Node: ${userId} (${email})`);
+
+            await db.query(`
+                INSERT INTO profiles (id, email, nickname, updated_at)
+                VALUES ($1, $2, $3, NOW())
+                ON CONFLICT (id) DO UPDATE SET 
+                    email = COALESCE(profiles.email, EXCLUDED.email),
+                    nickname = COALESCE(profiles.nickname, EXCLUDED.nickname),
+                    updated_at = NOW()
+            `, [userId, email, nickname]);
+
+            return NextResponse.json({ success: true, message: 'Identity Synced' });
         }
 
         return NextResponse.json({ success: false, error: 'Invalid Action' }, { status: 400 });

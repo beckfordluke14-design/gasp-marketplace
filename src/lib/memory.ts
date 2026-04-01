@@ -23,13 +23,52 @@ export async function retrieveMemories(userId: string, personaId: string, queryE
       FROM persona_memories
       WHERE user_id = $1 AND persona_id = $2
       ORDER BY embedding <=> $3::vector
-      LIMIT 5
+      LIMIT 3
     `, [userId, personaId, `[${queryEmbedding.join(',')}]`]);
     return rows.filter(r => (r.distance || 1) < 0.5).map(r => r.memory_text);
   } catch (error) {
     console.error('[Memory Retrieval Error]:', error);
     return [];
   }
+}
+
+/**
+ * SHARED INTELLIGENCE: Pulls memories from ANY persona for this user.
+ * Allows "Gossip" or cross-persona awareness.
+ */
+export async function retrieveGlobalMemories(userId: string, queryEmbedding: number[], currentPersonaId: string) {
+  try {
+    const { rows } = await db.query(`
+      SELECT memory_text, persona_id, (embedding <=> $2::vector) as distance
+      FROM persona_memories
+      WHERE user_id = $1 AND persona_id != $3
+      ORDER BY embedding <=> $2::vector
+      LIMIT 2
+    `, [userId, `[${queryEmbedding.join(',')}]`, currentPersonaId]);
+    
+    return rows
+        .filter(r => (r.distance || 1) < 0.5)
+        .map(r => `(Heard via ${r.persona_id}): ${r.memory_text}`);
+  } catch (error) {
+    console.error('[Global Memory Retrieval Error]:', error);
+    return [];
+  }
+}
+
+export async function getEmbedding(text: string): Promise<number[] | null> {
+    try {
+        const embedUrl = `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GOOGLE_GEMINI_KEY}`;
+        const embedRes = await fetch(embedUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: { parts: [{ text }] } })
+        });
+        const embedData = await embedRes.json();
+        return embedData.embedding?.values || null;
+    } catch (err) {
+        console.error('[Memory] Embedding Failure:', err);
+        return null;
+    }
 }
 
 /**
@@ -54,14 +93,7 @@ export async function summarizeAndStore(messages: any[], userId: string, persona
     if (!summary) return;
 
     // Generate Embedding (text-embedding-004)
-    const embedUrl = `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GOOGLE_GEMINI_KEY}`;
-    const embedRes = await fetch(embedUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: { parts: [{ text: summary }] } })
-    });
-    const embedData = await embedRes.json();
-    const embeddingValues = embedData.embedding?.values;
+    const embeddingValues = await getEmbedding(summary);
     
     if (embeddingValues) {
         await storeMemory(userId, personaId, summary, embeddingValues);
@@ -71,5 +103,3 @@ export async function summarizeAndStore(messages: any[], userId: string, persona
     console.error('[Memory] Summarization Failure:', err);
   }
 }
-
-

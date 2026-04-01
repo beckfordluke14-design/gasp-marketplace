@@ -126,6 +126,8 @@ export default function ChatDrawer({
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
 
+    const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
     // 🛡️ FRONTEND CREDIT ENFORCEMENT: Block transmit if balance is depleted
     const COST_MESSAGE_TEXT = 50;
     if (!idToUse.startsWith('guest-') && currentBalance < COST_MESSAGE_TEXT) {
@@ -139,6 +141,8 @@ export default function ChatDrawer({
     setIsLoading(true);
     setIsTyping(true);
 
+    let activeConfig = { delayMultiplier: 1, typingStyle: 'monolith' };
+
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -147,6 +151,7 @@ export default function ChatDrawer({
           messages: [...messages, userMsg],
           userId: idToUse,
           personaId: profileId,
+          userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }),
       });
 
@@ -180,20 +185,16 @@ export default function ChatDrawer({
         buffer = lines.pop() || '';
 
         for (const line of lines) {
-          if (line.startsWith('0:')) {
-            try { 
-              const text = JSON.parse(line.slice(2)); 
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === 'assistant' && last.id.startsWith('ai-')) {
-                   return [...prev.slice(0, -1), { ...last, content: text }];
-                }
-                return [...prev, { id: 'ai-' + Date.now(), role: 'assistant', content: text, audio_script: isVoiceDetected ? '...' : null }];
-              });
-            } catch {}
-          } else if (line.startsWith('2:')) {
+          if (line.startsWith('2:')) {
             try {
               const event = JSON.parse(line.slice(2));
+              if (event?.type === 'config') {
+                 activeConfig = event;
+                 // 🧬 RANDOMIZED RESPONSE DELAY: 1.5s to 3.5s base, scaled by persona multiplier
+                 const baseDelay = 1500 + Math.random() * 2000;
+                 const finalDelay = baseDelay / activeConfig.delayMultiplier;
+                 await wait(finalDelay);
+              }
               if (event?.type === 'voice_note') {
                  console.log('📡 [Sovereign Stream] Voice Event Received:', !!event.audioUrl ? 'READY' : 'PENDING');
                  isVoiceDetected = true;
@@ -213,6 +214,36 @@ export default function ChatDrawer({
                         return prev;
                     });
                  }
+              }
+            } catch {}
+          } else if (line.startsWith('0:')) {
+            try { 
+              const text = JSON.parse(line.slice(2)); 
+              
+              if (activeConfig.typingStyle === 'burst') {
+                 // 🧬 BURST MODE: Split into multiple short messages rapidly
+                 const fragments = text.split('\n').filter((f: string) => f.trim().length > 0);
+                 for (let i = 0; i < fragments.length; i++) {
+                    const frag = fragments[i];
+                    setMessages(prev => [...prev, { 
+                        id: `ai-${Date.now()}-${i}`, 
+                        role: 'assistant', 
+                        content: frag,
+                        audio_script: (i === fragments.length - 1 && isVoiceDetected) ? '...' : null 
+                    }]);
+                    if (i < fragments.length - 1) {
+                        // Small pause between burst bubbles
+                        await wait(600 / activeConfig.delayMultiplier);
+                    }
+                 }
+              } else {
+                 setMessages(prev => {
+                   const last = prev[prev.length - 1];
+                   if (last?.role === 'assistant' && last.id.startsWith('ai-')) {
+                      return [...prev.slice(0, -1), { ...last, content: text }];
+                   }
+                   return [...prev, { id: 'ai-' + Date.now(), role: 'assistant', content: text, audio_script: isVoiceDetected ? '...' : null }];
+                 });
               }
             } catch {}
           }

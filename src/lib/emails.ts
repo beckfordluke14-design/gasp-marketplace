@@ -17,7 +17,7 @@ export async function sendNudgeEmail(email: string, personaName: string, message
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Gasp Syndicate <onboarding@resend.dev>', // 🛡️ Replace with nudge@gasp.fun once domain is verified in Resend dashboard
+      from: 'Gasp Syndicate <nudge@gasp.fun>', // 🛡️ Replace with nudge@gasp.fun once domain is verified in Resend dashboard
       to: email,
       subject: `${personaName} is thinking about you...`,
       html: `

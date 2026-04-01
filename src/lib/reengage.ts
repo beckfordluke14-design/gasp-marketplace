@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { initialPersonas } from './profiles';
+import { getPersonas } from './sovereign';
 import { getEnvironmentContext } from './governor';
 import { isDaylightHours } from './governor/drip';
 import { sendNudgeEmail } from './emails';
@@ -17,10 +18,21 @@ export async function runSpontaneousPingWorker() {
 
   if (!sessions || sessions.length === 0) return;
 
+  // 🧬 SOVEREIGN PERSONA SYNC: Merge Hardcoded + Database Personas
+  const dbPersonas = await getPersonas();
+  const allPersonas = [...initialPersonas];
+  
+  // Add DB personas if they don't already exist in initialPersonas (by ID)
+  dbPersonas.forEach(p => {
+    if (!allPersonas.find(ap => ap.id === p.id)) {
+      allPersonas.push(p);
+    }
+  });
+
   const now = new Date();
 
   for (const session of sessions) {
-    const p = initialPersonas.find(p => p.id === session.persona_id);
+    const p = allPersonas.find(p => p.id === session.persona_id);
     if (!p) continue;
 
     // SYSTEM 3: DAYLIGHT GATE
@@ -51,15 +63,28 @@ export async function runSpontaneousPingWorker() {
 }
 
 async function triggerSpontaneousPing(session: any, persona: any) {
-  const vibes = [
-    "so bored rn",
-    "what u doing?", 
-    "u got pics? let me see u",
-    "thinking about u mmm",
-    "u went ghost on me parce lol"
-  ];
-  
-  const ping = vibes[Math.floor(Math.random() * vibes.length)];
+  // 🛰️ NEURAL RE-ENGAGEMENT: Dynamically generate ping based on personality
+  let ping = "thinking about u mmm";
+  try {
+     const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GOOGLE_GENERATIVE_AI_API_KEY}`;
+     const prompt = `You are ${persona.name}. Your vibe is: ${persona.vibe}. 
+     You are reaching out to a user you haven't talked to in a few hours. 
+     Write a very short (max 12 words) message that is in character, slightly flirty, and high status. 
+     Don't use generic AI greetings. Use your cultural background if mentioned in your vibe. 
+     Be curious or demanding. No hashtags.`;
+
+     const res = await fetch(googleUrl, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+     });
+     
+     const data = await res.json();
+     const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+     if (aiText.trim()) ping = aiText.trim();
+  } catch (e) {
+     console.error('[Governor] AI Ping Gen Failed:', e);
+  }
   
   // 🛡️ IDENTITY PULSE: Fetch user email from ledger (Railway)
   const { rows: profiles } = await db.query(

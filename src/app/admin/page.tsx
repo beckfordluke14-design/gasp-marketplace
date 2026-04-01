@@ -189,6 +189,37 @@ export default function AdminHub() {
       cta: 'Review',
       ctaIcon: <ArrowRight size={14} />,
     },
+    {
+      label: 'Neural Nudge Test',
+      description: 'Trigger a manual persona re-engagement email to yourself to test the Resend gateway and layout.',
+      action: async () => {
+         const adminKey = localStorage.getItem('admin_gasp_key');
+         if (!adminKey) {
+            alert('Master Secret Key Required');
+            return;
+         }
+         const email = prompt('Enter recipient email for test nudge:');
+         if (!email) return;
+
+         try {
+            const res = await fetch('/api/admin/test-nudge', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+               body: JSON.stringify({ email, personaId: 'valentina-lima' })
+            });
+            const data = await res.json();
+            if (data.success) alert('Neural Nudge Dispatched! Check your inbox.');
+            else alert('Neural Nudge Failed: ' + data.error);
+         } catch (e: any) {
+            alert('Network Error: ' + e.message);
+         }
+      },
+      icon: <ClipboardList size={20} className="text-[#ff00ff]" />,
+      color: 'text-[#ff00ff]',
+      glow: 'from-[#ff00ff]/10 to-[#ff00ff]/5 border-[#ff00ff]/20',
+      cta: 'Trigger Test',
+      ctaIcon: <Zap size={14} />,
+    },
   ];
 
   return (

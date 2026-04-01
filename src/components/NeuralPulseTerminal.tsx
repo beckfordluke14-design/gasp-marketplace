@@ -31,7 +31,7 @@ export default function NeuralPulseTerminal({ followingIds, profiles, unreadCoun
             // Mocking for testing if DB is empty - Using REAL IDs from initialProfiles
             const firstId = initialProfiles[0]?.id || 'syndicate-node';
             setNews([
-                { id: '1', persona_id: firstId, title: 'ALPHA NODE BREACH: SECTOR 07 // HIGH-HEAT', heat: 'High' },
+                { id: '1', persona_id: firstId, title: 'ALPHA NODE BREACH: SECTOR 07 // HIGH-SIGNAL', heat: 'High' },
                 { id: '2', persona_id: firstId, title: 'SECURE DATA UPLINK: CLASSIFIED BROADCAST LEAK', heat: 'Critical' },
                 { id: '3', persona_id: firstId, title: 'TARGET NODE ACTIVITY SPIKE: REGION 12', heat: 'Standard' }
             ]);

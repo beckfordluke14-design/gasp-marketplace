@@ -169,7 +169,7 @@ function GlobalFeedItem({
           ) : (
              <div className="relative z-10 w-full h-full flex items-center justify-center p-6 md:p-12">
                 <div className="max-w-xl w-full p-8 md:p-10 rounded-[2.5rem] bg-black/60 border border-white/5 backdrop-blur-3xl relative overflow-hidden shadow-2xl">
-                   <div className="absolute top-0 left-6 px-4 py-1 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-b-lg">Sector Intel // High-Heat</div>
+                   <div className="absolute top-0 left-6 px-4 py-1 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-b-lg">Sector Intel // High-Signal</div>
                    <div className="space-y-6 pt-4">
                       <div className="flex items-center gap-3" onClick={() => onSelectProfile(profile.id)}>
                          <img src={proxyImg(profile.image)} className="w-12 h-12 rounded-full border border-[#00f0ff]/40" alt="" />
@@ -211,7 +211,7 @@ function GlobalFeedItem({
                     )}
                  </div>
                  <div className="flex items-center gap-4">
-                    {/* 🏮 HEAT: The Like Signal */}
+                    {/* 🏮 LIKE: The Signal */}
                     <button 
                       onClick={(e) => { 
                         e.stopPropagation(); 
@@ -220,7 +220,7 @@ function GlobalFeedItem({
                       className={`w-16 h-16 rounded-2xl border flex flex-col items-center justify-center backdrop-blur-md transition-all active:scale-90 ${hasLiked ? 'bg-red-500/10 border-red-500/40 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'bg-black/20 border-white/10 text-white/40 hover:border-red-500/50 hover:text-white'}`}
                     >
                        <Heart size={22} fill={hasLiked ? 'currentColor' : 'none'} />
-                       <span className="text-[7px] font-black uppercase tracking-widest mt-1">Heat</span>
+                       <span className="text-[7px] font-black uppercase tracking-widest mt-1">Like</span>
                     </button>
 
                     {/* 🛰️ FAVORITE: The Shadow Syndicate Signal */}
