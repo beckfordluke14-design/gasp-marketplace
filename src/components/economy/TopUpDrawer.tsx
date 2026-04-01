@@ -1,10 +1,11 @@
 'use client';
 
-import { X, Diamond, ShieldCheck, ArrowRight, Clock, CreditCard, Globe, Zap } from 'lucide-react';
+import { X, Diamond, ShieldCheck, ArrowRight, Clock, CreditCard, Globe, Zap, Wallet } from 'lucide-react';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import SovereignCheckout from './SovereignCheckout';
+import { HelioCheckout } from '@heliofi/checkout-react';
 
 interface TopUpDrawerProps {
   onClose: () => void;
@@ -21,6 +22,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [showHelio, setShowHelio] = useState(false);
 
   // 🧬 CUSTOM CREDIT LOGIC
   const [customAmount, setCustomAmount] = useState<string>('');
@@ -185,17 +187,35 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     </div>
                 </div>
                 <div className="flex flex-col gap-3">
-                   <button 
-                     onClick={() => {
-                       const amt = parseFloat(customAmount);
-                       const baseUrl = 'https://hel.io/pay/69cd2e9c8a77d8d75027d9ce';
-                       const url = amt > 0 ? `${baseUrl}?amount=${amt.toFixed(2)}` : baseUrl;
-                       window.open(url, '_blank');
-                     }}
-                     className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[10px] tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-[0_10px_40px_rgba(0,240,255,0.3)]"
-                   >
-                       Open P2P Bridge
-                   </button>
+                   {showHelio ? (
+                      <div className="w-full mt-4 border border-white/10 rounded-[2rem] p-4 bg-black/40 backdrop-blur-3xl overflow-hidden min-h-[450px]">
+                        <div className="flex justify-between items-center mb-4 px-2">
+                           <span className="text-[8px] font-black uppercase tracking-widest text-[#00f0ff]">Native P2P Bridge</span>
+                           <button onClick={() => setShowHelio(false)} className="text-white/40 hover:text-white"><X size={14} /></button>
+                        </div>
+                        <HelioCheckout 
+                          config={{
+                            paylinkId: "69cd404d41511ff6dc103455",
+                            theme: { themeMode: "dark" },
+                            primaryColor: "#ff00ff",
+                            neutralColor: "#111111",
+                            amount: (parseFloat(customAmount) > 0 ? customAmount : undefined) as any,
+                            onSuccess: () => {
+                               setShowHelio(false);
+                               window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+                            }
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => setShowHelio(true)}
+                        className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[10px] tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-[0_10px_40px_rgba(0,240,255,0.3)] flex items-center justify-center gap-2"
+                      >
+                          <Wallet size={16} />
+                          Open P2P Bridge
+                      </button>
+                    )}
                    <p className="text-[7px] text-white/20 text-center font-black uppercase tracking-widest italic">Credits granted automatically on confirmation</p>
                 </div>
             </div>

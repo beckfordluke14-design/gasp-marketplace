@@ -62,6 +62,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${outfit.variable} ${syncopate.variable}`}>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <script src="https://embed.hel.io/v1/checkout.js" defer></script>
       </head>
       <body className="bg-black overflow-x-hidden antialiased selection:bg-[#ff00ff]/30 selection:text-white">
         <Providers>
