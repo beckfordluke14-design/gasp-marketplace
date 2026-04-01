@@ -62,11 +62,10 @@ export async function POST(req: Request) {
     });
 
     const rawResult = await response.text();
+    console.log('[Stripe Onramp] Raw response status:', response.status);
+    console.log('[Stripe Onramp] Raw response body:', rawResult);
 
     if (!response.ok) {
-        console.error('[Stripe Onramp] Create Session Fail:', rawResult);
-        
-        // 🔱 SOVEREIGN FEEDBACK: Forced reflection of the raw node signal
         let detailedError = rawResult;
         try {
             const parsed = JSON.parse(rawResult);
@@ -80,10 +79,21 @@ export async function POST(req: Request) {
     }
 
     const data = JSON.parse(rawResult);
-    return NextResponse.json({ 
-      success: true, 
-      onrampUrl: data.onramp_url
-    });
+    
+    // 🔱 CHECK ALL POSSIBLE URL FIELDS — Stripe varies by version
+    const onrampUrl = data.redirect_url || data.onramp_url || data.url || data.hosted_url;
+    
+    console.log('[Stripe Onramp] Session data keys:', Object.keys(data));
+    console.log('[Stripe Onramp] URL found:', onrampUrl);
+    
+    if (!onrampUrl) {
+      return NextResponse.json({ 
+        success: false, 
+        error: `SESSION_CREATED_BUT_NO_URL: ${JSON.stringify(data)}` 
+      }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, onrampUrl });
 
   } catch (err: any) {
     console.error('[OnrampBridge] Fatal Fault:', err);
