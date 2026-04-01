@@ -43,10 +43,15 @@ export async function POST(req: Request) {
     const params = new URLSearchParams();
     params.append('customer_ip_address', clientIp);
     
-    // 🛡️ MINIMALIST PROTOCOL: Stripping all constrained parameters for 100% node stability
+    // 🛡️ DESTINATION: Lock to USDC on Solana
     params.append('transaction_details[destination_currency]', 'usdc');
     params.append('transaction_details[destination_network]', 'solana');
     params.append('transaction_details[wallet_addresses][solana]', treasury);
+
+    // 🛡️ AMOUNT: Pre-fill exact tier price in cents (USD)
+    // source_exchange_amount confirmed accepted by Stripe node
+    const cents = Math.round(pkg.priceUsd * 100);
+    params.append('transaction_details[source_exchange_amount]', cents.toString());
 
     params.append('metadata[userId]', userId);
     params.append('metadata[packageId]', packageId);
