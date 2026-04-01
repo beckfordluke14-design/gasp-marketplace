@@ -284,12 +284,12 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
           </span>
         </button>
 
-        {/* O: Tip */}
+        {/* I: Support */}
         <button className="group flex flex-col items-center gap-2">
           <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-[#FF007F]/50 transition-all shadow-xl group-hover:shadow-[#FF007F]/10">
             <Circle size={18} className="text-white/40 group-hover:text-[#FF007F] transition-colors" />
           </div>
-          <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/20 group-hover:text-white/40">tip</span>
+          <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/20 group-hover:text-white/40">support</span>
         </button>
 
         {/* I: Chat */}

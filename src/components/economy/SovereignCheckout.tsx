@@ -83,8 +83,8 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
           <ArrowRight size={20} className="rotate-180 text-white/40" />
         </button>
         <div className="flex flex-col">
-          <span className="text-[8px] font-black uppercase text-[#00f0ff] tracking-widest">Settlement Gate Active</span>
-          <h3 className="text-2xl font-syncopate font-black uppercase text-white italic">Choose Rail</h3>
+          <span className="text-[8px] font-black uppercase text-[#00f0ff] tracking-widest italic">Verification Active</span>
+          <h3 className="text-2xl font-syncopate font-black uppercase text-white italic">Secure Checkout</h3>
         </div>
       </div>
 
@@ -100,14 +100,14 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
       <div className="p-5 md:p-8 rounded-[2rem] bg-white/5 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 shadow-2xl relative overflow-hidden group">
         <div className="absolute inset-0 bg-gradient-to-br from-[#00f0ff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <div className="flex flex-col gap-1 relative z-10 shrink-0">
-          <span className="text-[9px] md:text-[11px] uppercase font-black text-white/40 tracking-[0.3em] italic mb-1">Terminal Tier: {pkg.label}</span>
+          <span className="text-[9px] md:text-[11px] uppercase font-black text-white/40 tracking-[0.3em] italic mb-1">Package: {pkg.label}</span>
           <div className="flex flex-col items-start leading-none">
             <span className="text-3xl md:text-5xl font-syncopate font-black text-white italic">{totalCredits.toLocaleString()}</span>
-            <span className="text-[8px] md:text-[10px] font-black text-[#00f0ff] uppercase tracking-[0.3em] italic animate-pulse mt-1 md:mt-2">SYSTEM CREDITS</span>
+            <span className="text-[8px] md:text-[10px] font-black text-[#00f0ff] uppercase tracking-[0.3em] italic animate-pulse mt-1 md:mt-2">CREDITS</span>
           </div>
         </div>
         <div className="flex flex-col items-start md:items-end relative z-10 border-t md:border-t-0 border-white/5 pt-4 md:pt-0 shrink-0">
-          <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white/20 mb-1">Settlement Amount</span>
+          <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white/20 mb-1">Total Due</span>
           <span className="text-2xl md:text-5xl font-syncopate font-black text-[#ffea00] italic whitespace-nowrap tracking-tighter group-hover:text-white transition-all">${pkg.priceUsd}</span>
         </div>
       </div>
@@ -123,7 +123,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
         >
           <div className="flex flex-col gap-1">
              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Option 01</span>
-             <span className="text-sm font-syncopate font-black uppercase text-white italic">Card Bridge</span>
+             <span className="text-sm font-syncopate font-black uppercase text-white italic">Pay with Card</span>
           </div>
 
           <div className="flex gap-2">
@@ -141,8 +141,8 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
           <Globe size={32} className="text-[#00f0ff] group-hover:scale-110 transition-transform duration-500" />
           <div className="flex flex-col gap-1">
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Option 02</span>
-            <span className="text-sm font-syncopate font-black uppercase text-white italic">Crypto Universal</span>
-            <span className="text-[7px] font-black uppercase text-white/30 tracking-widest">P2P + HELIO ONRAMP</span>
+            <span className="text-sm font-syncopate font-black uppercase text-white italic">Pay with Crypto</span>
+            <span className="text-[7px] font-black uppercase text-white/30 tracking-widest">P2P + HELIO</span>
           </div>
 
           {parseFloat(pkg.priceUsd.toString()) < 19.99 ? (

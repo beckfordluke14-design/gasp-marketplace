@@ -45,7 +45,7 @@ export async function POST(req: Request) {
             updated_at = NOW()
     `, [userId, pkg.credits]);
 
-    // 3. 🧬 THE AIRDROP LEDGER: Log $GASPAI Stake (1:1 Reserved Model)
+    // 3. 🧬 THE AIRDROP LEDGER: Log $GASPAI Activity (1:1 Loyalty Model)
     try {
         await db.query(`
             UPDATE profiles 

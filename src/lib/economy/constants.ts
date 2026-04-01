@@ -25,21 +25,20 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
     id: 'tier_starter',
     priceUsd: 4.99,
     credits: 5000,
-    label: 'Starter Access Node',
-    // No helioPayLink — Helio minimum is too high for this tier. Card Bridge only.
+    label: 'Starter Access',
   },
   { 
     id: 'tier_entry', 
     priceUsd: 19.99, 
     credits: 20000, 
-    label: 'Standard Entry Node', 
+    label: 'Member Access', 
     helioPayLink: 'https://moonpay.hel.io/pay/69ca493b6858b763c861473d'
   },
   { 
     id: 'tier_session', 
     priceUsd: 24.99, 
     credits: 30000, 
-    label: 'Operational Prime Link', 
+    label: 'Prime Access', 
     isPopular: true, 
     helioPayLink: 'https://moonpay.hel.io/pay/69ca499a00ba8a6f4a64973e'
   },
@@ -47,21 +46,21 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
     id: 'tier_whale',
     priceUsd: 99.99,
     credits: 120000,
-    label: 'Enterprise Archive Node',
+    label: 'GASP Elite',
     helioPayLink: 'https://moonpay.hel.io/pay/69ca49e727ac0ea87fc7ea46'
   },
   {
     id: 'tier_reserve',
     priceUsd: 249.99,
     credits: 350000,
-    label: 'Strategic Reserve Node',
+    label: 'GASP Archive Pro',
     helioPayLink: 'https://moonpay.hel.io/pay/69ca4aa9034fcd42d6dc3220'
   },
   {
     id: 'tier_master',
     priceUsd: 999.99,
     credits: 1500000,
-    label: 'Elite Terminal Master',
+    label: 'GASP Master Member',
     helioPayLink: 'https://moonpay.hel.io/pay/69ca4b3b27ac0ea87fc7f1e5'
   }
 ];

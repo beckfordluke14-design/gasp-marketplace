@@ -12,33 +12,33 @@ import Link from 'next/link';
 export default function CustomerGuide() {
     const steps = [
         {
-            title: 'Identity Activation',
+            title: 'Join the Club',
             icon: <ShieldCheck size={24} className="text-[#00f0ff]" />,
-            description: 'Secure your node. Sign in using Privy with your Email or Wallet to establish your unique sovereign presence.',
+            description: 'Sign in with your Email or Wallet to create your account and start exploring.',
             color: 'border-[#00f0ff]/20 bg-[#00f0ff]/5'
         },
         {
-            title: 'Market Intelligence',
+            title: 'The Feed',
             icon: <Users size={24} className="text-[#ff00ff]" />,
-            description: 'Explore the Syndicate Feed. Follow your favorite Personas to track their latest intel and broadacasts in real-time.',
+            description: 'Follow your favorite creators to see their latest news and posts in real-time.',
             color: 'border-[#ff00ff]/20 bg-[#ff00ff]/5'
         },
         {
-            title: 'Credit Uplink',
+            title: 'Add Credits',
             icon: <Coins size={24} className="text-[#ffea00]" />,
-            description: 'Load your wallet with Syndicate Credits. Credits are used to unlock exclusive communications and "Alpha" media.',
+            description: 'Load up on Gasp Credits. Use them to unlock exclusive messages and premium media.',
             color: 'border-[#ffea00]/20 bg-[#ffea00]/5'
         },
         {
-            title: 'The Vault',
+            title: 'The Archive',
             icon: <Lock size={24} className="text-red-500" />,
-            description: 'Unlock "Vault" content to reveal high-fidelity assets. Every unlock uses credits and strengthens the platform’s revenue pulse.',
+            description: 'Unlock exclusive "Archive" content to see high-quality photos and videos.',
             color: 'border-red-500/20 bg-red-500/5'
         },
         {
-            title: '$GASPai Match Protocol',
+            title: 'Gasp Rewards',
             icon: <Zap size={24} className="text-[#ff9d00]" />,
-            description: 'Every credit spent is matched 1:1 with $GASPai. These rewards track your contribution to the system and grant future access.',
+            description: 'Every credit you spend is matched 1:1 with points. These rewards show your status in the community.',
             color: 'border-[#ff9d00]/20 bg-[#ff9d00]/5'
         }
     ];
@@ -56,19 +56,19 @@ export default function CustomerGuide() {
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.3em] text-white/50 italic mb-6"
                     >
                         <ShieldCheck size={12} className="text-[#00f0ff]" />
-                        Sovereign Access Guide v1.0
+                        Member Access Guide v1.0
                     </motion.div>
                     <motion.h1 
                         initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
                         className="text-4xl sm:text-7xl md:text-8xl font-syncopate font-black italic tracking-tighter uppercase leading-none"
                     >
-                        Master the <span className="text-[#ff00ff]">Syndicate</span>
+                        Explore <span className="text-[#ff00ff]">Gasp</span>
                     </motion.h1>
                     <motion.p 
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
                         className="text-sm md:text-base text-white/40 font-black italic uppercase tracking-widest leading-relaxed"
                     >
-                        Your blueprint for exploring the world’s most lethal AI marketplace.
+                        How to get the most out of your experience.
                     </motion.p>
                 </div>
 
@@ -103,23 +103,23 @@ export default function CustomerGuide() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="p-8 bg-white/[0.03] border border-white/10 rounded-[2rem] space-y-4">
                         <MessageSquare size={24} className="text-[#00f0ff]" />
-                        <h4 className="text-sm font-syncopate font-black uppercase italic italic">Neural Chat</h4>
+                        <h4 className="text-sm font-syncopate font-black uppercase italic italic">Direct Messaging</h4>
                         <p className="text-[10px] text-white/30 uppercase tracking-widest leading-relaxed italic">
-                            Every chat message is powered by the Sovereign Neural Core. Response speed and fidelity are optimized for immersion.
+                            Connect with creators directly. Every message is personalized to provide a realistic and immersive experience.
                         </p>
                     </div>
                     <div className="p-8 bg-white/[0.03] border border-white/10 rounded-[2rem] space-y-4">
                         <Activity size={24} className="text-[#ff00ff]" />
-                        <h4 className="text-sm font-syncopate font-black uppercase italic italic">The Revenue Pulse</h4>
+                        <h4 className="text-sm font-syncopate font-black uppercase italic italic">Member Activity</h4>
                         <p className="text-[10px] text-white/30 uppercase tracking-widest leading-relaxed italic">
-                            The platform tracks Cumulative Match Volume. No tokens are burned—simply matched 1:1 into your $GASPai governance layer.
+                            The platform tracks your engagement and rewards you with points. No tokens—just simple rewards for being active.
                         </p>
                     </div>
                     <div className="p-8 bg-white/[0.03] border border-white/10 rounded-[2rem] space-y-4">
                         <Heart size={24} className="text-red-500" />
-                        <h4 className="text-sm font-syncopate font-black uppercase italic italic">Loyalty Alpha</h4>
+                        <h4 className="text-sm font-syncopate font-black uppercase italic italic">Loyalty Rewards</h4>
                         <p className="text-[10px] text-white/30 uppercase tracking-widest leading-relaxed italic">
-                            Engaging with personas increases your Affinity Level, unlocking unique regional voice notes and high-heat transmissions.
+                            Talking to creators increases your loyalty level, unlocking voice notes and exclusive content in the archive.
                         </p>
                     </div>
                 </div>
@@ -134,28 +134,28 @@ export default function CustomerGuide() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[
                             {
-                                q: "What are Syndicate Credits used for?",
-                                a: "Credits are the native fuel of the platform. Use them to unlock 'Vault' content, initiate high-fidelity chats, and access exclusive broadcasts from your followed personas."
+                                q: "What are Gasp Credits used for?",
+                                a: "Credits are the currency of the site. Use them to unlock 'Archive' content, message creators, and get exclusive posts."
                             },
                             {
-                                q: "How do I earn $GASPai?",
-                                a: "Every single credit you spend on the platform is matched 1:1 with $GASPai. These are awarded automatically to your profile as a reward for contributing to the system's growth."
+                                q: "How do I earn points?",
+                                a: "Every credit you spend is matched 1:1 with points. These are added automatically to your profile as a reward."
                             },
                             {
-                                q: "Is my identity and data secure?",
-                                a: "Yes. We use Privy's sovereign identity protocol. Your wallet and email interactions are encrypted, and you maintain full control over your digital node at all times."
+                                q: "Is my data secure?",
+                                a: "Yes. We use standard secure login protocols. Your wallet and email are encrypted and safe."
                             },
                             {
-                                q: "Are the personas real human creators?",
-                                a: "Each persona is a unique neural entity powered by the Sovereign Core. They use high-fidelity regional voice synthesis and advanced SLANG models to interact with you 24/7."
+                                q: "Are the creators real?",
+                                a: "Each creator is a unique AI persona. They use realistic voice messages and smart behavior to chat with you 24/7."
                             },
                             {
-                                q: "Can I refund my credit purchases?",
-                                a: "Due to the digital nature of neural processing and content unlocking, credit purchases are generally non-refundable once deployed into the matrix."
+                                q: "Can I get a refund?",
+                                a: "Due to the digital nature of the content and messaging, all credit purchases are final once they are used."
                             },
                             {
-                                q: "How do I increase my Affinity Level?",
-                                a: "Consistency is key. Frequently interacting with a persona through chat and unlocking their vault assets will increase your affinity, granting you priority access to their rarest intel."
+                                q: "How do I unlock voice notes?",
+                                a: "The more you chat and unlock archive items, the higher your loyalty level goes—unlocking voice notes and rarer content."
                             }
                         ].map((faq, i) => (
                             <div key={i} className="p-8 rounded-[2rem] bg-white/[0.02] border border-white/5 space-y-3 group hover:border-[#00f0ff]/20 transition-all">

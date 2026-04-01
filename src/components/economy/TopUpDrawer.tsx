@@ -22,20 +22,20 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   const [history, setHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  // 🧬 CUSTOM STAKE LOGIC
+  // 🧬 CUSTOM CREDIT LOGIC
   const [customAmount, setCustomAmount] = useState<string>('');
-  const handleCustomStake = () => {
+  const handleCustomAddCredits = () => {
     const amount = parseFloat(customAmount);
     if (isNaN(amount) || amount < 4.99) return;
     setSelectedPkgId(`custom_${amount}`);
   };
 
-  // 🧬 RECOVERY PORTAL: Check for unsaved stakes
-  const [activeStake, setActiveStake] = useState<any>(null);
+  // 🧬 RECOVERY PORTAL: Check for unsaved orders
+  const [activeOrder, setActiveOrder] = useState<any>(null);
   useEffect(() => {
-    const stored = localStorage.getItem('gasp_active_stake');
+    const stored = localStorage.getItem('gasp_active_order');
     if (stored) {
-        try { setActiveStake(JSON.parse(stored)); } catch { }
+        try { setActiveOrder(JSON.parse(stored)); } catch { }
     }
   }, []);
 
@@ -105,20 +105,20 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
           <SovereignCheckout 
             userId={userId}
             packageId={selectedPkgId}
-            onSuccess={() => { setIsSuccess(true); setActiveStake(null); }}
+            onSuccess={() => { setIsSuccess(true); setActiveOrder(null); }}
             onCancel={() => setSelectedPkgId(null)}
           />
         ) : (
           <div className="p-5 md:p-8 space-y-6 md:space-y-8 animate-in fade-in duration-500">
             {/* 🧬 RECOVERY PORTAL INDICATOR */}
-            {activeStake && activeStake.packageId && (
+            {activeOrder && activeOrder.packageId && (
                <button 
-                 onClick={() => setSelectedPkgId(activeStake.packageId)}
+                 onClick={() => setSelectedPkgId(activeOrder.packageId)}
                  className="w-full p-6 rounded-[2rem] bg-[#ffea00]/10 border border-[#ffea00]/30 flex items-center justify-between group hover:bg-[#ffea00]/20 transition-all animate-pulse"
                >
                   <div className="flex flex-col items-start gap-1">
-                     <span className="text-[10px] font-black uppercase text-[#ffea00] tracking-widest italic group-hover:scale-110 transition-transform">Pending Stake Detected</span>
-                     <span className="text-[8px] text-[#ffea00]/60 uppercase font-black tracking-widest">Resume your Sovereign Bridge Session</span>
+                     <span className="text-[10px] font-black uppercase text-[#ffea00] tracking-widest italic group-hover:scale-110 transition-transform">Pending Order Detected</span>
+                     <span className="text-[8px] text-[#ffea00]/60 uppercase font-black tracking-widest">Resume your Credit Purchase Session</span>
                   </div>
                   <ArrowRight size={20} className="text-[#ffea00]" />
                </button>
@@ -139,8 +139,8 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
             <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-6 shadow-2xl relative overflow-hidden group">
                 <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#ff6b00]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="flex items-center justify-between">
-                    <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b00] italic">Custom Node Infusion</h4>
-                    <span className="text-[7px] font-black uppercase text-white/20 tracking-widest italic">Institutional Grade</span>
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b00] italic">Custom Credit Purchase</h4>
+                    <span className="text-[7px] font-black uppercase text-white/20 tracking-widest italic">Digital Goods</span>
                 </div>
                 
                 <div className="flex flex-col gap-4">
@@ -157,18 +157,18 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                         </div>
 
                         <button 
-                          onClick={handleCustomStake}
+                          onClick={handleCustomAddCredits}
                           disabled={!customAmount || parseFloat(customAmount) < 4.99}
                           className="h-16 px-8 rounded-2xl bg-[#ff6b00] disabled:bg-white/5 disabled:text-white/20 text-black font-black uppercase text-[10px] tracking-widest transition-all hover:scale-105 active:scale-95 shadow-[0_10px_30px_rgba(255,107,0,0.2)]"
                         >
-                            Infuse
+                            Add Credits
                         </button>
                     </div>
 
                     {parseFloat(customAmount) > 30000 && (
                       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-4 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-2xl mt-2 animate-pulse">
                          <p className="text-[9px] font-black uppercase text-[#ffea00] tracking-widest leading-loose text-center">
-                            🏮 WHALE ALERT: LARGE INFUSION DETECTED. WE RECOMMEND USING "CRYPTO LINK" FOR AMOUNTS OVER $30,000 TO AVOID REJECTION.
+                            🏮 WHALE ALERT: LARGE ORDER DETECTED. WE RECOMMEND USING "CRYPTO LINK" FOR AMOUNTS OVER $30,000 TO AVOID REJECTION.
                          </p>
                       </motion.div>
                     )}

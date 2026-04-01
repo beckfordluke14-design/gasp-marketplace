@@ -10,18 +10,18 @@ const syncopate = Syncopate({ subsets: ["latin"], weight: ['400', '700'], variab
 const SITE_URL = 'https://gasp.fun';
 
 export const metadata: Metadata = {
-  title: 'GASP // Synthetic Influencer Archive Terminal',
-  description: 'Institutional Managed Interface for High-Heat Neural Signal Synchronization and Restricted Archival Retrieval.',
+  title: 'GASP // Premium Archive',
+  description: 'Exclusive digital media archive and premium creator feed.',
   manifest: "/manifest.json",
   metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: '$GASPai | Strategic Intelligence Terminal',
-    description: "The world's first collaborative intelligence network. Fueling the sovereign weather board through direct utility matching and $GASPai rewards.",
+    title: 'GASP // Premium Archive',
+    description: "Exclusive digital media archive and premium creator feed.",
     url: SITE_URL,
-    siteName: '$GASPai',
+    siteName: 'GASP',
     images: [
       {
         url: '/og-image.png',
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '$GASPai | Strategic Intelligence Terminal',
-    description: "The world's first collaborative intelligence network. Fueling the sovereign weather board through direct utility matching and $GASPai rewards.",
+    title: 'GASP // Premier Digital Media Archive',
+    description: "The official GASP Archive. High-status creator content, exclusive dispatches, and $GASPai member rewards.",
     images: ['/og-image.png'],
   },
   icons: {

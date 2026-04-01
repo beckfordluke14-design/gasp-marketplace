@@ -1,42 +1,31 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import { Zap, Wallet, Activity, User, Star, Menu, RadioReceiver } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import CoinBalance from './economy/CoinBalance';
-import ProfileSearch from './ProfileSearch';
-import { usePrivy } from '@privy-io/react-auth';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Menu, X, Bell, User, LayoutDashboard, Settings, 
+  LogOut, Shield, Zap, Search, RadioReceiver, Database
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useUser } from './providers/UserProvider';
-import StoriesRow from './StoriesRow';
 
-export default function Header({ 
-  onOpenTopUp = () => {}, 
-  deadIds = new Set(), 
-  setDeadIds = () => {}, 
-  onOpenMenu = () => {},
-  profiles = [],
-  onSelectProfile = () => {}
-}: { 
-  onOpenTopUp?: () => void, 
-  deadIds?: Set<string>, 
-  setDeadIds?: (ids: any) => void, 
-  onOpenMenu?: () => void,
-  profiles?: any[],
-  onSelectProfile?: (id: string) => void
-}) {
-  const router = useRouter();
-  const { login, authenticated } = usePrivy();
-  const { user, profile } = useUser();
+interface HeaderProps {
+    onOpenMenu?: () => void;
+}
+
+/**
+ * 🛰️ SIAT: SYNTHETIC INFLUENCER ARCHIVE TERMINAL (V12)
+ * High-Status premium branding with integrated Ticker.
+ */
+export default function Header({ onOpenMenu }: HeaderProps) {
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
+  const { user, profile } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showAdmin, setShowAdmin] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const isGranted = document.cookie.includes('admin_gasp_override=granted');
-    setIsAdmin(isGranted);
-    setShowAdmin(isGranted);
+    setIsAdmin(document.cookie.includes('admin_gasp_override=granted'));
   }, []);
   
   const navItems = [
@@ -51,11 +40,12 @@ export default function Header({
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] flex flex-col pointer-events-none">
+        
         {/* 🧬 GASP FEED: LATEST ACTIVITY */}
-        <div className="h-6 md:h-7 bg-[#ff00ff]/10 border-b border-white/5 flex items-center overflow-hidden whitespace-nowrap pointer-events-auto">
+        <div className="h-6 md:h-7 bg-[#ff00ff]/10 border-b border-white/5 flex items-center overflow-hidden whitespace-nowrap pointer-events-auto shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
             <div className="px-4 h-full bg-[#ff00ff] flex items-center gap-2 shrink-0 z-10 shadow-[5px_0_15px_#ff00ff]">
-                <RadioReceiver size={10} className="text-white animate-pulse" />
-                <span className="text-[7px] md:text-[8px] font-black uppercase text-white tracking-widest italic">Latest News</span>
+                <Database size={10} className="text-white animate-pulse" />
+                <span className="text-[7px] md:text-[8px] font-black uppercase text-white tracking-widest italic">GASP FEED</span>
             </div>
             
             <motion.div 
@@ -77,11 +67,11 @@ export default function Header({
                 ))}
             </motion.div>
         </div>
- 
-        {/* Navigation Bar */}
-        <header className="h-12 md:h-14 bg-black flex items-center justify-between px-6 md:px-12 pointer-events-auto transition-all">
+
+        {/* SIAT Navigation Bar */}
+        <header className="h-12 md:h-14 bg-black/80 backdrop-blur-3xl flex items-center justify-between px-6 md:px-12 pointer-events-auto transition-all border-b border-white/5 shadow-2xl">
             
-            {/* Logo & Mobile Menu */}
+            {/* Logo Section */}
             <div className="flex items-center gap-4 md:gap-10 pointer-events-auto">
                 <button 
                   onClick={onOpenMenu}
@@ -89,45 +79,17 @@ export default function Header({
                 >
                    <Menu size={18} />
                 </button>
-                <div className="flex flex-col">
-                  <motion.h1 
-                    onClick={() => router.push('/')}
-                    initial={{ scale: 0.8, opacity: 0, filter: 'blur(10px)' }}
-                    animate={{ 
-                      scale: 0.9, 
-                      opacity: 1, 
-                      filter: 'blur(0px)',
-                      textShadow: [
-                        "0 0 0px #fff",
-                        "5px 0 10px #ff00ff",
-                        "-5px 0 10px #00f0ff",
-                        "0 0 0px #fff"
-                      ],
-                      x: [0, -2, 2, -1, 0]
-                    }}
-                    transition={{ 
-                      duration: 0.8, 
-                      ease: "easeOut",
-                      textShadow: { duration: 0.4, repeat: 1 },
-                      x: { duration: 0.2, repeat: 2 }
-                    }}
-                    className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white font-outfit italic cursor-pointer group leading-none relative shadow-[0_0_30px_rgba(255,255,255,0.1)]"
-                  >
-                    GASP<span className="text-[#ff00ff]">.</span>
-                     
-                     <motion.span 
-                       animate={{ opacity: [0, 0.4, 0], x: [-10, 10, -10] }}
-                       transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                       className="absolute inset-0 text-[#00f0ff] mix-blend-screen pointer-events-none select-none opacity-0"
-                     >
-                       GASP.
-                     </motion.span>
-                  </motion.h1>
-                  <p className="hidden md:block text-[6px] font-black uppercase text-[#00f0ff] tracking-[0.4em] mt-0.5 animate-pulse ml-1 italic">Strategic Intelligence Node</p>
+                
+                <div className="flex flex-col gap-0.5 cursor-pointer group" onClick={() => router.push('/')}>
+                  <div className="flex items-baseline gap-1.5">
+                    <h1 className="text-xl md:text-2xl font-syncopate font-black italic tracking-tighter text-white uppercase leading-none group-hover:text-[#ff00ff] transition-colors">GASP</h1>
+                    <span className="text-[8px] font-black uppercase text-[#ff00ff] tracking-widest italic animate-pulse">Archive</span>
+                  </div>
+                  <span className="hidden md:block text-[6px] font-black uppercase text-white/20 tracking-[0.4em] group-hover:text-white/40 transition-colors italic">Premium Media Terminal</span>
                 </div>
 
-                {/* Main Nav */}
-                <nav className="hidden xl:flex items-center gap-6">
+                {/* Main Nav Items */}
+                <nav className="hidden xl:flex items-center gap-6 ml-4">
                     {navItems.map((item) => (
                       <button 
                         key={item.label}
@@ -147,8 +109,6 @@ export default function Header({
 
             {/* User Actions */}
             <div className="flex items-center gap-1 md:gap-2 pointer-events-auto">
-                
-                {/* User Profile */}
                 {user ? (
                    <div 
                      onClick={() => router.push('/vault')}
@@ -158,57 +118,19 @@ export default function Header({
                           <User size={12} className="text-[#00f0ff]" />
                        </div>
                        <span className="hidden md:block text-[8px] font-black uppercase tracking-[0.1em] text-white/40 group-hover:text-white transition-colors truncate max-w-[100px]">
-                          {profile?.nickname || 'ACCOUNT'}
+                          {profile?.nickname || 'Account'}
                        </span>
                    </div>
                 ) : (
                    <button 
-                      onClick={() => {
-                         console.log("🏁 [Sovereign] Initializing Social Pop-up Node...");
-                         login();
-                      }}
-                      className="h-7 md:h-9 px-4 bg-white/5 border border-white/10 rounded-full flex items-center justify-center gap-2 hover:bg-white/10 active:scale-95 transition-all group"
+                    onClick={() => router.push('/login')}
+                    className="px-5 py-2 md:py-2.5 rounded-full bg-white text-black text-[9px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)]"
                    >
-                      <User size={10} className="text-white/40 group-hover:text-[#ff00ff] transition-colors" />
-                      <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] text-white/40 group-hover:text-white">Join</span>
+                     Sign In
                    </button>
-                )}
-
-                {/* Add Credits (Desktop Only - CoinBalance covers mobile) */}
-                {authenticated && (
-                  <button 
-                    onClick={() => onOpenTopUp()}
-                    className="hidden lg:flex h-9 px-6 bg-[#00f0ff] text-black text-[8px] font-black uppercase tracking-[0.1em] rounded-full hover:shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:scale-105 active:scale-95 transition-all font-syncopate italic shadow-[0_0_10px_rgba(0,240,255,0.2)]"
-                  >
-                     TOP UP
-                  </button>
-                )}
-
-                <motion.div 
-                   onClick={() => onOpenTopUp()} 
-                   whileTap={{ scale: 0.95 }}
-                   className="cursor-pointer hover:bg-white/5 active:bg-white/10 rounded-2xl px-2 py-1 transition-all flex items-center"
-                >
-                   <CoinBalance onOpenTopUp={() => onOpenTopUp()} />
-                </motion.div>
-
-                {/* Admin Toggle */}
-                {isAdmin && (
-                   <div 
-                     onClick={() => {
-                        const next = !showAdmin;
-                        setShowAdmin(next);
-                        window.dispatchEvent(new CustomEvent('gasp_admin_toggle', { detail: next }));
-                     }}
-                     title={showAdmin ? "Deactivate Command Mode" : "Activate Command Mode"}
-                     className={`w-7 h-7 md:w-8 md:h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer ${showAdmin ? 'bg-[#ffea00]/10 text-[#ffea00] shadow-[0_0_15px_#ffea0044]' : 'bg-white/5 text-white/20 hover:text-white'}`}
-                   >
-                      <Star size={14} fill={showAdmin ? 'currentColor' : 'none'} />
-                   </div>
                 )}
             </div>
         </header>
-
     </div>
   );
 }
