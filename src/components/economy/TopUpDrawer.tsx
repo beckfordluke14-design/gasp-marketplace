@@ -132,6 +132,8 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                       primaryColor: "#00f0ff",
                       neutralColor: "#111111",
                       amount: (parseFloat(customAmount) > 0 ? customAmount : "1.00"),
+                      display: "all",
+                      allowedCurrencies: ["SOL", "USDC", "USDT"],
                       canChangeAmount: true,
                       canChangeToken: true,
                       canChangeNetwork: true,
