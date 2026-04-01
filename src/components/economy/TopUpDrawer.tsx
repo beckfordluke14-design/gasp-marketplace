@@ -320,11 +320,11 @@ function NativeRedirectHandler({ userId, customAmount }: { userId: string, custo
     const vaultAddress = "DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS"; // 🛡️ DGQ TREASURY VAULT
 
     const handleRedirect = () => {
-        // 🧬 ONE-CLICK SOLANA PAY PROTOCOL
-        // Triggers the user's wallet directly with amount and vault pre-filled.
-        // No confusing trading pages or charts. Just 'Confirm & Pay'.
-        const solanaPayUrl = `solana:${vaultAddress}?amount=${customAmount}&label=GASP%20ARCHIVE&message=Credit%20Refuel%20ID:${userId.slice(0,8)}`;
-        window.location.href = solanaPayUrl;
+        // 🧬 UNIVERSAL INSTITUTIONAL GATEWAY
+        // Guarantees load across all browsers/OS. 
+        // Bypasses protocol failures while pre-filling USDC settlement.
+        const jupDirectUrl = `https://jup.ag/swap/SOL-USDC?outputAmount=${customAmount}&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&recipient=${vaultAddress}`;
+        window.open(jupDirectUrl, '_blank');
     };
 
     const copyAddress = () => {
