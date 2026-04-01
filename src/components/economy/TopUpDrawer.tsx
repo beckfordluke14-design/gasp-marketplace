@@ -346,6 +346,11 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
             </div>
           </div>
         )}
+      </div>
+    </div>
+    </div>
+  );
+}
 
 /**
  * 🛰️ JUPITER INITIALIZER NODE
@@ -362,7 +367,7 @@ function JupiterInitializer({ userId, customAmount, onVerifySuccess }: {
         const initJup = () => {
             const jup = (window as any).Jupiter;
             if (jup && document.getElementById('jupiter-terminal-mount')) {
-              if (clearInterval) clearInterval(mountPoll);
+              if (mountPoll) clearInterval(mountPoll);
               
               jup.init({
                   displayMode: "integrated",
@@ -405,16 +410,8 @@ function JupiterInitializer({ userId, customAmount, onVerifySuccess }: {
         };
 
         mountPoll = setInterval(initJup, 1000);
-        return () => { if (clearInterval) clearInterval(mountPoll); };
+        return () => { if (mountPoll) clearInterval(mountPoll); };
     }, [userId, customAmount]);
 
     return null;
 }
-      </div>
-    </div>
-    </div>
-  );
-}
-
-
-
