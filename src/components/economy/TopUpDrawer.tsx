@@ -125,19 +125,21 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                 </button>
              </div>
              <div className="w-full flex-1 overflow-y-auto rounded-3xl bg-black/40 border border-white/5 shadow-2xl">
-               <HelioCheckout 
-                  config={{
-                    paylinkId: "69cd404d41511ff6dc103455",
-                    theme: { themeMode: "dark" },
-                    primaryColor: "#00f0ff",
-                    neutralColor: "#111111",
-                    amount: (parseFloat(customAmount) > 0 ? customAmount : "1.00") as any,
-                    onSuccess: () => {
-                       setShowHelio(false);
-                       window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
-                    }
-                  }}
-                />
+                 <HelioCheckout 
+                    config={{
+                      paylinkId: "69cd404d41511ff6dc103455",
+                      theme: { themeMode: "dark" },
+                      primaryColor: "#00f0ff",
+                      neutralColor: "#111111",
+                      amount: (parseFloat(customAmount) > 0 ? customAmount : "1.00"),
+                      canChangeAmount: true,
+                      canChangeToken: true,
+                      onSuccess: () => {
+                         setShowHelio(false);
+                         window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+                      }
+                    }}
+                  />
              </div>
           </div>
         ) : (
