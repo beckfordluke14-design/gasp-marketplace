@@ -11,17 +11,26 @@ import { useUser } from './providers/UserProvider';
 
 interface HeaderProps {
     onOpenMenu?: () => void;
+    onOpenTopUp?: () => void;
 }
 
 /**
  * 🛰️ SIAT: SYNTHETIC INFLUENCER ARCHIVE TERMINAL (V12)
  * High-Status premium branding with integrated Ticker.
  */
-export default function Header({ onOpenMenu }: HeaderProps) {
+export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { user, profile } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const handleBalanceRefresh = () => {
+      // Re-fetch handled by provider
+    };
+    window.addEventListener('gasp_balance_refresh', handleBalanceRefresh);
+    return () => window.removeEventListener('gasp_balance_refresh', handleBalanceRefresh);
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -110,17 +119,47 @@ export default function Header({ onOpenMenu }: HeaderProps) {
             {/* User Actions */}
             <div className="flex items-center gap-1 md:gap-2 pointer-events-auto">
                 {user ? (
-                   <div 
-                     onClick={() => router.push('/vault')}
-                     className="flex items-center gap-2 p-1 pr-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all cursor-pointer group"
-                   >
-                       <div className="w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-[#00f0ff]/40 group-hover:border-[#00f0ff] transition-all bg-black flex items-center justify-center shrink-0">
-                          <User size={12} className="text-[#00f0ff]" />
-                       </div>
-                       <span className="hidden md:block text-[8px] font-black uppercase tracking-[0.1em] text-white/40 group-hover:text-white transition-colors truncate max-w-[100px]">
-                          {profile?.nickname || 'Account'}
-                       </span>
-                   </div>
+                   <>
+                    {/* 🧬 CREDIT FUEL GAUGE */}
+                    <div 
+                      onClick={onOpenTopUp}
+                      className="flex items-center gap-2 p-1 pl-2 md:pl-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all cursor-pointer group h-9 md:h-10 ml-2"
+                    >
+                        <div className="flex items-center gap-1.5">
+                            <Zap size={14} className="text-[#ff6b00] animate-pulse" />
+                            <div className="flex flex-col">
+                                <span className="text-[10px] md:text-[11px] font-black text-white leading-none italic">
+                                   {(profile?.credit_balance || 0).toLocaleString()}
+                                </span>
+                                <span className="text-[6px] font-black text-white/40 uppercase tracking-[0.2em] leading-tight">CREDITS</span>
+                            </div>
+                        </div>
+                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#ff6b00] flex items-center justify-center text-black shadow-lg group-hover:scale-110 active:scale-95 transition-all">
+                            <AnimatePresence>
+                                <motion.div
+                                  initial={{ scale: 0.8 }}
+                                  animate={{ scale: 1 }}
+                                  key={profile?.credit_balance}
+                                >
+                                    <span className="text-sm font-black">+</span>
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
+                    </div>
+
+                    {/* Profile Section */}
+                    <div 
+                      onClick={() => router.push('/vault')}
+                      className="flex items-center gap-2 p-1 pr-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all cursor-pointer group"
+                    >
+                        <div className="w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-[#00f0ff]/40 group-hover:border-[#00f0ff] transition-all bg-black flex items-center justify-center shrink-0">
+                           <User size={12} className="text-[#00f0ff]" />
+                        </div>
+                        <span className="hidden md:block text-[8px] font-black uppercase tracking-[0.1em] text-white/40 group-hover:text-white transition-colors truncate max-w-[80px]">
+                           {profile?.nickname || 'Account'}
+                        </span>
+                    </div>
+                   </>
                 ) : (
                    <button 
                     onClick={() => router.push('/login')}
