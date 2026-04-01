@@ -18,7 +18,7 @@ import { trackEvent } from '@/lib/telemetry';
 import TopUpDrawer from '@/components/economy/TopUpDrawer';
 import ChatDrawer from '@/components/ChatDrawer';
 import { useUser } from '@/components/providers/UserProvider';
-import MobileBottomNav from '@/components/MobileBottomNav';
+import NeuralPulseTerminal from '@/components/NeuralPulseTerminal';
 import NeuralPulseTerminal from '@/components/NeuralPulseTerminal';
 import FloatingChatTerminal from '@/components/FloatingChatTerminal';
 import { Star } from 'lucide-react';
@@ -386,13 +386,6 @@ function MarketplaceContent() {
             onClose={() => setOpenChatIds([])}
          />
 
-         <MobileBottomNav 
-            onOpenTopUp={() => setIsTopUpOpen(true)}
-            onSelectChat={() => setShowProfileList(true)}
-            followingIds={following}
-            unreadCounts={unreadCounts}
-            profiles={randomizedProfiles}
-         />
      </main>
   );
 }
