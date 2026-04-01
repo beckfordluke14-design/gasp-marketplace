@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Diamond, ShieldCheck, ArrowRight, Clock, CreditCard, Globe } from 'lucide-react';
+import { X, Diamond, ShieldCheck, ArrowRight, Clock, CreditCard, Globe, Zap } from 'lucide-react';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -135,43 +135,63 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                <ShieldCheck size={16} className="text-[#ffea00]/30" />
             </div>
 
-            {/* 🧬 CUSTOM INFUSION INPUT (PRIORITY) */}
-            <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-6 shadow-2xl relative overflow-hidden group">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#ff6b00]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            {/* 🧬 PREMIUM CARD ACCESS (MIN $19.97) */}
+            <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-6 shadow-2xl relative overflow-hidden group hover:bg-white/[0.07] transition-all">
                 <div className="flex items-center justify-between">
-                    <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b00] italic">Custom Credit Purchase</h4>
-                    <span className="text-[7px] font-black uppercase text-white/20 tracking-widest italic">Digital Goods</span>
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b00] italic">Premium Onramp Access</h4>
+                    <span className="text-[7px] font-black uppercase text-white/20 tracking-widest italic">Min. $1.00</span>
                 </div>
                 
                 <div className="flex flex-col gap-4">
                     <div className="flex gap-3">
-                        <div className="flex-1 relative">
-                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-white/40 font-black text-xl">$</div>
+                        <div className="flex-1 relative font-syncopate">
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 font-black text-xl">$</div>
                             <input 
                               type="number"
                               value={customAmount}
                               onChange={(e) => setCustomAmount(e.target.value)}
-                              placeholder="Min. $4.99"
+                              placeholder="1.00"
                               className="w-full h-16 bg-black/40 border border-white/10 rounded-2xl px-12 text-xl font-black text-white outline-none focus:border-[#ff6b00]/50 transition-all placeholder:text-white/10"
                             />
                         </div>
 
                         <button 
                           onClick={handleCustomAddCredits}
-                          disabled={!customAmount || parseFloat(customAmount) < 4.99}
+                          disabled={!customAmount || parseFloat(customAmount) < 1.00}
                           className="h-16 px-8 rounded-2xl bg-[#ff6b00] disabled:bg-white/5 disabled:text-white/20 text-black font-black uppercase text-[10px] tracking-widest transition-all hover:scale-105 active:scale-95 shadow-[0_10px_30px_rgba(255,107,0,0.2)]"
                         >
-                            Add Credits
+                            Onramp Access
                         </button>
                     </div>
+                </div>
+            </div>
 
-                    {parseFloat(customAmount) > 30000 && (
-                      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-4 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-2xl mt-2 animate-pulse">
-                         <p className="text-[9px] font-black uppercase text-[#ffea00] tracking-widest leading-loose text-center">
-                            🏮 WHALE ALERT: LARGE ORDER DETECTED. WE RECOMMEND USING "CRYPTO LINK" FOR AMOUNTS OVER $30,000 TO AVOID REJECTION.
-                         </p>
-                      </motion.div>
-                    )}
+            {/* 🧬 STRATEGIC P2P BRIDGE (NO MINIMUMS) */}
+            <div className="p-8 bg-[#00f0ff]/5 border border-[#00f0ff]/20 rounded-[2.5rem] space-y-6 relative overflow-hidden group hover:bg-[#00f0ff]/10 transition-all cursor-pointer shadow-xl">
+                 <div className="flex items-center justify-between">
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-[#00f0ff] italic">Strategic P2P Link</h4>
+                    <div className="flex items-center gap-2">
+                       <ShieldCheck size={10} className="text-[#00f0ff] animate-pulse" />
+                       <span className="text-[7px] font-black uppercase text-white/20 tracking-widest italic tracking-[0.3em]">NO MINIMUMS // ZERO FEES</span>
+                    </div>
+                </div>
+                <div className="flex items-center gap-6">
+                    <div className="w-14 h-14 rounded-2xl bg-[#00f0ff]/20 flex items-center justify-center border border-[#00f0ff]/40 shadow-[0_0_50px_rgba(0,240,255,0.3)]">
+                        <Zap size={28} className="text-[#00f0ff] animate-pulse" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <p className="text-[10px] text-white/80 font-black uppercase tracking-widest leading-relaxed">Direct SOL / USDC Bridge</p>
+                        <p className="text-[8px] text-white/40 font-bold italic">Perfect for small amounts ($1+). Node-to-node fulfillment.</p>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-3">
+                   <button 
+                     onClick={() => window.open('https://helio.xyz/@gasp', '_blank')}
+                     className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[10px] tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-[0_10px_40px_rgba(0,240,255,0.3)]"
+                   >
+                       Open P2P Bridge
+                   </button>
+                   <p className="text-[7px] text-white/20 text-center font-black uppercase tracking-widest italic">Credits granted automatically on confirmation</p>
                 </div>
             </div>
 
