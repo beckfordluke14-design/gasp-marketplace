@@ -110,6 +110,35 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
             onSuccess={() => { setIsSuccess(true); setActiveOrder(null); }}
             onCancel={() => setSelectedPkgId(null)}
           />
+        ) : showHelio ? (
+          <div className="p-5 md:p-6 animate-in fade-in duration-500 flex flex-col min-h-[450px]">
+             <div className="w-full flex justify-between items-center mb-6">
+                <span className="text-[9px] font-black uppercase tracking-widest text-[#00f0ff] italic flex items-center gap-2">
+                   <Zap size={14} className="animate-pulse" /> P2P Bridge Authorized
+                </span>
+                <button 
+                   onClick={() => setShowHelio(false)} 
+                   className="text-[9px] text-white/40 hover:text-white uppercase font-black tracking-widest px-4 py-2 rounded-full hover:bg-white/5 transition-all border border-white/5"
+                >
+                   Return
+                </button>
+             </div>
+             <div className="w-full flex-1 bg-black/40 rounded-3xl overflow-hidden shadow-2xl">
+               <HelioCheckout 
+                  config={{
+                    paylinkId: "69cd404d41511ff6dc103455",
+                    theme: { themeMode: "dark" },
+                    primaryColor: "#00f0ff",
+                    neutralColor: "#111111",
+                    amount: (parseFloat(customAmount) > 0 ? customAmount : "1.00") as any,
+                    onSuccess: () => {
+                       setShowHelio(false);
+                       window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+                    }
+                  }}
+                />
+             </div>
+          </div>
         ) : (
           <div className="p-5 md:p-8 space-y-6 md:space-y-8 animate-in fade-in duration-500">
             {/* 🧬 RECOVERY PORTAL INDICATOR */}
@@ -187,35 +216,13 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     </div>
                 </div>
                 <div className="flex flex-col gap-3">
-                   {showHelio ? (
-                      <div className="w-full mt-4 border border-white/10 rounded-[2rem] p-4 bg-black/40 backdrop-blur-3xl overflow-hidden min-h-[450px]">
-                        <div className="flex justify-between items-center mb-4 px-2">
-                           <span className="text-[8px] font-black uppercase tracking-widest text-[#00f0ff]">Native P2P Bridge</span>
-                           <button onClick={() => setShowHelio(false)} className="text-white/40 hover:text-white"><X size={14} /></button>
-                        </div>
-                        <HelioCheckout 
-                          config={{
-                            paylinkId: "69cd404d41511ff6dc103455",
-                            theme: { themeMode: "dark" },
-                            primaryColor: "#00f0ff",
-                            neutralColor: "#111111",
-                            amount: (parseFloat(customAmount) > 0 ? customAmount : "1.00") as any,
-                            onSuccess: () => {
-                               setShowHelio(false);
-                               window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
-                            }
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <button 
-                        onClick={() => setShowHelio(true)}
-                        className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[10px] tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-[0_10px_40px_rgba(0,240,255,0.3)] flex items-center justify-center gap-2"
-                      >
-                          <Wallet size={16} />
-                          Open P2P Bridge
-                      </button>
-                    )}
+                   <button 
+                     onClick={() => setShowHelio(true)}
+                     className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[10px] tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-[0_10px_40px_rgba(0,240,255,0.3)] flex items-center justify-center gap-2"
+                   >
+                       <Wallet size={16} />
+                       Open P2P Bridge
+                   </button>
                    <p className="text-[7px] text-white/20 text-center font-black uppercase tracking-widest italic">Credits granted automatically on confirmation</p>
                 </div>
             </div>
