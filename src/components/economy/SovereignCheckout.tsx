@@ -49,12 +49,13 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
         });
       }
 
-      // Exact pattern from Stripe docs — pre-fills amount, currency, network
+      // Exact pattern from Stripe docs — pre-fills amount, currency, network, and treasury destination
       const standaloneOnramp = (window as any).StripeOnramp.Standalone({
         source_currency: 'usd',
         amount: { source_amount: pkg.priceUsd.toString() },
         destination_currency: 'usdc',
         destination_network: 'solana',
+        destination_wallet_address: 'H7BvF9o1yWh7ZBej7N3y5K27vY6LqzE7S6jXF8A9Z1K1', 
       });
       window.location.href = standaloneOnramp.getUrl();
 
