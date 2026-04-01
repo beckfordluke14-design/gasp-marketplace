@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Diamond, Trophy, ShieldCheck, Loader2, ArrowRight } from 'lucide-react';
+import { X, Diamond, ShieldCheck, ArrowRight, Clock, CreditCard, Globe } from 'lucide-react';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -18,6 +18,9 @@ interface TopUpDrawerProps {
 export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   const [selectedPkgId, setSelectedPkgId] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   // 🧬 CUSTOM STAKE LOGIC
   const [customAmount, setCustomAmount] = useState<string>('');
@@ -35,6 +38,22 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
         try { setActiveStake(JSON.parse(stored)); } catch { }
     }
   }, []);
+
+  const loadHistory = async () => {
+    if (historyLoading) return;
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`/api/economy/history?userId=${userId}`);
+      const data = await res.json();
+      if (data.success) setHistory(data.transactions);
+    } catch {}
+    setHistoryLoading(false);
+  };
+
+  const toggleHistory = () => {
+    if (!showHistory) loadHistory();
+    setShowHistory(v => !v);
+  };
 
   if (isSuccess) {
     return (
@@ -185,17 +204,59 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                 </div>
             </div>
 
-            {/* Compliance / Info Array */}
+            {/* 🧬 PAYMENT HISTORY */}
+            <div className="mt-4 border-t border-white/5 pt-6">
+              <button
+                onClick={toggleHistory}
+                className="w-full flex items-center justify-between group"
+              >
+                <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">
+                  <Clock size={12} /> Payment History
+                </span>
+                <ArrowRight size={14} className={`text-white/20 transition-transform duration-300 ${showHistory ? 'rotate-90' : ''}`} />
+              </button>
+
+              {showHistory && (
+                <div className="mt-4 space-y-2">
+                  {historyLoading ? (
+                    <p className="text-[9px] text-white/20 uppercase font-black tracking-widest text-center py-4 animate-pulse">Loading transactions...</p>
+                  ) : history.length === 0 ? (
+                    <p className="text-[9px] text-white/20 uppercase font-black tracking-widest text-center py-4">No transactions yet.</p>
+                  ) : history.map((tx) => (
+                    <div key={tx.id} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                      <div className="flex items-center gap-3">
+                        {tx.provider === 'stripe_onramp' 
+                          ? <CreditCard size={14} className="text-white/30" />
+                          : <Globe size={14} className="text-[#00f0ff]/50" />}
+                        <div className="flex flex-col">
+                          <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">
+                            +{tx.amount.toLocaleString()} credits
+                          </span>
+                          <span className="text-[7px] text-white/20 font-black uppercase tracking-widest">
+                            ${tx.meta?.actualAmountUsd?.toFixed(2) || '—'} · {tx.provider === 'stripe_onramp' ? 'Card' : 'Crypto'}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-[7px] text-white/20 font-black">
+                        {new Date(tx.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Compliance */}
             <div className="p-6 rounded-2xl border border-white/5 bg-white/[0.02] space-y-4">
                 <h5 className="text-[9px] font-black uppercase tracking-[0.25em] text-[#ff6b00] flex items-center gap-2">
                     <ShieldCheck size={12} /> SECURE FULFILLMENT G-V1.9
                 </h5>
                 <p className="text-[8px] text-white/10 uppercase tracking-[0.3em] mt-2 block leading-loose border-t border-white/5 pt-4 font-black italic">
-                    Digital Media Credits Issued by AllTheseFlows Strategic Media LLC. Instant Fulfillment. 15% Bonus Applied to every Tier. 💎
+                    Digital Media Credits Issued by AllTheseFlows Strategic Media LLC. Instant Fulfillment. 💎
                 </p>
-                  <p className="text-[7px] text-white/20 uppercase tracking-[0.2em] font-black text-center italic">
-                     Fulfilled by AllTheseFlows LLC. Card / Crypto / Apple Pay Settlement Managed by Stripe & MoonPay. 🛡️
-                  </p>
+                <p className="text-[7px] text-white/20 uppercase tracking-[0.2em] font-black text-center italic">
+                   Fulfilled by AllTheseFlows LLC. Card / Crypto Settlement managed by Stripe & Helio. 🛡️
+                </p>
             </div>
           </div>
         )}
