@@ -344,7 +344,7 @@ function JupiterInitializer({ userId, customAmount, onVerifySuccess }: {
             if (jup && document.getElementById('jupiter-terminal-mount')) {
                 if (mountPoll) clearInterval(mountPoll);
                 
-                const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
+                const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://rpc.ankr.com/solana";
 
                 jup.init({
                     displayMode: "integrated",
