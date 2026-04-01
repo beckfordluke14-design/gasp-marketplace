@@ -63,15 +63,15 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
         <div className="w-24 h-24 rounded-full bg-[#ff6b00]/20 flex items-center justify-center mb-8 border border-[#ff6b00]/40 shadow-[0_0_60px_rgba(16,185,129,0.3)]">
           <Diamond size={48} className="text-[#ff6b00] animate-pulse" />
         </div>
-        <h3 className="text-3xl font-syncopate font-black uppercase italic text-white mb-4">Access Authorized</h3>
+        <h3 className="text-3xl font-syncopate font-black uppercase italic text-white mb-4">Transfer Complete</h3>
         <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-black leading-relaxed px-6">
-          The Terminal has verified your digital settlement. System Credits + 15% Bonus successfully infused into your active identity node. 🧬🛡️
+          Your digital settlement is confirmed. Credits + 15% Bonus successfully added to your account. See you in the Archive. 🧿🛡️
         </p>
         <button 
           onClick={onClose}
           className="mt-16 w-full h-16 rounded-2xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
         >
-          Return to Console
+          Back to the Archive
         </button>
       </div>
     );
@@ -171,7 +171,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
             {/* 🧬 STRATEGIC P2P BRIDGE (NO MINIMUMS) */}
             <div className="p-8 bg-[#00f0ff]/5 border border-[#00f0ff]/20 rounded-[2.5rem] space-y-6 relative overflow-hidden group hover:bg-[#00f0ff]/10 transition-all cursor-pointer shadow-xl">
                  <div className="flex items-center justify-between">
-                    <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-[#00f0ff] italic">Strategic P2P Link</h4>
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-[#00f0ff] italic">P2P Bridge</h4>
                     <div className="flex items-center gap-2">
                        <ShieldCheck size={10} className="text-[#00f0ff] animate-pulse" />
                        <span className="text-[7px] font-black uppercase text-white/20 tracking-widest italic tracking-[0.3em]">NO MINIMUMS // ZERO FEES</span>
@@ -220,9 +220,9 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                 </div>
             </div>
 
-            {/* 🧬 SIMPLIFIED TIER SELECTION */}
+            {/* 🧬 SIMPLIFIED SELECTION */}
             <div className="space-y-4 pt-4">
-               <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white/40 italic">Or Select Asset Tier</h4>
+               <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white/40 italic">Or Select Credit Bundle</h4>
                <div className="grid gap-3">
                   {CREDIT_PACKAGES.filter(p => ['tier_starter', 'tier_entry', 'tier_whale', 'tier_master'].includes(p.id)).map((pkg) => (
                     <button
@@ -240,11 +240,11 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                         {pkg.id === 'tier_master' && (
                             <span className="text-[9px] font-black uppercase text-[#ff6b00] tracking-[0.2em] mb-3 flex items-center gap-2">
                                 <Diamond size={10} fill="#ff6b00" />
-                                Syndicate Elite
+                                Archive Elite
                             </span>
                         )}
                         <span className="text-[10px] font-black uppercase text-white/40 tracking-widest leading-none">
-                            {pkg.id === 'tier_starter' ? 'Starter Access' : pkg.id === 'tier_entry' ? 'Member Access' : pkg.id === 'tier_whale' ? 'Elite Access' : 'Archive Master'}
+                            {pkg.id === 'tier_starter' ? 'Starter Access' : pkg.id === 'tier_entry' ? 'Member Access' : pkg.id === 'tier_whale' ? 'Elite Access' : 'Full Archive Access'}
                         </span>
                         <span className="text-3xl font-syncopate font-bold text-white mt-1 italic leading-none">
                             {Math.floor(pkg.credits * 1.15).toLocaleString()}

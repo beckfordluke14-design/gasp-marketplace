@@ -85,7 +85,7 @@ export default function Header({ onOpenMenu }: HeaderProps) {
                     <h1 className="text-xl md:text-2xl font-syncopate font-black italic tracking-tighter text-white uppercase leading-none group-hover:text-[#ff00ff] transition-colors">GASP</h1>
                     <span className="text-[8px] font-black uppercase text-[#ff00ff] tracking-widest italic animate-pulse">Archive</span>
                   </div>
-                  <span className="hidden md:block text-[6px] font-black uppercase text-white/20 tracking-[0.4em] group-hover:text-white/40 transition-colors italic">Premium Media Terminal</span>
+                  <span className="hidden md:block text-[6px] font-black uppercase text-white/20 tracking-[0.4em] group-hover:text-white/40 transition-colors italic">Synthetic Influencer Archive Terminal</span>
                 </div>
 
                 {/* Main Nav Items */}

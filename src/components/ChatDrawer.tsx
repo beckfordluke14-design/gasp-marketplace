@@ -519,9 +519,8 @@ export default function ChatDrawer({
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8 no-scrollbar scroll-smooth bg-transparent">
             {chatTab === 'chat' ? (
               <div className="space-y-8">
-                {/* 📟 SYSTEM UPLINK: The 'Leaker' Perspective Anchor */}
                 <div className="flex flex-col items-center justify-center gap-3 py-6 border-b border-white/5 opacity-40">
-                   <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/40 italic">Secure Encrypted Chat</p>
+                   <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/40 italic">Connected to the Archive</p>
                 </div>
 
                 {messages.map((msg: any, idx: number) => {
