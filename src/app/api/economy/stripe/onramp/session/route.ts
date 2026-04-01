@@ -2,107 +2,77 @@ import { NextResponse } from 'next/server';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 
 /**
- * 🛡️ SOVEREIGN STRIPE CRYPTO ONRAMP (Embedded)
- * Identity: AllTheseFlows LLC (d.b.a. AllTheseFlows Strategic Media)
- * Objective: Formal Fiat-to-Crypto Settlement
+ * 🛡️ SOVEREIGN STRIPE ONRAMP SESSION
+ * Per official docs: https://docs.stripe.com/crypto/onramp/stripe-hosted
+ * The session API returns a redirect_url.
+ * Pre-selection of currency/amount is handled client-side via StripeOnramp.Standalone() JS SDK.
  */
 
 export async function POST(req: Request) {
   try {
-    const { packageId, userId, walletAddress } = await req.json();
+    const { packageId, userId } = await req.json();
 
     if (!process.env.STRIPE_SECRET_KEY) {
-        return NextResponse.json({ error: 'Uplink Disconnected (Missing API Key)' }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'STRIPE_KEY_MISSING' }, { status: 500 });
     }
 
-    // Identify the package for amount/metadata
-    let pkg;
+    // Resolve package
+    let priceUsd: number;
+    let credits: number;
+    let label: string;
+
     if (packageId.startsWith('custom_')) {
-        const val = parseFloat(packageId.split('_')[1]);
-        pkg = { priceUsd: val, credits: Math.floor(val * 15) };
+      const val = parseFloat(packageId.split('_')[1]);
+      priceUsd = val;
+      credits = Math.floor(val * 15);
+      label = 'Custom Terminal Infusion';
     } else {
-        pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
-    }
-    
-    if (!pkg) return NextResponse.json({ error: 'Sector Intel Missing (Invalid Package)' }, { status: 400 });
-
-    // 🧬 ONRAMP SESSION CREATE (Manual Fetch - Corrected Params)
-    // identity: AllTheseFlows LLC
-    // Strategy: Direct Treasury Infusion (Merchant-Owned Address)
-    const treasury = 'H7BvF9o1yWh7ZBej7N3y5K27vY6LqzE7S6jXF8A9Z1K1'; // 🔱 GLOBAL TREASURY NODE
-
-    // 🛡️ IP RESOLVER: Stripe rejects 127.0.0.1. We must provide a valid public client node.
-    let clientIp = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
-                  req.headers.get('x-real-ip') || 
-                  '1.1.1.1'; // 🛰️ CLOUDFLARE PUBLIC ASSET (Safe Placeholder)
-
-    if (clientIp === '127.0.0.1' || clientIp === '::1') {
-      clientIp = '8.8.8.8'; // 🔭 GOOGLE PUBLIC ASSET (Safe Placeholder for localhost/dev)
+      const found = CREDIT_PACKAGES.find(p => p.id === packageId);
+      if (!found) return NextResponse.json({ success: false, error: 'INVALID_PACKAGE' }, { status: 400 });
+      priceUsd = found.priceUsd;
+      credits = found.credits;
+      label = found.label;
     }
 
-    const params = new URLSearchParams();
-    params.append('customer_ip_address', clientIp);
-    
-    // 🛡️ FORCE AUTO-SELECT: Restrict to ONLY USDC on Solana
-    // Single-item supported arrays force Stripe to skip the picker entirely
-    params.append('transaction_details[destination_currency]', 'usdc');
-    params.append('transaction_details[destination_network]', 'solana');
-    params.append('transaction_details[supported_destination_currencies][]', 'usdc');
-    params.append('transaction_details[supported_destination_networks][]', 'solana');
-    params.append('transaction_details[wallet_addresses][solana]', treasury);
-
-    // 🛡️ AMOUNT: Pre-fill exact tier price
-    params.append('transaction_details[source_exchange_amount]', pkg.priceUsd.toString());
-
-    params.append('metadata[userId]', userId);
-    params.append('metadata[packageId]', packageId);
-    params.append('metadata[credits]', pkg.credits.toString());
-
+    // Create a minimal onramp session — the redirect_url is returned and used client-side
     const response = await fetch('https://api.stripe.com/v1/crypto/onramp_sessions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: params,
+      // Minimal body — per docs, pre-selection is done with Standalone() JS, not session params
+      body: new URLSearchParams({
+        'wallet_addresses[solana]': 'H7BvF9o1yWh7ZBej7N3y5K27vY6LqzE7S6jXF8A9Z1K1',
+        'metadata[userId]': userId,
+        'metadata[packageId]': packageId,
+        'metadata[credits]': credits.toString(),
+      }),
     });
 
     const rawResult = await response.text();
-    console.log('[Stripe Onramp] Raw response status:', response.status);
-    console.log('[Stripe Onramp] Raw response body:', rawResult);
+    console.log('[OnrampSession] Status:', response.status, '| Body:', rawResult.slice(0, 300));
 
     if (!response.ok) {
-        let detailedError = rawResult;
-        try {
-            const parsed = JSON.parse(rawResult);
-            detailedError = parsed.error?.message || rawResult;
-        } catch (e) {}
-
-        return NextResponse.json({ 
-            success: false, 
-            error: `STRIPENODE_REJECTION: ${detailedError}` 
-        }, { status: 500 });
+      let detail = rawResult;
+      try { detail = JSON.parse(rawResult).error?.message || rawResult; } catch {}
+      return NextResponse.json({ success: false, error: `STRIPE: ${detail}` }, { status: 500 });
     }
 
-    const data = JSON.parse(rawResult);
-    
-    // 🔱 CHECK ALL POSSIBLE URL FIELDS — Stripe varies by version
-    const onrampUrl = data.redirect_url || data.onramp_url || data.url || data.hosted_url;
-    
-    console.log('[Stripe Onramp] Session data keys:', Object.keys(data));
-    console.log('[Stripe Onramp] URL found:', onrampUrl);
-    
-    if (!onrampUrl) {
-      return NextResponse.json({ 
-        success: false, 
-        error: `SESSION_CREATED_BUT_NO_URL: ${JSON.stringify(data)}` 
-      }, { status: 500 });
-    }
+    const session = JSON.parse(rawResult);
 
-    return NextResponse.json({ success: true, onrampUrl });
+    // Return the redirect_url + session params so client-side can build the Standalone URL
+    return NextResponse.json({
+      success: true,
+      redirectUrl: session.redirect_url,
+      // Pass back params so client-side Standalone() can pre-configure
+      sourceAmount: priceUsd.toString(),
+      destinationCurrency: 'usdc',
+      destinationNetwork: 'solana',
+    });
 
   } catch (err: any) {
-    console.error('[OnrampBridge] Fatal Fault:', err);
-    return NextResponse.json({ success: false, error: `UPLINK_FAULT: ${err.message}` }, { status: 500 });
+    console.error('[OnrampSession] Fatal:', err);
+    return NextResponse.json({ success: false, error: `FAULT: ${err.message}` }, { status: 500 });
   }
 }

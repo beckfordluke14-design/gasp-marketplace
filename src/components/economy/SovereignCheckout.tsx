@@ -32,21 +32,34 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
     setIsLoadingCard(true);
     setError(null);
     try {
-      const res = await fetch('/api/economy/stripe/onramp/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packageId, userId })
-      });
-      const data = await res.json();
-      if (data.success && data.onrampUrl) {
-        window.location.href = data.onrampUrl;
-      } else {
-        // Show the full raw error from Stripe so we can diagnose
-        setError(data.error || 'Uplink Refused — check Railway logs for STRIPE_SECRET_KEY');
+      // Load Stripe Onramp JS SDK if not already present
+      if (!(window as any).StripeOnramp) {
+        await new Promise<void>((resolve, reject) => {
+          const s1 = document.createElement('script');
+          s1.src = 'https://js.stripe.com/dahlia/stripe.js';
+          s1.onload = () => {
+            const s2 = document.createElement('script');
+            s2.src = 'https://crypto-js.stripe.com/crypto-onramp-outer.js';
+            s2.onload = () => resolve();
+            s2.onerror = reject;
+            document.head.appendChild(s2);
+          };
+          s1.onerror = reject;
+          document.head.appendChild(s1);
+        });
       }
+
+      // Exact pattern from Stripe docs — pre-fills amount, currency, network
+      const standaloneOnramp = (window as any).StripeOnramp.Standalone({
+        source_currency: 'usd',
+        amount: { source_amount: pkg.priceUsd.toString() },
+        destination_currency: 'usdc',
+        destination_network: 'solana',
+      });
+      window.location.href = standaloneOnramp.getUrl();
+
     } catch (err: any) {
-      setError(`Network Fault: ${err.message}`);
-    } finally {
+      setError(`Fault: ${err.message}`);
       setIsLoadingCard(false);
     }
   };
