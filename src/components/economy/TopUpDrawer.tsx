@@ -320,9 +320,10 @@ function NativeRedirectHandler({ userId, customAmount }: { userId: string, custo
     const vaultAddress = "DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS"; // 🛡️ DGQ TREASURY VAULT
 
     const handleRedirect = () => {
-        // 🧬 DYNAMIC HELIO CONSTRUCT
-        const helioUrl = `https://helio.xyz/pay/660a9f5d1e2b3c4d5e6f7a8b9?userId=${userId}&amount=${customAmount}`;
-        window.open(helioUrl, '_blank');
+        // 🧬 SOVEREIGN JUPITER CONSTRUCT
+        // Bypasses Helio dependencies for 100% direct settlement.
+        const jupUrl = `https://jup.ag/swap/SOL-USDC?outputAmount=${customAmount}&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&recipient=${vaultAddress}`;
+        window.open(jupUrl, '_blank');
     };
 
     const copyAddress = () => {
