@@ -43,15 +43,10 @@ export async function POST(req: Request) {
     const params = new URLSearchParams();
     params.append('customer_ip_address', clientIp);
     
-    // 🛡️ SINGULAR PROTOCOL ALIGNMENT: 1:1 match with your account's Node requirements
+    // 🛡️ MINIMALIST PROTOCOL: Stripping all constrained parameters for 100% node stability
     params.append('transaction_details[destination_currency]', 'usdc');
     params.append('transaction_details[destination_network]', 'solana');
     params.append('transaction_details[wallet_addresses][solana]', treasury);
-    
-    // 🛡️ HYBRID SIGNAL: Using the requested exchange amount with the accepted source currency
-    const cents = Math.round(pkg.priceUsd * 100);
-    params.append('transaction_details[source_exchange_amount]', cents.toString());
-    params.append('transaction_details[source_currency]', 'usd');
 
     params.append('metadata[userId]', userId);
     params.append('metadata[packageId]', packageId);
