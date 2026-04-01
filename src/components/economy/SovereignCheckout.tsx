@@ -55,7 +55,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
         amount: { source_amount: pkg.priceUsd.toString() },
         destination_currency: 'usdc',
         destination_network: 'solana',
-        destination_wallet_address: 'H7BvF9o1yWh7ZBej7N3y5K27vY6LqzE7S6jXF8A9Z1K1', 
+        destination_wallet_address: 'DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS', 
       });
       window.location.href = standaloneOnramp.getUrl();
 
