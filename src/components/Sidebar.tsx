@@ -95,10 +95,26 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
   useEffect(() => {
     syncFollows();
     
-    window.addEventListener('gasp_sync_follows', syncFollows);
+    // 🛰️ SIGNAL PULSE: Handle live updates from any Favorite button in the system
+    const handleSyncPulse = (e: any) => {
+      const detail = e.detail;
+      if (detail && detail.personaId) {
+        setFollowing(prev => {
+          if (detail.isFollowing) {
+            return prev.includes(detail.personaId) ? prev : [...prev, detail.personaId];
+          } else {
+            return prev.filter(id => id !== detail.personaId);
+          }
+        });
+      } else {
+        syncFollows(); // Full sync fallback
+      }
+    };
+
+    window.addEventListener('gasp_sync_follows', handleSyncPulse as EventListener);
     window.addEventListener('storage', syncFollows);
     return () => {
-       window.removeEventListener('gasp_sync_follows', syncFollows);
+       window.removeEventListener('gasp_sync_follows', handleSyncPulse as EventListener);
        window.removeEventListener('storage', syncFollows);
     };
   }, [profile]);
@@ -180,13 +196,17 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                    const gid = profile?.id || localStorage.getItem('gasp_guest_id');
                    if (!gid) return;
 
+                   const newState = !isFollowing;
+                   // 🛰️ SIGNAL PULSE: Instant local update across all components
+                   window.dispatchEvent(new CustomEvent('gasp_sync_follows', { 
+                     detail: { personaId: profileItem.id, isFollowing: newState } 
+                   }));
+
                    try {
                      await fetch('/api/rpc/db', {
                        method: 'POST',
-                       body: JSON.stringify({ action: 'toggle-follow', payload: { userId: gid, personaId: profileItem.id, isFollowing } })
+                       body: JSON.stringify({ action: 'toggle-follow', payload: { userId: gid, personaId: profileItem.id, isFollowing: !newState } })
                      });
-                     
-                     window.dispatchEvent(new Event('gasp_sync_follows'));
                    } catch (err) {
                      console.error('[Sidebar] Follow Failure:', err);
                    }
@@ -197,7 +217,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                   : 'bg-white/5 border-white/10 text-white/20 hover:text-white hover:border-white/40'
                 }`}
               >
-                  <PlusCircle size={12} className={isFollowing ? 'rotate-45 transition-transform' : ''} />
+                  <PlusCircle size={12} className={isFollowing ? 'rotate-45 transition-transform' : 'transition-transform'} />
               </button>
            </div>
            <p className="text-[9px] text-white/30 truncate leading-relaxed">

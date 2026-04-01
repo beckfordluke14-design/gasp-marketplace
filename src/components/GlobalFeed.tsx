@@ -211,13 +211,26 @@ function GlobalFeedItem({
                     )}
                  </div>
                  <div className="flex items-center gap-4">
-                    <button onClick={handleInteraction} className={`w-14 h-14 rounded-2xl border flex flex-col items-center justify-center backdrop-blur-md ${hasLiked ? 'bg-red-500/10 border-red-500/40 text-red-500' : 'bg-black/10 border-white/5 text-white/30'}`}>
-                       <Heart size={20} fill={hasLiked ? 'currentColor' : 'none'} />
-                       <span className="text-[7px] font-black uppercase mt-1">Heat</span>
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); setIsFollowing(!isFollowing); }} className={`w-14 h-14 rounded-2xl border flex flex-col items-center justify-center backdrop-blur-md ${isFollowing ? 'bg-[#ffea00]/10 border-[#ffea00]/30 text-[#ffea00]' : 'bg-black/10 border-white/5 text-white/30'}`}>
+                    <button 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        const newState = !isFollowing;
+                        setIsFollowing(newState);
+                        // 🛰️ SIGNAL PULSE: Force Sidebar & Bubbles to re-sync live
+                        window.dispatchEvent(new CustomEvent('gasp_sync_follows', { 
+                          detail: { personaId: profile.id, isFollowing: newState } 
+                        }));
+                        
+                        // Persist to DB (Mock logic or actual RPC)
+                        fetch('/api/rpc/db', {
+                          method: 'POST',
+                          body: JSON.stringify({ action: 'toggle-follow', payload: { personaId: profile.id, userId: localStorage.getItem('gasp_guest_id') } })
+                        });
+                      }} 
+                      className={`h-16 px-8 rounded-2xl border flex items-center justify-center gap-3 backdrop-blur-md transition-all active:scale-90 ${isFollowing ? 'bg-[#ffea00] text-black border-[#ffea00] shadow-[0_0_30px_#ffea00]/30' : 'bg-black/20 border-white/10 text-white/40 hover:border-[#ffea00]/50 hover:text-white'}`}
+                    >
                        <Star size={20} fill={isFollowing ? 'currentColor' : 'none'} />
-                       <span className="text-[7px] font-black uppercase mt-1">Secure</span>
+                       <span className="text-[10px] font-black uppercase tracking-widest">{isFollowing ? 'Favorited' : 'Favorite Analyst'}</span>
                     </button>
                  </div>
               </div>
