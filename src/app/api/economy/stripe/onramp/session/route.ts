@@ -41,12 +41,16 @@ export async function POST(req: Request) {
     }
 
     const params = new URLSearchParams();
-    params.append('source_amount', pkg.priceUsd.toString());
-    params.append('source_currency', 'usd');
-    params.append('destination_currencies[0]', 'usdc');
-    params.append('destination_networks[0]', 'solana');
-    params.append('wallet_addresses[solana]', treasury);
     params.append('customer_ip_address', clientIp);
+    params.append('transaction_details[destination_currencies][0]', 'usdc');
+    params.append('transaction_details[destination_networks][0]', 'solana');
+    params.append('transaction_details[wallet_addresses][solana]', treasury);
+    params.append('transaction_details[supported_destination_currencies][0]', 'usdc');
+    params.append('transaction_details[supported_destination_networks][0]', 'solana');
+    
+    // Optional: Pre-fill amount
+    params.append('transaction_details[destination_amount]', pkg.priceUsd.toString());
+
     params.append('metadata[userId]', userId);
     params.append('metadata[packageId]', packageId);
     params.append('metadata[credits]', pkg.credits.toString());
