@@ -472,7 +472,7 @@ export default function ChatDrawer({
 
              <div className="flex gap-8">
                 <button onClick={() => setChatTab('chat')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'chat' ? 'text-white' : 'text-white/30'}`}>
-                   <MessageSquare size={12} className={chatTab === 'chat' ? 'text-[#00f0ff]' : ''} /> CHAT w/ {profile?.name.split(' ')[0]}
+                   <MessageSquare size={12} className={chatTab === 'chat' ? 'text-[#00f0ff]' : ''} /> chat w/ {profile?.name.split(' ')[0]}
                    {chatTab === 'chat' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
                 </button>
                 <button onClick={() => setChatTab('pics')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
@@ -547,7 +547,7 @@ export default function ChatDrawer({
                       <div className="flex items-center gap-2 px-2">
                          <div className={`w-1 h-1 rounded-full ${isRequestingVoice ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'} animate-pulse`} />
                          <span className={`text-[7px] font-black uppercase tracking-widest ${isRequestingVoice ? 'text-[#ff00ff]' : 'text-[#00f0ff]'} italic`}>
-                            {isRequestingVoice ? 'Generating Voice...' : `Chatting with ${profile?.name}...`}
+                            {isRequestingVoice ? 'Generating Voice...' : `chat w/ ${profile?.name}...`}
                          </span>
                       </div>
                       <div className="flex items-start gap-2">
@@ -734,7 +734,7 @@ export default function ChatDrawer({
                           value={input} 
                           onChange={(e) => setInput(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleLocalSubmit(); } }}
-                          placeholder={isDepleted ? "MESSAGING DISABLED..." : `Message ${profile?.name}...`} 
+                          placeholder={isDepleted ? "MESSAGING DISABLED..." : `chat w/ ${profile?.name}...`} 
                           className="w-full bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
                           disabled={isLoading || isDepleted}
                        />

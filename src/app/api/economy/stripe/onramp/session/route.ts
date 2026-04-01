@@ -16,7 +16,14 @@ export async function POST(req: Request) {
     }
 
     // Identify the package for amount/metadata
-    const pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
+    let pkg;
+    if (packageId.startsWith('custom_')) {
+        const val = parseFloat(packageId.split('_')[1]);
+        pkg = { priceUsd: val, credits: Math.floor(val * 15) };
+    } else {
+        pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
+    }
+    
     if (!pkg) return NextResponse.json({ error: 'Sector Intel Missing (Invalid Package)' }, { status: 400 });
 
     // 🧬 ONRAMP SESSION CREATE (Manual Fetch - Corrected Params)

@@ -207,7 +207,7 @@ function GlobalFeedItem({
                        <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">{displayName}</h2>
                     </div>
                     {showChatBubble && (
-                       <button onClick={(e) => { e.stopPropagation(); onSelectProfile(profile.id); }} className="px-4 py-2 bg-[#00f0ff] text-black text-[8px] font-black uppercase rounded-full animate-bounce">Sync Signal?</button>
+                       <button onClick={(e) => { e.stopPropagation(); onSelectProfile(profile.id); }} className="px-4 py-2 bg-[#00f0ff] text-black text-[8px] font-black uppercase rounded-full animate-bounce underline-offset-4 decoration-black">chat w/ {displayName}?</button>
                     )}
                  </div>
                  <div className="flex items-center gap-4">
@@ -230,12 +230,10 @@ function GlobalFeedItem({
 export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFeedProps) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     async function load() {
       try {
-        // 🛡️ DUAL FETCH: Guarantee both Text logs and Full-Bleed Media are pulled regardless of recent frequency
         const [textRes, mediaRes] = await Promise.all([
            fetch('/api/admin/feed?limit=50&type=text'),
            fetch('/api/admin/feed?limit=50&type=media')
@@ -272,7 +270,7 @@ export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFee
   if (loading) return (
      <div className="w-full h-full flex flex-col items-center justify-center bg-black gap-6">
         <Zap size={48} className="text-[#ffea00] animate-spin" />
-        <span className="text-[10px] font-black text-white/20 uppercase tracking-[.5em] animate-pulse">Syncing Syndicate Feed...</span>
+        <span className="text-[10px] font-black text-white/20 uppercase tracking-[.5em] animate-pulse">Loading Syndicate Feed...</span>
      </div>
   );
 
