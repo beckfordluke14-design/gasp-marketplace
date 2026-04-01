@@ -66,12 +66,12 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
 
   const handleCryptoChoice = () => {
     trackEvent('vault_unlock_intent', packageId);
-    const link = pkg.helioPayLink;
-    if (link) {
-      window.location.href = link;
-    } else {
-      setError('Crypto rail not configured for this tier.');
+    if (!pkg.helioPayLink) {
+      setError('Crypto rail not available for this tier.');
+      return;
     }
+    // Route through server bridge — stores userId before redirecting to Helio
+    window.location.href = `/api/economy/helio/redirect?userId=${userId}&packageId=${packageId}`;
   };
 
   return (
