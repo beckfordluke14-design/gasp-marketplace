@@ -108,8 +108,10 @@ export default function ChatDrawer({
       
       if (data.success) {
         setShowGifts(false);
-        // Add local gift message
-        const giftMsg = `[SENT_GIFT]: ${emoji} (${cost}cr)`;
+        // 🧬 PERSONA AWARENESS: Send a literal trigger for the AI to react to
+        const giftItems: {[key: string]: string} = { '☕': 'Coffee', '🍹': 'Drink', '🍽️': 'Dinner', '🍾': 'Bottle Service', '✈️': 'Private Jet' };
+        const giftName = giftItems[emoji] || 'Gift';
+        const giftMsg = `[SENT_GIFT]: I just bought you a ${giftName} ${emoji}. Enjoy it.`;
         await sendMessage(giftMsg);
         window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
       } else {
@@ -723,11 +725,17 @@ export default function ChatDrawer({
                          <span className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff]">Send Gift</span>
                          <button onClick={() => setShowGifts(false)} className="text-white/40 hover:text-white"><X size={14} /></button>
                       </div>
-                      <div className="grid grid-cols-4 gap-4">
-                         {[ { e: '🌹', c: 1000 }, { e: '🍫', c: 2500 }, { e: '💎', c: 5000 }, { e: '💍', c: 10000 }].map(g => (
-                            <button key={g.e} onClick={() => sendGift(g.e, g.c)} className="flex flex-col items-center gap-2 p-4 bg-black/40 border border-white/5 rounded-2xl hover:border-[#ff00ff]/50 transition-all">
+                      <div className="grid grid-cols-5 gap-3">
+                         {[ 
+                           { e: '☕', c: 500 }, 
+                           { e: '🍹', c: 1500 }, 
+                           { e: '🍽️', c: 7000 }, 
+                           { e: '🍾', c: 25000 }, 
+                           { e: '✈️', c: 100000 }
+                         ].map(g => (
+                            <button key={g.e} onClick={() => sendGift(g.e, g.c)} className="flex flex-col items-center gap-2 py-4 px-1 bg-black/40 border border-white/5 rounded-2xl hover:border-[#ff00ff]/50 transition-all">
                                <span className="text-2xl">{g.e}</span>
-                               <span className="text-[7px] font-black text-white/40">{g.c >= 1000 ? (g.c/1000)+'K' : g.c}cr</span>
+                               <span className="text-[7.5px] font-black text-white px-2 py-0.5 bg-white/5 rounded-full">{g.c.toLocaleString()} CREDITS</span>
                             </button>
                          ))}
                       </div>
@@ -756,7 +764,7 @@ export default function ChatDrawer({
                          }
                        </button>
                        <button type="button" onClick={() => (isDepleted ? setShowLimitCTA(true) : setShowGifts(!showGifts))} className="hover:text-[#ff00ff] transition-colors">
-                          <Zap size={20} />
+                          <Gift size={22} className={showGifts ? 'text-[#ff00ff] drop-shadow-[0_0_10px_#ff00ff]' : ''} />
                        </button>
                     </div>
                     <div className="flex-1 relative flex items-center">

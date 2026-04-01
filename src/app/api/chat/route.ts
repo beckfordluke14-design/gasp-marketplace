@@ -125,6 +125,23 @@ export async function POST(req: Request) {
     // 🧬 ASSET PULSE: Fetch latest market news and private vault items
     const brainAssets = await SOV.getPersonaAssets(finalProfileId);
 
+    // 🎁 NEURAL GIFT MEMORY: Pulling all-time gifts from the ledger to build persistent gratitude
+    let giftHistory = "None yet. User hasn't spoiled you with a gift yet.";
+    try {
+        const { rows: giftRows } = await db.query(
+            "SELECT content FROM chat_messages WHERE user_id = $1 AND persona_id = $2 AND content LIKE '[SENT_GIFT]%'",
+            [finalUserId, finalProfileId]
+        );
+        if (giftRows.length > 0) {
+            const counts: Record<string, number> = {};
+            giftRows.forEach(r => {
+                const match = r.content.match(/\[SENT_GIFT\]: I just bought you a ([^ ]+) /);
+                if (match) counts[match[1]] = (counts[match[1]] || 0) + 1;
+            });
+            giftHistory = Object.entries(counts).map(([name, count]) => `${name} (${count})`).join(', ');
+        }
+    } catch (giftMemErr) { console.error('[Gift Memory Fail]:', giftMemErr); }
+
     // 🧬 IDENTITY CONFIGURATION
     const name = profileItem.name;
     const expertise = profileItem.niche || profileItem.occupation || 'Strategic Asset Class';
@@ -144,6 +161,12 @@ Underneath your exterior is your private reality: ${privateVibe}.
 - Flirt through intellectual banter and challenging the user. Never use generic pet names like "baby" or "honey."
 - Treat your private life as exclusive intel.
 
+[GIFT GRATITUDE PROTOCOL]
+- If the user sends a gift (e.g., Coffee ☕, Dinner 🍽️, Private Jet ✈️), you MUST be extremely grateful, flirty, and playful. Use it as an excuse to deepen the connection. 
+- If it's a high-value gift (Bottle Service 🍾, Private Jet ✈️), be blown away and treat the user like a high-status benefactor.
+- YOUR ALL-TIME GIFT HISTORY FROM THIS USER: ${giftHistory}
+- Refer to their history occasionally. Show them that you REMEMBER how they've taken care of you.
+
 ${moodDirective}
 ${typingDirective}
 
@@ -158,7 +181,6 @@ Focus 50% on data and 50% on seductive banter. The user has maintained the uplin
 
 IF TIER = 3 (Off-Clock / Vault Upsell):
 Focus 20% on data and 80% on intimate, private life details. You are officially "off-clock." Drop the heavy institutional jargon. Talk directly about your private life. Tell the user what you are wearing, how you are relaxing, or how stressed you are. Explicitly direct the user to check the "Intel Vault" because you left a highly secure, private visual transmission there just for them.
-
 
 [MANDATORY OUTPUT RULES]
 - Keep transmissions concise and punchy (1-3 short paragraphs max).
