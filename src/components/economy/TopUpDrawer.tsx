@@ -136,14 +136,15 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
              </div>
              
              {/* 🛸 JUPITER TERMINAL MOUNT POINT */}
-             <div className="flex-1 flex flex-col items-center justify-center p-8 bg-black/40 border border-white/5 rounded-3xl relative overflow-hidden group">
-                 <div id="jupiter-terminal-mount" className="w-full h-full min-h-[400px]">
-                    <div className="flex flex-col items-center justify-center h-full space-y-6">
+             <div className="flex-1 flex flex-col items-center justify-center bg-black/40 border border-white/5 rounded-3xl relative overflow-hidden group">
+                 <div id="jupiter-terminal-mount" className="w-full h-full min-h-[460px]">
+                    {/* Placeholder that fades as Terminal mounts */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-black pointer-events-none z-0 animate-out fade-out delay-1000 duration-500">
                         <div className="w-16 h-16 rounded-2xl bg-[#00f0ff]/20 flex items-center justify-center border border-[#00f0ff]/30 animate-pulse">
                             <Zap size={32} className="text-[#00f0ff]" />
                         </div>
-                        <div className="space-y-2 text-center">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-white">Initializing Bridge Node...</p>
+                        <div className="space-y-2 text-center mt-6">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-white">Connecting Bridge Node...</p>
                             <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest italic">Syncing with Archive Liquidity</p>
                         </div>
                     </div>
