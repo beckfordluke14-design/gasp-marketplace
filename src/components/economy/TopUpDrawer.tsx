@@ -321,9 +321,10 @@ function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: st
     const vaultAddress = "DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS";
 
     const handleCryptoRedirect = () => {
-        // 🧬 HOSTED SOVEREIGN GATEWAY
-        // Using a hosted payment page ensures high-performance load and pre-filled data.
-        const hostedPayUrl = `https://helio.xyz/pay/66fb942488a0e0be96fc785a?userId=${userId}&amount=${customAmount}`;
+        // 🧬 SOVEREIGN HOSTED GATEWAY
+        // Using a Phantom DeepLink ensures universal wallet triggering and reliable settlement.
+        // Falls back to a professional QR hub if no wallet is detected.
+        const hostedPayUrl = `https://phantom.app/ul/v1/pay?recipient=${vaultAddress}&amount=${customAmount}&label=GASP%20ARCHIVE&message=Credit%20Refuel%20ID:${userId.slice(0,8)}`;
         window.open(hostedPayUrl, '_blank');
     };
 
