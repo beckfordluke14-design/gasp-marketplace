@@ -84,16 +84,16 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
       {/* PACKAGE SUMMARY */}
       <div className="p-5 md:p-8 rounded-[2rem] bg-white/5 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 shadow-2xl relative overflow-hidden group">
         <div className="absolute inset-0 bg-gradient-to-br from-[#00f0ff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="flex flex-col gap-1 relative z-10 w-full md:w-auto">
+        <div className="flex flex-col gap-1 relative z-10 shrink-0">
           <span className="text-[9px] md:text-[11px] uppercase font-black text-white/40 tracking-[0.3em] italic mb-1">Terminal Tier: {pkg.label}</span>
           <div className="flex flex-col items-start leading-none">
-            <span className="text-3xl md:text-5xl font-syncopate font-black text-white italic drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] truncate max-w-full">{totalCredits.toLocaleString()}</span>
+            <span className="text-3xl md:text-5xl font-syncopate font-black text-white italic drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">{totalCredits.toLocaleString()}</span>
             <span className="text-[8px] md:text-[10px] font-black text-[#00f0ff] uppercase tracking-[0.3em] italic animate-pulse mt-1 md:mt-2">SYSTEM CREDITS</span>
           </div>
         </div>
-        <div className="flex flex-col items-start md:items-end relative z-10 text-left md:text-right border-t md:border-t-0 border-white/5 pt-3 md:pt-0 w-full md:w-auto">
+        <div className="flex flex-col items-start md:items-end relative z-10 text-left md:text-right border-t md:border-t-0 border-white/5 pt-4 md:pt-0 shrink-0">
             <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white/20 mb-1">Settlement Amount</span>
-            <span className="text-3xl md:text-6xl font-syncopate font-black text-[#ffea00] italic underline-offset-4 decoration-wavy transition-all group-hover:text-white">${pkg.priceUsd}</span>
+            <span className="text-2xl md:text-5xl font-syncopate font-black text-[#ffea00] italic transition-all group-hover:text-white whitespace-nowrap tracking-tighter">${pkg.priceUsd}</span>
         </div>
       </div>
 
