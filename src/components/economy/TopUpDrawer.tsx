@@ -321,11 +321,11 @@ function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: st
     const vaultAddress = "DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS";
 
     const handleCryptoRedirect = () => {
-        // 🧬 SOVEREIGN HOSTED GATEWAY
-        // Using a Phantom DeepLink ensures universal wallet triggering and reliable settlement.
-        // Falls back to a professional QR hub if no wallet is detected.
-        const hostedPayUrl = `https://phantom.app/ul/v1/pay?recipient=${vaultAddress}&amount=${customAmount}&label=GASP%20ARCHIVE&message=Credit%20Refuel%20ID:${userId.slice(0,8)}`;
-        window.open(hostedPayUrl, '_blank');
+        // 🧬 UNIVERSAL TIPLINK GATEWAY
+        // Optimized for zero-friction settlement across all devices. 
+        // Handles desktop connections and mobile QR scanning automatically.
+        const tipLinkUrl = `https://tiplink.io/pay/${vaultAddress}?amount=${customAmount}&label=GASP%20ARCHIVE&message=Credit%20Refuel%20ID:${userId.slice(0,8)}`;
+        window.open(tipLinkUrl, '_blank');
     };
 
     return (
