@@ -127,19 +127,22 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
              <div className="w-full flex-1 overflow-y-auto rounded-3xl bg-black/40 border border-white/5 shadow-2xl">
                  <HelioCheckout 
                     config={{
-                      paylinkId: "69cd5f102a4ab352c54d5c10",
+                      paylinkId: "69cd5f11f1c04738c8fc9d35",
                       theme: { themeMode: "dark" },
                       primaryColor: "#00f0ff",
                       neutralColor: "#111111",
                       amount: (parseFloat(customAmount) > 0 ? customAmount : "1.00"),
                       display: "inline",
-                      allowedCurrencies: ["SOL", "USDC", "USDT"],
-                      canChangeAmount: true,
-                      canChangeToken: true,
-                      canChangeNetwork: true,
-                      onSuccess: () => {
+                      onSuccess: (event) => {
+                         console.log("Helio Success:", event);
                          setShowHelio(false);
                          window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+                      },
+                      onError: (event) => console.log("Helio Error:", event),
+                      onPending: (event) => console.log("Helio Pending:", event),
+                      onCancel: () => {
+                         console.log("Helio Cancelled");
+                         setShowHelio(false);
                       }
                     }}
                   />
