@@ -86,10 +86,10 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
            </div>
            <div>
                <h3 className="text-xl font-syncopate font-black uppercase italic text-white leading-none">
-                  ACCESS TERMINAL
+                  GASP // ARCHIVE
                </h3>
                <p className="text-[10px] text-[#ff6b00] uppercase font-black tracking-widest mt-2 underline decoration-[#ff6b00]/30 underline-offset-4">
-                  Syndicate System Credits
+                  GASP CREDITS
                </p>
            </div>
         </div>
@@ -219,7 +219,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                             </span>
                         )}
                         <span className="text-[10px] font-black uppercase text-white/40 tracking-widest leading-none">
-                            {pkg.id === 'tier_starter' ? 'Starter Access' : pkg.id === 'tier_entry' ? 'Standard Entry' : pkg.id === 'tier_whale' ? 'Professional Tier' : 'Master Syndicate'}
+                            {pkg.id === 'tier_starter' ? 'Starter Access' : pkg.id === 'tier_entry' ? 'Member Access' : pkg.id === 'tier_whale' ? 'Elite Access' : 'Archive Master'}
                         </span>
                         <span className="text-3xl font-syncopate font-bold text-white mt-1 italic leading-none">
                             {Math.floor(pkg.credits * 1.15).toLocaleString()}
