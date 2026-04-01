@@ -36,10 +36,11 @@ export async function GET(req: Request) {
     // Non-blocking — still redirect
   }
 
-  // Append userId to Helio URL so it appears in webhook payload as ref
+  // Append userId and amount to Helio URL so it identifies the user AND charges the correct price
   const helioUrl = new URL(pkg.helioPayLink);
   helioUrl.searchParams.set('ref', userId);
   helioUrl.searchParams.set('customerId', userId);
+  helioUrl.searchParams.set('amount', pkg.priceUsd.toString()); // 🔱 DYNAMIC PRICE LOCK
 
   return NextResponse.redirect(helioUrl.toString());
 }
