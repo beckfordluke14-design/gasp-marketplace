@@ -119,7 +119,15 @@ export default function NewsFeed() {
                             </p>
 
                             <button 
-                                onClick={() => (window as any).onSelectProfile?.(item.persona_id)}
+                                onClick={() => {
+                                    const profileObj = {
+                                        id: item.persona_id,
+                                        name: item.persona_name,
+                                        image: item.persona_image,
+                                        city: item.meta?.city || 'Global Hub',
+                                    };
+                                    (window as any).onSelectProfile?.(item.persona_id, '', profileObj);
+                                }}
                                 className="group/btn flex items-center gap-3 mb-10 pl-6 text-[#ff00ff] hover:text-white transition-all cursor-pointer"
                             >
                                 <Zap size={14} className="animate-pulse" />
@@ -157,7 +165,15 @@ export default function NewsFeed() {
                                             <Share2 size={16} />
                                         </button>
                                         <button 
-                                           onClick={() => (window as any).onSelectProfile?.(item.persona_id)}
+                                           onClick={() => {
+                                             const profileObj = {
+                                                 id: item.persona_id,
+                                                 name: item.persona_name,
+                                                 image: item.persona_image,
+                                                 city: item.meta?.city || 'Global Hub',
+                                             };
+                                             (window as any).onSelectProfile?.(item.persona_id, '', profileObj);
+                                           }}
                                            className="px-6 py-2.5 bg-[#ff00ff] text-white rounded-full flex items-center gap-2 text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-105 transition-all"
                                         >
                                             Open Terminal <CornerRightUp size={14} />

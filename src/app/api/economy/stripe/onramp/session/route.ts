@@ -48,8 +48,10 @@ export async function POST(req: Request) {
     params.append('transaction_details[supported_destination_currencies][0]', 'usdc');
     params.append('transaction_details[supported_destination_networks][0]', 'solana');
     
-    // Optional: Pre-fill amount
-    params.append('transaction_details[destination_amount]', pkg.priceUsd.toString());
+    // 🛡️ CENTS CONVERSION: Stripe expects integer cents for USD nodes
+    const cents = Math.round(pkg.priceUsd * 100);
+    params.append('transaction_details[source_amount]', cents.toString());
+    params.append('transaction_details[source_currency]', 'usd');
 
     params.append('metadata[userId]', userId);
     params.append('metadata[packageId]', packageId);
