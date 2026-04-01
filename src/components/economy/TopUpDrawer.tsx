@@ -149,45 +149,12 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     </div>
                  </div>
                  
-                 {/* 🧬 INITIALIZATION LOGIC */}
-                 <script dangerouslySetInnerHTML={{ __html: `
-                    (function() {
-                      const mountInterval = setInterval(() => {
-                        if (window.Jupiter && document.getElementById('jupiter-terminal-mount')) {
-                           clearInterval(mountInterval);
-                           window.Jupiter.init({
-                              displayMode: "integrated",
-                              integratedTargetId: "jupiter-terminal-mount",
-                              endpoint: "https://api.mainnet-beta.solana.com",
-                              strictTokenList: false,
-                              formProps: {
-                                fixedOutputMint: true,
-                                initialOutputMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-                                fixedAmount: false,
-                                initialInputAmount: "${customAmount || '0.1'}"
-                              },
-                              onSuccess: ({ txid }) => {
-                                 console.log("✅ Bridge Success:", txid);
-                                 fetch('/api/economy/verify-tx', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                       signature: txid,
-                                       userId: "${userId}",
-                                       amountUsdc: ${parseFloat(customAmount) || 1.00},
-                                       expectedCredits: ${Math.floor((parseFloat(customAmount) || 1.00) * 1000)}
-                                    })
-                                 }).then(r => r.json()).then(data => {
-                                    if (data.success) {
-                                       window.dispatchEvent(new CustomEvent('gasp_transfer_success'));
-                                    }
-                                 });
-                              }
-                           });
-                        }
-                      }, 500);
-                    })();
-                 `}} />
+                 {/* 🧬 NATIVE INITIALIZATION EFFICIENCY */}
+                 <JupiterInitializer 
+                    userId={userId} 
+                    customAmount={customAmount} 
+                    onVerifySuccess={() => window.dispatchEvent(new CustomEvent('gasp_transfer_success'))} 
+                 />
              </div>
           </div>
         ) : (
@@ -379,6 +346,70 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
             </div>
           </div>
         )}
+
+/**
+ * 🛰️ JUPITER INITIALIZER NODE
+ * Handles stable mounting and transaction tracking for the sovereign bridge.
+ */
+function JupiterInitializer({ userId, customAmount, onVerifySuccess }: { 
+    userId: string, 
+    customAmount: string, 
+    onVerifySuccess: () => void 
+}) {
+    useEffect(() => {
+        let mountPoll: any;
+        
+        const initJup = () => {
+            const jup = (window as any).Jupiter;
+            if (jup && document.getElementById('jupiter-terminal-mount')) {
+              if (clearInterval) clearInterval(mountPoll);
+              
+              jup.init({
+                  displayMode: "integrated",
+                  integratedTargetId: "jupiter-terminal-mount",
+                  endpoint: "https://api.mainnet-beta.solana.com",
+                  strictTokenList: false,
+                  formProps: {
+                      fixedOutputMint: true,
+                      initialOutputMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
+                      swapMode: "ExactOut",
+                      fixedAmount: false,
+                      initialInputAmount: "0.1",
+                  },
+                  // 🛡️ REVENUE LOCK: Payout goes to DGQ Vault
+                  passthroughWalletContext: true,
+                  onSuccess: ({ txid }: { txid: string }) => {
+                      console.log("✅ [Jupiter] Swap Success:", txid);
+                      
+                      const amount = parseFloat(customAmount) || 1.00;
+                      const credits = Math.floor(amount * 1000);
+
+                      fetch('/api/economy/verify-tx', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                              signature: txid,
+                              userId,
+                              amountUsdc: amount,
+                              expectedCredits: credits
+                          })
+                      })
+                      .then(r => r.json())
+                      .then(data => {
+                          if (data.success) onVerifySuccess();
+                      })
+                      .catch(err => console.error("❌ verification fault:", err));
+                  }
+              });
+            }
+        };
+
+        mountPoll = setInterval(initJup, 1000);
+        return () => { if (clearInterval) clearInterval(mountPoll); };
+    }, [userId, customAmount]);
+
+    return null;
+}
       </div>
     </div>
     </div>
