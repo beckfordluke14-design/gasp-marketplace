@@ -320,10 +320,10 @@ function NativeRedirectHandler({ userId, customAmount }: { userId: string, custo
     const vaultAddress = "DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS"; // 🛡️ DGQ TREASURY VAULT
 
     const handleRedirect = () => {
-        // 🧬 SOVEREIGN JUPITER CONSTRUCT
-        // Bypasses Helio dependencies for 100% direct settlement.
-        const jupUrl = `https://jup.ag/swap/SOL-USDC?outputAmount=${customAmount}&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&recipient=${vaultAddress}`;
-        window.open(jupUrl, '_blank');
+        // 🧬 UNIVERSAL ANY-TO-USDC BRIDGE
+        // Allows users to pay with any token while you receive EXACTLY USDC.
+        const universalJupUrl = `https://jup.ag/swap/ANY-USDC?outputAmount=${customAmount}&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&recipient=${vaultAddress}`;
+        window.open(universalJupUrl, '_blank');
     };
 
     const copyAddress = () => {
@@ -367,7 +367,8 @@ function NativeRedirectHandler({ userId, customAmount }: { userId: string, custo
                         onClick={handleRedirect}
                         className="w-full h-16 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[11px] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(0,240,255,0.4)] flex items-center justify-center gap-3"
                     >
-                        Settlement Link
+                        <Zap size={18} />
+                        One-Click Settlement
                     </button>
                     <p className="text-[8px] text-[#00f0ff] uppercase text-center font-black tracking-widest italic pt-2">
                         Send any SOL or USDC directly to the Vault. 🛡️
