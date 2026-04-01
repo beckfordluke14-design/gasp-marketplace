@@ -118,17 +118,22 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
         {/* CARD: Stripe Onramp — always shown */}
         <button 
           onClick={handleCardChoice}
-          disabled={isLoadingCard}
-          className="group p-6 md:p-8 rounded-[2rem] bg-white text-black hover:bg-[#ffea00] transition-all flex flex-col items-center justify-center text-center gap-4 relative overflow-hidden shadow-2xl disabled:opacity-50"
+          disabled={isLoadingCard || parseFloat(pkg.priceUsd.toString()) > 2000}
+          className={`group p-6 md:p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:border-[#ff00ff]/40 hover:bg-[#ff00ff]/5 transition-all flex flex-col items-center justify-center text-center gap-4 relative overflow-hidden shadow-2xl ${parseFloat(pkg.priceUsd.toString()) > 2000 ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
         >
-          <CreditCard size={32} className="group-hover:scale-110 transition-transform duration-500" />
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Option 01</span>
-            <span className="text-sm font-syncopate font-black uppercase italic">Card Bridge</span>
+             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Option 01</span>
+             <span className="text-sm font-syncopate font-black uppercase text-white italic">Card Bridge</span>
           </div>
-          {isLoadingCard && (
-            <div className="absolute inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center">
-              <Loader2 size={32} className="animate-spin text-black" />
+
+          {parseFloat(pkg.priceUsd.toString()) > 2000 ? (
+            <div className="text-[8px] font-black uppercase text-red-500 tracking-widest bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20">
+               Limit: $2000 Max (Use Crypto)
+            </div>
+          ) : (
+            <div className="flex gap-2">
+               <div className="px-2 py-1 bg-white/10 rounded flex items-center gap-1.5 grayscale opacity-50"><CreditCard size={10} /> <span className="text-[8px] font-black">VISA</span></div>
+               <div className="px-2 py-1 bg-white/10 rounded flex items-center gap-1.5 grayscale opacity-50"><CreditCard size={10} /> <span className="text-[8px] font-black">MC</span></div>
             </div>
           )}
         </button>

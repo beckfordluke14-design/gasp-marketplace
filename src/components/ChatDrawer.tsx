@@ -176,7 +176,7 @@ export default function ChatDrawer({
         if (done) break;
         
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
+        const lines = (buffer || '').split('\n');
         buffer = lines.pop() || '';
 
         for (const line of lines) {
@@ -390,7 +390,7 @@ export default function ChatDrawer({
                                   </div>
                                )}
                             </div>
-                            <span className="text-[7px] font-black uppercase text-white/30 group-hover:text-white transition-colors">{p.name.split(' ')[0]}</span>
+                            <span className="text-[7px] font-black uppercase text-white/30 group-hover:text-white transition-colors">{(p.name || 'ANON')?.split(' ')?.[0]}</span>
                          </motion.button>
                       );
                    })}
@@ -471,8 +471,8 @@ export default function ChatDrawer({
              </div>
 
              <div className="flex gap-8">
-                <button onClick={() => setChatTab('chat')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'chat' ? 'text-white' : 'text-white/30'}`}>
-                   <MessageSquare size={12} className={chatTab === 'chat' ? 'text-[#00f0ff]' : ''} /> chat w/ {profile?.name.split(' ')[0]}
+                <button onClick={() => setChatTab('chat')} className={`pb-4 text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'chat' ? 'text-white' : 'text-white/30'}`}>
+                   <MessageSquare size={13} className={chatTab === 'chat' ? 'text-[#00f0ff]' : ''} /> CHAT
                    {chatTab === 'chat' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
                 </button>
                 <button onClick={() => setChatTab('pics')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
