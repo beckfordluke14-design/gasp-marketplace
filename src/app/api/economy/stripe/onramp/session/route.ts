@@ -43,15 +43,16 @@ export async function POST(req: Request) {
     const params = new URLSearchParams();
     params.append('customer_ip_address', clientIp);
     
-    // 🛡️ DESTINATION: Lock to USDC on Solana
+    // 🛡️ FORCE AUTO-SELECT: Restrict to ONLY USDC on Solana
+    // Single-item supported arrays force Stripe to skip the picker entirely
     params.append('transaction_details[destination_currency]', 'usdc');
     params.append('transaction_details[destination_network]', 'solana');
+    params.append('transaction_details[supported_destination_currencies][]', 'usdc');
+    params.append('transaction_details[supported_destination_networks][]', 'solana');
     params.append('transaction_details[wallet_addresses][solana]', treasury);
 
-    // 🛡️ AMOUNT: Pre-fill exact tier price in cents (USD)
-    // source_exchange_amount confirmed accepted by Stripe node
-    const cents = Math.round(pkg.priceUsd * 100);
-    params.append('transaction_details[source_exchange_amount]', cents.toString());
+    // 🛡️ AMOUNT: Pre-fill exact tier price
+    params.append('transaction_details[source_exchange_amount]', pkg.priceUsd.toString());
 
     params.append('metadata[userId]', userId);
     params.append('metadata[packageId]', packageId);
