@@ -23,7 +23,7 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
   const isCustom = packageId.startsWith('custom_');
   const customVal = isCustom ? parseFloat(packageId.split('_')[1]) : 0;
   const pkg = isCustom 
-    ? { id: packageId, priceUsd: customVal, credits: customVal * 15, label: 'Custom Terminal Infusion', helioPayLink: undefined }
+    ? { id: packageId, priceUsd: customVal, credits: Math.floor(customVal * 1000), label: 'Archive Credit Infusion', helioPayLink: undefined }
     : (CREDIT_PACKAGES.find(p => p.id === packageId) || CREDIT_PACKAGES[0]);
 
   const totalCredits = pkg.credits;
