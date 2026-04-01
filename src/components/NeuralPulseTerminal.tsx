@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Radio, Zap, ChevronRight, Activity } from 'lucide-react';
+import { Zap, ChevronRight, Activity, RadioReceiver } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { initialProfiles } from '@/lib/profiles';
@@ -31,9 +31,9 @@ export default function NeuralPulseTerminal({ followingIds, profiles, unreadCoun
             // Mocking for testing if DB is empty - Using REAL IDs from initialProfiles
             const firstId = initialProfiles[0]?.id || 'syndicate-node';
             setNews([
-                { id: '1', persona_id: firstId, title: 'ALPHA NODE BREACH: SECTOR 07 // HIGH-SIGNAL', heat: 'High' },
-                { id: '2', persona_id: firstId, title: 'SECURE DATA UPLINK: CLASSIFIED BROADCAST LEAK', heat: 'Critical' },
-                { id: '3', persona_id: firstId, title: 'TARGET NODE ACTIVITY SPIKE: REGION 12', heat: 'Standard' }
+                { id: '1', persona_id: firstId, title: 'NEW FEED DROP: SECTOR 07', heat: 'High' },
+                { id: '2', persona_id: firstId, title: 'NEW ARCHIVE DETECTED: CLASSIFIED', heat: 'Critical' },
+                { id: '3', persona_id: firstId, title: 'TRENDING ACTIVITY SPIKE: REGION 12', heat: 'Standard' }
             ]);
         }
     } catch (e) {
@@ -43,10 +43,8 @@ export default function NeuralPulseTerminal({ followingIds, profiles, unreadCoun
 
   useEffect(() => {
     fetchLatest();
-    const inv = setInterval(fetchLatest, 30000); // 30s updates
-    return () => {
-      clearInterval(inv);
-    };
+    const inv = setInterval(fetchLatest, 15000); // 15s updates for "Live" feel
+    return () => clearInterval(inv);
   }, []);
 
   useEffect(() => {
@@ -58,16 +56,6 @@ export default function NeuralPulseTerminal({ followingIds, profiles, unreadCoun
   }, [news]);
 
   if (news.length === 0) return null;
-    const handleHardSync = async () => {
-        try {
-            await fetch('/api/admin/sync-intel');
-            setNews([]); // Cloud Flush
-            fetchLatest();
-        } catch (e) {
-            console.error('❌ HUB SYNC FAILURE:', e);
-        }
-    };
-
   const current = news[currentIndex];
 
   return (
@@ -78,8 +66,8 @@ export default function NeuralPulseTerminal({ followingIds, profiles, unreadCoun
         </div>
         
         <div className="flex items-center gap-2 mb-3">
-           <Radio size={10} className="text-[#00f0ff] animate-pulse" />
-           <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#00f0ff] italic">Market Pulse</span>
+           <RadioReceiver size={12} className="text-[#00f0ff] animate-pulse" />
+           <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#00f0ff] italic">Gasp Latest</span>
         </div>
 
         <AnimatePresence mode="wait">
@@ -96,7 +84,7 @@ export default function NeuralPulseTerminal({ followingIds, profiles, unreadCoun
               <div className="flex items-center justify-between mt-3">
                  <span className="text-[7px] font-black uppercase tracking-widest text-white/30 truncate max-w-[100px]">Verified: {current.persona_id}</span>
                  <div className="flex items-center gap-1 text-[7px] font-black uppercase text-[#ffea00] italic">
-                    Source: Intel <ChevronRight size={8} />
+                    Latest Drop <ChevronRight size={8} />
                  </div>
               </div>
            </motion.div>

@@ -40,22 +40,22 @@ export default function Header({
   }, []);
   
   const navItems = [
-    { label: 'Pulse', active: true, href: '/' },
-    ...(isAdmin ? [{ label: 'Admin Panel', active: false, href: '/admin' }] : []),
+    { label: 'Feed', active: true, href: '/' },
+    ...(isAdmin ? [{ label: 'Admin', active: false, href: '/admin' }] : []),
     { label: 'How-To', active: false, href: '/how-to' },
     { label: 'Archive', active: false, href: '/vault' },
-    { label: 'Strategy', active: false, href: '/' },
+    { label: 'About', active: false, href: '/' },
   ];
 
   if (!mounted) return null;
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] flex flex-col pointer-events-none">
-        {/* 🧬 NEURAL NEWS TICKER: Breaking Intelligence Alpha */}
+        {/* 🧬 GASP FEED: LATEST ACTIVITY */}
         <div className="h-6 md:h-7 bg-[#ff00ff]/10 border-b border-white/5 flex items-center overflow-hidden whitespace-nowrap pointer-events-auto">
             <div className="px-4 h-full bg-[#ff00ff] flex items-center gap-2 shrink-0 z-10 shadow-[5px_0_15px_#ff00ff]">
                 <RadioReceiver size={10} className="text-white animate-pulse" />
-                <span className="text-[7px] md:text-[8px] font-black uppercase text-white tracking-widest italic">Trending Intelligence</span>
+                <span className="text-[7px] md:text-[8px] font-black uppercase text-white tracking-widest italic">Latest News</span>
             </div>
             
             <motion.div 
@@ -64,12 +64,11 @@ export default function Header({
                className="flex items-center gap-20 pl-6"
             >
                 {[
-                  "🌪️ UNUSUAL TEMPERATURE ANOMALY DETECTED IN SECTOR KLGA // ARBITRAGE WINDOW OPENING (+340% ROI)",
-                  "💎 INSTITUTIONAL LIQUIDITY SWEEP IN GASP PAIR // WHALE WALLETS MOVED 5.2M UNITS",
-                  "🛡️ SECURITY UPDATE: SYNDICATE NEURAL VAULT CAPACITY EXPANDED // 5 NEW PERSONAS SYNCED",
-                  "🔥 HIGH-SIGNAL: ELENA (MIAMI) JUST LEAKED SECTOR 7 DATA // ENCRYPTED BRIEFING IN VAULT",
-                  "⚡️ NETWORK PULSE AT CRITICAL LEVELS // 1.2M SIGNALS MATCHED IN 24H // GASP MATCHING ACTIVE",
-                  "🌪️ UNUSUAL TEMPERATURE ANOMALY DETECTED IN SECTOR KLGA // ARBITRAGE WINDOW OPENING (+340% ROI)",
+                  "🌪️ NEW ARCHIVE ADDED TO THE VAULT // ELENA (MIAMI)",
+                  "💎 NEW PROFILE ONLINE // VALENTINA LIMA",
+                  "⚡️ NEW FEED DROP // CARA (MADRID)",
+                  "🔥 TRENDING NOW // CHECK THE LATEST ARCHIVE",
+                  "🌪️ NEW ARCHIVE ADDED TO THE VAULT // ELENA (MIAMI)",
                 ].map((news, i) => (
                   <div key={i} className="flex items-center gap-4 text-white/40 text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] italic">
                      <div className="w-1 h-1 rounded-full bg-[#ff00ff] animate-pulse" />

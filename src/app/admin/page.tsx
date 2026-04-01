@@ -239,11 +239,11 @@ export default function AdminHub() {
                 <ShieldAlert size={24} />
               </div>
               <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/30 italic">
-                Syndicate Control Matrix v11
+                Gasp Admin
               </h2>
             </div>
             <h1 className="text-4xl sm:text-6xl md:text-8xl font-syncopate font-bold uppercase italic tracking-tighter leading-none">
-              Command <span className="text-[#ff00ff]">Hub</span>
+              Control <span className="text-[#ff00ff]">Panel</span>
             </h1>
             <p className="text-sm text-white/30 max-w-lg">
               Full administrative access to every system. Select a tool to begin.
@@ -300,9 +300,9 @@ export default function AdminHub() {
                 <Zap size={18} />
               </div>
               <div>
-                <h3 className="text-sm font-black uppercase italic tracking-tighter">Neural Engine Architecture</h3>
+                <h3 className="text-sm font-black uppercase italic tracking-tighter">AI Engine</h3>
                 <p className="text-[9px] text-white/30 uppercase tracking-widest">
-                  Hot-swap the LLM backend. Gemini is 50x cheaper. Grok is premium/unfiltered.
+                  Hot-swap the LLM backend. Gemini is 50x cheaper.
                 </p>
               </div>
             </div>
@@ -355,43 +355,44 @@ export default function AdminHub() {
 
           {/* ── Sovereign Handbook ── */}
           <div className="space-y-8">
-            <div className="flex items-center gap-3">
-              <ClipboardList size={24} className="text-[#00f0ff]" />
-              <h2 className="text-2xl font-syncopate font-black italic uppercase tracking-tighter">Sovereign Protocols: Operational Handbook</h2>
+            <div className="flex items-center gap-2 mb-3">
+               <Radio size={10} className="text-[#00f0ff] animate-pulse" />
+               <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#00f0ff] italic">Gasp Latest</span>
             </div>
+            <h2 className="text-2xl font-syncopate font-black italic uppercase tracking-tighter">Sovereign Protocols: Operational Handbook</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
                 {
                   title: "Identity Handshake",
                   steps: [
-                    "Sign in with beckfordluke14@gmail.com or lukexwayne34@gmail.com.",
-                    "The system will automatically grant admin flags in the database.",
-                    "Ensure 'Command Mode' is activated in the Hub to see Stars on the live feed."
+                    "Sign in with authorized emails.",
+                    "System grants admin flags automatically.",
+                    "Activate Command Mode to see Stars."
                   ]
                 },
                 {
                   title: "Economy & Credits",
                   steps: [
-                    "Enter the Master Secret Key to unlock the 'Credit Command'.",
-                    "Use 'Credit Command' to manually top-up user balances.",
-                    "Toggle 'Trigger Burn' to sync 1:1 reward matching (Points)."
+                    "Enter Master Secret Key.",
+                    "Top-up user balances manually.",
+                    "Toggle Burn to sync rewards."
                   ]
                 },
                 {
                   title: "Post & Billboard Logic",
                   steps: [
-                    "Use 'Post Studio' to toggle 'Vault' (Private) or 'Hero' (Featured) status.",
-                    "Pin the top 5 conversion assets to the homepage using the Gold Star.",
-                    "Merge text captions with media assets for high-fidelity storytelling."
+                    "Toggle Vault or Hero status.",
+                    "Pin assets using Gold Star.",
+                    "Merge captions with media."
                   ]
                 },
                 {
                   title: "Neural Engine Management",
                   steps: [
-                    "Switch to 'Gemini 1.5 Flash' for 50x lower operational costs.",
-                    "Switch to 'Grok 3' for premium, unfiltered persona interactions.",
-                    "Sync Pulse in 'System Vitals' to verify $GASPai matching integrity."
+                    "Gemini for cost efficiency.",
+                    "Grok for premium interactions.",
+                    "Sync Pulse to verify integrity."
                   ]
                 }
               ].map((section, idx) => (

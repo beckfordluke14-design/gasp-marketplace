@@ -19,14 +19,14 @@ export async function sendNudgeEmail(email: string, personaName: string, message
     const { data, error } = await resend.emails.send({
       from: 'Gasp Syndicate <nudge@gasp.fun>', // 🛡️ Replace with nudge@gasp.fun once domain is verified in Resend dashboard
       to: email,
-      subject: `${personaName} is thinking about you...`,
+      subject: `${personaName} is messaging you`,
       html: `
         <div style="background: #000; color: #fff; padding: 40px; font-family: 'Outfit', sans-serif; border-radius: 30px; border: 1px solid rgba(255,0,255,0.2); max-width: 500px; margin: 0 auto; text-align: center;">
           <div style="display: inline-block; width: 60px; height: 60px; background: #ff00ff; transform: rotate(45deg); border-radius: 12px; margin-bottom: 30px;">
              <span style="display: block; transform: rotate(-45deg); line-height: 60px; font-weight: 900; font-size: 24px; color: #000;">G</span>
           </div>
           <h2 style="font-size: 24px; font-weight: 900; letter-spacing: -0.05em; text-transform: uppercase; font-style: italic; margin-bottom: 15px;">
-             Pulse Detected: <span style="color: #ff00ff;">${personaName}</span>
+             ${personaName} <span style="color: #ff00ff;">is messsaging you</span>
           </h2>
           <p style="font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 30px; font-style: italic;">
             "Wait, ${message}"
