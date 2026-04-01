@@ -5,7 +5,6 @@ import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import SovereignCheckout from './SovereignCheckout';
-import { HelioCheckout } from '@heliofi/checkout-react';
 
 interface TopUpDrawerProps {
   onClose: () => void;
@@ -13,8 +12,8 @@ interface TopUpDrawerProps {
 }
 
 /**
- * ⛽ TERMINAL TOP-UP v2.0
- * Objective: 100% Bank-Free Revenue via Direct P2P Crypto Settlement.
+ * ⛽ TERMINAL TOP-UP v3.0 // SOVEREIGN EDITION
+ * Objective: 100% Permissionless P2P Settlement via Jupiter.
  */
 export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   const [selectedPkgId, setSelectedPkgId] = useState<string | null>(null);
@@ -23,6 +22,17 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   const [history, setHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [showHelio, setShowHelio] = useState(false);
+
+  // 🧬 SETTLEMENT WATCHER: Listen for on-chain verification success
+  useEffect(() => {
+    const handleSuccess = () => {
+      console.log("🏁 [Settlement] Final verification confirmed. Granting UI access.");
+      setIsSuccess(true);
+      window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+    };
+    window.addEventListener('gasp_transfer_success', handleSuccess);
+    return () => window.removeEventListener('gasp_transfer_success', handleSuccess);
+  }, []);
 
   // 🧬 CUSTOM CREDIT LOGIC
   const [customAmount, setCustomAmount] = useState<string>('');
@@ -115,7 +125,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
           <div className="w-full h-full flex flex-col p-5 md:p-6 animate-in fade-in duration-300">
              <div className="w-full flex justify-between items-center mb-4 shrink-0">
                 <span className="text-[9px] font-black uppercase tracking-widest text-[#00f0ff] italic flex items-center gap-2">
-                   <Zap size={14} className="animate-pulse" /> P2P Bridge Authorized
+                   <Zap size={14} className="animate-pulse" /> Native P2P Bridge Active
                 </span>
                 <button 
                    onClick={() => setShowHelio(false)} 
@@ -124,28 +134,60 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                    Return
                 </button>
              </div>
-             <div className="w-full flex-1 overflow-y-auto rounded-3xl bg-black/40 border border-white/5 shadow-2xl">
-                 <HelioCheckout 
-                    config={{
-                      paylinkId: "69cd5f11f1c04738c8fc9d35",
-                      theme: { themeMode: "dark" },
-                      primaryColor: "#00f0ff",
-                      neutralColor: "#111111",
-                      amount: (parseFloat(customAmount) > 0 ? customAmount : "1.00"),
-                      display: "inline",
-                      onSuccess: (event) => {
-                         console.log("Helio Success:", event);
-                         setShowHelio(false);
-                         window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
-                      },
-                      onError: (event) => console.log("Helio Error:", event),
-                      onPending: (event) => console.log("Helio Pending:", event),
-                      onCancel: () => {
-                         console.log("Helio Cancelled");
-                         setShowHelio(false);
-                      }
-                    }}
-                  />
+             
+             {/* 🛸 JUPITER TERMINAL MOUNT POINT */}
+             <div className="flex-1 flex flex-col items-center justify-center p-8 bg-black/40 border border-white/5 rounded-3xl relative overflow-hidden group">
+                 <div id="jupiter-terminal-mount" className="w-full h-full min-h-[400px]">
+                    <div className="flex flex-col items-center justify-center h-full space-y-6">
+                        <div className="w-16 h-16 rounded-2xl bg-[#00f0ff]/20 flex items-center justify-center border border-[#00f0ff]/30 animate-pulse">
+                            <Zap size={32} className="text-[#00f0ff]" />
+                        </div>
+                        <div className="space-y-2 text-center">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-white">Initializing Bridge Node...</p>
+                            <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest italic">Syncing with Archive Liquidity</p>
+                        </div>
+                    </div>
+                 </div>
+                 
+                 {/* 🧬 INITIALIZATION LOGIC */}
+                 <script dangerouslySetInnerHTML={{ __html: `
+                    (function() {
+                      const mountInterval = setInterval(() => {
+                        if (window.Jupiter && document.getElementById('jupiter-terminal-mount')) {
+                           clearInterval(mountInterval);
+                           window.Jupiter.init({
+                              displayMode: "integrated",
+                              integratedTargetId: "jupiter-terminal-mount",
+                              endpoint: "https://api.mainnet-beta.solana.com",
+                              strictTokenList: false,
+                              formProps: {
+                                fixedOutputMint: true,
+                                initialOutputMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                                fixedAmount: false,
+                                initialInputAmount: "${customAmount || '0.1'}"
+                              },
+                              onSuccess: ({ txid }) => {
+                                 console.log("✅ Bridge Success:", txid);
+                                 fetch('/api/economy/verify-tx', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                       signature: txid,
+                                       userId: "${userId}",
+                                       amountUsdc: ${parseFloat(customAmount) || 1.00},
+                                       expectedCredits: ${Math.floor((parseFloat(customAmount) || 1.00) * 1000)}
+                                    })
+                                 }).then(r => r.json()).then(data => {
+                                    if (data.success) {
+                                       window.dispatchEvent(new CustomEvent('gasp_transfer_success'));
+                                    }
+                                 });
+                              }
+                           });
+                        }
+                      }, 500);
+                    })();
+                 `}} />
              </div>
           </div>
         ) : (
