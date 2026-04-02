@@ -58,6 +58,10 @@ export async function POST(req: Request) {
     body.append('source_amount', priceUsd.toFixed(2));
     body.append('source_currency', 'usd');
 
+    // 🛡️ RETURN URL: Brings user back to gasp.fun with pending status flag
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gasp.fun';
+    body.append('return_url', `${baseUrl}/?payment_pending=true&userId=${userId}`);
+
     const response = await fetch('https://api.stripe.com/v1/crypto/onramp_sessions', {
       method: 'POST',
       headers: {

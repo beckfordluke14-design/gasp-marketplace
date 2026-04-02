@@ -38,6 +38,7 @@ function MarketplaceContent() {
   const [activeTab, setActiveTab] = useState<'feed' | 'weather' | 'reports' | 'protocol'>('feed');
   const [following, setFollowing] = useState<string[]>([]);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+  const [showPaymentPending, setShowPaymentPending] = useState(false);
   
   const handleSetSidebarView = (view: 'chats' | 'vault' | 'feed') => {
      if (view === 'feed') {
@@ -129,6 +130,13 @@ function MarketplaceContent() {
        setActiveTab(tab as any);
     }
 
+    // 🏦 BANK TRANSFER PENDING DETECTION
+    if (searchParams.get('payment_pending') === 'true') {
+      setShowPaymentPending(true);
+      // Clean the URL so it doesn't show on refresh
+      window.history.replaceState({}, '', '/');
+    }
+
     return () => {
        window.removeEventListener('gasp_unread_sync_trigger', syncUnreads);
        window.removeEventListener('gasp_sync_follows', syncFollows);
@@ -197,6 +205,27 @@ function MarketplaceContent() {
 
    return (
     <main className="min-h-screen bg-transparent text-white relative flex flex-col lg:flex-row xl:gap-0">
+
+      {/* 🏦 BANK TRANSFER PENDING BANNER */}
+      <AnimatePresence>
+        {showPaymentPending && (
+          <motion.div
+            initial={{ opacity: 0, y: -40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -40 }}
+            className="fixed top-0 inset-x-0 z-[99999] flex items-center justify-between gap-4 px-6 py-4 bg-[#0a0a0a] border-b border-[#00f0ff]/30 shadow-[0_4px_60px_rgba(0,240,255,0.15)]"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-2 h-2 rounded-full bg-[#00f0ff] animate-pulse shadow-[0_0_10px_#00f0ff]" />
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] font-black uppercase tracking-widest text-white font-syncopate italic">Bank Transfer Processing</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-white/40">Your credits will arrive automatically in 3–5 business days. No action required.</span>
+              </div>
+            </div>
+            <button onClick={() => setShowPaymentPending(false)} className="text-white/20 hover:text-white transition-colors text-xs font-black uppercase tracking-widest">Dismiss</button>
+          </motion.div>
+        )}
+      </AnimatePresence>
        <div className="hidden lg:flex h-screen sticky top-0 shrink-0 z-[40]">
            <Sidebar 
               onSelectProfile={handleSelectProfile} 
