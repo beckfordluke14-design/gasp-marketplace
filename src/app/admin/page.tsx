@@ -28,6 +28,7 @@ interface Tool {
 export default function AdminHub() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [engine, setEngine] = useState('gemini'); // Default to gemini per user request
+  const [isGenesisConfirm, setIsGenesisConfirm] = useState(false);
 
   useEffect(() => {
     setIsAdmin(document.cookie.includes('admin_gasp_override=granted'));
@@ -232,6 +233,68 @@ export default function AdminHub() {
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#00f0ff]/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
         <div className="space-y-10 sm:space-y-16 relative z-10">
+          {/* ⚡️ GENESIS COMMANDER: PROTOCOL START SWITCH */}
+          <div className="p-8 rounded-[3rem] bg-gradient-to-br from-red-500/20 via-black to-[#ffea00]/10 border-2 border-red-500/40 shadow-[0_0_100px_rgba(239,68,68,0.15)] space-y-6 relative overflow-hidden group">
+             <div className="absolute top-0 right-0 p-4">
+                <div className="flex items-center gap-2">
+                   <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                   <span className="text-[8px] font-black uppercase tracking-[0.4em] text-red-500 italic">Genesis Phase Node</span>
+                </div>
+             </div>
+             <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                 <div className="space-y-3 max-w-xl">
+                    <div className="flex items-center gap-3">
+                       <ShieldAlert size={28} className="text-red-500" />
+                       <h2 className="text-2xl font-syncopate font-black italic uppercase italic text-white tracking-tighter">Protocol Activation</h2>
+                    </div>
+                    <p className="text-[10px] text-white/50 uppercase tracking-widest leading-relaxed font-bold italic">
+                       Final Authorization Required. Activating this node will synchronize the <strong className="text-[#ffea00]">180-Day Genesis Lock</strong> across all sovereign identities. Use only when launch readiness is 100%. 🛡️
+                    </p>
+                 </div>
+                 
+                 <div className="flex gap-4 shrink-0">
+                    {!isGenesisConfirm ? (
+                       <button 
+                          onClick={() => setIsGenesisConfirm(true)}
+                          className="px-10 h-16 rounded-2xl bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                       >
+                          Initialize Genesis
+                       </button>
+                    ) : (
+                       <div className="flex gap-4 animate-in zoom-in duration-300">
+                          <button 
+                             onClick={() => setIsGenesisConfirm(false)}
+                             className="px-6 h-16 rounded-2xl bg-white/5 border border-white/10 text-white/40 text-[9px] font-black uppercase tracking-widest hover:text-white"
+                          >
+                             Cancel
+                          </button>
+                          <button 
+                             onClick={async () => {
+                                const key = localStorage.getItem('admin_gasp_key');
+                                if (!key) return alert("Master Secret Key Required for Genesis Activation.");
+                                try {
+                                   const res = await fetch('/api/admin/config', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json', 'x-admin-key': key },
+                                      body: JSON.stringify({ key: 'genesis_launch_date', value: Date.now().toString() })
+                                   });
+                                   const data = await res.json();
+                                   if (data.success) {
+                                      alert("🏁 GENESIS PROTOCOL ACTIVE: 180-DAY LOCK SYNCHRONIZED.");
+                                      window.location.reload();
+                                   }
+                                } catch (e) { alert("Initialization Failed."); }
+                             }}
+                             className="px-10 h-16 rounded-2xl bg-red-600 text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_20px_60px_rgba(220,38,38,0.4)] hover:bg-red-500 hover:scale-110 active:scale-95 transition-all border-none"
+                          >
+                             Confirm 180-Day Lock
+                          </button>
+                       </div>
+                    )}
+                 </div>
+             </div>
+          </div>
+
           {/* Header Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">

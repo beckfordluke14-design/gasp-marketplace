@@ -20,7 +20,9 @@ import {
   Sparkles,
   Star,
   Flame,
-  Share
+  Share,
+  Copy,
+  Shield
 } from 'lucide-react';
 import { useUser } from '@/components/providers/UserProvider';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
@@ -379,10 +381,30 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 </div>
               </div>
 
+              <div className="space-y-3 relative z-10 px-1 border-t border-white/5 pt-4">
+                 <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                       <Shield size={12} className="text-[#ffea00]" />
+                       <span className="text-[10px] font-black uppercase tracking-widest text-[#ffea00] italic">Genesis Lock</span>
+                    </div>
+                    <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">Day 12 / 180</span>
+                 </div>
+                 <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden border border-white/5">
+                    <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: '7%' }} 
+                        className="h-full bg-[#ffea00] shadow-[0_0_10px_#ffea0044]" 
+                    />
+                 </div>
+                 <div className="flex items-center gap-1.5 text-[6px] font-black uppercase text-[#ffea00]/60 tracking-widest italic animate-pulse">
+                    <Zap size={8} /> 50% EXIT BURN PENALTY ACTIVE
+                 </div>
+              </div>
+
               <div className="space-y-1 relative z-10 px-1">
                  <div className="flex items-center gap-2 mb-1">
-                    <Flame size={12} className="text-[#ffea00]" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-[#ffea00] italic">Network Power</span>
+                    <Flame size={12} className="text-[#ff6b00]" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#ff6b00] italic">Network Power</span>
                  </div>
                  <h3 className="text-[12px] font-black uppercase italic tracking-tighter text-white">
                     {pointsStats.balance >= 10000 ? 'Sovereign Node 💎' : pointsStats.balance >= 1000 ? 'Syndicate Overseer ⚡️' : 'Recruit Analyst 🟠'}
@@ -390,10 +412,33 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
               </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="flex flex-col gap-3 pt-4 border-t border-white/5 bg-black/20 p-4 rounded-2xl mb-4">
+              <div className="flex items-center justify-between mb-1">
+                 <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20 italic">Sovereign Identity</span>
+                 <div className="flex items-center gap-1 scale-90">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
+                    <span className="text-[6px] font-black text-[#00f0ff] uppercase tracking-widest">Linked Node</span>
+                 </div>
+              </div>
+              <div className="flex items-center justify-between">
+                 <code className="text-[9px] font-mono text-white/60 tracking-wider">
+                    {profile?.id?.slice(0, 6)}...{profile?.id?.slice(-4)}
+                 </code>
+                 <Copy 
+                    size={12} 
+                    className="text-white/20 hover:text-[#00f0ff] cursor-pointer transition-colors" 
+                    onClick={() => {
+                        navigator.clipboard.writeText(profile?.id || '');
+                        alert('Identity Node Copied.');
+                    }}
+                 />
+              </div>
+          </div>
+
+          <div className="space-y-4 pt-2 border-t border-white/5">
              <button 
                 onClick={() => onOpenTopUp ? onOpenTopUp() : (window as any).openTopUp?.()}
-                className="w-full h-11 bg-[#00f0ff] text-black rounded-2xl flex items-center justify-center gap-2 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(0,240,255,0.15)] active:scale-95 border-none"
+                className="w-full h-12 bg-[#00f0ff] text-black rounded-2xl flex items-center justify-center gap-2 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(0,240,255,0.2)] active:scale-95 border-none"
              >
                 <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center">
                    <Zap size={10} className="text-black" />
