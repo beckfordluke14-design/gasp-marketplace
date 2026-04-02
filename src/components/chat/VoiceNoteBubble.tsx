@@ -16,14 +16,14 @@ interface VoiceNoteBubbleProps {
   translation?: string;
   isUnlocked?: boolean;
   onUnlockTranslation?: () => Promise<boolean>;
-  isEnglish?: boolean;
+  isEnglish?: boolean; // Persona language status
 }
 
 /**
- * 🛰️ GASP VOICE NOTE BUBBLE v9.0 // MULTI-LOCALE AUDIO HUB
- * Audio plays FREE in native language.
- * Translation = 1,000 credits (the core voice note monetization mechanic).
+ * 🛰️ GASP VOICE NOTE BUBBLE v9.1 // SMART DECODING PROTOCOL
  * 100% Bilingual Sync (EN/ES).
+ * Dynamic Logic: Reveal text instantly if message language matches user locale.
+ * Monetize only for cross-language decodes (1,000 credits).
  */
 export default function VoiceNoteBubble({
   audioUrl,
@@ -35,7 +35,7 @@ export default function VoiceNoteBubble({
   translation,
   isUnlocked,
   onUnlockTranslation,
-  isEnglish: initialIsEnglish,
+  isEnglish,
 }: VoiceNoteBubbleProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -44,11 +44,17 @@ export default function VoiceNoteBubble({
   const [translationUnlocked, setTranslationUnlocked] = useState(isUnlocked || false);
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [internalUrl, setInternalUrl] = useState<string | null>(null); // 🛡️ IN-MEMORY BINARY BRIDGE
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animFrameRef = useRef<number>(0);
 
   // 🌍 GLOBAL LOCALE STATE
-  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
+  const isSpanishLocale = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
+  
+  // 🛰️ DYNAMIC DECODING LOGIC: If message language matches user locale, unlock it automatically.
+  // Note: isEnglish = Persona's native language. isSpanishLocale = User's UI language.
+  const isUserNative = (isEnglish && !isSpanishLocale) || (!isEnglish && isSpanishLocale);
+  const isAutoUnlocked = translationUnlocked || isUserNative;
 
   // Seeded waveform heights: Use fallback if audio source is pending
   const barCount = 35;
@@ -72,7 +78,6 @@ export default function VoiceNoteBubble({
             const blob = new Blob([bytes], { type: 'audio/wav' });
             blobUrl = URL.createObjectURL(blob);
             setInternalUrl(blobUrl);
-            console.log('[VoiceNote] Binary Ingress Success. In-memory DNA active.');
         } catch (err) {
             console.error('[VoiceNote] Binary Handshake Failed:', err);
         }
@@ -247,7 +252,7 @@ export default function VoiceNoteBubble({
       {/* 🧬 DECODE PORTAL: MONETIZATION NODE */}
       {translation && (
         <div className="px-1 -mt-7 relative z-10 mx-4">
-          {(translationUnlocked || initialIsEnglish) ? (
+          {isAutoUnlocked ? (
             <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl">
                <p className="text-[13px] text-white/60 leading-relaxed font-medium italic">"{translation}"</p>
             </motion.div>
@@ -260,7 +265,7 @@ export default function VoiceNoteBubble({
               <div className="flex items-center gap-3">
                  <Languages size={14} className="text-[#ff00ff]" />
                  <span className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff]">
-                    {isSpanish ? 'DECODIFICAR MENSAJE' : 'DECODE WHAT SHE SAID'}
+                    {isSpanishLocale ? 'DECODIFICAR MENSAJE' : 'DECODE WHAT SHE SAID'}
                  </span>
               </div>
               <span className="text-[10px] font-black text-[#ff00ff]">{formatCredits(1000)}</span>
