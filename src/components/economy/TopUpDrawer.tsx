@@ -38,9 +38,9 @@ interface Transaction {
 }
 
 /**
- * ⛽ TERMINAL TOP-UP v3.5 // REVENUE MAXIMIZER
- * Objective: 100% Permissionless P2P Settlement with Cross-Chain Privy Sync.
- * Strategy: Institutional Upselling with Tiered Bonus Logic.
+ * ⛽ TERMINAL TOP-UP v3.8 // STRIPE-HYBRID EDITION
+ * Objective: 100% Coverage via Sovereign SOL P2P + Stripe Retail Card Gateway.
+ * Strategy: Zero-Friction Handshake for both Pro and Retail users.
  */
 export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   const [selectedPkgId, setSelectedPkgId] = useState<string | null>(null);
@@ -74,8 +74,8 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   if (isSuccess) {
     return (
       <div className="fixed inset-0 m-auto w-[95%] md:w-[420px] h-fit bg-black/95 backdrop-blur-3xl border border-white/10 z-[300] flex flex-col items-center justify-center p-10 text-center font-outfit rounded-[3rem] shadow-2xl">
-        <div className="w-24 h-24 rounded-full bg-[#ff6b00]/20 flex items-center justify-center mb-8 border border-[#ff6b00]/40 shadow-[0_0_60px_rgba(255,107,0,0.3)]">
-          <Diamond size={48} className="text-[#ff6b00] animate-pulse" />
+        <div className="w-24 h-24 rounded-full bg-[#ffea00]/20 flex items-center justify-center mb-8 border border-[#ffea00]/40 shadow-[0_0_60px_rgba(255,234,0,0.3)]">
+          <Diamond size={48} className="text-[#ffea00] animate-pulse" />
         </div>
         <h3 className="text-3xl font-syncopate font-black uppercase italic text-white mb-4">Transfer Complete</h3>
         <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-black leading-relaxed px-6">
@@ -98,13 +98,13 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
         {/* 🧬 HEADER */}
         <div className="p-8 border-b border-white/5 flex items-center justify-between bg-black/40">
            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#ff6b00]/10 flex items-center justify-center border border-[#ff6b00]/20">
-                <Diamond size={20} className="text-[#ff6b00]" />
+              <div className="w-10 h-10 rounded-xl bg-[#ffea00]/10 flex items-center justify-center border border-[#ffea00]/20">
+                <Diamond size={20} className="text-[#ffea00]" />
               </div>
               <div>
                 <h2 className="text-lg font-syncopate font-black text-white italic tracking-tighter">GASP // ARCHIVE</h2>
                 <div className="flex items-center gap-2">
-                   <div className="w-1 h-1 rounded-full bg-[#ff6b00] animate-pulse" />
+                   <div className="w-1 h-1 rounded-full bg-[#ffea00] animate-pulse" />
                    <span className="text-[8px] font-black uppercase tracking-widest text-white/30">Strategic Treasury Active</span>
                 </div>
               </div>
@@ -119,7 +119,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
 
         {!selectedPkgId ? (
           <div className="flex-1 overflow-y-auto no-scrollbar p-8 space-y-8">
-              {/* 🧬 DYNAMIC PACKAGE GRID: REVENUE MAXIMIZER */}
+              {/* 🧬 DYNAMIC PACKAGE GRID */}
               <div className="grid grid-cols-1 gap-4">
                 {CREDIT_PACKAGES.map((pkg) => {
                   const isHighTier = pkg.priceUsd >= 50;
@@ -155,13 +155,6 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                           </span>
                         </div>
                       </div>
-
-                      {selectedPkgId === pkg.id && (
-                        <motion.div 
-                          layoutId="pkg-glow"
-                          className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00f0ff]/5 to-transparent pointer-events-none"
-                        />
-                      )}
                     </button>
                   );
                 })}
@@ -173,7 +166,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">Custom Contribution</span>
                     <History 
                       size={14} 
-                      className={`text-white/20 cursor-pointer hover:text-white transition-colors ${showHistory ? 'text-[#ff6b00]' : ''}`} 
+                      className={`text-white/20 cursor-pointer hover:text-white transition-colors ${showHistory ? 'text-[#ffea00]' : ''}`} 
                       onClick={() => setShowHistory(!showHistory)}
                     />
                   </div>
@@ -183,31 +176,45 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                       value={customAmount}
                       onChange={(e) => setCustomAmount(e.target.value)}
                       placeholder="ENTER AMOUNT"
-                      className="flex-1 h-14 bg-black border border-white/10 rounded-2xl px-6 text-white font-syncopate text-xs focus:border-[#ff6b00] focus:ring-0 transition-all placeholder:text-white/10"
+                      className="flex-1 h-14 bg-black border border-white/10 rounded-2xl px-6 text-white font-syncopate text-xs focus:border-[#ffea00] focus:ring-0 transition-all placeholder:text-white/10"
                     />
                     <button 
                       onClick={() => customAmount && setSelectedPkgId(`custom_${customAmount}`)}
-                      className="w-14 h-14 bg-[#ff6b00] rounded-2xl flex items-center justify-center text-black hover:scale-105 active:scale-95 transition-all"
+                      className="w-14 h-14 bg-[#ffea00] rounded-2xl flex items-center justify-center text-black hover:scale-105 active:scale-95 transition-all"
                     >
                       <ArrowRight size={20} />
                     </button>
                   </div>
               </div>
 
+              {/* 🛡️ STRIPE RETAIL BRIDGE: THE CARD ESCAPE HATCH */}
+              <div className="p-6 bg-white/[0.03] border border-white/5 rounded-3xl space-y-4 text-center">
+                  <p className="text-[9px] text-white/20 uppercase font-black tracking-widest italic">Don't have a Solana Wallet?</p>
+                  <button 
+                    onClick={() => window.open('https://buy.stripe.com/5kA02A56A8F6dDq3ce', '_blank')}
+                    className="w-full h-14 rounded-2xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl flex items-center justify-center gap-2"
+                  >
+                    <CreditCard size={16} /> Pay with Card (Stripe)
+                  </button>
+                  <p className="text-[7px] text-white/30 uppercase font-bold tracking-widest leading-relaxed">
+                    Stripe delivers USDC directly to your Privy Managed Vault. 🏛️🛡️
+                  </p>
+              </div>
+
               {showHistory && (
                 <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
-                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">Archived Transfers</span>
+                    <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white/20">Archived Transfers</span>
                     <div className="space-y-2">
                         {history.length > 0 ? history.map((tx: Transaction) => (
                            <div key={tx.id} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between">
                               <div className="flex items-center gap-3">
-                                 <Clock size={12} className="text-[#ff6b00]" />
+                                 <Clock size={12} className="text-[#ffea00]" />
                                  <div className="flex flex-col">
                                     <span className="text-[10px] text-white font-bold">${tx.amount} US-SETTLE</span>
                                     <span className="text-[7px] text-white/20 uppercase font-black">{new Date(tx.timestamp).toLocaleDateString()}</span>
                                  </div>
                               </div>
-                              <span className="text-[9px] font-black text-[#ff6b00]">+{tx.credits.toLocaleString()}💎</span>
+                              <span className="text-[9px] font-black text-[#ffea00]">+{tx.credits.toLocaleString()}💎</span>
                            </div>
                         )) : (
                           <div className="p-8 text-center bg-white/2 border border-dashed border-white/5 rounded-2xl">
@@ -288,13 +295,15 @@ function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: st
             <div className="flex flex-col items-center bg-black/40 border border-white/5 rounded-[2.5rem] p-8 space-y-6">
                 <div className="text-center space-y-2">
                     <h4 className="text-3xl font-syncopate font-black text-white italic tracking-tighter">${customAmount}</h4>
-                    <p className="text-[8px] text-white/30 uppercase font-bold tracking-widest">Settlement for Archive Credits (USDC) 🛡️</p>
+                    <p className="text-[8px] text-[#ffea00] uppercase font-bold tracking-widest animate-pulse">
+                        Settle with SOL or USDC (Solana Network) 🛡️
+                    </p>
                 </div>
 
                 <div className="relative p-4 bg-white rounded-3xl group shadow-[0_0_50px_rgba(255,255,255,0.05)]">
                     <img src={qrUrl} alt="Scan to Pay" className="w-40 h-40 object-contain rounded-xl" />
                     <div className="absolute inset-0 flex items-center justify-center bg-white/90 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
-                         <span className="text-[8px] font-black uppercase text-black tracking-widest text-center px-4">Scan with Phantom<br/>or Trust Wallet App</span>
+                         <span className="text-[8px] font-black uppercase text-black tracking-widest text-center px-4">Scan with Phantom,<br/>Trust Wallet, or Solfare</span>
                     </div>
                 </div>
 
@@ -306,6 +315,14 @@ function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: st
                     >
                         <Wallet size={16} /> Settle Invoice (One-Click)
                     </button>
+
+                    <button 
+                        onClick={() => window.open('https://buy.stripe.com/5kA02A56A8F6dDq3ce', '_blank')}
+                        className="w-full h-14 rounded-2xl bg-white text-black font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl flex items-center justify-center gap-2"
+                    >
+                        <CreditCard size={16} /> Pay with Card (Stripe)
+                    </button>
+
                     <p className="text-[7px] text-white/30 uppercase text-center font-bold tracking-widest animate-pulse">
                         Desktop: Supports Phantom // Solflare // Backpack
                     </p>

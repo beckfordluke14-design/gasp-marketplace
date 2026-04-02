@@ -295,6 +295,50 @@ export default function AdminHub() {
              </div>
           </div>
 
+          {/* ⚡️ PROMOTION CONTROL: LAUNCH WEEK BOOSTER */}
+          <div className="p-8 rounded-[3rem] bg-gradient-to-br from-[#ffea00]/10 via-black to-[#00f0ff]/10 border border-white/10 space-y-6 relative overflow-hidden group mb-10 sm:mb-16">
+             <div className="absolute top-0 right-0 p-4 shrink-0">
+                <div className="flex items-center gap-2">
+                   <div className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-pulse" />
+                   <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#ffea00] italic">Growth Hack Active</span>
+                </div>
+             </div>
+             <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                 <div className="space-y-3 max-w-xl">
+                    <div className="flex items-center gap-3">
+                       <Zap size={24} className="text-[#ffea00]" />
+                       <h2 className="text-xl font-syncopate font-black italic uppercase text-white tracking-tighter">Launch Day Booster</h2>
+                    </div>
+                    <p className="text-[10px] text-white/50 uppercase tracking-widest leading-relaxed font-bold italic">
+                       Activate a <strong className="text-[#ffea00]">+15% Universal Credit Bonus</strong> for all new settlements. This promotion will <strong className="text-white">auto-expire after 168 hours (7 Days)</strong> to protect institutional margins. 💎
+                    </p>
+                 </div>
+                 
+                 <div className="flex gap-4 shrink-0">
+                    <button 
+                       onClick={async () => {
+                          const key = localStorage.getItem('admin_gasp_key');
+                          if (!key) return alert("Master Secret Key Required.");
+                          if (!confirm("ACTIVATE 7-DAY PROMOTION: Are you sure? This increases conversion but lowers immediate margin.")) return;
+                          
+                          try {
+                             await fetch('/api/admin/config', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'x-admin-key': key },
+                                body: JSON.stringify({ key: 'is_launch_bonus_active', value: 'true' })
+                             });
+                             alert("🚀 LAUNCH WEEK BOOSTER ACTIVE. PROMOTION EXPIRING IN 7 DAYS.");
+                             window.location.reload();
+                          } catch (e) { alert("Activation Failed."); }
+                       }}
+                       className="px-10 h-14 rounded-2xl bg-[#ffea00] text-black text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_15px_40px_rgba(255,234,0,0.3)] hover:scale-105 active:scale-95 transition-all outline-none border-none"
+                    >
+                       Activate 7-Day Bonus
+                    </button>
+                 </div>
+             </div>
+          </div>
+
           {/* Header Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
