@@ -336,6 +336,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
  */
 function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: string, customAmount: string, onStepBack: () => void }) {
     const vaultAddress = "DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS";
+    const usdcMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
     const [isPaying, setIsPaying] = useState(false);
 
     // 🧬 NATIVE ACTION: TRIGGER WALLET DIRECTLY
@@ -348,8 +349,8 @@ function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: st
                 setIsPaying(false);
                 return;
             }
-            // Trigger browser extension directly.
-            window.location.href = `solana:${vaultAddress}?amount=${customAmount}&label=GASP%20ARCHIVE&message=Refuel:${userId.slice(0,8)}`;
+            // Trigger browser extension directly with USDC mandate.
+            window.location.href = `solana:${vaultAddress}?amount=${customAmount}&spl-token=${usdcMint}&label=GASP%20ARCHIVE&message=Refuel:${userId.slice(0,8)}`;
         } catch (err) {
             console.error("❌ Settlement error:", err);
         }
@@ -361,7 +362,7 @@ function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: st
         alert("🛡️ Vault Address Copied for Archive Settlement.");
     };
 
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`solana:${vaultAddress}?amount=${customAmount}&label=GASP%20ARCHIVE`)}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`solana:${vaultAddress}?amount=${customAmount}&spl-token=${usdcMint}&label=GASP%20ARCHIVE`)}`;
 
     return (
         <div className="flex-1 flex flex-col p-6 md:p-8 space-y-6 animate-in zoom-in duration-500 overflow-y-auto no-scrollbar">
@@ -377,7 +378,9 @@ function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: st
             <div className="flex flex-col items-center bg-black/40 border border-white/5 rounded-[2.5rem] p-8 space-y-6">
                 <div className="text-center space-y-2">
                     <h4 className="text-3xl font-syncopate font-black text-white italic tracking-tighter">${customAmount}</h4>
-                    <p className="text-[8px] text-white/30 uppercase font-bold tracking-widest">Settlement for Archive Credits</p>
+                    <p className="text-[8px] text-white/30 uppercase font-bold tracking-widest">
+                        Manual or One-Click Settlement (SOL or USDC) 🛡️
+                    </p>
                 </div>
 
                 {/* 🧬 DYNAMIC QR HUB */}
@@ -388,7 +391,7 @@ function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: st
                         className="w-40 h-40 object-contain rounded-xl"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-white/90 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
-                         <span className="text-[8px] font-black uppercase text-black tracking-widest text-center px-4">Scan with Phantom<br/>or Solflare App</span>
+                         <span className="text-[8px] font-black uppercase text-black tracking-widest text-center px-4">Scan with Phantom<br/>or Trust Wallet App</span>
                     </div>
                 </div>
 
@@ -398,13 +401,13 @@ function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: st
                         disabled={isPaying}
                         className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_15px_40px_rgba(0,240,255,0.3)] flex items-center justify-center gap-2"
                     >
-                        <Wallet size={16} /> Pay with Wallet
+                        <Wallet size={16} /> Settle Invoice (One-Click)
                     </button>
                     
                     <p className="text-[7px] text-white/20 uppercase text-center font-black tracking-[0.3em] py-2">OR MANUAL SETTLEMENT</p>
 
                     <div className="p-4 bg-white/5 border border-white/5 rounded-2xl relative group">
-                        <code className="block text-[8px] font-mono text-white/40 break-all text-center leading-relaxed mb-1 pr-6">
+                        <code className="block text-[9px] font-mono text-white/40 break-all text-center leading-relaxed mb-1 pr-6">
                             {vaultAddress}
                         </code>
                         <button 
@@ -418,7 +421,7 @@ function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: st
             </div>
 
             <p className="text-[7px] text-white/20 text-center font-black uppercase tracking-widest leading-loose pb-12 italic">
-               Verification node: ONLINE // 100% Sovereign Settlement 🧿🛡️
+               Verification node: ONLINE // 100% Sovereign USDC Settlement 🧿🛡️
             </p>
         </div>
     );
