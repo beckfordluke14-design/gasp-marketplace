@@ -155,6 +155,14 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
 
     const handleSwitchToP2P = async () => {
         try {
+            // 🚀 FAST PRICE SYNC: Get latest market rate before session starts
+            try {
+                const pRes = await fetch('https://api.jup.ag/price/v2?ids=So11111111111111111111111111111111111111112');
+                const pData = await pRes.json();
+                const freshPrice = pData.data['So11111111111111111111111111111111111111112']?.price;
+                if (freshPrice) setSolPrice(parseFloat(freshPrice));
+            } catch (e) {}
+
             // 🛡️ SERVER-SIDE reference generation — userId + amount locked server-side
             const resolvedId = userId || propUserId || 'anon';
             const res = await fetch('/api/economy/solana/session', {
@@ -218,9 +226,28 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
 
     if (!isOpen) return null;
 
-    const solanaPayUrl = p2pAsset === 'USDC' 
-        ? `solana:${vaultAddress}?amount=${parseFloat(targetUsd.toString()).toFixed(2)}&spl-token=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&reference=${uniqueRef}&label=GASP%20Archive&message=Terminal%20Refill%20Request`
-        : `solana:${vaultAddress}?amount=${targetSol}&reference=${uniqueRef}&label=GASP%20Archive&message=Terminal%20Refill%20Request`;
+    // 🧬 SOVEREIGN URI ENGINE: High-Compliance Solana Pay Building
+    const buildSolanaPayUrl = () => {
+        const params = new URLSearchParams();
+        const cleanUsd = Math.max(0.01, parseFloat(targetUsd.toString()) || 4.99);
+        
+        if (p2pAsset === 'USDC') {
+            params.append('amount', cleanUsd.toFixed(2));
+            params.append('spl-token', 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+        } else {
+            // 🛡️ Precision Lock: Use 4 decimals for clean Phantom pricing
+            const cleanSol = Math.max(0.0001, parseFloat(targetSol) || 0.025);
+            params.append('amount', cleanSol.toFixed(4));
+        }
+
+        if (uniqueRef) params.append('reference', uniqueRef);
+        params.append('label', 'GASP');
+        params.append('message', 'Refill');
+        
+        return `solana:${vaultAddress}?${params.toString()}`;
+    };
+
+    const solanaPayUrl = buildSolanaPayUrl();
 
     return (
         <AnimatePresence>
@@ -319,6 +346,18 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                         {isPolling && <div className="absolute inset-0 border-2 border-[#00f0ff] border-t-transparent animate-spin rounded-2xl shadow-[0_0_40px_rgba(0,240,255,0.4)]" />}
                                     </div>
                                     <h3 className="text-xl font-syncopate font-black uppercase italic text-white tracking-tighter leading-none">{isPolling ? (isSpanish ? 'ESPERANDO PAGO...' : 'WAITING FOR SYNC...') : (isSpanish ? 'LIQUIDACIÓN P2P' : 'P2P SETTLEMENT')}</h3>
+                                    
+                                    {/* 📟 SETTLEMENT DISPLAY (REAL-TIME RATE) */}
+                                    <div className="flex flex-col items-center gap-1">
+                                        <div className="flex items-center gap-2 px-4 py-2 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-full">
+                                            <div className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-pulse shadow-[0_0_8px_#00f0ff]" />
+                                            <span className="text-[10px] font-black text-white italic tracking-tighter">
+                                                {p2pAsset === 'SOL' ? `${targetSol} SOL` : `$${parseFloat(targetUsd.toString()).toFixed(2)} USDC`}
+                                            </span>
+                                        </div>
+                                        <p className="text-[8px] text-white/20 font-black uppercase tracking-widest">{isSpanish ? 'TASA DE RED EN TIEMPO REAL' : 'REAL-TIME NETWORK RATE'}</p>
+                                    </div>
+                                    
                                     <p className="text-[9px] text-white/40 leading-relaxed max-w-[280px] mx-auto font-black uppercase tracking-widest italic">{isPolling ? (isSpanish ? 'ESCANEANDO BLOQUES DE SOLANA...' : 'SCANNING SOLANA BLOCKS...') : `Enviar ${p2pAsset === 'SOL' ? targetSol : targetUsd} ${p2pAsset} a la Bóveda.`}</p>
                                 </div>
 
