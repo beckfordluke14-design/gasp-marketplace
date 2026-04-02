@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { type Profile, type Broadcast, proxyImg } from '@/lib/profiles';
 import Image from 'next/image';
-import { Lock, Circle, MessageSquare, Image as ImageIcon, Heart, Star } from 'lucide-react';
+import { Lock, Circle, MessageSquare, Image as ImageIcon, Heart, Star, ArrowRight } from 'lucide-react';
 import GlitchText from './ui/GlitchText';
 
 interface FeedItemProps {
@@ -99,9 +99,32 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
       {/* Content Switcher */}
       <div className="px-4">
         {broadcast.type === 'text' && (
-          <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-white lowercase leading-tight">
-            {broadcast.content}
-          </h2>
+          <div className="space-y-6">
+             <div className="flex items-center gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ff00ff] animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#ff00ff] italic">
+                   {profile.name} SHARED A NOTE
+                </span>
+             </div>
+
+             <div className="relative p-8 rounded-[2.5rem] bg-white/[0.03] border border-white/5 space-y-4">
+                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[#ff00ff] to-transparent opacity-40" />
+                <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-white/90 lowercase leading-tight">
+                   {broadcast.content}
+                </h2>
+             </div>
+
+             <button 
+                onClick={() => window.location.href = `/chat?personaId=${profile.id}`}
+                className="w-full h-14 rounded-2xl bg-[#ff00ff]/10 border border-[#ff00ff]/30 flex items-center justify-center gap-3 group hover:bg-[#ff00ff]/20 transition-all"
+             >
+                <MessageSquare size={16} className="text-[#ff00ff]" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white italic">
+                   CHAT W/ {profile.name} FOR DEEP-DIVE ANALYSIS
+                </span>
+                <ArrowRight size={14} className="text-[#ff00ff] group-hover:translate-x-1 transition-transform" />
+             </button>
+          </div>
         )}
 
         {broadcast.type === 'image' && (

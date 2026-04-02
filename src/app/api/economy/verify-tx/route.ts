@@ -4,18 +4,19 @@ import { db } from '@/lib/db';
 import { SYNDICATE_TREASURY_SOL, USDC_MINT_SOL } from '@/lib/economy/constants';
 
 /**
- * 🛰️ SOVEREIGN TRANSACTION VERIFIER v6.0
- * Objective: Direct On-Chain Fulfillment for the Archive Bridge.
+ * 🛰️ SOVEREIGN TRANSACTION AUDITOR v7.0 // DYNAMIC GRANT ENGINE
+ * Objective: Verify actual on-chain settlement and grant credits dynamically.
+ * Security: Prevents underpayment fraud by auditing the specific vault balance change.
  */
 export async function POST(req: Request) {
     try {
-        const { signature, userId, amountUsdc, expectedCredits } = await req.json();
+        const { signature, userId } = await req.json();
 
-        if (!signature || !userId || !amountUsdc) {
+        if (!signature || !userId) {
             return NextResponse.json({ success: false, error: 'Missing critical identifiers.' }, { status: 400 });
         }
 
-        console.log(`📡 [Verifier] Checking signature: ${signature} for user: ${userId}`);
+        console.log(`📡 [Auditor] Auditing signature: ${signature} for user: ${userId}`);
 
         // 🧿 REAL-TIME BLOCKCHAIN UPLINK
         const connection = new Connection(
@@ -23,13 +24,7 @@ export async function POST(req: Request) {
             'confirmed'
         );
 
-        // Wait up to 30 seconds for confirmation if it's a fresh signature
-        const status = await connection.getSignatureStatus(signature);
-        if (status?.value?.err) {
-            return NextResponse.json({ success: false, error: 'Transaction failed on-chain.' }, { status: 400 });
-        }
-
-        // 🛡️ REVENUE-WATCHER: Confirm successful transaction details
+        // Fetch transaction with full metadata
         const tx = await connection.getParsedTransaction(signature, {
             maxSupportedTransactionVersion: 0,
         });
@@ -38,8 +33,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: 'Transaction not found or not yet indexed.' }, { status: 404 });
         }
 
-        // Verify it was a successful USDC transfer to our vault
-        // 🧬 Logic: Loop through token balances changes and find the one that matches our DGQ vault
+        // 🛡️ REVENUE-WATCHER: Audit vault balance changes
         const postTokenBalances = tx.meta?.postTokenBalances || [];
         const preTokenBalances = tx.meta?.preTokenBalances || [];
 
@@ -52,41 +46,59 @@ export async function POST(req: Request) {
 
         const actualReceived = (vaultBalanceAfter?.uiTokenAmount.uiAmount || 0) - (vaultBalanceBefore?.uiTokenAmount.uiAmount || 0);
 
-        // Allow for 1.5% margin for swap slippage/fees
-        const minimumRequired = amountUsdc * 0.985;
-
-        if (actualReceived < minimumRequired) {
-             console.error(`❌ [Verifier] Amount Failure. Received: ${actualReceived}, Required: ${minimumRequired}`);
-             return NextResponse.json({ success: false, error: 'Verification Failed: Incorrect amount received.' }, { status: 400 });
+        // Check for validity
+        if (actualReceived <= 0) {
+             console.error(`❌ [Auditor] Zero/Negative Balance detected. Received: ${actualReceived}`);
+             return NextResponse.json({ success: false, error: 'Verification Failed: No USDC deposit detected in treasury.' }, { status: 400 });
         }
 
-        console.log(`✅ [Verifier] Payment Validated: ${actualReceived} USDC received.`);
+        // 🧬 DYNAMIC CREDIT CALCULATION (INSTITUTIONAL AUDIT)
+        // Rate: 100 base credits per 1 USDC
+        // Bonus Tiers based on ACTUAL amount received
+        let bonusMultiplier = 1;
+        if (actualReceived >= 100) bonusMultiplier = 1.40; // 40% Bonus
+        else if (actualReceived >= 50) bonusMultiplier = 1.25; // 25% Bonus
+        else if (actualReceived >= 19.99) bonusMultiplier = 1.15; // 15% Bonus
+
+        const creditsToGrant = Math.floor(actualReceived * 100 * bonusMultiplier);
+
+        console.log(`✅ [Auditor] Validated: ${actualReceived} USDC received. Dynamic Grant: ${creditsToGrant} Credits.`);
 
         // 🏦 CREDIT INJECTION
         await db.query(`
             UPDATE profiles 
             SET credits = credits + $1 
             WHERE id = $2
-        `, [expectedCredits, userId]);
+        `, [creditsToGrant, userId]);
 
-        // Log the success
+        // Log the success in the ledger
         await db.query(`
             INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
-            VALUES ($1, $2, 'credit_buy', 'jupiter_direct', $3, NOW())
-        `, [userId, actualReceived, JSON.stringify({ signature, source: 'jupiter_bridge' })]);
+            VALUES ($1, $2, 'credit_buy', 'on_chain_audit', $3, NOW())
+        `, [
+            userId, 
+            actualReceived, 
+            JSON.stringify({ 
+                signature, 
+                bonus_applied: `${(bonusMultiplier - 1) * 100}%`, 
+                raw_usdc: actualReceived,
+                timestamp: new Date().toISOString()
+            })
+        ]);
 
         return NextResponse.json({ 
             success: true, 
-            creditsGranted: expectedCredits,
-            newBalance: actualReceived 
+            creditsGranted: creditsToGrant,
+            actualReceived: actualReceived,
+            bonus: `${(bonusMultiplier - 1) * 100}%`
         });
 
     } catch (err: any) {
-        console.error('❌ [Verifier] Critical Fault:', err.message);
-        return NextResponse.json({ success: false, error: `Critical System Fault: ${err.message}` }, { status: 500 });
+        console.error('❌ [Auditor] Critical Fault:', err.message);
+        return NextResponse.json({ success: false, error: `Critical Audit Fault: ${err.message}` }, { status: 500 });
     }
 }
 
 export async function GET() {
-    return NextResponse.json({ status: 'ACTIVE // SOVEREIGN_UPLINK_6.0' });
+    return NextResponse.json({ status: 'ACTIVE // SOVEREIGN_AUDITOR_7.0' });
 }

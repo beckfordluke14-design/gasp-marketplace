@@ -76,11 +76,11 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                OUT OF CREDITS
             </h3>
             
-            <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-8 max-w-[320px]">
+            <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-8 max-w-[320px] italic">
                {personaName ? (
-                   <>You're out of credits. Maintain your high-heat uplink with <span className="text-[#ffea00]">{personaName}</span>. Top up to continue the conversation. 🛡️🛰️</>
+                   <>CHAT W/ <span className="text-[#ffea00]">{personaName}</span> TO CONTINUE. Allocation of Credits Required to Maintain Connection. 🗝️🛡️</>
                ) : (
-                   <>The Neural Bridge is fading. Allocate more <span className="text-[#ffea00]">System Credits</span> to maintain the Synchronized Uplink. 🛡️🛰️</>
+                   <>Allocation of <span className="text-[#ffea00]">System Credits</span> Required to Access Secure Archive Uplink. 🛡️🛰️</>
                )}
             </p>
 
@@ -90,17 +90,17 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                     onClose();
                     onOpenTopUp();
                   }}
-                  className="w-full h-16 rounded-2xl bg-[#ffea00] text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(255,234,0,0.3)] flex items-center justify-center gap-3"
+                  className="w-full h-16 rounded-2xl bg-[#ffea00] text-black text-[11px] font-black uppercase tracking-[0.3em] font-syncopate italic hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_40px_rgba(255,234,0,0.4)] flex items-center justify-center gap-3"
                 >
-                   <Diamond size={14} fill="currentColor" />
-                   INFUSE NODE ENERGY
+                   <Diamond size={16} fill="currentColor" />
+                   ADD CREDITS
                 </button>
                
                <button 
                  onClick={onClose}
-                 className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white/40 text-[9px] font-black uppercase tracking-[0.2em] hover:text-white transition-all"
+                 className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white/40 text-[10px] font-black uppercase tracking-[0.2em] hover:text-white transition-all shadow-xl"
                >
-                  LATER
+                  DISMISS
                </button>
             </div>
           </div>
