@@ -76,24 +76,24 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex justify-end">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/80 backdrop-blur-md"
       />
       
       <motion.div
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="relative w-full max-w-xl h-full bg-[#050505] border-l border-white/5 flex flex-col shadow-2xl"
+        className="relative w-full max-w-xl bg-[#050505] border border-white/10 flex flex-col shadow-[0_0_100px_rgba(0,0,0,0.8)] rounded-[3.5rem] overflow-hidden max-h-[90dvh]"
       >
         {/* Header */}
-        <div className="p-8 flex items-center justify-between border-b border-white/5 bg-black/40">
+        <div className="p-10 flex items-center justify-between bg-black/40 border-b border-white/5">
           <div className="flex flex-col">
             <h2 className="text-2xl font-syncopate font-black italic uppercase text-white tracking-widest">
                 {isSpanish ? 'Puente del Archivo' : 'Archive Bridge'}
@@ -107,9 +107,9 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
           </div>
           <button 
             onClick={onClose}
-            className="w-10 h-10 rounded-full hover:bg-white/5 transition-all flex items-center justify-center text-white/40 hover:text-white"
+            className="w-12 h-12 rounded-full hover:bg-white/5 transition-all flex items-center justify-center text-white/40 hover:text-white border border-white/10"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
@@ -205,7 +205,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     key="institutional-cashier"
                     userId={userId} 
                     vaultAddress={vaultAddress}
-                    customAmount={selectedPkgId.startsWith('custom_') ? selectedPkgId.split('_')[1] : CREDIT_PACKAGES.find(p => p.id === selectedPkgId)?.priceUsd.toString() || '4.99'} 
+                    customAmount={selectedPkgId!.startsWith('custom_') ? selectedPkgId!.split('_')[1] : CREDIT_PACKAGES.find(p => p.id === selectedPkgId)?.priceUsd.toString() || '4.99'} 
                     onStepBack={() => setSelectedPkgId(null)}
                     onSuccess={() => setIsSuccess(true)}
                     isSpanish={isSpanish}

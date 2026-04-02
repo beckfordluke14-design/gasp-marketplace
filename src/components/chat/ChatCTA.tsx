@@ -11,8 +11,15 @@ interface ChatCTAProps {
   balance?: number;
 }
 
+/**
+ * 🛰️ STRATEGIC CHAT CTA v9.0 // MULTI-LOCALE CONVERSION ENGINE
+ * Strategy: High-Status In-Stream Prompts with 100% Bilingual Sync (EN/ES).
+ */
 export default function ChatCTA({ type, onAction, personaName, balance }: ChatCTAProps) {
   const { login } = useUser();
+
+  // 🌍 GLOBAL LOCALE STATE
+  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
 
   if (type === 'signup') {
     return (
@@ -28,11 +35,15 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
         </div>
 
         <div className="space-y-1 z-10">
-           <h3 className="text-sm font-syncopate font-black uppercase text-white italic italic tracking-tighter">
-             CONNECTION PAUSED
+           <h3 className="text-sm font-syncopate font-black uppercase text-white italic tracking-tighter">
+             {isSpanish ? 'CONEXIÓN PAUSADA' : 'CONNECTION PAUSED'}
            </h3>
            <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
-             You’ve Ran Out of Credits. <br /> Sign up to Continue the Strategy Session with <span className="text-[#ff00ff]">{personaName}</span> & get 1,500 FREE.
+             {isSpanish ? (
+               <>Te has quedado sin créditos. <br /> Regístrate para continuar la sesión con <span className="text-[#ff00ff]">{personaName}</span> y obtén 1,500 GRATIS.</>
+             ) : (
+               <>You’ve Ran Out of Credits. <br /> Sign up to Continue the Strategy Session with <span className="text-[#ff00ff]">{personaName}</span> & get 1,500 FREE.</>
+             )}
            </p>
         </div>
 
@@ -40,13 +51,15 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
            onClick={() => login()}
            className="mt-2 w-full h-16 bg-white text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic rounded-2xl hover:bg-[#00f0ff] hover:text-black transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 z-10 flex items-center justify-center gap-2"
         >
-           CLAIM 1,500 FREE CREDITS
+           {isSpanish ? 'RECLAMAR 1,500 CRÉDITOS GRATIS' : 'CLAIM 1,500 FREE CREDITS'}
            <ArrowRight size={14} />
         </button>
 
         <div className="pt-2 flex items-center gap-2 opacity-30">
            <ShieldPlus size={10} className="text-[#ff00ff]" />
-           <span className="text-[7px] font-black uppercase tracking-widest">Sovereign Identity Protection Active</span>
+           <span className="text-[7px] font-black uppercase tracking-widest">
+              {isSpanish ? 'Protección de Identidad Soberana Activa' : 'Sovereign Identity Protection Active'}
+           </span>
         </div>
       </motion.div>
     );
@@ -65,11 +78,15 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
       </div>
 
       <div className="space-y-1 z-10">
-         <h3 className="text-sm font-syncopate font-black uppercase text-white italic italic tracking-tighter">
-           OUT OF CREDITS
+         <h3 className="text-sm font-syncopate font-black uppercase text-white italic tracking-tighter">
+           {isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS'}
          </h3>
          <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
-           You currently have <span className="text-white font-syncopate">{balance !== undefined ? balance.toLocaleString() : '---'}</span>. <br /> Top up to maintain Sync Lock.
+           {isSpanish ? (
+             <>Actualmente tienes <span className="text-white font-syncopate">{balance !== undefined ? balance.toLocaleString() : '---'}</span>. <br /> Recarga para mantener el Sincronismo.</>
+           ) : (
+             <>You currently have <span className="text-white font-syncopate">{balance !== undefined ? balance.toLocaleString() : '---'}</span>. <br /> Top up to maintain Sync Lock.</>
+           )}
          </p>
       </div>
 
@@ -77,13 +94,15 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
          onClick={onAction}
          className="mt-2 w-full h-16 bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(0,240,255,0.3)] z-10 flex items-center justify-center gap-2"
       >
-         RECHARGE HUB
+         {isSpanish ? 'CENTRO DE RECARGA' : 'RECHARGE HUB'}
          <Zap size={14} fill="currentColor" />
       </button>
 
       <div className="pt-2 flex items-center gap-2 opacity-30">
          <ShieldPlus size={10} className="text-[#ff00ff]" />
-         <span className="text-[7px] font-black uppercase tracking-widest">Instant Sovereign Bridge</span>
+         <span className="text-[7px] font-black uppercase tracking-widest">
+            {isSpanish ? 'Puente Soberano Instantáneo' : 'Instant Sovereign Bridge'}
+         </span>
       </div>
     </motion.div>
   );
