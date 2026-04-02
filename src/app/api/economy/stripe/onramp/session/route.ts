@@ -37,20 +37,25 @@ export async function POST(req: Request) {
 
     const body = new URLSearchParams();
     
-    // 🛡️ REVENUE-LOCK: New Stripe API format for destination
-    body.append('destination_currencies[0]', 'usdc');
-    body.append('destination_networks[0]', 'solana');
-    body.append('destination_wallet_address', SYNDICATE_TREASURY_SOL);
+    // 🛡️ REVENUE-LOCK: Official Stripe Standalone Spec (Nested)
+    body.append('transaction_details[destination_currency]', 'usdc');
+    body.append('transaction_details[destination_network]', 'solana');
+    body.append('transaction_details[wallet_address]', SYNDICATE_TREASURY_SOL);
+    body.append('transaction_details[lock_wallet_address]', 'true');
     
-    // 🔱 METADATA: Ensure all values are strings and non-undefined
+    // Constraints (Arrays)
+    body.append('transaction_details[destination_currencies][0]', 'usdc');
+    body.append('transaction_details[destination_networks][0]', 'solana');
+
+    // 🔱 METADATA: Internal tracking
     body.append('metadata[userId]', String(userId || 'anon'));
     if (packageId) body.append('metadata[packageId]', String(packageId));
     body.append('metadata[expectedCredits]', String(credits || 0));
     body.append('metadata[expectedAmount]', String(priceUsd || 0));
 
-    // Pre-fill amount
-    body.append('source_amount', priceUsd.toFixed(2));
-    body.append('source_currency', 'usd');
+    // Pre-fill amount (Nested in transaction_details for Standalone)
+    body.append('transaction_details[source_amount]', priceUsd.toFixed(2));
+    body.append('transaction_details[source_currency]', 'usd');
 
     // 🛡️ RETURN URL: Brings user back to gasp.fun with pending status flag
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gasp.fun';
