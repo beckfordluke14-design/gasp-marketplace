@@ -7,31 +7,32 @@ import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 import { useUser } from '../providers/UserProvider';
 
 interface TopUpDrawerProps {
-  isOpen: boolean;
+  isOpen?: boolean; // Now optional, defaults to true if rendered
   onClose: () => void;
   initialPackage?: string;
+  userId?: string;
 }
 
 /**
  * ⛽ SOVEREIGN REVENUE TERMINAL v9.5 // UNIFIED SESSION
  * Now featuring "Managed Sessions" to ensure 100% pre-fill & revenue lock.
  */
-export default function TopUpDrawer({ isOpen, onClose, initialPackage }: TopUpDrawerProps) {
+export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, userId: propUserId }: TopUpDrawerProps) {
     const { profile } = useUser();
     const [selectedPkgId, setSelectedPkgId] = useState(initialPackage || CREDIT_PACKAGES[0].id);
     const [copied, setCopied] = useState(false);
     const [view, setView] = useState<'options' | 'p2p' | 'success'>('options');
-    const [userId, setUserId] = useState('');
+    const [userId, setUserId] = useState(propUserId || '');
     const [isLoading, setIsLoading] = useState(false);
 
     const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
     const vaultAddress = 'DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS';
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        if (!userId && typeof window !== 'undefined') {
             setUserId(localStorage.getItem('gasp_guest_id') || 'anon');
         }
-    }, []);
+    }, [userId]);
 
     // 🧬 UNIFIED ECONOMY MATRIX
     const packages = CREDIT_PACKAGES.slice(0, 3).map((p, idx) => ({
@@ -54,7 +55,7 @@ export default function TopUpDrawer({ isOpen, onClose, initialPackage }: TopUpDr
             const res = await fetch('/api/economy/stripe/onramp/session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ packageId: selectedPkgId, userId }),
+                body: JSON.stringify({ packageId: selectedPkgId, userId: userId || propUserId }),
             });
             const data = await res.json();
             if (data.redirectUrl) {
