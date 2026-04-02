@@ -32,7 +32,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     const [isLoading, setIsLoading] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     
-    const [customAmount, setCustomAmount] = useState<string>('5000');
+    const [customAmount, setCustomAmount] = useState<string>('4.99');
     const [isCustom, setIsCustom] = useState(false);
 
     const [solPrice, setSolPrice] = useState<number>(0);
