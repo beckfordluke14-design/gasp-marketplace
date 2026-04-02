@@ -6,8 +6,16 @@
     "watchPatterns": [
         "src/**",
         "public/**",
+        "*.ts",
+        "*.tsx",
+        "*.js",
+        "*.json",
+        "*.toml",
+        "nixpacks.toml",
+        ".dockerignore",
         "next.config.ts",
-        "package.json"
+        "package.json",
+        "package-lock.json"
     ]
   },
   "deploy": {
