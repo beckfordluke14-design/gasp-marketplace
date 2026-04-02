@@ -1,32 +1,41 @@
+# 🔱 FINAL REVENUE SHIELD: BUILD OPTIMIZATION
+# These files are EXCLUDED from the build context to prevent 20-minute timeouts.
+
+# Node & Next.js cache
 node_modules
 .next
-.git
-.gemini
-out
-build
+.nx
+.vercel
 dist
-*.log
-*.tsbuildinfo
-.env*
-!.env.example
-*.map
-.DS_Store
-*.log
-build_log.txt
-*error.log
-check-*.js
-test-*.js
-trigger-*.js
 
-# Essential Resources for Deployment Build
-!src/
-!public/
-!post-build.js
-!postcss.config.mjs
-!eslint.config.mjs
-!package.json
-!package-lock.json
-!tsconfig.json
-!next.config.ts
-!railway.json
-!nixpacks.toml
+# Media (Served via Public folder)
+# We ONLY copy what's actually needed in Standalone
+public/assets
+public/video
+*.mp4
+*.zip
+
+# 📦 SCRIPT BLOAT (168+ Files)
+# These are internal tools, not needed for the production cloud deployment.
+scripts/*.js
+scripts/*.py
+scripts/*.txt
+scripts/*.log
+scripts/*.md
+scripts/build*
+*.log
+*.txt
+
+# Environments & Secret Scanning
+.env*
+.history
+.vscode
+.git
+.gitignore
+.railwayignore
+Dockerfile
+README.md
+
+# OS Junk
+.DS_Store
+Thumbs.db

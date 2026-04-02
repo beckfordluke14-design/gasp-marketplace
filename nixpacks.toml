@@ -1,16 +1,20 @@
+# 🔱 FINAL SOVEREIGN BUILD PROTOCOL: NIXPACKS v15.0
+# Optimized for High-Velocity Railway Deployment
+
 [phases.setup]
 nixPkgs = ["nodejs_22", "ffmpeg"]
 
 [phases.install]
-cmds = ["npm install"]
+cmds = ["npm ci --prefer-offline --no-audit"]
 
 [phases.build]
 cmds = [
   "npm run build",
+  "# Ensure Standalone Assets are correctly positioned for production",
   "mkdir -p .next/standalone/public",
   "mkdir -p .next/standalone/.next/static",
-  "cp -r public/. .next/standalone/public/ || true",
-  "cp -r .next/static/. .next/standalone/.next/static/ || true"
+  "cp -R public/. .next/standalone/public/ 2>/dev/null || true",
+  "cp -R .next/static/. .next/standalone/.next/static/ 2>/dev/null || true"
 ]
 
 [start]
