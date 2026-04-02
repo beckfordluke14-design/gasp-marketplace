@@ -4,8 +4,8 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "node .next/standalone/server.js",
-    "healthCheckPath": "/",
+    "startCommand": "HOSTNAME=0.0.0.0 node .next/standalone/server.js",
+    "healthCheckPath": "/api/health",
     "healthCheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE"
   }
