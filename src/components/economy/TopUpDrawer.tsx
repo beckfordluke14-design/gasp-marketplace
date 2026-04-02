@@ -71,17 +71,31 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
         }
     }, [userId]);
 
+    const fetchLivePrice = async () => {
+        try {
+            // Source 1: Jupiter v2
+            const jRes = await fetch('https://api.jup.ag/price/v2?ids=So11111111111111111111111111111111111111112');
+            const jData = await jRes.json();
+            const p1 = jData.data['So11111111111111111111111111111111111111112']?.price;
+            if (p1) { setSolPrice(parseFloat(p1)); return; }
+
+            // Source 2: Binance (Global Stable)
+            const bRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
+            const bData = await bRes.json();
+            if (bData.price) { setSolPrice(parseFloat(bData.price)); return; }
+
+            // Source 3: CoinGecko (Global Fallback)
+            const gRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+            const gData = await gRes.json();
+            if (gData.solana?.usd) { setSolPrice(parseFloat(gData.solana.usd)); return; }
+        } catch (e) {
+            console.error('[Oracle] Critical failure on all feeds:', e);
+        }
+    };
+
     useEffect(() => {
-        const fetchPrice = async () => {
-           try {
-              const res = await fetch('https://api.jup.ag/price/v2?ids=So11111111111111111111111111111111111111112');
-              const data = await res.json();
-              const price = data.data['So11111111111111111111111111111111111111112']?.price;
-              if (price) setSolPrice(parseFloat(price));
-           } catch (e) { console.error('Price Fetch Error:', e); }
-        };
-        fetchPrice();
-        const interval = setInterval(fetchPrice, 30000);
+        fetchLivePrice();
+        const interval = setInterval(fetchLivePrice, 15000); // 15s High-Heat Sync
         return () => clearInterval(interval);
     }, []);
 
@@ -154,14 +168,15 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     }, [userId, targetUsd, propUserId]);
 
     const handleSwitchToP2P = async () => {
+        if (!solPrice || solPrice === 0) {
+            alert('Awaiting Market Oracle... give it a second.');
+            await fetchLivePrice();
+            if (!solPrice || solPrice === 0) return;
+        }
+
         try {
             // 🚀 FAST PRICE SYNC: Get latest market rate before session starts
-            try {
-                const pRes = await fetch('https://api.jup.ag/price/v2?ids=So11111111111111111111111111111111111111112');
-                const pData = await pRes.json();
-                const freshPrice = pData.data['So11111111111111111111111111111111111111112']?.price;
-                if (freshPrice) setSolPrice(parseFloat(freshPrice));
-            } catch (e) {}
+            await fetchLivePrice();
 
             // 🛡️ SERVER-SIDE reference generation — userId + amount locked server-side
             const resolvedId = userId || propUserId || 'anon';
@@ -362,7 +377,9 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                                     {isSpanish ? 'TASA DE CONVERSIÓN ACTUAL' : 'CURRENT CONVERSION RATE'}
                                                 </span>
                                                 <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1">
-                                                    {p2pAsset === 'SOL' ? `1 SOL = $${solPrice.toFixed(2)}` : '1 USDC = $1.00'}
+                                                    {p2pAsset === 'SOL' 
+                                                        ? (solPrice > 0 ? `1 SOL = $${solPrice.toFixed(2)}` : 'ORACLE SYNCING...')
+                                                        : '1 USDC = $1.00'}
                                                 </span>
                                             </div>
                                         </div>
