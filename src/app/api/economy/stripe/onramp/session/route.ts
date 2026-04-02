@@ -9,7 +9,7 @@ import { CREDIT_PACKAGES, SYNDICATE_TREASURY_SOL } from '@/lib/economy/constants
 
 export async function POST(req: Request) {
   try {
-    const { packageId, userId } = await req.json();
+    const { packageId, userId, amountUsd, isCustom } = await req.json();
 
     if (!process.env.STRIPE_SECRET_KEY) {
       return NextResponse.json({ success: false, error: 'STRIPE_KEY_MISSING' }, { status: 500 });
@@ -19,17 +19,20 @@ export async function POST(req: Request) {
     let credits: number;
     let label: string;
 
-    if (packageId.startsWith('custom_')) {
-      const val = parseFloat(packageId.split('_')[1]);
-      priceUsd = val;
-      credits = Math.floor(val * 1000); // 1000 credits per $1
-      label = 'Custom Terminal Infusion';
-    } else {
+    if (isCustom && amountUsd) {
+      // 🛡️ INSTITUTIONAL CUSTOM FLOW: Up to $30,000.00
+      const safeAmount = Math.min(30000, parseFloat(amountUsd));
+      priceUsd = safeAmount;
+      credits = Math.floor(safeAmount * 1000); // 1000 credits per $1
+      label = `Institutional Terminal Infusion: $${safeAmount}`;
+    } else if (packageId) {
       const found = CREDIT_PACKAGES.find(p => p.id === packageId);
       if (!found) return NextResponse.json({ success: false, error: 'INVALID_PACKAGE' }, { status: 400 });
       priceUsd = found.priceUsd;
       credits = found.credits;
       label = found.label;
+    } else {
+      return NextResponse.json({ success: false, error: 'MISSING_PAYLOAD' }, { status: 400 });
     }
 
     const body = new URLSearchParams();

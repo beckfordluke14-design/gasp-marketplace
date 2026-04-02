@@ -37,19 +37,32 @@ export async function issueCredits({
 
   await db.query('BEGIN');
   try {
+    // 🛡️ ATOMIC UPSERT: Ensure profile node exists before credit infusion
+    // satisfies all N-N constraints (name, country, flag, vibe, image, system_prompt)
     await db.query(
-      `UPDATE profiles SET credit_balance = credit_balance + $1, updated_at = NOW() WHERE id = $2`,
-      [credits, userId]
+      `INSERT INTO profiles (id, name, nickname, country, flag, vibe, image, system_prompt, credit_balance, updated_at)
+       VALUES ($1, 'Syndicate Member', 'Member', 'GB', '🇬🇧', 'Professional', 'https://avatar.vercel.sh/member', 'Sovereign Intelligence Node', $2, NOW())
+       ON CONFLICT (id) DO UPDATE SET 
+         credit_balance = profiles.credit_balance + $2, 
+         updated_at = NOW()`,
+      [userId, credits]
     );
 
+    // 🔱 AUDIT LOG: Record purchase with standardized metadata keys
     await db.query(
       `INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
        VALUES ($1, $2, 'purchase', $3, $4, NOW())`,
-      [userId, credits, provider, JSON.stringify({ txId, actualAmountUsd, ...meta })]
+      [userId, credits, provider, JSON.stringify({ 
+        txId, 
+        amountUsd: actualAmountUsd, // Standardized key for Sales Dashboard
+        actualAmountUsd, // Keeping legacy key for compatibility
+        creditsIssued: credits,
+        ...meta 
+      })]
     );
 
     await db.query('COMMIT');
-    console.log(`[Credits] ✅ Issued ${credits} credits to ${userId} via ${provider} (tx: ${txId}, $${actualAmountUsd})`);
+    console.log(`[Credits] ✅ SUCCESS: Issued ${credits} credits to ${userId} ($${actualAmountUsd.toFixed(2)})`);
     return { success: true, credits };
   } catch (err) {
     await db.query('ROLLBACK');
