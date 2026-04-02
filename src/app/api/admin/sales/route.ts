@@ -2,70 +2,72 @@ import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 /**
- * 💹 SOVEREIGN SALES AUDIT (API)
- * Aggregates revenue data from the transactions ledger.
- * Targets: purchase type, manual_remedy type.
+ * 🔱 SOVEREIGN REVENUE AUDIT API v1.0
+ * Strategy: Real-time oversight of all capital ingress (Stripe + P2P).
+ * Security: Administrative Master Override Required.
  */
+
 export async function GET(req: Request) {
   try {
-    const auth = req.headers.get('Authorization') || req.headers.get('Cookie');
-    if (!auth?.includes('syndicate_sovereign_2026_master_override')) {
-        return NextResponse.json({ success: false, error: 'Unauthorized Access' }, { status: 401 });
+    const { searchParams } = new URL(req.url);
+    const token = searchParams.get('token');
+
+    // 🔒 SECURITY CHECK: Master Override Sync
+    if (token !== 'syndicate_sovereign_2026_master_override') {
+      return NextResponse.json({ success: false, error: 'UNAUTHORIZED_ACCESS' }, { status: 401 });
     }
 
-    // 🛡️ REVENUE AGGREGATION: Last 30 Days
-    const { rows: dailyRevenue } = await db.query(`
-        SELECT 
-            DATE(created_at) as date,
-            SUM((meta->>'amountUsd')::numeric) as volume,
-            COUNT(*) as purchases
-        FROM transactions 
-        WHERE type = 'purchase' 
-        AND created_at > NOW() - INTERVAL '30 days'
-        GROUP BY DATE(created_at)
-        ORDER BY date DESC
+    // 1. Calculate Total Gross USD Revenue
+    const { rows: revenueData } = await db.query(`
+      SELECT 
+        SUM((meta->>'actualAmountUsd')::numeric) as total_usd,
+        SUM(amount) as total_credits,
+        COUNT(id) as total_transactions
+      FROM transactions
+      WHERE type = 'purchase'
     `);
 
-    // 🛡️ TOTAL METRICS
-    const { rows: totals } = await db.query(`
-        SELECT 
-            SUM((meta->>'amountUsd')::numeric) as total_volume,
-            COUNT(*) as total_purchases
-        FROM transactions 
-        WHERE type = 'purchase'
+    // 2. Fetch Recent Transactions with Identification
+    const { rows: transactions } = await db.query(`
+      SELECT 
+        id,
+        user_id,
+        amount as credits,
+        (meta->>'actualAmountUsd')::numeric as amount_usd,
+        provider,
+        created_at
+      FROM transactions
+      WHERE type = 'purchase'
+      ORDER BY created_at DESC
+      LIMIT 100
     `);
 
-    // 🛡️ RECENT SALES LOG
-    const { rows: recentSales } = await db.query(`
-        SELECT 
-            t.id,
-            t.user_id,
-            p.nickname,
-            p.image,
-            t.amount as credits,
-            t.meta->>'amountUsd' as usd,
-            t.created_at,
-            t.meta->>'txId' as tx_id,
-            t.provider
-        FROM transactions t
-        LEFT JOIN profiles p ON t.user_id = p.id
-        WHERE t.type = 'purchase'
-        ORDER BY t.created_at DESC
-        LIMIT 50
+    // 3. Identify The Whale Tier (Top Spenders)
+    const { rows: whales } = await db.query(`
+      SELECT 
+        user_id,
+        SUM((meta->>'actualAmountUsd')::numeric) as total_spent_usd,
+        COUNT(id) as purchase_count
+      FROM transactions
+      WHERE type = 'purchase'
+      GROUP BY user_id
+      ORDER BY total_spent_usd DESC
+      LIMIT 20
     `);
 
-    return NextResponse.json({ 
-        success: true, 
-        metrics: {
-            totalVolume: parseFloat(totals[0]?.total_volume || '0'),
-            totalPurchases: parseInt(totals[0]?.total_purchases || '0'),
-            daily: dailyRevenue
-        },
-        sales: recentSales 
+    return NextResponse.json({
+      success: true,
+      stats: {
+        grossUsd: revenueData[0].total_usd || 0,
+        grossCredits: revenueData[0].total_credits || 0,
+        transactionCount: revenueData[0].total_transactions || 0
+      },
+      transactions,
+      whales
     });
 
-  } catch (error: any) {
-    console.error('[Admin Sales API] Audit Failure:', error.message);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (err: any) {
+    console.error('[RevenueAudit] Failure:', err.message);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

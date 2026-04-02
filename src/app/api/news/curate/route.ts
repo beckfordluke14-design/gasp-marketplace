@@ -3,28 +3,28 @@ import { initialProfiles } from '@/lib/profiles';
 import { NextResponse } from 'next/server';
 
 /**
- * 🛰️ DIVERSIFIED NEURAL SNIPER v3.0 - SYNDICATE HQ
- * Mission: Multi-Niche Curation (Weather, Crypto, Luxury, Macro).
+ * 🛰️ SOVEREIGN MASS-INGRESS ENGINE v5.0 (THE MOAT)
+ * Strategy: Brave Search Curation for 50+ Personas (Parallel Neural Pulse).
+ * Mission: Generate 3,000+ indexable Archival Briefings by June 1st.
  */
 
 const BRAVE_API_KEY = process.env.BRAVE_API_KEY || '';
 const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
 
-// 🧬 NICHE REPOSITORY: Mapping personas to their specialized intel streams (v4.0)
 const PERSONA_NICHES: Record<string, string[]> = {
-    "Nova": ["Metar sensor arbitrage", "London high-heat warning"],
-    "Ericka": ["High-end supercar trends", "Luxury penthouse sales"],
-    "Elena": ["Solana whale activity", "Base L2 network expansion"],
-    "Amaya": ["AI-driven market shifts", "Global cyber intelligence"],
-    "Valentina Lima": ["Miami temperature anomalies", "Caribbean financial sweeps"],
-    "Suki": ["Tokyo predictive market volatility", "Asian tech-sector alpha"],
-    "Jade": ["London ESSEX rainfall signals", "UK financial heatmaps"],
-    "Elena Miami": ["South Beach liquidity surges", "Coastal real-estate arbitrage"],
-    "Mika": ["Seoul neural network breakthroughs", "K-Tech market forecasts"]
+    "Nova": ["Solana MEV trends", "Metar meteorological signals", "London financial heatmaps"],
+    "Ericka": ["High-end real estate luxury", "Supercar auction results", "Monaco wealth ingress"],
+    "Elena": ["DeFi liquidity sweeps", "Solana whale wallet movements", "Cross-chain arbitrage"],
+    "Amaya": ["AI cybersecurity alerts", "Global neural network expansion", "Decentralized compute"],
+    "Valentina Lima": ["Caribbean tropical signals", "Offshore financial currents", "Miami tech wealth"],
+    "Suki": ["Tokyo predictive markets", "Asian L2 expansion", "Neural infrastructure"],
+    "Jade": ["UK rainfall arbitrage", "European macro signals", "Archival intelligence"],
+    "Mika": ["K-Tech neural breakthroughs", "Seoul venture capital flows", "Asian signal decay"]
 };
 
-const DEFAULT_KEYWORDS = ["Global Arbitrage Opportunities", "Polymarket Signal Analysis", "High-Status Intelligence", "Sovereign Strategic Alpha"];
+const DEFAULT_KEYWORDS = ["Global Strategic Arbitrage", "Neural Signal Decay", "High-IQ Market Intelligence", "Sovereign Strategic Alpha"];
 
+/** 🛰️ BRAVE SNIPRE: Fetch real-time niche intelligence */
 async function getSniperTargets(personaName: string) {
     try {
         const keywords = PERSONA_NICHES[personaName] || DEFAULT_KEYWORDS;
@@ -36,29 +36,24 @@ async function getSniperTargets(personaName: string) {
         const braveData = await braveRes.json();
         return braveData.results || [];
     } catch (e) {
-        console.error(`Brave Snipe Failed for ${personaName}:`, e);
         return [];
     }
 }
 
+/** 🧬 NEURAL SYNTHESIS: Generate unique persona-driven report */
 async function synthesizeReport(persona: any, rawNews: any) {
     const prompt = `
-        YOU ARE ${persona.name}. 
-        VIBE: ${persona.vibe}. 
-        ROLE: Syndicate Specialized Intelligence.
-        NICHE: Based on the persona's vibe and current data.
+        YOU ARE ${persona.name}. VIBE: ${persona.vibe}. ROLE: Syndicate Intelligence Node.
+        MISSION: Provide a high-IQ tactical briefing based on current news.
+        Connect the data to your specialized niche or the Syndicate terminal.
         
-        MISSION: Provide a high-IQ tactical briefing for our Syndicate members.
-        Connect the data to our decentralized economy or your personal world.
-        Sound like a sophisticated expert in your field. 
-        
-        NEWS DATA: ${rawNews.title} - ${rawNews.description}
+        NEWS SOURCE: ${rawNews.title} - ${rawNews.description}
         
         FORMAT (JSON):
         {
-          "title": "A tactical, authority-driven headline (e.g. [DECRYPTED], [MACRO ALERT])",
-          "content": "A high-IQ briefing (2-3 paragraphs). Break down the 'So What' for our community. Sound like an insider.",
-          "heat": "Standard" | "High" | "Critical"
+          "title": "[STATUS_TYPE] Short Punchy Headline",
+          "content": "2-3 paragraphs of expert strategic analysis. Sound authoritative.",
+          "heat": "High" | "Critical" | "Standard"
         }
     `;
 
@@ -73,44 +68,55 @@ async function synthesizeReport(persona: any, rawNews: any) {
     
     const data = await res.json();
     const result = JSON.parse(data.candidates[0].content.parts[0].text);
-    return result;
+    return { ...result, personaId: persona.id };
 }
 
 export async function GET() {
     try {
-        // Run a full sync for a random sample of active analysts (Scaling to 10 for High-Velocity Drops)
-        const candidates = [...initialProfiles].sort(() => 0.5 - Math.random()).slice(0, 10);
+        console.log('[Syndicate] ⚡ INITIATING MASS-INGRESS PULSE...');
+        
+        // 🔱 UNCAGED ROSTER: Processing all participants for maximum SEO coverage
+        const roster = initialProfiles; 
+        
+        // 1. Parallel Intelligence Ingress
+        const newsGathering = roster.map(async (p) => {
+            const items = await getSniperTargets(p.name);
+            return { persona: p, news: items[0] }; // Take the top result
+        });
+        
+        const intelligencePackages = await Promise.all(newsGathering);
+        const validPackages = intelligencePackages.filter(pkg => pkg.news);
+
+        // 2. Parallel Neural Synthesis
+        const synthesisTasks = validPackages.map(pkg => synthesizeReport(pkg.persona, pkg.news));
+        const reports = await Promise.all(synthesisTasks);
+
+        // 3. Sovereign Dispatch: High-Velocity Feed Update
         const results = [];
-
-        for (const persona of candidates) {
-            const newsItems = await getSniperTargets(persona.name);
-            if (newsItems.length > 0) {
-                const article = newsItems[Math.floor(Math.random() * newsItems.length)];
-                const post = await synthesizeReport(persona, article);
-
-                // ⚡ DISPATCH TO NEWS REPOSITORY
-                await db.query(`
-                    INSERT INTO news_posts (persona_id, title, content, meta)
-                    VALUES ($1, $2, $3, $4)
+        for (const report of reports) {
+            try {
+                // Drop directly into the PUBLIC FEED for SEO indexing
+                const { rows } = await db.query(`
+                    INSERT INTO posts (persona_id, content_type, caption, content, is_vault, is_gallery, meta)
+                    VALUES ($1, 'text', $2, $3, false, false, $4)
+                    RETURNING id
                 `, [
-                    persona.id, 
-                    post.title, 
-                    post.content, 
-                    JSON.stringify({ 
-                        heat: post.heat, 
-                        source: article.url, 
-                        niche: PERSONA_NICHES[persona.name]?.[0] || 'Macro'
-                    })
+                    report.personaId,
+                    report.title,
+                    report.content,
+                    JSON.stringify({ heat: report.heat, type: 'brave_ingress', created_at: new Date().toISOString() })
                 ]);
-
-                results.push({ persona: persona.name, title: post.title });
+                results.push({ id: rows[0].id });
+            } catch (err) {
+                console.error(`Sovereign Dispatch Failure for ${report.personaId}`);
             }
         }
 
-        return NextResponse.json({ success: true, posts: results });
+        console.log(`[Syndicate] ✅ MASS-INGRESS COMPLETE: ${results.length} Briefings Deployed.`);
+        return NextResponse.json({ success: true, count: results.length });
 
     } catch (e: any) {
-        console.error('Multi-Niche Pulse Failure:', e);
+        console.error('Core Pulse Failure:', e.message);
         return NextResponse.json({ success: false, error: e.message }, { status: 500 });
     }
 }

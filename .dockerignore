@@ -1,41 +1,55 @@
-# 🔱 FINAL REVENUE SHIELD: BUILD OPTIMIZATION
-# These files are EXCLUDED from the build context to prevent 20-minute timeouts.
+# 🔱 SOVEREIGN DEPLOYMENT SHIELD: AGGRESSIVE STRIPPING
+# Mission: Kill 100% of Build-Weight. No Time-Outs.
 
-# Node & Next.js cache
-node_modules
-.next
-.nx
-.vercel
-dist
+# Core Exclusions
+node_modules/
+.next/
+.nx/
+.vercel/
+dist/
+out/
+build/
 
-# Media (Served via Public folder)
-# We ONLY copy what's actually needed in Standalone
-public/assets
-public/video
+# Media Redundancy (Cloud-Ingress ONLY)
 *.mp4
 *.zip
+*.log
+*.txt
+*.pdf
+public/video/
 
-# 📦 SCRIPT BLOAT (168+ Files)
-# These are internal tools, not needed for the production cloud deployment.
+# 📦 SCRIPT BLOAT (Purging 168+ Utility Files)
 scripts/*.js
 scripts/*.py
 scripts/*.txt
 scripts/*.log
 scripts/*.md
 scripts/build*
-*.log
-*.txt
 
-# Environments & Secret Scanning
+# Root Artifact Purge (The Timeout Culprits)
+tsc_errors.txt
+build_error.log
+build_error_utf8.log
+build_final.log
+build_final_2.log
+build_ultra.log
+server.log
+test_poly.json
+factory_paths.txt
+tmp_inspect.txt
+
+# OS & IDE Junk
 .env*
 .history
 .vscode
 .git
 .gitignore
 .railwayignore
-Dockerfile
-README.md
-
-# OS Junk
 .DS_Store
 Thumbs.db
+Dockerfile
+README.md
+Caddy*
+Caddyfile
+pg_tools/
+New folder/

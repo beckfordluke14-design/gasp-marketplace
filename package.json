@@ -37,7 +37,9 @@
     "sharp": "^0.34.5",
     "socks-proxy-agent": "^9.0.0",
     "stripe": "^21.0.1",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "utf-8-validate": "^6.0.4",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@farcaster/mini-app-solana": "^1.1.3",
