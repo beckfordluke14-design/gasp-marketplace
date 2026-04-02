@@ -250,8 +250,8 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                 {/* 🧪 CUSTOM INSTITUTIONAL HUB */}
                                 <div onClick={() => setIsCustom(!isCustom)} className={`relative p-8 rounded-[2.5rem] border transition-all duration-700 cursor-pointer group overflow-hidden ${isCustom ? 'bg-[#00f0ff]/5 border-[#00f0ff]/60 shadow-[0_0_80px_rgba(0,240,255,0.15)] ring-1 ring-[#00f0ff]/30' : 'bg-white/[0.02] border-white/10 opacity-60'}`}>
                                     <div className="absolute top-0 right-0 p-4">
-                                        <div className={`px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.3em] font-syncopate italic flex items-center gap-3 ${isCustom ? 'bg-[#00f0ff] text-black shadow-[0_0_30px_#00f0ff]' : 'bg-white/10 text-white/40'}`}>
-                                            {isCustom ? (isSpanish ? 'ACTIVO' : 'OVERRIDE ACTIVE') : (isSpanish ? 'ACTIVAR' : 'ACTIVATE')}
+                                        <div className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic flex items-center gap-3 transition-all duration-500 ${isCustom ? 'bg-[#00f0ff] text-black shadow-[0_0_30px_#00f0ff]' : 'bg-[#00f0ff] text-black animate-pulse shadow-[0_0_20px_#00f0ff] ring-4 ring-[#00f0ff]/20'}`}>
+                                            {isCustom ? (isSpanish ? 'ACTIVO' : 'OVERRIDE ACTIVE') : (isSpanish ? 'HABILITAR' : 'CLICK TO ACTIVATE')}
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-6 relative z-10 text-left">
@@ -313,56 +313,39 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
 
                         {view === 'p2p' && (
                             <div className="space-y-10 animate-in fade-in zoom-in duration-700 text-center py-4">
-                                <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => setP2pAsset('USDC')} className={`px-6 py-3 rounded-2xl flex items-center gap-2 border transition-all ${p2pAsset === 'USDC' ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff]' : 'bg-white/5 border-white/10 text-white/40'}`}><Diamond size={16} fill={p2pAsset === 'USDC' ? 'currentColor' : 'none'} /><span className="text-[10px] font-black tracking-widest">USDC</span></button>
-                                    <button onClick={() => setP2pAsset('SOL')} className={`px-6 py-3 rounded-2xl flex items-center gap-2 border transition-all ${p2pAsset === 'SOL' ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff]' : 'bg-white/5 border-white/10 text-white/40'}`}><Coins size={16} /><span className="text-[10px] font-black tracking-widest">SOL</span></button>
-                                </div>
-
                                 <div className="space-y-4">
-                                    <div className="w-20 h-20 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-8 relative">
-                                        <QrCode size={40} className="text-[#00f0ff]" />
-                                        {isPolling && <div className="absolute inset-0 border-2 border-[#00f0ff] border-t-transparent animate-spin rounded-[2rem] shadow-[0_0_40px_rgba(0,240,255,0.4)]" />}
+                                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4 relative">
+                                        <QrCode size={32} className="text-[#00f0ff]" />
+                                        {isPolling && <div className="absolute inset-0 border-2 border-[#00f0ff] border-t-transparent animate-spin rounded-2xl shadow-[0_0_40px_rgba(0,240,255,0.4)]" />}
                                     </div>
-                                    <h3 className="text-2xl font-syncopate font-black uppercase italic text-white tracking-tighter leading-none">{isPolling ? (isSpanish ? 'ESPERANDO PAGO...' : 'WAITING FOR SYNC...') : (isSpanish ? 'LIQUIDACIÓN P2P' : 'P2P SETTLEMENT')}</h3>
-                                    <p className="text-[10px] text-white/40 leading-relaxed max-w-[280px] mx-auto font-black uppercase tracking-widest italic">{isPolling ? (isSpanish ? 'ESCANEANDO BLOQUES DE SOLANA EN TIEMPO REAL...' : 'SCANNING SOLANA BLOCKS IN REAL-TIME...') : `Enviar ${p2pAsset === 'SOL' ? targetSol : targetUsd} ${p2pAsset} a la Bóveda.`}</p>
+                                    <h3 className="text-xl font-syncopate font-black uppercase italic text-white tracking-tighter leading-none">{isPolling ? (isSpanish ? 'ESPERANDO PAGO...' : 'WAITING FOR SYNC...') : (isSpanish ? 'LIQUIDACIÓN P2P' : 'P2P SETTLEMENT')}</h3>
+                                    <p className="text-[9px] text-white/40 leading-relaxed max-w-[280px] mx-auto font-black uppercase tracking-widest italic">{isPolling ? (isSpanish ? 'ESCANEANDO BLOQUES DE SOLANA...' : 'SCANNING SOLANA BLOCKS...') : `Enviar ${p2pAsset === 'SOL' ? targetSol : targetUsd} ${p2pAsset} a la Bóveda.`}</p>
                                 </div>
 
                                 {isMobile ? (
-                                    <div className="py-10 space-y-8">
-                                        <button onClick={handleSolanaPayDeepLink} className="w-full h-24 rounded-[3rem] bg-[#00f0ff] text-black font-black uppercase text-[15px] tracking-[0.2em] shadow-[0_10px_60px_rgba(0,240,255,0.4)] flex items-center justify-center gap-4 animate-bounce">
-                                           <Smartphone size={32} />
+                                    <div className="py-6 space-y-6">
+                                        <button onClick={handleSolanaPayDeepLink} className="w-full h-20 rounded-[2.5rem] bg-[#00f0ff] text-black font-black uppercase text-[14px] tracking-[0.2em] shadow-[0_10px_60px_rgba(0,240,255,0.4)] flex items-center justify-center gap-4 animate-bounce">
+                                           <Smartphone size={28} />
                                            <span className="font-syncopate italic tracking-tighter">{isSpanish ? 'ABRIR PHANTOM' : 'OPEN IN PHANTOM'}</span>
                                         </button>
-                                        <div className="flex flex-col gap-2 opacity-40">
-                                            <span className="text-[8px] font-black uppercase tracking-widest">{isSpanish ? 'O ESCANEAR CON OTRO DISPOSITIVO' : 'OR SCAN WITH ANOTHER DEVICE'}</span>
-                                            <div className="p-4 bg-white rounded-3xl w-48 h-48 mx-auto"><img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(solanaPayUrl)}`} className="w-full h-full object-contain" /></div>
-                                        </div>
+                                        <div className="p-4 bg-white rounded-3xl w-44 h-44 mx-auto"><img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(solanaPayUrl)}`} className="w-full h-full object-contain" /></div>
                                     </div>
                                 ) : (
-                                    <div className="relative p-10 bg-white rounded-[3.5rem] w-80 h-80 mx-auto shadow-[0_0_100px_rgba(255,255,255,0.1)] ring-8 ring-white/5 group">
+                                    <div className="relative p-8 bg-white rounded-[3rem] w-72 h-72 mx-auto shadow-[0_0_100px_rgba(255,255,255,0.1)] ring-8 ring-white/5 group">
                                         <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(solanaPayUrl)}`} alt="QR Protocol" className="w-full h-full object-contain" />
-                                        <div className="absolute inset-0 border-[20px] border-white rounded-[3.5rem]" />
+                                        <div className="absolute inset-0 border-[16px] border-white rounded-[3rem]" />
                                     </div>
                                 )}
 
-                                <div className="space-y-6">
-                                    <div className="p-6 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-between group">
-                                        <code className="text-[10px] text-white/30 font-mono break-all">{vaultAddress}</code>
-                                        <button onClick={handleCopy} className="text-[#00f0ff]">{copied ? <Check size={20} /> : <Copy size={20} />}</button>
+                                {/* 🔄 ASSET SELECTOR & RETURN (MOVED TO CENTER) */}
+                                <div className="flex flex-col items-center gap-6 py-4">
+                                    <div className="flex items-center justify-center gap-4 bg-white/5 p-2 rounded-2xl border border-white/5">
+                                        <button onClick={() => setP2pAsset('USDC')} className={`px-8 py-3 rounded-xl flex items-center gap-2 border transition-all ${p2pAsset === 'USDC' ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.2)]' : 'bg-white/5 border-white/10 text-white/40'}`}><Diamond size={14} fill={p2pAsset === 'USDC' ? 'currentColor' : 'none'} /><span className="text-[10px] font-black tracking-widest">USDC</span></button>
+                                        <button onClick={() => setP2pAsset('SOL')} className={`px-8 py-3 rounded-xl flex items-center gap-2 border transition-all ${p2pAsset === 'SOL' ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.2)]' : 'bg-white/5 border-white/10 text-white/40'}`}><Coins size={14} /><span className="text-[10px] font-black tracking-widest">SOL</span></button>
                                     </div>
-                                    <div className="p-6 rounded-[2.5rem] bg-black border border-white/5 space-y-4">
-                                        <div className="flex items-center gap-3 px-2">
-                                            <div className="w-1 h-1 rounded-full bg-white/20" />
-                                            <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] font-syncopate italic">{isSpanish ? 'FALLO DE SINCRONIZACIÓN? PEGAR HASH' : 'SYNC FAILURE? PASTE TRANSACTION HASH'}</span>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <input type="text" placeholder="Solana Tx Signature" value={txSignature} onChange={(e) => setTxSignature(e.target.value)} className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] text-zinc-400 font-mono outline-none focus:border-[#00f0ff]/40 transition-all" />
-                                            <button onClick={handleSolanaSync} disabled={isVerifying} className="px-6 rounded-2xl bg-[#00f0ff] text-black text-[10px] font-black hover:scale-[1.05]">{isVerifying ? <Loader2 size={16} className="animate-spin" /> : 'FORCE'}</button>
-                                        </div>
-                                    </div>
+                                    
+                                    <button onClick={() => setView('options')} className="text-[11px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic hover:text-white transition-all hover:scale-105">{isSpanish ? '← VOLVER A OPCIONES' : '← RETURN TO OPTIONS'}</button>
                                 </div>
-
-                                <button onClick={() => setView('options')} className="text-[11px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic hover:text-white transition-colors">{isSpanish ? 'VOLVER AL INICIO' : 'RETURN TO OPTIONS'}</button>
                             </div>
                         )}
 
