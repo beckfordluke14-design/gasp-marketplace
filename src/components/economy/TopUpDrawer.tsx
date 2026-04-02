@@ -319,79 +319,89 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
  */
 function InstitutionalCashier({ userId, customAmount, onStepBack }: { userId: string, customAmount: string, onStepBack: () => void }) {
     const vaultAddress = "DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS";
+    const [isPaying, setIsPaying] = useState(false);
 
-    const handleCryptoRedirect = () => {
-        // 🧬 UNIVERSAL TIPLINK GATEWAY
-        // Optimized for zero-friction settlement across all devices. 
-        // Handles desktop connections and mobile QR scanning automatically.
-        const tipLinkUrl = `https://tiplink.io/pay/${vaultAddress}?amount=${customAmount}&label=GASP%20ARCHIVE&message=Credit%20Refuel%20ID:${userId.slice(0,8)}`;
-        window.open(tipLinkUrl, '_blank');
+    // 🧬 NATIVE ACTION: TRIGGER WALLET DIRECTLY
+    const handleWalletPay = async () => {
+        setIsPaying(true);
+        try {
+            const solana = (window as any).solana;
+            if (!solana) {
+                alert("🛡️ No Wallet Detected. Please scan the QR Code below with your mobile wallet.");
+                setIsPaying(false);
+                return;
+            }
+            // Trigger browser extension directly.
+            window.location.href = `solana:${vaultAddress}?amount=${customAmount}&label=GASP%20ARCHIVE&message=Refuel:${userId.slice(0,8)}`;
+        } catch (err) {
+            console.error("❌ Settlement error:", err);
+        }
+        setIsPaying(false);
     };
 
+    const copyAddress = () => {
+        navigator.clipboard.writeText(vaultAddress);
+        alert("🛡️ Vault Address Copied for Archive Settlement.");
+    };
+
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`solana:${vaultAddress}?amount=${customAmount}&label=GASP%20ARCHIVE`)}`;
+
     return (
-        <div className="flex-1 flex flex-col p-6 md:p-8 space-y-6 animate-in slide-in-from-bottom-4 duration-500 overflow-y-auto no-scrollbar">
+        <div className="flex-1 flex flex-col p-6 md:p-8 space-y-6 animate-in zoom-in duration-500 overflow-y-auto no-scrollbar">
             {/* 🧬 HEADER STATUS */}
             <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] font-black uppercase tracking-widest text-[#ff6b00] italic flex items-center gap-2">
-                   <ShieldCheck size={12} className="animate-pulse" /> Strategic Cashier v2.9 Active
+                <span className="text-[9px] font-black uppercase tracking-widest text-[#00f0ff] italic flex items-center gap-2">
+                   <ShieldCheck size={12} className="animate-pulse" /> Native Settlement Node Active
                 </span>
-                <button onClick={onStepBack} className="text-[9px] text-white/40 uppercase font-black tracking-widest hover:text-white transition-colors">Return</button>
+                <button onClick={onStepBack} className="text-[9px] text-white/40 uppercase font-black tracking-widest hover:text-white">Return</button>
             </div>
 
-            {/* 🧬 OPTION 1: PREMIUM CARD ACCESS */}
-            <div className="group relative p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-4 hover:bg-white/[0.08] hover:border-[#ff6b00]/40 transition-all cursor-pointer shadow-2xl">
-                <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 rounded-2xl bg-[#ff6b00]/20 flex items-center justify-center border border-[#ff6b00]/40">
-                        <CreditCard size={24} className="text-[#ff6b00]" />
+            {/* 🧬 THE INVOICE HUB */}
+            <div className="flex flex-col items-center bg-black/40 border border-white/5 rounded-[2.5rem] p-8 space-y-6">
+                <div className="text-center space-y-2">
+                    <h4 className="text-3xl font-syncopate font-black text-white italic tracking-tighter">${customAmount}</h4>
+                    <p className="text-[8px] text-white/30 uppercase font-bold tracking-widest">Settlement for Archive Credits</p>
+                </div>
+
+                {/* 🧬 DYNAMIC QR HUB */}
+                <div className="relative p-4 bg-white rounded-3xl group shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+                    <img 
+                        src={qrUrl} 
+                        alt="Scan to Pay" 
+                        className="w-40 h-40 object-contain rounded-xl"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/90 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+                         <span className="text-[8px] font-black uppercase text-black tracking-widest text-center px-4">Scan with Phantom<br/>or Solflare App</span>
                     </div>
-                    <span className="text-[7px] font-black uppercase text-white/20 tracking-[0.3em]">SECURE // PCI-READY</span>
                 </div>
-                <div>
-                   <h4 className="text-lg font-syncopate font-black uppercase italic text-white leading-tight">Card Refuel</h4>
-                   <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">Stripe Institutional Onramp</p>
-                </div>
-                <div className="pt-4">
-                    <button 
-                        onClick={() => window.open(`/api/onramp?userId=${userId}&amount=${customAmount}`, '_blank')}
-                        className="w-full h-14 rounded-2xl bg-[#ff6b00] text-black font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(255,107,0,0.3)]"
-                    >
-                        Initiate Card Checkout
-                    </button>
-                </div>
-            </div>
 
-            {/* 🧬 OPTION 2: SOVEREIGN P2P BRIDGE */}
-            <div className="group relative p-8 bg-[#00f0ff]/5 border border-[#00f0ff]/20 rounded-[2.5rem] space-y-4 hover:bg-[#00f0ff]/10 hover:border-[#00f0ff]/40 transition-all cursor-pointer shadow-2xl">
-                 <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 rounded-2xl bg-[#00f0ff]/20 flex items-center justify-center border border-[#00f0ff]/40 shadow-[0_0_30px_rgba(0,240,255,0.2)]">
-                        <Zap size={24} className="text-[#00f0ff] animate-pulse" />
+                <div className="w-full space-y-3">
+                    <button 
+                        onClick={handleWalletPay}
+                        disabled={isPaying}
+                        className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_15px_40px_rgba(0,240,255,0.3)] flex items-center justify-center gap-2"
+                    >
+                        <Wallet size={16} /> Pay with Wallet
+                    </button>
+                    
+                    <p className="text-[7px] text-white/20 uppercase text-center font-black tracking-[0.3em] py-2">OR MANUAL SETTLEMENT</p>
+
+                    <div className="p-4 bg-white/5 border border-white/5 rounded-2xl relative group">
+                        <code className="block text-[8px] font-mono text-white/40 break-all text-center leading-relaxed mb-1 pr-6">
+                            {vaultAddress}
+                        </code>
+                        <button 
+                            onClick={copyAddress}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-white/20 hover:bg-[#00f0ff] hover:text-black transition-all"
+                        >
+                            <Copy size={14} />
+                        </button>
                     </div>
-                    <span className="text-[7px] font-black uppercase text-white/20 tracking-[0.3em]">NATIVE // GASLESS</span>
-                </div>
-                <div>
-                   <h4 className="text-lg font-syncopate font-black uppercase italic text-white leading-tight text-[#00f0ff]">P2P Bridge</h4>
-                   <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">Sovereign Crypto Settlement</p>
-                </div>
-                <div className="pt-4">
-                    <button 
-                        onClick={handleCryptoRedirect}
-                        className="w-full h-14 rounded-2xl bg-[#00f0ff] text-black font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(0,240,255,0.3)] flex items-center justify-center gap-2"
-                    >
-                        <Wallet size={16} /> Open Crypto Checkout
-                    </button>
                 </div>
             </div>
 
-            {/* 🧬 OPTION 3: DIRECT VAULT COPY (FOOTER) */}
-            <div className="p-6 bg-black/40 border border-white/5 rounded-3xl space-y-3">
-                <span className="text-[7px] font-black uppercase text-white/20 tracking-widest block text-center">Protocol Vault Address (Manual)</span>
-                <code className="block text-[8px] font-mono text-white/30 break-all text-center leading-relaxed px-4">
-                    {vaultAddress}
-                </code>
-            </div>
-
-            <p className="text-[7px] text-white/20 text-center font-black uppercase tracking-widest leading-loose pb-8 italic">
-                Strategic Digital Assets Issued By AllTheseFlows LLC. Settlement strictly via DGQ Treasury Vault. 🧿🛡️
+            <p className="text-[7px] text-white/20 text-center font-black uppercase tracking-widest leading-loose pb-12 italic">
+               Verification node: ONLINE // 100% Sovereign Settlement 🧿🛡️
             </p>
         </div>
     );
