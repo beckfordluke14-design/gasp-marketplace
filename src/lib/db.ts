@@ -1,10 +1,4 @@
-import { Pool } from 'pg';
-
-/**
- * 🛡️ SOVEREIGN NEURAL BRIDGE: The Safe Postgres Interface
- * This singleton Pool handles all the direct database connections to Railway.
- * We use the global object to persist the pool across Next.js hot-reloads.
- */
+﻿import { Pool } from 'pg';
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -19,9 +13,9 @@ const pool = globalForPool.pool || new Pool({
   ssl: {
     rejectUnauthorized: false
   },
-  max: 10, // Reduced to prevent connection saturation on Railway
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  max: 15, // Sovereign scale
+  idleTimeoutMillis: 10000, 
+  connectionTimeoutMillis: 2000, // 🛡️ PREVENTS 502: Fail fast rather than hanging the node
 });
 
 if (process.env.NODE_ENV !== 'production') globalForPool.pool = pool;
@@ -31,42 +25,31 @@ export const db = {
   connect: () => pool.connect(),
 };
 
-/**
- * 🔥 AUTOMATED SHADOW BURN & GASP POINTS MATCHING (Atomic Edition)
- * Mission: Execute the 1:1 match and update global deflationary stats.
- * This function can accept a transaction client to ensure atomic integrity with sales.
- */
 export async function recordShadowBurn(userId: string, credits: number, client?: any) {
-    const pointsMatched = credits; // 1:1 Matching Logic
+    const pointsMatched = credits;
     const q = client || db;
-
     try {
-        // 1. Update User's Syndicate Points (1:1 Match)
-        await q.query(`
+        await q.query(\
             INSERT INTO syndicate_points (user_id, points, total_spent_credits)
-            VALUES ($1, $2, $3)
+            VALUES (\, \, \)
             ON CONFLICT (user_id) DO UPDATE SET 
-                points = syndicate_points.points + $2,
-                total_spent_credits = syndicate_points.total_spent_credits + $3,
+                points = syndicate_points.points + \,
+                total_spent_credits = syndicate_points.total_spent_credits + \,
                 last_updated = NOW()
-        `, [userId, pointsMatched, credits]);
+        \, [userId, pointsMatched, credits]);
 
-        // 2. Update Global Burn Stats (Dynamic Tally)
-        // Self-Healing UPSERT ensures ID 1 always exists
-        await q.query(`
+        await q.query(\
             INSERT INTO global_burn_stats (id, total_burned_credits, total_points_issued, last_updated)
-            VALUES (1, $1, $2, NOW())
+            VALUES (1, \, \, NOW())
             ON CONFLICT (id) DO UPDATE SET 
-                total_burned_credits = global_burn_stats.total_burned_credits + $1,
-                total_points_issued = global_burn_stats.total_points_issued + $2,
+                total_burned_credits = global_burn_stats.total_burned_credits + \,
+                total_points_issued = global_burn_stats.total_points_issued + \,
                 last_updated = NOW()
-        `, [credits, pointsMatched]);
-        
+        \, [credits, pointsMatched]);
     } catch (e) {
         console.error('🔥 [CRITICAL] Shadow Burn Logic Failure:', e);
-        throw e; // Throw so parent transactions can ROLLBACK
+        throw e;
     }
 }
-
 
 export default db;
