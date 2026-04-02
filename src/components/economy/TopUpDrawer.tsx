@@ -1,6 +1,23 @@
 'use client';
 
-import { X, Diamond, ShieldCheck, ArrowRight, Clock, CreditCard, Globe, Zap, Wallet } from 'lucide-react';
+import { 
+  X, 
+  Terminal, 
+  ChevronRight, 
+  ShieldCheck, 
+  Wallet, 
+  CreditCard,
+  History,
+  Zap,
+  Lock,
+  ArrowUpRight,
+  Shield,
+  Copy,
+  Clock,
+  Diamond,
+  ArrowRight,
+  Globe
+} from 'lucide-react';
 import { CREDIT_PACKAGES } from '@/lib/economy/constants';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
