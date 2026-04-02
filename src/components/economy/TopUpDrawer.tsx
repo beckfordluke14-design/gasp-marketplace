@@ -286,17 +286,36 @@ function InstitutionalCashier({ userId, vaultAddress, customAmount, onStepBack, 
                         {isSpanish ? 'O LIQUIDACIÓN DIRECTA A BÓVEDA' : 'OR DIRECT VAULT SETTLEMENT'}
                     </p>
 
-                    <div className="p-8 bg-white/5 border border-white/10 rounded-3xl relative group">
-                        <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20 block mb-3 text-center">MASTER VAULT ADDRESS</span>
-                        <code className="block text-[11px] font-mono text-[#00f0ff] break-all text-center leading-relaxed pr-10">
-                            {vaultAddress}
-                        </code>
-                        <button 
-                            onClick={copyAddress}
-                            className="absolute right-4 bottom-6 w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-white/20 hover:bg-[#00f0ff] hover:text-black transition-all shadow-2xl"
-                        >
-                            <Copy size={20} />
-                        </button>
+                    <div className="p-8 bg-white/5 border border-white/10 rounded-3xl relative group flex flex-col items-center gap-6">
+                        {/* 🏦 STRATEGIC QR HUB */}
+                        <div className="relative group/qr">
+                            <div className="absolute -inset-4 bg-[#00f0ff]/10 blur-xl opacity-0 group-hover/qr:opacity-100 transition-opacity" />
+                            <div className="relative w-40 h-40 bg-white p-2 rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                                <img 
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${vaultAddress}&color=000000&bgcolor=ffffff`}
+                                    alt="Vault QR Code"
+                                    className="w-full h-full"
+                                />
+                            </div>
+                            <div className="mt-4 text-center">
+                                <span className="text-[7px] font-black uppercase text-[#00f0ff] tracking-[0.4em] italic animate-pulse">
+                                    {isSpanish ? 'ESCANEAR PARA PAGAR' : 'SCAN TO SETTLE'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="w-full relative">
+                            <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20 block mb-3 text-center">MASTER VAULT ADDRESS</span>
+                            <code className="block text-[11px] font-mono text-[#00f0ff] break-all text-center leading-relaxed pr-10">
+                                {vaultAddress}
+                            </code>
+                            <button 
+                                onClick={copyAddress}
+                                className="absolute right-0 bottom-[-4px] w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/20 hover:bg-[#00f0ff] hover:text-black transition-all shadow-2xl"
+                            >
+                                <Copy size={16} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
