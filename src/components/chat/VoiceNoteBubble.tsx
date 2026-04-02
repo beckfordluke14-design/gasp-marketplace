@@ -20,10 +20,10 @@ interface VoiceNoteBubbleProps {
 }
 
 /**
- * GASP VOICE NOTE BUBBLE
- * WhatsApp-style audio player with waveform bars + translation unlock.
+ * 🛰️ GASP VOICE NOTE BUBBLE v9.0 // MULTI-LOCALE AUDIO HUB
  * Audio plays FREE in native language.
  * Translation = 1,000 credits (the core voice note monetization mechanic).
+ * 100% Bilingual Sync (EN/ES).
  */
 export default function VoiceNoteBubble({
   audioUrl,
@@ -35,7 +35,7 @@ export default function VoiceNoteBubble({
   translation,
   isUnlocked,
   onUnlockTranslation,
-  isEnglish,
+  isEnglish: initialIsEnglish,
 }: VoiceNoteBubbleProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -46,6 +46,9 @@ export default function VoiceNoteBubble({
   const [internalUrl, setInternalUrl] = useState<string | null>(null); // 🛡️ IN-MEMORY BINARY BRIDGE
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animFrameRef = useRef<number>(0);
+
+  // 🌍 GLOBAL LOCALE STATE
+  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
 
   // Seeded waveform heights: Use fallback if audio source is pending
   const barCount = 35;
@@ -244,7 +247,7 @@ export default function VoiceNoteBubble({
       {/* 🧬 DECODE PORTAL: MONETIZATION NODE */}
       {translation && (
         <div className="px-1 -mt-7 relative z-10 mx-4">
-          {(translationUnlocked || isEnglish) ? (
+          {(translationUnlocked || initialIsEnglish) ? (
             <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl">
                <p className="text-[13px] text-white/60 leading-relaxed font-medium italic">"{translation}"</p>
             </motion.div>
@@ -256,7 +259,9 @@ export default function VoiceNoteBubble({
             >
               <div className="flex items-center gap-3">
                  <Languages size={14} className="text-[#ff00ff]" />
-                 <span className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff]">DECODE WHAT SHE SAID</span>
+                 <span className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff]">
+                    {isSpanish ? 'DECODIFICAR MENSAJE' : 'DECODE WHAT SHE SAID'}
+                 </span>
               </div>
               <span className="text-[10px] font-black text-[#ff00ff]">{formatCredits(1000)}</span>
             </button>

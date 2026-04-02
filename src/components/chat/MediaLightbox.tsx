@@ -13,8 +13,8 @@ interface MediaLightboxProps {
 }
 
 /**
- * 💎 SOVEREIGN MEDIA LIGHTBOX
- * High-fidelity, zoomable, slidable media viewer with watermarking.
+ * 💎 SOVEREIGN MEDIA LIGHTBOX v9.0 // MULTI-LOCALE VISUAL HUB
+ * High-fidelity, zoomable, slidable media viewer with 100% Bilingual Sync (EN/ES).
  */
 export default function MediaLightbox({
   isOpen,
@@ -25,6 +25,9 @@ export default function MediaLightbox({
 }: MediaLightboxProps) {
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [scale, setScale] = useState(1);
+
+  // 🌍 GLOBAL LOCALE STATE
+  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
 
   useEffect(() => {
     setActiveIndex(initialIndex);
@@ -60,8 +63,10 @@ export default function MediaLightbox({
         {/* 🏔️ TOP BAR */}
         <div className="absolute top-0 inset-x-0 p-6 flex items-center justify-between z-10 pointer-events-none">
            <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic">Syndicate Vault</span>
-              <span className="text-[8px] font-black text-[#ff00ff] uppercase tracking-widest">{activeIndex + 1} / {items.length} NODES</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic">
+                {isSpanish ? 'Bóveda del Sindicato' : 'Syndicate Vault'}
+              </span>
+              <span className="text-[8px] font-black text-[#ff00ff] uppercase tracking-widest">{activeIndex + 1} / {items.length} {isSpanish ? 'NODOS' : 'NODES'}</span>
            </div>
            <button 
              onClick={onClose}
@@ -132,7 +137,7 @@ export default function MediaLightbox({
 
                   {scale > 1 && (
                      <div className="absolute top-6 right-6 px-4 py-1.5 bg-black/80 backdrop-blur-2xl border border-white/10 rounded-full text-[9px] text-[#ffea00] font-black uppercase tracking-[0.2em]">
-                        Active Sync • Tap to Reset
+                        {isSpanish ? 'Sincronización Activa • Toque para Reiniciar' : 'Active Sync • Tap to Reset'}
                      </div>
                   )}
                </motion.div>
@@ -148,7 +153,7 @@ export default function MediaLightbox({
                 animate={{ opacity: 1, y: 0 }}
                 className="text-[10px] md:text-xs font-black uppercase tracking-[0.1em] text-white/40 italic flex items-center justify-center gap-2"
               >
-                 {items[activeIndex]?.caption || "Secure File Transfer #"+activeIndex}
+                 {items[activeIndex]?.caption || (isSpanish ? "Transferencia de Archivos Segura" : "Secure File Transfer") + " #"+activeIndex}
               </motion.p>
            </AnimatePresence>
         </div>

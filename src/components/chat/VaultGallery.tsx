@@ -12,9 +12,16 @@ interface VaultGalleryProps {
     onUnlock: (itemId: string) => Promise<boolean>;
 }
 
+/**
+ * 🛰️ SOVEREIGN VAULT GALLERY v9.0 // MULTI-LOCALE EXCLUSIVE HUB
+ * Strategy: High-Margin Asset Access with 100% Bilingual Sync (EN/ES).
+ */
 export default function VaultGallery({ items, userBalance, onUnlock }: VaultGalleryProps) {
     const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
     const [unlockingId, setUnlockingId] = useState<string | null>(null);
+
+    // 🌍 GLOBAL LOCALE STATE
+    const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
 
     const handleUnlockRequest = async (item: VaultItem) => {
         if (userBalance < item.price) return;
@@ -68,8 +75,12 @@ export default function VaultGallery({ items, userBalance, onUnlock }: VaultGall
                                         
                                         <div className="space-y-4 relative z-10">
                                             <div className="flex flex-col gap-1">
-                                                <span className="text-[10px] font-black uppercase text-[#ff00ff] tracking-[0.4em] mb-1 italic animate-pulse">Restricted Media Node</span>
-                                                <h4 className="text-[8px] font-black uppercase tracking-[0.2em] text-white/20">High-Fidelity Visual Asset</h4>
+                                                <span className="text-[10px] font-black uppercase text-[#ff00ff] tracking-[0.4em] mb-1 italic animate-pulse">
+                                                    {isSpanish ? 'Nodo de Medios Restringido' : 'Restricted Media Node'}
+                                                </span>
+                                                <h4 className="text-[8px] font-black uppercase tracking-[0.2em] text-white/20">
+                                                    {isSpanish ? 'Activo Visual de Alta Fidelidad' : 'High-Fidelity Visual Asset'}
+                                                </h4>
                                             </div>
 
                                             <div className="flex items-center justify-center gap-3 py-6 border-y border-white/5 my-4">
@@ -89,13 +100,13 @@ export default function VaultGallery({ items, userBalance, onUnlock }: VaultGall
                                                 {isUnlocking ? (
                                                     <Loader2 size={24} className="animate-spin" />
                                                 ) : (
-                                                    <>DEPLOY ACCESS <ArrowRight size={20} /></>
+                                                    <>{isSpanish ? 'DESPLEGAR ACCESO' : 'DEPLOY ACCESS'} <ArrowRight size={20} /></>
                                                 )}
                                             </button>
                                             
                                             {!canAfford && (
                                                 <p className="text-[8px] uppercase font-black tracking-widest text-[#ff00ff] mt-4 flex items-center justify-center gap-2">
-                                                    <AlertCircle size={10} /> Insufficient Pulse Credits
+                                                    <AlertCircle size={10} /> {isSpanish ? 'Créditos de Pulso Insuficientes' : 'Insufficient Pulse Credits'}
                                                 </p>
                                             )}
                                         </div>
@@ -120,9 +131,11 @@ export default function VaultGallery({ items, userBalance, onUnlock }: VaultGall
                                         <p className="text-[10px] font-medium leading-tight lowercase italic text-white/80">"{item.caption}"</p>
                                     </div>
                                     <div className="absolute top-6 right-6">
-                                         <div className="px-3 py-1 bg-gasp-neon/20 border border-gasp-neon/40 rounded-lg flex items-center gap-2">
-                                            <CheckCircle2 size={12} className="text-gasp-neon" />
-                                            <span className="text-[8px] font-black uppercase tracking-widest text-gasp-neon">Unlocked</span>
+                                         <div className="px-3 py-1 bg-[#ffea00]/20 border border-[#ffea00]/40 rounded-lg flex items-center gap-2">
+                                            <CheckCircle2 size={12} className="text-[#ffea00]" />
+                                            <span className="text-[8px] font-black uppercase tracking-widest text-[#ffea00]">
+                                                {isSpanish ? 'Desbloqueado' : 'Unlocked'}
+                                            </span>
                                          </div>
                                     </div>
                                 </motion.div>
@@ -131,16 +144,6 @@ export default function VaultGallery({ items, userBalance, onUnlock }: VaultGall
                     </motion.div>
                 );
             })}
-            
-            <style jsx>{`
-                .glass-vault {
-                    background: rgba(255, 255, 255, 0.02);
-                    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-                }
-            `}</style>
         </div>
     );
 }
-
-
-
