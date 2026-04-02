@@ -49,16 +49,25 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
         });
       }
 
-      // 🛡️ REVENUE-GATE: Construct direct session URL with "Force-Lock" params
-      const onrampUrl = new URL('https://crypto.link.com/');
-      onrampUrl.searchParams.set('destination_currency', 'usdc');
-      onrampUrl.searchParams.set('destination_network', 'solana');
-      onrampUrl.searchParams.set('source_currency', 'usd');
-      onrampUrl.searchParams.set('source_amount', pkg.priceUsd.toString());
-      onrampUrl.searchParams.set('wallet_address', 'DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS');
-      onrampUrl.searchParams.set('lock_wallet_address', 'true');
-      
-      window.location.href = onrampUrl.toString();
+      // 🛡️ SESSION-LOCK: Create a server-side session to ensure metadata is attached.
+      // This is CRITICAL for the webhook to know which user to credit.
+      const res = await fetch('/api/economy/stripe/onramp/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ packageId, userId }),
+      });
+
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to initiate secure checkout');
+      }
+
+      // Redirect to the managed Stripe Onramp page
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        throw new Error('Incomplete session response');
+      }
 
     } catch (err: any) {
       setError(`Fault: ${err.message}`);

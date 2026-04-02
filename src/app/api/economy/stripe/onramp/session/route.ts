@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { CREDIT_PACKAGES } from '@/lib/economy/constants';
+import { CREDIT_PACKAGES, SYNDICATE_TREASURY_SOL } from '@/lib/economy/constants';
 
 /**
  * 🛡️ SOVEREIGN STRIPE ONRAMP SESSION
@@ -33,12 +33,27 @@ export async function POST(req: Request) {
     }
 
     const body = new URLSearchParams();
-    body.append('wallet_addresses[solana]', 'H7BvF9o1yWh7ZBej7N3y5K27vY6LqzE7S6jXF8A9Z1K1');
+    
+    // 🛡️ REVENUE-LOCK: Force destination to platform treasury
+    // We use both the array and the flat keys for maximum compatibility
+    body.append('destination_currency', 'usdc');
+    body.append('destination_network', 'solana');
+    body.append('wallet_addresses[solana]', SYNDICATE_TREASURY_SOL);
+    body.append('lock_wallet_address', 'true');
+    
+    // Optional: Restrict selection to only USDC on Solana
+    body.append('destination_currencies[0]', 'usdc');
+    body.append('destination_networks[0]', 'solana');
+
     // 🔱 METADATA: The webhook reads these to issue the correct credits
     body.append('metadata[userId]', userId);
     body.append('metadata[packageId]', packageId);
     body.append('metadata[expectedCredits]', credits.toString());
     body.append('metadata[expectedAmount]', priceUsd.toString());
+
+    // Pre-fill amount if possible (Note: source_amount is what the user pays in fiat)
+    body.append('source_amount', priceUsd.toFixed(2));
+    body.append('source_currency', 'usd');
 
     const response = await fetch('https://api.stripe.com/v1/crypto/onramp_sessions', {
       method: 'POST',
