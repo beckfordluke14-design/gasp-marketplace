@@ -80,7 +80,9 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
             </div>
 
             <h3 className="text-2xl font-syncopate font-black uppercase italic text-white tracking-tighter mb-2">
-               {isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS'}
+               {balance && balance > 0 
+                 ? (isSpanish ? 'CRÉDITOS INSUFICIENTES' : 'NOT ENOUGH CREDITS')
+                 : (isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS')}
             </h3>
             
             <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-8 max-w-[320px] italic">

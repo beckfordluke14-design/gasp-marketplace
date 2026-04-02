@@ -71,6 +71,23 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }, [ready, authenticated, user?.id]);
 
+  useEffect(() => {
+    if (!authenticated || !user?.id) return;
+    
+    // 🛰️ EVENT-DRIVEN SYNC: Refresh balance on manual triggers
+    const handleRefresh = async () => {
+       fetchProfile(user.id, user);
+    };
+    
+    window.addEventListener('gasp_balance_refresh', handleRefresh);
+    window.addEventListener('gasp_sync_follows', handleRefresh);
+    
+    return () => {
+       window.removeEventListener('gasp_balance_refresh', handleRefresh);
+       window.removeEventListener('gasp_sync_follows', handleRefresh);
+    };
+  }, [authenticated, user?.id]);
+
   const refreshProfile = async () => {
     if (authenticated && user?.id) await fetchProfile(user.id, user);
   };

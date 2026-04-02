@@ -74,7 +74,6 @@ export default function ChatDrawer({
   const [showInsufficientFunds, setShowInsufficientFunds] = useState(false);
   const [showVaultCTA, setShowVaultCTA] = useState(false);
   const [showLimitCTA, setShowLimitCTA] = useState(false);
-  const [currentBalance, setCurrentBalance] = useState<number>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // 🧠 SOVEREIGN CHAT ENGINE: Custom fetch-based, bypasses AI SDK entirely
@@ -90,12 +89,13 @@ export default function ChatDrawer({
     if (isProcessing) return;
     
     // 🛡️ LOCK GUEST: Guests must have credits or sign up
-    if (idToUse.startsWith('guest-') && currentBalance < cost) {
+    const balance = userProfile?.credit_balance || 0;
+    if (idToUse.startsWith('guest-') && balance < cost) {
        setShowInsufficientFunds(true);
        return;
     }
 
-    if (currentBalance < cost) {
+    if (balance < cost) {
        setShowInsufficientFunds(true);
        return;
     }
@@ -135,7 +135,8 @@ export default function ChatDrawer({
 
     // 🛡️ FRONTEND CREDIT ENFORCEMENT: Block transmit if balance is depleted
     const COST_MESSAGE_TEXT = 50;
-    if (!idToUse.startsWith('guest-') && currentBalance < COST_MESSAGE_TEXT) {
+    const balance = userProfile?.credit_balance || 0;
+    if (!idToUse.startsWith('guest-') && balance < COST_MESSAGE_TEXT) {
        setShowInsufficientFunds(true);
        return;
     }
@@ -278,7 +279,6 @@ export default function ChatDrawer({
         if (result.success) {
            setMessages(result.data.messages || []);
            setVaultItems(result.data.vaultItems || []);
-           setCurrentBalance(result.data.balance || 0);
            setIsDepleted(result.data.isDepleted || false);
 
            // Fetch following status
@@ -372,7 +372,6 @@ export default function ChatDrawer({
         } else {
             if (result.error?.includes('balance') || result.error?.includes('funds') || result.error?.includes('Insufficient')) {
                setShowVaultCTA(true);
-               if (result.balance !== undefined) setCurrentBalance(result.balance);
             } else {
                alert(`Error: ${result.error || 'Connection error'}`);
             }
@@ -720,7 +719,7 @@ export default function ChatDrawer({
                       <ChatCTA 
                         type="topup" 
                         onAction={onOpenTopUp} 
-                        balance={currentBalance}
+                        balance={userProfile?.credit_balance || 0}
                       />
                    </div>
                 )}

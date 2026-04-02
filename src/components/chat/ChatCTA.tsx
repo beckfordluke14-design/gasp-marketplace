@@ -79,7 +79,9 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
 
       <div className="space-y-1 z-10">
          <h3 className="text-sm font-syncopate font-black uppercase text-white italic tracking-tighter">
-           {isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS'}
+           {balance && balance > 0 
+             ? (isSpanish ? 'CRÉDITOS INSUFICIENTES' : 'NOT ENOUGH CREDITS')
+             : (isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS')}
          </h3>
          <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
            {isSpanish ? (
