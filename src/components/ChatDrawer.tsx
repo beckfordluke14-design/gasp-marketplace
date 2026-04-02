@@ -158,6 +158,7 @@ export default function ChatDrawer({
           userId: idToUse,
           personaId: profileId,
           userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          locale: typeof window !== 'undefined' ? (localStorage.getItem('gasp_locale') || 'en') : 'en',
         }),
       });
 

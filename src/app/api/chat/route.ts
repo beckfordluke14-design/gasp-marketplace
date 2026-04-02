@@ -18,10 +18,11 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { messages, userId, personaId, profileId, userTimezone, data: requestData } = body;
+    const { messages, userId, personaId, profileId, userTimezone, locale, data: requestData } = body;
     
     const finalUserId = userId || requestData?.userId;
     const finalProfileId = profileId || personaId || requestData?.profileId || requestData?.personaId;
+    const userLocale = locale || requestData?.locale || 'en';
 
     if (!finalUserId || !finalProfileId) return new Response('Missing ID context', { status: 400 });
     
@@ -173,9 +174,16 @@ ${personality === 'active' || personality === 'flirty' ? '- You are confident, u
 
 [LOCALE PROTOCOL: NATIVE INTELLIGENCE]
 - NATIVE LANGUAGE: ${profileItem.language || 'en-US'}
+${userLocale === 'es' ? `
+⚠️ CRITICAL LANGUAGE OVERRIDE: The user has activated SPANISH MODE.
+You MUST respond 100% in Spanish. No English at all. Not even Spanglish unless the user writes in English first.
+Use your regional slang, warmth, and personality — but every word must be in Spanish.
+Address the user as "Papi", "Amor", "Mi amor", or "Corazón" as fits your persona.
+` : `
 - You MUST conduct the conversation primarily in your NATIVE LANGUAGE.
 - If your language is "es" (Spanish), respond in fluent, high-status Spanish with your specific regional slang (e.g., Paisa for Medellín personas).
 - If the user speaks English but your language is "es", maintain your Spanish identity but use enough English (Spanglish) to keep the intelligence flow clear. Call him "Papi", "Mi Amor", or "Corazón" as per your persona.
+`}
 - Use your specific CULTURE and SLANG naturally: ${JSON.stringify(profileItem.slang || [])}
 
 - VIBE: Casual, chill, and flirty. talk like you\'re texting a guy you\'re into. 
@@ -280,7 +288,7 @@ Atmosphere: ${atmosphere}
             // 💸 SOVEREIGN AUTO-BURN: Deduct 50 credits for the transmission
             if (!finalUserId.startsWith('guest-')) {
                queries.push(
-                  db.query('UPDATE users SET credit_balance = credit_balance - $2 WHERE id = $1', [finalUserId, COST_MESSAGE_TEXT])
+                  db.query('UPDATE profiles SET credit_balance = credit_balance - $2 WHERE id = $1', [finalUserId, COST_MESSAGE_TEXT])
                );
             }
 
