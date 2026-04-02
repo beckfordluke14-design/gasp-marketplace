@@ -73,23 +73,14 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
 
     const fetchLivePrice = async () => {
         try {
-            // Source 1: Jupiter v2
-            const jRes = await fetch('https://api.jup.ag/price/v2?ids=So11111111111111111111111111111111111111112');
-            const jData = await jRes.json();
-            const p1 = jData.data['So11111111111111111111111111111111111111112']?.price;
-            if (p1) { setSolPrice(parseFloat(p1)); return; }
-
-            // Source 2: Binance (Global Stable)
-            const bRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
-            const bData = await bRes.json();
-            if (bData.price) { setSolPrice(parseFloat(bData.price)); return; }
-
-            // Source 3: CoinGecko (Global Fallback)
-            const gRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
-            const gData = await gRes.json();
-            if (gData.solana?.usd) { setSolPrice(parseFloat(gData.solana.usd)); return; }
+            // Source: Our own server-side proxy (No CORS limits)
+            const res = await fetch('/api/economy/solana/price');
+            const data = await res.json();
+            if (data.success && data.price) {
+                setSolPrice(data.price);
+            }
         } catch (e) {
-            console.error('[Oracle] Critical failure on all feeds:', e);
+            console.error('[Oracle] Critical failure:', e);
         }
     };
 

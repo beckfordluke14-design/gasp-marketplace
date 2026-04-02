@@ -37,24 +37,18 @@ export async function POST(req: Request) {
 
     const body = new URLSearchParams();
     
-    // 🛡️ REVENUE-LOCK: Force destination to platform treasury
-    // We use both the array and the flat keys for maximum compatibility
-    body.append('destination_currency', 'usdc');
-    body.append('destination_network', 'solana');
-    body.append('wallet_addresses[solana]', SYNDICATE_TREASURY_SOL);
-    body.append('lock_wallet_address', 'true');
-    
-    // Optional: Restrict selection to only USDC on Solana
+    // 🛡️ REVENUE-LOCK: New Stripe API format for destination
     body.append('destination_currencies[0]', 'usdc');
     body.append('destination_networks[0]', 'solana');
+    body.append('destination_wallet_address', SYNDICATE_TREASURY_SOL);
+    
+    // 🔱 METADATA: Ensure all values are strings and non-undefined
+    body.append('metadata[userId]', String(userId || 'anon'));
+    if (packageId) body.append('metadata[packageId]', String(packageId));
+    body.append('metadata[expectedCredits]', String(credits || 0));
+    body.append('metadata[expectedAmount]', String(priceUsd || 0));
 
-    // 🔱 METADATA: The webhook reads these to issue the correct credits
-    body.append('metadata[userId]', userId);
-    body.append('metadata[packageId]', packageId);
-    body.append('metadata[expectedCredits]', credits.toString());
-    body.append('metadata[expectedAmount]', priceUsd.toString());
-
-    // Pre-fill amount if possible (Note: source_amount is what the user pays in fiat)
+    // Pre-fill amount
     body.append('source_amount', priceUsd.toFixed(2));
     body.append('source_currency', 'usd');
 
