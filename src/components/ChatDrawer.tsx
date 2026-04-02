@@ -460,7 +460,9 @@ export default function ChatDrawer({
                       </div>
                       <div className="flex items-center gap-1 opacity-60">
                          <SparkleIcon size={8} className="text-[#ff00ff]" />
-                         <span className="text-[7px] font-black uppercase tracking-widest text-[#ff00ff] italic font-syncopate">Verified Connection</span>
+                         <span className="text-[7px] font-black uppercase tracking-widest text-[#ff00ff] italic font-syncopate">
+                            {isSpanish ? 'Conexión Verificada' : 'Verified Connection'}
+                         </span>
                       </div>
                    </div>
                 </div>
@@ -498,7 +500,7 @@ export default function ChatDrawer({
                        )}
                        {/* TOOLTIP */}
                        <div className="absolute -bottom-8 right-0 px-2 py-1 bg-black border border-white/10 text-[6px] font-black uppercase tracking-widest rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                          Restricted Archive
+                          {isSpanish ? 'Archivo Restringido' : 'Restricted Archive'}
                        </div>
                     </button>
                    <button className="hover:text-white transition-colors opacity-30"><Trophy size={18} /></button>
@@ -506,16 +508,16 @@ export default function ChatDrawer({
                 </div>
              </div>
 
-             <div className="flex gap-8">
-                <button onClick={() => setChatTab('chat')} className={`pb-4 text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'chat' ? 'text-white' : 'text-white/30'}`}>
-                   <MessageSquare size={13} className={chatTab === 'chat' ? 'text-[#00f0ff]' : ''} /> CHAT
-                   {chatTab === 'chat' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
-                </button>
-                <button onClick={() => setChatTab('pics')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
-                   ARCHIVE
-                   {chatTab === 'pics' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
-                </button>
-             </div>
+              <div className="flex gap-8">
+                 <button onClick={() => setChatTab('chat')} className={`pb-4 text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'chat' ? 'text-white' : 'text-white/30'}`}>
+                    <MessageSquare size={13} className={chatTab === 'chat' ? 'text-[#00f0ff]' : ''} /> {isSpanish ? 'CHAT' : 'CHAT'}
+                    {chatTab === 'chat' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
+                 </button>
+                 <button onClick={() => setChatTab('pics')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
+                    {isSpanish ? 'ARCHIVO' : 'ARCHIVE'}
+                    {chatTab === 'pics' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
+                 </button>
+              </div>
           </div>
 
           {/* Stream Block - Adaptive Readability */}
@@ -571,7 +573,7 @@ export default function ChatDrawer({
                         )}
                        {!isAssistant && (
                           <div className="flex items-center gap-1 px-1">
-                             <span className="text-[7px] font-black uppercase text-white/20 tracking-widest">READ</span>
+                             <span className="text-[7px] font-black uppercase text-white/20 tracking-widest">{isSpanish ? 'LEÍDO' : 'READ'}</span>
                              <CheckCheck size={10} className="text-[#00f0ff]" />
                           </div>
                        )}
@@ -641,7 +643,9 @@ export default function ChatDrawer({
                       <span className="w-2 h-2 bg-[#00f0ff] rounded-full animate-bounce [animation-delay:-0.15s]" />
                       <span className="w-2 h-2 bg-[#00f0ff] rounded-full animate-bounce" />
                     </div>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-white/20">Syncing vault...</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-white/20">
+                       {isSpanish ? 'Sincronizando bóveda...' : 'Syncing vault...'}
+                    </p>
                   </div>
                 ) : vaultItems.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -730,7 +734,7 @@ export default function ChatDrawer({
                 {showGifts && (
                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full left-6 right-6 mb-6 z-50 bg-[#111] border border-white/10 rounded-[2rem] p-6 shadow-2xl">
                       <div className="flex items-center justify-between mb-4 px-2">
-                         <span className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff]">Send Gift</span>
+                         <span className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff]">{isSpanish ? 'Enviar Regalo' : 'Send Gift'}</span>
                          <button onClick={() => setShowGifts(false)} className="text-white/40 hover:text-white"><X size={14} /></button>
                       </div>
                       <div className="grid grid-cols-5 gap-3">
@@ -743,7 +747,7 @@ export default function ChatDrawer({
                          ].map(g => (
                             <button key={g.e} onClick={() => sendGift(g.e, g.c)} className="flex flex-col items-center gap-2 py-4 px-1 bg-black/40 border border-white/5 rounded-2xl hover:border-[#ff00ff]/50 transition-all">
                                <span className="text-2xl">{g.e}</span>
-                               <span className="text-[7.5px] font-black text-white px-2 py-0.5 bg-white/5 rounded-full">{g.c.toLocaleString()} CREDITS</span>
+                               <span className="text-[7.5px] font-black text-white px-2 py-0.5 bg-white/5 rounded-full">{g.c.toLocaleString()} {isSpanish ? 'CRÉDITOS' : 'CREDITS'}</span>
                             </button>
                          ))}
                       </div>
