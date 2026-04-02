@@ -13,9 +13,16 @@ interface InsufficientFundsModalProps {
   personaName?: string;
 }
 
+/**
+ * 🛰️ INSUFFICIENT FUNDS MODAL v9.0 // MULTI-LOCALE CONVERSION HUB
+ * Strategy: High-Status billing urgency with 100% Bilingual Sync (EN/ES).
+ */
 export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, personaName }: InsufficientFundsModalProps) {
   const { profile } = useUser();
   const [balance, setBalance] = useState<number | null>(null);
+
+  // 🌍 GLOBAL LOCALE STATE
+  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
 
   useEffect(() => {
     async function fetchBalance() {
@@ -73,14 +80,22 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
             </div>
 
             <h3 className="text-2xl font-syncopate font-black uppercase italic text-white tracking-tighter mb-2">
-               OUT OF CREDITS
+               {isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS'}
             </h3>
             
             <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-8 max-w-[320px] italic">
                {personaName ? (
-                   <>CHAT W/ <span className="text-[#ffea00]">{personaName}</span> TO CONTINUE. Allocation of Credits Required to Maintain Connection. 🗝️🛡️</>
+                   isSpanish ? (
+                       <>CHATEAR CON <span className="text-[#ffea00]">{personaName.toUpperCase()}</span> PARA CONTINUAR. SE REQUIERE ASIGNACIÓN DE CRÉDITOS PARA MANTENER LA CONEXIÓN. 🗝️🛡️</>
+                   ) : (
+                       <>CHAT W/ <span className="text-[#ffea00]">{personaName}</span> TO CONTINUE. Allocation of Credits Required to Maintain Connection. 🗝️🛡️</>
+                   )
                ) : (
-                   <>Allocation of <span className="text-[#ffea00]">System Credits</span> Required to Access Secure Archive Uplink. 🛡️🛰️</>
+                   isSpanish ? (
+                       <>SE REQUIERE ASIGNACIÓN DE <span className="text-[#ffea00]">CRÉDITOS DEL SISTEMA</span> PARA ACCEDER AL ENLACE SEGURO DEL ARCHIVO. 🛡️🛰️</>
+                   ) : (
+                       <>Allocation of <span className="text-[#ffea00]">System Credits</span> Required to Access Secure Archive Uplink. 🛡️🛰️</>
+                   )
                )}
             </p>
 
@@ -93,14 +108,14 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                   className="w-full h-16 rounded-2xl bg-[#ffea00] text-black text-[11px] font-black uppercase tracking-[0.3em] font-syncopate italic hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_40px_rgba(255,234,0,0.4)] flex items-center justify-center gap-3"
                 >
                    <Diamond size={16} fill="currentColor" />
-                   ADD CREDITS
+                   {isSpanish ? 'AÑADIR CRÉDITOS' : 'ADD CREDITS'}
                 </button>
                
                <button 
                  onClick={onClose}
                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white/40 text-[10px] font-black uppercase tracking-[0.2em] hover:text-white transition-all shadow-xl"
                >
-                  DISMISS
+                  {isSpanish ? 'DESCARTAR' : 'DISMISS'}
                </button>
             </div>
           </div>
@@ -108,7 +123,9 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
           {/* Bottom Security Tag */}
           <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-center gap-2 opacity-20">
              <AlertCircle size={10} />
-             <span className="text-[7px] font-black uppercase tracking-widest italic">Sovereign Strategic Media Hub // Secure Interface</span>
+             <span className="text-[7px] font-black uppercase tracking-widest italic">
+                {isSpanish ? 'Centro de Medios Estratégicos Soberano // Interfaz Segura' : 'Sovereign Strategic Media Hub // Secure Interface'}
+             </span>
           </div>
         </motion.div>
       </div>

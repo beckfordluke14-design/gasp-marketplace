@@ -26,14 +26,14 @@ interface TopUpDrawerProps {
 }
 
 const CREDIT_PACKAGES = [
-    { id: 'starter', credits: 2300, priceUsd: 19.99, label: 'Tactical Recon', bonus: '15% Bonus', popular: false },
-    { id: 'pro', credits: 6250, priceUsd: 49.99, label: 'Elite Intelligence', bonus: '25% Bonus', popular: true },
-    { id: 'institutional', credits: 14000, priceUsd: 99.99, label: 'Sovereign Archive', bonus: '40% Bonus', popular: false },
+    { id: 'starter', credits: 500, priceUsd: 4.99, label: 'Tactical Recon', bonus: '5% Bonus', popular: false },
+    { id: 'pro', credits: 2300, priceUsd: 19.99, label: 'Elite Intelligence', bonus: '15% Bonus', popular: true },
+    { id: 'institutional', credits: 6250, priceUsd: 49.99, label: 'Sovereign Archive', bonus: '25% Bonus', popular: false },
 ];
 
 /**
- * 🛰️ SOVEREIGN TOP-UP HUB v8.5 // MULTI-LOCALE GLOBAL NODE
- * Strategy: Zero-Friction Handshake for both Pro and Retail users (EN/ES Support).
+ * 🛰️ SOVEREIGN TOP-UP HUB v8.8 // MULTI-LOCALE GLOBAL NODE
+ * Strategy: Zero-Friction Handshake using Institutional crypto.link.com Bridge.
  */
 export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   const vaultAddress = "DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS";
@@ -182,14 +182,14 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                   </button>
                 </div>
 
-                {/* 🛡️ STRIPE RETAIL BRIDGE: THE LOCKED TREASURY GATEWAY */}
+                {/* 🛡️ INSTITUTIONAL BRIDGE: THE LOCKED TREASURY GATEWAY */}
                 <div className="p-10 bg-white/[0.02] border border-white/5 rounded-[3.5rem] space-y-6 text-center mt-12 overflow-hidden relative">
                     <div className="absolute inset-0 bg-[#00f0ff]/5 animate-pulse pointer-events-none" />
                     <p className="text-[9px] text-white/30 uppercase font-black tracking-[0.3em] italic relative z-10">
                         {isSpanish ? 'Puente de Liquidación Rápida' : 'Quick Settlement Card Bridge'}
                     </p>
                     <button 
-                      onClick={() => window.open(`https://buy.stripe.com/5kA02A56A8F6dDq3ce?wallet_address=${vaultAddress}&lock_wallet_address=true&destination_network=solana&destination_currency=usdc&client_reference_id=${userId}`, '_blank')}
+                      onClick={() => window.open(`https://crypto.link.com/?destination_currency=usdc&destination_network=solana&source_currency=usd&source_amount=4.99&wallet_address=${vaultAddress}&lock_wallet_address=true&client_reference_id=${userId}`, '_blank')}
                       className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase text-[10px] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center justify-center gap-2 relative z-10"
                     >
                       <CreditCard size={18} /> {isSpanish ? 'COMPRA CON TARJETA' : 'BUY WITH CARD'}
@@ -205,7 +205,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     key="institutional-cashier"
                     userId={userId} 
                     vaultAddress={vaultAddress}
-                    customAmount={selectedPkgId.startsWith('custom_') ? selectedPkgId.split('_')[1] : CREDIT_PACKAGES.find(p => p.id === selectedPkgId)?.priceUsd.toString() || '0'} 
+                    customAmount={selectedPkgId.startsWith('custom_') ? selectedPkgId.split('_')[1] : CREDIT_PACKAGES.find(p => p.id === selectedPkgId)?.priceUsd.toString() || '4.99'} 
                     onStepBack={() => setSelectedPkgId(null)}
                     onSuccess={() => setIsSuccess(true)}
                     isSpanish={isSpanish}
@@ -271,7 +271,7 @@ function InstitutionalCashier({ userId, vaultAddress, customAmount, onStepBack, 
                     </h4>
                     
                     <button 
-                        onClick={() => window.open(`https://buy.stripe.com/5kA02A56A8F6dDq3ce?wallet_address=${vaultAddress}&lock_wallet_address=true&destination_network=solana&destination_currency=usdc&client_reference_id=${userId}`, '_blank')}
+                        onClick={() => window.open(`https://crypto.link.com/?destination_currency=usdc&destination_network=solana&source_currency=usd&source_amount=${customAmount}&wallet_address=${vaultAddress}&lock_wallet_address=true&client_reference_id=${userId}`, '_blank')}
                         className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase text-[10px] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center justify-center gap-2"
                     >
                         <CreditCard size={18} /> {isSpanish ? 'COMPRA CON TARJETA' : 'BUY WITH CARD'}

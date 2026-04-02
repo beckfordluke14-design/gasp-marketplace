@@ -65,6 +65,9 @@ export default function ChatDrawer({
   const [isFollowing, setIsFollowing] = useState(false);
   const [liveVoiceUrl, setLiveVoiceUrl] = useState<string | null>(null);
   
+  // 🌍 GLOBAL LOCALE STATE
+  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
+
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedLightboxIndex, setSelectedLightboxIndex] = useState(0);
   const [lightboxItems, setLightboxItems] = useState<any[]>([]);
@@ -520,7 +523,9 @@ export default function ChatDrawer({
             {chatTab === 'chat' ? (
               <div className="space-y-8">
                 <div className="flex flex-col items-center justify-center gap-3 py-6 border-b border-white/5 opacity-40">
-                   <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/40 italic">Connected to the Archive</p>
+                   <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/40 italic">
+                      {isSpanish ? 'Conectado al Archivo' : 'Connected to the Archive'}
+                   </p>
                 </div>
 
                 {messages.map((msg: any, idx: number) => {
@@ -579,7 +584,7 @@ export default function ChatDrawer({
                       <div className="flex items-center gap-2 px-2">
                          <div className={`w-1 h-1 rounded-full ${isRequestingVoice ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'} animate-pulse`} />
                          <span className={`text-[7px] font-black uppercase tracking-widest ${isRequestingVoice ? 'text-[#ff00ff]' : 'text-[#00f0ff]'} italic`}>
-                            {isRequestingVoice ? 'Generating Voice...' : `chat w/ ${profile?.name}...`}
+                            {isRequestingVoice ? (isSpanish ? 'Generando Voz...' : 'Generating Voice...') : (isSpanish ? `chatear con ${profile?.name}...` : `chat w/ ${profile?.name}...`)}
                          </span>
                       </div>
                       <div className="flex items-start gap-2">
@@ -641,7 +646,9 @@ export default function ChatDrawer({
                 ) : vaultItems.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-20 gap-3">
                     <Lock size={28} className="text-white/10" />
-                    <p className="text-[9px] font-black uppercase tracking-widest text-white/20">No pics available yet</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-white/20">
+                       {isSpanish ? 'No hay fotos disponibles' : 'No pics available yet'}
+                    </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-3">
@@ -685,7 +692,9 @@ export default function ChatDrawer({
                               disabled={isProcessing}
                               className="w-full py-2.5 bg-white text-black text-[9px] font-black uppercase rounded-xl hover:bg-[#ffea00] transition-colors disabled:opacity-50 shadow-lg"
                             >
-                              {isProcessing ? 'SYNCING...' : `UNLOCK · ${item.price_credits || item.price || 6000}cr`}
+                              {isProcessing 
+                                 ? (isSpanish ? 'SINCRONIZANDO...' : 'SYNCING...') 
+                                 : (isSpanish ? 'DESBLOQUEAR' : 'UNLOCK') + ` · ${item.price_credits || item.price || 6000}cr`}
                             </button>
                           </div>
                         )}
@@ -772,7 +781,7 @@ export default function ChatDrawer({
                           value={input} 
                           onChange={(e) => setInput(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleLocalSubmit(); } }}
-                          placeholder={isDepleted ? "MESSAGING DISABLED..." : `chat w/ ${profile?.name}...`} 
+                          placeholder={isDepleted ? (isSpanish ? "MENSAJERÍA DESACTIVADA..." : "MESSAGING DISABLED...") : (isSpanish ? `chatear con ${profile?.name}...` : `chat w/ ${profile?.name}...`)} 
                           className="w-full bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none"
                           disabled={isLoading || isDepleted}
                        />
