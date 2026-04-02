@@ -19,7 +19,6 @@ import TopUpDrawer from '@/components/economy/TopUpDrawer';
 import ChatDrawer from '@/components/ChatDrawer';
 import { useUser } from '@/components/providers/UserProvider';
 import NeuralPulseTerminal from '@/components/NeuralPulseTerminal';
-import NeuralPulseTerminal from '@/components/NeuralPulseTerminal';
 import FloatingChatTerminal from '@/components/FloatingChatTerminal';
 import { Star } from 'lucide-react';
 
@@ -194,7 +193,7 @@ function MarketplaceContent() {
     });
   }, [refinedProfiles, randomSeed]);
 
-  if (!mounted) return null;
+  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
 
    return (
     <main className="min-h-screen bg-transparent text-white relative flex flex-col lg:flex-row xl:gap-0">
@@ -226,25 +225,25 @@ function MarketplaceContent() {
                      onClick={() => setActiveTab('feed')} 
                      className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'feed' ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.4)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
                   >
-                     Global Feed
+                     {isSpanish ? 'Feed Global' : 'Global Feed'}
                   </button>
                   <button 
                      onClick={() => setActiveTab('weather')} 
                      className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'weather' ? 'bg-[#00f0ff] text-black shadow-[0_0_20px_rgba(0,240,255,0.6)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
                   >
-                     Weather X
+                     {isSpanish ? 'Clima X' : 'Weather X'}
                   </button>
                   <button 
                      onClick={() => setActiveTab('reports')} 
                      className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'reports' ? 'bg-[#ff00ff] text-white shadow-[0_0_20px_rgba(255,0,255,0.6)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
                   >
-                     Reports
+                     {isSpanish ? 'Reportes' : 'Reports'}
                   </button>
                   <button 
                      onClick={() => setActiveTab('protocol')} 
                      className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'protocol' ? 'bg-[#ffea00] text-black shadow-[0_0_20px_rgba(255,234,0,0.6)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
                   >
-                     Protocol
+                     {isSpanish ? 'Protocolo' : 'Protocol'}
                   </button>
               </div>
 
@@ -362,7 +361,9 @@ function MarketplaceContent() {
               >
                  {/* 🚀 MAIN OPERATIONS CENTER */}
                  <div className="pt-36 lg:pt-32 pb-32">
-                    <button onClick={() => setShowProfileList(false)} className="mb-4 text-[#00f0ff] uppercase text-[10px] font-black">← Close Access</button>
+                    <button onClick={() => setShowProfileList(false)} className="mb-4 text-[#00f0ff] uppercase text-[10px] font-black">
+                       {isSpanish ? '← Cerrar Acceso' : '← Close Access'}
+                    </button>
                     <Sidebar 
                        onSelectProfile={(id) => { handleSelectProfile(id); setShowProfileList(false); }} 
                        selectedProfileId={selectedProfileId} 

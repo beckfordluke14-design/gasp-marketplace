@@ -48,6 +48,9 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
   const { profile } = useUser();
   const [following, setFollowing] = useState<string[]>([]);
   const [recentIds, setRecentIds] = useState<string[]>([]);
+  
+  // 🌍 GLOBAL LOCALE STATE
+  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
 
   // 1. NAV HUB FOR SIDEBAR
   const NavButton = ({ label, icon: Icon, targetView }: { label: string, icon: any, targetView: 'chats' | 'vault' | 'feed' }) => (
@@ -59,17 +62,6 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
         <span className="text-[7px] font-black uppercase tracking-widest">{label}</span>
     </button>
   );
-
-  // ACCOUNT RANK LOGIC
-  const getAccountRank = (points: number = 0) => {
-    if (points >= 10000) return { label: 'Sovereign Node [Level 5] 💎', color: '#00f0ff', priority: '10x', shadow: '0 0 20px #00f0ff44', icon: <Trophy size={12} /> };
-    if (points >= 5000) return { label: 'Elite Operative [Level 4] ⚡️', color: '#ff00ff', priority: '5x', shadow: '0 0 20px #ff00ff44', icon: <Zap size={12} /> };
-    if (points >= 2000) return { label: 'Field Analyst [Level 3] 🟡', color: '#ffea00', priority: '2x', shadow: '0 0 20px #ffea0044', icon: <ShieldCheck size={12} /> };
-    if (points >= 500) return { label: 'Verified Scout [Level 2] 🔘', color: '#e5e7eb', priority: '1.5x', shadow: '0 0 20px #ffffff22', icon: <Zap size={12} /> };
-    return { label: 'Entry Node [Level 1] 🟠', color: '#cd7f32', priority: '1x', shadow: 'none', icon: <Zap size={12} /> };
-  };
-
-  const rank = getAccountRank(profile?.credit_balance || 0);
 
   useEffect(() => {
     const storedRecent = localStorage.getItem('gasp_recent_chats');
@@ -174,7 +166,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
         {isFollowing && (
             <div className="absolute top-2 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                <div className="w-1 h-1 rounded-full bg-[#00ff00] animate-pulse shadow-[0_0_8px_#00ff00]" />
-               <span className="text-[6px] font-black text-[#00ff00] uppercase tracking-tighter italic">Following</span>
+               <span className="text-[6px] font-black text-[#00ff00] uppercase tracking-tighter italic">{isSpanish ? 'Siguiendo' : 'Following'}</span>
             </div>
         )}
 
@@ -223,7 +215,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
               </button>
            </div>
            <p className="text-[9px] text-white/30 truncate leading-relaxed">
-              {(profileItem.vibe || profileItem.city || 'online now').toUpperCase()}
+              {(profileItem.vibe || profileItem.city || (isSpanish ? 'en línea' : 'online now')).toUpperCase()}
            </p>
         </div>
       </motion.div>
@@ -234,9 +226,9 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
     <aside className="flex w-full lg:w-[260px] h-screen bg-transparent backdrop-blur-xl border-r border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 font-outfit transition-all">
       {/* NAVIGATION BLADE (MOBILE ONLY) */}
       <div className="flex lg:hidden bg-white/5 backdrop-blur-3xl border-b border-white/5 pt-12 items-center px-4">
-        <NavButton label="Feed" icon={Home} targetView="feed" />
-        <NavButton label="Chats" icon={MessageSquare} targetView="chats" />
-        <NavButton label="Vault" icon={ShieldCheck} targetView="vault" />
+        <NavButton label={isSpanish ? 'Feed' : 'Feed'} icon={Home} targetView="feed" />
+        <NavButton label={isSpanish ? 'Chats' : 'Chats'} icon={MessageSquare} targetView="chats" />
+        <NavButton label={isSpanish ? 'Bóveda' : 'Vault'} icon={ShieldCheck} targetView="vault" />
         
         {/* 🌍 MOBILE LOCALE TOGGLE */}
         <div className="flex items-center gap-1 p-1 bg-black/40 rounded-xl border border-white/10 scale-75 origin-right">
@@ -270,13 +262,12 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
             {/* 🌍 GLOBAL LOCALE TOGGLE */}
             <div className="px-6 mb-6">
                 <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/10 group hover:border-[#00f0ff]/30 transition-all">
-                    <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/30 italic">Locale Protocol</span>
+                    <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/30 italic">{isSpanish ? 'Protocolo Local' : 'Locale Protocol'}</span>
                     <div className="flex items-center gap-1 p-1 bg-black rounded-xl border border-white/5">
                         <button 
                            onClick={() => {
                                localStorage.setItem('gasp_locale', 'en');
-                               window.dispatchEvent(new CustomEvent('gasp_locale_change', { detail: { locale: 'en' } }));
-                               window.location.reload(); // Force full system sync
+                               window.location.reload();
                            }}
                            className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${localStorage.getItem('gasp_locale') === 'es' ? 'text-white/20 hover:text-white' : 'bg-[#00f0ff] text-black shadow-[0_0_10px_rgba(0,240,255,0.4)]'}`}
                         >
@@ -285,8 +276,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                         <button 
                            onClick={() => {
                                localStorage.setItem('gasp_locale', 'es');
-                               window.dispatchEvent(new CustomEvent('gasp_locale_change', { detail: { locale: 'es' } }));
-                               window.location.reload(); // Force full system sync
+                               window.location.reload();
                            }}
                            className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${localStorage.getItem('gasp_locale') === 'es' ? 'bg-[#ff00ff] text-white shadow-[0_0_10px_rgba(255,0,255,0.4)]' : 'text-white/20 hover:text-white'}`}
                         >
@@ -303,21 +293,21 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
             <div className="px-6 mb-8 mt-4 animate-in fade-in slide-in-from-right-4 duration-1000">
                 <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-[#ffea00] mb-4 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-pulse shadow-[0_0_8px_#ffea00]" />
-                  Latest Intel Brief
+                  {isSpanish ? 'Resumen de Inteligencia' : 'Latest Intel Brief'}
                 </h2>
                 <div 
                    onClick={() => (window as any).onSetActiveTab?.('reports')}
                    className="p-4 rounded-2xl bg-[#ffea00]/5 border border-[#ffea00]/20 hover:bg-[#ffea00]/10 hover:border-[#ffea00]/40 transition-all cursor-pointer group"
                 >
                    <div className="flex items-center justify-between mb-2">
-                       <span className="text-[7px] font-black text-[#ffea00]/60 uppercase tracking-widest italic">Signal Verified</span>
+                       <span className="text-[7px] font-black text-[#ffea00]/60 uppercase tracking-widest italic">{isSpanish ? 'Señal Verificada' : 'Signal Verified'}</span>
                        <span className="text-[7px] font-black text-white/20 uppercase tracking-widest italic">14:02 UTC</span>
                    </div>
                    <h3 className="text-[10px] font-black uppercase italic tracking-tighter text-white mb-2 leading-tight group-hover:text-[#ffea00] transition-colors">
-                      Critical Sector Anomaly: Miami Heatwave Correlation Detected
+                      {isSpanish ? 'Anomalía Crítica: Correlación Detectada en Miami' : 'Critical Sector Anomaly: Miami Heatwave Correlation Detected'}
                    </h3>
                    <div className="flex items-center gap-2 text-[6px] font-black uppercase text-white/30 tracking-widest">
-                      <ArrowRight size={10} className="text-[#ffea00] -rotate-45" /> OPEN REPORT
+                      <ArrowRight size={10} className="text-[#ffea00] -rotate-45" /> {isSpanish ? 'ABRIR REPORTE' : 'OPEN REPORT'}
                    </div>
                 </div>
             </div>
@@ -330,7 +320,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
               <div className="px-6 mb-8 mt-4">
                 <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-[#ff00ff] mb-4 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#ff00ff] animate-ping" />
-                  Priority Uplinks
+                  {isSpanish ? 'Uplinks Prioritarios' : 'Priority Uplinks'}
                 </h2>
                 <div className="space-y-1">
                   {profiles.filter(p => unreadCounts[p.id] > 0).map(renderProfile)}
@@ -341,7 +331,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
             {/* FAVORITES */}
             {followedProfiles.length > 0 && (
               <div className="px-6 mb-8">
-                <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 mb-4 italic">Shadow Syndicate</h2>
+                <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 mb-4 italic">{isSpanish ? 'Sindicato Shadow' : 'Shadow Syndicate'}</h2>
                 <div className="space-y-1">
                   {followedProfiles.map(renderProfile)}
                 </div>
@@ -350,7 +340,9 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
 
             {/* DISCOVERY */}
             <div className="px-6 pb-20">
-              <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-white/20 mb-4 italic">Neural Discovery</h2>
+              <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-white/20 mb-4 italic">
+                {isSpanish ? 'Descubrimiento Neural' : 'Neural Discovery'}
+              </h2>
               <div className="space-y-1">
                 {otherProfiles.map(renderProfile)}
               </div>
@@ -362,8 +354,8 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
         {view === 'vault' && (
            <div className="px-8 py-10 space-y-10 animate-in fade-in slide-in-from-left-4 duration-500">
               <div className="space-y-2">
-                 <span className="text-[9px] font-black uppercase text-[#ff00ff] tracking-[0.4em]">Vault Access Node</span>
-                 <h2 className="text-3xl font-syncopate font-black italic uppercase text-white">Archives</h2>
+                 <span className="text-[9px] font-black uppercase text-[#ff00ff] tracking-[0.4em]">{isSpanish ? 'Nodo de Acceso a Bóveda' : 'Vault Access Node'}</span>
+                 <h2 className="text-3xl font-syncopate font-black italic uppercase text-white">{isSpanish ? 'Archivos' : 'Archives'}</h2>
               </div>
               
               <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 flex flex-col gap-6 group">
@@ -371,29 +363,31 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                     <ShieldCheck size={24} />
                  </div>
                  <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-loose">
-                    Your institutional credit balance authorizes access to restricted archival assets. Use credits to unlock high-heat personas and private dispatches.
+                    {isSpanish 
+                      ? 'Su saldo de crédito institucional autoriza el acceso a activos de archivo restringidos. Use créditos para desbloquear personas de alto calor y despachos privados.' 
+                      : 'Your institutional credit balance authorizes access to restricted archival assets. Use credits to unlock high-heat personas and private dispatches.'}
                  </p>
                  <Link href="/vault" className="w-full py-4 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-xl text-center hover:scale-[1.02] transition-all">
-                    Open Private Hub
+                    {isSpanish ? 'Abrir Centro Privado' : 'Open Private Hub'}
                  </Link>
               </div>
 
               {/* RE-RENDER WALLET BALANCE HERE FOR VAULT VIEW */}
               <div className="space-y-4">
-                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Your Balance</h2>
+                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">{isSpanish ? 'Su Saldo' : 'Your Balance'}</h2>
                  <div className="p-6 rounded-[2rem] bg-white/5 border border-white/10">
                     <div className="flex flex-col items-center gap-2">
                         <span className="text-[24px] font-black font-syncopate italic text-white leading-none">
                            {profile?.credit_balance?.toLocaleString() || '0'}
                         </span>
-                        <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">Terminal Credits</span>
+                        <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">{isSpanish ? 'Créditos de Terminal' : 'Terminal Credits'}</span>
                     </div>
                  </div>
                   <button 
                     onClick={() => onOpenTopUp ? onOpenTopUp() : (window as any).openTopUp?.()}
                     className="flex-1 w-full py-3 bg-[#00f0ff] text-black text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-white transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)]"
                   >
-                    TOP UP
+                    {isSpanish ? 'RECARGAR' : 'TOP UP'}
                   </button>
               </div>
            </div>
@@ -406,20 +400,22 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#00f0ff]/5 to-transparent pointer-events-none" />
                 <div className="flex items-center justify-between relative z-10 border-b border-white/5 pb-2">
                    <div className="flex flex-col">
-                      <span className="text-[6px] font-black uppercase tracking-[0.2em] text-white/30 italic">Syndicate Points</span>
+                      <span className="text-[6px] font-black uppercase tracking-[0.2em] text-white/30 italic">
+                        {isSpanish ? 'Puntos del Sindicato' : 'Syndicate Points'}
+                      </span>
                       <div className="flex items-center gap-1.5 mt-0.5">
                          <span className="text-[#00f0ff] font-black text-[10px] italic animate-pulse">⚡️</span>
                          <span className="text-[10px] font-syncopate font-black italic text-white leading-none">
-                            {(pointsStats?.balance || 0).toLocaleString()} <span className="text-[7px] text-[#00f0ff] not-italic">POINTS</span>
+                            {(pointsStats?.balance || 0).toLocaleString()} <span className="text-[7px] text-[#00f0ff] not-italic">{isSpanish ? 'PUNTOS' : 'POINTS'}</span>
                          </span>
                       </div>
                    </div>
-                   <div className="px-2 py-0.5 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20 text-[6px] font-black text-[#00f0ff] uppercase tracking-widest">Matched 🛡️</div>
+                   <div className="px-2 py-0.5 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20 text-[6px] font-black text-[#00f0ff] uppercase tracking-widest">{isSpanish ? 'Nivelado' : 'Matched'} 🛡️</div>
                 </div>
 
                 <div className="relative z-10">
                    <div className="flex justify-between items-center mb-1.5">
-                      <span className="text-[7px] font-black text-white/40 uppercase tracking-widest italic">Shadow Burn Weight</span>
+                      <span className="text-[7px] font-black text-white/40 uppercase tracking-widest italic">{isSpanish ? 'Peso de Quema Shadow' : 'Shadow Burn Weight'}</span>
                       <span className="text-[7px] font-black text-[#ffea00] uppercase tracking-widest">{(pointsStats?.totalSpent || 0).toLocaleString()} CR</span>
                    </div>
                    <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
@@ -436,9 +432,9 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                  <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
                        <Shield size={12} className="text-[#ffea00]" />
-                       <span className="text-[10px] font-black uppercase tracking-widest text-[#ffea00] italic">Genesis Lock</span>
+                       <span className="text-[10px] font-black uppercase tracking-widest text-[#ffea00] italic">{isSpanish ? 'Bloqueo Génesis' : 'Genesis Lock'}</span>
                     </div>
-                    <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">Day 12 / 180</span>
+                    <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">{isSpanish ? 'Día' : 'Day'} 12 / 180</span>
                  </div>
                  <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden border border-white/5">
                     <motion.div 
@@ -448,27 +444,31 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                     />
                  </div>
                  <div className="flex items-center gap-1.5 text-[6px] font-black uppercase text-[#ffea00]/60 tracking-widest italic animate-pulse">
-                    <Zap size={8} /> 50% EXIT BURN PENALTY ACTIVE
+                    <Zap size={8} /> {isSpanish ? 'PENALIZACIÓN DE QUEMA ACTIVA' : '50% EXIT BURN PENALTY ACTIVE'}
                  </div>
               </div>
 
               <div className="space-y-1 relative z-10 px-1">
                  <div className="flex items-center gap-2 mb-1">
                     <Flame size={12} className="text-[#ff6b00]" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-[#ff6b00] italic">Network Power</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#ff6b00] italic">{isSpanish ? 'Poder de Red' : 'Network Power'}</span>
                  </div>
                  <h3 className="text-[12px] font-black uppercase italic tracking-tighter text-white">
-                    {pointsStats.balance >= 10000 ? 'Sovereign Node 💎' : pointsStats.balance >= 1000 ? 'Syndicate Overseer ⚡️' : 'Recruit Analyst 🟠'}
+                    {pointsStats.balance >= 10000 
+                        ? (isSpanish ? 'Nodo Soberano 💎' : 'Sovereign Node 💎')
+                        : pointsStats.balance >= 1000 
+                            ? (isSpanish ? 'Supervisor del Sindicato ⚡️' : 'Syndicate Overseer ⚡️')
+                            : (isSpanish ? 'Analista Recluta 🟠' : 'Recruit Analyst 🟠')}
                  </h3>
               </div>
           </div>
 
           <div className="flex flex-col gap-3 pt-4 border-t border-white/5 bg-black/20 p-4 rounded-2xl mb-4">
               <div className="flex items-center justify-between mb-1">
-                 <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20 italic">Sovereign Identity</span>
+                 <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20 italic">{isSpanish ? 'Identidad Soberana' : 'Sovereign Identity'}</span>
                  <div className="flex items-center gap-1 scale-90">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                    <span className="text-[6px] font-black text-[#00f0ff] uppercase tracking-widest">Linked Node</span>
+                    <span className="text-[6px] font-black text-[#00f0ff] uppercase tracking-widest">{isSpanish ? 'Nodo Vinculado' : 'Linked Node'}</span>
                  </div>
               </div>
               <div className="flex items-center justify-between">
@@ -480,7 +480,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                     className="text-white/20 hover:text-[#00f0ff] cursor-pointer transition-colors" 
                     onClick={() => {
                         navigator.clipboard.writeText(profile?.id || '');
-                        alert('Identity Node Copied.');
+                        alert(isSpanish ? 'Nodo de Identidad Copiado.' : 'Identity Node Copied.');
                     }}
                  />
               </div>
@@ -494,7 +494,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center">
                    <Zap size={10} className="text-black" />
                  </div>
-                <span className="text-[8px] font-black uppercase tracking-widest italic font-syncopate">TOP UP</span>
+                <span className="text-[8px] font-black uppercase tracking-widest italic font-syncopate">{isSpanish ? 'RECARGAR' : 'TOP UP'}</span>
              </button>
           </div>
 
@@ -502,18 +502,18 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
              <button 
                 onClick={() => {
                    navigator.clipboard.writeText('https://gasp.fun');
-                   alert('Sovereign Link Copied to Clipboard.');
+                   alert(isSpanish ? 'Enlace Soberano Copiado.' : 'Sovereign Link Copied to Clipboard.');
                 }}
                 className="w-full flex items-center justify-center gap-2 py-2 text-[8px] font-black uppercase text-white/40 hover:text-[#00f0ff] transition-colors tracking-widest italic"
              >
                 <Share size={10} />
-                <span>Copy Invite Link</span>
+                <span>{isSpanish ? 'Copiar Enlace de Invitación' : 'Copy Invite Link'}</span>
              </button>
              
              <div className="flex items-center justify-center gap-4 text-[7px] font-black uppercase text-white/20 tracking-[0.2em]">
-                <Link href="/how-to" className="hover:text-white transition-colors">How-To</Link>
-                <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-                <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+                <Link href="/how-to" className="hover:text-white transition-colors">{isSpanish ? 'Cómo' : 'How-To'}</Link>
+                <Link href="/terms" className="hover:text-white transition-colors">{isSpanish ? 'Términos' : 'Terms'}</Link>
+                <Link href="/privacy" className="hover:text-white transition-colors">{isSpanish ? 'Privacidad' : 'Privacy'}</Link>
              </div>
              
              <span className="text-[8px] text-white/10 uppercase font-black italic text-center">Version 1.8 // Sovereign Terminal</span>

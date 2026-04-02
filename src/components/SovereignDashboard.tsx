@@ -13,6 +13,9 @@ export default function SovereignDashboard() {
     const [loading, setLoading] = useState(true);
     const [modelAmount, setModelAmount] = useState('500');
 
+    // 🌍 GLOBAL LOCALE STATE
+    const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
+
     // 📡 FETCH LIVE RANKINGS
     useEffect(() => {
         const fetchLeaderboard = async () => {
@@ -41,14 +44,20 @@ export default function SovereignDashboard() {
                     <div className="flex items-center justify-between border-b border-white/10 pb-6 relative z-10">
                         <div className="flex items-center gap-4">
                             <Users size={24} className="text-[#00f0ff]" />
-                            <h2 className="text-2xl font-syncopate font-black italic tracking-tighter italic uppercase text-white/80 underline decoration-[#00f0ff]">Hall of Sovereigns</h2>
+                            <h2 className="text-2xl font-syncopate font-black italic tracking-tighter italic uppercase text-white/80 underline decoration-[#00f0ff]">
+                                {isSpanish ? 'Salón de Soberanos' : 'Hall of Sovereigns'}
+                            </h2>
                         </div>
-                        <span className="text-[8px] font-black uppercase text-white/20 tracking-widest italic animate-pulse">Live Ranking Active 🛰️</span>
+                        <span className="text-[8px] font-black uppercase text-white/20 tracking-widest italic animate-pulse">
+                            {isSpanish ? 'Clasificación en Vivo Activa 🛰️' : 'Live Ranking Active 🛰️'}
+                        </span>
                     </div>
 
                     <div className="space-y-4 relative z-10">
                         {loading ? (
-                            <div className="h-64 flex items-center justify-center text-[10px] uppercase font-black text-white/20 animate-pulse italic tracking-[0.4em]">Synchronizing Network Power...</div>
+                            <div className="h-64 flex items-center justify-center text-[10px] uppercase font-black text-white/20 animate-pulse italic tracking-[0.4em]">
+                                {isSpanish ? 'Sincronizando Poder de Red...' : 'Synchronizing Network Power...'}
+                            </div>
                         ) : (
                             leaderboard.map((op, idx) => (
                                 <motion.div 
@@ -60,18 +69,24 @@ export default function SovereignDashboard() {
                                         <div className="w-8 h-8 rounded-xl bg-black border border-white/10 flex items-center justify-center text-[10px] font-syncopate font-black italic text-[#00f0ff]">#{idx + 1}</div>
                                         <div className="space-y-0.5">
                                             <p className="text-xs font-black uppercase tracking-widest text-white/60 group-hover:text-white transition-colors">OP_{op.identifier}</p>
-                                            <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] italic">Network Power: {op.power.toLocaleString()} PTS</p>
+                                            <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] italic">
+                                                {isSpanish ? 'Poder de Red' : 'Network Power'}: {op.power.toLocaleString()} PTS
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-[10px] font-black text-[#ffea00] font-syncopate italic tracking-tighter uppercase leading-none">{op.burnContribution.toLocaleString()}</p>
-                                        <p className="text-[6px] font-black text-white/20 uppercase tracking-[0.2em] mt-1 italic">Credits Contributed</p>
+                                        <p className="text-[6px] font-black text-white/20 uppercase tracking-[0.2em] mt-1 italic">
+                                            {isSpanish ? 'Créditos Contribuidos' : 'Credits Contributed'}
+                                        </p>
                                     </div>
                                 </motion.div>
                             ))
                         )}
                         {(!loading && leaderboard.length === 0) && (
-                            <div className="p-12 text-center text-[10px] font-black uppercase tracking-widest text-white/10 italic">Awaiting First Sovereign Handshake...</div>
+                            <div className="p-12 text-center text-[10px] font-black uppercase tracking-widest text-white/10 italic">
+                                {isSpanish ? 'Esperando Primer Apretón de Manos Soberano...' : 'Awaiting First Sovereign Handshake...'}
+                            </div>
                         )}
                     </div>
                 </div>
@@ -81,16 +96,20 @@ export default function SovereignDashboard() {
                     <div className="space-y-4 relative z-10">
                         <div className="flex items-center gap-4">
                              <TrendingUp size={24} className="text-[#ffea00]" />
-                             <h2 className="text-2xl font-syncopate font-black italic tracking-tighter italic uppercase text-white/80 underline decoration-[#ffea00]">Allocation Modeler</h2>
+                             <h2 className="text-2xl font-syncopate font-black italic tracking-tighter italic uppercase text-white/80 underline decoration-[#ffea00]">
+                                {isSpanish ? 'Modelador de Asignación' : 'Allocation Modeler'}
+                             </h2>
                         </div>
-                        <p className="text-white/20 text-[10px] font-black uppercase leading-relaxed italic tracking-widest">Model your syndicate weight before capital entry. verified 1:1 match logic active.</p>
+                        <p className="text-white/20 text-[10px] font-black uppercase leading-relaxed italic tracking-widest">
+                            {isSpanish ? 'Modele su peso en el sindicato antes de entrar. Lógica de paridad verificada activa.' : 'Model your syndicate weight before capital entry. verified 1:1 match logic active.'}
+                        </p>
                     </div>
 
                     <div className="space-y-12 relative z-10">
                         <div className="space-y-4">
                             <label className="text-[10px] font-black uppercase text-white/40 tracking-widest italic flex items-center justify-between">
-                                Target Allocation ($USD)
-                                <span className="text-[#ffea00] italic">Sovereign Pack</span>
+                                {isSpanish ? 'Asignación Objetivo' : 'Target Allocation'} ($USD)
+                                <span className="text-[#ffea00] italic">{isSpanish ? 'Paquete Soberano' : 'Sovereign Pack'}</span>
                             </label>
                             <input 
                                 type="number" 
@@ -102,23 +121,25 @@ export default function SovereignDashboard() {
 
                         <div className="grid grid-cols-2 gap-8">
                             <div className="space-y-2 p-6 bg-white/5 rounded-3xl border border-white/5">
-                                <p className="text-[8px] font-black uppercase text-white/40 tracking-widest">Utility Credits</p>
+                                <p className="text-[8px] font-black uppercase text-white/40 tracking-widest">{isSpanish ? 'Créditos de Utilidad' : 'Utility Credits'}</p>
                                 <h4 className="text-2xl font-syncopate font-black italic tracking-tighter text-white">{(parseInt(modelAmount, 10) * 100 || 0).toLocaleString()} <span className="text-[8px] text-white/20 not-italic uppercase">CR</span></h4>
                             </div>
                             <div className="space-y-2 p-6 bg-white/5 rounded-3xl border border-white/5">
-                                <p className="text-[8px] font-black uppercase text-white/40 tracking-widest text-[#00f0ff]">GASP Points (Equity)</p>
+                                <p className="text-[8px] font-black uppercase text-white/40 tracking-widest text-[#00f0ff]">{isSpanish ? 'Puntos GASP (Capital)' : 'GASP Points (Equity)'}</p>
                                 <h4 className="text-2xl font-syncopate font-black italic tracking-tighter text-[#00f0ff]">{(parseInt(modelAmount, 10) * 100 || 0).toLocaleString()} <span className="text-[8px] text-white/20 not-italic uppercase">PTS</span></h4>
                             </div>
                         </div>
 
                         <button 
                            onClick={() => {
-                              if ((window as any).onSetActiveTab) (window as any).onSetActiveTab('weather');
-                              else window.location.href = '/?tab=weather';
+                               if ((window as any).onSetActiveTab) (window as any).onSetActiveTab('weather');
+                               else window.location.href = '/?tab=weather';
                            }}
                            className="w-full flex items-center justify-between p-8 bg-white text-black rounded-[2.5rem] hover:scale-105 active:scale-95 transition-all shadow-2xl group"
                         >
-                            <span className="text-xs font-black uppercase tracking-[0.2em]">Secure This Allocation ►</span>
+                            <span className="text-xs font-black uppercase tracking-[0.2em]">
+                                {isSpanish ? 'Asegurar Esta Asignación ►' : 'Secure This Allocation ►'}
+                            </span>
                             <Zap size={24} className="group-hover:rotate-12 transition-transform" />
                         </button>
                     </div>

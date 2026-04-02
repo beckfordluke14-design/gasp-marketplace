@@ -52,6 +52,8 @@ function GlobalFeedItem({
   const itemRef = useRef<HTMLDivElement>(null);
   const lastTapRef = useRef<number>(0);
 
+  // 🌍 GLOBAL LOCALE STATE
+  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
   const displayName = getProfileName(profile);
 
   const handleSave = () => {
@@ -147,7 +149,9 @@ function GlobalFeedItem({
                 {broadcast.is_locked ? (
                    <div className="relative z-20 w-full h-full flex flex-col items-center justify-center p-8 bg-black/40 backdrop-blur-3xl">
                        <Lock size={40} className="text-[#ffea00] mb-8 animate-pulse" />
-                       <button onClick={(e) => { e.stopPropagation(); onSelectProfile(profile.id); }} className="px-8 py-4 bg-[#ffea00] text-black rounded-2xl text-[10px] font-black uppercase tracking-widest">Unlock {broadcast.lock_price || COST_PREMIUM_VAULT_UNLOCK} BP</button>
+                       <button onClick={(e) => { e.stopPropagation(); onSelectProfile(profile.id); }} className="px-8 py-4 bg-[#ffea00] text-black rounded-2xl text-[10px] font-black uppercase tracking-widest">
+                          {isSpanish ? 'Desbloquear' : 'Unlock'} {broadcast.lock_price || COST_PREMIUM_VAULT_UNLOCK} BP
+                       </button>
                    </div>
                 ) : (
                     <video src={proxyImg(postUrl)} autoPlay loop muted playsInline className="relative z-10 w-full h-full object-cover md:object-contain" />
@@ -160,7 +164,9 @@ function GlobalFeedItem({
                 {broadcast.is_locked ? (
                    <div className="relative z-20 w-full h-full flex flex-col items-center justify-center p-8 bg-black/40 backdrop-blur-3xl">
                        <Lock size={40} className="text-[#ff00ff] mb-8 animate-pulse" />
-                       <button onClick={(e) => { e.stopPropagation(); onSelectProfile(profile.id); }} className="px-8 py-4 bg-[#ff00ff] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest">Unlock {broadcast.lock_price || COST_VAULT_UNLOCK} BP</button>
+                       <button onClick={(e) => { e.stopPropagation(); onSelectProfile(profile.id); }} className="px-8 py-4 bg-[#ff00ff] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest">
+                          {isSpanish ? 'Desbloquear' : 'Unlock'} {broadcast.lock_price || COST_VAULT_UNLOCK} BP
+                       </button>
                    </div>
                 ) : (
                     <img src={proxyImg(postUrl || profile.image)} alt="" className="relative z-10 w-full h-full object-cover md:object-contain" />
@@ -169,19 +175,27 @@ function GlobalFeedItem({
           ) : (
              <div className="relative z-10 w-full h-full flex items-center justify-center p-6 md:p-12">
                 <div className="max-w-xl w-full p-8 md:p-10 rounded-[2.5rem] bg-black/60 border border-white/5 backdrop-blur-3xl relative overflow-hidden shadow-2xl">
-                   <div className="absolute top-0 left-6 px-4 py-1 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-b-lg">Trending // High-Heat</div>
+                   <div className="absolute top-0 left-6 px-4 py-1 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-b-lg">
+                      {isSpanish ? 'Tendencia // Alta-Calor' : 'Trending // High-Heat'}
+                   </div>
                    <div className="space-y-6 pt-4">
                       <div className="flex items-center gap-3" onClick={() => onSelectProfile(profile.id)}>
                          <img src={proxyImg(profile.image)} className="w-12 h-12 rounded-full border border-[#00f0ff]/40" alt="" />
                          <div className="flex flex-col">
                             <span className="text-sm font-black text-white uppercase italic">{profile.name}</span>
-                            <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">Verified Account</span>
+                            <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">
+                               {isSpanish ? 'Cuenta Verificada' : 'Verified Account'}
+                            </span>
                          </div>
                       </div>
                       <p className="text-xs md:text-sm font-bold text-white uppercase tracking-tight leading-relaxed font-mono whitespace-pre-wrap">{postText}</p>
                       <div className="flex items-center justify-between pt-4 border-t border-white/5 opacity-50">
-                         <span className="text-[6px] font-black text-white/40 uppercase tracking-widest">Verified // Member Access Only</span>
-                         <span className="text-[6px] font-black text-[#ffea00] uppercase tracking-widest italic">Found on GASP.FUN</span>
+                         <span className="text-[6px] font-black text-white/40 uppercase tracking-widest">
+                            {isSpanish ? 'Verificado // Solo Miembros' : 'Verified // Member Access Only'}
+                         </span>
+                         <span className="text-[6px] font-black text-[#ffea00] uppercase tracking-widest italic">
+                            {isSpanish ? 'Encontrado en GASP.FUN' : 'Found on GASP.FUN'}
+                         </span>
                       </div>
                    </div>
                 </div>
@@ -189,62 +203,52 @@ function GlobalFeedItem({
           )}
        </div>
 
-       {/* ADMIN CONTROLS */}
-       {(onDeletePost || onToggleFeatured || onUpdatePost || onEditBrain) && (
-          <div className="absolute top-20 right-0 z-50 flex flex-col gap-2">
-             {onDeletePost && <button onClick={(e) => { e.stopPropagation(); onDeletePost(broadcast.id); }} className="p-4 bg-black/60 hover:bg-red-500 rounded-l-2xl text-white/40 hover:text-white transition-all"><Trash2 size={20} /></button>}
-             {onToggleFeatured && <button onClick={(e) => { e.stopPropagation(); onToggleFeatured(broadcast.id, !isFeatured); }} className={`p-4 bg-black/60 rounded-l-2xl ${isFeatured ? 'text-[#ffea00]' : 'text-white/20'}`}><Star size={20} fill={isFeatured ? '#ffea00' : 'none'} /></button>}
-          </div>
-       )}
-
        {/* INTERACTION OVERLAY (HIDDEN FOR TEXT OR WEATHER LOGS) */}
        {postType !== 'text' && (
           <div className="relative z-10 w-full h-full flex flex-col justify-end p-8 md:p-16 pb-32 pointer-events-none">
               <div className="space-y-6 pointer-events-auto">
-                 <div className="flex items-center gap-4">
-                    <div className="flex flex-col gap-1">
-                       <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">{displayName}</h2>
-                    </div>
-                    {showChatBubble && (
-                       <button onClick={(e) => { e.stopPropagation(); onSelectProfile(profile.id); }} className="px-4 py-2 bg-[#00f0ff] text-black text-[8px] font-black uppercase rounded-full animate-bounce underline-offset-4 decoration-black">chat w/ {displayName}?</button>
-                    )}
-                 </div>
-                 <div className="flex items-center gap-4">
-                    {/* 🏮 LIKE: The Signal */}
-                    <button 
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        handleLike(); 
-                      }} 
-                      className={`w-16 h-16 rounded-2xl border flex flex-col items-center justify-center backdrop-blur-md transition-all active:scale-90 ${hasLiked ? 'bg-red-500/10 border-red-500/40 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'bg-black/20 border-white/10 text-white/40 hover:border-red-500/50 hover:text-white'}`}
-                    >
-                       <Heart size={22} fill={hasLiked ? 'currentColor' : 'none'} />
-                       <span className="text-[7px] font-black uppercase tracking-widest mt-1">Like</span>
-                    </button>
+                  <div className="flex items-center gap-4">
+                     <div className="flex flex-col gap-1">
+                        <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">{displayName}</h2>
+                     </div>
+                     {showChatBubble && (
+                        <button onClick={(e) => { e.stopPropagation(); onSelectProfile(profile.id); }} className="px-4 py-2 bg-[#00f0ff] text-black text-[8px] font-black uppercase rounded-full animate-bounce underline-offset-4 decoration-black">{isSpanish ? `¿chatear con ${displayName}?` : `chat w/ ${displayName}?`}</button>
+                     )}
+                  </div>
+                  <div className="flex items-center gap-4">
+                     {/* 🏮 LIKE */}
+                     <button 
+                       onClick={(e) => { 
+                         e.stopPropagation(); 
+                         handleLike(); 
+                       }} 
+                       className={`w-16 h-16 rounded-2xl border flex flex-col items-center justify-center backdrop-blur-md transition-all active:scale-90 ${hasLiked ? 'bg-red-500/10 border-red-500/40 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'bg-black/20 border-white/10 text-white/40 hover:border-red-500/50 hover:text-white'}`}
+                     >
+                        <Heart size={22} fill={hasLiked ? 'currentColor' : 'none'} />
+                        <span className="text-[7px] font-black uppercase tracking-widest mt-1">{isSpanish ? 'Me Gusta' : 'Like'}</span>
+                     </button>
 
-                    {/* 🛰️ FAVORITE: The Shadow Syndicate Signal */}
-                    <button 
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        const newState = !isFollowing;
-                        setIsFollowing(newState);
-                        // 🛰️ SIGNAL PULSE: Force Sidebar & Bubbles to re-sync live
-                        window.dispatchEvent(new CustomEvent('gasp_sync_follows', { 
-                          detail: { personaId: profile.id, isFollowing: newState } 
-                        }));
-                        
-                        // Persist to DB
-                        fetch('/api/rpc/db', {
-                          method: 'POST',
-                          body: JSON.stringify({ action: 'toggle-follow', payload: { personaId: profile.id, userId: localStorage.getItem('gasp_guest_id') } })
-                        });
-                      }} 
-                      className={`h-16 px-6 rounded-2xl border flex items-center justify-center gap-3 backdrop-blur-md transition-all active:scale-90 ${isFollowing ? 'bg-[#ffea00] text-black border-[#ffea00] shadow-[0_0_30px_#ffea00]/30' : 'bg-black/20 border-white/10 text-white/40 hover:border-[#ffea00]/50 hover:text-white'}`}
-                    >
-                       <Star size={20} fill={isFollowing ? 'currentColor' : 'none'} />
-                       <span className="text-[9px] font-black uppercase tracking-widest leading-none">{isFollowing ? 'Favorited' : 'Favorite'}</span>
-                    </button>
-                 </div>
+                     {/* 🛰️ FAVORITE */}
+                     <button 
+                       onClick={(e) => { 
+                         e.stopPropagation(); 
+                         const newState = !isFollowing;
+                         setIsFollowing(newState);
+                         window.dispatchEvent(new CustomEvent('gasp_sync_follows', { 
+                           detail: { personaId: profile.id, isFollowing: newState } 
+                         }));
+                         
+                         fetch('/api/rpc/db', {
+                           method: 'POST',
+                           body: JSON.stringify({ action: 'toggle-follow', payload: { personaId: profile.id, userId: localStorage.getItem('gasp_guest_id') } })
+                         });
+                       }} 
+                       className={`h-16 px-6 rounded-2xl border flex items-center justify-center gap-3 backdrop-blur-md transition-all active:scale-90 ${isFollowing ? 'bg-[#ffea00] text-black border-[#ffea00] shadow-[0_0_30px_#ffea00]/30' : 'bg-black/20 border-white/10 text-white/40 hover:border-[#ffea00]/50 hover:text-white'}`}
+                     >
+                        <Star size={20} fill={isFollowing ? 'currentColor' : 'none'} />
+                        <span className="text-[9px] font-black uppercase tracking-widest leading-none">{isFollowing ? (isSpanish ? 'Favorito' : 'Favorited') : (isSpanish ? 'Favorito' : 'Favorite')}</span>
+                     </button>
+                  </div>
               </div>
           </div>
        )}
@@ -255,6 +259,7 @@ function GlobalFeedItem({
 export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFeedProps) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
 
   useEffect(() => {
     async function load() {
@@ -295,7 +300,9 @@ export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFee
   if (loading) return (
      <div className="w-full h-full flex flex-col items-center justify-center bg-black gap-6">
         <Zap size={48} className="text-[#ffea00] animate-spin" />
-        <span className="text-[10px] font-black text-white/20 uppercase tracking-[.5em] animate-pulse">Loading Syndicate Feed...</span>
+        <span className="text-[10px] font-black text-white/20 uppercase tracking-[.5em] animate-pulse">
+           {isSpanish ? 'Cargando Feed del Sindicato...' : 'Loading Syndicate Feed...'}
+        </span>
      </div>
   );
 

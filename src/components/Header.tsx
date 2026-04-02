@@ -17,12 +17,16 @@ interface HeaderProps {
 /**
  * 🛰️ SIAT: SYNTHETIC INFLUENCER ARCHIVE TERMINAL (V12)
  * High-Status premium branding with integrated Ticker.
+ * MULTI-LOCALE GLOBAL SYNC (EN/ES)
  */
 export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { user, profile } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // 🌍 GLOBAL LOCALE STATE
+  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
 
   useEffect(() => {
     const handleBalanceRefresh = () => {
@@ -38,11 +42,11 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
   }, []);
   
   const navItems = [
-    { label: 'Feed', active: true, href: '/' },
+    { label: isSpanish ? 'Feed' : 'Feed', active: true, href: '/' },
     ...(isAdmin ? [{ label: 'Admin', active: false, href: '/admin' }] : []),
-    { label: 'How-To', active: false, href: '/how-to' },
-    { label: 'Archive', active: false, href: '/vault' },
-    { label: 'About', active: false, href: '/' },
+    { label: isSpanish ? 'Cómo' : 'How-To', active: false, href: '/how-to' },
+    { label: isSpanish ? 'Archivo' : 'Archive', active: false, href: '/vault' },
+    { label: isSpanish ? 'Acerca' : 'About', active: false, href: '/' },
   ];
 
   if (!mounted) return null;
@@ -50,11 +54,13 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] flex flex-col pointer-events-none">
         
-        {/* 🧬 GASP FEED: LATEST ACTIVITY */}
+        {/* 🧬 GASP FEED: LATEST ACTIVITY TICKER */}
         <div className="h-6 md:h-7 bg-[#ff00ff]/10 border-b border-white/5 flex items-center overflow-hidden whitespace-nowrap pointer-events-auto shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
             <div className="px-4 h-full bg-[#ff00ff] flex items-center gap-2 shrink-0 z-10 shadow-[5px_0_15px_#ff00ff]">
                 <Database size={10} className="text-white animate-pulse" />
-                <span className="text-[7px] md:text-[8px] font-black uppercase text-white tracking-widest italic">GASP FEED</span>
+                <span className="text-[7px] md:text-[8px] font-black uppercase text-white tracking-widest italic">
+                  {isSpanish ? 'GASP FEED' : 'GASP FEED'}
+                </span>
             </div>
             
             <motion.div 
@@ -63,11 +69,11 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
                className="flex items-center gap-20 pl-6"
             >
                 {[
-                  "🌪️ NEW ARCHIVE ADDED TO THE VAULT // ELENA (MIAMI)",
-                  "💎 NEW PROFILE ONLINE // VALENTINA LIMA",
-                  "⚡️ NEW FEED DROP // CARA (MADRID)",
-                  "🔥 TRENDING NOW // CHECK THE LATEST ARCHIVE",
-                  "🌪️ NEW ARCHIVE ADDED TO THE VAULT // ELENA (MIAMI)",
+                  isSpanish ? "🌪️ NUEVO ARCHIVO AÑADIDO A LA BÓVEDA // ELENA (MIAMI)" : "🌪️ NEW ARCHIVE ADDED TO THE VAULT // ELENA (MIAMI)",
+                  isSpanish ? "💎 NUEVO PERFIL EN LÍNEA // VALENTINA LIMA" : "💎 NEW PROFILE ONLINE // VALENTINA LIMA",
+                  isSpanish ? "⚡️ NUEVO FEED DROP // CARA (MADRID)" : "⚡️ NEW FEED DROP // CARA (MADRID)",
+                  isSpanish ? "🔥 TENDENCIA AHORA // REVISA EL ÚLTIMO ARCHIVO" : "🔥 TRENDING NOW // CHECK THE LATEST ARCHIVE",
+                  isSpanish ? "🌪️ NUEVO ARCHIVO AÑADIDO A LA BÓVEDA // ELENA (MIAMI)" : "🌪️ NEW ARCHIVE ADDED TO THE VAULT // ELENA (MIAMI)",
                 ].map((news, i) => (
                   <div key={i} className="flex items-center gap-4 text-white/40 text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] italic">
                      <div className="w-1 h-1 rounded-full bg-[#ff00ff] animate-pulse" />
@@ -92,9 +98,13 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
                 <div className="flex flex-col gap-0.5 cursor-pointer group" onClick={() => router.push('/')}>
                   <div className="flex items-baseline gap-1.5">
                     <h1 className="text-xl md:text-2xl font-syncopate font-black italic tracking-tighter text-white uppercase leading-none group-hover:text-[#ff00ff] transition-colors">GASP</h1>
-                    <span className="text-[8px] font-black uppercase text-[#ff00ff] tracking-widest italic animate-pulse">Archive</span>
+                    <span className="text-[8px] font-black uppercase text-[#ff00ff] tracking-widest italic animate-pulse">
+                      {isSpanish ? 'Archivo' : 'Archive'}
+                    </span>
                   </div>
-                  <span className="hidden md:block text-[6px] font-black uppercase text-white/20 tracking-[0.4em] group-hover:text-white/40 transition-colors italic">Synthetic Influencer Archive Terminal</span>
+                  <span className="hidden md:block text-[6px] font-black uppercase text-white/20 tracking-[0.4em] group-hover:text-white/40 transition-colors italic">
+                    {isSpanish ? 'Terminal de Archivo de Influencers Sintéticos' : 'Synthetic Influencer Archive Terminal'}
+                  </span>
                 </div>
 
                 {/* Main Nav Items */}
@@ -131,7 +141,9 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
                                 <span className="text-[10px] md:text-[11px] font-black text-white leading-none italic">
                                    {(profile?.credit_balance || 0).toLocaleString()}
                                 </span>
-                                <span className="text-[6px] font-black text-white/40 uppercase tracking-[0.2em] leading-tight">CREDITS</span>
+                                <span className="text-[6px] font-black text-white/40 uppercase tracking-[0.2em] leading-tight">
+                                  {isSpanish ? 'CRÉDITOS' : 'CREDITS'}
+                                </span>
                             </div>
                         </div>
                         <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#ff6b00] flex items-center justify-center text-black shadow-lg group-hover:scale-110 active:scale-95 transition-all">
@@ -156,7 +168,7 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
                            <User size={12} className="text-[#00f0ff]" />
                         </div>
                         <span className="hidden md:block text-[8px] font-black uppercase tracking-[0.1em] text-white/40 group-hover:text-white transition-colors truncate max-w-[80px]">
-                           {profile?.nickname || 'Account'}
+                           {profile?.nickname || (isSpanish ? 'Cuenta' : 'Account')}
                         </span>
                     </div>
                    </>
@@ -165,7 +177,7 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
                     onClick={() => router.push('/login')}
                     className="px-5 py-2 md:py-2.5 rounded-full bg-white text-black text-[9px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)]"
                    >
-                     Sign In
+                     {isSpanish ? 'ENTRAR' : 'SIGN IN'}
                    </button>
                 )}
             </div>
