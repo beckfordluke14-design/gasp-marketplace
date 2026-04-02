@@ -51,7 +51,23 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     useEffect(() => {
         if (typeof window !== 'undefined') {
             setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
-            if (!userId) setUserId(localStorage.getItem('gasp_guest_id') || 'anon');
+            const guestId = localStorage.getItem('gasp_guest_id') || 'anon';
+            if (!userId) setUserId(guestId);
+
+            // 🛡️ RESUME: Check server for any pending P2P session for this user
+            const resolvedId = propUserId || guestId;
+            if (resolvedId) {
+                fetch(`/api/economy/solana/session?userId=${resolvedId}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.session) {
+                            setUniqueRef(data.session.reference);
+                            setView('p2p');
+                            startPolling(data.session.reference);
+                        }
+                    })
+                    .catch(() => {});
+            }
         }
     }, [userId]);
 
@@ -126,17 +142,34 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                     clearInterval(pollingRef.current!);
                     setIsPolling(false);
                     setView('success');
+                    // 🧹 CLEAR: Payment confirmed, remove pending state
+                    localStorage.removeItem('gasp_p2p_ref');
+                    localStorage.removeItem('gasp_p2p_amount');
                     window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
                 }
             } catch (e) { console.error('Poll Error:', e); }
         }, 3000);
     }, [userId, targetUsd, propUserId]);
 
-    const handleSwitchToP2P = () => {
-        const ref = Keypair.generate().publicKey.toBase58();
-        setUniqueRef(ref);
-        setView('p2p');
-        startPolling(ref);
+    const handleSwitchToP2P = async () => {
+        try {
+            // 🛡️ SERVER-SIDE reference generation — userId + amount locked server-side
+            const resolvedId = userId || propUserId || 'anon';
+            const res = await fetch('/api/economy/solana/session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: resolvedId, amountUsd: targetUsd }),
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error);
+
+            setUniqueRef(data.reference);
+            setView('p2p');
+            startPolling(data.reference);
+        } catch (err) {
+            console.error('[P2P] Session creation failed:', err);
+            alert('P2P session unavailable. Try again.');
+        }
     };
 
     const handleWalletTransfer = async () => {

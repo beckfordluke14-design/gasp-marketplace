@@ -79,7 +79,7 @@ export async function POST(req: Request) {
     const result = await issueCredits({
       userId,
       actualAmountUsd: actualAmountUsdc,
-      provider: 'helio', // Using Helio as the P2P indicator for dashboard
+      provider: 'helio',
       txId: signature,
       meta: {
         signature,
@@ -89,6 +89,13 @@ export async function POST(req: Request) {
         asset: 'USDC'
       }
     });
+
+    // 🔒 CLOSE THE LOOP: Mark the server-side session as complete
+    await db.query(`
+      UPDATE p2p_sessions 
+      SET status = 'complete', claimed_at = NOW()
+      WHERE user_id = $1 AND status = 'pending'
+    `, [userId]);
 
     return NextResponse.json({
       success: true,
