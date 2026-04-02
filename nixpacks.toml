@@ -1,11 +1,7 @@
-# 🔱 SOVEREIGN RESILIENT BUILD PROTOCOL: NIXPACKS v16.0
-# Strategy: 100% SUCCESS RATE OVER VELOCITY
-
-[phases.setup]
+﻿[phases.setup]
 nixPkgs = ["nodejs_22", "ffmpeg"]
 
 [phases.install]
-# Resilient install: updates lockfile on-the-fly if needed
 cmds = ["npm install --prefer-offline"]
 
 [phases.build]
@@ -18,4 +14,4 @@ cmds = [
 ]
 
 [start]
-cmd = "HOSTNAME=0.0.0.0 PORT=$PORT node .next/standalone/server.js"
+cmd = "PORT=$PORT node .next/standalone/server.js"
