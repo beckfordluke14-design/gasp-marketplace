@@ -348,14 +348,24 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                     <h3 className="text-xl font-syncopate font-black uppercase italic text-white tracking-tighter leading-none">{isPolling ? (isSpanish ? 'ESPERANDO PAGO...' : 'WAITING FOR SYNC...') : (isSpanish ? 'LIQUIDACIÓN P2P' : 'P2P SETTLEMENT')}</h3>
                                     
                                     {/* 📟 SETTLEMENT DISPLAY (REAL-TIME RATE) */}
-                                    <div className="flex flex-col items-center gap-1">
-                                        <div className="flex items-center gap-2 px-4 py-2 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-full">
-                                            <div className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-pulse shadow-[0_0_8px_#00f0ff]" />
-                                            <span className="text-[10px] font-black text-white italic tracking-tighter">
-                                                {p2pAsset === 'SOL' ? `${targetSol} SOL` : `$${parseFloat(targetUsd.toString()).toFixed(2)} USDC`}
-                                            </span>
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="flex flex-col items-center gap-1.5 px-6 py-4 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-[1.5rem] shadow-[0_0_40px_rgba(0,240,255,0.1)]">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <div className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-pulse shadow-[0_0_8px_#00f0ff]" />
+                                                <span className="text-[12px] font-syncopate font-black text-white italic tracking-tighter">
+                                                    {p2pAsset === 'SOL' ? `${targetSol} SOL` : `${parseFloat(targetUsd.toString()).toFixed(2)} USDC`}
+                                                </span>
+                                            </div>
+                                            <div className="h-px w-full bg-white/10" />
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-[7.5px] font-black text-[#00f0ff] uppercase tracking-[0.2em] italic">
+                                                    {isSpanish ? 'TASA DE CONVERSIÓN ACTUAL' : 'CURRENT CONVERSION RATE'}
+                                                </span>
+                                                <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1">
+                                                    {p2pAsset === 'SOL' ? `1 SOL = $${solPrice.toFixed(2)}` : '1 USDC = $1.00'}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <p className="text-[8px] text-white/20 font-black uppercase tracking-widest">{isSpanish ? 'TASA DE RED EN TIEMPO REAL' : 'REAL-TIME NETWORK RATE'}</p>
                                     </div>
                                     
                                     <p className="text-[9px] text-white/40 leading-relaxed max-w-[280px] mx-auto font-black uppercase tracking-widest italic">{isPolling ? (isSpanish ? 'ESCANEANDO BLOQUES DE SOLANA...' : 'SCANNING SOLANA BLOCKS...') : `Enviar ${p2pAsset === 'SOL' ? targetSol : targetUsd} ${p2pAsset} a la Bóveda.`}</p>
