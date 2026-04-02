@@ -103,7 +103,9 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
 
     const selectedPkg = packages.find(p => p.id === selectedPkgId) || packages[0];
     const targetUsd = isCustom ? parseFloat(customAmount) : selectedPkg.price;
-    const targetSol = solPrice > 0 ? (targetUsd / solPrice).toFixed(4) : '0.0000';
+    // 🛡️ FALLBACK: If price fails, use a safe default ($180) to avoid showing 0
+    const resolvedSolPrice = solPrice > 0 ? solPrice : 180;
+    const targetSol = (targetUsd / resolvedSolPrice).toFixed(6);
 
     const handleStripeCheckout = async () => {
         setIsLoading(true);
@@ -217,8 +219,8 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     if (!isOpen) return null;
 
     const solanaPayUrl = p2pAsset === 'USDC' 
-        ? `solana:${vaultAddress}?amount=${targetUsd}&spl-token=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&reference=${uniqueRef}&label=GASP%20Archive`
-        : `solana:${vaultAddress}?amount=${targetSol}&reference=${uniqueRef}&label=GASP%20Archive`;
+        ? `solana:${vaultAddress}?amount=${parseFloat(targetUsd.toString()).toFixed(2)}&spl-token=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&reference=${uniqueRef}&label=GASP%20Archive&message=Terminal%20Refill%20Request`
+        : `solana:${vaultAddress}?amount=${targetSol}&reference=${uniqueRef}&label=GASP%20Archive&message=Terminal%20Refill%20Request`;
 
     return (
         <AnimatePresence>
