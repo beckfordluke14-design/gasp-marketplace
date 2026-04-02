@@ -1,7 +1,7 @@
-# 🔱 SOVEREIGN DEPLOYMENT SHIELD: AGGRESSIVE STRIPPING
-# Mission: Kill 100% of Build-Weight. No Time-Outs.
+# 🔱 SOVEREIGN DEPLOYMENT SHIELD: DOCKER-MOUNT REFINEMENT
+# Mission: Resolve "tsconfig.tsbuildinfo is not a directory" error.
 
-# Core Exclusions
+# Node & Next.js cache
 node_modules/
 .next/
 .nx/
@@ -9,8 +9,10 @@ node_modules/
 dist/
 out/
 build/
+*.tsbuildinfo
+next-env.d.ts
 
-# Media Redundancy (Cloud-Ingress ONLY)
+# Media Redundancy
 *.mp4
 *.zip
 *.log
@@ -26,7 +28,7 @@ scripts/*.log
 scripts/*.md
 scripts/build*
 
-# Root Artifact Purge (The Timeout Culprits)
+# Root Artifact Purge
 tsc_errors.txt
 build_error.log
 build_error_utf8.log
