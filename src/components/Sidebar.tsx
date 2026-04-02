@@ -233,10 +233,32 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
   return (
     <aside className="flex w-full lg:w-[260px] h-screen bg-transparent backdrop-blur-xl border-r border-white/5 flex-col shrink-0 overflow-hidden sticky top-0 font-outfit transition-all">
       {/* NAVIGATION BLADE (MOBILE ONLY) */}
-      <div className="flex lg:hidden bg-white/5 backdrop-blur-3xl border-b border-white/5 pt-12">
+      <div className="flex lg:hidden bg-white/5 backdrop-blur-3xl border-b border-white/5 pt-12 items-center px-4">
         <NavButton label="Feed" icon={Home} targetView="feed" />
         <NavButton label="Chats" icon={MessageSquare} targetView="chats" />
         <NavButton label="Vault" icon={ShieldCheck} targetView="vault" />
+        
+        {/* 🌍 MOBILE LOCALE TOGGLE */}
+        <div className="flex items-center gap-1 p-1 bg-black/40 rounded-xl border border-white/10 scale-75 origin-right">
+            <button 
+                onClick={() => {
+                    localStorage.setItem('gasp_locale', 'en');
+                    window.location.reload();
+                }}
+                className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${localStorage.getItem('gasp_locale') === 'es' ? 'text-white/20' : 'bg-[#00f0ff] text-black'}`}
+            >
+                EN
+            </button>
+            <button 
+                onClick={() => {
+                    localStorage.setItem('gasp_locale', 'es');
+                    window.location.reload();
+                }}
+                className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${localStorage.getItem('gasp_locale') === 'es' ? 'bg-[#ff00ff] text-white' : 'text-white/20'}`}
+            >
+                ES
+            </button>
+        </div>
       </div>
 
       <div className="hidden lg:block h-20 shrink-0" />
@@ -245,6 +267,35 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
         {/* VIEW: CHATS */}
         {view === 'chats' && (
           <>
+            {/* 🌍 GLOBAL LOCALE TOGGLE */}
+            <div className="px-6 mb-6">
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/10 group hover:border-[#00f0ff]/30 transition-all">
+                    <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/30 italic">Locale Protocol</span>
+                    <div className="flex items-center gap-1 p-1 bg-black rounded-xl border border-white/5">
+                        <button 
+                           onClick={() => {
+                               localStorage.setItem('gasp_locale', 'en');
+                               window.dispatchEvent(new CustomEvent('gasp_locale_change', { detail: { locale: 'en' } }));
+                               window.location.reload(); // Force full system sync
+                           }}
+                           className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${localStorage.getItem('gasp_locale') === 'es' ? 'text-white/20 hover:text-white' : 'bg-[#00f0ff] text-black shadow-[0_0_10px_rgba(0,240,255,0.4)]'}`}
+                        >
+                            EN
+                        </button>
+                        <button 
+                           onClick={() => {
+                               localStorage.setItem('gasp_locale', 'es');
+                               window.dispatchEvent(new CustomEvent('gasp_locale_change', { detail: { locale: 'es' } }));
+                               window.location.reload(); // Force full system sync
+                           }}
+                           className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${localStorage.getItem('gasp_locale') === 'es' ? 'bg-[#ff00ff] text-white shadow-[0_0_10px_rgba(255,0,255,0.4)]' : 'text-white/20 hover:text-white'}`}
+                        >
+                            ES
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {/* 🛰️ MARKET PULSE: WeatherX & Polymarket Sentiment Indicator */}
             <MarketPulseTerminal />
 

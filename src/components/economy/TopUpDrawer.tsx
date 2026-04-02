@@ -32,14 +32,16 @@ const CREDIT_PACKAGES = [
 ];
 
 /**
- * 🛰️ SOVEREIGN TOP-UP HUB v8.0 // THE DIRECT SETTLEMENT NODE
- * Strategy: Zero-Friction Handshake for both Pro and Retail users.
+ * 🛰️ SOVEREIGN TOP-UP HUB v8.5 // MULTI-LOCALE GLOBAL NODE
+ * Strategy: Zero-Friction Handshake for both Pro and Retail users (EN/ES Support).
  */
 export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   const vaultAddress = "DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS";
   const [selectedPkgId, setSelectedPkgId] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+
+  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
 
   const handleSelect = (id: string) => {
     setSelectedPkgId(id);
@@ -56,13 +58,17 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                    <div className="w-24 h-24 rounded-full bg-[#ff00ff]/10 flex items-center justify-center mb-8">
                        <CheckCircle2 size={48} className="text-[#ff00ff]" />
                    </div>
-                   <h2 className="text-4xl font-syncopate font-black italic uppercase text-white mb-4">UPLINK SUCCESS</h2>
-                   <p className="text-white/40 text-sm font-outfit uppercase tracking-widest leading-relaxed mb-10">Intelligence Credits have been provisioned to your Archive Vault.</p>
+                   <h2 className="text-4xl font-syncopate font-black italic uppercase text-white mb-4">
+                        {isSpanish ? 'UPLINK EXITOSO' : 'UPLINK SUCCESS'}
+                   </h2>
+                   <p className="text-white/40 text-sm font-outfit uppercase tracking-widest leading-relaxed mb-10">
+                        {isSpanish ? 'Los créditos de inteligencia han sido provicionados en su Bóveda del Archivo.' : 'Intelligence Credits have been provisioned to your Archive Vault.'}
+                   </p>
                    <button 
                     onClick={onClose}
                     className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-xl"
                    >
-                    CLOSE TERMINAL
+                    {isSpanish ? 'CERRAR TERMINAL' : 'CLOSE TERMINAL'}
                    </button>
               </div>
           </motion.div>
@@ -89,10 +95,14 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
         {/* Header */}
         <div className="p-8 flex items-center justify-between border-b border-white/5 bg-black/40">
           <div className="flex flex-col">
-            <h2 className="text-2xl font-syncopate font-black italic uppercase text-white tracking-widest">Archive Bridge</h2>
+            <h2 className="text-2xl font-syncopate font-black italic uppercase text-white tracking-widest">
+                {isSpanish ? 'Puente del Archivo' : 'Archive Bridge'}
+            </h2>
             <div className="flex items-center gap-2 mt-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#ff00ff] animate-pulse" />
-                <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/40 italic">Direct Treasury Settlement Active</p>
+                <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/40 italic">
+                    {isSpanish ? 'Liquidación Directa Activa' : 'Direct Treasury Settlement Active'}
+                </p>
             </div>
           </div>
           <button 
@@ -108,14 +118,19 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
           <AnimatePresence mode="wait">
             {!selectedPkgId ? (
               <motion.div
+                key="package-selection"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-6"
               >
                 <div className="mb-10 text-center md:text-left">
-                  <h3 className="text-sm font-black uppercase text-white/60 tracking-[0.2em] mb-2 font-syncopate italic">Select Intelligence Package</h3>
-                  <p className="text-[10px] text-white/20 uppercase font-bold tracking-widest italic">All settlements processed directly into the Archive Master Vault.</p>
+                  <h3 className="text-sm font-black uppercase text-white/60 tracking-[0.2em] mb-2 font-syncopate italic">
+                    {isSpanish ? 'Seleccione Paquete de Inteligencia' : 'Select Intelligence Package'}
+                  </h3>
+                  <p className="text-[10px] text-white/20 uppercase font-bold tracking-widest italic">
+                    {isSpanish ? 'Todas las liquidaciones se procesan directamente en la Bóveda Maestra del Archivo.' : 'All settlements processed directly into the Archive Master Vault.'}
+                  </p>
                 </div>
 
                 <div className="grid gap-4">
@@ -130,7 +145,9 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                       }`}
                     >
                       {pkg.popular && (
-                        <div className="absolute top-0 right-10 bg-[#ff00ff] text-white text-[7px] font-black uppercase px-4 py-1.5 rounded-b-xl tracking-widest italic animate-pulse">RECOMMENDED</div>
+                        <div className="absolute top-0 right-10 bg-[#ff00ff] text-white text-[7px] font-black uppercase px-4 py-1.5 rounded-b-xl tracking-widest italic animate-pulse">
+                            {isSpanish ? 'RECOMENDADO' : 'RECOMMENDED'}
+                        </div>
                       )}
                       
                       <div className="flex items-center justify-between">
@@ -159,31 +176,39 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
                     onClick={() => handleSelect('custom_250')}
                     className="p-6 rounded-3xl border border-dashed border-white/10 hover:border-[#ff00ff]/30 hover:bg-[#ff00ff]/5 transition-all text-center group"
                   >
-                    <span className="text-[8px] font-black uppercase text-white/20 tracking-widest group-hover:text-[#ff00ff] transition-all italic">Institutional Scale / Custom Deployment</span>
+                    <span className="text-[8px] font-black uppercase text-white/20 tracking-widest group-hover:text-[#ff00ff] transition-all italic">
+                        {isSpanish ? 'Escala Institucional / Despliegue Personalizado' : 'Institutional Scale / Custom Deployment'}
+                    </span>
                   </button>
                 </div>
 
-                {/* 🛡️ STRIPE RETAIL BRIDGE: THE SOLANA-USDC GATEWAY */}
-              <div className="p-6 bg-white/[0.03] border border-white/5 rounded-3xl space-y-4 text-center">
-                  <p className="text-[9px] text-white/20 uppercase font-black tracking-widest italic">Don't have a Solana Wallet?</p>
-                  <button 
-                    onClick={() => window.open(`https://buy.stripe.com/5kA02A56A8F6dDq3ce?wallet_address=${vaultAddress}&lock_wallet_address=true&destination_network=solana&destination_currency=usdc&client_reference_id=${userId}`, '_blank')}
-                    className="w-full h-14 rounded-2xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl flex items-center justify-center gap-2"
-                  >
-                    <CreditCard size={16} /> BUY WITH CARD
-                  </button>
-                  <p className="text-[7px] text-white/30 uppercase font-bold tracking-widest leading-relaxed px-8">
-                    Direct Solana-USDC Settlement to: <br /> <span className="text-[#00f0ff]">{vaultAddress.slice(0, 8)}...{vaultAddress.slice(-8)}</span> 🏛️🛡️
-                  </p>
-              </div>
+                {/* 🛡️ STRIPE RETAIL BRIDGE: THE LOCKED TREASURY GATEWAY */}
+                <div className="p-10 bg-white/[0.02] border border-white/5 rounded-[3.5rem] space-y-6 text-center mt-12 overflow-hidden relative">
+                    <div className="absolute inset-0 bg-[#00f0ff]/5 animate-pulse pointer-events-none" />
+                    <p className="text-[9px] text-white/30 uppercase font-black tracking-[0.3em] italic relative z-10">
+                        {isSpanish ? 'Puente de Liquidación Rápida' : 'Quick Settlement Card Bridge'}
+                    </p>
+                    <button 
+                      onClick={() => window.open(`https://buy.stripe.com/5kA02A56A8F6dDq3ce?wallet_address=${vaultAddress}&lock_wallet_address=true&destination_network=solana&destination_currency=usdc&client_reference_id=${userId}`, '_blank')}
+                      className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase text-[10px] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center justify-center gap-2 relative z-10"
+                    >
+                      <CreditCard size={18} /> {isSpanish ? 'COMPRA CON TARJETA' : 'BUY WITH CARD'}
+                    </button>
+                    <p className="text-[8px] text-white/20 uppercase font-black tracking-widest leading-relaxed px-12 italic relative z-10">
+                      {isSpanish ? 'Liquidación Directa SOL-USDC a:' : 'Direct Solana-USDC Settlement to:'} <br /> 
+                      <span className="text-[#00f0ff] font-mono">{vaultAddress.slice(0, 8)}...{vaultAddress.slice(-8)}</span> 🏛️🛡️
+                    </p>
+                </div>
               </motion.div>
             ) : (
                 <InstitutionalCashier 
+                    key="institutional-cashier"
                     userId={userId} 
                     vaultAddress={vaultAddress}
                     customAmount={selectedPkgId.startsWith('custom_') ? selectedPkgId.split('_')[1] : CREDIT_PACKAGES.find(p => p.id === selectedPkgId)?.priceUsd.toString() || '0'} 
                     onStepBack={() => setSelectedPkgId(null)}
                     onSuccess={() => setIsSuccess(true)}
+                    isSpanish={isSpanish}
                 />
             )}
           </AnimatePresence>
@@ -193,13 +218,15 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
         <div className="p-8 border-t border-white/5 bg-black/40 flex items-center justify-between">
             <div className="flex items-center gap-3">
                 <ShieldCheck size={16} className="text-[#00f0ff]" />
-                <span className="text-[7px] font-black uppercase text-white/30 tracking-widest italic">Sovereign Encryption Active</span>
+                <span className="text-[7px] font-black uppercase text-white/30 tracking-widest italic">
+                    {isSpanish ? 'Encriptación Soberana Activa' : 'Sovereign Encryption Active'}
+                </span>
             </div>
             <button 
               onClick={() => setShowHistory(!showHistory)}
               className="text-[7px] font-black uppercase text-white/40 hover:text-white tracking-widest flex items-center gap-2 italic"
             >
-                <History size={14} /> Settlement History
+                <History size={14} /> {isSpanish ? 'Historial de Liquidación' : 'Settlement History'}
             </button>
         </div>
       </motion.div>
@@ -207,11 +234,7 @@ export default function TopUpDrawer({ onClose, userId }: TopUpDrawerProps) {
   );
 }
 
-function InstitutionalCashier({ userId, vaultAddress, customAmount, onStepBack, onSuccess }: { userId: string, vaultAddress: string, customAmount: string, onStepBack: () => void, onSuccess: () => void }) {
-    const usdcMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-    const [isPaying, setIsPaying] = useState(false);
-    const { wallets } = useWallets();
-
+function InstitutionalCashier({ userId, vaultAddress, customAmount, onStepBack, onSuccess, isSpanish }: { userId: string, vaultAddress: string, customAmount: string, onStepBack: () => void, onSuccess: () => void, isSpanish: boolean }) {
     const copyAddress = () => {
         navigator.clipboard.writeText(vaultAddress);
     };
@@ -226,11 +249,15 @@ function InstitutionalCashier({ userId, vaultAddress, customAmount, onStepBack, 
                 <button onClick={onStepBack} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white">
                     <X size={16} className="rotate-45" />
                 </button>
-                <h3 className="text-sm font-black uppercase text-white tracking-widest font-syncopate italic">Vault Settlement Panel</h3>
+                <h3 className="text-sm font-black uppercase text-white tracking-widest font-syncopate italic">
+                    {isSpanish ? 'Panel de Liquidación de Bóveda' : 'Vault Settlement Panel'}
+                </h3>
             </div>
 
             <div className="p-10 bg-[#ff00ff]/5 border border-[#ff00ff]/20 rounded-[3rem] text-center">
-                <span className="text-[9px] font-black uppercase text-[#ff00ff] tracking-[0.4em] mb-4 block italic">TOTAL SETTLEMENT</span>
+                <span className="text-[9px] font-black uppercase text-[#ff00ff] tracking-[0.4em] mb-4 block italic">
+                    {isSpanish ? 'LIQUIDACIÓN TOTAL' : 'TOTAL SETTLEMENT'}
+                </span>
                 <div className="flex items-center justify-center gap-3">
                     <span className="text-5xl font-syncopate font-black italic text-white">${customAmount}</span>
                     <span className="text-xl font-syncopate font-black text-white/20 italic">USD</span>
@@ -239,20 +266,25 @@ function InstitutionalCashier({ userId, vaultAddress, customAmount, onStepBack, 
 
             <div className="space-y-4">
                 <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] space-y-6">
-                    <h4 className="text-[8px] font-black uppercase text-white/40 tracking-widest mb-4 italic px-2">Institutional Bridge (SOL/USDC)</h4>
+                    <h4 className="text-[8px] font-black uppercase text-white/40 tracking-widest mb-4 italic px-2">
+                        {isSpanish ? 'Puente Institucional (SOL/USDC)' : 'Institutional Bridge (SOL/USDC)'}
+                    </h4>
                     
                     <button 
                         onClick={() => window.open(`https://buy.stripe.com/5kA02A56A8F6dDq3ce?wallet_address=${vaultAddress}&lock_wallet_address=true&destination_network=solana&destination_currency=usdc&client_reference_id=${userId}`, '_blank')}
                         className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase text-[10px] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center justify-center gap-2"
                     >
-                        <CreditCard size={18} /> BUY WITH CARD
+                        <CreditCard size={18} /> {isSpanish ? 'COMPRA CON TARJETA' : 'BUY WITH CARD'}
                     </button>
 
                     <p className="text-[7px] text-white/30 uppercase text-center font-bold tracking-widest leading-relaxed px-8 italic">
-                        Settlement arrives directly in: <br /> <span className="text-[#00f0ff]">{vaultAddress}</span> 🏛️🛡️
+                        {isSpanish ? 'La liquidación llega directamente a la Bóveda Maestro.' : 'Settlement arrives directly in the Master Vault.'} <br /> 
+                        {isSpanish ? 'Verificación Instantánea Activa.' : 'Instant Verification Active.'} 🏛️🛡️
                     </p>
                     
-                    <p className="text-[7px] text-white/20 uppercase text-center font-black tracking-[0.3em] py-4">OR DIRECT TREASURY SETTLEMENT</p>
+                    <p className="text-[7px] text-white/20 uppercase text-center font-black tracking-[0.3em] py-4">
+                        {isSpanish ? 'O LIQUIDACIÓN DIRECTA A BÓVEDA' : 'OR DIRECT VAULT SETTLEMENT'}
+                    </p>
 
                     <div className="p-8 bg-white/5 border border-white/10 rounded-3xl relative group">
                         <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20 block mb-3 text-center">MASTER VAULT ADDRESS</span>
@@ -271,7 +303,9 @@ function InstitutionalCashier({ userId, vaultAddress, customAmount, onStepBack, 
                 <div className="flex items-center gap-3 p-4 bg-black/40 rounded-2xl border border-white/5">
                     <AlertCircle size={14} className="text-[#ffea00] shrink-0" />
                     <p className="text-[7px] font-black text-white/40 uppercase tracking-widest leading-loose">
-                        Manual transfers require on-chain verification. Use the Transaction Scanner on the dash to claim points.
+                        {isSpanish 
+                            ? 'Las transferencias manuales requieren verificación en cadena. Use el Escáner de Transacciones para reclamar puntos.' 
+                            : 'Manual transfers require on-chain verification. Use the Transaction Scanner on the dash to claim points.'}
                     </p>
                 </div>
             </div>
