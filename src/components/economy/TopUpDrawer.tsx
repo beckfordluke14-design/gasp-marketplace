@@ -317,14 +317,30 @@ function InstitutionalCashier({ userId, vaultAddress, customAmount, onStepBack, 
                             </button>
                         </div>
                     </div>
+
+                    {/* 🧬 BILINGUAL SETTLEMENT WIZARD */}
+                    <div className="grid grid-cols-3 gap-2 w-full pt-4">
+                        <div className="flex flex-col items-center gap-2 p-3 bg-white/5 rounded-2xl border border-white/5">
+                            <span className="text-[6px] font-black uppercase text-[#00f0ff] tracking-widest italic">{isSpanish ? '01. ESCANEAR' : '01. SCAN'}</span>
+                            <p className="text-[6px] text-white/30 uppercase text-center font-black leading-tight">{isSpanish ? 'Usa tu Móvil' : 'Use Mobile Wallet'}</p>
+                        </div>
+                        <div className="flex flex-col items-center gap-2 p-3 bg-white/5 rounded-2xl border border-white/5">
+                            <span className="text-[6px] font-black uppercase text-[#ff00ff] tracking-widest italic">{isSpanish ? '02. ENVIAR' : '02. SEND'}</span>
+                            <p className="text-[6px] text-white/30 uppercase text-center font-black leading-tight">{isSpanish ? 'Firma Transacción' : 'Push Signature'}</p>
+                        </div>
+                        <div className="flex flex-col items-center gap-2 p-3 bg-white/5 rounded-2xl border border-white/5">
+                            <span className="text-[6px] font-black uppercase text-[#ffea00] tracking-widest italic">{isSpanish ? '03. RECIBIR' : '03. SYNC'}</span>
+                            <p className="text-[6px] text-white/30 uppercase text-center font-black leading-tight">{isSpanish ? 'Créditos Listos' : 'Credits Ready'}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3 p-4 bg-black/40 rounded-2xl border border-white/5">
                     <AlertCircle size={14} className="text-[#ffea00] shrink-0" />
                     <p className="text-[7px] font-black text-white/40 uppercase tracking-widest leading-loose">
                         {isSpanish 
-                            ? 'Las transferencias manuales requieren verificación en cadena. Use el Escáner de Transacciones para reclamar puntos.' 
-                            : 'Manual transfers require on-chain verification. Use the Transaction Scanner on the dash to claim points.'}
+                            ? 'Las transferencias manuales requieren verificación en cadena. El G-Scanner monitorea su saldo 24/7.' 
+                            : 'Manual transfers require on-chain verification. G-Scanner monitors your balance 24/7.'}
                     </p>
                 </div>
             </div>
