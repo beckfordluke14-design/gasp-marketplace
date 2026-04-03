@@ -41,6 +41,7 @@ export async function POST(req: Request) {
     body.append('destination_currency', 'usdc');
     body.append('destination_network', 'solana');
     body.append('wallet_addresses[solana]', SYNDICATE_TREASURY_SOL);
+    body.append('lock_wallet_address', 'true');
     body.append('source_amount', priceUsd.toFixed(2));
     body.append('source_currency', 'usd');
 
