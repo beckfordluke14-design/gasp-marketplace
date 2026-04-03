@@ -51,15 +51,16 @@ export async function POST(req: Request) {
     body.append('metadata[userId]', String(userId || 'anon'));
     if (packageId) body.append('metadata[packageId]', String(packageId));
     body.append('metadata[expectedCredits]', String(credits || 0));
-    body.append('metadata[expectedAmount]', String(priceUsd || 0));
 
     // Pre-fill amount (Nested in transaction_details for Standalone)
     body.append('transaction_details[source_amount]', priceUsd.toFixed(2));
     body.append('transaction_details[source_currency]', 'usd');
 
-    // 🛡️ RETURN URL: Brings user back to gasp.fun with pending status flag
+    // 🛡️ RETURN URL
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gasp.fun';
-    body.append('return_url', `${baseUrl}/?payment_pending=true&userId=${userId}`);
+    body.append('return_url', `${baseUrl}/?payment_pending=true&userId=${userId || 'anon'}`);
+
+    console.log('[Stripe API Request]:', body.toString());
 
     const response = await fetch('https://api.stripe.com/v1/crypto/onramp_sessions', {
       method: 'POST',
@@ -74,7 +75,9 @@ export async function POST(req: Request) {
     if (!response.ok) {
       let detail = raw;
       try { detail = JSON.parse(raw).error?.message || raw; } catch {}
-      return NextResponse.json({ success: false, error: `STRIPE: ${detail}` }, { status: 500 });
+      console.error('[Stripe Reject]:', detail);
+      // 🔥 CRITICAL: Pass the actual detail back to the UI alert
+      return NextResponse.json({ success: false, error: detail }, { status: 500 });
     }
 
     const session = JSON.parse(raw);
@@ -82,7 +85,6 @@ export async function POST(req: Request) {
       success: true,
       sessionId: session.id,
       redirectUrl: session.redirect_url,
-      // Pass back to client for Standalone() pre-fill
       sourceAmount: priceUsd.toString(),
     });
 

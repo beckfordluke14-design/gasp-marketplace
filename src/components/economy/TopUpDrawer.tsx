@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Zap, ShieldCheck, CreditCard, QrCode, ArrowRight, CheckCircle2, AlertCircle, Copy, Check, Loader2, Coins, Wallet, Smartphone, Diamond } from 'lucide-react';
-import { CREDIT_PACKAGES } from '@/lib/economy/constants';
+import { X, Zap, ShieldCheck, CreditCard, QrCode, ArrowRight, CheckCircle2, AlertCircle, Copy, Check, Loader2, Coins, Wallet, Smartphone } from 'lucide-react';
+import { CREDIT_PACKAGES, SYNDICATE_TREASURY_SOL } from '@/lib/economy/constants';
 import { useUser } from '../providers/UserProvider';
-import { Keypair } from '@solana/web3.js';
 import { usePrivy } from '@privy-io/react-auth';
 
 interface TopUpDrawerProps {
@@ -16,10 +15,9 @@ interface TopUpDrawerProps {
 }
 
 /**
- * ⛽ SOVEREIGN REVENUE TERMINAL v14.0 // FINAL REVENUE PROTOCOL
- * 100% Cross-Platform: Desktop High-Status QR vs Mobile Deep-Link.
- * 1-Click Wallet Settlement for Phantom / Connected Wallets.
- * 100% Automatic Solana Pay Integration (Beginning-to-End).
+ * ⛽ SOVEREIGN REVENUE TERMINAL v15.0 // FINAL ARCHIVED REVENUE RAILS
+ * Dual-Rail (USDC/SOL) Settlement Terminal.
+ * 100% Verified Revenue Lockdown to SYNDICATE_TREASURY_SOL.
  */
 export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, userId: propUserId }: TopUpDrawerProps) {
     const { user, authenticated } = usePrivy();
@@ -32,7 +30,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     const [isLoading, setIsLoading] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     
-    const [customAmount, setCustomAmount] = useState<string>('4.99');
+    const [customAmount, setCustomAmount] = useState<string>('19.99');
     const [isCustom, setIsCustom] = useState(false);
 
     const [solPrice, setSolPrice] = useState<number>(0);
@@ -44,9 +42,8 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
     const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
-    const vaultAddress = 'DGQVNRTWEv1HEwP6Wtcm1LEUPgZKsW9JfwVpEDjPcEkS';
 
-    const solanaAddress = user?.linkedAccounts?.find(a => a.type === 'wallet' && a.chainType === 'solana')?.address;
+    const solanaAddress = (user?.linkedAccounts?.find(a => (a as any).type === 'wallet' && (a as any).chainType === 'solana') as any)?.address;
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -54,7 +51,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             const guestId = localStorage.getItem('gasp_guest_id') || 'anon';
             if (!userId) setUserId(guestId);
 
-            // 🛡️ RESUME: Check server for any pending P2P session for this user
+            // 🛡️ RESUME: Check server for any pending P2P session
             const resolvedId = propUserId || guestId;
             if (resolvedId) {
                 fetch(`/api/economy/solana/session?userId=${resolvedId}`)
@@ -73,20 +70,17 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
 
     const fetchLivePrice = async () => {
         try {
-            // Source: Our own server-side proxy (No CORS limits)
             const res = await fetch('/api/economy/solana/price');
             const data = await res.json();
             if (data.success && data.price) {
                 setSolPrice(data.price);
             }
-        } catch (e) {
-            console.error('[Oracle] Critical failure:', e);
-        }
+        } catch (e) { console.error('[Oracle] failure:', e); }
     };
 
     useEffect(() => {
         fetchLivePrice();
-        const interval = setInterval(fetchLivePrice, 15000); // 15s High-Heat Sync
+        const interval = setInterval(fetchLivePrice, 15000);
         return () => clearInterval(interval);
     }, []);
 
@@ -108,8 +102,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
 
     const selectedPkg = packages.find(p => p.id === selectedPkgId) || packages[0];
     const targetUsd = isCustom ? parseFloat(customAmount) : selectedPkg.price;
-    // 🛡️ FALLBACK: If price fails, use a safe default ($180) to avoid showing 0
-    const resolvedSolPrice = solPrice > 0 ? solPrice : 180;
+    const resolvedSolPrice = solPrice > 0 ? solPrice : 188;
     const targetSol = (targetUsd / resolvedSolPrice).toFixed(6);
 
     const handleStripeCheckout = async () => {
@@ -149,9 +142,6 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                     clearInterval(pollingRef.current!);
                     setIsPolling(false);
                     setView('success');
-                    // 🧹 CLEAR: Payment confirmed, remove pending state
-                    localStorage.removeItem('gasp_p2p_ref');
-                    localStorage.removeItem('gasp_p2p_amount');
                     window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
                 }
             } catch (e) { console.error('Poll Error:', e); }
@@ -160,16 +150,13 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
 
     const handleSwitchToP2P = async () => {
         if (!solPrice || solPrice === 0) {
-            alert('Awaiting Market Oracle... give it a second.');
+            alert('Awaiting Market Oracle...');
             await fetchLivePrice();
             if (!solPrice || solPrice === 0) return;
         }
 
         try {
-            // 🚀 FAST PRICE SYNC: Get latest market rate before session starts
             await fetchLivePrice();
-
-            // 🛡️ SERVER-SIDE reference generation — userId + amount locked server-side
             const resolvedId = userId || propUserId || 'anon';
             const res = await fetch('/api/economy/solana/session', {
                 method: 'POST',
@@ -184,55 +171,18 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             startPolling(data.reference);
         } catch (err) {
             console.error('[P2P] Session creation failed:', err);
-            alert('P2P session unavailable. Try again.');
+            alert('P2P session unavailable.');
         }
-    };
-
-    const handleWalletTransfer = async () => {
-        alert(isSpanish ? 'Firmar transacción en Phantom/Bóveda para completar la liquidación.' : 'Please sign the transaction in Phantom to complete settlement.');
     };
 
     const handleSolanaPayDeepLink = () => {
         window.location.href = solanaPayUrl;
     };
 
-    const handleSolanaSync = async () => {
-        if (!txSignature || isVerifying) return;
-        setIsVerifying(true);
-        try {
-            const res = await fetch('/api/economy/solana/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ signature: txSignature, userId: userId || propUserId, expectedAmount: targetUsd })
-            });
-            const data = await res.json();
-            if (data.success) {
-                setView('success');
-                window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
-            } else {
-                alert(data.error || 'Sync Failed: Transaction underpaid or not found.');
-            }
-        } catch (err) {
-            console.error('[P2P Sync] Error:', err);
-            alert('Sync Protocol Offline.');
-        } finally {
-            setIsVerifying(false);
-        }
-    };
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(vaultAddress);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
     useEffect(() => {
         return () => { if (pollingRef.current) clearInterval(pollingRef.current); };
     }, []);
 
-    if (!isOpen) return null;
-
-    // 🧬 SOVEREIGN URI ENGINE: High-Compliance Solana Pay Building
     const buildSolanaPayUrl = () => {
         const params = new URLSearchParams();
         const cleanUsd = Math.max(0.01, parseFloat(targetUsd.toString()) || 4.99);
@@ -241,7 +191,6 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             params.append('amount', cleanUsd.toFixed(2));
             params.append('spl-token', 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
         } else {
-            // 🛡️ Precision Lock: Use 4 decimals for clean Phantom pricing
             const cleanSol = Math.max(0.0001, parseFloat(targetSol) || 0.025);
             params.append('amount', cleanSol.toFixed(4));
         }
@@ -250,10 +199,12 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
         params.append('label', 'GASP');
         params.append('message', 'Refill');
         
-        return `solana:${vaultAddress}?${params.toString()}`;
+        return `solana:${SYNDICATE_TREASURY_SOL}?${params.toString()}`;
     };
 
     const solanaPayUrl = buildSolanaPayUrl();
+
+    if (!isOpen) return null;
 
     return (
         <AnimatePresence>
@@ -279,8 +230,6 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                     <div className="flex-1 p-10 pt-4 overflow-y-auto no-scrollbar pb-12">
                         {view === 'options' && (
                             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                                
-                                {/* 🧪 CUSTOM INSTITUTIONAL HUB */}
                                 <div onClick={() => setIsCustom(!isCustom)} className={`relative p-8 rounded-[2.5rem] border transition-all duration-700 cursor-pointer group overflow-hidden ${isCustom ? 'bg-[#00f0ff]/5 border-[#00f0ff]/60 shadow-[0_0_80px_rgba(0,240,255,0.15)] ring-1 ring-[#00f0ff]/30' : 'bg-white/[0.02] border-white/10 opacity-60'}`}>
                                     <div className="absolute top-0 right-0 p-4">
                                         <div className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic flex items-center gap-3 transition-all duration-500 ${isCustom ? 'bg-[#00f0ff] text-black shadow-[0_0_30px_#00f0ff]' : 'bg-[#00f0ff] text-black animate-pulse shadow-[0_0_20px_#00f0ff] ring-4 ring-[#00f0ff]/20'}`}>
@@ -289,7 +238,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                     </div>
                                     <div className="flex flex-col gap-6 relative z-10 text-left">
                                         <div className="flex flex-col gap-1.5"><span className="text-[10px] font-black uppercase text-[#00f0ff] tracking-[0.4em] italic leading-none">{isSpanish ? 'SALA DE TRADING' : 'INSTITUTIONAL CUSTOM INFUSION'}</span></div>
-                                        <div className="flex flex-col md:flex-row items-center gap-8 py-4">
+                                        <div className="flex flex-row items-center gap-8 py-4">
                                             <div className="flex-1 w-full space-y-3">
                                                 <div className="flex items-baseline justify-between px-2"><span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{isSpanish ? 'MONTO USD' : 'SETTLEMENT USD'}</span><span className="text-[8px] font-black text-red-500/60 uppercase tracking-widest">LIMIT: $30,000</span></div>
                                                 <div className={`flex items-center gap-4 bg-black/60 border rounded-[1.5rem] p-6 transition-all duration-500 ${isCustom ? 'border-[#00f0ff]/40 ring-1 ring-[#00f0ff]/20' : 'border-white/5 opacity-30 grayscale'}`}>
@@ -297,17 +246,10 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                                     <input disabled={!isCustom} type="number" value={customAmount} onClick={(e) => e.stopPropagation()} onChange={(e) => setCustomAmount(Math.min(30000, parseFloat(e.target.value) || 0).toString())} className="bg-transparent border-none outline-none text-4xl font-syncopate font-black italic text-white w-full placeholder:text-white/5" />
                                                 </div>
                                             </div>
-                                            <div className="flex-1 w-full space-y-3">
-                                                <div className="flex items-baseline px-2"><span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{isSpanish ? 'CRÉDITOS ALLOC' : 'CREDIT ALLOCATION'}</span></div>
-                                                <div className={`flex flex-col items-start justify-center h-[90px] px-8 bg-white/5 border rounded-[1.5rem] transition-all duration-500 ${isCustom ? 'border-[#00f0ff]/30' : 'border-white/5 opacity-10'}`}>
-                                                    <div className="flex items-baseline gap-2"><span className="text-3xl font-syncopate font-black text-white">{(parseFloat(customAmount) * 1000).toLocaleString()}</span><span className="text-[10px] font-black text-[#00f0ff] uppercase italic">CR</span></div>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* PACKAGE SELECTOR */}
                                 <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-700 ${isCustom ? 'opacity-10 pointer-events-none' : ''}`}>
                                     {packages.map((pkg) => (
                                         <button key={pkg.id} onClick={() => setSelectedPkgId(pkg.id)} className={`relative p-6 rounded-[2rem] border transition-all duration-300 flex items-center justify-between group overflow-hidden ${selectedPkgId === pkg.id ? 'bg-white/5 border-white/30 scale-[1.02]' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
@@ -318,7 +260,6 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                     ))}
                                 </div>
 
-                                {/* STRIPE CTA */}
                                 <div className="space-y-6 text-center">
                                     <button onClick={handleStripeCheckout} disabled={isLoading} className="w-full h-24 rounded-[2.5rem] bg-white text-black font-black uppercase text-[14px] tracking-[0.2em] transition-all shadow-[0_20px_80px_rgba(255,255,255,0.15)] flex items-center justify-center gap-6 group hover:scale-[1.02]">
                                         {isLoading ? <Loader2 size={32} className="animate-spin text-black" /> : <CreditCard size={32} fill="black" />}
@@ -327,7 +268,6 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                     </button>
                                 </div>
 
-                                {/* SOVEREIGN TRIGGER (MOBILE vs DESKTOP) */}
                                 {solanaAddress ? (
                                     <button onClick={handleSwitchToP2P} className="w-full py-8 rounded-[2.5rem] bg-[#00f0ff]/10 border border-[#00f0ff]/40 hover:bg-[#00f0ff]/20 transition-all flex items-center justify-center gap-6 group relative">
                                         <div className="absolute top-0 right-0 px-3 py-1 bg-[#00f0ff] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-xl shadow-[0_0_20px_#00f0ff]">{isSpanish ? 'BÓVEDA DETECTADA' : 'SOVEREIGN WALLET'}</div>
@@ -336,7 +276,6 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                     </button>
                                 ) : (
                                     <button onClick={handleSwitchToP2P} className="w-full py-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:border-[#00f0ff]/40 transition-all flex items-center justify-center gap-6 group relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 px-3 py-1 bg-[#00f0ff]/20 text-[#00f0ff] text-[7px] font-black uppercase tracking-widest rounded-bl-xl">{isSpanish ? 'SIN VERIFICACIÓN' : 'NO KYC REQUIRED'}</div>
                                         <QrCode size={28} className="text-[#00f0ff]" />
                                         <div className="flex flex-col items-start leading-none gap-2 text-left"><span className="text-[11px] font-black text-white uppercase tracking-widest font-syncopate italic">{isSpanish ? 'LIQUIDACIÓN AUTOMÁTICA P2P' : 'AUTOMATIC P2P SETTLEMENT'}</span><span className="text-[8px] font-black text-white/20 uppercase tracking-[0.5em] italic">{isSpanish ? 'SOL o USDC // Sincronización Directa' : 'SOL or USDC // DIRECT SYNC'}</span></div>
                                     </button>
@@ -353,35 +292,29 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                     </div>
                                     <h3 className="text-xl font-syncopate font-black uppercase italic text-white tracking-tighter leading-none">{isPolling ? (isSpanish ? 'ESPERANDO PAGO...' : 'WAITING FOR SYNC...') : (isSpanish ? 'LIQUIDACIÓN P2P' : 'P2P SETTLEMENT')}</h3>
                                     
-                                    {/* 📟 SETTLEMENT DISPLAY (REAL-TIME RATE) */}
                                     <div className="flex flex-col items-center gap-2">
                                         <div className="flex flex-col items-center gap-1.5 px-6 py-4 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-[1.5rem] shadow-[0_0_40px_rgba(0,240,255,0.1)]">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <div className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-pulse shadow-[0_0_8px_#00f0ff]" />
                                                 <span className="text-[12px] font-syncopate font-black text-white italic tracking-tighter">
-                                                    {p2pAsset === 'SOL' ? `${targetSol} SOL` : `${parseFloat(targetUsd.toString()).toFixed(2)} USDC`}
+                                                    {p2pAsset === 'SOL' ? `${targetSol} SOL` : `$${parseFloat(targetUsd.toString()).toFixed(2)} USDC`}
                                                 </span>
                                             </div>
                                             <div className="h-px w-full bg-white/10" />
                                             <div className="flex flex-col items-center">
-                                                <span className="text-[7.5px] font-black text-[#00f0ff] uppercase tracking-[0.2em] italic">
-                                                    {isSpanish ? 'TASA DE CONVERSIÓN ACTUAL' : 'CURRENT CONVERSION RATE'}
-                                                </span>
+                                                <span className="text-[7.5px] font-black text-[#00f0ff] uppercase tracking-[0.2em] italic">{isSpanish ? 'TASA DE CONVERSIÓN ACTUAL' : 'CURRENT CONVERSION RATE'}</span>
                                                 <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1">
-                                                    {p2pAsset === 'SOL' 
-                                                        ? (solPrice > 0 ? `1 SOL = $${solPrice.toFixed(2)}` : 'ORACLE SYNCING...')
-                                                        : '1 USDC = $1.00'}
+                                                    {p2pAsset === 'SOL' ? (solPrice > 0 ? `1 SOL = $${solPrice.toFixed(2)}` : 'ORACLE SYNCING...') : '1 USDC = $1.00'}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
-                                    
                                     <p className="text-[9px] text-white/40 leading-relaxed max-w-[280px] mx-auto font-black uppercase tracking-widest italic">{isPolling ? (isSpanish ? 'ESCANEANDO BLOQUES DE SOLANA...' : 'SCANNING SOLANA BLOCKS...') : `Enviar ${p2pAsset === 'SOL' ? targetSol : targetUsd} ${p2pAsset} a la Bóveda.`}</p>
                                 </div>
 
                                 {isMobile ? (
                                     <div className="py-6 space-y-6">
-                                        <button onClick={handleSolanaPayDeepLink} className="w-full h-20 rounded-[2.5rem] bg-[#00f0ff] text-black font-black uppercase text-[14px] tracking-[0.2em] shadow-[0_10px_60px_rgba(0,240,255,0.4)] flex items-center justify-center gap-4 animate-bounce">
+                                        <button onClick={handleSolanaPayDeepLink} className="w-full h-20 rounded-[2.5rem] bg-[#00f0ff] text-black font-black uppercase text-[14px] tracking-[0.2em] shadow-[0_10px_60px_rgba(0,240,255,0.4)] flex items-center justify-center gap-4">
                                            <Smartphone size={28} />
                                            <span className="font-syncopate italic tracking-tighter">{isSpanish ? 'ABRIR PHANTOM' : 'OPEN IN PHANTOM'}</span>
                                         </button>
@@ -394,13 +327,11 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                     </div>
                                 )}
 
-                                {/* 🔄 ASSET SELECTOR & RETURN (MOVED TO CENTER) */}
                                 <div className="flex flex-col items-center gap-6 py-4">
                                     <div className="flex items-center justify-center gap-4 bg-white/5 p-2 rounded-2xl border border-white/5">
-                                        <button onClick={() => setP2pAsset('USDC')} className={`px-8 py-3 rounded-xl flex items-center gap-2 border transition-all ${p2pAsset === 'USDC' ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.2)]' : 'bg-white/5 border-white/10 text-white/40'}`}><Diamond size={14} fill={p2pAsset === 'USDC' ? 'currentColor' : 'none'} /><span className="text-[10px] font-black tracking-widest">USDC</span></button>
-                                        <button onClick={() => setP2pAsset('SOL')} className={`px-8 py-3 rounded-xl flex items-center gap-2 border transition-all ${p2pAsset === 'SOL' ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.2)]' : 'bg-white/5 border-white/10 text-white/40'}`}><Coins size={14} /><span className="text-[10px] font-black tracking-widest">SOL</span></button>
+                                        <button onClick={() => setP2pAsset('USDC')} className={`px-8 py-3 rounded-xl flex items-center gap-2 border transition-all ${p2pAsset === 'USDC' ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.2)]' : 'bg-white/5 border-white/10 text-white/40'}`}><span className="text-[10px] font-black tracking-widest">USDC</span></button>
+                                        <button onClick={() => setP2pAsset('SOL')} className={`px-8 py-3 rounded-xl flex items-center gap-2 border transition-all ${p2pAsset === 'SOL' ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.2)]' : 'bg-white/5 border-white/10 text-white/40'}`}><span className="text-[10px] font-black tracking-widest">SOL</span></button>
                                     </div>
-                                    
                                     <button onClick={() => setView('options')} className="text-[11px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic hover:text-white transition-all hover:scale-105">{isSpanish ? '← VOLVER A OPCIONES' : '← RETURN TO OPTIONS'}</button>
                                 </div>
                             </div>
