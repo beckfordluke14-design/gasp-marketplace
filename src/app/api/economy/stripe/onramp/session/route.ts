@@ -37,13 +37,15 @@ export async function POST(req: Request) {
 
     const body = new URLSearchParams();
 
-    // ✅ VALID STRIPE CRYPTO ONRAMP PARAMS ONLY
-    body.append('wallet_addresses[solana]', SYNDICATE_TREASURY_SOL);
-    body.append('destination_currencies[0]', 'usdc');
-    body.append('destination_networks[0]', 'solana');
-    body.append('source_amount', priceUsd.toFixed(2));
-    body.append('source_currency', 'usd');
-    body.append('return_url', 'https://gasp.fun');
+    // ✅ EXACT STRIPE API SCHEMA (per docs: transaction_details nested params)
+    body.append('transaction_details[wallet_addresses][solana]', SYNDICATE_TREASURY_SOL);
+    body.append('transaction_details[destination_currencies][0]', 'usdc');
+    body.append('transaction_details[destination_networks][0]', 'solana');
+    body.append('transaction_details[destination_currency]', 'usdc');
+    body.append('transaction_details[destination_network]', 'solana');
+    body.append('transaction_details[source_currency]', 'usd');
+    body.append('transaction_details[source_amount]', priceUsd.toFixed(2));
+    // NOTE: return_url is NOT a valid API param — Stripe returns redirect_url in response
 
     console.log('[Stripe] Minting session — wallet:', SYNDICATE_TREASURY_SOL, 'amount:', priceUsd);
 
