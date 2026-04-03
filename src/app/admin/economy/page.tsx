@@ -1,18 +1,31 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@/components/providers/UserProvider';
-import { format } from 'date-fns';
-import { ShieldCheck, Coins, ArrowUpRight, Search, Filter, Loader2, CreditCard, QrCode } from 'lucide-react';
+import { usePrivy } from '@privy-io/react-auth';
+import { useProfile } from '@/hooks/useProfile';
 
-export default function AdminEconomyPage() {
-    const { profile, authenticated } = useUser();
-    const [transactions, setTransactions] = useState<any[]>([]);
+interface Transaction {
+    id: string;
+    user_id: string;
+    amount_usd: number;
+    provider: string;
+    created_at: string;
+    meta: any;
+}
+
+export default function EconomyAdmin() {
+    const { authenticated } = usePrivy();
+    const { profile } = useProfile();
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
     const [manualPrice, setManualPrice] = useState('79.22');
     const [isLocked, setIsLocked] = useState(true);
+
+    const [grantId, setGrantId] = useState('');
+    const [grantAmount, setGrantAmount] = useState('');
+    const [grantReason, setGrantReason] = useState('Manual Reconciliation');
 
     useEffect(() => {
         if (authenticated && profile?.is_admin) {
@@ -33,142 +46,157 @@ export default function AdminEconomyPage() {
         }
     };
 
+    const handleManualGrant = async () => {
+        try {
+            const res = await fetch('/api/admin/grant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    targetUserId: grantId, 
+                    amountUsd: grantAmount, 
+                    reason: grantReason 
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(`SUCCESS: Granted ${data.credits} credits to ${grantId}`);
+                fetchTransactions();
+            } else {
+                alert(`GRANT FAILED: ${data.error}`);
+            }
+        } catch (e) { alert('Grant Error'); }
+    };
+
     const fetchTransactions = async () => {
         try {
             const res = await fetch('/api/admin/transactions');
             const data = await res.json();
-            if (data.success) {
-                setTransactions(data.transactions);
-            }
-        } catch (err) {
-            console.error('Failed to fetch transactions:', err);
-        } finally {
-            setLoading(false);
-        }
+            if (data.success) setTransactions(data.transactions);
+        } catch (e) { console.error('Fetch Failed'); }
+        finally { setLoading(false); }
     };
 
-    if (!profile?.is_admin) {
-        return (
-            <div className="min-h-screen bg-black flex items-center justify-center p-10 text-center">
-                <div className="space-y-6">
-                    <ShieldCheck size={64} className="text-red-500 mx-auto animate-pulse" />
-                    <h1 className="text-4xl font-syncopate font-black text-white italic">ACCESS DENIED</h1>
-                    <p className="text-white/40 font-black uppercase tracking-widest italic">Sovereign Admin Clearance Required</p>
-                </div>
-            </div>
-        );
-    }
-
-    const filtered = transactions.filter(tx => 
-        tx.user_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tx.meta?.signature?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tx.meta?.reference?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (!profile?.is_admin) return <div className="p-20 text-center text-zinc-500 uppercase tracking-widest">Access Restricted // Admin Only</div>;
 
     return (
-        <div className="min-h-screen bg-black text-white font-outfit p-10">
-            <div className="max-w-7xl mx-auto space-y-12">
-                
-                {/* 📟 HEADER */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="min-h-screen bg-black p-8 font-mono text-zinc-300">
+            <div className="mx-auto max-w-6xl space-y-12">
+                <div className="flex justify-between items-end border-b border-zinc-900 pb-8">
                     <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 bg-[#00f0ff] rounded-full animate-pulse shadow-[0_0_10px_#00f0ff]" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">Sovereign Financial Hub</span>
-                        </div>
-                        <h1 className="text-5xl font-syncopate font-black uppercase italic tracking-tighter">ECONOMY LOGS</h1>
+                        <h1 className="text-4xl font-black italic tracking-tighter text-white uppercase">
+                            Revenue Controller
+                        </h1>
+                        <p className="text-[10px] uppercase tracking-widest text-[#ff3333] font-bold">
+                            Central Strategic Allocation // Institutional Terminal
+                        </p>
                     </div>
-                    <div className="flex items-center gap-6">
-                        <div className="relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    {/* 🛡️ MANUAL INFUSION TERMINAL */}
+                    <div className="space-y-6 border border-zinc-800 p-8 bg-[#0a0a0a]">
+                        <h2 className="text-xl font-black italic tracking-tighter text-white uppercase italic">
+                            Manual Credit Grant
+                        </h2>
+                        <div className="space-y-4">
                             <input 
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Search Reference / Signature / User ID..."
-                                className="pl-12 pr-6 py-4 bg-white/5 border border-white/10 rounded-2xl w-80 font-black uppercase text-[11px] tracking-widest outline-none focus:border-[#00f0ff]/40 transition-all"
+                                className="w-full bg-black border border-zinc-800 p-4 text-xs focus:border-[#ff3333] outline-none"
+                                placeholder="Target User ID"
+                                value={grantId}
+                                onChange={(e) => setGrantId(e.target.value)}
+                            />
+                            <div className="flex gap-4">
+                                <input 
+                                    className="w-1/2 bg-black border border-zinc-800 p-4 text-xs focus:border-[#ff3333] outline-none"
+                                    placeholder="Amount ($US)"
+                                    value={grantAmount}
+                                    onChange={(e) => setGrantAmount(e.target.value)}
+                                />
+                                <button 
+                                    onClick={handleManualGrant}
+                                    className="w-1/2 bg-[#ff3333] text-white font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
+                                >
+                                    Grant Credits
+                                </button>
+                            </div>
+                            <input 
+                                className="w-full bg-black border border-zinc-800 p-4 text-xs focus:border-[#ff3333] outline-none"
+                                placeholder="Reason (Audit Log)"
+                                value={grantReason}
+                                onChange={(e) => setGrantReason(e.target.value)}
                             />
                         </div>
                     </div>
-                </div>
 
-                {/* 📊 SUMMARY */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-2">
-                        <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">Total Volume</span>
-                        <div className="text-4xl font-syncopate font-black italic text-[#00f0ff]">${transactions.reduce((acc, tx) => acc + (tx.amount_usd || 0), 0).toFixed(2)}</div>
-                    </div>
-                    <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-2">
-                        <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">Total Ingress</span>
-                        <div className="text-4xl font-syncopate font-black italic text-white">{transactions.length} <span className="text-sm font-black text-white/20">TX</span></div>
-                    </div>
-                </div>
-
-                {/* 📜 LOGS TABLE */}
-                <div className="bg-white/5 border border-white/10 rounded-[3rem] overflow-hidden">
-                    {loading ? (
-                        <div className="p-40 flex flex-col items-center justify-center gap-6">
-                            <Loader2 className="animate-spin text-[#00f0ff]" size={48} />
-                            <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em] italic">Decrypting Ledgers...</p>
+                    {/* 🛡️ MARKET SNAPSHOT CONTROL */}
+                    <div className="space-y-6 border border-zinc-800 p-8 bg-[#0a0a0a]">
+                        <h2 className="text-xl font-black italic tracking-tighter text-white uppercase italic">
+                            Market Snapshot Controller
+                        </h2>
+                        <div className="flex gap-4">
+                            <input 
+                                className="flex-1 bg-black border border-zinc-800 p-4 text-xs focus:border-[#ff3333] outline-none"
+                                value={manualPrice}
+                                onChange={(e) => setManualPrice(e.target.value)}
+                            />
+                            <button 
+                                onClick={handlePriceLock}
+                                className="bg-white text-black font-black px-8 uppercase tracking-widest hover:bg-[#ff3333] hover:text-white transition-all"
+                            >
+                                Lock Market
+                            </button>
                         </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="bg-white/5">
-                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-white/40 tracking-widest italic border-b border-white/5">Timestamp</th>
-                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-white/40 tracking-widest italic border-b border-white/5">Method</th>
-                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-white/40 tracking-widest italic border-b border-white/5">Amount</th>
-                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-white/40 tracking-widest italic border-b border-b border-white/5">Reference / Metadata</th>
-                                        <th className="px-8 py-6 text-[10px] font-black uppercase text-white/40 tracking-widest italic border-b border-white/5 text-right">User ID</th>
+                        <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-widest">Warning: Bypasses live market oracles globally.</p>
+                    </div>
+                </div>
+
+                {/* 🗄️ TRANSACTION ARCHIVE */}
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-black italic tracking-tighter text-white uppercase italic">
+                            Sovereign Settlement Ledger
+                        </h2>
+                        <input 
+                            className="bg-zinc-900 border-none p-4 text-[10px] w-64 focus:ring-1 ring-zinc-700 outline-none uppercase font-bold tracking-widest"
+                            placeholder="FILTER BY USER / REFERENCE / TX"
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="overflow-x-auto border border-zinc-900 bg-[#050505]">
+                        <table className="w-full text-left text-[10px] font-mono">
+                            <thead className="bg-[#0a0a0a] text-zinc-500 uppercase tracking-widest border-b border-zinc-900 border-t border-zinc-900">
+                                <tr>
+                                    <th className="p-6">Timestamp</th>
+                                    <th className="p-6">User Identity</th>
+                                    <th className="p-6">Asset Type</th>
+                                    <th className="p-6">Amount ($)</th>
+                                    <th className="p-6">Status</th>
+                                    <th className="p-6">Signature Hash</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-zinc-900">
+                                {transactions.filter(t => 
+                                    t.user_id?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                    t.meta?.txId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    t.meta?.reference?.toLowerCase().includes(searchTerm.toLowerCase())
+                                ).map((t) => (
+                                    <tr key={t.id} className="hover:bg-zinc-900/40 transition-colors">
+                                        <td className="p-6 text-zinc-600 font-bold">{new Date(t.created_at).toLocaleString()}</td>
+                                        <td className="p-6 text-white font-bold">{t.user_id?.slice(0, 16)}...</td>
+                                        <td className="p-6 uppercase text-[#ff3333] font-black tracking-widest">{t.provider}</td>
+                                        <td className="p-6 font-black text-white italic text-sm">${t.amount_usd}</td>
+                                        <td className="p-6">
+                                            <span className="bg-[#111] px-3 py-1 text-[8px] border border-zinc-800 text-[#ff3333] font-black tracking-widest">SETTLED</span>
+                                        </td>
+                                        <td className="p-6 text-zinc-600 font-bold">
+                                            {t.meta?.txId?.slice(0, 24)}...
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {filtered.map((tx, idx) => (
-                                        <tr key={tx.id || idx} className="hover:bg-white/[0.02] transition-colors group">
-                                            <td className="px-8 py-8 border-b border-white/5">
-                                                <div className="flex flex-col gap-1">
-                                                    <span className="text-[11px] font-black text-white font-syncopate italic leading-none">{format(new Date(tx.created_at), 'HH:mm:ss')}</span>
-                                                    <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">{format(new Date(tx.created_at), 'MMM dd, yyyy')}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-8 border-b border-white/5">
-                                                <div className="flex items-center gap-3">
-                                                    {tx.provider === 'helio' ? <QrCode size={16} className="text-[#00f0ff]" /> : <CreditCard size={16} className="text-[#ff00ff]" />}
-                                                    <span className={`text-[10px] font-black uppercase tracking-widest italic ${tx.provider === 'helio' ? 'text-[#00f0ff]' : 'text-[#ff00ff]'}`}>{tx.provider === 'helio' ? 'P2P Sync' : 'Stripe'}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-8 border-b border-white/5">
-                                                <div className="flex flex-col gap-1">
-                                                    <span className="text-xl font-syncopate font-black italic text-white leading-none">${(tx.amount_usd || 0).toFixed(2)}</span>
-                                                    <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{(tx.credits_issued || 0).toLocaleString()} Credits</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-8 border-b border-white/5 max-w-sm">
-                                                <div className="flex flex-col gap-2">
-                                                    <div className="flex flex-col gap-0.5">
-                                                        <span className="text-[8px] font-black text-white/20 uppercase">Reference Key</span>
-                                                        <span className="text-[10px] font-mono text-white/60 break-all">{tx.meta?.reference || 'N/A'}</span>
-                                                    </div>
-                                                    {tx.meta?.signature && (
-                                                        <a 
-                                                            href={`https://solscan.io/tx/${tx.meta.signature}`} 
-                                                            target="_blank"
-                                                            className="flex items-center gap-1.5 text-[8px] font-black text-[#00f0ff] uppercase hover:underline"
-                                                        >
-                                                            View On Explorer <ArrowUpRight size={10} />
-                                                        </a>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-8 border-b border-white/5 text-right">
-                                                <span className="text-[10px] font-mono text-white/30">{tx.user_id}</span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
