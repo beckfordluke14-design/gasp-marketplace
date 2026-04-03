@@ -197,9 +197,13 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             params.append('amount', cleanSol.toFixed(9));
         }
 
-        if (uniqueRef) params.append('reference', uniqueRef);
+        if (uniqueRef) {
+            params.append('reference', uniqueRef);
+            // 🛡️ SOVEREIGN MEMO: Embed the session ID directly into the blockchain metadata
+            params.append('memo', `GASP:REF:${uniqueRef.slice(0, 8)}`);
+        }
         params.append('label', 'GASP Hub');
-        params.append('message', `Order ID: ${uniqueRef?.slice(0, 8)}`);
+        params.append('message', `SECURE_SETTLE_${uniqueRef?.slice(0, 4)}`);
         
         return `solana:${SYNDICATE_TREASURY_SOL}?${params.toString()}`;
     };

@@ -31,20 +31,23 @@ export async function GET(req: Request) {
     let signatures = await connection.getSignaturesForAddress(referencePubkey, { limit: 1 });
     let signature = signatures.length > 0 ? signatures[0].signature : null;
 
+    // Fetch session metadata for exact amount matching
+    const { rows: sessionRows } = await db.query(`SELECT metadata FROM p2p_sessions WHERE reference = $1`, [reference]);
+    const storedMetadata = sessionRows[0]?.metadata || {};
+    const expectedSolAmount = storedMetadata.expectedSol;
+
     // 🛡️ RECOVERY FALLBACK: If reference is missing, scan treasury for exact amount
     if (!signature) {
-        console.log('[P2P Poll] Reference not found. Executing Treasury Sweep...');
+        console.log(`[P2P Poll] Reference missing. Scanning treasury for ~${expectedSolAmount} SOL...`);
         const treasurySigs = await connection.getSignaturesForAddress(new PublicKey(SYNDICATE_TREASURY_SOL), { limit: 20 });
         
         for (const sigInfo of treasurySigs) {
-            // Check if this signature was already processed
             const { rows: processed } = await db.query(`SELECT 1 FROM transactions WHERE meta->>'txId' = $1`, [sigInfo.signature]);
             if (processed.length > 0) continue;
 
             const fetchedTx = await connection.getParsedTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 });
             if (!fetchedTx || !fetchedTx.meta) continue;
 
-            // Simple amount scan for Native SOL transfers
             const solTransfer = fetchedTx.transaction.message.instructions.find(ix => 
                (ix as any).programId?.toBase58() === '11111111111111111111111111111111' &&
                (ix as any).parsed?.info?.destination === SYNDICATE_TREASURY_SOL
@@ -54,10 +57,10 @@ export async function GET(req: Request) {
                const lamports = (solTransfer as any).parsed?.info?.lamports || 0;
                const solSent = lamports / 1e9;
                
-               // Match based on amount (with tiny float margin)
-               const diff = Math.abs(solSent - (expectedAmountUsd / 79.19)); // Use site price
-               if (diff < 0.001) {
-                  console.log('[P2P Poll] Treasury Match Found Via Amount:', sigInfo.signature);
+               // Match based on stored amount (allow tiny margin for 'dusting')
+               const diff = Math.abs(solSent - (expectedSolAmount || (expectedAmountUsd / 79.19)));
+               if (diff < 0.0001) {
+                  console.log('[P2P Poll] Treasury Match Found Via Stored Amount:', sigInfo.signature);
                   signature = sigInfo.signature;
                   break;
                }
