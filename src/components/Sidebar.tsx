@@ -428,11 +428,11 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 </div>
               </div>
 
-               <div className="space-y-3 relative z-10 px-1 border-t border-white/5 pt-4">
+                <div className="space-y-3 relative z-10 px-1 border-t border-white/5 pt-4">
                   <div className="flex items-center justify-between mb-1">
                      <div className="flex items-center gap-2">
                         <Shield size={12} className="text-[#ffea00]" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[#ffea00] italic">{isSpanish ? 'Bloqueo Génesis' : 'Genesis Lock'}</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[#ffea00] italic">{isSpanish ? 'Racha Activa' : 'Active Streak'}</span>
                      </div>
                      <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">{isSpanish ? 'Día' : 'Day'} 12 / 180</span>
                   </div>
@@ -444,43 +444,43 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                      />
                   </div>
                   <div className="flex items-center gap-1.5 text-[6px] font-black uppercase text-[#ffea00]/60 tracking-widest italic animate-pulse">
-                     <Zap size={8} /> {isSpanish ? 'PENALIZACIÓN DE QUEMA ACTIVA' : '50% EXIT BURN PENALTY ACTIVE'}
+                     <Zap size={8} /> {isSpanish ? 'PENALIZACIÓN POR SALIDA ANTICIPADA' : 'EARLY EXIT PENALTY ACTIVE'}
                   </div>
                </div>
 
                <div className="space-y-1 relative z-10 px-1">
                   <div className="flex items-center gap-2 mb-1">
                      <Flame size={12} className="text-[#ff6b00]" />
-                     <span className="text-[10px] font-black uppercase tracking-widest text-[#ff6b00] italic">{isSpanish ? 'Poder de Red' : 'Network Power'}</span>
+                     <span className="text-[10px] font-black uppercase tracking-widest text-[#ff6b00] italic">{isSpanish ? 'Rango de Miembro' : 'Member Rank'}</span>
                   </div>
                   <h3 className="text-[12px] font-black uppercase italic tracking-tighter text-white">
                     {pointsStats.balance >= 10000 
-                        ? (isSpanish ? 'Nodo Soberano 💎' : 'Sovereign Node 💎')
+                        ? (isSpanish ? 'Miembro Elite 💎' : 'Elite Member 💎')
                         : pointsStats.balance >= 1000 
-                            ? (isSpanish ? 'Supervisor del Sindicato ⚡️' : 'Syndicate Overseer ⚡️')
-                            : (isSpanish ? 'Analista Recluta 🟠' : 'Recruit Analyst 🟠')}
+                            ? (isSpanish ? 'Miembro Pro ⚡️' : 'Pro Member ⚡️')
+                            : (isSpanish ? 'Nuevo Miembro 🟠' : 'New Member 🟠')}
                   </h3>
                </div>
           </div>
 
           <div className="flex flex-col gap-3 pt-4 border-t border-white/5 bg-white/5 p-4 rounded-2xl mb-4 group hover:bg-[#00f0ff]/5 transition-all duration-500">
-              <div className="flex items-center justify-between mb-1">
-                 <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic">{isSpanish ? 'CLAVE DE USUARIO' : 'USERKEY'}</span>
-                 <div className="flex items-center gap-1 scale-90">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse shadow-[0_0_8px_#00f0ff]" />
-                    <span className="text-[6px] font-black text-[#00f0ff] uppercase tracking-widest">{isSpanish ? 'Nodo Vinculado' : 'Linked Node'}</span>
-                 </div>
-              </div>
-              <div 
-                className="flex items-center justify-between group-hover:bg-black/40 p-2 rounded-xl border border-transparent group-hover:border-white/5 transition-all cursor-pointer" 
-                onClick={() => {
-                  navigator.clipboard.writeText(profile?.id || '');
-                  alert(isSpanish ? 'Clave de Usuario Copiada.' : 'USERKEY Copied to Clipboard.');
-                }}
-              >
-                 <code className="text-[10px] font-mono text-white/60 tracking-wider font-black">
-                    {profile?.id?.slice(0, 10)}...{profile?.id?.slice(-6)}
-                 </code>
+               <div className="flex items-center justify-between mb-1">
+                  <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic">{isSpanish ? 'ID DE MIEMBRO' : 'MEMBER ID'}</span>
+                  <div className="flex items-center gap-1 scale-90">
+                     <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse shadow-[0_0_8px_#00f0ff]" />
+                     <span className="text-[6px] font-black text-[#00f0ff] uppercase tracking-widest">{isSpanish ? 'Sesión Activa' : 'Active Session'}</span>
+                  </div>
+               </div>
+               <div 
+                 className="flex items-center justify-between group-hover:bg-black/40 p-2 rounded-xl border border-transparent group-hover:border-white/5 transition-all cursor-pointer" 
+                 onClick={() => {
+                   navigator.clipboard.writeText(profile?.id || '');
+                   alert(isSpanish ? 'ID de Miembro Copiado.' : 'MEMBER ID Copied to Clipboard.');
+                 }}
+               >
+                  <code className="text-[10px] font-mono text-white/60 tracking-wider font-black">
+                     {profile?.id?.slice(0, 10)}...{profile?.id?.slice(-6)}
+                  </code>
                  <Copy 
                     size={12} 
                     className="text-[#00f0ff] opacity-40 group-hover:opacity-100 transition-opacity" 

@@ -367,10 +367,33 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                         )}
 
                         {view === 'success' && (
-                             <div className="py-24 flex flex-col items-center justify-center text-center gap-8 animate-in zoom-in duration-1000">
-                                <div className="w-28 h-28 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center shadow-[0_0_100px_rgba(0,240,255,0.3)] animate-pulse"><CheckCircle2 size={56} className="text-[#00f0ff]" /></div>
-                                <div className="space-y-3"><h3 className="text-4xl font-syncopate font-black uppercase italic text-white tracking-tighter leading-none shrink-0">{isSpanish ? 'FUSIÓN EXITOSA' : 'SYNC SUCCESSFUL'}</h3><p className="text-[10px] text-white/40 uppercase tracking-[0.5em] font-black italic">{isSpanish ? 'Créditos asignados a su nodo de identidad' : 'Credits allocated to your identity node'}</p></div>
-                                <button onClick={onClose} className="px-14 py-6 rounded-[2.5rem] bg-white text-black font-black uppercase text-[13px] tracking-[0.3em] hover:scale-[1.05] active:scale-95 transition-all shadow-white/20 shadow-2xl">{isSpanish ? 'VOLVER AL TERMINAL' : 'RETURN TO TERMINAL'}</button>
+                             <div className="py-24 flex flex-col items-center justify-center text-center gap-10 animate-in zoom-in duration-1000">
+                                <div className="w-28 h-28 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_100px_rgba(16,185,129,0.3)] animate-pulse"><CheckCircle2 size={56} className="text-emerald-500" /></div>
+                                <div className="space-y-4">
+                                    <h3 className="text-4xl font-syncopate font-black uppercase italic text-white tracking-tighter leading-none shrink-0">
+                                        {isSpanish ? 'DEPOSITO CONFIRMADO' : 'DEPOSIT CONFIRMED'}
+                                    </h3>
+                                    <p className="text-[12px] text-white/60 uppercase tracking-[0.4em] font-black italic">
+                                        {p2pAsset === 'SOL' ? `${targetSol} SOL` : p2pAsset === 'USDC' ? `$${targetUsd} USDC` : 'STRIPE TRANSFER'} {isSpanish ? 'RECIBIDO' : 'RECEIVED'}
+                                    </p>
+                                </div>
+                                <div className="flex flex-col gap-4 w-full px-12">
+                                    <button 
+                                        onClick={onClose} 
+                                        className="w-full py-6 rounded-[2.5rem] bg-white text-black font-black uppercase text-[13px] tracking-[0.3em] hover:scale-[1.05] active:scale-95 transition-all shadow-white/20 shadow-2xl"
+                                    >
+                                        {isSpanish ? 'VOLVER AL TERMINAL' : 'RETURN TO TERMINAL'}
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            setView('options');
+                                            setIsPolling(false);
+                                        }} 
+                                        className="w-full py-4 rounded-[2rem] bg-white/5 text-white/40 border border-white/10 font-black uppercase text-[10px] tracking-[0.2em] hover:text-white hover:bg-white/10 transition-all"
+                                    >
+                                        {isSpanish ? 'HACER OTRO DEPOSITO' : 'MAKE ANOTHER DEPOSIT'}
+                                    </button>
+                                </div>
                              </div>
                         )}
                     </div>

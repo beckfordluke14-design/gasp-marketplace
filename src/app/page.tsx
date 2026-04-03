@@ -296,7 +296,9 @@ function MarketplaceContent() {
                      />
                  )}
                  {activeTab === 'weather' && (
+                  <div className="w-full max-w-4xl mx-auto px-4 md:px-6 animate-in fade-in zoom-in duration-500">
                      <WeatherFeed onOpenTopUp={() => setIsTopUpOpen(true)} />
+                  </div>
                  )}
                  {activeTab === 'reports' && (
                      <NewsFeed />
