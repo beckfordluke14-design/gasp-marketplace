@@ -37,13 +37,21 @@ export async function POST(req: Request) {
     const livePrice = oracleData.price || 79.19;
     const expectedSol = (amountUsd / livePrice);
 
+    // 🛡️ SESSION FLUSH: Clear any stuck 'pending' sessions for this user
+    // This prevents unique-constraint or overlap conflicts.
+    await db.query(`UPDATE p2p_sessions SET status = 'expired' WHERE user_id = $1 AND status = 'pending'`, [userId]);
+
     // 🗄️ Store in DB: bound to userId + amount + expected SOL + expiry
     // 🛡️ REVENUE-LOCK: Using a metadata column (fallback if table not migrated)
-    await db.query(`
-      INSERT INTO p2p_sessions (user_id, reference, amount_usd, status, expires_at, metadata)
-      VALUES ($1, $2, $3, 'pending', NOW() + INTERVAL '24 hours', $4)
-      ON CONFLICT (reference) DO NOTHING
-    `, [userId, reference, amountUsd, JSON.stringify({ expectedSol, priceAtCreation: livePrice })]);
+    try {
+        await db.query(`
+          INSERT INTO p2p_sessions (user_id, reference, amount_usd, status, expires_at, metadata)
+          VALUES ($1, $2, $3, 'pending', NOW() + INTERVAL '24 hours', $4)
+        `, [userId, reference, amountUsd, JSON.stringify({ expectedSol, priceAtCreation: livePrice })]);
+    } catch (dbErr: any) {
+        console.error('[P2P DB ERROR]:', dbErr.message);
+        return NextResponse.json({ success: false, error: `DB_SYNC_FAULT: ${dbErr.message}` }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, reference, amountUsd, expectedSol });
 
