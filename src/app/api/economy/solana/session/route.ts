@@ -13,6 +13,12 @@ export async function POST(req: Request) {
   try {
     const { userId, amountUsd } = await req.json();
 
+    // 🛡️ SELF-HEALING DATABASE MIGRATION
+    // Ensures 'metadata' and 'expected_sol' columns exist without manual psql access.
+    try {
+        await db.query(`ALTER TABLE p2p_sessions ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';`);
+    } catch (_) { /* Already exists or locked */ }
+
     if (!userId || !amountUsd || amountUsd <= 0) {
       return NextResponse.json({ success: false, error: 'INVALID_PAYLOAD' }, { status: 400 });
     }
