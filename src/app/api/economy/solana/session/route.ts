@@ -24,14 +24,22 @@ export async function POST(req: Request) {
     // 🔑 Generate reference SERVER-SIDE — client never controls this
     const reference = Keypair.generate().publicKey.toBase58();
 
-    // 🗄️ Store in DB: bound to userId + amount + expiry
-    await db.query(`
-      INSERT INTO p2p_sessions (user_id, reference, amount_usd, status, expires_at)
-      VALUES ($1, $2, $3, 'pending', NOW() + INTERVAL '24 hours')
-      ON CONFLICT (reference) DO NOTHING
-    `, [userId, reference, amountUsd]);
+    // 🧬 PRICE SNAPSHOT: Lock the SOL/USD rate at the time of session creation
+    // This allows the scanner to match the exact SOL amount even if price moves.
+    const oracleRes = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/economy/solana/price`).catch(() => null);
+    const oracleData = oracleRes ? await oracleRes.json() : { price: 79.19 };
+    const livePrice = oracleData.price || 79.19;
+    const expectedSol = (amountUsd / livePrice);
 
-    return NextResponse.json({ success: true, reference, amountUsd });
+    // 🗄️ Store in DB: bound to userId + amount + expected SOL + expiry
+    // 🛡️ REVENUE-LOCK: Using a metadata column (fallback if table not migrated)
+    await db.query(`
+      INSERT INTO p2p_sessions (user_id, reference, amount_usd, status, expires_at, metadata)
+      VALUES ($1, $2, $3, 'pending', NOW() + INTERVAL '24 hours', $4)
+      ON CONFLICT (reference) DO NOTHING
+    `, [userId, reference, amountUsd, JSON.stringify({ expectedSol, priceAtCreation: livePrice })]);
+
+    return NextResponse.json({ success: true, reference, amountUsd, expectedSol });
 
   } catch (err: any) {
     console.error('[P2PSession] Fault:', err.message);

@@ -75,12 +75,13 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             if (data.success && data.price) {
                 setSolPrice(data.price);
             }
-        } catch (e) { console.error('[Oracle] failure:', e); }
+        } catch (e) { console.error('[Oracle Sync Lag]:', e); }
     };
 
     useEffect(() => {
         fetchLivePrice();
-        const interval = setInterval(fetchLivePrice, 15000);
+        // 🧬 DYNAMIC HEARTBEAT: Re-fetch every 30s for high-volatility lockdown
+        const interval = setInterval(fetchLivePrice, 30000); 
         return () => clearInterval(interval);
     }, []);
 
