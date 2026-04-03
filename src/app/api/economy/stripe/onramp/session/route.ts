@@ -37,14 +37,14 @@ export async function POST(req: Request) {
 
     const body = new URLSearchParams();
 
-    // 🛡️ PERFECT ALIGNMENT: Using EXACT keys from the Stripe alert
+    // 🛡️ RE-SYNC: Using the key explicitly requested by the latest Stripe alert
     body.append('destination_currency', 'usdc');
     body.append('destination_network', 'solana');
     body.append('wallet_addresses[solana]', SYNDICATE_TREASURY_SOL);
-    body.append('source_exchange_amount', priceUsd.toFixed(2));
+    body.append('source_amount', priceUsd.toFixed(2));
     body.append('source_currency', 'usd');
 
-    console.log('[Stripe] Minting session — wallet:', SYNDICATE_TREASURY_SOL, 'amount:', priceUsd);
+    console.log('[Stripe] Re-Minting session — wallet:', SYNDICATE_TREASURY_SOL, 'amount:', priceUsd);
 
     const response = await fetch('https://api.stripe.com/v1/crypto/onramp_sessions', {
       method: 'POST',
