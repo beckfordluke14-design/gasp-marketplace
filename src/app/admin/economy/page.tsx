@@ -92,6 +92,14 @@ export default function EconomyAdmin() {
                             Central Strategic Allocation // Institutional Terminal
                         </p>
                     </div>
+                    <div className="flex gap-4">
+                        <a 
+                            href="/admin/assets" 
+                            className="bg-zinc-900 text-white/40 border border-white/5 py-3 px-6 rounded-2xl flex items-center gap-3 text-[9px] font-black uppercase tracking-widest hover:border-[#00f0ff] hover:text-[#00f0ff] transition-all group"
+                        >
+                            Manage Asset Vault <LinkIcon size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                        </a>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
