@@ -1,5 +1,10 @@
+'use client';
+
 import { useUser } from '@/components/providers/UserProvider';
 import { usePrivy } from '@privy-io/react-auth';
+import { useState, useEffect } from 'react';
+
+export const dynamic = 'force-dynamic';
 
 interface Transaction {
     id: string;
@@ -12,7 +17,7 @@ interface Transaction {
 
 export default function EconomyAdmin() {
     const { authenticated } = usePrivy();
-    const { profile } = useProfile();
+    const { profile } = useUser();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');

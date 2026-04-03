@@ -1,17 +1,17 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { isAdminRequest, unauthorizedResponse } from '@/lib/auth';
 import { issueCredits } from '@/lib/economy/issueCredits';
-import { getServerSideProfile } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * 🛡️ SOVEREIGN ADMIN: MANUAL CREDIT GRANT
- * Allows admins to manually override and issue credits for manual reconciliation.
+ * Allows admins to manually override and issue credits.
  */
 export async function POST(req: Request) {
     try {
-        const profile = await getServerSideProfile();
-        if (!profile?.is_admin) {
-            return NextResponse.json({ success: false, error: 'UNAUTHORIZED' }, { status: 403 });
+        if (!(await isAdminRequest(req))) {
+            return unauthorizedResponse();
         }
 
         const { targetUserId, amountUsd, reason } = await req.json();
