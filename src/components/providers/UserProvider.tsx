@@ -46,6 +46,24 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 nickname: privyUser?.email?.address?.split('@')[0] || 'Syndicate Member'
             });
         }
+
+        // 🛰️ SOVEREIGN BACKGROUND RECONCILIATION
+        // Silence-check for any pending P2P or Stripe sessions
+        const p2pRes = await fetch(`/api/economy/solana/session?userId=${userId}`);
+        const p2pData = await p2pRes.json();
+        if (p2pData.success && p2pData.session) {
+           const ref = p2pData.session.reference;
+           const amount = p2pData.session.amount_usd || 19.99;
+           // Trigger a verification ping without blocking
+           fetch(`/api/economy/solana/verify/reference?reference=${ref}&userId=${userId}&expectedAmount=${amount}`)
+             .then(r => r.json())
+             .then(v => {
+                if (v.success) {
+                   console.log('[Sovereign Sync]: Background payment confirmed.');
+                   window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+                }
+             }).catch(() => {});
+        }
     } catch (e) {
         console.error('[UserProvider] Sovereign Sync Failed:', e);
     }
