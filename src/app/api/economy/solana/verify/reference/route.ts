@@ -69,8 +69,8 @@ export async function GET(req: Request) {
        const lamports = (solTransfer as any).parsed?.info?.lamports || 0;
        const solSent = lamports / 1e9;
        
-       // 🛡️ RECOVERY: Use DexScreener + CoinGecko Oracle (No 401s)
-       let solPrice = 188; // Safety Floor
+       // 🛡️ RECOVERY: Trust User's Market Floor ($79.19)
+       let solPrice = 79.19; 
        try {
            const dRes = await fetch('https://api.dexscreener.com/latest/dex/pairs/solana/83w5pydpoy9g8r8k6z3a6p5r4v5d5p1n3e7e2y7m');
            const dData = await dRes.json();

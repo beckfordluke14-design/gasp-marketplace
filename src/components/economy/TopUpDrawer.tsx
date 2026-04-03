@@ -310,22 +310,45 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                         </div>
                                     </div>
                                     <p className="text-[9px] text-white/40 leading-relaxed max-w-[280px] mx-auto font-black uppercase tracking-widest italic">{isPolling ? (isSpanish ? 'ESCANEANDO BLOQUES DE SOLANA...' : 'SCANNING SOLANA BLOCKS...') : `Enviar ${p2pAsset === 'SOL' ? targetSol : targetUsd} ${p2pAsset} a la Bóveda.`}</p>
+                                    
+                                    {/* 🚩 CRITICAL USER GUIDANCE */}
+                                    {isPolling && (
+                                        <div className="mx-auto max-w-[320px] p-4 bg-red-500/10 border border-red-500/40 rounded-2xl animate-pulse">
+                                            <p className="text-[10px] font-black text-red-500 uppercase tracking-widest leading-normal">
+                                                {isSpanish ? '¡NO CIERRE ESTA VENTANA!' : 'DO NOT CLOSE THIS WINDOW!'} <br/>
+                                                <span className="text-white/60 opacity-60">
+                                                    {isSpanish ? 'Esperando confirmación de la red... Sea paciente.' : 'Waiting for network nodes to signal... stay patient.'}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
 
-                                {isMobile ? (
-                                    <div className="py-6 space-y-6">
-                                        <button onClick={handleSolanaPayDeepLink} className="w-full h-20 rounded-[2.5rem] bg-[#00f0ff] text-black font-black uppercase text-[14px] tracking-[0.2em] shadow-[0_10px_60px_rgba(0,240,255,0.4)] flex items-center justify-center gap-4">
-                                           <Smartphone size={28} />
-                                           <span className="font-syncopate italic tracking-tighter">{isSpanish ? 'ABRIR PHANTOM' : 'OPEN IN PHANTOM'}</span>
-                                        </button>
-                                        <div className="p-4 bg-white rounded-3xl w-44 h-44 mx-auto"><img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(solanaPayUrl)}`} className="w-full h-full object-contain" /></div>
+                                <div className="space-y-6">
+                                    {isMobile ? (
+                                        <div className="py-2 space-y-6">
+                                            <button onClick={handleSolanaPayDeepLink} className="w-full h-20 rounded-[2.5rem] bg-[#00f0ff] text-black font-black uppercase text-[14px] tracking-[0.2em] shadow-[0_10px_60px_rgba(0,240,255,0.4)] flex items-center justify-center gap-4">
+                                               <Smartphone size={28} />
+                                               <span className="font-syncopate italic tracking-tighter">{isSpanish ? 'ABRIR PHANTOM' : 'OPEN IN PHANTOM'}</span>
+                                            </button>
+                                            <div className="p-4 bg-white rounded-3xl w-44 h-44 mx-auto"><img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(solanaPayUrl)}`} className="w-full h-full object-contain" /></div>
+                                        </div>
+                                    ) : (
+                                        <div className="relative p-8 bg-white rounded-[3rem] w-72 h-72 mx-auto shadow-[0_0_100px_rgba(255,255,255,0.1)] ring-8 ring-white/5 group">
+                                            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(solanaPayUrl)}`} alt="QR Protocol" className="w-full h-full object-contain" />
+                                            <div className="absolute inset-0 border-[16px] border-white rounded-[3rem]" />
+                                        </div>
+                                    )}
+
+                                    {/* 🛠️ MANUAL SUPPORT TRACE */}
+                                    <div className="mx-auto max-w-[340px] p-6 bg-black/40 border border-white/5 rounded-3xl text-left space-y-4">
+                                        <div className="flex items-center gap-3"><AlertCircle size={14} className="text-[#00f0ff]" /><span className="text-[9px] font-black uppercase text-[#00f0ff] tracking-widest">{isSpanish ? 'DATOS DE SOPORTE' : 'MANUAL SUPPORT METADATA'}</span></div>
+                                        <div className="space-y-2">
+                                            <div className="flex flex-col"><span className="text-[7px] text-white/20 uppercase font-bold">REF:</span><span className="text-[10px] font-mono text-white/60 break-all">{uniqueRef || 'GENERATING...'}</span></div>
+                                            <div className="flex flex-col"><span className="text-[7px] text-white/20 uppercase font-bold">VAULT:</span><span className="text-[10px] font-mono text-white/60 break-all">{SYNDICATE_TREASURY_SOL}</span></div>
+                                        </div>
                                     </div>
-                                ) : (
-                                    <div className="relative p-8 bg-white rounded-[3rem] w-72 h-72 mx-auto shadow-[0_0_100px_rgba(255,255,255,0.1)] ring-8 ring-white/5 group">
-                                        <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(solanaPayUrl)}`} alt="QR Protocol" className="w-full h-full object-contain" />
-                                        <div className="absolute inset-0 border-[16px] border-white rounded-[3rem]" />
-                                    </div>
-                                )}
+                                </div>
 
                                 <div className="flex flex-col items-center gap-6 py-4">
                                     <div className="flex items-center justify-center gap-4 bg-white/5 p-2 rounded-2xl border border-white/5">
