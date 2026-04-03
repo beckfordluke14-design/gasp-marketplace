@@ -23,8 +23,32 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: 'MISSING_PARAMS' }, { status: 400 });
     }
 
-    // 1. Connect to Solana — using Ankr + Fallback discovery
-    const connection = new Connection('https://rpc.ankr.com/solana', 'confirmed');
+    // 1. Connect to Solana — Multi-Node Relay Protocol
+    const endpoints = [
+        'https://solana-rpc.publicnode.com',
+        'https://api.mainnet-beta.solana.com'
+    ];
+    
+    let connection;
+    let fallbackSuccess = false;
+
+    for (const endpoint of endpoints) {
+        try {
+            connection = new Connection(endpoint, 'confirmed');
+            // Test connection with a light request
+            await connection.getSlot();
+            fallbackSuccess = true;
+            console.log(`[P2P RPC] Connected to ${endpoint}`);
+            break;
+        } catch (e) {
+            console.warn(`[P2P RPC] Endpoint Failed: ${endpoint}`);
+        }
+    }
+
+    if (!fallbackSuccess || !connection) {
+        return NextResponse.json({ success: false, error: 'INFRASTRUCTURE_OFFLINE' }, { status: 503 });
+    }
+
     const referencePubkey = new PublicKey(reference);
 
     // 2. Discovery Loop: Reference first, then Treasury Sweep
@@ -137,13 +161,17 @@ export async function GET(req: Request) {
        }
     }
 
-    // 🛡️ SECURITY CEILING: Verify sufficient payment
-    // We allow a 5% margin for price volatility if paying in SOL
-    const margin = isNativeSol ? 0.95 : 0.99; 
-    if (actualAmountUsd < expectedAmountUsd * margin) {
-       console.log(`[P2P Poll] Underpaid: Received $${actualAmountUsd} but expected $${expectedAmountUsd}`);
-       return NextResponse.json({ success: false, error: 'UNDERPAID' });
+    // 🛡️ REVENUE CAPTURE: Dynamic Pro-Rating
+    // We accept ANY amount above a $1.00 institutional floor and issue exact value credits.
+    const floorUsd = 1.00;
+    if (actualAmountUsd < floorUsd) {
+       console.log(`[P2P Poll] Below Floor: Received $${actualAmountUsd}`);
+       return NextResponse.json({ success: false, error: 'BELOW_FLOOR' });
     }
+
+    // 🔬 DYNAMIC CREDIT CALCULATION: 1,000 Credits per $1.00
+    // If they pay more, they get more. If they pay less, they get less. We don't block them.
+    const proRatedCredits = Math.floor(actualAmountUsd * 1000);
 
     // 4. Issue Credits with Automatic Synchronization
     const result = await issueCredits({
