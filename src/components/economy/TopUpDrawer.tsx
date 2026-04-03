@@ -149,14 +149,10 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     }, [userId, targetUsd, propUserId]);
 
     const handleSwitchToP2P = async () => {
-        if (!solPrice || solPrice === 0) {
-            alert('Awaiting Market Oracle...');
-            await fetchLivePrice();
-            if (!solPrice || solPrice === 0) return;
-        }
+        // Fetch latest price silently — don't block the user
+        await fetchLivePrice();
 
         try {
-            await fetchLivePrice();
             const resolvedId = userId || propUserId || 'anon';
             const res = await fetch('/api/economy/solana/session', {
                 method: 'POST',
@@ -171,7 +167,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             startPolling(data.reference);
         } catch (err) {
             console.error('[P2P] Session creation failed:', err);
-            alert('P2P session unavailable.');
+            alert('P2P session unavailable. Try again.');
         }
     };
 

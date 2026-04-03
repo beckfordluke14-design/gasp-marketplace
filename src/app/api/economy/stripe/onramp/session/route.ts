@@ -36,26 +36,16 @@ export async function POST(req: Request) {
     }
 
     const body = new URLSearchParams();
-    
-    // 🛡️ RECOVERY: Dead-Simple Flat Spec
-    body.append('destination_currency', 'usdc');
-    body.append('destination_network', 'solana');
+
+    // ✅ VALID STRIPE CRYPTO ONRAMP PARAMS ONLY
     body.append('wallet_addresses[solana]', SYNDICATE_TREASURY_SOL);
-    body.append('lock_wallet_address', 'true');
-    
-    // Constraints
     body.append('destination_currencies[0]', 'usdc');
     body.append('destination_networks[0]', 'solana');
-
-    // Pre-fill amount (Flat)
     body.append('source_amount', priceUsd.toFixed(2));
     body.append('source_currency', 'usd');
+    body.append('return_url', 'https://gasp.fun');
 
-    // 🛡️ RETURN URL
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gasp.fun';
-    body.append('return_url', `${baseUrl}/?payment_pending=true`);
-
-    console.log('[Stripe Emergency Sync]: Minting session for wallet:', SYNDICATE_TREASURY_SOL);
+    console.log('[Stripe] Minting session — wallet:', SYNDICATE_TREASURY_SOL, 'amount:', priceUsd);
 
     const response = await fetch('https://api.stripe.com/v1/crypto/onramp_sessions', {
       method: 'POST',

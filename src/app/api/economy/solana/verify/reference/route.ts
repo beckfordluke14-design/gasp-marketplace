@@ -23,8 +23,8 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: 'MISSING_PARAMS' }, { status: 400 });
     }
 
-    // 1. Connect to Solana Mainnet
-    const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+    // 1. Connect to Solana — using Ankr free RPC (no rate limits)
+    const connection = new Connection('https://rpc.ankr.com/solana', 'confirmed');
     const referencePubkey = new PublicKey(reference);
 
     // 2. Fetch signatures for the unique reference
@@ -69,21 +69,18 @@ export async function GET(req: Request) {
        const lamports = (solTransfer as any).parsed?.info?.lamports || 0;
        const solSent = lamports / 1e9;
        
-       // 🛡️ RECOVERY: Trust User's Market Floor ($79.19)
-       let solPrice = 79.19; 
+       // CoinGecko price (same source as frontend)
+       let solPrice = 79.0;
        try {
-           const dRes = await fetch('https://api.dexscreener.com/latest/dex/pairs/solana/83w5pydpoy9g8r8k6z3a6p5r4v5d5p1n3e7e2y7m');
-           const dData = await dRes.json();
-           const p1 = dData.pairs?.[0]?.priceUsd;
-           if (p1) {
-               solPrice = parseFloat(p1);
-           } else {
-               const gRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
-               const gData = await gRes.json();
-               if (gData.solana?.usd) solPrice = gData.solana.usd;
-           }
-       } catch (e) {
-           console.error('[Verify Price Feed Delay]:', e);
+           const gRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+           const gData = await gRes.json();
+           if (gData?.solana?.usd) solPrice = gData.solana.usd;
+       } catch (_) {
+           try {
+               const bRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT');
+               const bData = await bRes.json();
+               if (bData?.price) solPrice = parseFloat(bData.price);
+           } catch (_) {}
        }
        
        actualAmountUsd = solSent * solPrice;
