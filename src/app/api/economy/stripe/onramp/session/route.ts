@@ -37,15 +37,12 @@ export async function POST(req: Request) {
 
     const body = new URLSearchParams();
 
-    // ✅ EXACT STRIPE API SCHEMA (per docs: transaction_details nested params)
-    body.append('transaction_details[wallet_addresses][solana]', SYNDICATE_TREASURY_SOL);
-    body.append('transaction_details[destination_currencies][0]', 'usdc');
-    body.append('transaction_details[destination_networks][0]', 'solana');
-    body.append('transaction_details[destination_currency]', 'usdc');
-    body.append('transaction_details[destination_network]', 'solana');
-    body.append('transaction_details[source_currency]', 'usd');
-    body.append('transaction_details[source_amount]', priceUsd.toFixed(2));
-    // NOTE: return_url is NOT a valid API param — Stripe returns redirect_url in response
+    // 🛡️ PERFECT ALIGNMENT: Using EXACT keys from the Stripe alert
+    body.append('destination_currency', 'usdc');
+    body.append('destination_network', 'solana');
+    body.append('wallet_addresses[solana]', SYNDICATE_TREASURY_SOL);
+    body.append('source_exchange_amount', priceUsd.toFixed(2));
+    body.append('source_currency', 'usd');
 
     console.log('[Stripe] Minting session — wallet:', SYNDICATE_TREASURY_SOL, 'amount:', priceUsd);
 
