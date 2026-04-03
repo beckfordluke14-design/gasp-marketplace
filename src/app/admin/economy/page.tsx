@@ -1,8 +1,5 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+import { useUser } from '@/components/providers/UserProvider';
 import { usePrivy } from '@privy-io/react-auth';
-import { useProfile } from '@/hooks/useProfile';
 
 interface Transaction {
     id: string;
