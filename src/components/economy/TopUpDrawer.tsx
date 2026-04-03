@@ -123,9 +123,9 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             } else {
                 throw new Error(data.error || 'Fault');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('[TopUp] Stripe session failed:', err);
-            alert('Secure checkout unavailable. Use P2P rail.');
+            alert(`Stripe Error: ${err.message || 'System Fault'}. Use P2P rail for instant settlement.`);
             setIsLoading(false);
         }
     };
