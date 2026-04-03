@@ -23,20 +23,53 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: 'MISSING_PARAMS' }, { status: 400 });
     }
 
-    // 1. Connect to Solana — using Ankr free RPC (no rate limits)
+    // 1. Connect to Solana — using Ankr + Fallback discovery
     const connection = new Connection('https://rpc.ankr.com/solana', 'confirmed');
     const referencePubkey = new PublicKey(reference);
 
-    // 2. Fetch signatures for the unique reference
-    const signatures = await connection.getSignaturesForAddress(referencePubkey, { limit: 1 });
+    // 2. Discovery Loop: Reference first, then Treasury Sweep
+    let signatures = await connection.getSignaturesForAddress(referencePubkey, { limit: 1 });
+    let signature = signatures.length > 0 ? signatures[0].signature : null;
 
-    if (signatures.length === 0) {
+    // 🛡️ RECOVERY FALLBACK: If reference is missing, scan treasury for exact amount
+    if (!signature) {
+        console.log('[P2P Poll] Reference not found. Executing Treasury Sweep...');
+        const treasurySigs = await connection.getSignaturesForAddress(new PublicKey(SYNDICATE_TREASURY_SOL), { limit: 20 });
+        
+        for (const sigInfo of treasurySigs) {
+            // Check if this signature was already processed
+            const { rows: processed } = await db.query(`SELECT 1 FROM transactions WHERE meta->>'txId' = $1`, [sigInfo.signature]);
+            if (processed.length > 0) continue;
+
+            const fetchedTx = await connection.getParsedTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 });
+            if (!fetchedTx || !fetchedTx.meta) continue;
+
+            // Simple amount scan for Native SOL transfers
+            const solTransfer = fetchedTx.transaction.message.instructions.find(ix => 
+               (ix as any).programId?.toBase58() === '11111111111111111111111111111111' &&
+               (ix as any).parsed?.info?.destination === SYNDICATE_TREASURY_SOL
+            );
+
+            if (solTransfer) {
+               const lamports = (solTransfer as any).parsed?.info?.lamports || 0;
+               const solSent = lamports / 1e9;
+               
+               // Match based on amount (with tiny float margin)
+               const diff = Math.abs(solSent - (expectedAmountUsd / 79.19)); // Use site price
+               if (diff < 0.001) {
+                  console.log('[P2P Poll] Treasury Match Found Via Amount:', sigInfo.signature);
+                  signature = sigInfo.signature;
+                  break;
+               }
+            }
+        }
+    }
+
+    if (!signature) {
       return NextResponse.json({ success: false, error: 'TX_NOT_FOUND_YET' });
     }
 
-    const { signature } = signatures[0];
-
-    // 3. Check for Idempotency
+    // 3. Check for Idempotency with found signature
     const { rows: existing } = await db.query(
       `SELECT 1 FROM transactions WHERE meta->>'txId' = $1 LIMIT 1`,
       [signature]

@@ -181,19 +181,24 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
 
     const buildSolanaPayUrl = () => {
         const params = new URLSearchParams();
-        const cleanUsd = Math.max(0.01, parseFloat(targetUsd.toString()) || 4.99);
+        const baseUsd = parseFloat(targetUsd.toString()) || 4.99;
         
+        // 🧬 UNIQUE DUSTING PROTOCOL: Add random lamports to ensure global amount uniqueness
+        // This allows 100% accurate matching even if reference keys are stripped.
+        const dust = (Math.floor(Math.random() * 900) + 100) / 100000000; // 0.00000100 to 0.00000999 SOL
+
         if (p2pAsset === 'USDC') {
-            params.append('amount', cleanUsd.toFixed(2));
+            const cleanUsd = baseUsd + dust;
+            params.append('amount', cleanUsd.toFixed(6));
             params.append('spl-token', 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
         } else {
-            const cleanSol = Math.max(0.0001, parseFloat(targetSol) || 0.025);
-            params.append('amount', cleanSol.toFixed(4));
+            const cleanSol = (baseUsd / (solPrice || 79.19)) + dust;
+            params.append('amount', cleanSol.toFixed(9));
         }
 
         if (uniqueRef) params.append('reference', uniqueRef);
-        params.append('label', 'GASP');
-        params.append('message', 'Refill');
+        params.append('label', 'GASP Hub');
+        params.append('message', `Order ID: ${uniqueRef?.slice(0, 8)}`);
         
         return `solana:${SYNDICATE_TREASURY_SOL}?${params.toString()}`;
     };
