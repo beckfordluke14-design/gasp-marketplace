@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   try {
     // 🛡️ SINGLE SOURCE OF TRUTH: profiles table is the authoritative credit node
     const { rows: profiles } = await db.query(
-        'SELECT credit_balance, is_admin, total_spent_usd, nickname FROM profiles WHERE id = $1 LIMIT 1', 
+        'SELECT credit_balance, is_admin, nickname FROM profiles WHERE id = $1 LIMIT 1', 
         [userId]
     );
     if (profiles && profiles.length > 0) {
@@ -20,7 +20,6 @@ export async function GET(req: Request) {
          success: true, 
          balance: profiles[0].credit_balance || 0,
          is_admin: profiles[0].is_admin || false,
-         total_spent_usd: profiles[0].total_spent_usd || 0,
          nickname: profiles[0].nickname || null
        });
     }

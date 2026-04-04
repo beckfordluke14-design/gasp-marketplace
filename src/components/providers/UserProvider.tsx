@@ -44,7 +44,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 id: userId,
                 credit_balance: data.balance,
                 is_admin: data.is_admin,
-                total_spent_usd: data.total_spent_usd,
                 nickname: data.nickname || privyUser?.email?.address?.split('@')[0] || 'Syndicate Member'
             });
 
