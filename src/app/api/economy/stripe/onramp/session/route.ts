@@ -38,8 +38,12 @@ export async function POST(req: Request) {
     const body = new URLSearchParams();
 
     // 🛡️ RE-SYNC: Using the key explicitly requested by the latest Stripe alert
+    // 🔱 LOCKDOWN: Forcing USDC on Solana to prevent cross-chain errors or 'gaming'
     body.append('destination_currency', 'usdc');
+    body.append('destination_networks[0]', 'solana');
+    body.append('destination_currencies[0]', 'usdc');
     body.append('destination_network', 'solana');
+    
     body.append('wallet_addresses[solana]', SYNDICATE_TREASURY_SOL);
     body.append('lock_wallet_address', 'true');
     body.append('source_amount', priceUsd.toFixed(2));
