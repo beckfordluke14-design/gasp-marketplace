@@ -57,6 +57,12 @@ export default function AssetAdmin() {
     };
 
     const runAction = async (payload: any) => {
+        // Guard: hero/gallery/vault actions all require a persona target
+        const needsPersona = ['create_gallery', 'create_vault'].includes(payload.action || '') || (payload.type === 'persona');
+        if (needsPersona && !payload.id && !payload.personaId) {
+            setMsg('✗ SELECT A PERSONA FIRST');
+            return;
+        }
         setMsg('COMMITTING...');
         const k = localStorage.getItem('admin_gasp_key') || '';
         try {
@@ -66,7 +72,7 @@ export default function AssetAdmin() {
             });
             const data = await res.json();
             if (data.success) {
-                setMsg('✓ SUCCESS');
+                setMsg('✓ SUCCESS — ' + (payload.action || payload.type || 'DONE').toUpperCase());
                 setActionId(null);
                 setTimeout(loadData, 500);
             } else { setMsg('✗ ' + (data.error || 'FAILED')); }
@@ -199,7 +205,22 @@ export default function AssetAdmin() {
                 {/* ── LOST SCAN / FORM VIEW ── */}
                 {view === 'lost' && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter Search..." style={{ width: '100%', background: '#111', border: '1px solid #333', color: '#fff', padding: '15px', borderRadius: '15px' }} />
+                        
+                        {/* 🛡️ PERSONA TARGET SELECTOR — Required for SET AS HERO to work */}
+                        <div style={{ width: '100%', background: '#0a1a0a', border: `2px solid ${selectedPersonaId ? '#00f0ff' : '#ff4444'}`, borderRadius: '15px', padding: '12px 15px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '9px', color: selectedPersonaId ? '#00f0ff' : '#ff4444', fontWeight: 'bold', whiteSpace: 'nowrap' }}>TARGET PERSONA:</span>
+                            <select 
+                                value={selectedPersonaId || ''} 
+                                onChange={e => setSelectedPersonaId(e.target.value || null)}
+                                style={{ flex: 1, background: '#111', border: '1px solid #333', color: '#fff', padding: '8px', borderRadius: '8px', fontSize: '11px' }}
+                            >
+                                <option value="">── Select who to assign images to ──</option>
+                                {personas.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                            </select>
+                            {selectedPersonaId && <span style={{ fontSize: '9px', color: '#00f0ff', whiteSpace: 'nowrap' }}>✓ READY</span>}
+                        </div>
+
+                        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter by filename..." style={{ width: '100%', background: '#111', border: '1px solid #333', color: '#fff', padding: '15px', borderRadius: '15px' }} />
                         {displayAssets.slice(0, limit).map((a: any) => (
                             <div key={a.key} style={{ width: 'calc(50% - 5px)', background: birthUrl === a.url ? '#0d1a0d' : '#0a0a0a', borderRadius: '15px', border: birthUrl === a.url ? '1px solid #00ff00' : '1px solid #111' }}>
                                 <img src={a.url} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} loading="lazy" />
