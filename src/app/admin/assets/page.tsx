@@ -25,9 +25,10 @@ export default function AssetAdmin() {
     
     // Modal / Inspector State
     const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null);
-    const [targetAsset, setTargetAsset] = useState<any>(null); // For grafting/linking
     const [msg, setMsg] = useState('');
     const [limit, setLimit] = useState(30);
+    const [birthName, setBirthName] = useState('');
+    const [birthUrl, setBirthUrl] = useState('');
 
     useEffect(() => {
         setReady(true);
@@ -71,19 +72,20 @@ export default function AssetAdmin() {
         } catch { setMsg('✗ ERR'); }
     };
 
-    const birthPersona = async (assetUrl: string) => {
-        const name = prompt('Sovereign Name for New Persona:');
-        if (!name) return;
+    const birthPersona = async () => {
+        if (!birthName || !birthUrl) return;
         setMsg('BIRTHING...');
         const k = localStorage.getItem('admin_gasp_key') || '';
         try {
             const res = await fetch('/api/admin/persona', {
                 method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-key': k },
-                body: JSON.stringify({ name, seed_image_url: assetUrl })
+                body: JSON.stringify({ name: birthName, seed_image_url: birthUrl })
             });
             const data = await res.json();
             if (data.success) {
-                setMsg('★ BORN');
+                setMsg('★ BORN: ' + birthName);
+                setBirthName('');
+                setBirthUrl('');
                 loadData();
             }
         } catch { setMsg('✗ ERR'); }
@@ -93,7 +95,12 @@ export default function AssetAdmin() {
 
     const selectedPersona = personas.find(p => p.id === selectedPersonaId);
     const personaPosts = posts.filter(p => p.persona_id === selectedPersonaId);
-    const displayAssets = [...lost, ...vault].filter(a => a.key.toLowerCase().includes(search.toLowerCase()));
+    // 🛡️ NORMALIZE: lost nodes use 'id', vault nodes use 'key'. Unify both.
+    const allAssets = [
+        ...lost.map((n: any) => ({ key: n.id || n.key || '', url: n.url })),
+        ...vault.filter((v: any) => !lost.find((l: any) => (l.id || l.key) === v.key)).map((v: any) => ({ key: v.key || '', url: v.url }))
+    ];
+    const displayAssets = allAssets.filter(a => (a.key || '').toLowerCase().includes((search || '').toLowerCase()));
 
     return (
         <div style={{ background: '#000', minHeight: '100vh', color: '#ccc', fontFamily: 'monospace', fontSize: '11px', display: 'flex', flexDirection: 'column' }}>
@@ -187,7 +194,7 @@ export default function AssetAdmin() {
                            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter Search..." style={{ width: '100%', background: '#111', border: '1px solid #333', color: '#fff', padding: '15px', borderRadius: '15px', outline: 'none' }} />
                         </div>
                         {displayAssets.slice(0, limit).map((a: any) => (
-                            <div key={a.key} style={{ width: 'calc(50% - 5px)', background: '#0a0a0a', borderRadius: '15px', border: '1px solid #111', overflow: 'hidden' }}>
+                            <div key={a.key} style={{ width: 'calc(50% - 5px)', background: birthUrl === a.url ? '#0d1a0d' : '#0a0a0a', borderRadius: '15px', border: birthUrl === a.url ? '1px solid #00ff00' : '1px solid #111', overflow: 'hidden' }}>
                                 <img src={a.url} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} loading="lazy" />
                                 <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                     {selectedPersonaId ? (
@@ -197,11 +204,24 @@ export default function AssetAdmin() {
                                             <button onClick={() => runAction({ personaId: selectedPersonaId, assetUrl: a.url, action: 'create_vault' })} style={{ background: '#ff00ff', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px', fontWeight: 'bold', fontSize: '8px' }}>+ VAULT</button>
                                         </>
                                     ) : (
-                                        <button onClick={() => birthPersona(a.url)} style={{ background: '#fff', color: '#000', border: 'none', borderRadius: '6px', padding: '10px', fontWeight: 'black', fontSize: '9px' }}>BIRTH PERSONA</button>
+                                        <button onClick={() => setBirthUrl(a.url)} style={{ background: birthUrl === a.url ? '#00ff00' : '#fff', color: '#000', border: 'none', borderRadius: '6px', padding: '10px', fontWeight: 'bold', fontSize: '9px' }}>
+                                            {birthUrl === a.url ? '★ STAGED' : 'BIRTH PERSONA'}
+                                        </button>
                                     )}
                                 </div>
                             </div>
                         ))}
+                        {/* BIRTH FORM - Shows when an image is staged */}
+                        {birthUrl && !selectedPersonaId && (
+                            <div style={{ width: '100%', background: '#0d1a0d', border: '1px solid #00ff00', borderRadius: '15px', padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <p style={{ margin: 0, color: '#00ff00', fontWeight: 'bold' }}>BIRTH PROTOCOL // NAME THE NODE</p>
+                                <input value={birthName} onChange={e => setBirthName(e.target.value)} placeholder="Enter sovereign name..." style={{ background: '#111', border: '1px solid #00ff00', color: '#fff', padding: '12px', borderRadius: '10px', outline: 'none' }} />
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button onClick={birthPersona} style={{ flex: 1, background: '#00ff00', color: '#000', border: 'none', borderRadius: '10px', padding: '12px', fontWeight: 'bold' }}>★ BIRTH</button>
+                                    <button onClick={() => { setBirthUrl(''); setBirthName(''); }} style={{ background: '#222', color: '#888', border: 'none', borderRadius: '10px', padding: '12px' }}>CANCEL</button>
+                                </div>
+                            </div>
+                        )}
                         {limit < displayAssets.length && (
                             <button onClick={() => setLimit(l => l + 30)} style={{ width: '100%', padding: '20px', background: '#111', border: 'none', borderRadius: '15px', color: '#00f0ff', fontWeight: 'bold' }}>SCAN MORE NODES</button>
                         )}
