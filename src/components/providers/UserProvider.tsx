@@ -48,16 +48,21 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 nickname: data.nickname || privyUser?.email?.address?.split('@')[0] || 'Syndicate Member'
             });
 
-            // 🧬 GENESIS HANDSHAKE: Silently attempt to claim the 1,500 CR signup bonus
-            // The backend prevents duplicates, so this is safe to run on every handshake.
-            if (data.balance === 0 || data.is_guest) {
+            // 🧬 GENESIS HANDSHAKE: One-time 1,500 CR signup bonus for brand-new users only
+            // Guard: only fires if balance is exactly 0 (new account) — never for existing users
+            if (data.balance === 0 && !data.is_admin) {
               fetch('/api/economy/balance', {
                   method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ userId, action: 'starter_claim' })
-              }).then(r => r.json()).then(claimData => {
+              }).then(r => r.json()).then(async claimData => {
                   if (claimData.success) {
                     console.log('🏦 [Genesis] 1,500 CR Bonus Provisioned.');
-                    refreshProfile(); // Trigger UI update
+                    // Fetch fresh balance directly — no recursive call
+                    const fresh = await fetch(`/api/economy/balance?userId=${userId}`).then(r => r.json());
+                    if (fresh.success) {
+                      setProfile((prev: any) => prev ? { ...prev, credit_balance: fresh.balance } : prev);
+                    }
                   }
               }).catch(() => {});
             }
