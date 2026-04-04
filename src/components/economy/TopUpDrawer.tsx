@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Zap, ShieldCheck, CreditCard, QrCode, ArrowRight, CheckCircle2, AlertCircle, Copy, Check, Loader2, Coins, Wallet, Smartphone } from 'lucide-react';
 import { CREDIT_PACKAGES, SYNDICATE_TREASURY_SOL } from '@/lib/economy/constants';
 import { useUser } from '../providers/UserProvider';
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivy, useSolanaWallets } from '@privy-io/react-auth';
+import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 interface TopUpDrawerProps {
   isOpen?: boolean;
@@ -21,6 +22,7 @@ interface TopUpDrawerProps {
  */
 export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, userId: propUserId }: TopUpDrawerProps) {
     const { user, authenticated } = usePrivy();
+    const { wallets } = useSolanaWallets();
     const { profile } = useUser();
     
     const [selectedPkgId, setSelectedPkgId] = useState(initialPackage || CREDIT_PACKAGES[0].id);
@@ -149,6 +151,71 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
         }, 3000);
     }, [userId, targetUsd, propUserId]);
 
+    const handleDirectPayment = async () => {
+        if (!wallets || wallets.length === 0) {
+            // No wallet connected? Just open deep link if on mobile
+            if (isMobile) {
+                window.location.href = buildSolanaPayUrl();
+            } else {
+                alert(isSpanish ? 'BÓVEDA NO DETECTADA. Use el código QR.' : 'NO VAULT DETECTED. Use the QR code.');
+            }
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const wallet = wallets[0];
+            const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+            
+            // Create Transaction
+            const transaction = new Transaction().add(
+                SystemProgram.transfer({
+                    fromPubkey: new PublicKey(wallet.address),
+                    toPubkey: new PublicKey(SYNDICATE_TREASURY_SOL),
+                    lamports: Math.floor(parseFloat(targetSol) * LAMPORTS_PER_SOL),
+                })
+            );
+
+            // Add Reference if available (Solana Pay spec)
+            if (uniqueRef) {
+                try {
+                    transaction.add({
+                        keys: [{ pubkey: new PublicKey(uniqueRef), isWritable: false, isSigner: false }],
+                        programId: SystemProgram.programId,
+                        data: Buffer.alloc(0),
+                    });
+                } catch (e) {
+                    console.warn('[Settlement] Failed to add reference key:', e);
+                }
+            }
+
+            const { blockhash } = await connection.getLatestBlockhash();
+            transaction.recentBlockhash = blockhash;
+            transaction.feePayer = new PublicKey(wallet.address);
+
+            // Request browser/extension signature
+            const provider = await wallet.getProvider();
+            const { signature } = await (provider as any).request({
+                method: 'signAndSendTransaction',
+                params: {
+                    message: transaction.serializeMessage().toString('base64'),
+                },
+            });
+
+            console.log('✅ Settlement Initialized:', signature);
+            setTxSignature(signature);
+            setIsVerifying(true);
+            
+            // Start polling specifically for this signature if needed, 
+            // though the reference polling will also catch it.
+        } catch (err: any) {
+            console.error('[Settlement Fault]:', err);
+            alert(isSpanish ? 'Fallo en la transacción: ' : 'Transaction Failed: ' + (err.message || 'Unknown'));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleSwitchToP2P = async () => {
         // Fetch latest price silently — don't block the user
         await fetchLivePrice();
@@ -166,6 +233,15 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             setUniqueRef(data.reference);
             setView('p2p');
             startPolling(data.reference);
+
+            // 🧬 AUTOMATIC MOBILE HANDSHAKE
+            // If they are on mobile, automatically trigger the deep link for Phantom/Solflare
+            if (isMobile) {
+                // Short delay to ensure state and QR are ready, then bounce to wallet
+                setTimeout(() => {
+                    window.location.href = buildSolanaPayUrl();
+                }, 800);
+            }
         } catch (err) {
             console.error('[P2P] Session creation failed:', err);
             alert('P2P session unavailable. Try again.');
@@ -227,8 +303,8 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                     
                     <div className="p-10 pb-6 flex items-center justify-between shrink-0">
                         <div className="flex flex-col gap-1.5 text-left">
-                            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">{isSpanish ? 'Protocolo de Ingreso' : 'REVENUE INGRESS PROTOCOL'}</span>
-                            <h2 className="text-3xl font-syncopate font-black uppercase italic text-white leading-none tracking-tighter">{isSpanish ? 'Centro de Recarga' : 'TOP UP HUB'}</h2>
+                            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">{isSpanish ? 'SISTEMA DE CRÉDITOS' : 'CREDIT RECHARGE SYSTEM'}</span>
+                            <h2 className="text-3xl font-syncopate font-black uppercase italic text-white leading-none tracking-tighter">{isSpanish ? 'RECARGAR BILLETERA' : 'TOP UP WALLET'}</h2>
                         </div>
                         <button onClick={onClose} className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"><X size={24} /></button>
                     </div>
@@ -243,7 +319,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-6 relative z-10 text-left">
-                                        <div className="flex flex-col gap-1.5"><span className="text-[10px] font-black uppercase text-[#00f0ff] tracking-[0.4em] italic leading-none">{isSpanish ? 'SALA DE TRADING' : 'INSTITUTIONAL CUSTOM INFUSION'}</span></div>
+                                        <div className="flex flex-col gap-1.5"><span className="text-[10px] font-black uppercase text-[#00f0ff] tracking-[0.4em] italic leading-none">{isSpanish ? 'MONTO PERSONALIZADO' : 'SET CUSTOM AMOUNT'}</span></div>
                                         <div className="flex flex-row items-center gap-8 py-4">
                                             <div className="flex-1 w-full space-y-3">
                                                 <div className="flex items-baseline justify-between px-2"><span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{isSpanish ? 'MONTO USD' : 'SETTLEMENT USD'}</span><span className="text-[8px] font-black text-red-500/60 uppercase tracking-widest">LIMIT: $30,000</span></div>
@@ -269,21 +345,21 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                 <div className="space-y-6 text-center">
                                     <button onClick={handleStripeCheckout} disabled={isLoading} className="w-full h-24 rounded-[2.5rem] bg-white text-black font-black uppercase text-[14px] tracking-[0.2em] transition-all shadow-[0_20px_80px_rgba(255,255,255,0.15)] flex items-center justify-center gap-6 group hover:scale-[1.02]">
                                         {isLoading ? <Loader2 size={32} className="animate-spin text-black" /> : <CreditCard size={32} fill="black" />}
-                                        <div className="flex flex-col items-start leading-none gap-2"><span className="font-syncopate italic tracking-tighter">{isSpanish ? 'INICIAR COMPRA' : 'INITIATE PURCHASE'}</span><span className="text-[10px] opacity-40 font-bold tracking-widest">{isSpanish ? 'Acceso Directo con Tarjeta / Stripe' : 'Direct Card Access / Stripe Secure'}</span></div>
+                                        <div className="flex flex-col items-start leading-none gap-2"><span className="font-syncopate italic tracking-tighter">{isSpanish ? 'PAGAR CON TARJETA' : 'PAY WITH CARD'}</span><span className="text-[10px] opacity-40 font-bold tracking-widest">{isSpanish ? 'Stripe Checkout Seguro' : 'Stripe Secure Checkout'}</span></div>
                                         {!isLoading && <ArrowRight size={24} className="opacity-40 group-hover:translate-x-3 transition-transform" />}
                                     </button>
                                 </div>
 
                                 {solanaAddress ? (
                                     <button onClick={handleSwitchToP2P} className="w-full py-8 rounded-[2.5rem] bg-[#00f0ff]/10 border border-[#00f0ff]/40 hover:bg-[#00f0ff]/20 transition-all flex items-center justify-center gap-6 group relative">
-                                        <div className="absolute top-0 right-0 px-3 py-1 bg-[#00f0ff] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-xl shadow-[0_0_20px_#00f0ff]">{isSpanish ? 'BÓVEDA DETECTADA' : 'SOVEREIGN WALLET'}</div>
+                                        <div className="absolute top-0 right-0 px-3 py-1 bg-[#00f0ff] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-xl shadow-[0_0_20px_#00f0ff]">{isSpanish ? 'BILLETERA CONECTADA' : 'CONNECTED WALLET'}</div>
                                         <Wallet size={28} className="text-[#00f0ff]" />
-                                        <div className="flex flex-col items-start leading-none gap-2 text-left"><span className="text-[11px] font-black text-white uppercase tracking-widest font-syncopate italic">{isSpanish ? 'LIQUIDACIÓN CON BÓVEDA CONECTADA' : 'PAY WITH CONNECTED WALLET'}</span><span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-[0.5em] italic">{solanaAddress.slice(0, 4)}...{solanaAddress.slice(-4)} // 1-CLICK SETTLEMENT</span></div>
+                                        <div className="flex flex-col items-start leading-none gap-2 text-left"><span className="text-[11px] font-black text-white uppercase tracking-widest font-syncopate italic">{isSpanish ? 'PAGAR AHORA CON CRIPTO' : 'PAY NOW WITH CRYPTO'}</span><span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-[0.5em] italic">{solanaAddress.slice(0, 4)}...{solanaAddress.slice(-4)} // ONE-CLICK</span></div>
                                     </button>
                                 ) : (
                                     <button onClick={handleSwitchToP2P} className="w-full py-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:border-[#00f0ff]/40 transition-all flex items-center justify-center gap-6 group relative overflow-hidden">
                                         <QrCode size={28} className="text-[#00f0ff]" />
-                                        <div className="flex flex-col items-start leading-none gap-2 text-left"><span className="text-[11px] font-black text-white uppercase tracking-widest font-syncopate italic">{isSpanish ? 'LIQUIDACIÓN AUTOMÁTICA P2P' : 'AUTOMATIC P2P SETTLEMENT'}</span><span className="text-[8px] font-black text-white/20 uppercase tracking-[0.5em] italic">{isSpanish ? 'SOL o USDC // Sincronización Directa' : 'SOL or USDC // DIRECT SYNC'}</span></div>
+                                        <div className="flex flex-col items-start leading-none gap-2 text-left"><span className="text-[11px] font-black text-white uppercase tracking-widest font-syncopate italic">{isSpanish ? 'PAGAR CON SOLANA / USDC' : 'PAY WITH SOLANA / USDC'}</span><span className="text-[8px] font-black text-white/20 uppercase tracking-[0.5em] italic">{isSpanish ? 'Transferencia P2P Directa' : 'Direct P2P Transfer'}</span></div>
                                     </button>
                                 )}
                             </div>
@@ -315,7 +391,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                             </div>
                                         </div>
                                     </div>
-                                    <p className="text-[9px] text-white/40 leading-relaxed max-w-[280px] mx-auto font-black uppercase tracking-widest italic">{isPolling ? (isSpanish ? 'ESCANEANDO BLOQUES DE SOLANA...' : 'SCANNING SOLANA BLOCKS...') : `Enviar ${p2pAsset === 'SOL' ? targetSol : targetUsd} ${p2pAsset} a la Bóveda.`}</p>
+                                    <p className="text-[9px] text-white/40 leading-relaxed max-w-[280px] mx-auto font-black uppercase tracking-widest italic">{isPolling ? (isSpanish ? 'VERIFICANDO TRANSACCIÓN...' : 'VERIFYING TRANSACTION...') : `Enviar ${p2pAsset === 'SOL' ? targetSol : targetUsd} ${p2pAsset} a la dirección.`}</p>
                                     
                                     {/* 🚩 CRITICAL USER GUIDANCE */}
                                     {isPolling && (
@@ -323,7 +399,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                             <p className="text-[10px] font-black text-red-500 uppercase tracking-widest leading-normal">
                                                 {isSpanish ? '¡NO CIERRE ESTA VENTANA!' : 'DO NOT CLOSE THIS WINDOW!'} <br/>
                                                 <span className="text-white/60 opacity-60">
-                                                    {isSpanish ? 'Esperando confirmación de la red... Sea paciente.' : 'Waiting for network nodes to signal... stay patient.'}
+                                                    {isSpanish ? 'Esperando confirmación de la red...' : 'Waiting for network nodes to confirm...'}
                                                 </span>
                                             </p>
                                         </div>
@@ -333,16 +409,30 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                 <div className="space-y-6">
                                     {isMobile ? (
                                         <div className="py-2 space-y-6">
-                                            <button onClick={handleSolanaPayDeepLink} className="w-full h-20 rounded-[2.5rem] bg-[#00f0ff] text-black font-black uppercase text-[14px] tracking-[0.2em] shadow-[0_10px_60px_rgba(0,240,255,0.4)] flex items-center justify-center gap-4">
-                                               <Smartphone size={28} />
-                                               <span className="font-syncopate italic tracking-tighter">{isSpanish ? 'ABRIR PHANTOM' : 'OPEN IN PHANTOM'}</span>
+                                            <button onClick={handleSolanaPayDeepLink} className="w-full h-24 rounded-[3rem] bg-[#00f0ff] text-black font-black uppercase text-[15px] tracking-[0.2em] shadow-[0_20px_80px_rgba(0,240,255,0.4)] flex items-center justify-center gap-6 group hover:scale-[1.02] active:scale-95 transition-all">
+                                               <Smartphone size={32} />
+                                               <div className="flex flex-col items-start leading-none gap-1.5 pt-1">
+                                                   <span className="font-syncopate italic tracking-tighter">{isSpanish ? 'ABRIR BILLETERA' : 'OPEN PHANTOM WALLET'}</span>
+                                                   <span className="text-[8px] font-bold opacity-60 tracking-widest">{isSpanish ? 'AUTO-CONECTAR APLICACIÓN' : 'AUTO-CONNECT APP'}</span>
+                                               </div>
                                             </button>
                                             <div className="p-4 bg-white rounded-3xl w-44 h-44 mx-auto"><img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(solanaPayUrl)}`} className="w-full h-full object-contain" /></div>
                                         </div>
                                     ) : (
-                                        <div className="relative p-8 bg-white rounded-[3rem] w-72 h-72 mx-auto shadow-[0_0_100px_rgba(255,255,255,0.1)] ring-8 ring-white/5 group">
-                                            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(solanaPayUrl)}`} alt="QR Protocol" className="w-full h-full object-contain" />
-                                            <div className="absolute inset-0 border-[16px] border-white rounded-[3rem]" />
+                                        <div className="space-y-8">
+                                            {wallets && wallets.length > 0 && (
+                                                <button onClick={handleDirectPayment} disabled={isLoading} className="w-full h-24 rounded-[3rem] bg-[#00f0ff] text-black font-black uppercase text-[15px] tracking-[0.2em] shadow-[0_20px_100px_rgba(0,240,255,0.4)] flex items-center justify-center gap-6 group hover:scale-[1.02] active:scale-95 transition-all">
+                                                    {isLoading ? <Loader2 size={32} className="animate-spin" /> : <Wallet size={32} />}
+                                                    <div className="flex flex-col items-start leading-none gap-1.5 pt-1">
+                                                        <span className="font-syncopate italic tracking-tighter">{isSpanish ? 'PAGAR AHORA' : 'PAY NOW'}</span>
+                                                        <span className="text-[8px] font-bold opacity-60 tracking-widest">{isSpanish ? 'CONFIRMAR EN BILLETERA' : 'CONFIRM IN WALLET'}</span>
+                                                    </div>
+                                                </button>
+                                            )}
+                                            <div className="relative p-8 bg-white rounded-[3rem] w-72 h-72 mx-auto shadow-[0_0_100px_rgba(255,255,255,0.1)] ring-8 ring-white/5 group">
+                                                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(solanaPayUrl)}`} alt="QR Protocol" className="w-full h-full object-contain" />
+                                                <div className="absolute inset-0 border-[16px] border-white rounded-[3rem]" />
+                                            </div>
                                         </div>
                                     )}
 
