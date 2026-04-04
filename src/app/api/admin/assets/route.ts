@@ -110,8 +110,12 @@ export async function POST(req: Request) {
         if (!id || !type || !assetUrl) return NextResponse.json({ success: false, error: 'MISSING_DATA' }, { status: 400 });
 
         if (type === 'persona') {
-            const res = await db.query(`UPDATE personas SET seed_image_url = $1 WHERE id = $2 OR slug::text = $2`, [assetUrl, id]);
-            if (res.rowCount === 0) return NextResponse.json({ success: false, error: 'PERSONA_NOT_FOUND' }, { status: 404 });
+            console.log(`[Grafting] Updating Persona ${id} -> ${assetUrl}`);
+            const res = await db.query(`UPDATE personas SET seed_image_url = $1 WHERE id = $2`, [assetUrl, id]);
+            if (res.rowCount === 0) {
+                console.warn(`[Grafting] Persona NOT FOUND: ${id}`);
+                return NextResponse.json({ success: false, error: 'PERSONA_NOT_FOUND' }, { status: 404 });
+            }
         } else if (type === 'post') {
             const res = await db.query(`UPDATE posts SET content_url = $1 WHERE id = $2`, [assetUrl, id]);
             if (res.rowCount === 0) return NextResponse.json({ success: false, error: 'POST_NOT_FOUND' }, { status: 404 });
