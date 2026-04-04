@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Crown, X, Plus, Gift, Timer } from 'lucide-react';
+import { Zap, Crown, X, Plus, Gift, Timer, Coffee, Flower2, Wine, ShoppingBag, Plane } from 'lucide-react';
 
 interface TipModalProps {
     isOpen: boolean;
@@ -13,14 +13,17 @@ interface TipModalProps {
 }
 
 export default function TipModal({ isOpen, onClose, onTip, userBalance, profileName }: TipModalProps) {
-    const [selectedAmount, setSelectedAmount] = useState<number>(10);
+    const [selectedAmount, setSelectedAmount] = useState<number>(5000);
     const [isProcessing, setIsProcessing] = useState(false);
 
+    // 🛡️ TOKEMONICS SCALE: 1,000 CR = $1.00 USD
     const tipOptions = [
-        { label: 'Subtle Spark', amount: 10, icon: <Gift size={16} /> },
-        { label: 'Priority Echo', amount: 20, icon: <Zap size={16} /> },
-        { label: 'Whale Surge', amount: 50, icon: <Crown size={16} /> },
-        { label: 'Supreme Synthesis', amount: 150, icon: <Crown size={20} /> },
+        { label: 'Iced Coffee', amount: 5000, icon: <Coffee size={16} /> },         // $5.00
+        { label: 'Bouquet of Roses', amount: 15000, icon: <Flower2 size={16} /> },  // $15.00 (Matches standard tier)
+        { label: 'Dinner Date', amount: 50000, icon: <Wine size={16} /> },          // $50.00
+        { label: 'Designer Bag', amount: 250000, icon: <ShoppingBag size={16} /> }, // $250.00
+        { label: 'Weekend Getaway', amount: 1000000, icon: <Plane size={16} /> },   // $1,000.00
+        { label: 'Private Jet Flight', amount: 5000000, icon: <Crown size={20} /> },// $5,000.00
     ];
 
     const handleSendGift = async () => {
@@ -66,7 +69,7 @@ export default function TipModal({ isOpen, onClose, onTip, userBalance, profileN
                                     Boost Signal Priority for {profileName}
                                 </p>
                                 <p className="text-sm text-white/40 italic leading-relaxed px-6">
-                                    Inject a data boost to <span className="text-white">{profileName}</span>. Priority signals bypass the agency buffer and trigger an immediate response.
+                                    Spoil <span className="text-white">{profileName}</span> with a real-world gift. She will remember what you buy her, and it will permanently alter her affection towards you.
                                 </p>
                             </div>
 

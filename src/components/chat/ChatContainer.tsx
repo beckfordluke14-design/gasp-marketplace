@@ -3,7 +3,7 @@
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Clock, Sparkles, Mic } from 'lucide-react';
+import { Send, Clock, Sparkles, Mic, Gift } from 'lucide-react';
 import VoiceNoteBubble from './VoiceNoteBubble';
 
 interface ChatContainerProps {
@@ -103,22 +103,45 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
                 const isVoiceMessage = voiceMetadata && (voiceMetadata.type === 'voice-note' || voiceMetadata.audioUrl);
                 const isRecording = m.role === 'assistant' && !isVoiceMessage && messages.indexOf(m) === messages.length - 1 && isLoading;
 
+                const isGift = m.content?.startsWith('[SENT_GIFT]');
+                const giftText = isGift ? m.content.replace('[SENT_GIFT]:', '').trim() : m.content;
+
                 return (
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: isGift ? 0.8 : 1, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
                     key={m.id}
                     className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'} gap-2`}
                   >
-                    <div className={`max-w-[85%] px-5 py-3 rounded-[2.5rem] shadow-xl ${
-                      m.role === 'user'
-                      ? 'bg-[#00f0ff] text-black font-bold rounded-tr-none border border-[#00f0ff]/20'
-                      : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'
-                    }`}>
-                      <div className="text-[14px] leading-relaxed whitespace-pre-wrap">
-                        {m.content}
+                    {!isGift ? (
+                      <div className={`max-w-[85%] px-5 py-3 rounded-[2.5rem] shadow-xl ${
+                        m.role === 'user'
+                        ? 'bg-[#00f0ff] text-black font-bold rounded-tr-none border border-[#00f0ff]/20'
+                        : 'bg-white/5 text-white border border-white/5 rounded-tl-none font-medium'
+                      }`}>
+                        <div className="text-[14px] leading-relaxed whitespace-pre-wrap">
+                          {giftText}
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <motion.div 
+                        initial={{ rotate: -5 }}
+                        animate={{ rotate: [0, -2, 2, -2, 2, 0] }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="max-w-[85%] px-6 py-4 bg-gradient-to-br from-[#ffea00]/20 to-[#ffaa00]/10 border border-[#ffea00]/40 rounded-[2.5rem] rounded-tr-none shadow-[0_0_30px_rgba(255,234,0,0.2)] flex items-center gap-3 relative overflow-hidden group"
+                      >
+                         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ffea00] to-[#ffaa00] flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(255,234,0,0.5)]">
+                            <Gift size={18} className="text-black" />
+                         </div>
+                         <div>
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#ffea00] block mb-1">Gift Sent</span>
+                            <div className="text-[14px] font-bold text-white leading-tight">
+                              {giftText}
+                            </div>
+                         </div>
+                      </motion.div>
+                    )}
 
                     {isRecording && (
                        <motion.div 
