@@ -25,8 +25,9 @@ export async function GET(req: Request) {
         // 2. Identify Orphaned Posts (Placeholder Feed Items)
         const { rows: orphanPosts } = await db.query(`
             SELECT id, persona_id, content_url as url, 'post' as type 
-            FROM feed_posts 
-            WHERE content_url IS NULL OR content_url LIKE '%null%' OR content_url = ''
+            FROM posts 
+            WHERE (content_url IS NULL OR content_url LIKE '%null%' OR content_url = '')
+            AND content_type != 'text'
             ORDER BY created_at DESC LIMIT 100
         `);
 
@@ -74,13 +75,25 @@ export async function POST(req: Request) {
     try {
         if (!(await isAdminRequest(req))) return unauthorizedResponse();
 
-        const { id, type, assetUrl } = await req.json();
+        const { id, type, assetUrl, personaId, action } = await req.json();
+        
+        // 🧪 SOVEREIGN ACTION: CRAFTING NEW VAULT ENTRY
+        if (action === 'create_vault') {
+            if (!personaId || !assetUrl) return NextResponse.json({ success: false, error: 'MISSING_DATA' }, { status: 400 });
+            const { rows } = await db.query(`
+                INSERT INTO posts (persona_id, content_url, content_type, is_vault, caption, created_at, updated_at)
+                VALUES ($1, $2, 'image', true, 'Uncovered Vault Asset // Syndicate Source', NOW(), NOW())
+                RETURNING id
+            `, [personaId, assetUrl]);
+            return NextResponse.json({ success: true, createdId: rows[0].id });
+        }
+
         if (!id || !type || !assetUrl) return NextResponse.json({ success: false, error: 'MISSING_DATA' }, { status: 400 });
 
         if (type === 'persona') {
             await db.query(`UPDATE personas SET seed_image_url = $1 WHERE id = $2`, [assetUrl, id]);
         } else if (type === 'post') {
-            await db.query(`UPDATE feed_posts SET content_url = $1 WHERE id = $2`, [assetUrl, id]);
+            await db.query(`UPDATE posts SET content_url = $1 WHERE id = $2`, [assetUrl, id]);
         }
 
         return NextResponse.json({ success: true, updatedId: id });
