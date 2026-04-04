@@ -312,12 +312,47 @@ export default function VerdadChatPage(props: any) {
               </div>
            </div>
            
-           <button 
-              onClick={() => setIsTipModalOpen(true)}
-              className="w-full py-5 rounded-2xl bg-white/5 border border-white/10 hover:border-neon-purple hover:bg-neon-purple/10 transition-all flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white"
-           >
-              Priority Infusion <Gift size={16} className="text-neon-purple" />
-           </button>
+            {/* 🛡️ PROTOCOL LOYALTY TRACKER (v8.19) */}
+            <div className="mt-4 p-6 rounded-[2rem] bg-gasp-neon/5 border border-gasp-neon/10 shadow-xl overflow-hidden relative group">
+               <div className="flex items-center justify-between mb-4">
+                  <span className="text-[8px] font-black uppercase tracking-[0.3em] text-gasp-neon">Genesis Snapshot active</span>
+                  <Zap size={12} className="text-gasp-neon animate-pulse" />
+               </div>
+               
+               <div className="space-y-4">
+                  <div>
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">$GASPai Points</p>
+                    <h4 className="text-3xl font-syncopate font-black italic tracking-tighter text-gasp-neon">
+                       {userBalance.toLocaleString()} <span className="text-[10px] text-white/20">PTS</span>
+                    </h4>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/5 space-y-3">
+                     <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-widest">
+                        <span className="text-white/30">Member Status</span>
+                        <span className="text-white">Phase 01</span>
+                     </div>
+                     <button 
+                        onClick={() => router.push('/docs/whitepaper')}
+                        className="w-full py-3 rounded-xl bg-gasp-neon text-black text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)]"
+                     >
+                        Upgrade to Elite
+                     </button>
+                  </div>
+               </div>
+               
+               {/* ⚖️ NJ-SAFE DISCLOSURE */}
+               <p className="mt-4 text-[7px] font-black uppercase tracking-widest text-white/10 leading-relaxed text-center italic">
+                  Points represent community rank & loyalty. No cash value.
+               </p>
+            </div>
+            
+            <button 
+               onClick={() => setIsTipModalOpen(true)}
+               className="w-full py-5 rounded-2xl bg-white/5 border border-white/10 hover:border-neon-purple hover:bg-neon-purple/10 transition-all flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white mt-12"
+            >
+               Priority Infusion <Gift size={16} className="text-neon-purple" />
+            </button>
         </div>
       </aside>
 
@@ -375,9 +410,30 @@ export default function VerdadChatPage(props: any) {
                             <div className="flex flex-col items-center gap-3 my-6 md:my-12 opacity-20 group cursor-default">
                                <div className="p-4 md:p-5 bg-white/5 rounded-3xl border border-dashed border-white/20 group-hover:border-gasp-neon transition-colors">
                                   <ShieldCheck className="w-8 h-8 md:w-11 md:h-11 text-white animate-pulse" />
-                               </div>
-                               <p className="text-[8px] md:text-[9px] uppercase font-black tracking-[0.6em] text-white text-center">Gasp Neutral Session</p>
+                                </div>
+                                <p className="text-[8px] md:text-[9px] uppercase font-black tracking-[0.6em] text-white text-center italic">Gasp Neutral Session // Protocol Verified</p>
                             </div>
+
+                            {/* 🧬 CONVERSION RAIL: THE "MINI AD" (v8.19) */}
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mx-auto w-full max-w-xl p-8 rounded-[2.5rem] bg-gradient-to-r from-gasp-neon/10 to-neon-purple/10 border border-white/10 backdrop-blur-3xl overflow-hidden relative group mb-12"
+                            >
+                                <div className="absolute inset-0 bg-noise opacity-10 mix-blend-overlay" />
+                                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                                    <div className="space-y-1 text-center md:text-left">
+                                        <h4 className="text-lg font-syncopate font-black italic uppercase tracking-tighter text-white">Your Reward Pool</h4>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/40">1:1 Points Match Active • $GASPai Launch Incoming</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => router.push('/docs/whitepaper')}
+                                        className="px-8 py-3 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-2xl"
+                                    >
+                                        View Protocol
+                                    </button>
+                                </div>
+                            </motion.div>
 
                             {messages.map((msg: any) => {
                                 let displayContent = msg.content;

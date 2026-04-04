@@ -110,14 +110,17 @@ export async function POST(req: Request) {
         if (!id || !type || !assetUrl) return NextResponse.json({ success: false, error: 'MISSING_DATA' }, { status: 400 });
 
         if (type === 'persona') {
-            await db.query(`UPDATE personas SET seed_image_url = $1 WHERE id = $2`, [assetUrl, id]);
+            const res = await db.query(`UPDATE personas SET seed_image_url = $1 WHERE id = $2 OR slug::text = $2`, [assetUrl, id]);
+            if (res.rowCount === 0) return NextResponse.json({ success: false, error: 'PERSONA_NOT_FOUND' }, { status: 404 });
         } else if (type === 'post') {
-            await db.query(`UPDATE posts SET content_url = $1 WHERE id = $2`, [assetUrl, id]);
+            const res = await db.query(`UPDATE posts SET content_url = $1 WHERE id = $2`, [assetUrl, id]);
+            if (res.rowCount === 0) return NextResponse.json({ success: false, error: 'POST_NOT_FOUND' }, { status: 404 });
         }
 
         return NextResponse.json({ success: true, updatedId: id });
 
     } catch (err: any) {
-        return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+        console.error('[Grafting Failure Dialect]:', err.message);
+        return NextResponse.json({ success: false, error: err.message || 'Vault write failure.' }, { status: 500 });
     }
 }

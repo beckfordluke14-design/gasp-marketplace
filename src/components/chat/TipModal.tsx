@@ -63,13 +63,13 @@ export default function TipModal({ isOpen, onClose, onTip, userBalance, profileN
 
                             <div className="space-y-4">
                                 <h2 className="text-2xl font-syncopate font-black italic uppercase tracking-tighter text-white">
-                                    Infuse Node
+                                    Small Favors
                                 </h2>
                                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic mt-1">
-                                    Boost Signal Priority for {profileName}
+                                    Show {profileName} some love
                                 </p>
-                                <p className="text-sm text-white/40 italic leading-relaxed px-6">
-                                    Spoil <span className="text-white">{profileName}</span> with a real-world gift. She will remember what you buy her, and it will permanently alter her affection towards you.
+                                <p className="text-xs text-white/40 italic leading-relaxed px-6">
+                                    Surprise <span className="text-white">{profileName}</span> with a little something. She wasn't expecting it, but she'll definitely remember the gesture. It’s the small things that build a real connection.
                                 </p>
                             </div>
 
@@ -90,7 +90,7 @@ export default function TipModal({ isOpen, onClose, onTip, userBalance, profileN
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-[9px] uppercase font-black tracking-widest text-white/40">{opt.label}</span>
-                                            <span className="text-lg font-black tracking-tight">{opt.amount} Credits</span>
+                                            <span className="text-lg font-black tracking-tight">{opt.amount.toLocaleString()} <span className="text-[10px] opacity-20">CR</span></span>
                                         </div>
                                         {selectedAmount === opt.amount && (
                                             <div className="absolute top-4 right-4 text-neon-purple animate-pulse">
@@ -112,10 +112,10 @@ export default function TipModal({ isOpen, onClose, onTip, userBalance, profileN
                             >
                                 {isProcessing ? (
                                     <div className="flex items-center justify-center gap-2">
-                                        <Timer size={16} className="animate-spin" /> Uplink Infusing...
+                                        <Timer size={16} className="animate-spin" /> Sending Gift...
                                     </div>
                                 ) : (
-                                    <>Initiate Priority Gift</>
+                                    <>Make her smile</>
                                 )}
                             </button>
                             

@@ -69,8 +69,8 @@ export default function AssetAdmin() {
                 setMsg('✓ SUCCESS');
                 setActionId(null);
                 setTimeout(loadData, 500);
-            } else { setMsg('✗ FAILED'); }
-        } catch { setMsg('✗ ERR'); }
+            } else { setMsg('✗ ' + (data.error || 'FAILED')); }
+        } catch (err: any) { setMsg('✗ ERR: ' + err.message); }
     };
 
     const birthFromPost = async (url: string) => {
