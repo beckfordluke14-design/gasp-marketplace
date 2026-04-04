@@ -91,6 +91,8 @@ export default function AssetAdmin() {
         } catch { setMsg('✗ ERR'); }
     };
 
+    const isDead = (u: any) => !u || u.trim() === '' || u.includes('null');
+
     if (!ready) return null;
 
     const selectedPersona = personas.find(p => p.id === selectedPersonaId);
@@ -166,7 +168,7 @@ export default function AssetAdmin() {
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                {personaPosts.map(p => (
+                                {personaPosts.filter(p => !isDead(p.content_url) && p.content_type !== 'text').map(p => (
                                     <div key={p.id} style={{ display: 'flex', gap: '12px', background: '#080808', padding: '12px', borderRadius: '15px', border: '1px solid #111' }}>
                                         <div style={{ width: '60px', height: '60px', background: '#111', borderRadius: '10px', overflow: 'hidden', flexShrink: 0 }}>
                                             <img src={p.content_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
