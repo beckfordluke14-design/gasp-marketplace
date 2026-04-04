@@ -27,6 +27,12 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
     credits: 5000,
     label: 'Starter Access',
   },
+  {
+    id: 'tier_standard',
+    priceUsd: 14.99,
+    credits: 15000,
+    label: 'Standard Uplink',
+  },
   { 
     id: 'tier_entry', 
     priceUsd: 19.99, 

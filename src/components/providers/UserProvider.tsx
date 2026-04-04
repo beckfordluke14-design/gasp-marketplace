@@ -45,6 +45,20 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 credit_balance: data.balance,
                 nickname: privyUser?.email?.address?.split('@')[0] || 'Syndicate Member'
             });
+
+            // 🧬 GENESIS HANDSHAKE: Silently attempt to claim the 1,500 CR signup bonus
+            // The backend prevents duplicates, so this is safe to run on every handshake.
+            if (data.balance === 0 || data.is_guest) {
+              fetch('/api/economy/balance', {
+                  method: 'POST',
+                  body: JSON.stringify({ userId, action: 'starter_claim' })
+              }).then(r => r.json()).then(claimData => {
+                  if (claimData.success) {
+                    console.log('🏦 [Genesis] 1,500 CR Bonus Provisioned.');
+                    refreshProfile(); // Trigger UI update
+                  }
+              }).catch(() => {});
+            }
         }
 
         // 🛰️ SOVEREIGN BACKGROUND RECONCILIATION

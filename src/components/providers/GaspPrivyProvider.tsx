@@ -30,7 +30,7 @@ export function GaspPrivyProvider({ children }: { children: React.ReactNode }) {
           theme: 'dark',
           accentColor: '#ff00ff', 
           logo: '/icons/icon.svg',
-          showWalletLoginFirst: false, // Default to social nodes for better guest conversion
+          showWalletLoginFirst: true, // Prioritize Phantom/Solana wallets for high-status crypto users
         },
         // 💎 Embedded Wallet: Zero-friction settlement node creation
         embeddedWallets: {
