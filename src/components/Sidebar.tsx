@@ -387,7 +387,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                     onClick={() => onOpenTopUp ? onOpenTopUp() : (window as any).openTopUp?.()}
                     className="flex-1 w-full py-3 bg-[#00f0ff] text-black text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-white transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)]"
                   >
-                    {isSpanish ? 'RECARGAR' : 'TOP UP'}
+                    {isSpanish ? 'AÑADIR CRÉDITOS' : 'ADD CREDITS'}
                   </button>
               </div>
            </div>
@@ -496,7 +496,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center">
                    <Zap size={10} className="text-black" />
                  </div>
-                <span className="text-[8px] font-black uppercase tracking-widest italic font-syncopate">{isSpanish ? 'RECARGAR' : 'TOP UP'}</span>
+                <span className="text-[8px] font-black uppercase tracking-widest italic font-syncopate">{isSpanish ? 'AÑADIR CRÉDITOS' : 'ADD CREDITS'}</span>
              </button>
           </div>
 

@@ -85,9 +85,9 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
          </h3>
          <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
            {isSpanish ? (
-             <>Actualmente tienes <span className="text-white font-syncopate">{balance !== undefined ? balance.toLocaleString() : '---'}</span>. <br /> Recarga para mantener el Sincronismo.</>
+             <>Actualmente tienes <span className="text-white font-syncopate">{balance !== undefined ? balance.toLocaleString() : '---'}</span>. <br /> Añade créditos para mantener el Sincronismo.</>
            ) : (
-             <>You currently have <span className="text-white font-syncopate">{balance !== undefined ? balance.toLocaleString() : '---'}</span>. <br /> Top up to maintain Sync Lock.</>
+             <>You currently have <span className="text-white font-syncopate">{balance !== undefined ? balance.toLocaleString() : '---'}</span>. <br /> Add credits to maintain Sync Lock.</>
            )}
          </p>
       </div>
@@ -96,7 +96,7 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
          onClick={onAction}
          className="mt-2 w-full h-16 bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(0,240,255,0.3)] z-10 flex items-center justify-center gap-2"
       >
-         {isSpanish ? 'CENTRO DE RECARGA' : 'RECHARGE HUB'}
+         {isSpanish ? 'CENTRO DE CRÉDITOS' : 'ADD CREDITS'}
          <Zap size={14} fill="currentColor" />
       </button>
 

@@ -24,6 +24,7 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
   const router = useRouter();
   const { user, profile } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // 🌍 GLOBAL LOCALE STATE
   const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
@@ -39,6 +40,12 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
   useEffect(() => {
     setMounted(true);
     setIsAdmin(document.cookie.includes('admin_gasp_override=granted'));
+    
+    // 🧬 RESPONSIVE UPLINK BREAKPOINT (768px for Tablet/Mobile)
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
   
   const navItems = [
@@ -133,30 +140,22 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
                     {/* 🧬 CREDIT FUEL GAUGE */}
                     <div 
                       onClick={onOpenTopUp}
-                      className="flex items-center gap-2 p-1 pl-2 md:pl-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all cursor-pointer group h-9 md:h-10 ml-2"
+                      className="flex items-center gap-2 p-1.5 md:p-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all cursor-pointer group h-9 md:h-11 ml-2"
                     >
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2 px-2 md:px-3">
                             <Zap size={14} className="text-[#ff6b00] animate-pulse" />
                             <div className="flex flex-col">
-                                <span className="text-[10px] md:text-[11px] font-black text-white leading-none italic">
+                                <span className="text-[10px] md:text-[12px] font-black text-white leading-none italic">
                                    {(profile?.credit_balance || 0).toLocaleString()}
                                 </span>
-                                <span className="text-[6px] font-black text-white/40 uppercase tracking-[0.2em] leading-tight">
+                                <span className="text-[6px] md:text-[7px] font-black text-white/40 uppercase tracking-[0.2em] leading-tight">
                                   {isSpanish ? 'CRÉDITOS' : 'CREDITS'}
                                 </span>
                             </div>
                         </div>
-                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#ff6b00] flex items-center justify-center text-black shadow-lg group-hover:scale-110 active:scale-95 transition-all">
-                            <AnimatePresence>
-                                <motion.div
-                                  initial={{ scale: 0.8 }}
-                                  animate={{ scale: 1 }}
-                                  key={profile?.credit_balance}
-                                >
-                                    <span className="text-sm font-black">+</span>
-                                </motion.div>
-                            </AnimatePresence>
-                        </div>
+                        <button className="h-7 md:h-8 px-3 md:px-4 rounded-full bg-[#ff6b00] text-black text-[7px] md:text-[8px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center justify-center">
+                            {isSpanish ? 'AÑADIR' : (isMobile ? 'ADD' : 'ADD CREDITS')}
+                        </button>
                     </div>
 
                     {/* Profile Section */}

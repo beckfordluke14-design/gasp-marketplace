@@ -27,7 +27,7 @@ export default function MobileBottomNav({ onSelectChat, onOpenTopUp, unreadCount
     { icon: Home, label: 'Hub', active: true, action: () => router.push('/') },
     { icon: Compass, label: 'Intel', active: false, action: () => router.push('/') },
     // 🧬 THE CENTER STAKE PILLAR
-    { icon: Zap, label: 'TOP UP', active: false, isSpecial: true, action: () => onOpenTopUp() },
+    { icon: Zap, label: 'ADD', active: false, isSpecial: true, action: () => onOpenTopUp() },
     { icon: MessageSquare, label: 'Comms', active: false, action: () => onSelectChat(), badge: totalUnread, hasFavorites: favProfiles.length > 0 }, 
     { icon: User, label: 'Vault', active: false, action: () => router.push('/vault') },
   ];

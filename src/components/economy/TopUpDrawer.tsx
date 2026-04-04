@@ -101,7 +101,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             credits: p.credits,
             price: p.priceUsd,
             label: label,
-            popular: p.isPopular || idx === 2,
+            popular: p.isPopular || false,
             color: color
         };
     });
@@ -267,8 +267,8 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                 <div className={`relative p-6 rounded-[2rem] border transition-all duration-700 group overflow-hidden bg-white/[0.02] ${isCustom ? 'border-[#00f0ff]/60 shadow-[0_0_50px_rgba(0,240,255,0.1)] ring-1 ring-[#00f0ff]/30' : 'border-white/10'}`}>
                                     <div className="flex flex-col gap-4 relative z-10 text-left">
                                         <div className="flex items-center justify-between"><span className="text-[9px] font-black uppercase text-[#00f0ff] tracking-[0.4em] italic leading-none">{isSpanish ? 'MONTO PERSONALIZADO' : 'SET CUSTOM AMOUNT'}</span><span className="text-[8px] font-black text-white/20 uppercase tracking-widest">LIMIT: $30,000</span></div>
-                                        <div className={`flex items-center gap-4 bg-black/40 border rounded-[1.2rem] px-6 py-4 transition-all duration-500 ${isCustom ? 'border-[#00f0ff]/40' : 'border-white/5'}`}>
-                                            <span className={`text-3xl font-syncopate font-black italic ${isCustom ? 'text-[#00f0ff]' : 'text-white/20'}`}>$</span>
+                                        <div className={`flex items-center gap-4 bg-black/40 border rounded-[1.2rem] px-6 py-4 transition-all duration-500 ${isCustom ? 'border-[#fbbf24]/40' : 'border-white/5'}`}>
+                                            <span className={`text-3xl font-syncopate font-black italic ${isCustom ? 'text-white' : 'text-white/20'}`}>$</span>
                                             <input 
                                                 type="number" 
                                                 value={customAmount} 
@@ -281,15 +281,40 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                                 className="bg-transparent border-none outline-none text-3xl font-syncopate font-black italic text-white w-full placeholder:text-white/5" 
                                             />
                                         </div>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-[10px] font-black uppercase text-white/40 tracking-widest italic">{isSpanish ? 'RECIBES:' : 'YOU RECEIVE:'}</span>
+                                            <span className="text-xl font-syncopate font-black italic text-[#fbbf24] shadow-[0_0_20px_rgba(251,191,36,0.3)]">
+                                                {(parseFloat(customAmount) * 1000).toLocaleString()} 
+                                            </span>
+                                            <span className="text-[10px] font-black text-[#fbbf24]/40 uppercase tracking-tighter mt-1 italic">CR</span>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div className={`grid grid-cols-2 gap-3 transition-all duration-700 ${isCustom ? 'opacity-30' : ''}`}>
                                     {packages.map((pkg) => (
-                                        <button key={pkg.id} onClick={() => { setSelectedPkgId(pkg.id); setIsCustom(false); }} className={`relative p-4 rounded-[1.5rem] border transition-all duration-300 flex items-center justify-between group overflow-hidden ${(!isCustom && selectedPkgId === pkg.id) ? 'bg-white/5 border-[#00f0ff]/30 scale-[1.02]' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
-                                            {(!isCustom && selectedPkgId === pkg.id) && <div className="absolute inset-x-0 bottom-0 h-1" style={{ backgroundColor: pkg.color }} />}
-                                            <div className="flex flex-col gap-0.5 text-left relative z-10"><span className="text-[8px] font-black uppercase tracking-widest text-white/30 font-syncopate italic">{pkg.label}</span><div className="flex items-center gap-1.5"><span className="text-lg font-syncopate font-black text-white italic tracking-tighter">{pkg.credits > 100000 ? (pkg.credits/1000).toFixed(0) + 'K' : pkg.credits.toLocaleString()}</span><span className="text-[8px] font-black text-white/40 uppercase mt-0.5">CR</span></div></div>
-                                            <div className="flex flex-col items-end relative z-10"><span className="text-lg font-black text-white italic tracking-tighter">${pkg.price.toFixed(0)}</span></div>
+                                        <button key={pkg.id} onClick={() => { setSelectedPkgId(pkg.id); setIsCustom(false); }} className={`relative p-4 rounded-[1.5rem] border transition-all duration-300 flex items-center justify-between group overflow-hidden ${(!isCustom && selectedPkgId === pkg.id) ? 'bg-[#fbbf24]/5 border-[#fbbf24]/40 scale-[1.02] shadow-[0_0_30px_rgba(251,191,36,0.1)]' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
+                                            {/* 🎯 CONVERSION BADGES */}
+                                            {pkg.price >= 999 && <div className="absolute top-0 right-0 px-3 py-1 bg-[#fbbf24] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-lg shadow-[0_0_15px_rgba(251,191,36,0.3)] z-20 pulse">BEST VALUE</div>}
+                                            {pkg.popular && <div className="absolute top-0 right-0 px-3 py-1 bg-[#00f0ff] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-lg shadow-[0_0_15px_rgba(0,240,255,0.3)] z-20">POPULAR</div>}
+                                            
+                                            {(!isCustom && selectedPkgId === pkg.id) && <div className="absolute inset-x-0 bottom-0 h-1" style={{ backgroundColor: '#fbbf24' }} />}
+                                            
+                                            <div className="flex flex-col gap-1 text-left relative z-10">
+                                                <span className="text-[7px] font-black uppercase tracking-widest text-white/20 font-syncopate italic leading-none">{pkg.label}</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-xl font-syncopate font-black text-[#fbbf24] italic tracking-tighter drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]">
+                                                        {pkg.credits > 100000 ? (pkg.credits/1000).toFixed(0) + 'K' : pkg.credits.toLocaleString()}
+                                                    </span>
+                                                    <span className="text-[10px] font-black text-[#fbbf24] uppercase tracking-tighter mt-1 italic">CR</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex flex-col items-end relative z-10 transition-all group-hover:translate-x-1">
+                                                <div className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl group-hover:border-white/40 transition-all">
+                                                    <span className="text-lg font-black text-white italic tracking-tighter leading-none">${pkg.price.toFixed(0)}</span>
+                                                </div>
+                                            </div>
                                         </button>
                                     ))}
                                 </div>
