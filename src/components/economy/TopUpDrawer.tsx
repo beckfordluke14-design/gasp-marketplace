@@ -39,7 +39,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     const [isCustom, setIsCustom] = useState(false);
 
     const [solPrice, setSolPrice] = useState<number>(0);
-    const [p2pAsset, setP2pAsset] = useState<'USDC' | 'SOL'>('USDC');
+    const [p2pAsset, setP2pAsset] = useState<'USDC' | 'SOL'>('SOL');
     const [uniqueRef, setUniqueRef] = useState<string | null>(null);
     const [isPolling, setIsPolling] = useState(false);
     const [txSignature, setTxSignature] = useState('');
@@ -253,165 +253,123 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                 >
                     <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-transparent via-[#00f0ff] to-transparent opacity-60 shrink-0" />
                     
-                    <div className="p-10 pb-6 flex items-center justify-between shrink-0">
-                        <div className="flex flex-col gap-1.5 text-left">
-                            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">{isSpanish ? 'SISTEMA DE CRÉDITOS' : 'CREDIT SYSTEM'}</span>
-                            <h2 className="text-3xl font-syncopate font-black uppercase italic text-white leading-none tracking-tighter">{isSpanish ? 'COMPRAR CRÉDITOS' : 'BUY CREDITS'}</h2>
+                    <div className="p-8 pb-4 flex items-center justify-between shrink-0">
+                        <div className="flex flex-col gap-1 text-left">
+                            <span className="text-[9px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">{isSpanish ? 'SISTEMA DE CRÉDITOS' : 'CREDIT SYSTEM'}</span>
+                            <h2 className="text-2xl font-syncopate font-black uppercase italic text-white leading-none tracking-tighter">{isSpanish ? 'COMPRAR CRÉDITOS' : 'BUY CREDITS'}</h2>
                         </div>
-                        <button onClick={onClose} className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"><X size={24} /></button>
+                        <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"><X size={20} /></button>
                     </div>
 
-                    <div className="flex-1 p-10 pt-4 overflow-y-auto no-scrollbar pb-12">
+                    <div className="flex-1 p-8 pt-2 overflow-y-auto no-scrollbar pb-10">
                         {view === 'options' && (
                             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                                <div onClick={() => setIsCustom(!isCustom)} className={`relative p-8 rounded-[2.5rem] border transition-all duration-700 cursor-pointer group overflow-hidden ${isCustom ? 'bg-[#00f0ff]/5 border-[#00f0ff]/60 shadow-[0_0_80px_rgba(0,240,255,0.15)] ring-1 ring-[#00f0ff]/30' : 'bg-white/[0.02] border-white/10 opacity-60'}`}>
-                                    <div className="absolute top-0 right-0 p-4">
-                                        <div className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic flex items-center gap-3 transition-all duration-500 ${isCustom ? 'bg-[#00f0ff] text-black shadow-[0_0_30px_#00f0ff]' : 'bg-[#00f0ff] text-black animate-pulse shadow-[0_0_20px_#00f0ff] ring-4 ring-[#00f0ff]/20'}`}>
-                                            {isCustom ? (isSpanish ? 'ACTIVO' : 'OVERRIDE ACTIVE') : (isSpanish ? 'HABILITAR' : 'CLICK TO ACTIVATE')}
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col gap-6 relative z-10 text-left">
-                                        <div className="flex flex-col gap-1.5"><span className="text-[10px] font-black uppercase text-[#00f0ff] tracking-[0.4em] italic leading-none">{isSpanish ? 'MONTO PERSONALIZADO' : 'SET CUSTOM AMOUNT'}</span></div>
-                                        <div className="flex flex-row items-center gap-8 py-4">
-                                            <div className="flex-1 w-full space-y-3">
-                                                <div className="flex items-baseline justify-between px-2"><span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{isSpanish ? 'MONTO USD' : 'SETTLEMENT USD'}</span><span className="text-[8px] font-black text-red-500/60 uppercase tracking-widest">LIMIT: $30,000</span></div>
-                                                <div className={`flex items-center gap-4 bg-black/60 border rounded-[1.5rem] p-6 transition-all duration-500 ${isCustom ? 'border-[#00f0ff]/40 ring-1 ring-[#00f0ff]/20' : 'border-white/5 opacity-30 grayscale'}`}>
-                                                    <span className={`text-4xl font-syncopate font-black italic ${isCustom ? 'text-[#00f0ff]' : 'text-white/20'}`}>$</span>
-                                                    <input disabled={!isCustom} type="number" value={customAmount} onClick={(e) => e.stopPropagation()} onChange={(e) => setCustomAmount(Math.min(30000, parseFloat(e.target.value) || 0).toString())} className="bg-transparent border-none outline-none text-4xl font-syncopate font-black italic text-white w-full placeholder:text-white/5" />
-                                                </div>
-                                            </div>
+                                <div className={`relative p-6 rounded-[2rem] border transition-all duration-700 group overflow-hidden bg-white/[0.02] ${isCustom ? 'border-[#00f0ff]/60 shadow-[0_0_50px_rgba(0,240,255,0.1)] ring-1 ring-[#00f0ff]/30' : 'border-white/10'}`}>
+                                    <div className="flex flex-col gap-4 relative z-10 text-left">
+                                        <div className="flex items-center justify-between"><span className="text-[9px] font-black uppercase text-[#00f0ff] tracking-[0.4em] italic leading-none">{isSpanish ? 'MONTO PERSONALIZADO' : 'SET CUSTOM AMOUNT'}</span><span className="text-[8px] font-black text-white/20 uppercase tracking-widest">LIMIT: $30,000</span></div>
+                                        <div className={`flex items-center gap-4 bg-black/40 border rounded-[1.2rem] px-6 py-4 transition-all duration-500 ${isCustom ? 'border-[#00f0ff]/40' : 'border-white/5'}`}>
+                                            <span className={`text-3xl font-syncopate font-black italic ${isCustom ? 'text-[#00f0ff]' : 'text-white/20'}`}>$</span>
+                                            <input 
+                                                type="number" 
+                                                value={customAmount} 
+                                                onClick={(e) => { e.stopPropagation(); setIsCustom(true); }} 
+                                                onChange={(e) => {
+                                                    const val = Math.min(30000, parseFloat(e.target.value) || 0).toString();
+                                                    setCustomAmount(val);
+                                                    setIsCustom(true);
+                                                }} 
+                                                className="bg-transparent border-none outline-none text-3xl font-syncopate font-black italic text-white w-full placeholder:text-white/5" 
+                                            />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-700 ${isCustom ? 'opacity-10 pointer-events-none' : ''}`}>
+                                <div className={`grid grid-cols-2 gap-3 transition-all duration-700 ${isCustom ? 'opacity-30' : ''}`}>
                                     {packages.map((pkg) => (
-                                        <button key={pkg.id} onClick={() => { setSelectedPkgId(pkg.id); setIsCustom(false); }} className={`relative p-6 rounded-[2rem] border transition-all duration-300 flex items-center justify-between group overflow-hidden ${selectedPkgId === pkg.id ? 'bg-white/5 border-white/30 scale-[1.02]' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
-                                            {selectedPkgId === pkg.id && <div className="absolute inset-x-0 bottom-0 h-1.5" style={{ backgroundColor: pkg.color }} />}
-                                            <div className="flex flex-col gap-1 text-left relative z-10"><span className="text-[9px] font-black uppercase tracking-widest text-white/30 font-syncopate italic">{pkg.label}</span><div className="flex items-center gap-2"><span className="text-2xl font-syncopate font-black text-white italic tracking-tighter">{pkg.credits > 100000 ? (pkg.credits/1000).toFixed(0) + 'K' : pkg.credits.toLocaleString()}</span><span className="text-[10px] font-black text-white/40 uppercase tracking-tighter mt-1">CR</span></div></div>
-                                            <div className="flex flex-col items-end relative z-10"><span className="text-2xl font-black text-white italic tracking-tighter">${pkg.price.toFixed(0)}</span></div>
+                                        <button key={pkg.id} onClick={() => { setSelectedPkgId(pkg.id); setIsCustom(false); }} className={`relative p-4 rounded-[1.5rem] border transition-all duration-300 flex items-center justify-between group overflow-hidden ${(!isCustom && selectedPkgId === pkg.id) ? 'bg-white/5 border-[#00f0ff]/30 scale-[1.02]' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
+                                            {(!isCustom && selectedPkgId === pkg.id) && <div className="absolute inset-x-0 bottom-0 h-1" style={{ backgroundColor: pkg.color }} />}
+                                            <div className="flex flex-col gap-0.5 text-left relative z-10"><span className="text-[8px] font-black uppercase tracking-widest text-white/30 font-syncopate italic">{pkg.label}</span><div className="flex items-center gap-1.5"><span className="text-lg font-syncopate font-black text-white italic tracking-tighter">{pkg.credits > 100000 ? (pkg.credits/1000).toFixed(0) + 'K' : pkg.credits.toLocaleString()}</span><span className="text-[8px] font-black text-white/40 uppercase mt-0.5">CR</span></div></div>
+                                            <div className="flex flex-col items-end relative z-10"><span className="text-lg font-black text-white italic tracking-tighter">${pkg.price.toFixed(0)}</span></div>
                                         </button>
                                     ))}
                                 </div>
 
-                                <div className="space-y-6 text-center">
-                                    <button onClick={handleStripeCheckout} disabled={isLoading} className="w-full h-28 rounded-[3rem] bg-white text-black font-black uppercase text-[14px] tracking-[0.2em] transition-all shadow-[0_20px_100px_rgba(255,255,255,0.2)] flex items-center justify-center gap-6 group hover:scale-[1.02] relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 px-5 py-2 bg-emerald-500 text-white text-[9px] font-black uppercase tracking-widest rounded-bl-2xl shadow-[0_0_30px_rgba(16,185,129,0.4)] animate-pulse">
-                                            {isSpanish ? 'LO MÁS FÁCIL' : 'RECOMMENDED'}
-                                        </div>
-                                        {isLoading ? <Loader2 size={36} className="animate-spin text-black" /> : <CreditCard size={36} fill="black" />}
-                                        <div className="flex flex-col items-start leading-none gap-2.5 pt-1">
-                                            <span className="font-syncopate italic tracking-tighter text-xl">{isSpanish ? 'COMPRAR CON TARJETA' : 'BUY WITH CARD'}</span>
-                                            <span className="text-[10px] opacity-60 font-bold tracking-widest text-left">
-                                                {isSpanish ? '¿No tienes cripto? Compra al instante con tu tarjeta.' : 'No crypto? Buy it instantly with your card.'}
-                                            </span>
-                                        </div>
-                                        {!isLoading && <ArrowRight size={28} className="opacity-40 group-hover:translate-x-3 transition-transform" />}
+                                <div className="space-y-4 text-center">
+                                    <button onClick={handleStripeCheckout} disabled={isLoading} className="w-full h-20 rounded-[2.5rem] bg-white text-black font-black uppercase text-[12px] tracking-[0.2em] transition-all shadow-[0_20px_100px_rgba(255,255,255,0.2)] flex items-center justify-center gap-5 group hover:scale-[1.02] relative overflow-hidden shrink-0">
+                                        {isLoading ? <Loader2 size={24} className="animate-spin text-black" /> : <CreditCard size={24} fill="black" />}
+                                        <span className="font-syncopate italic tracking-tighter text-base">{isSpanish ? 'PAGAR CON TARJETA' : 'BUY WITH CARD'}</span>
                                     </button>
                                 </div>
 
-                                {solanaAddress ? (
-                                    <button onClick={handleSwitchToP2P} className="w-full py-8 rounded-[2.5rem] bg-[#00f0ff]/10 border border-[#00f0ff]/40 hover:bg-[#00f0ff]/20 transition-all flex items-center justify-center gap-6 group relative">
-                                        <div className="absolute top-0 right-0 px-3 py-1 bg-[#00f0ff] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-xl shadow-[0_0_20px_#00f0ff]">{isSpanish ? 'BILLETERA CONECTADA' : 'CONNECTED WALLET'}</div>
-                                        <Wallet size={28} className="text-[#00f0ff]" />
-                                        <div className="flex flex-col items-start leading-none gap-2 text-left"><span className="text-[11px] font-black text-white uppercase tracking-widest font-syncopate italic">{isSpanish ? 'PAGAR AHORA CON CRIPTO' : 'PAY NOW WITH CRYPTO'}</span><span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-[0.5em] italic">{solanaAddress.slice(0, 4)}...{solanaAddress.slice(-4)} // ONE-CLICK</span></div>
-                                    </button>
-                                ) : (
-                                    <button onClick={handleSwitchToP2P} className="w-full py-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:border-[#00f0ff]/40 transition-all flex items-center justify-center gap-6 group relative overflow-hidden">
-                                        <QrCode size={28} className="text-[#00f0ff]" />
-                                        <div className="flex flex-col items-start leading-none gap-2 text-left"><span className="text-[11px] font-black text-white uppercase tracking-widest font-syncopate italic">{isSpanish ? 'PAGAR CON SOLANA / USDC' : 'PAY WITH SOLANA / USDC'}</span><span className="text-[8px] font-black text-white/20 uppercase tracking-[0.5em] italic">{isSpanish ? 'Transferencia P2P Directa' : 'Direct P2P Transfer'}</span></div>
-                                    </button>
-                                )}
+                                <button onClick={handleSwitchToP2P} className="w-full py-6 rounded-[2rem] bg-white/5 border border-white/10 hover:border-[#00f0ff]/40 transition-all flex items-center justify-center gap-5 group relative overflow-hidden shrink-0">
+                                    <QrCode size={24} className="text-[#00f0ff]" />
+                                    <div className="flex flex-col items-start leading-none gap-1.5 text-left"><span className="text-[10px] font-black text-white uppercase tracking-widest font-syncopate italic">{isSpanish ? 'PAGAR CON SOLANA / USDC' : 'PAY WITH SOLANA / USDC'}</span><span className="text-[7px] font-black text-white/20 uppercase tracking-[0.5em] italic">{isSpanish ? 'Transferencia P2P Directa' : 'Direct P2P Transfer'}</span></div>
+                                </button>
                             </div>
                         )}
 
                         {view === 'p2p' && (
-                            <div className="space-y-10 animate-in fade-in zoom-in duration-700 text-center py-4">
-                                <div className="space-y-4">
-                                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4 relative">
-                                        <QrCode size={32} className="text-[#00f0ff]" />
-                                        {isPolling && <div className="absolute inset-0 border-2 border-[#00f0ff] border-t-transparent animate-spin rounded-2xl shadow-[0_0_40px_rgba(0,240,255,0.4)]" />}
+                            <div className="space-y-4 animate-in fade-in zoom-in duration-700 text-center py-2">
+                                <div className="space-y-3">
+                                    <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-2 relative">
+                                        <QrCode size={24} className="text-[#00f0ff]" />
+                                        {isPolling && <div className="absolute inset-0 border-2 border-[#00f0ff] border-t-transparent animate-spin rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.4)]" />}
                                     </div>
-                                    <h3 className="text-xl font-syncopate font-black uppercase italic text-white tracking-tighter leading-none">{isPolling ? (isSpanish ? 'ESPERANDO PAGO...' : 'WAITING FOR SYNC...') : (isSpanish ? 'LIQUIDACIÓN P2P' : 'P2P SETTLEMENT')}</h3>
+                                    <h3 className="text-lg font-syncopate font-black uppercase italic text-white tracking-tighter leading-none">{isPolling ? (isSpanish ? 'VERIFICANDO...' : 'VERIFYING...') : (isSpanish ? 'LIQUIDACIÓN P2P' : 'P2P SETTLEMENT')}</h3>
                                     
                                     <div className="flex flex-col items-center gap-2">
-                                        <div className="flex flex-col items-center gap-1.5 px-6 py-4 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-[1.5rem] shadow-[0_0_40px_rgba(0,240,255,0.1)]">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <div className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-pulse shadow-[0_0_8px_#00f0ff]" />
-                                                <span className="text-[12px] font-syncopate font-black text-white italic tracking-tighter">
+                                        <div className="flex flex-col items-center gap-1 px-5 py-3 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-[1.2rem]">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full animate-pulse" />
+                                                <span className="text-[14px] font-syncopate font-black text-white italic tracking-tighter">
                                                     {p2pAsset === 'SOL' ? `${targetSol} SOL` : `$${parseFloat(targetUsd.toString()).toFixed(2)} USDC`}
                                                 </span>
                                             </div>
-                                            <div className="h-px w-full bg-white/10" />
-                                            <div className="flex flex-col items-center">
-                                                <span className="text-[7.5px] font-black text-[#00f0ff] uppercase tracking-[0.2em] italic">{isSpanish ? 'TASA DE CONVERSIÓN ACTUAL' : 'CURRENT CONVERSION RATE'}</span>
-                                                <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1">
-                                                    {p2pAsset === 'SOL' ? (solPrice > 0 ? `1 SOL = $${solPrice.toFixed(2)}` : 'ORACLE SYNCING...') : '1 USDC = $1.00'}
-                                                </span>
-                                            </div>
+                                            <div className="h-px w-full bg-white/10 my-1" />
+                                            <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">
+                                                {p2pAsset === 'SOL' ? (solPrice > 0 ? `1 SOL = $${solPrice.toFixed(2)}` : 'ORACLE SYNCING...') : '1 USDC = $1.00'}
+                                            </span>
                                         </div>
                                     </div>
-                                    <p className="text-[9px] text-white/40 leading-relaxed max-w-[280px] mx-auto font-black uppercase tracking-widest italic">{isPolling ? (isSpanish ? 'VERIFICANDO TRANSACCIÓN...' : 'VERIFYING TRANSACTION...') : `Enviar ${p2pAsset === 'SOL' ? targetSol : targetUsd} ${p2pAsset} a la dirección.`}</p>
-                                    
-                                    {/* 🚩 CRITICAL USER GUIDANCE */}
-                                    {isPolling && (
-                                        <div className="mx-auto max-w-[320px] p-4 bg-red-500/10 border border-red-500/40 rounded-2xl animate-pulse">
-                                            <p className="text-[10px] font-black text-red-500 uppercase tracking-widest leading-normal">
-                                                {isSpanish ? '¡NO CIERRE ESTA VENTANA!' : 'DO NOT CLOSE THIS WINDOW!'} <br/>
-                                                <span className="text-white/60 opacity-60">
-                                                    {isSpanish ? 'Esperando confirmación de la red...' : 'Waiting for network nodes to confirm...'}
-                                                </span>
-                                            </p>
-                                        </div>
-                                    )}
                                 </div>
 
                                 <div className="space-y-6">
+                                    <div className="flex flex-col items-center gap-4 py-2">
+                                        <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-[0.3em] font-syncopate italic">{isSpanish ? 'SELECCIONA ACTIVO' : 'SELECT ASSET'}</span>
+                                        <div className="flex items-center justify-center gap-3 bg-white/5 p-1.5 rounded-xl border border-white/5">
+                                            <button onClick={() => setP2pAsset('USDC')} className={`px-6 py-2 rounded-lg flex items-center gap-2 border transition-all ${p2pAsset === 'USDC' ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff] shadow-[0_0_15px_rgba(0,240,255,0.2)]' : 'bg-white/5 border-white/10 text-white/40'}`}><span className="text-[9px] font-black tracking-widest font-syncopate italic">USDC</span></button>
+                                            <button onClick={() => setP2pAsset('SOL')} className={`px-6 py-2 rounded-lg flex items-center gap-2 border transition-all ${p2pAsset === 'SOL' ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff] shadow-[0_0_15px_rgba(0,240,255,0.2)]' : 'bg-white/5 border-white/10 text-white/40'}`}><span className="text-[9px] font-black tracking-widest font-syncopate italic">SOL</span></button>
+                                        </div>
+                                    </div>
+
                                     {isMobile ? (
-                                        <div className="py-2 space-y-6">
-                                            <button onClick={handleSolanaPayDeepLink} className="w-full h-24 rounded-[3rem] bg-[#00f0ff] text-black font-black uppercase text-[15px] tracking-[0.2em] shadow-[0_20px_80px_rgba(0,240,255,0.4)] flex items-center justify-center gap-6 group hover:scale-[1.02] active:scale-95 transition-all">
-                                               <Smartphone size={32} />
-                                               <div className="flex flex-col items-start leading-none gap-1.5 pt-1">
-                                                   <span className="font-syncopate italic tracking-tighter">{isSpanish ? 'ABRIR BILLETERA' : 'OPEN PHANTOM WALLET'}</span>
-                                                   <span className="text-[8px] font-bold opacity-60 tracking-widest">{isSpanish ? 'AUTO-CONECTAR APLICACIÓN' : 'AUTO-CONNECT APP'}</span>
+                                        <div className="py-1 space-y-4">
+                                            <button onClick={handleSolanaPayDeepLink} className="w-full h-20 rounded-[2.5rem] bg-[#00f0ff] text-black font-black uppercase text-[13px] tracking-[0.2em] shadow-[0_15px_60px_rgba(0,240,255,0.4)] flex items-center justify-center gap-5 group hover:scale-[1.02] active:scale-95 transition-all">
+                                               <Smartphone size={28} />
+                                               <div className="flex flex-col items-start leading-none gap-1 pt-0.5">
+                                                   <span className="font-syncopate italic tracking-tighter uppercase">{isSpanish ? 'ABRIR BILLETERA' : 'OPEN PHANTOM'}</span>
                                                </div>
                                             </button>
-                                            <div className="p-4 bg-white rounded-3xl w-44 h-44 mx-auto"><img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(solanaPayUrl)}`} className="w-full h-full object-contain" /></div>
+                                            <div className="p-3 bg-white rounded-2xl w-36 h-36 mx-auto"><img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(solanaPayUrl)}`} className="w-full h-full object-contain" /></div>
                                         </div>
                                     ) : (
-                                        <div className="space-y-8">
-                                            {wallets && wallets.length > 0 && (
-                                                <button onClick={handleDirectPayment} disabled={isLoading} className="w-full h-24 rounded-[3rem] bg-[#00f0ff] text-black font-black uppercase text-[15px] tracking-[0.2em] shadow-[0_20px_100px_rgba(0,240,255,0.4)] flex items-center justify-center gap-6 group hover:scale-[1.02] active:scale-95 transition-all">
-                                                    {isLoading ? <Loader2 size={32} className="animate-spin" /> : <Wallet size={32} />}
-                                                    <div className="flex flex-col items-start leading-none gap-1.5 pt-1">
-                                                        <span className="font-syncopate italic tracking-tighter">{isSpanish ? 'PAGAR AHORA' : 'PAY NOW'}</span>
-                                                        <span className="text-[8px] font-bold opacity-60 tracking-widest">{isSpanish ? 'CONFIRMAR EN BILLETERA' : 'CONFIRM IN WALLET'}</span>
-                                                    </div>
-                                                </button>
-                                            )}
-                                            <div className="relative p-8 bg-white rounded-[3rem] w-72 h-72 mx-auto shadow-[0_0_100px_rgba(255,255,255,0.1)] ring-8 ring-white/5 group">
-                                                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(solanaPayUrl)}`} alt="QR Protocol" className="w-full h-full object-contain" />
-                                                <div className="absolute inset-0 border-[16px] border-white rounded-[3rem]" />
+                                        <div className="space-y-6">
+                                            <button onClick={handleDirectPayment} className="w-full h-20 rounded-[2.5rem] bg-[#00f0ff] text-black font-black uppercase text-[13px] tracking-[0.2em] shadow-[0_20px_80px_rgba(0,240,255,0.4)] flex items-center justify-center gap-5 group hover:scale-[1.02] active:scale-95 transition-all">
+                                                <Wallet size={28} />
+                                                <div className="flex flex-col items-start leading-none gap-1 pt-0.5">
+                                                    <span className="font-syncopate italic tracking-tighter uppercase">{isSpanish ? 'PAGAR AHORA' : 'PAY NOW'}</span>
+                                                </div>
+                                            </button>
+                                            <div className="relative p-6 bg-white rounded-[2.5rem] w-64 h-64 mx-auto shadow-[0_0_80px_rgba(255,255,255,0.1)] ring-4 ring-white/5 group">
+                                                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(solanaPayUrl)}`} alt="QR Protocol" className="w-full h-full object-contain" />
+                                                <div className="absolute inset-0 border-[12px] border-white rounded-[2.5rem]" />
                                             </div>
                                         </div>
                                     )}
-
-                                    {/* 🛠️ MANUAL SUPPORT TRACE */}
-                                    <div className="mx-auto max-w-[340px] p-6 bg-black/40 border border-white/5 rounded-3xl text-left space-y-4">
-                                        <div className="flex items-center gap-3"><AlertCircle size={14} className="text-[#00f0ff]" /><span className="text-[9px] font-black uppercase text-[#00f0ff] tracking-widest">{isSpanish ? 'DATOS DE SOPORTE' : 'MANUAL SUPPORT METADATA'}</span></div>
-                                        <div className="space-y-2">
-                                            <div className="flex flex-col"><span className="text-[7px] text-white/20 uppercase font-bold">REF:</span><span className="text-[10px] font-mono text-white/60 break-all">{uniqueRef || 'GENERATING...'}</span></div>
-                                            <div className="flex flex-col"><span className="text-[7px] text-white/20 uppercase font-bold">VAULT:</span><span className="text-[10px] font-mono text-white/60 break-all">{SYNDICATE_TREASURY_SOL}</span></div>
-                                        </div>
-                                    </div>
                                 </div>
-
-                                <div className="flex flex-col items-center gap-6 py-4">
-                                    <div className="flex items-center justify-center gap-4 bg-white/5 p-2 rounded-2xl border border-white/5">
-                                        <button onClick={() => setP2pAsset('USDC')} className={`px-8 py-3 rounded-xl flex items-center gap-2 border transition-all ${p2pAsset === 'USDC' ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.2)]' : 'bg-white/5 border-white/10 text-white/40'}`}><span className="text-[10px] font-black tracking-widest">USDC</span></button>
-                                        <button onClick={() => setP2pAsset('SOL')} className={`px-8 py-3 rounded-xl flex items-center gap-2 border transition-all ${p2pAsset === 'SOL' ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.2)]' : 'bg-white/5 border-white/10 text-white/40'}`}><span className="text-[10px] font-black tracking-widest">SOL</span></button>
-                                    </div>
-                                    <button onClick={() => setView('options')} className="text-[11px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic hover:text-white transition-all hover:scale-105">{isSpanish ? '← VOLVER A OPCIONES' : '← RETURN TO OPTIONS'}</button>
+                                
+                                <div className="flex flex-col items-center gap-4 pt-2">
+                                    <button onClick={() => setView('options')} className="text-[10px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic hover:text-white transition-all hover:scale-105">{isSpanish ? '← VOLVER' : '← RETURN'}</button>
                                 </div>
                             </div>
                         )}
