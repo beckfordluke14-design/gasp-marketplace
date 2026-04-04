@@ -165,11 +165,12 @@ export default function AssetAdmin() {
                                             <img src={p.content_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </div>
                                         <div style={{ flex: 1 }}>
-                                            <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
-                                                <button onClick={() => runAction({ id: p.id, action: 'toggle_gallery' })} style={{ background: p.is_gallery ? '#ffea00' : '#222', color: p.is_gallery ? '#000' : '#444', border: 'none', padding: '4px 6px', borderRadius: '4px', fontSize: '8px', fontWeight: 'bold' }}>GALLERY</button>
-                                                <button onClick={() => runAction({ id: p.id, action: 'toggle_vault' })} style={{ background: p.is_vault ? '#ff00ff' : '#222', color: p.is_vault ? '#fff' : '#444', border: 'none', padding: '4px 6px', borderRadius: '4px', fontSize: '8px', fontWeight: 'bold' }}>VAULT</button>
+                                            <div style={{ display: 'flex', gap: '4px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                                                <button onClick={() => runAction({ id: p.id, action: 'toggle_gallery' })} style={{ background: p.is_gallery ? '#ffea00' : '#222', color: p.is_gallery ? '#000' : '#444', border: 'none', padding: '6px 8px', borderRadius: '4px', fontSize: '8px', fontWeight: 'bold' }}>GALLERY</button>
+                                                <button onClick={() => runAction({ id: p.id, action: 'toggle_vault' })} style={{ background: p.is_vault ? '#ff00ff' : '#222', color: p.is_vault ? '#fff' : '#444', border: 'none', padding: '6px 8px', borderRadius: '4px', fontSize: '8px', fontWeight: 'bold' }}>VAULT</button>
+                                                <button onClick={() => runAction({ id: selectedPersonaId, type: 'persona', assetUrl: p.content_url })} style={{ background: '#00f0ff', color: '#000', border: 'none', padding: '6px 8px', borderRadius: '4px', fontSize: '8px', fontWeight: 'bold' }}>HERO</button>
                                             </div>
-                                            <p style={{ margin: 0, fontSize: '9px', color: '#555', truncate: 'true' }}>{p.caption}</p>
+                                            <p style={{ margin: 0, fontSize: '9px', color: '#555', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.caption || 'No caption'}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -202,7 +203,7 @@ export default function AssetAdmin() {
                             </div>
                         ))}
                         {limit < displayAssets.length && (
-                            <button onClick={() => setLimit(l => l + 30)} style={{ width: '100%', padding: '20px', background: '#111', border: 'none', color: '#fff', borderRadius: '15px', color: '#00f0ff', fontWeight: 'bold' }}>SCAN MORE NODES</button>
+                            <button onClick={() => setLimit(l => l + 30)} style={{ width: '100%', padding: '20px', background: '#111', border: 'none', borderRadius: '15px', color: '#00f0ff', fontWeight: 'bold' }}>SCAN MORE NODES</button>
                         )}
                     </div>
                 )}
