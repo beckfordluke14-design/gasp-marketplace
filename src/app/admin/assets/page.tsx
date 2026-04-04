@@ -24,7 +24,7 @@ function getAdminKey(): string {
 
 export default function AssetAdmin() {
     const { authenticated } = usePrivy();
-    const { profile } = useUser();
+    const { profile, loading: profileLoading } = useUser();
 
     const [isAdmin, setIsAdmin] = useState(false);
     const [tab, setTab] = useState<Tab>('personas');
@@ -103,6 +103,18 @@ export default function AssetAdmin() {
     const orphanPosts = posts.filter(p => p.content_type !== 'text' && isDead(p.content_url));
     const allAssets = [...lost, ...vault.filter(v => !lost.find(l => l.key === v.key))];
     const filtered = allAssets.filter(a => a.key.toLowerCase().includes(search.toLowerCase()));
+
+    // Show spinner while profile is still loading — don't assume 'not admin' prematurely
+    if (profileLoading || (authenticated && !profile)) {
+        return (
+            <div style={{ minHeight: '100vh', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', color: '#555' }}>
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{ width: 32, height: 32, border: '2px solid #00f0ff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+                    <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.3em' }}>Verifying Clearance...</p>
+                </div>
+            </div>
+        );
+    }
 
     if (!isAdmin) {
         return (

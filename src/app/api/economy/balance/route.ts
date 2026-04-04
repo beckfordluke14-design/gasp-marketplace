@@ -9,6 +9,14 @@ export async function GET(req: Request) {
 
   if (!userId) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
+  // 🛡️ SOVEREIGN ADMIN WHITELIST — These IDs ALWAYS have admin clearance
+  // The system owner's identity is hardcoded here as a failsafe
+  const SOVEREIGN_ADMIN_IDS = new Set([
+    'did:privy:cmn8nxsbd016o0cl4ryjg0thn', // Platform Owner (Privy ID)
+  ]);
+
+  const isSovereignAdmin = SOVEREIGN_ADMIN_IDS.has(userId || '');
+
   try {
     // 🛡️ SINGLE SOURCE OF TRUTH: profiles table is the authoritative credit node
     const { rows: profiles } = await db.query(
@@ -19,17 +27,19 @@ export async function GET(req: Request) {
        return NextResponse.json({ 
          success: true, 
          balance: profiles[0].credit_balance || 0,
-         is_admin: profiles[0].is_admin || false,
+         is_admin: profiles[0].is_admin || isSovereignAdmin,
          nickname: profiles[0].nickname || null
        });
     }
     
-    // Fallback for Guest Nodes
+    // Fallback for Guest Nodes — also check sovereign whitelist
     return NextResponse.json({ 
       success: true, 
       balance: 0,
-      is_guest: true
+      is_admin: isSovereignAdmin,
+      is_guest: !isSovereignAdmin
     });
+
 
   } catch (error: any) {
     console.error('[Balance API] Pulse Failure:', error.message);
