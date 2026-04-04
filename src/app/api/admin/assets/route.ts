@@ -102,6 +102,10 @@ export async function POST(req: Request) {
             await db.query(`UPDATE posts SET persona_id = $1 WHERE id = $2`, [targetPersonaId, id]);
             return NextResponse.json({ success: true });
         }
+        if (action === 'hide_post') {
+            await db.query(`UPDATE posts SET caption = CONCAT('DELETED // ', COALESCE(caption, '')) WHERE id = $1`, [id]);
+            return NextResponse.json({ success: true });
+        }
 
         if (!id || !type || !assetUrl) return NextResponse.json({ success: false, error: 'MISSING_DATA' }, { status: 400 });
 
