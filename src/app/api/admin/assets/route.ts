@@ -75,17 +75,32 @@ export async function POST(req: Request) {
     try {
         if (!(await isAdminRequest(req))) return unauthorizedResponse();
 
-        const { id, type, assetUrl, personaId, action } = await req.json();
+        const { id, type, assetUrl, personaId, action, targetPersonaId } = await req.json();
         
         // 🧪 SOVEREIGN ACTION: CRAFTING NEW VAULT ENTRY
-        if (action === 'create_vault') {
+        if (action === 'create_vault' || action === 'create_gallery') {
+            const isVault = action === 'create_vault';
             if (!personaId || !assetUrl) return NextResponse.json({ success: false, error: 'MISSING_DATA' }, { status: 400 });
             const { rows } = await db.query(`
-                INSERT INTO posts (persona_id, content_url, content_type, is_vault, caption, created_at, updated_at)
-                VALUES ($1, $2, 'image', true, 'Uncovered Vault Asset // Syndicate Source', NOW(), NOW())
+                INSERT INTO posts (persona_id, content_url, content_type, is_vault, is_gallery, caption, created_at, updated_at)
+                VALUES ($1, $2, 'image', $3, $4, 'Identity Update // Syndicate Node', NOW(), NOW())
                 RETURNING id
-            `, [personaId, assetUrl]);
+            `, [personaId, assetUrl, isVault, !isVault]);
             return NextResponse.json({ success: true, createdId: rows[0].id });
+        }
+
+        // 🧪 SOVEREIGN ACTION: OVERHAULING EXISTING POSTS
+        if (action === 'toggle_vault') {
+            await db.query(`UPDATE posts SET is_vault = NOT is_vault, is_gallery = false WHERE id = $1`, [id]);
+            return NextResponse.json({ success: true });
+        }
+        if (action === 'toggle_gallery') {
+            await db.query(`UPDATE posts SET is_gallery = NOT is_gallery, is_vault = false WHERE id = $1`, [id]);
+            return NextResponse.json({ success: true });
+        }
+        if (action === 'move_to_persona') {
+            await db.query(`UPDATE posts SET persona_id = $1 WHERE id = $2`, [targetPersonaId, id]);
+            return NextResponse.json({ success: true });
         }
 
         if (!id || !type || !assetUrl) return NextResponse.json({ success: false, error: 'MISSING_DATA' }, { status: 400 });

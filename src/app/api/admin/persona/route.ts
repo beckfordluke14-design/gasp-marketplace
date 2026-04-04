@@ -35,5 +35,19 @@ export async function PATCH(req: Request) {
   }
 }
 
+export async function POST(req: Request) {
+  try {
+    const { name, seed_image_url } = await req.json();
+    const { rows } = await db.query(`
+      INSERT INTO personas (name, seed_image_url, is_active, created_at, updated_at, city, age, description) 
+      VALUES ($1, $2, true, NOW(), NOW(), 'Global', 22, 'New Persona // System Generation')
+      RETURNING id
+    `, [name || 'New Persona', seed_image_url]);
+    return NextResponse.json({ success: true, id: rows[0].id });
+  } catch (e: any) {
+    return NextResponse.json({ success: false, error: e.message }, { status: 500 });
+  }
+}
+
 
 
