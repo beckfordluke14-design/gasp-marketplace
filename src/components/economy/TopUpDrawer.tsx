@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Zap, ShieldCheck, CreditCard, QrCode, ArrowRight, CheckCircle2, AlertCircle, Copy, Check, Loader2, Coins, Wallet, Smartphone } from 'lucide-react';
 import { CREDIT_PACKAGES, SYNDICATE_TREASURY_SOL } from '@/lib/economy/constants';
 import { useUser } from '../providers/UserProvider';
-import { usePrivy, useSolanaWallets } from '@privy-io/react-auth';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 interface TopUpDrawerProps {
@@ -22,8 +22,11 @@ interface TopUpDrawerProps {
  */
 export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, userId: propUserId }: TopUpDrawerProps) {
     const { user, authenticated } = usePrivy();
-    const { wallets } = useSolanaWallets();
+    const { wallets } = useWallets();
     const { profile } = useUser();
+    
+    // 🛡️ SOLANA WALLET FILTER
+    const solanaWallets = wallets.filter(w => (w as any).chainType === 'solana' || w.address?.length > 42);
     
     const [selectedPkgId, setSelectedPkgId] = useState(initialPackage || CREDIT_PACKAGES[0].id);
     const [copied, setCopied] = useState(false);
@@ -152,7 +155,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     }, [userId, targetUsd, propUserId]);
 
     const handleDirectPayment = async () => {
-        if (!wallets || wallets.length === 0) {
+        if (!solanaWallets || solanaWallets.length === 0) {
             // No wallet connected? Just open deep link if on mobile
             if (isMobile) {
                 window.location.href = buildSolanaPayUrl();
@@ -164,7 +167,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
 
         setIsLoading(true);
         try {
-            const wallet = wallets[0];
+            const wallet = solanaWallets[0];
             const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
             
             // Create Transaction
@@ -194,7 +197,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             transaction.feePayer = new PublicKey(wallet.address);
 
             // Request browser/extension signature
-            const provider = await wallet.getProvider();
+            const provider = await (wallet as any).getProvider();
             const { signature } = await (provider as any).request({
                 method: 'signAndSendTransaction',
                 params: {
@@ -303,8 +306,8 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                     
                     <div className="p-10 pb-6 flex items-center justify-between shrink-0">
                         <div className="flex flex-col gap-1.5 text-left">
-                            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">{isSpanish ? 'SISTEMA DE CRÉDITOS' : 'CREDIT RECHARGE SYSTEM'}</span>
-                            <h2 className="text-3xl font-syncopate font-black uppercase italic text-white leading-none tracking-tighter">{isSpanish ? 'RECARGAR BILLETERA' : 'TOP UP WALLET'}</h2>
+                            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">{isSpanish ? 'SISTEMA DE CRÉDITOS' : 'CREDIT SYSTEM'}</span>
+                            <h2 className="text-3xl font-syncopate font-black uppercase italic text-white leading-none tracking-tighter">{isSpanish ? 'COMPRAR CRÉDITOS' : 'BUY CREDITS'}</h2>
                         </div>
                         <button onClick={onClose} className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"><X size={24} /></button>
                     </div>
@@ -343,10 +346,18 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                 </div>
 
                                 <div className="space-y-6 text-center">
-                                    <button onClick={handleStripeCheckout} disabled={isLoading} className="w-full h-24 rounded-[2.5rem] bg-white text-black font-black uppercase text-[14px] tracking-[0.2em] transition-all shadow-[0_20px_80px_rgba(255,255,255,0.15)] flex items-center justify-center gap-6 group hover:scale-[1.02]">
-                                        {isLoading ? <Loader2 size={32} className="animate-spin text-black" /> : <CreditCard size={32} fill="black" />}
-                                        <div className="flex flex-col items-start leading-none gap-2"><span className="font-syncopate italic tracking-tighter">{isSpanish ? 'PAGAR CON TARJETA' : 'PAY WITH CARD'}</span><span className="text-[10px] opacity-40 font-bold tracking-widest">{isSpanish ? 'Stripe Checkout Seguro' : 'Stripe Secure Checkout'}</span></div>
-                                        {!isLoading && <ArrowRight size={24} className="opacity-40 group-hover:translate-x-3 transition-transform" />}
+                                    <button onClick={handleStripeCheckout} disabled={isLoading} className="w-full h-28 rounded-[3rem] bg-white text-black font-black uppercase text-[14px] tracking-[0.2em] transition-all shadow-[0_20px_100px_rgba(255,255,255,0.2)] flex items-center justify-center gap-6 group hover:scale-[1.02] relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 px-5 py-2 bg-emerald-500 text-white text-[9px] font-black uppercase tracking-widest rounded-bl-2xl shadow-[0_0_30px_rgba(16,185,129,0.4)] animate-pulse">
+                                            {isSpanish ? 'LO MÁS FÁCIL' : 'RECOMMENDED'}
+                                        </div>
+                                        {isLoading ? <Loader2 size={36} className="animate-spin text-black" /> : <CreditCard size={36} fill="black" />}
+                                        <div className="flex flex-col items-start leading-none gap-2.5 pt-1">
+                                            <span className="font-syncopate italic tracking-tighter text-xl">{isSpanish ? 'COMPRAR CON TARJETA' : 'BUY WITH CARD'}</span>
+                                            <span className="text-[10px] opacity-60 font-bold tracking-widest text-left">
+                                                {isSpanish ? '¿No tienes cripto? Compra al instante con tu tarjeta.' : 'No crypto? Buy it instantly with your card.'}
+                                            </span>
+                                        </div>
+                                        {!isLoading && <ArrowRight size={28} className="opacity-40 group-hover:translate-x-3 transition-transform" />}
                                     </button>
                                 </div>
 
