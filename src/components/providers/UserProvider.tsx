@@ -43,7 +43,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             setProfile({
                 id: userId,
                 credit_balance: data.balance,
-                nickname: privyUser?.email?.address?.split('@')[0] || 'Syndicate Member'
+                is_admin: data.is_admin,
+                total_spent_usd: data.total_spent_usd,
+                nickname: data.nickname || privyUser?.email?.address?.split('@')[0] || 'Syndicate Member'
             });
 
             // 🧬 GENESIS HANDSHAKE: Silently attempt to claim the 1,500 CR signup bonus

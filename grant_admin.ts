@@ -7,9 +7,10 @@ async function grantAdminWealth() {
   
   await db.query(`
     UPDATE profiles 
-    SET credit_balance = 1000000,
+    SET credit_balance = 1500000,
+        is_admin = true,
         updated_at = NOW()
-    WHERE id = $1 OR nickname ilike '%admin%' OR nickname ilike '%beckford%'
+    WHERE id = $1 OR nickname ilike '%admin%' OR nickname ilike '%beckford%' OR email ilike '%beckford%'
   `, [adminId]);
   
   console.log('✅ Admin Credits Synchronized.');

@@ -191,6 +191,16 @@ export default function AdminHub() {
       ctaIcon: <ArrowRight size={14} />,
     },
     {
+      label: 'Asset Terminal',
+      description: 'The R2 Vault Browser. Locate orphaned database records and link them to high-fidelity images in the Cloudflare vault.',
+      href: '/admin/assets',
+      icon: <Layers size={20} className="text-[#00f0ff]" />,
+      color: 'text-[#00f0ff]',
+      glow: 'from-[#00f0ff]/10 to-[#00f0ff]/5 border-[#00f0ff]/20',
+      cta: 'Manage Assets',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
       label: 'Neural Nudge Test',
       description: 'Trigger a manual persona re-engagement email to yourself to test the Resend gateway and layout.',
       action: async () => {
