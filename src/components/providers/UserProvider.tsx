@@ -39,42 +39,46 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch(`/api/economy/balance?userId=${userId}`);
         const data = await res.json();
         
-        if (data.success) {
-            setProfile({
-                id: userId,
-                credit_balance: data.balance,
-                is_admin: data.is_admin,
-                nickname: data.nickname || privyUser?.email?.address?.split('@')[0] || 'Syndicate Member'
-            });
+        const balance = data.balance || 0;
+        const isNewUser = !data.success || data.is_guest || balance === 0;
 
-            // 🧬 GENESIS HANDSHAKE: One-time 1,500 CR signup bonus for brand-new users only
-            // Guard: only fires if balance is exactly 0 (new account) — never for existing users
-            if (data.balance === 0 && !data.is_admin) {
-              fetch('/api/economy/balance', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ userId, action: 'starter_claim' })
-              }).then(r => r.json()).then(async claimData => {
-                  if (claimData.success) {
-                    console.log('🏦 [Genesis] 1,500 CR Bonus Provisioned.');
-                    // Fetch fresh balance directly — no recursive call
-                    const fresh = await fetch(`/api/economy/balance?userId=${userId}`).then(r => r.json());
-                    if (fresh.success) {
-                      setProfile((prev: any) => prev ? { ...prev, credit_balance: fresh.balance } : prev);
-                    }
-                  }
-              }).catch(() => {});
-            }
+        // Always set profile — even for brand new users with no DB row yet
+        setProfile({
+            id: userId,
+            credit_balance: balance,
+            is_admin: data.is_admin || false,
+            nickname: data.nickname || privyUser?.google?.name?.split(' ')[0] || privyUser?.email?.address?.split('@')[0] || 'Syndicate Member'
+        });
+
+        // 🧬 GENESIS HANDSHAKE: One-time 1,500 CR signup bonus for brand-new users only
+        if (isNewUser && !data.is_admin) {
+          fetch('/api/economy/balance', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, action: 'starter_claim' })
+          }).then(r => r.json()).then(async claimData => {
+              if (claimData.success) {
+                console.log('🏦 [Genesis] 1,500 CR Bonus Provisioned.');
+                const fresh = await fetch(`/api/economy/balance?userId=${userId}`).then(r => r.json());
+                if (fresh.success) {
+                  setProfile((prev: any) => prev ? { ...prev, credit_balance: fresh.balance } : prev);
+                }
+              }
+          }).catch(() => {});
         }
+    } catch (e) {
+        console.error('[UserProvider] Balance Sync Failed:', e);
+        // Still set a minimal profile so the user is not stuck on a loading screen
+        setProfile({ id: userId, credit_balance: 0, is_admin: false, nickname: 'Syndicate Member' });
+    }
 
-        // 🛰️ SOVEREIGN BACKGROUND RECONCILIATION
-        // Silence-check for any pending P2P or Stripe sessions
+    // 🛰️ SOVEREIGN BACKGROUND RECONCILIATION — fully isolated, never blocks auth
+    try {
         const p2pRes = await fetch(`/api/economy/solana/session?userId=${userId}`);
         const p2pData = await p2pRes.json();
         if (p2pData.success && p2pData.session) {
            const ref = p2pData.session.reference;
            const amount = p2pData.session.amount_usd || 19.99;
-           // Trigger a verification ping without blocking
            fetch(`/api/economy/solana/verify/reference?reference=${ref}&userId=${userId}&expectedAmount=${amount}`)
              .then(r => r.json())
              .then(v => {
@@ -84,9 +88,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 }
              }).catch(() => {});
         }
-    } catch (e) {
-        console.error('[UserProvider] Sovereign Sync Failed:', e);
-    }
+    } catch (_) { /* P2P reconciliation is non-blocking — ignore all failures */ }
+
     setLoading(false);
   };
 
