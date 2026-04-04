@@ -5,12 +5,10 @@ import { useUser } from '@/components/providers/UserProvider';
 import { usePrivy } from '@privy-io/react-auth';
 import { 
   Search, Loader2, Link2, ExternalLink, ImageIcon, 
-  AlertTriangle, CheckCircle2, Users, FileImage, 
-  FolderOpen, RefreshCw, Unlink, Eye, Tag, Zap
+  AlertTriangle, Users, FileImage, 
+  FolderOpen, RefreshCw, Unlink
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-export const dynamic = 'force-dynamic';
+import { motion } from 'framer-motion';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 interface R2Asset { key: string; url: string; size?: number; lastModified?: string; }
