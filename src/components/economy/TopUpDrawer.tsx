@@ -6,7 +6,7 @@ import { X, Zap, ShieldCheck, CreditCard, QrCode, ArrowRight, CheckCircle2, Aler
 import { CREDIT_PACKAGES, SYNDICATE_TREASURY_SOL } from '@/lib/economy/constants';
 import { useUser } from '../providers/UserProvider';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
+
 
 interface TopUpDrawerProps {
   isOpen?: boolean;
@@ -154,68 +154,17 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
         }, 3000);
     }, [userId, targetUsd, propUserId]);
 
-    const handleDirectPayment = async () => {
-        if (!solanaWallets || solanaWallets.length === 0) {
-            // No wallet connected? Just open deep link if on mobile
-            if (isMobile) {
-                window.location.href = buildSolanaPayUrl();
-            } else {
-                alert(isSpanish ? 'BÓVEDA NO DETECTADA. Use el código QR.' : 'NO VAULT DETECTED. Use the QR code.');
-            }
-            return;
-        }
-
-        setIsLoading(true);
-        try {
-            const wallet = solanaWallets[0];
-            const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
-            
-            // Create Transaction
-            const transaction = new Transaction().add(
-                SystemProgram.transfer({
-                    fromPubkey: new PublicKey(wallet.address),
-                    toPubkey: new PublicKey(SYNDICATE_TREASURY_SOL),
-                    lamports: Math.floor(parseFloat(targetSol) * LAMPORTS_PER_SOL),
-                })
-            );
-
-            // Add Reference if available (Solana Pay spec)
-            if (uniqueRef) {
-                try {
-                    transaction.add({
-                        keys: [{ pubkey: new PublicKey(uniqueRef), isWritable: false, isSigner: false }],
-                        programId: SystemProgram.programId,
-                        data: Buffer.alloc(0),
-                    });
-                } catch (e) {
-                    console.warn('[Settlement] Failed to add reference key:', e);
-                }
-            }
-
-            const { blockhash } = await connection.getLatestBlockhash();
-            transaction.recentBlockhash = blockhash;
-            transaction.feePayer = new PublicKey(wallet.address);
-
-            // Request browser/extension signature
-            const provider = await (wallet as any).getProvider();
-            const { signature } = await (provider as any).request({
-                method: 'signAndSendTransaction',
-                params: {
-                    message: transaction.serializeMessage().toString('base64'),
-                },
-            });
-
-            console.log('✅ Settlement Initialized:', signature);
-            setTxSignature(signature);
-            setIsVerifying(true);
-            
-            // Start polling specifically for this signature if needed, 
-            // though the reference polling will also catch it.
-        } catch (err: any) {
-            console.error('[Settlement Fault]:', err);
-            alert(isSpanish ? 'Fallo en la transacción: ' : 'Transaction Failed: ' + (err.message || 'Unknown'));
-        } finally {
-            setIsLoading(false);
+    // 📡 DIRECT PAYMENT: Opens the Solana Pay deep link which auto-connects to
+    // any installed wallet (Phantom, Solflare, Backpack) on both mobile and desktop.
+    // This avoids importing @solana/web3.js which breaks client-side Next.js bundles.
+    const handleDirectPayment = () => {
+        const url = buildSolanaPayUrl();
+        // On desktop: try opening in a new tab so the wallet extension can intercept
+        // On mobile: navigate directly to trigger the wallet app deep link
+        if (isMobile) {
+            window.location.href = url;
+        } else {
+            window.open(url, '_blank');
         }
     };
 
