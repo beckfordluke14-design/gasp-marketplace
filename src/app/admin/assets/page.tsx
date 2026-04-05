@@ -67,7 +67,9 @@ export default function AssetAdmin() {
             if (Array.isArray(pRes)) setPersonas(pRes);
             if (vRes?.vault) setVault(vRes.vault);
             if (vRes?.posts) setPosts(vRes.posts);
+            if (vRes?.orphans) setLost(vRes.orphans);
             setStatus('Synchronized.');
+
 
             setMsg('✓ CLEARANCE VERIFIED');
         } catch (e: any) { setStatus('Error: ' + e.message); }
@@ -208,7 +210,9 @@ export default function AssetAdmin() {
                                                 <div style={{ display: 'flex', gap: '4px', marginBottom: '8px', flexWrap: 'wrap' }}>
                                                     <button onClick={() => runAction({ id: p.id, action: 'toggle_gallery' })} style={{ background: p.is_gallery ? '#ffea00' : '#111', color: p.is_gallery ? '#000' : '#444', border: 'none', padding: '6px' }}>GALLERY</button>
                                                     <button onClick={() => runAction({ id: p.id, action: 'toggle_vault' })} style={{ background: p.is_vault ? '#ff00ff' : '#111', color: p.is_vault ? '#fff' : '#444', border: 'none', padding: '6px' }}>VAULT</button>
+                                                    <button onClick={() => runAction({ id: p.id, action: 'toggle_freebie' })} style={{ background: p.is_freebie ? '#00ff00' : '#111', color: p.is_freebie ? '#000' : '#444', border: 'none', padding: '6px' }}>GIFT</button>
                                                     <button onClick={() => runAction({ id: selectedPersonaId, type: 'persona', assetUrl: p.content_url })} style={{ background: '#00f0ff', color: '#000', border: 'none', padding: '6px' }}>HERO</button>
+
                                                     <button onClick={() => { if (confirm('DESTROY NODE?')) runAction({ id: p.id, action: 'hide_post' }); }} style={{ background: '#300', color: '#f55', border: 'none', padding: '6px' }}>DELETE</button>
                                                     <button onClick={() => setActionId(actionId === p.id ? null : p.id)} style={{ background: '#222', color: '#888', border: 'none', padding: '6px' }}>☰ CMD</button>
                                                 </div>
@@ -265,6 +269,8 @@ export default function AssetAdmin() {
                                             <button onClick={() => runAction({ id: selectedPersonaId, type: 'persona', assetUrl: a.url })} style={{ background: '#00f0ff', color: '#000', border: 'none', borderRadius: '6px', padding: '8px' }}>SET AS HERO</button>
                                             <button onClick={() => runAction({ personaId: selectedPersonaId, assetUrl: a.url, action: 'create_gallery' })} style={{ background: '#ffea00', color: '#000', border: 'none', borderRadius: '6px', padding: '8px' }}>+ GALLERY</button>
                                             <button onClick={() => runAction({ personaId: selectedPersonaId, assetUrl: a.url, action: 'create_vault' })} style={{ background: '#ff00ff', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px' }}>+ VAULT</button>
+                                            <button onClick={() => runAction({ personaId: selectedPersonaId, assetUrl: a.url, action: 'create_freebie' })} style={{ background: '#00ff00', color: '#000', border: 'none', borderRadius: '6px', padding: '8px' }}>+ GIFT</button>
+
                                         </>
                                     ) : (
                                         <button onClick={() => setBirthUrl(a.url)} style={{ background: birthUrl === a.url ? '#00ff00' : '#fff', color: '#000', border: 'none', borderRadius: '6px', padding: '10px' }}>{birthUrl === a.url ? '★ STAGED' : 'BIRTH PERSONA'}</button>

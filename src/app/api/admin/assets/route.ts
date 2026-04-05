@@ -33,11 +33,12 @@ export async function GET(req: Request) {
 
         // 3. Identify ALL Inventory (For Nodal Inventory Hub)
         const { rows: allPosts } = await db.query(`
-            SELECT id, persona_id, content_url, content_type, is_vault, is_gallery, caption, created_at 
+            SELECT id, persona_id, content_url, content_type, is_vault, is_gallery, is_freebie, caption, created_at 
             FROM posts 
             WHERE (caption IS NULL OR caption NOT LIKE 'DELETED%')
             ORDER BY created_at DESC
         `);
+
 
         // 4. Browse ALL R2 Assets (Global Node Discovery)
         const r2Prefixes = ['', 'personas/', 'posts/', 'profile/'];
@@ -93,27 +94,33 @@ export async function POST(req: Request) {
 
         const { id, type, assetUrl, personaId, action, targetPersonaId } = await req.json();
         
-        // 🧪 SOVEREIGN ACTION: CRAFTING NEW VAULT ENTRY
-        if (action === 'create_vault' || action === 'create_gallery') {
+        // 🧪 SOVEREIGN ACTION: CRAFTING NEW NODES (VAULT / GALLERY / GIFT)
+        if (action === 'create_vault' || action === 'create_gallery' || action === 'create_freebie') {
             const isVault = action === 'create_vault';
+            const isFreebie = action === 'create_freebie';
             if (!personaId || !assetUrl) return NextResponse.json({ success: false, error: 'MISSING_DATA' }, { status: 400 });
             const { rows } = await db.query(`
-                INSERT INTO posts (persona_id, content_url, content_type, is_vault, is_gallery, caption, created_at, updated_at)
-                VALUES ($1, $2, 'image', $3, $4, 'Identity Update // Syndicate Node', NOW(), NOW())
+                INSERT INTO posts (persona_id, content_url, content_type, is_vault, is_gallery, is_freebie, caption, created_at, updated_at)
+                VALUES ($1, $2, 'image', $3, $4, $5, 'Identity Update // Syndicate Node', NOW(), NOW())
                 RETURNING id
-            `, [personaId, assetUrl, isVault, !isVault]);
+            `, [personaId, assetUrl, isVault, (action === 'create_gallery'), isFreebie]);
             return NextResponse.json({ success: true, createdId: rows[0].id });
         }
 
         // 🧪 SOVEREIGN ACTION: OVERHAULING EXISTING POSTS
         if (action === 'toggle_vault') {
-            await db.query(`UPDATE posts SET is_vault = NOT is_vault, is_gallery = false WHERE id = $1`, [id]);
+            await db.query(`UPDATE posts SET is_vault = NOT is_vault, is_gallery = false, is_freebie = false WHERE id = $1`, [id]);
             return NextResponse.json({ success: true });
         }
         if (action === 'toggle_gallery') {
-            await db.query(`UPDATE posts SET is_gallery = NOT is_gallery, is_vault = false WHERE id = $1`, [id]);
+            await db.query(`UPDATE posts SET is_gallery = NOT is_gallery, is_vault = false, is_freebie = false WHERE id = $1`, [id]);
             return NextResponse.json({ success: true });
         }
+        if (action === 'toggle_freebie') {
+            await db.query(`UPDATE posts SET is_freebie = NOT is_freebie, is_vault = false, is_gallery = false WHERE id = $1`, [id]);
+            return NextResponse.json({ success: true });
+        }
+
         if (action === 'move_to_persona') {
             await db.query(`UPDATE posts SET persona_id = $1 WHERE id = $2`, [targetPersonaId, id]);
             return NextResponse.json({ success: true });
