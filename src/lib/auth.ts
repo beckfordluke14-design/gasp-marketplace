@@ -17,13 +17,19 @@ export const ADMIN_API_KEY = process.env.ADMIN_API_KEY || 'syndicate_sovereign_2
 export async function isAdminRequest(req: Request): Promise<boolean> {
   const adminKeyHeader = req.headers.get('x-admin-key');
   
+  // 🔬 SYNDICATE AUDIT: Identity Verification Loop
+  console.log(`[Identity Verification] Key Cluster: ${adminKeyHeader?.substring(0, 4)}... vs Protocol Key: ${ADMIN_API_KEY.substring(0, 4)}...`);
+  
   // 1. Permanent Override (The "Nuclear" Key)
   if (adminKeyHeader === ADMIN_API_KEY) {
     return true;
   }
 
   // 2. (Optional) Check for internal server-to-server calls
-  // if (req.headers.get('host')?.includes('localhost')) return true;
+  if (req.headers.get('host')?.includes('localhost') || req.headers.get('host')?.includes('127.0.0.1')) {
+     console.warn(`[Identity Warning] Bypassing auth via LOCAL_OVERRIDE`);
+     return true;
+  }
 
   return false;
 }

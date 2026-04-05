@@ -28,30 +28,46 @@ export default function AssetAdmin() {
     const [birthName, setBirthName] = useState('');
     const [birthUrl, setBirthUrl] = useState('');
     const [actionId, setActionId] = useState<string | null>(null); // To toggle post action menu
+    const [adminKey, setAdminKey] = useState('');
 
     useEffect(() => {
+        const k = localStorage.getItem('admin_gasp_key') || '';
+        setAdminKey(k);
         setReady(true);
-        loadData();
+        loadData(k);
     }, []);
+
+    const updateKey = (k: string) => {
+        localStorage.setItem('admin_gasp_key', k);
+        setAdminKey(k);
+        loadData(k);
+    };
 
     const isDead = (u: any) => !u || u.trim() === '' || u.includes('null');
 
-    const loadData = async () => {
+    const loadData = async (k?: string) => {
+        const keyToUse = k || adminKey;
+        if (!keyToUse) {
+            setStatus('NO ADMIN KEY FOUND');
+            return;
+        }
         setLoading(true);
-        const k = localStorage.getItem('admin_gasp_key') || '';
-        const h = { 'x-admin-key': k };
+        const h = { 'x-admin-key': keyToUse };
         try {
             setStatus('Syncing Nodes...');
             const pRes = await fetch('/api/admin/persona', { headers: h }).then(r => r.json());
-            const fRes = await fetch('/api/admin/feed?all=true&limit=500', { headers: h }).then(r => r.json());
-            const lRes = await fetch('/api/admin/lostfiles', { headers: h }).then(r => r.json());
             const vRes = await fetch('/api/admin/assets', { headers: h }).then(r => r.json());
 
+            if (pRes?.error?.includes('DENIED') || vRes?.error?.includes('DENIED')) {
+                setStatus('IDENTITY_DENIED // RE-AUTHORIZE');
+                setMsg('✗ INCORRECT CLEARANCE');
+                return;
+            }
+
             if (Array.isArray(pRes)) setPersonas(pRes);
-            if (fRes?.posts) setPosts(fRes.posts);
-            if (lRes?.nodes) setLost(lRes.nodes);
             if (vRes?.vault) setVault(vRes.vault);
             setStatus('Synchronized.');
+            setMsg('✓ CLEARANCE VERIFIED');
         } catch (e: any) { setStatus('Error: ' + e.message); }
         setLoading(false);
     };
@@ -74,7 +90,7 @@ export default function AssetAdmin() {
             if (data.success) {
                 setMsg('✓ SUCCESS — ' + (payload.action || payload.type || 'DONE').toUpperCase());
                 setActionId(null);
-                setTimeout(loadData, 500);
+                setTimeout(() => loadData(k), 500);
             } else { setMsg('✗ ' + (data.error || 'FAILED')); }
         } catch (err: any) { setMsg('✗ ERR: ' + err.message); }
     };
@@ -122,7 +138,18 @@ export default function AssetAdmin() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                     <div>
                         <h1 style={{ margin: 0, fontSize: '14px', fontWeight: 'black', color: '#fff' }}>SOVEREIGN HUB <span style={{ color: '#00f0ff' }}>v8.3</span></h1>
-                        <p style={{ margin: '2px 0 0', fontSize: '9px', color: '#444' }}>{status} // {msg}</p>
+                        <p style={{ margin: '2px 0 0', fontSize: '9px', color: status.includes('DENIED') ? '#ff00ff' : '#444' }}>{status} // {msg}</p>
+                    </div>
+                    
+                    {/* 🛡️ CLEARANCE OVERRIDE */}
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                         <input 
+                            type="password" 
+                            placeholder="ADMIN_PROTOCOL_KEY" 
+                            value={adminKey}
+                            onChange={(e) => updateKey(e.target.value)}
+                            style={{ background: '#111', border: '1px solid #222', color: '#00f0ff', padding: '6px 12px', fontSize: '9px', borderRadius: '5px', width: '120px' }}
+                         />
                     </div>
                 </div>
 
