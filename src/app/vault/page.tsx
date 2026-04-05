@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useUser } from '@/components/providers/UserProvider';
-import { Lock, Heart, ArrowLeft, Grid, ShoppingBag } from 'lucide-react';
+import { Lock, Heart, ArrowLeft, Grid, ShoppingBag, X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import VaultLightbox from '@/components/VaultLightbox';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +14,7 @@ export default function VaultCollection() {
   const { user } = useUser();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     // SYNDICATE V2.0: HYBRID PERSISTENCE (Guest + User)
@@ -42,11 +45,11 @@ export default function VaultCollection() {
             <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#ff00ff]/10 transition-all shadow-inner">
                 <ArrowLeft size={18} />
             </div>
-            <span className="text-sm font-black uppercase tracking-widest italic group-hover:text-[#ff00ff] transition-colors leading-none">Back to Feed</span>
+            <span className="text-sm font-black uppercase tracking-widest italic group-hover:text-[#ff00ff] transition-colors leading-none">Back</span>
          </Link>
          <div className="flex flex-col items-center">
-            <h1 className="text-xl font-syncopate font-black uppercase italic tracking-tighter leading-none">Your Collection</h1>
-            <p className="text-[8px] text-[#ffea00] font-bold uppercase tracking-[0.3em] mt-1 italic leading-none">Private Vault Inventory</p>
+            <h1 className="text-xl font-syncopate font-black uppercase italic tracking-tighter leading-none">Your Vault</h1>
+            <p className="text-[8px] text-[#ffea00] font-bold uppercase tracking-[0.3em] mt-1 italic leading-none">Private Inventory Node</p>
          </div>
          <div className="w-24 shrink-0 hidden md:block" /> 
       </div>
@@ -61,8 +64,8 @@ export default function VaultCollection() {
                          <Lock size={20} className="animate-pulse" />
                       </div>
                       <div className="flex flex-col">
-                          <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white/30 italic">SUPPORT PROTOCOL ARTIFACT:</span>
-                          <h2 className="text-lg font-syncopate font-black italic text-[#00f0ff] uppercase tracking-tighter leading-none mt-1">USERKEY RECON</h2>
+                          <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white/30 italic">SUPPORT ARTIFACT:</span>
+                          <h2 className="text-lg font-syncopate font-black italic text-[#00f0ff] uppercase tracking-tighter leading-none mt-1">Sovereign Key</h2>
                       </div>
                   </div>
 
@@ -77,57 +80,85 @@ export default function VaultCollection() {
                   >
                       <span className="text-[7px] font-black uppercase tracking-widest text-[#00f0ff] italic">UNIQUE IDENTIFIER NODE:</span>
                       <div className="flex items-center gap-4">
-                         <code className="text-[10px] md:text-sm font-mono text-white/60 tracking-wider break-all">{user?.id || 'AUTHENTICATING NODE...'}</code>
+                         <code className="text-[10px] md:text-sm font-mono text-white/60 tracking-wider">{user?.id || 'AUTHENTICATING...'}</code>
                          <span className="shrink-0 text-[8px] font-black uppercase text-[#00f0ff] animate-pulse">COPY</span>
                       </div>
                   </div>
+              </div>
           </div>
-      </div>
 
-      {loading ? (
-            <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-                <div className="w-12 h-12 border-2 border-[#ff00ff] border-t-transparent rounded-full animate-spin" />
-                <p className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff]">Decrypting Vault...</p>
-            </div>
-        ) : items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center min-h-[50vh] text-center gap-6">
-                <div className="w-24 h-24 rounded-[3rem] bg-white/5 flex items-center justify-center">
-                    <ShoppingBag size={40} className="text-white/10" />
+          {loading ? (
+                <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+                    <div className="w-12 h-12 border-2 border-[#ff00ff] border-t-transparent rounded-full animate-spin" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-[#ff00ff]">Decrypting Vault...</p>
                 </div>
-                <div>
-                   <h2 className="text-2xl font-black uppercase italic tracking-tight">Vault is Empty</h2>
-                   <p className="text-white/40 text-[10px] uppercase tracking-widest mt-2">Purchase exclusive content in chat to see it here.</p>
+            ) : items.length === 0 ? (
+                <div className="flex flex-col items-center justify-center min-h-[50vh] text-center gap-6">
+                    <div className="w-24 h-24 rounded-[3rem] bg-white/5 flex items-center justify-center">
+                        <ShoppingBag size={40} className="text-white/10" />
+                    </div>
+                    <div>
+                       <h2 className="text-2xl font-black uppercase italic tracking-tight">Vault Idle</h2>
+                       <p className="text-white/40 text-[10px] uppercase tracking-widest mt-2">No exclusive assets found in this node.</p>
+                    </div>
+                    <Link href="/" className="px-8 py-4 bg-[#ff00ff] text-black rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all">
+                        Marketplace Hub
+                    </Link>
                 </div>
-                <Link href="/" className="px-8 py-4 bg-[#ff00ff] text-black rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all">
-                    Browse Marketplace
-                </Link>
-            </div>
-        ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {items.map((item) => (
-                    <div key={item.id} className="relative aspect-[3/4] rounded-3xl overflow-hidden border border-white/10 bg-white/5 group">
-                        <Image src={item.content_url} alt="" fill unoptimized className="object-cover group-hover:scale-110 transition-transform duration-700" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-                        
-                        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20">
-                                    <img src={item.personas?.image} alt="" className="w-full h-full object-cover" />
+            ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {items.map((item, idx) => (
+                        <div 
+                          key={item.id} 
+                          onClick={() => setSelectedIndex(idx)}
+                          className="relative aspect-[3/4] rounded-3xl overflow-hidden border border-white/10 bg-white/5 group cursor-pointer"
+                        >
+                            <Image 
+                              src={item.content_url} 
+                              alt="" 
+                              fill 
+                              unoptimized 
+                              className="object-cover group-hover:scale-110 transition-transform duration-700" 
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+                            
+                            <div className="absolute top-4 right-4 z-20">
+                                <div className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/40 group-hover:text-white transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all">
+                                    <ZoomIn size={18} />
                                 </div>
-                                <span className="text-[10px] font-black uppercase italic text-white">{item.personas?.name}</span>
                             </div>
-                            <div className="px-2 py-1 rounded-lg bg-black/40 backdrop-blur-md border border-white/10">
-                                <span className="text-[8px] font-black uppercase text-[#ffea00] tracking-widest">Unlocked</span>
+
+                            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between z-10">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20">
+                                        <img src={item.personas?.image} alt="" className="w-full h-full object-cover" />
+                                    </div>
+                                    <span className="text-[10px] font-black uppercase italic text-white truncate max-w-[80px]">{item.personas?.name}</span>
+                                </div>
+                                <div className="px-2 py-1 rounded-lg bg-black/40 backdrop-blur-md border border-white/10">
+                                    <span className="text-[8px] font-black uppercase text-[#ffea00] tracking-widest">Unlocked</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
-        )}
+                    ))}
+                </div>
+            )}
       </div>
+
+      {/* LIGHTBOX: SOVEREIGN VIEWER */}
+      <AnimatePresence>
+        {selectedIndex !== null && (
+          <VaultLightbox 
+            items={items}
+            initialIndex={selectedIndex}
+            onClose={() => setSelectedIndex(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
 
 
 

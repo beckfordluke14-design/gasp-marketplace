@@ -3,16 +3,37 @@ import React from 'react';
 interface BrandingOverlayProps {
   profileName?: string;
   className?: string;
+  showRepeating?: boolean;
 }
 
 /**
- * THE GASP v1.7 BRANDING-LOCK OVERLAY
+ * THE GASP v11.0 BRANDING-LOCK OVERLAY
  * Purpose: Professional-grade CTA over public content while keeping source files clean.
  * Design: High-lux, semi-transparent neon magenta/cyan.
+ * Features: Repeating watermark grid for asset protection.
  */
-const BrandingOverlay: React.FC<BrandingOverlayProps> = ({ profileName, className = "" }) => {
+const BrandingOverlay: React.FC<BrandingOverlayProps> = ({ profileName, className = "", showRepeating = false }) => {
   return (
     <div className={`absolute inset-0 pointer-events-none z-20 overflow-hidden ${className}`}>
+        {/* 🛡️ REPEATING BRAND WATERMARK GRID */}
+        {showRepeating && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden mix-blend-overlay opacity-40">
+              {/* Repeat GASP in center */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-45deg] opacity-[0.08] select-none">
+                  <span className="text-[12rem] font-bold tracking-[0.5em] text-white">GASP</span>
+              </div>
+              
+              {/* Micro Grid */}
+              <div className="absolute inset-0 grid grid-cols-4 grid-rows-6 opacity-[0.05]">
+                  {Array.from({ length: 24 }).map((_, i) => (
+                      <div key={i} className="flex items-center justify-center p-4">
+                          <span className="text-[10px] font-black uppercase tracking-widest -rotate-12 whitespace-nowrap">GASP.FUN</span>
+                      </div>
+                  ))}
+              </div>
+          </div>
+        )}
+
         {/* Horizon-Sync Horizontal Branding (Shifted Left) - GASP V11 */}
         <div className="absolute top-1/2 -translate-y-1/2 left-[40%] right-0 flex items-center opacity-70 transition-opacity duration-500">
             <div className="flex items-center gap-4 w-full">
@@ -30,6 +51,7 @@ const BrandingOverlay: React.FC<BrandingOverlayProps> = ({ profileName, classNam
 };
 
 export default BrandingOverlay;
+
 
 
 

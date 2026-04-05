@@ -6,11 +6,13 @@ import { type Profile, type Broadcast, proxyImg } from '@/lib/profiles';
 import Image from 'next/image';
 import { Lock, Circle, MessageSquare, Image as ImageIcon, Heart, Star, ArrowRight } from 'lucide-react';
 import GlitchText from './ui/GlitchText';
+import BrandingOverlay from './ui/BrandingOverlay';
 
 interface FeedItemProps {
   profile: Profile;
   broadcast: Broadcast;
 }
+
 
 const getCityStatus = (profile: Profile) => {
     const weatherPool: Record<string, string> = {
@@ -145,7 +147,9 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
                   unoptimized
                   className="object-cover"
                 />
+                <BrandingOverlay showRepeating className="opacity-20 translate-y-10" />
              </motion.div>
+
 
              {/* 💖 LIKE ANIMATION OVERLAY */}
              <AnimatePresence>
