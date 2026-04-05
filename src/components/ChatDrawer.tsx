@@ -13,7 +13,9 @@ import { useUser } from './providers/UserProvider';
 import ProfileAvatar from './profile/ProfileAvatar';
 import FreebieImageBubble from './chat/FreebieImageBubble';
 import MediaLightbox from './chat/MediaLightbox';
+import { getPersonaDailyState, type PersonaDailyState } from '@/lib/masterRandomizer';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
+
 import { trackEvent } from '@/lib/telemetry';
 import InsufficientFundsModal from './economy/InsufficientFundsModal';
 import ChatCTA from './chat/ChatCTA';
@@ -83,6 +85,8 @@ export default function ChatDrawer({
   const [chatData, setChatData] = useState<any[]>([]);
   const [isRequestingVoice, setIsRequestingVoice] = useState(false);
   const [isDepleted, setIsDepleted] = useState(false);
+  const [personaState, setPersonaState] = useState<PersonaDailyState | null>(null);
+
 
   // 🎁 GIFT PROTOCOL: Charges credits and sends a notification
   const sendGift = async (emoji: string, cost: number) => {
@@ -132,6 +136,10 @@ export default function ChatDrawer({
     if (!text.trim() || isLoading) return;
 
     const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    
+    // 🧬 VARIATION ENGINE: Dynamic speed based on randomizer
+    const speedMult = personaState?.responseSpeedMultiplier || (0.8 + Math.random() * 1.5);
+
 
     // 🛡️ FRONTEND CREDIT ENFORCEMENT: Block transmit if balance is depleted
     const COST_MESSAGE_TEXT = 50;
@@ -150,6 +158,11 @@ export default function ChatDrawer({
     let activeConfig = { delayMultiplier: 1, typingStyle: 'monolith' };
 
     try {
+      // ⏳ INITIAL THINKING PAUSE (Pre-typing)
+      const thinkTime = (1200 + Math.random() * 2500) / speedMult;
+      await wait(thinkTime);
+
+
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -197,10 +210,11 @@ export default function ChatDrawer({
               const event = JSON.parse(line.slice(2));
               if (event?.type === 'config') {
                  activeConfig = event;
-                 // 🧬 RANDOMIZED RESPONSE DELAY: 1.5s to 3.5s base, scaled by persona multiplier
-                 const baseDelay = 1500 + Math.random() * 2000;
-                 const finalDelay = baseDelay / activeConfig.delayMultiplier;
+                 // 🧬 RANDOMIZED RESPONSE DELAY: scaled by persona state
+                 const baseDelay = 1000 + Math.random() * 2000;
+                 const finalDelay = baseDelay / (activeConfig.delayMultiplier * speedMult);
                  await wait(finalDelay);
+
               }
               if (event?.type === 'voice_note') {
                  console.log('📡 [Sovereign Stream] Voice Event Received:', !!event.audioUrl ? 'READY' : 'PENDING');
@@ -227,20 +241,29 @@ export default function ChatDrawer({
             try { 
               const text = JSON.parse(line.slice(2)); 
               
-              if (activeConfig.typingStyle === 'burst') {
-                 // 🧬 BURST MODE: Split into multiple short messages rapidly
-                 const fragments = text.split('\n').filter((f: string) => f.trim().length > 0);
+              // 🧪 FRAGMENTATION RANDOMIZER (Internal Burst Logic)
+              const style = activeConfig.typingStyle || 'monolith';
+              const forceBurst = style === 'burst' || (Math.random() < 0.2 && text.length > 100);
+              const fragments = forceBurst ? text.split(/[.!?]\s+/).filter((f: string) => f.trim().length > 0) : [text];
+
+              if (fragments.length > 1) {
                  for (let i = 0; i < fragments.length; i++) {
-                    const frag = fragments[i];
+                    let frag = fragments[i];
+                    // Re-add punctuation if missing due to split
+                    if (forceBurst && !frag.match(/[.!?]$/)) frag += '.';
+
                     setMessages(prev => [...prev, { 
                         id: `ai-${Date.now()}-${i}`, 
                         role: 'assistant', 
                         content: frag,
                         audio_script: (i === fragments.length - 1 && isVoiceDetected) ? '...' : null 
                     }]);
+                    
                     if (i < fragments.length - 1) {
-                        // Small pause between burst bubbles
-                        await wait(600 / activeConfig.delayMultiplier);
+                        // ⏳ INTER-BUBBLE VARIATION: 0.8s to 2.5s per thought
+                        const pause = (800 + Math.random() * 1700) / speedMult;
+                        setIsTyping(true);
+                        await wait(pause);
                     }
                  }
               } else {
@@ -265,6 +288,7 @@ export default function ChatDrawer({
       // 💸 Trigger instant balance refresh in the header after credit burn
       window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
     }
+
   }, [messages, isLoading, idToUse, profileId]);
 
 
@@ -296,10 +320,16 @@ export default function ChatDrawer({
       } catch (e) {
         console.error('[Gasp Neural Sync] Error:', e);
       }
+
+      // 🎰 INITIALIZE PERSONALITY VARIATION
+      const state = getPersonaDailyState(profileId);
+      setPersonaState(state);
+
       setDbLoaded(true);
     };
     loadData();
   }, [profileId, idToUse]);
+
 
   useEffect(() => {
     if (!chatData || !Array.isArray(chatData)) return;
@@ -421,10 +451,10 @@ export default function ChatDrawer({
                                
                                {/* 🧧 SMART UNREAD BADGE (99+ Logic) */}
                                {unread > 0 && (
-                                  <div className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[18px] h-[18px] bg-[#ff00ff] text-black text-[8px] font-black rounded-full flex items-center justify-center border-2 border-black shadow-[0_0_10px_#ff00ff]">
-                                     {unread > 99 ? '99+' : unread}
-                                  </div>
-                               )}
+                           <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-[#ff00ff] text-black text-[8px] font-black rounded-full flex items-center justify-center border-2 border-black shadow-[0_0_10px_rgba(255,0,255,0.6)] z-10 animate-in fade-in zoom-in duration-300">
+                              {unread > 99 ? '99+' : unread}
+                           </div>
+                        )}
                             </div>
                             <span className="text-[7px] font-black uppercase text-white/30 group-hover:text-white transition-colors">{(p.name || 'ANON')?.split(' ')?.[0]}</span>
                          </motion.button>
@@ -584,10 +614,12 @@ export default function ChatDrawer({
                 {(isLoading || isTyping || isRequestingVoice) && (
                    <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
                       <div className="flex items-center gap-2 px-2">
-                         <div className={`w-1 h-1 rounded-full ${isRequestingVoice ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'} animate-pulse`} />
-                         <span className={`text-[7px] font-black uppercase tracking-widest ${isRequestingVoice ? 'text-[#ff00ff]' : 'text-[#00f0ff]'} italic`}>
-                            {isRequestingVoice ? (isSpanish ? 'Generando Voz...' : 'Generating Voice...') : (isSpanish ? `chatear con ${profile?.name}...` : `chat w/ ${profile?.name}...`)}
-                         </span>
+                         <div className={`w-1 h-1 rounded-full ${isRequestingVoice ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'} animate-pulse shadow-[0_0_8px_currentColor]`} />
+                         {isRequestingVoice && (
+                            <span className="text-[7px] font-black uppercase tracking-widest text-[#ff00ff] italic">
+                               {isSpanish ? 'Generando Voz...' : 'Generating Voice...'}
+                            </span>
+                         )}
                       </div>
                       <div className="flex items-start gap-2">
                          <div className="px-4 py-3 bg-white/5 backdrop-blur-3xl border border-white/5 rounded-full flex gap-1.5 items-center">

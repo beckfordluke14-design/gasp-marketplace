@@ -31,9 +31,21 @@ export async function GET(req: Request) {
             ORDER BY created_at DESC LIMIT 100
         `);
 
-        // 3. Browse R2 Vault (Real-time Cloudflare Listing)
-        const r2Prefixes = ['personas/', 'posts/personas/lostfiles/'];
+        // 3. Identify ALL Inventory (For Nodal Inventory Hub)
+        const { rows: allPosts } = await db.query(`
+            SELECT id, persona_id, content_url, content_type, is_vault, is_gallery, caption, created_at 
+            FROM posts 
+            WHERE (caption IS NULL OR caption NOT LIKE 'DELETED%')
+            ORDER BY created_at DESC
+        `);
+
+        // 4. Browse ALL R2 Assets (Global Node Discovery)
+        const r2Prefixes = ['', 'personas/', 'posts/', 'profile/'];
         let r2Assets: any[] = [];
+
+        // Note: Using ['', 'personas/', ...] to ensure we hit root and subfolders
+        // We will deduplicate based on Key
+        const seenKeys = new Set<string>();
 
         for (const prefix of r2Prefixes) {
             const cmd = new ListObjectsV2Command({
@@ -44,7 +56,8 @@ export async function GET(req: Request) {
             const { Contents } = await r2Client.send(cmd);
             if (Contents) {
                 Contents.forEach(item => {
-                    if (item.Key && !item.Key.endsWith('/')) {
+                    if (item.Key && !item.Key.endsWith('/') && !seenKeys.has(item.Key)) {
+                        seenKeys.add(item.Key);
                         r2Assets.push({
                             key: item.Key,
                             url: `https://asset.gasp.fun/${item.Key}`,
@@ -56,11 +69,14 @@ export async function GET(req: Request) {
             }
         }
 
+
         return NextResponse.json({ 
             success: true, 
             orphans: [...orphanPersonas, ...orphanPosts],
-            vault: r2Assets 
+            vault: r2Assets,
+            posts: allPosts
         });
+
 
     } catch (err: any) {
         return NextResponse.json({ success: false, error: err.message }, { status: 500 });

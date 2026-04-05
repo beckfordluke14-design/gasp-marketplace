@@ -66,7 +66,9 @@ export default function AssetAdmin() {
 
             if (Array.isArray(pRes)) setPersonas(pRes);
             if (vRes?.vault) setVault(vRes.vault);
+            if (vRes?.posts) setPosts(vRes.posts);
             setStatus('Synchronized.');
+
             setMsg('✓ CLEARANCE VERIFIED');
         } catch (e: any) { setStatus('Error: ' + e.message); }
         setLoading(false);
@@ -190,8 +192,12 @@ export default function AssetAdmin() {
                         </div>
 
                         <div style={{ borderTop: '1px solid #111', paddingTop: '15px' }}>
-                            <h3 style={{ fontSize: '12px', fontWeight: 'black', color: '#fff', marginBottom: '15px' }}>NODAL INVENTORY</h3>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                                <h3 style={{ fontSize: '12px', fontWeight: 'black', color: '#fff', margin: 0 }}>NODAL INVENTORY</h3>
+                                <button onClick={() => setView('lost')} style={{ background: '#00f0ff', color: '#000', border: 'none', padding: '6px 12px', borderRadius: '5px', fontSize: '9px', fontWeight: 'bold' }}>+ ADD FROM SCANNER</button>
+                            </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+
                                 {personaPosts.filter(p => !isDead(p.content_url) && p.content_type !== 'text').map(p => (
                                     <div key={p.id} style={{ background: '#080808', padding: '12px', borderRadius: '15px', border: actionId === p.id ? '1px solid #00f0ff' : '1px solid #111' }}>
                                         <div style={{ display: 'flex', gap: '12px' }}>
@@ -203,8 +209,10 @@ export default function AssetAdmin() {
                                                     <button onClick={() => runAction({ id: p.id, action: 'toggle_gallery' })} style={{ background: p.is_gallery ? '#ffea00' : '#111', color: p.is_gallery ? '#000' : '#444', border: 'none', padding: '6px' }}>GALLERY</button>
                                                     <button onClick={() => runAction({ id: p.id, action: 'toggle_vault' })} style={{ background: p.is_vault ? '#ff00ff' : '#111', color: p.is_vault ? '#fff' : '#444', border: 'none', padding: '6px' }}>VAULT</button>
                                                     <button onClick={() => runAction({ id: selectedPersonaId, type: 'persona', assetUrl: p.content_url })} style={{ background: '#00f0ff', color: '#000', border: 'none', padding: '6px' }}>HERO</button>
+                                                    <button onClick={() => { if (confirm('DESTROY NODE?')) runAction({ id: p.id, action: 'hide_post' }); }} style={{ background: '#300', color: '#f55', border: 'none', padding: '6px' }}>DELETE</button>
                                                     <button onClick={() => setActionId(actionId === p.id ? null : p.id)} style={{ background: '#222', color: '#888', border: 'none', padding: '6px' }}>☰ CMD</button>
                                                 </div>
+
                                             </div>
                                         </div>
                                         
