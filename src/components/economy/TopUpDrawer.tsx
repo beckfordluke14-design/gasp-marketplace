@@ -233,7 +233,15 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
         params.append('label', 'GASP Hub');
         params.append('message', `SECURE_SETTLE_${uniqueRef?.slice(0, 4)}`);
         
-        return `solana:${SYNDICATE_TREASURY_SOL}?${params.toString()}`;
+        const solPayUrl = `solana:${SYNDICATE_TREASURY_SOL}?${params.toString()}`;
+        
+        // 🧬 MOBILE BREAKOUT: Wrap in Phantom/Solflare universal link if on mobile
+        // This ensures it breaks out of in-app browsers (Twitter/Instagram/Discord)
+        if (isMobile) {
+            return `https://phantom.app/ul/v1/browse/${encodeURIComponent(solPayUrl)}?ref=${encodeURIComponent(window.location.host)}`;
+        }
+        
+        return solPayUrl;
     };
 
     const solanaPayUrl = buildSolanaPayUrl();
