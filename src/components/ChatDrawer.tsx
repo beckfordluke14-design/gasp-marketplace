@@ -360,12 +360,19 @@ export default function ChatDrawer({
     }
 
     setIsRequestingVoice(true);
+    const scriptText = input.trim();
+    if (!scriptText) {
+       alert(isSpanish ? 'Escribe lo que quieres que diga primero.' : 'Type what you want her to say first.');
+       setIsRequestingVoice(false);
+       return;
+    }
+
     try {
       // 1. Deduct 1,000 credits atomically
       const spendRes = await fetch('/api/economy/balance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, action: 'spend', amount: 1000, type: 'voice_note_request', meta: { personaId: profileId } })
+        body: JSON.stringify({ userId, action: 'spend', amount: 1000, type: 'voice_note_request', meta: { personaId: profileId, script: scriptText } })
       });
       const spendData = await spendRes.json();
 
@@ -377,8 +384,11 @@ export default function ChatDrawer({
       // 2. Refresh balance display immediately
       window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
 
-      // 3. Send a hidden trigger message that forces voice generation
-      await sendMessage('[VOICE_NOTE_REQUEST]: Send me a voice message right now. I want to hear your voice.');
+      // 3. Send the specific script request
+      await sendMessage(isSpanish ? `[SAY]: "${scriptText}". Di esto exactamente en una nota de voz.` : `[SAY]: "${scriptText}". Say this exactly in a voice note.`);
+      setInput(''); // Clear input after successful request
+
+
     } catch (err: any) {
       console.error('[VoiceRequest] Failed:', err.message);
     } finally {

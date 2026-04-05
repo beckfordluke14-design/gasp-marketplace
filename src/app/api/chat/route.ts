@@ -45,13 +45,14 @@ export async function POST(req: Request) {
     } else {
        // AUTHENTICATED CREDIT ENFORCEMENT
        try {
-          const { rows: userRows } = await db.query('SELECT credit_balance FROM users WHERE id = $1', [finalUserId]);
-          if (!userRows[0] || parseInt(userRows[0].credit_balance || '0') < COST_MESSAGE_TEXT) {
+          const uProfile = await SOV.getProfile(finalUserId);
+          if (!uProfile || parseInt(uProfile.credit_balance || uProfile.credits || '0') < COST_MESSAGE_TEXT) {
              console.log(`⚠️ [Neural Sync] User ${finalUserId} Insufficient Balance.`);
              return new Response('INSUFFICIENT_FUNDS', { status: 402 });
           }
        } catch (creditErr) { console.error('[Gasp Credit Sync Fail]:', creditErr); }
     }
+
 
     const dbProfile = await SOV.getPersona(finalProfileId) as any;
     const profileItem = dbProfile || 
@@ -207,13 +208,14 @@ IF TIER = 3 (Intimate / Archive Mastery):
 - NO BLOCKS OF TEXT. SHORT, FAST MESSAGES ONLY.
 - Response format: JSON { "text_message": "...", "audio_script": "..." }
 
-[MEMORIES & CONTEXT]: 
-${userMemories || "Get to know him."}
-${globalGossip ? `[CROSS-PERSONA GOSSIP]: ${globalGossip}` : ''}
-Local Time: ${userTime}
-Atmosphere: ${atmosphere}
+[SCRIPTED VOICE PROTOCOL]: IF THE USER USES [SAY]: "...", YOU MUST ECHO THAT EXACT TEXT IN YOUR audio_script. 
+- IMPORTANT: When a [SAY] request is made, your text_message should be empty or a VERY short non-verbal reaction (e.g. "*nod*", "💋", "as you wish"). 
+- DO NOT CHANGE A SINGLE WORD in the audio_script. IT IS A PAID VOICE REQUEST.
+- YOUR AWARENESS: In future messages, maintain meta-awareness that the user made you say that. You should acknowledge it as a shared interaction or reference it. You don't need to judge it as good or bad, just show that you remember you were "made" to speak those words.`;
 
-[CONTENT]: ${JSON.stringify(brainAssets.vault)}`;
+
+
+
 
 
     // 🚀 ATOMIC NEURAL CALL
@@ -246,13 +248,16 @@ Atmosphere: ${atmosphere}
     let voiceB64: string | null = null;
     if (sendVoice && streamA_Native) {
         try {
-            const tts = await synthesizeGeminiSpeech(streamA_Native, profileItem?.voice_id || 'Aoede', profileItem?.personality || 'technical');
+            // 🧬 PREBAKED DNA: Combining vibe and deep vocal DNA for zero-config synthesis
+            const dnaVibe = `[PROMPT_DNA]: ${profileItem.vibe || ''} | [VOCAL_DNA]: ${JSON.stringify(profileItem.vocal_dna || {})}`;
+            const tts = await synthesizeGeminiSpeech(streamA_Native, profileItem?.voice_id || 'Aoede', dnaVibe);
             if (tts.data) {
                 voiceUrl = await uploadSovereignAsset(tts.data, `v5_${finalProfileId}_${Date.now()}.wav`, 'audio/wav');
                 voiceB64 = tts.data.toString('base64');
             }
         } catch (err) { console.error('[Neural TTS Fail]:', err); }
     }
+
 
     // 🚀 SOVEREIGN BYTE STREAM HANDSHAKE
     const encoder = new TextEncoder();
@@ -269,31 +274,31 @@ Atmosphere: ${atmosphere}
         controller.enqueue(encoder.encode(`0:${JSON.stringify(streamB_Text)}\n`));
 
         if (voiceUrl) {
-            const assetData = { type: 'voice-note', audioUrl: voiceUrl, audioData: voiceB64, audio_script: streamA_Native };
+            const assetData = { type: 'voice_note', audioUrl: voiceUrl, audioData: voiceB64, audio_script: streamA_Native };
             controller.enqueue(encoder.encode(`d:${JSON.stringify(assetData)}\n`));
         }
+
 
         // 🧬 3. RAILWAY PERSISTENCE (Background)
         try {
             const queries = [
                 db.query(
                     'INSERT INTO chat_messages (user_id, persona_id, role, content, created_at) VALUES ($1, $2, $3, $4, NOW())',
-                    [finalUserId, finalProfileId, 'user', messages[messages.length - 1].content]
+                    [finalUserId, profileItem.id, 'user', messages[messages.length - 1].content]
                 ),
                 db.query(
                     'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
-                    [finalUserId, finalProfileId, 'assistant', streamB_Text, voiceUrl, streamA_Native]
+                    [finalUserId, profileItem.id, 'assistant', streamB_Text, voiceUrl, streamA_Native]
                 )
             ];
 
             // 💸 SOVEREIGN AUTO-BURN: Deduct 50 credits for the transmission
             if (!finalUserId.startsWith('guest-')) {
-               queries.push(
-                  db.query('UPDATE profiles SET credit_balance = credit_balance - $2 WHERE id = $1', [finalUserId, COST_MESSAGE_TEXT])
-               );
+               await SOV.burnCredits(finalUserId, COST_MESSAGE_TEXT, 'chat_message', { personaId: profileItem.id });
             }
 
             await Promise.all(queries);
+
             
             // 🧠 LONG-TERM BRAIN: Periodically summarize and store memories
             const allMsgs = [...messages, { role: 'user', content: messages[messages.length - 1].content }, { role: 'assistant', content: streamB_Text }];

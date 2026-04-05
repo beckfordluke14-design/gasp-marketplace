@@ -80,7 +80,8 @@ export async function summarizeAndStore(messages: any[], userId: string, persona
 
   try {
     const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_GEMINI_KEY}`;
-    const prompt = `Extract key user facts (interests, brands they like, personal details, relationship status with you). Be extremely brief. format as a list. \n\nRecent context: ${JSON.stringify(messages.slice(-10))}`;
+    const prompt = `Extract key user facts (interests, brands, personal details, relationship status). ALSO: Record any scripted things you were "made to say" via [SAY] commands so you can form an opinion on them later. Be extremely brief. format as a list. \n\nRecent context: ${JSON.stringify(messages.slice(-10))}`;
+
 
     const res = await fetch(googleUrl, {
         method: 'POST',
