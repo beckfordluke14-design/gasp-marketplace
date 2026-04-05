@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const GOOGLE_BRAIN_KEY = process.env.GOOGLE_BRAIN_KEY;
+const GOOGLE_BRAIN_KEY = process.env.GOOGLE_BRAIN_KEY || process.env.GOOGLE_VOICE_KEY || process.env.GEMINI_API_KEY;
 if (!GOOGLE_BRAIN_KEY) {
     console.error('❌ [Gemini TTS] CRITICAL: GOOGLE_BRAIN_KEY environment variable is missing.');
 }

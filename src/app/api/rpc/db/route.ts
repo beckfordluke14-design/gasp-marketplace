@@ -72,7 +72,7 @@ export async function POST(req: Request) {
                 SELECT $1, persona_id, affinity_score FROM user_relationships WHERE user_id = $2
                 ON CONFLICT (user_id, persona_id) DO NOTHING;
               `, [userId, guestId]);
-              await db.query('DELETE FROM user_relationships WHERE user_id = $2', [guestId]);
+              await db.query('DELETE FROM user_relationships WHERE user_id = $1', [guestId]);
 
               // 3. Safe Unlocks Merge
               await db.query(`
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
                 SELECT $1, post_id, created_at FROM user_vault_unlocks WHERE user_id = $2
                 ON CONFLICT (user_id, post_id) DO NOTHING;
               `, [userId, guestId]);
-              await db.query('DELETE FROM user_vault_unlocks WHERE user_id = $2', [guestId]);
+              await db.query('DELETE FROM user_vault_unlocks WHERE user_id = $1', [guestId]);
            } catch (mergeErr) { console.warn('[Neural Bridge Fail]:', mergeErr); }
         }
 

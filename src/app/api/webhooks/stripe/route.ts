@@ -6,7 +6,8 @@ import { NextResponse } from 'next/server';
  * Strategy: Audit actual settlement amount from Stripe and grant credits dynamically.
  */
 export async function POST(req: Request) {
-    const payload = await req.text();
+    const rawBody = await req.arrayBuffer();
+    const payload = Buffer.from(rawBody);
     const sig = req.headers.get('stripe-signature');
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 

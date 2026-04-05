@@ -36,7 +36,7 @@ export async function GET() {
         const polyRes = await fetch('https://gamma-api.polymarket.com/events?active=true&closed=false&limit=100&offset=0', {
             // @ts-ignore
             agent,
-            next: { revalidate: 300 }
+            cache: 'no-store'
         });
         const polyData = await polyRes.json();
 

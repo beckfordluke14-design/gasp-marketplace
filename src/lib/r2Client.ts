@@ -33,8 +33,7 @@ export async function uploadSovereignAsset(
         Bucket: BUCKET_NAME,
         Key: key,
         Body: buffer,
-        ContentType: contentType,
-        ACL: 'public-read'
+        ContentType: contentType
     }));
     
     // 🏛️ PERSISTENT ASSET URL: Switching to the user's primary infrastructure domain.
