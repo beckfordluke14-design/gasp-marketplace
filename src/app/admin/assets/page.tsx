@@ -163,7 +163,8 @@ export default function AssetAdmin() {
     const allAssets = [
         ...lost.map((n: any) => ({ key: n.id || n.key || '', url: n.url })),
         ...vault.filter((v: any) => !lost.find((l: any) => (l.id || l.key) === v.key)).map((v: any) => ({ key: v.key || '', url: v.url }))
-    ];
+    // 🛡️ NULL GUARD: Skip any asset with no URL to prevent client-side crashes
+    ].filter((a: any) => a.url && typeof a.url === 'string' && a.url.trim() !== '');
     const displayAssets = allAssets.filter(a => (a.key || '').toLowerCase().includes((search || '').toLowerCase()));
 
     return (
@@ -330,8 +331,8 @@ export default function AssetAdmin() {
 
                         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter by filename..." style={{ width: '100%', background: '#111', border: '1px solid #333', color: '#fff', padding: '15px', borderRadius: '15px' }} />
                         {displayAssets.slice(0, limit).map((a: any) => (
-                            <div key={a.key} style={{ width: 'calc(50% - 5px)', background: birthUrl === a.url ? '#0d1a0d' : '#0a0a0a', borderRadius: '15px', border: birthUrl === a.url ? '1px solid #00ff00' : '1px solid #111' }}>
-                                {a.url.toLowerCase().endsWith('.mp4') ? (
+                            <div key={a.key || a.url} style={{ width: 'calc(50% - 5px)', background: birthUrl === a.url ? '#0d1a0d' : '#0a0a0a', borderRadius: '15px', border: birthUrl === a.url ? '1px solid #00ff00' : '1px solid #111' }}>
+                                {(a.url || '').toLowerCase().endsWith('.mp4') ? (
                                     <video 
                                         onClick={() => setPreviewUrl(a.url)} 
                                         src={a.url} 
