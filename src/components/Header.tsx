@@ -134,7 +134,30 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
             </div>
 
             {/* User Actions */}
-            <div className="flex items-center gap-1 md:gap-2 pointer-events-auto">
+            <div className="flex items-center gap-2 md:gap-4 pointer-events-auto">
+                
+                {/* 🌍 GLOBAL LOCALE SWITCHER */}
+                <div className="flex items-center p-1 bg-white/5 border border-white/10 rounded-full h-8 md:h-9">
+                    <button 
+                        onClick={() => {
+                            localStorage.setItem('gasp_locale', 'en');
+                            window.location.reload();
+                        }}
+                        className={`px-2 md:px-3 h-full flex items-center justify-center text-[8px] md:text-[9px] font-black rounded-full transition-all ${!isSpanish ? 'bg-[#00f0ff] text-black shadow-[0_0_10px_rgba(0,240,255,0.4)]' : 'text-white/40 hover:text-white'}`}
+                    >
+                        EN
+                    </button>
+                    <button 
+                        onClick={() => {
+                            localStorage.setItem('gasp_locale', 'es');
+                            window.location.reload();
+                        }}
+                        className={`px-2 md:px-3 h-full flex items-center justify-center text-[8px] md:text-[9px] font-black rounded-full transition-all ${isSpanish ? 'bg-[#ff00ff] text-white shadow-[0_0_10px_rgba(255,0,255,0.4)]' : 'text-white/40 hover:text-white'}`}
+                    >
+                        ES
+                    </button>
+                </div>
+
                 {user ? (
                    <>
                     {/* 🧬 CREDIT FUEL GAUGE */}

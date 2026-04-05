@@ -713,10 +713,10 @@ export default function ChatDrawer({
                         className="relative aspect-[3/4] bg-zinc-900/80 rounded-2xl overflow-hidden border border-white/5 shadow-xl cursor-pointer group"
                       >
                         {/* Media preview — blurred if locked */}
-                        {item.content_url && (item.type === 'video' ? (
+                        {item.content_url && (item.type === 'video' || item.content_url.toLowerCase().endsWith('.mp4')) ? (
                           <video
                             src={proxyImg(item.content_url)}
-                            muted playsInline
+                            muted playsInline autoPlay loop
                             className={`absolute inset-0 w-full h-full object-cover transition-all ${item.is_vault && !item.is_unlocked ? 'blur-2xl scale-110 opacity-50' : 'opacity-100'}`}
                           />
                         ) : (
@@ -727,7 +727,7 @@ export default function ChatDrawer({
                             unoptimized
                             className={`object-cover transition-all ${item.is_vault && !item.is_unlocked ? 'blur-2xl scale-110 opacity-50' : 'opacity-100'}`}
                           />
-                        ))}
+                        )}
 
                         {/* Lock overlay */}
                         {item.is_vault && !item.is_unlocked && (

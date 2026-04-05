@@ -349,7 +349,7 @@ export default function StoriesRow({ profiles, onSelectProfile }: StoriesRowProp
                   </div>
                 ) : (
                   <div className="relative w-full h-full">
-                    {currentStory.type === 'video' ? (
+                    {(currentStory.type === 'video' || currentStory.asset_url?.toLowerCase().endsWith('.mp4')) ? (
                        <video 
                          src={proxyImg(currentStory.asset_url)} 
                          autoPlay 

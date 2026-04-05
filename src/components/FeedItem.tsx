@@ -140,13 +140,24 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
                animate={{ scale: isZoomed ? 2 : 1 }}
                onTap={handleTap}
              >
-                <Image
-                  src={proxyImg(broadcast.image_url || profile.image)}
-                  alt=""
-                  fill
-                  unoptimized
-                  className="object-cover"
-                />
+                {(broadcast.image_url || profile.image)?.toLowerCase().endsWith('.mp4') ? (
+                  <video 
+                    src={proxyImg(broadcast.image_url || profile.image)} 
+                    autoPlay 
+                    loop 
+                    muted 
+                    playsInline 
+                    className="absolute inset-0 w-full h-full object-cover" 
+                  />
+                ) : (
+                  <Image
+                    src={proxyImg(broadcast.image_url || profile.image)}
+                    alt=""
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
+                )}
                 <BrandingOverlay showRepeating className="opacity-20 translate-y-10" />
              </motion.div>
 
@@ -266,7 +277,7 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
                 </button>
               </div>
             ) : (
-              <video src={broadcast.video_url} autoPlay loop muted className="w-full h-full object-cover" />
+              <video src={broadcast.video_url} autoPlay loop muted playsInline className="w-full h-full object-cover" />
             )}
             <Image
               src={proxyImg(profile.image)}

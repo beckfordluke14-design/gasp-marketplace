@@ -173,7 +173,11 @@ export default function AssetAdmin() {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                         {personas.map(p => (
                             <div key={p.id} onClick={() => setSelectedPersonaId(p.id)} style={{ background: '#0a0a0a', borderRadius: '12px', border: '1px solid #111', overflow: 'hidden', cursor: 'pointer' }}>
-                                <img src={p.seed_image_url} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} loading="lazy" />
+                                {p.seed_image_url?.toLowerCase().endsWith('.mp4') ? (
+                                    <video src={p.seed_image_url} muted loop playsInline style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} />
+                                ) : (
+                                    <img src={p.seed_image_url} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} loading="lazy" />
+                                )}
                                 <div style={{ padding: '8px', textAlign: 'center' }}>
                                     <p style={{ margin: 0, fontSize: '9px', fontWeight: 'bold' }}>{p.name.split(' ')[0]}</p>
                                 </div>
@@ -188,7 +192,11 @@ export default function AssetAdmin() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <div style={{ display: 'flex', gap: '15px', background: '#111', padding: '15px', borderRadius: '20px', alignItems: 'center' }}>
                             <div style={{ width: '80px', height: '80px', borderRadius: '15px', overflow: 'hidden', border: '1px solid #00f0ff' }}>
-                                <img src={selectedPersona?.seed_image_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                {selectedPersona?.seed_image_url?.toLowerCase().endsWith('.mp4') ? (
+                                    <video src={selectedPersona?.seed_image_url} autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                    <img src={selectedPersona?.seed_image_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                )}
                             </div>
                             <div style={{ flex: 1 }}>
                                 <h2 style={{ color: '#fff', fontSize: '16px', margin: 0 }}>{selectedPersona?.name}</h2>
@@ -230,7 +238,11 @@ export default function AssetAdmin() {
                                     <div key={p.id} style={{ background: '#080808', padding: '12px', borderRadius: '15px', border: actionId === p.id ? '1px solid #00f0ff' : '1px solid #111' }}>
                                         <div style={{ display: 'flex', gap: '12px' }}>
                                             <div onClick={() => setPreviewUrl(p.content_url)} style={{ width: '60px', height: '60px', background: '#111', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, cursor: 'pointer' }}>
-                                                <img src={p.content_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                {p.content_url?.toLowerCase().endsWith('.mp4') ? (
+                                                    <video src={p.content_url} muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <img src={p.content_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                )}
                                             </div>
 
                                             <div style={{ flex: 1, overflow: 'hidden' }}>
@@ -289,7 +301,23 @@ export default function AssetAdmin() {
                         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter by filename..." style={{ width: '100%', background: '#111', border: '1px solid #333', color: '#fff', padding: '15px', borderRadius: '15px' }} />
                         {displayAssets.slice(0, limit).map((a: any) => (
                             <div key={a.key} style={{ width: 'calc(50% - 5px)', background: birthUrl === a.url ? '#0d1a0d' : '#0a0a0a', borderRadius: '15px', border: birthUrl === a.url ? '1px solid #00ff00' : '1px solid #111' }}>
-                                <img onClick={() => setPreviewUrl(a.url)} src={a.url} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', cursor: 'pointer' }} loading="lazy" />
+                                {a.url.toLowerCase().endsWith('.mp4') ? (
+                                    <video 
+                                        onClick={() => setPreviewUrl(a.url)} 
+                                        src={a.url} 
+                                        muted 
+                                        loop 
+                                        playsInline 
+                                        style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', cursor: 'pointer' }} 
+                                    />
+                                ) : (
+                                    <img 
+                                        onClick={() => setPreviewUrl(a.url)} 
+                                        src={a.url} 
+                                        style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', cursor: 'pointer' }} 
+                                        loading="lazy" 
+                                    />
+                                )}
 
                                 <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                     {selectedPersonaId ? (
@@ -330,9 +358,19 @@ export default function AssetAdmin() {
                     <div 
                       onClick={() => setPreviewUrl(null)}
                       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 5000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', cursor: 'zoom-out' }}
-
                     >
-                        <img src={previewUrl} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '20px', boxShadow: '0 0 50px rgba(0,240,255,0.2)' }} />
+                        {previewUrl.toLowerCase().endsWith('.mp4') ? (
+                            <video 
+                                src={previewUrl} 
+                                autoPlay 
+                                loop 
+                                muted 
+                                playsInline
+                                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '20px', boxShadow: '0 0 80px rgba(0,240,255,0.4)', border: '1px solid rgba(0,240,255,0.3)' }} 
+                            />
+                        ) : (
+                            <img src={previewUrl} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '20px', boxShadow: '0 0 50px rgba(0,240,255,0.2)' }} />
+                        )}
                         <button style={{ position: 'absolute', top: '20px', right: '20px', background: '#222', color: '#fff', border: 'none', borderRadius: '50%', width: '40px', height: '40px', fontWeight: 'bold' }}>✕</button>
                     </div>
                 )}
