@@ -275,16 +275,20 @@ export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFee
         const texts = textData.posts || [];
         const media = mediaData.posts || [];
         
+        // 🛡️ REVENUE-GRADE FILTER: Remove DELETED artifacts from public view
+        const activeTexts = texts.filter((t: any) => !(t.caption || t.content || '').includes('DELETED'));
+        const activeMedia = media.filter((m: any) => !(m.caption || m.content || '').includes('DELETED'));
+
         const woven = [];
         let tIndex = 0;
         let mIndex = 0;
 
-        while (tIndex < texts.length || mIndex < media.length) {
-            if (tIndex < texts.length) woven.push(texts[tIndex++]);
-            if (tIndex < texts.length) woven.push(texts[tIndex++]);
+        while (tIndex < activeTexts.length || mIndex < activeMedia.length) {
+            if (tIndex < activeTexts.length) woven.push(activeTexts[tIndex++]);
+            if (tIndex < activeTexts.length) woven.push(activeTexts[tIndex++]);
             
-            if (mIndex < media.length) woven.push(media[mIndex++]);
-            if (mIndex < media.length) woven.push(media[mIndex++]);
+            if (mIndex < activeMedia.length) woven.push(activeMedia[mIndex++]);
+            if (mIndex < activeMedia.length) woven.push(activeMedia[mIndex++]);
         }
 
         setItems(woven);

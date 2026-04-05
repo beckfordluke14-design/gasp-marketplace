@@ -29,6 +29,7 @@ export default function AssetAdmin() {
     const [limit, setLimit] = useState(30);
     const [birthName, setBirthName] = useState('');
     const [birthUrl, setBirthUrl] = useState('');
+    const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
     const [actionId, setActionId] = useState<string | null>(null); // To toggle post action menu
     const [adminKey, setAdminKey] = useState('');
 
@@ -85,6 +86,12 @@ export default function AssetAdmin() {
             setMsg('✗ SELECT A PERSONA FIRST');
             return;
         }
+
+        // 🛡️ OPTIMISTIC DESTRUCTION: Instantly hide from UI
+        if (payload.action === 'hide_post' && payload.id) {
+           setHiddenIds(prev => new Set([...prev, payload.id]));
+        }
+
         setMsg('COMMITTING...');
         const k = localStorage.getItem('admin_gasp_key') || '';
         try {
@@ -97,8 +104,27 @@ export default function AssetAdmin() {
                 setMsg('✓ SUCCESS — ' + (payload.action || payload.type || 'DONE').toUpperCase());
                 setActionId(null);
                 setTimeout(() => loadData(k), 500);
-            } else { setMsg('✗ ' + (data.error || 'FAILED')); }
-        } catch (err: any) { setMsg('✗ ERR: ' + err.message); }
+            } else { 
+                setMsg('✗ ' + (data.error || 'FAILED')); 
+                // Revert hiding on failure
+                if (payload.action === 'hide_post' && payload.id) {
+                   setHiddenIds(prev => {
+                      const next = new Set(prev);
+                      next.delete(payload.id);
+                      return next;
+                   });
+                }
+            }
+        } catch (err: any) { 
+            setMsg('✗ ERR: ' + err.message); 
+            if (payload.action === 'hide_post' && payload.id) {
+               setHiddenIds(prev => {
+                  const next = new Set(prev);
+                  next.delete(payload.id);
+                  return next;
+               });
+            }
+        }
     };
 
     const birthFromPost = async (url: string) => {
@@ -129,7 +155,11 @@ export default function AssetAdmin() {
     if (!ready) return null;
 
     const selectedPersona = personas.find(p => p.id === selectedPersonaId);
-    const personaPosts = posts.filter(p => p.persona_id === selectedPersonaId && !p.caption?.includes('DELETED'));
+    const personaPosts = posts.filter(p => 
+        p.persona_id === selectedPersonaId && 
+        !p.caption?.includes('DELETED') && 
+        !hiddenIds.has(p.id)
+    );
     const allAssets = [
         ...lost.map((n: any) => ({ key: n.id || n.key || '', url: n.url })),
         ...vault.filter((v: any) => !lost.find((l: any) => (l.id || l.key) === v.key)).map((v: any) => ({ key: v.key || '', url: v.url }))
