@@ -23,7 +23,9 @@ export default function AssetAdmin() {
     
     // Interaction State
     const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [msg, setMsg] = useState('');
+
     const [limit, setLimit] = useState(30);
     const [birthName, setBirthName] = useState('');
     const [birthUrl, setBirthUrl] = useState('');
@@ -170,7 +172,7 @@ export default function AssetAdmin() {
                 {view === 'global' && !selectedPersonaId && (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                         {personas.map(p => (
-                            <div key={p.id} onClick={() => setSelectedPersonaId(p.id)} style={{ background: '#0a0a0a', borderRadius: '12px', border: '1px solid #111', overflow: 'hidden' }}>
+                            <div key={p.id} onClick={() => setSelectedPersonaId(p.id)} style={{ background: '#0a0a0a', borderRadius: '12px', border: '1px solid #111', overflow: 'hidden', cursor: 'pointer' }}>
                                 <img src={p.seed_image_url} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} loading="lazy" />
                                 <div style={{ padding: '8px', textAlign: 'center' }}>
                                     <p style={{ margin: 0, fontSize: '9px', fontWeight: 'bold' }}>{p.name.split(' ')[0]}</p>
@@ -179,6 +181,7 @@ export default function AssetAdmin() {
                         ))}
                     </div>
                 )}
+
 
                 {/* ── PEER-LEVEL INSPECTOR ─ */}
                 {selectedPersonaId && (
@@ -203,9 +206,10 @@ export default function AssetAdmin() {
                                 {personaPosts.filter(p => !isDead(p.content_url) && p.content_type !== 'text').map(p => (
                                     <div key={p.id} style={{ background: '#080808', padding: '12px', borderRadius: '15px', border: actionId === p.id ? '1px solid #00f0ff' : '1px solid #111' }}>
                                         <div style={{ display: 'flex', gap: '12px' }}>
-                                            <div style={{ width: '60px', height: '60px', background: '#111', borderRadius: '10px', overflow: 'hidden', flexShrink: 0 }}>
+                                            <div onClick={() => setPreviewUrl(p.content_url)} style={{ width: '60px', height: '60px', background: '#111', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, cursor: 'pointer' }}>
                                                 <img src={p.content_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             </div>
+
                                             <div style={{ flex: 1, overflow: 'hidden' }}>
                                                 <div style={{ display: 'flex', gap: '4px', marginBottom: '8px', flexWrap: 'wrap' }}>
                                                     <button onClick={() => runAction({ id: p.id, action: 'toggle_gallery' })} style={{ background: p.is_gallery ? '#ffea00' : '#111', color: p.is_gallery ? '#000' : '#444', border: 'none', padding: '6px' }}>GALLERY</button>
@@ -262,7 +266,8 @@ export default function AssetAdmin() {
                         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter by filename..." style={{ width: '100%', background: '#111', border: '1px solid #333', color: '#fff', padding: '15px', borderRadius: '15px' }} />
                         {displayAssets.slice(0, limit).map((a: any) => (
                             <div key={a.key} style={{ width: 'calc(50% - 5px)', background: birthUrl === a.url ? '#0d1a0d' : '#0a0a0a', borderRadius: '15px', border: birthUrl === a.url ? '1px solid #00ff00' : '1px solid #111' }}>
-                                <img src={a.url} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} loading="lazy" />
+                                <img onClick={() => setPreviewUrl(a.url)} src={a.url} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', cursor: 'pointer' }} loading="lazy" />
+
                                 <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                     {selectedPersonaId ? (
                                         <>
@@ -296,6 +301,19 @@ export default function AssetAdmin() {
                 {view === 'lost' && limit < displayAssets.length && (
                     <button onClick={() => setLimit(l => l + 30)} style={{ width: '100%', padding: '20px', background: '#111', border: 'none', color: '#00f0ff', fontWeight: 'bold', borderRadius: '15px', marginTop: '10px' }}>SCAN MORE NODES</button>
                 )}
+
+                {/* 🔍 PREVIEW LIGHTBOX */}
+                {previewUrl && (
+                    <div 
+                      onClick={() => setPreviewUrl(null)}
+                      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 5000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', cursor: 'zoom-out' }}
+
+                    >
+                        <img src={previewUrl} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '20px', boxShadow: '0 0 50px rgba(0,240,255,0.2)' }} />
+                        <button style={{ position: 'absolute', top: '20px', right: '20px', background: '#222', color: '#fff', border: 'none', borderRadius: '50%', width: '40px', height: '40px', fontWeight: 'bold' }}>✕</button>
+                    </div>
+                )}
+
 
             </div>
             {msg && <div style={{ position: 'fixed', top: '130px', left: '50%', transform: 'translateX(-50%)', background: '#00f0ff', color: '#000', padding: '5px 15px', borderRadius: '10px', fontWeight: 'black', zIndex: 1000 }}>{msg}</div>}
