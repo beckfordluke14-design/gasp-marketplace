@@ -171,7 +171,7 @@ export default function AssetAdmin() {
                 {/* ── GLOBAL ROSTER VIEW ── */}
                 {view === 'global' && !selectedPersonaId && (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                        {personas.map(p => (
+                        {personas.filter(p => p.is_active !== false).map(p => (
                             <div key={p.id} onClick={() => setSelectedPersonaId(p.id)} style={{ background: '#0a0a0a', borderRadius: '12px', border: '1px solid #111', overflow: 'hidden', cursor: 'pointer' }}>
                                 {p.seed_image_url?.toLowerCase().endsWith('.mp4') ? (
                                     <video src={p.seed_image_url} muted loop playsInline style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} />
@@ -268,7 +268,7 @@ export default function AssetAdmin() {
                                                     <span style={{ fontSize: '9px', color: '#444' }}>TRANSFER:</span>
                                                     <select onChange={(e) => runAction({ id: p.id, targetPersonaId: e.target.value, action: 'move_to_persona' })} style={{ flex: 1, background: '#111', border: '1px solid #333', color: '#888', padding: '6px' }}>
                                                         <option value="">Choose Target...</option>
-                                                        {personas.filter(ps => ps.id !== selectedPersonaId).map(ps => <option key={ps.id} value={ps.id}>{ps.name}</option>)}
+                                                        {personas.filter(ps => ps.id !== selectedPersonaId && ps.is_active !== false).map(ps => <option key={ps.id} value={ps.id}>{ps.name}</option>)}
                                                     </select>
                                                 </div>
                                             </div>
@@ -293,7 +293,7 @@ export default function AssetAdmin() {
                                 style={{ flex: 1, background: '#111', border: '1px solid #333', color: '#fff', padding: '8px', borderRadius: '8px', fontSize: '11px' }}
                             >
                                 <option value="">── Select who to assign images to ──</option>
-                                {personas.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                {personas.filter(p => p.is_active !== false).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                             </select>
                             {selectedPersonaId && <span style={{ fontSize: '9px', color: '#00f0ff', whiteSpace: 'nowrap' }}>✓ READY</span>}
                         </div>
