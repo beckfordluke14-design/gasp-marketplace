@@ -38,17 +38,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  // Only process fulfillment_complete events
+  // Only process fulfillment events
   if (event.type !== 'crypto.onramp_session.updated') {
     return NextResponse.json({ received: true });
   }
 
   const session = event.data?.object;
-  if (session?.status !== 'fulfillment_complete') {
+  // 🛡️ RE-SYNC: Stripe Onramp uses 'fulfilled' status for successful completion
+  if (session?.status !== 'fulfilled' && session?.status !== 'fulfillment_complete') {
     return NextResponse.json({ received: true });
   }
 
-  const userId = session.metadata?.userId;
+  const userId = session.metadata?.userId || session.client_reference_id;
   const txId = session.id;
   // 🔱 ACTUAL AMOUNT: what Stripe reports was actually charged — NOT what was pre-filled
   const actualAmountUsd = parseFloat(session.transaction_details?.source_amount || '0');

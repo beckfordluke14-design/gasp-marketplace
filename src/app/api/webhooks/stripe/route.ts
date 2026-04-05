@@ -67,7 +67,7 @@ export async function POST(req: Request) {
 
                 // 1. Update Core Profile
                 await client.query(
-                    'UPDATE profiles SET credits = credits + $1, updated_at = NOW() WHERE id = $2',
+                    'UPDATE profiles SET credit_balance = credit_balance + $1, updated_at = NOW() WHERE id = $2',
                     [creditsToGrant, userId]
                 );
 

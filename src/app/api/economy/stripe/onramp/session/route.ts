@@ -44,12 +44,24 @@ export async function POST(req: Request) {
     body.append('destination_currencies[0]', 'usdc');
     body.append('destination_network', 'solana');
     
+    // 🧬 IDENTITY LINK: Crucial for the webhooks to know who is paying
+    body.append('client_reference_id', userId);
+    
+    // 🔱 AUDIT METADATA: For institutional ledger sync
+    body.append('metadata[userId]', userId);
+    if (packageId) body.append('metadata[packageId]', packageId);
+    body.append('metadata[origin]', 'gasp_marketplace_v2');
+    
+    // 🛡️ RISK AUDIT: Required by Stripe for onramp safety
+    const clientIP = req.headers.get('x-forwarded-for') || '127.0.0.1';
+    body.append('customer_ip_address', clientIP);
+
     body.append('wallet_addresses[solana]', SYNDICATE_TREASURY_SOL);
     body.append('lock_wallet_address', 'true');
     body.append('source_amount', priceUsd.toFixed(2));
     body.append('source_currency', 'usd');
 
-    console.log('[Stripe] Re-Minting session — wallet:', SYNDICATE_TREASURY_SOL, 'amount:', priceUsd);
+    console.log(`[Stripe Onramp] Creating Session for ${userId} (IP: ${clientIP}) — Amount: $${priceUsd}`);
 
     const response = await fetch('https://api.stripe.com/v1/crypto/onramp_sessions', {
       method: 'POST',
