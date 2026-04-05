@@ -190,13 +190,36 @@ export default function AssetAdmin() {
                             <div style={{ width: '80px', height: '80px', borderRadius: '15px', overflow: 'hidden', border: '1px solid #00f0ff' }}>
                                 <img src={selectedPersona?.seed_image_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             </div>
-                            <div>
+                            <div style={{ flex: 1 }}>
                                 <h2 style={{ color: '#fff', fontSize: '16px', margin: 0 }}>{selectedPersona?.name}</h2>
-                                <button onClick={() => setSelectedPersonaId(null)} style={{ background: '#222', color: '#888', border: 'none', padding: '6px 12px', borderRadius: '5px', fontSize: '10px', marginTop: '10px' }}>BACK TO FLEET</button>
+                                <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                                    <button onClick={() => setSelectedPersonaId(null)} style={{ background: '#222', color: '#888', border: 'none', padding: '6px 12px', borderRadius: '5px', fontSize: '10px' }}>BACK TO FLEET</button>
+                                    <button 
+                                        onClick={async () => {
+                                            if (confirm(`DEACTIVATE ${selectedPersona?.name.toUpperCase()}? This node will be hidden from all users.`)) {
+                                                const k = localStorage.getItem('admin_gasp_key') || '';
+                                                const res = await fetch('/api/admin/persona', {
+                                                    method: 'PATCH',
+                                                    headers: { 'Content-Type': 'application/json', 'x-admin-key': k },
+                                                    body: JSON.stringify({ personaId: selectedPersonaId, update: { is_active: false } })
+                                                });
+                                                if (res.ok) {
+                                                    setMsg('✓ NODE DEACTIVATED');
+                                                    setSelectedPersonaId(null);
+                                                    loadData();
+                                                }
+                                            }
+                                        }}
+                                        style={{ background: '#300', color: '#f55', border: 'none', padding: '6px 12px', borderRadius: '5px', fontSize: '10px' }}
+                                    >
+                                        ✘ DEACTIVATE
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
                         <div style={{ borderTop: '1px solid #111', paddingTop: '15px' }}>
+
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                                 <h3 style={{ fontSize: '12px', fontWeight: 'black', color: '#fff', margin: 0 }}>NODAL INVENTORY</h3>
                                 <button onClick={() => setView('lost')} style={{ background: '#00f0ff', color: '#000', border: 'none', padding: '6px 12px', borderRadius: '5px', fontSize: '9px', fontWeight: 'bold' }}>+ ADD FROM SCANNER</button>

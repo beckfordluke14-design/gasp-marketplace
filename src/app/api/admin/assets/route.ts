@@ -109,9 +109,15 @@ export async function POST(req: Request) {
 
         // 🧪 SOVEREIGN ACTION: OVERHAULING EXISTING POSTS
         if (action === 'toggle_vault') {
+            const { rows: postRows } = await db.query(`SELECT content_url FROM posts WHERE id = $1`, [id]);
+            if (postRows[0]?.content_url) {
+                // 🛡️ EXCLUSIVITY ENFORCEMENT: If vaulted, it CANNOT be a Hero image. 
+                await db.query(`UPDATE personas SET seed_image_url = NULL WHERE seed_image_url = $1`, [postRows[0].content_url]);
+            }
             await db.query(`UPDATE posts SET is_vault = NOT is_vault, is_gallery = false, is_freebie = false WHERE id = $1`, [id]);
             return NextResponse.json({ success: true });
         }
+
         if (action === 'toggle_gallery') {
             await db.query(`UPDATE posts SET is_gallery = NOT is_gallery, is_vault = false, is_freebie = false WHERE id = $1`, [id]);
             return NextResponse.json({ success: true });
@@ -157,6 +163,10 @@ export async function POST(req: Request) {
                 console.error(`[Grafting Critical] Target not found: ${id}`);
                 return NextResponse.json({ success: false, error: 'PERSONA_NOT_FOUND' }, { status: 404 });
             }
+
+            // 🛡️ EXCLUSIVITY ENFORCEMENT: If set as Hero, it CANNOT be a Vault image.
+            await db.query(`UPDATE posts SET is_vault = false WHERE content_url = $1`, [assetUrl]);
+
         } else if (type === 'post') {
             const res = await db.query(`UPDATE posts SET content_url = $1 WHERE id = $2`, [assetUrl, id]);
             if (res.rowCount === 0) return NextResponse.json({ success: false, error: 'POST_NOT_FOUND' }, { status: 404 });
