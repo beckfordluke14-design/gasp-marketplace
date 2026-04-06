@@ -45,7 +45,8 @@ export async function POST(req: Request) {
     body.append('destination_network', 'solana');
     
     // 🧬 IDENTITY LINK: Crucial for the webhooks to know who is paying
-    body.append('client_reference_id', userId);
+    // Note: client_reference_id is NOT supported on the Onramp API.
+    // Tracking is handled via the metadata block below.
     
     // 🔱 AUDIT METADATA: For institutional ledger sync
     body.append('metadata[userId]', userId);
