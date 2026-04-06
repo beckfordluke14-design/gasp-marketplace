@@ -12,6 +12,10 @@ import { useUser } from './providers/UserProvider';
 interface HeaderProps {
     onOpenMenu?: () => void;
     onOpenTopUp?: () => void;
+    deadIds?: Set<string>;
+    setDeadIds?: (ids: any) => void;
+    profiles?: any[];
+    onSelectProfile?: (id: string, initialMsg?: string) => void;
 }
 
 /**

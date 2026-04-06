@@ -54,7 +54,8 @@ export async function POST(req: Request) {
     body.append('metadata[origin]', 'gasp_marketplace_v2');
     
     // 🛡️ RISK AUDIT: Required by Stripe for onramp safety
-    const clientIP = req.headers.get('x-forwarded-for') || '127.0.0.1';
+    // Split and trim in case of multiple proxies (e.g., Cloudflare + Vercel)
+    const clientIP = (req.headers.get('x-forwarded-for') || '1.1.1.1').split(',')[0].trim();
     body.append('customer_ip_address', clientIP);
 
     body.append('wallet_addresses[solana]', SYNDICATE_TREASURY_SOL);

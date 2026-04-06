@@ -112,8 +112,23 @@ function MarketplaceContent() {
     };
     syncFollows();
 
+    const handleSyncPulse = (e: any) => {
+      const detail = e.detail;
+      if (detail && detail.personaId) {
+        setFollowing(prev => {
+          if (detail.isFollowing) {
+            return prev.includes(detail.personaId) ? prev : [...prev, detail.personaId];
+          } else {
+            return prev.filter(id => id !== detail.personaId);
+          }
+        });
+      } else {
+        syncFollows(); // Fallback to full sync
+      }
+    };
+
     window.addEventListener('gasp_unread_sync_trigger', syncUnreads);
-    window.addEventListener('gasp_sync_follows', syncFollows);
+    window.addEventListener('gasp_sync_follows', handleSyncPulse as EventListener);
 
     let gId = localStorage.getItem('gasp_guest_id');
     if (!gId) {
@@ -139,7 +154,7 @@ function MarketplaceContent() {
 
     return () => {
        window.removeEventListener('gasp_unread_sync_trigger', syncUnreads);
-       window.removeEventListener('gasp_sync_follows', syncFollows);
+       window.removeEventListener('gasp_sync_follows', handleSyncPulse as EventListener);
     };
   }, [searchParams]);
 
@@ -288,12 +303,26 @@ function MarketplaceContent() {
 
               <div className="flex-1 relative">
                  {activeTab === 'feed' && (
-                     <GlobalFeed 
-                        onSelectProfile={handleSelectProfile} 
-                        profiles={randomizedProfiles}
-                        deadIds={deadIds}
-                        setDeadIds={setDeadIds}
-                     />
+                   <div className="w-full flex-1 flex flex-col pt-32 md:pt-40">
+                      <AnimatePresence>
+                         {showStories && (
+                            <motion.div 
+                               initial={{ height: 0, opacity: 0 }}
+                               animate={{ height: 'auto', opacity: 1 }}
+                               exit={{ height: 0, opacity: 0 }}
+                               className="overflow-hidden mb-4"
+                            >
+                               <StoriesRow profiles={randomizedProfiles} onSelectProfile={handleSelectProfile} />
+                            </motion.div>
+                         )}
+                      </AnimatePresence>
+                      <GlobalFeed 
+                         onSelectProfile={handleSelectProfile} 
+                         profiles={randomizedProfiles}
+                         deadIds={deadIds}
+                         setDeadIds={setDeadIds}
+                      />
+                   </div>
                  )}
                  {activeTab === 'weather' && (
                   <div className="w-full max-w-4xl mx-auto px-4 md:px-6 animate-in fade-in zoom-in duration-500">

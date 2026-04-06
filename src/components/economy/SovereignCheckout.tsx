@@ -70,7 +70,12 @@ export default function SovereignCheckout({ userId, packageId, onSuccess, onCanc
       }
 
     } catch (err: any) {
-      setError(`Fault: ${err.message}`);
+      const msg = err.message || '';
+      if (msg.includes('IP address') || msg.includes('Invalid IP')) {
+          setError(`Invalid IP: Stripe rejected the request. Use P2P rail for instant settlement.`);
+      } else {
+          setError(`Fault: ${msg}`);
+      }
       setIsLoadingCard(false);
     }
   };
