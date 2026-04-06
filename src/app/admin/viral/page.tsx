@@ -22,6 +22,7 @@ export default function ViralGeneratorPage() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [isGeneratingScenario, setIsGeneratingScenario] = useState(false);
     const [viralCopy, setViralCopy] = useState<any>(null);
+    const [mobileEditorOpen, setMobileEditorOpen] = useState(true);
 
     const handleRandomizeCode = () => {
         setRewardCode(`${rewardType.substring(0,4).toUpperCase()}-` + Math.random().toString(36).substring(2, 10).toUpperCase());
@@ -78,9 +79,17 @@ export default function ViralGeneratorPage() {
     return (
         <div className="min-h-screen bg-black text-white flex flex-col md:flex-row font-sans">
             
+            {/* MOBILE TOGGLE (Floating) */}
+            <button 
+                onClick={() => setMobileEditorOpen(!mobileEditorOpen)}
+                className="md:hidden fixed bottom-6 right-6 z-[100] px-6 py-4 bg-gasp-neon text-black font-black uppercase tracking-widest rounded-full shadow-2xl"
+            >
+                {mobileEditorOpen ? 'Hide Editor 📸' : 'Open Editor ✍️'}
+            </button>
+
             {/* 🛠️ CONTROLS (Left Panel) */}
-            <div className="w-full md:w-[400px] border-r border-white/5 p-8 bg-black z-20 flex flex-col gap-8 h-screen overflow-y-auto">
-                <div>
+            <div className={`w-full md:w-[400px] border-r border-white/5 p-8 bg-black z-20 flex flex-col gap-8 md:h-screen md:overflow-y-auto transition-all ${!mobileEditorOpen ? 'hidden md:flex' : 'flex'}`}>
+                <div className="mt-8 md:mt-0">
                    <h1 className="text-3xl font-syncopate font-black italic tracking-tighter uppercase text-gasp-neon mb-2">Viral Engine</h1>
                    <p className="text-[10px] uppercase font-black tracking-widest text-white/30">Generate perfect marketing screenshots instantly.</p>
                 </div>
@@ -177,10 +186,10 @@ export default function ViralGeneratorPage() {
             </div>
 
             {/* 📸 CAPTURE CANVAS (Right Panel - Exact Chat Replica) */}
-            <div className="flex-1 bg-black relative flex flex-col max-h-screen">
+            <div className={`flex-1 bg-black relative flex flex-col md:max-h-screen pb-32 md:pb-0 ${mobileEditorOpen ? 'hidden md:flex' : 'flex min-h-screen'}`}>
                 
                 {/* Simulated Header */}
-                <header className="px-8 py-5 border-b border-white/5 flex items-center justify-between glass z-50">
+                <header className="px-5 md:px-8 py-4 md:py-5 border-b border-white/5 flex items-center justify-between glass z-50 sticky top-0 bg-black/80 backdrop-blur-xl">
                     <div className="flex items-center gap-4">
                         <div className="text-white/40"><ArrowLeft size={20} /></div>
                         <div className="flex flex-col">

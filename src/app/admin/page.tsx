@@ -71,6 +71,16 @@ export default function AdminHub() {
 
   const tools: Tool[] = [
     {
+      label: 'Viral Engine 📸',
+      description: 'Auto-generate pixel-perfect sovereign chat screenshots and use Gemini 2.5 to script TikTok hooks for infinite organic marketing.',
+      href: '/admin/viral',
+      icon: <Camera size={20} />,
+      color: 'text-[#00f0ff]',
+      glow: 'from-[#00f0ff]/10 to-[#00f0ff]/5 border-[#00f0ff]/20',
+      cta: 'Launch Studio',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
       label: 'Post Studio',
       description: 'Manage every post: toggle vault/hero, edit captions, merge posts together to attach text to media, and manage visibility.',
       href: '/admin/posts',
