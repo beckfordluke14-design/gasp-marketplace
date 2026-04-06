@@ -264,41 +264,24 @@ export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFee
   useEffect(() => {
     async function load() {
       try {
-        const [textRes, mediaRes] = await Promise.all([
-           fetch('/api/admin/feed?limit=50&type=text'),
-           fetch('/api/admin/feed?limit=50&type=media')
-        ]);
-        
-        const textData = await textRes.json();
+        const mediaRes = await fetch('/api/admin/feed?limit=200&type=media');
         const mediaData = await mediaRes.json();
-        
-        const texts = textData.posts || [];
         const media = mediaData.posts || [];
         
         // 🛡️ REVENUE-GRADE FILTER: Remove DELETED artifacts from public view
-        const activeTexts = texts.filter((t: any) => !(t.caption || t.content || '').includes('DELETED'));
         const activeMedia = media.filter((m: any) => !(m.caption || m.content || '').includes('DELETED'));
 
-        // 🛰️ FEATURED EXTRACTION: Pull priority nodes to the absolute top
-        const featured = [...activeTexts, ...activeMedia].filter((m: any) => m.is_featured);
+        const allItems = [...activeMedia];
+        
+        // 🛰️ FEATURED EXTRACTION: Priority nodes always top
+        const featured = allItems.filter((m: any) => m.is_featured);
         const featuredIds = new Set(featured.map(f => f.id));
 
-        const remainingTexts = activeTexts.filter((t: any) => !featuredIds.has(t.id));
-        const remainingMedia = activeMedia.filter((m: any) => !featuredIds.has(m.id));
+        const remaining = allItems
+            .filter((m: any) => !featuredIds.has(m.id))
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-        const woven = [...featured];
-        let tIndex = 0;
-        let mIndex = 0;
-
-        while (tIndex < remainingTexts.length || mIndex < remainingMedia.length) {
-            if (tIndex < remainingTexts.length) woven.push(remainingTexts[tIndex++]);
-            if (tIndex < remainingTexts.length) woven.push(remainingTexts[tIndex++]);
-            
-            if (mIndex < remainingMedia.length) woven.push(remainingMedia[mIndex++]);
-            if (mIndex < remainingMedia.length) woven.push(remainingMedia[mIndex++]);
-        }
-
-        setItems(woven);
+        setItems([...featured, ...remaining]);
       } catch (e) {
         console.error('Feed load fail:', e);
       } finally {
