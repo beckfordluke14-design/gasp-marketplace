@@ -34,6 +34,24 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const [lastTap, setLastTap] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [showLure, setShowLure] = useState(false);
+
+  const triggerReactiveLure = () => {
+     // Session cap limits lures to 2 per visit to maintain high-status scarcity
+     const count = parseInt(sessionStorage.getItem('gasp_lure_count') || '0');
+     if (count >= 2) return;
+     
+     sessionStorage.setItem('gasp_lure_count', (count + 1).toString());
+     
+     // Calculate random delay between 7s and 14s for human-like response
+     const delay = Math.floor(Math.random() * (14000 - 7000 + 1)) + 7000;
+     
+     setTimeout(() => {
+        setShowLure(true);
+        // Withdraw notification after 6 seconds if ignored (creates urgency)
+        setTimeout(() => setShowLure(false), 6000);
+     }, delay);
+  };
 
   useEffect(() => {
      const hasSeen = localStorage.getItem('gasp_zoom_hint');
@@ -71,6 +89,7 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
         setIsLiked(true);
         setShowHeartAnim(true);
         setTimeout(() => setShowHeartAnim(false), 1000);
+        triggerReactiveLure();
       } else {
         // Toggle off if already liked? Or just show anim again?
         // Standard IG: double tap always likes, doesn't unlike.
@@ -232,6 +251,10 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
                    const next = !isFollowing;
                    setIsFollowing(next);
 
+                   if (next) {
+                       triggerReactiveLure();
+                   }
+
                    try {
                      await fetch('/api/rpc/db', {
                        method: 'POST',
@@ -303,6 +326,7 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
             if (next) {
               setShowHeartAnim(true);
               setTimeout(() => setShowHeartAnim(false), 1000);
+              triggerReactiveLure();
             }
 
             try {
@@ -346,6 +370,36 @@ export default function FeedItem({ profile, broadcast }: FeedItemProps) {
           <span className="text-[7px] font-black uppercase tracking-[0.3em] text-white/20">private</span>
         </button>
       </div>
+
+      {/* 🎣 REACTIVE LURE (The Honeypot Push Notification) */}
+      <AnimatePresence>
+        {showLure && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            onClick={() => window.location.href = `/chat?personaId=${profile.id}`}
+            className="fixed top-6 left-4 right-4 z-[9999] md:left-1/2 md:w-[400px] md:-translate-x-1/2 p-4 rounded-3xl bg-black/80 backdrop-blur-3xl border border-white/20 shadow-[0_20px_60px_rgba(255,0,255,0.3)] flex items-center gap-4 cursor-pointer hover:bg-black transition-colors"
+          >
+             <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-[#00f0ff]">
+                <img src={profile.seed_image_url || profile.image} className="w-full h-full object-cover" />
+             </div>
+             <div className="flex-1 overflow-hidden">
+                <div className="flex items-center justify-between mb-1">
+                   <h4 className="text-xs font-black uppercase tracking-widest text-[#00f0ff] italic">{profile.name}</h4>
+                   <span className="text-[9px] text-white/40 font-bold uppercase">Now</span>
+                </div>
+                <p className="text-[12px] text-white/90 truncate leading-tight">
+                   {profile.personality === 'sarcastic' ? "caught you staring. 😉" :
+                    profile.personality === 'mysterious' ? "i see you looking..." :
+                    profile.personality === 'chill' ? "glad you liked the view 🌊" :
+                    "like what you see? come chat."}
+                </p>
+             </div>
+             <div className="w-2 h-2 rounded-full bg-[#ff00ff] shadow-[0_0_10px_#ff00ff] animate-pulse" />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
