@@ -125,16 +125,17 @@ CULTURE: ${archetype.culture}`;
 
     const { rows } = await db.query(`
       INSERT INTO personas (
-        name, seed_image_url, is_active, created_at, updated_at, city, country, system_prompt
+        name, seed_image_url, is_active, created_at, updated_at, city, country, system_prompt, tags
       ) 
-      VALUES ($1, $2, true, NOW(), NOW(), $3, $4, $5)
+      VALUES ($1, $2, true, NOW(), NOW(), $3, $4, $5, $6)
       RETURNING id
     `, [
       name || 'New Persona', 
       seed_image_url, 
       archetype.country === 'USA' ? 'Global' : 'Medellin',
       archetype.country,
-      systemPromptCombined
+      systemPromptCombined,
+      archetype.tags
     ]);
     
     return NextResponse.json({ success: true, id: rows[0].id, archetype: archetype.type });

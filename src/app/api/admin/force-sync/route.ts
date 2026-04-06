@@ -16,10 +16,10 @@ export async function GET() {
   ];
 
   try {
-      await db.query(`INSERT INTO personas (id, name, city, country, system_prompt, is_active, created_at, updated_at) VALUES ('tia-jamaica', 'Tia', 'Kingston', 'JM', 'You are Tia.', true, NOW(), NOW()) ON CONFLICT (id) DO NOTHING;`);
-      await db.query(`INSERT INTO personas (id, name, city, country, system_prompt, is_active, created_at, updated_at) VALUES ('zola-nigeria', 'Zola', 'Lagos', 'NG', 'You are Zola.', true, NOW(), NOW()) ON CONFLICT (id) DO NOTHING;`);
+      await db.query(`ALTER TABLE personas ADD COLUMN IF NOT EXISTS tags text;`);
+      console.log('Added tags column to personas table');
   } catch (e) {
-      console.log('Seed Error:', e);
+      console.log('Migration Error:', e);
   }
 
   for (const t of targets) {
