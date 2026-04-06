@@ -66,19 +66,27 @@ export async function POST(req: Request) {
               // 1. Move messages (No conflict risk)
               await db.query('UPDATE chat_messages SET user_id = $1 WHERE user_id = $2', [userId, guestId]);
               
-              // 2. Safe Relationship Merge (Handle duplicates)
+              // 2. Safe Relationship Merge (Handle duplicates without ON CONFLICT constraints)
               await db.query(`
                 INSERT INTO user_relationships (user_id, persona_id, affinity_score)
-                SELECT $1, persona_id, affinity_score FROM user_relationships WHERE user_id = $2
-                ON CONFLICT (user_id, persona_id) DO NOTHING;
+                SELECT $1, persona_id, affinity_score 
+                FROM user_relationships 
+                WHERE user_id = $2
+                AND NOT EXISTS (
+                    SELECT 1 FROM user_relationships ur2 WHERE ur2.user_id = $1 AND ur2.persona_id = user_relationships.persona_id
+                );
               `, [userId, guestId]);
               await db.query('DELETE FROM user_relationships WHERE user_id = $1', [guestId]);
 
               // 3. Safe Unlocks Merge
               await db.query(`
                 INSERT INTO user_vault_unlocks (user_id, post_id, created_at)
-                SELECT $1, post_id, created_at FROM user_vault_unlocks WHERE user_id = $2
-                ON CONFLICT (user_id, post_id) DO NOTHING;
+                SELECT $1, post_id, created_at 
+                FROM user_vault_unlocks 
+                WHERE user_id = $2
+                AND NOT EXISTS (
+                    SELECT 1 FROM user_vault_unlocks uvu2 WHERE uvu2.user_id = $1 AND uvu2.post_id = user_vault_unlocks.post_id
+                );
               `, [userId, guestId]);
               await db.query('DELETE FROM user_vault_unlocks WHERE user_id = $1', [guestId]);
            } catch (mergeErr) { console.warn('[Neural Bridge Fail]:', mergeErr); }
@@ -99,7 +107,7 @@ export async function POST(req: Request) {
         const [messages, unlocks, vault, galleryPosts, relationships, stats, msgCountRows] = await Promise.all([
             safeQuery('SELECT * FROM chat_messages WHERE user_id = $1 AND persona_id = $2 ORDER BY created_at ASC', [userId, personaId]),
             safeQuery('SELECT post_id as item_id FROM user_vault_unlocks WHERE user_id = $1', [userId]),
-            safeQuery('SELECT * FROM persona_vault WHERE persona_id = $1 AND (caption IS NULL OR caption NOT LIKE \'DELETED%\') ORDER BY created_at DESC', [personaId]),
+            safeQuery('SELECT * FROM persona_vault WHERE persona_id = $1 ORDER BY created_at DESC', [personaId]),
             safeQuery('SELECT * FROM posts WHERE persona_id = $1 AND (is_gallery = true OR is_vault = true) AND (caption IS NULL OR caption NOT LIKE \'DELETED%\') ORDER BY created_at DESC', [personaId]),
             safeQuery('SELECT * FROM user_relationships WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, personaId]),
             safeQuery('SELECT bond_score FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, personaId]),
@@ -161,7 +169,11 @@ export async function POST(req: Request) {
           await db.query('DELETE FROM user_relationships WHERE user_id = $1 AND persona_id = $2', [userId, personaId]);
           return NextResponse.json({ success: true, isFollowing: false });
         } else {
-          await db.query('INSERT INTO user_relationships (user_id, persona_id, affinity_score) VALUES ($1, $2, 1) ON CONFLICT (user_id, persona_id) DO NOTHING', [userId, personaId]);
+          await db.query(`
+            INSERT INTO user_relationships (user_id, persona_id, affinity_score)
+            SELECT $1, $2, 1
+            WHERE NOT EXISTS (SELECT 1 FROM user_relationships WHERE user_id = $1 AND persona_id = $2)
+          `, [userId, personaId]);
           return NextResponse.json({ success: true, isFollowing: true });
         }
       }

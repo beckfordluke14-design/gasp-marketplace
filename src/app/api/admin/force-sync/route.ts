@@ -15,6 +15,13 @@ export async function GET() {
       { file: 'Nigerian.mp4', persona: 'zola-nigeria', caption: 'NIGERIA Street Pulse. 🇳🇬🦾🏎️' }
   ];
 
+  try {
+      await db.query(`INSERT INTO personas (id, name, city, country, system_prompt, is_active, created_at, updated_at) VALUES ('tia-jamaica', 'Tia', 'Kingston', 'JM', 'You are Tia.', true, NOW(), NOW()) ON CONFLICT (id) DO NOTHING;`);
+      await db.query(`INSERT INTO personas (id, name, city, country, system_prompt, is_active, created_at, updated_at) VALUES ('zola-nigeria', 'Zola', 'Lagos', 'NG', 'You are Zola.', true, NOW(), NOW()) ON CONFLICT (id) DO NOTHING;`);
+  } catch (e) {
+      console.log('Seed Error:', e);
+  }
+
   for (const t of targets) {
       console.log(`📡 [Admin Master] Processing ${t.file}...`);
       const fullPath = path.join(process.cwd(), t.file);
