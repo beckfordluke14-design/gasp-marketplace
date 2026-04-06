@@ -115,15 +115,14 @@ export async function POST(req: Request) {
 
     const { rows } = await db.query(`
       INSERT INTO personas (
-        name, seed_image_url, is_active, created_at, updated_at, city, age, description,
+        name, seed_image_url, is_active, created_at, updated_at, city, age, 
         vibe, system_prompt, tags, voice_id, vocal_dna, country, culture
       ) 
-      VALUES ($1, $2, true, NOW(), NOW(), $10, 22, 'Sovereign Archetype: ' || $3, $4, $5, $6, 'Aoede', $7, $8, $9)
+      VALUES ($1, $2, true, NOW(), NOW(), $9, 22, $3, $4, $5, 'Aoede', $6, $7, $8)
       RETURNING id
     `, [
       name || 'New Persona', 
       seed_image_url, 
-      archetype.type,
       archetype.vibe, 
       `ARCHETYPE: ${archetype.type}. 
        PERSONALITY: ${archetype.personality} 

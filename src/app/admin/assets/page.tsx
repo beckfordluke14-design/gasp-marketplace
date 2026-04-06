@@ -278,7 +278,8 @@ export default function AssetAdmin() {
 
                                             <div style={{ flex: 1, overflow: 'hidden' }}>
                                                 <div style={{ display: 'flex', gap: '4px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                                                    <button onClick={() => runAction({ id: p.id, action: 'toggle_gallery' })} style={{ background: p.is_gallery ? '#ffea00' : '#111', color: p.is_gallery ? '#000' : '#444', border: 'none', padding: '6px' }}>GALLERY</button>
+                                                    <button onClick={() => runAction({ id: p.id, action: 'toggle_featured' })} style={{ background: p.is_featured ? '#ffea00' : '#111', color: p.is_featured ? '#000' : '#888', border: 'none', padding: '6px', fontWeight: 'bold' }}>{p.is_featured ? '★ PINNED' : '☆ PIN'}</button>
+                                                    <button onClick={() => runAction({ id: p.id, action: 'toggle_gallery' })} style={{ background: p.is_gallery ? '#ff6fff' : '#111', color: p.is_gallery ? '#000' : '#444', border: 'none', padding: '6px' }}>GALLERY</button>
                                                     <button onClick={() => runAction({ id: p.id, action: 'toggle_vault' })} style={{ background: p.is_vault ? '#ff00ff' : '#111', color: p.is_vault ? '#fff' : '#444', border: 'none', padding: '6px' }}>VAULT</button>
                                                     <button onClick={() => runAction({ id: p.id, action: 'toggle_freebie' })} style={{ background: p.is_freebie ? '#00ff00' : '#111', color: p.is_freebie ? '#000' : '#444', border: 'none', padding: '6px' }}>GIFT</button>
                                                     <button onClick={() => runAction({ id: selectedPersonaId, type: 'persona', assetUrl: p.content_url })} style={{ background: '#00f0ff', color: '#000', border: 'none', padding: '6px' }}>HERO</button>
