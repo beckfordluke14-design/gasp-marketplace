@@ -113,28 +113,28 @@ export async function POST(req: Request) {
 
     const archetype = archetypes[Math.floor(Math.random() * archetypes.length)];
 
+    const systemPromptCombined = `ARCHETYPE: ${archetype.type}.
+PERSONALITY: ${archetype.personality}
+STATUS: High-Heat Ultra-Feminine Presence.
+VOICE: ${archetype.voice}
+LIKES: ${archetype.likes}
+DISLIKES: ${archetype.dislikes}
+TAGS: ${archetype.tags}
+VOCAL_DNA: ${JSON.stringify(archetype.vocal_dna)}
+CULTURE: ${archetype.culture}`;
+
     const { rows } = await db.query(`
       INSERT INTO personas (
-        name, seed_image_url, is_active, created_at, updated_at, city, age, 
-        vibe, system_prompt, tags, voice_id, vocal_dna, country, culture
+        name, seed_image_url, is_active, created_at, updated_at, city, country, system_prompt
       ) 
-      VALUES ($1, $2, true, NOW(), NOW(), $9, 22, $3, $4, $5, 'Aoede', $6, $7, $8)
+      VALUES ($1, $2, true, NOW(), NOW(), $3, $4, $5)
       RETURNING id
     `, [
       name || 'New Persona', 
       seed_image_url, 
-      archetype.vibe, 
-      `ARCHETYPE: ${archetype.type}. 
-       PERSONALITY: ${archetype.personality} 
-       STATUS: High-Heat Ultra-Feminine Presence. 
-       VOICE: ${archetype.voice} 
-       LIKES: ${archetype.likes} 
-       DISLIKES: ${archetype.dislikes}`,
-      archetype.tags,
-      JSON.stringify(archetype.vocal_dna),
+      archetype.country === 'USA' ? 'Global' : 'Medellin',
       archetype.country,
-      archetype.culture,
-      archetype.country === 'USA' ? 'Global' : 'Medellin'
+      systemPromptCombined
     ]);
     
     return NextResponse.json({ success: true, id: rows[0].id, archetype: archetype.type });
