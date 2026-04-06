@@ -301,7 +301,8 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
             {/* 🛰️ MARKET PULSE: WeatherX & Polymarket Sentiment Indicator */}
             <MarketPulseTerminal />
 
-            {/* 🛰️ INTELLIGENCE BRIEF: High-Heat Report Prompt */}
+            {/* 🛰️ INTELLIGENCE BRIEF (HIDDEN PER USER REQUEST) */}
+            {/*
             <div className="px-6 mb-8 mt-4 animate-in fade-in slide-in-from-right-4 duration-1000">
                 <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-[#ffea00] mb-4 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-pulse shadow-[0_0_8px_#ffea00]" />
@@ -323,6 +324,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                    </div>
                 </div>
             </div>
+            */}
 
             {/* 🛰️ MARKET PULSE: Real-time Intel Ticker */}
             <NeuralPulseTerminal />

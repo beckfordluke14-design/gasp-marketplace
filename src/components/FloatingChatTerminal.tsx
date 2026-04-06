@@ -34,19 +34,17 @@ export default function FloatingChatTerminal({
   if (isOpen) return null;
   const totalUnread = Object.values(unreadCounts).reduce((a, b) => a + Number(b), 0);
   
-  // 🧬 DIAL STATE: Global rotation of the satellite fleet
-  const [activeRotation, setActiveRotation] = useState(0);
-  const rotation = useMotionValue(0);
-  const springRotation = useSpring(rotation, { damping: 40, stiffness: 300 });
-
   // Filter and sort favorites for the dial
   const favorites = useMemo(() => {
-    return profiles.filter(p => followingIds.includes(p.id)).slice(0, 12);
+    const follows = followingIds.map(String);
+    return profiles.filter(p => follows.includes(String(p.id))).slice(0, 12);
   }, [followingIds, profiles]);
 
   const hasFavorites = favorites.length > 0;
+  
+  const rotation = useMotionValue(0);
+  const springRotation = useSpring(rotation, { damping: 40, stiffness: 300 });
 
-  // 🛡️ DUAL-ACTION TOGGLE: Open Discovery or Close Active Chat
   const handleAnchorClick = () => {
     if (isOpen && onClose) {
        onClose();
@@ -55,59 +53,45 @@ export default function FloatingChatTerminal({
     }
   };
 
-  if (!hasFavorites && totalUnread === 0 && !isOpen) {
-      return (
-        <div className={`fixed bottom-6 ${isOpen ? 'left-6' : 'right-6'} z-[2500] pointer-events-none md:bottom-12 ${isOpen ? 'md:left-12' : 'md:right-12'} transition-all duration-700`}>
-            <motion.button
-                onClick={handleAnchorClick}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1.05, opacity: 1 }}
-                className="pointer-events-auto w-16 h-16 rounded-full bg-black/10 backdrop-blur-3xl border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all shadow-[0_20px_50px_rgba(0,0,0,0.5)] active:scale-90"
-            >
-                <MessageSquare size={24} />
-            </motion.button>
-        </div>
-      );
-  }
-
   return (
     <div className={`fixed bottom-6 ${isOpen ? 'left-6' : 'right-6'} z-[2500] pointer-events-none md:bottom-12 ${isOpen ? 'md:left-12' : 'md:right-12'} transition-all duration-700`}>
        <div className="relative flex items-center justify-center">
           
-          {/* 🎡 THE SOVEREIGN RADIAL DIAL (V4.25) */}
+          {/* 🎡 THE SOVEREIGN RADIAL DIAL (ORBITERS) */}
           <AnimatePresence>
-             <motion.div 
-               initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
-               animate={{ opacity: 1, rotate: 0, scale: 1 }}
-               exit={{ opacity: 0, scale: 0.5 }}
-               className="absolute pointer-events-auto"
-               style={{ width: 140, height: 140 }}
-             >
-                <motion.div
-                  drag="x"
-                  dragConstraints={{ left: -1000, right: 1000 }}
-                  className="w-full h-full relative cursor-grab active:cursor-grabbing"
-                  onDrag={(e, info) => {
-                     // 🧬 JOG WHEEL LOGIC: High-inertia rotation
-                     rotation.set(rotation.get() + info.delta.x * 1.2);
-                  }}
-                >
-                   {favorites.map((p, i) => (
-                      <Orbiter 
-                         key={p.id}
-                         p={p}
-                         index={i}
-                         total={favorites.length}
-                         rotation={springRotation}
-                         onSelect={() => onSelectProfile(p.id)}
-                         unreadCount={unreadCounts[p.id] || 0}
-                      />
-                   ))}
-                </motion.div>
-             </motion.div>
+             {hasFavorites && (
+               <motion.div 
+                 initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
+                 animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                 exit={{ opacity: 0, scale: 0.5 }}
+                 className="absolute pointer-events-auto"
+                 style={{ width: 140, height: 140 }}
+               >
+                  <motion.div
+                    drag="x"
+                    dragConstraints={{ left: -1000, right: 1000 }}
+                    className="w-full h-full relative cursor-grab active:cursor-grabbing"
+                    onDrag={(e, info) => {
+                       rotation.set(rotation.get() + info.delta.x * 1.2);
+                    }}
+                  >
+                     {favorites.map((p, i) => (
+                        <Orbiter 
+                           key={p.id}
+                           p={p}
+                           index={i}
+                           total={favorites.length}
+                           rotation={springRotation}
+                           onSelect={() => onSelectProfile(p.id)}
+                           unreadCount={unreadCounts[p.id] || 0}
+                        />
+                     ))}
+                  </motion.div>
+               </motion.div>
+             )}
           </AnimatePresence>
 
-          {/* 🧩 THE CORE ANCHOR NODE (TOGGLE) */}
+          {/* 🧩 THE CORE ANCHOR NODE (Always Visible) */}
           <motion.button
             onClick={handleAnchorClick}
             whileHover={{ scale: 1.1 }}
@@ -145,7 +129,7 @@ function Orbiter({ p, index, total, rotation, onSelect, unreadCount }: { p: any,
     
     // Distribute personas on a wide 330-degree arc for global visibility
     const arcSpread = 330; 
-    const baseAngle = -90 - (arcSpread / 2) + (index / Math.max(total - 1, 1)) * arcSpread;
+    const baseAngle = -90 - (arcSpread / 2) + ((index + 0.5) / total) * arcSpread;
     
     const x = useTransform(rotation, (r: number) => Math.cos(((baseAngle + r) * Math.PI) / 180) * radius);
     const y = useTransform(rotation, (r: number) => Math.sin(((baseAngle + r) * Math.PI) / 180) * radius);

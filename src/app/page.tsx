@@ -114,16 +114,19 @@ function MarketplaceContent() {
 
     const handleSyncPulse = (e: any) => {
       const detail = e.detail;
+      console.log('📡 [Signal Pulse] Sync Follows:', detail);
       if (detail && detail.personaId) {
         setFollowing(prev => {
-          if (detail.isFollowing) {
+          const isF = detail.isFollowing;
+          console.log(`🧬 [Sync] Updating persona ${detail.personaId} state to: ${isF}`);
+          if (isF) {
             return prev.includes(detail.personaId) ? prev : [...prev, detail.personaId];
           } else {
             return prev.filter(id => id !== detail.personaId);
           }
         });
       } else {
-        syncFollows(); // Fallback to full sync
+        syncFollows(); 
       }
     };
 
