@@ -307,18 +307,6 @@ function MarketplaceContent() {
               <div className="flex-1 relative">
                  {activeTab === 'feed' && (
                    <div className="w-full flex-1 flex flex-col pt-32 md:pt-40">
-                      <AnimatePresence>
-                         {showStories && (
-                            <motion.div 
-                               initial={{ height: 0, opacity: 0 }}
-                               animate={{ height: 'auto', opacity: 1 }}
-                               exit={{ height: 0, opacity: 0 }}
-                               className="overflow-hidden mb-4"
-                            >
-                               <StoriesRow profiles={randomizedProfiles} onSelectProfile={handleSelectProfile} />
-                            </motion.div>
-                         )}
-                      </AnimatePresence>
                       <GlobalFeed 
                          onSelectProfile={handleSelectProfile} 
                          profiles={randomizedProfiles}
