@@ -33,7 +33,7 @@ export async function GET(req: Request) {
 
         // 3. Identify ALL Inventory (For Nodal Inventory Hub)
         const { rows: allPosts } = await db.query(`
-            SELECT id, persona_id, content_url, content_type, is_vault, is_gallery, is_freebie, caption, created_at 
+            SELECT id, persona_id, content_url, content_type, is_vault, is_gallery, is_freebie, is_featured, caption, created_at 
             FROM posts 
             WHERE (caption IS NULL OR caption NOT LIKE 'DELETED%')
             ORDER BY created_at DESC
@@ -126,6 +126,10 @@ export async function POST(req: Request) {
             await db.query(`UPDATE posts SET is_freebie = NOT is_freebie, is_vault = false, is_gallery = false WHERE id = $1`, [id]);
             return NextResponse.json({ success: true });
         }
+        if (action === 'toggle_featured') {
+            await db.query(`UPDATE posts SET is_featured = NOT is_featured WHERE id = $1`, [id]);
+            return NextResponse.json({ success: true });
+        }
 
         if (action === 'move_to_persona') {
             await db.query(`UPDATE posts SET persona_id = $1 WHERE id = $2`, [targetPersonaId, id]);
@@ -136,7 +140,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true });
         }
 
-        if (!id || !type || !assetUrl) return NextResponse.json({ success: false, error: 'MISSING_DATA' }, { status: 400 });
+        const needsAssetData = !action || ['type_only', 'persona', 'post'].includes(type) && !['toggle_featured', 'toggle_vault', 'toggle_gallery', 'toggle_freebie', 'move_to_persona', 'hide_post'].includes(action);
+        
+        if (needsAssetData && (!id || !type || !assetUrl)) {
+             // Only throw if we strictly need id/type/url for grafting. Toggles only need id.
+             if (!id) return NextResponse.json({ success: false, error: 'MISSING_DATA' }, { status: 400 });
+        }
 
         if (type === 'persona') {
             console.log(`[Grafting Pulse] Target: ${id} | Asset: ${assetUrl}`);

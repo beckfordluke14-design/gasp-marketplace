@@ -17,7 +17,8 @@ export async function GET() {
 
   try {
       await db.query(`ALTER TABLE personas ADD COLUMN IF NOT EXISTS tags text;`);
-      console.log('Added tags column to personas table');
+      await db.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS is_featured boolean DEFAULT false;`);
+      console.log('Database Upgraded // Tags (Personas) & Pinned (Posts) live.');
   } catch (e) {
       console.log('Migration Error:', e);
   }
