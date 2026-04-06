@@ -295,7 +295,7 @@ ${userLocale === 'es' ? `
                 ),
                 db.query(
                     'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
-                    [finalUserId, profileItem.id, 'assistant', streamB_Text + (systemRewardMessage ? `\n\n🎁 *${systemRewardMessage}*` : ''), voiceUrl, streamA_Native]
+                    [finalUserId, profileItem.id, 'assistant', streamB_Text + (systemRewardMessage ? `\n\n🎁 *${systemRewardMessage}*` : ''), voiceUrl, voiceUrl ? streamA_Native : null]
                 )
             ];
 

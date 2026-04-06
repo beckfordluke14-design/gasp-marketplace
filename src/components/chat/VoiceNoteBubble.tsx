@@ -182,7 +182,7 @@ export default function VoiceNoteBubble({
     return `${m}:${sec.toString().padStart(2, '0')}`;
   };
 
-  const displayDuration = duration > 0 ? formatTime(duration) : '0:04';
+  const displayDuration = duration > 0 ? formatTime(duration) : '0:00';
   const ts = timestamp || new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
 
   return (

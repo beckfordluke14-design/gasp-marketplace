@@ -236,7 +236,7 @@ export default function ChatDrawer({
                            return [...prev.slice(0, -1), { 
                              ...last, 
                              media_url: event.audioUrl, 
-                             audio_script: event.nativeScript || '...',
+                             audio_script: event.audio_script || '...',
                              type: 'voice' 
                            }];
                         }
@@ -587,9 +587,9 @@ export default function ChatDrawer({
                   return (
                     <div key={msg.id || idx} className={`flex flex-col ${isAssistant ? 'items-start' : 'items-end'} gap-2`}>
                        {/* EXCLUSIVE RENDERING LOGIC: Voice OR Text, not both */}
-                       {msg.type === 'voice' || msg.audio_script ? (
+                       {(msg.type === 'voice' || msg.audio_script) && (msg.media_url || liveVoiceUrl) ? (
                           <VoiceNoteBubble 
-                             audioUrl={msg.media_url || liveVoiceUrl || ''} 
+                             audioUrl={msg.media_url || liveVoiceUrl} 
                              profileImage={profile?.image}
                              profileName={profile?.name}
                              translation={msg.audio_translation}
