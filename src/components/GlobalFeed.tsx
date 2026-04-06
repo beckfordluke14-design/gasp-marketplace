@@ -279,16 +279,23 @@ export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFee
         const activeTexts = texts.filter((t: any) => !(t.caption || t.content || '').includes('DELETED'));
         const activeMedia = media.filter((m: any) => !(m.caption || m.content || '').includes('DELETED'));
 
-        const woven = [];
+        // 🛰️ FEATURED EXTRACTION: Pull priority nodes to the absolute top
+        const featured = [...activeTexts, ...activeMedia].filter((m: any) => m.is_featured);
+        const featuredIds = new Set(featured.map(f => f.id));
+
+        const remainingTexts = activeTexts.filter((t: any) => !featuredIds.has(t.id));
+        const remainingMedia = activeMedia.filter((m: any) => !featuredIds.has(m.id));
+
+        const woven = [...featured];
         let tIndex = 0;
         let mIndex = 0;
 
-        while (tIndex < activeTexts.length || mIndex < activeMedia.length) {
-            if (tIndex < activeTexts.length) woven.push(activeTexts[tIndex++]);
-            if (tIndex < activeTexts.length) woven.push(activeTexts[tIndex++]);
+        while (tIndex < remainingTexts.length || mIndex < remainingMedia.length) {
+            if (tIndex < remainingTexts.length) woven.push(remainingTexts[tIndex++]);
+            if (tIndex < remainingTexts.length) woven.push(remainingTexts[tIndex++]);
             
-            if (mIndex < activeMedia.length) woven.push(activeMedia[mIndex++]);
-            if (mIndex < activeMedia.length) woven.push(activeMedia[mIndex++]);
+            if (mIndex < remainingMedia.length) woven.push(remainingMedia[mIndex++]);
+            if (mIndex < remainingMedia.length) woven.push(remainingMedia[mIndex++]);
         }
 
         setItems(woven);

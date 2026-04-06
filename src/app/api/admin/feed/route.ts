@@ -54,7 +54,7 @@ export async function GET(req: Request) {
       queryText += " WHERE " + conditions.join(" AND ");
     }
 
-    queryText += ` ORDER BY p.is_burner DESC, p.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    queryText += ` ORDER BY p.is_featured DESC, p.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
 
     const { rows: dbPosts } = await db.query(queryText, params);
