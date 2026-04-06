@@ -153,14 +153,21 @@ export default function ChatDrawer({
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
-    setIsTyping(true);
+    
+    // 🛡️ REACTION DELAY (Reading/Thinking): Dots are NOT shown yet.
+    setIsTyping(false);
 
     let activeConfig = { delayMultiplier: 1, typingStyle: 'monolith' };
 
     try {
-      // ⏳ INITIAL THINKING PAUSE (Pre-typing)
-      const thinkTime = (1200 + Math.random() * 2500) / speedMult;
-      await wait(thinkTime);
+      // ⏳ HUMAN REACTION: 0.8s to 2.5s base, adjusted by persona speed
+      const reactionDelay = (800 + Math.random() * 1700) / speedMult;
+      await wait(reactionDelay);
+
+      // 🦾 START TYPING: Dots appear now.
+      setIsTyping(true);
+      const startTypingDelay = (1000 + Math.random() * 2000) / speedMult;
+      await wait(startTypingDelay);
 
 
       const res = await fetch('/api/chat', {
@@ -260,10 +267,14 @@ export default function ChatDrawer({
                     }]);
                     
                     if (i < fragments.length - 1) {
-                        // ⏳ INTER-BUBBLE VARIATION: 0.8s to 2.5s per thought
-                        const pause = (800 + Math.random() * 1700) / speedMult;
+                        // ⏳ INTER-BUBBLE PAUSE: Stop typing, then start again (texting feel)
+                        setIsTyping(false);
+                        const silentPause = (1000 + Math.random() * 1500) / speedMult;
+                        await wait(silentPause);
+                        
                         setIsTyping(true);
-                        await wait(pause);
+                        const resumeTyping = (800 + Math.random() * 1200) / speedMult;
+                        await wait(resumeTyping);
                     }
                  }
               } else {
@@ -620,8 +631,8 @@ export default function ChatDrawer({
                     </div>
                   );
                 })}
-                {/* 🦾 NEURAL SYNC HAPTICS (THE MAIN MEAT) */}
-                {(isLoading || isTyping || isRequestingVoice) && (
+                {/* 🦾 NEURAL SYNC HAPTICS (REAL TEXTING FEEL) */}
+                {(isTyping || isRequestingVoice) && (
                    <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
                       <div className="flex items-center gap-2 px-2">
                          <div className={`w-1 h-1 rounded-full ${isRequestingVoice ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'} animate-pulse shadow-[0_0_8px_currentColor]`} />
