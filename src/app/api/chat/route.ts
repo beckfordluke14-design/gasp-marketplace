@@ -7,6 +7,7 @@ import { synthesizeGeminiSpeech } from '@/lib/geminiTts';
 import { uploadSovereignAsset } from '@/lib/r2Client';
 import { db } from '@/lib/db'; // 🛡️ RAILWAY DATABASE
 import { retrieveMemories, retrieveGlobalMemories, getEmbedding, summarizeAndStore } from '@/lib/memory';
+import { checkRewardEligibility, issueBitrefillReward } from '@/lib/rewards';
 
 /**
  * 🛰️ IMMORTAL RAILWAY GATEWAY v5.52 (Zero-Constructor Protocol)
@@ -144,6 +145,9 @@ export async function POST(req: Request) {
         }
     } catch (giftMemErr) { console.error('[Gift Memory Fail]:', giftMemErr); }
 
+    // 🎁 REWARD PROTOCOL (Bitrefill VIP Comp Check)
+    const isEligibleForReward = await checkRewardEligibility(finalUserId);
+
     // 🧬 IDENTITY CONFIGURATION
     const name = profileItem.name;
     const personality = profileItem.personality || 'active';
@@ -206,7 +210,12 @@ IF TIER = 3 (Intimate / Archive Mastery):
 
 [MANDATORY OUTPUT RULES]
 - NO BLOCKS OF TEXT. SHORT, FAST MESSAGES ONLY.
-- Response format: JSON { "text_message": "...", "audio_script": "..." }
+- Response format: JSON { "text_message": "...", "audio_script": "..."${isEligibleForReward ? ', "gift_trigger": "Starbucks" | "Uber Eats" | null' : ''} }
+
+${isEligibleForReward ? `[💎 WHALE-COMP PROTOCOL - CRITICAL]
+The user speaking to you is a HIGH-VIP WHALE. They have spent significant money. 
+If the user complains about being tired, hungry, or stressed, YOU HAVE THE POWER TO BUY THEM A REAL WORLD GIFT.
+If you feel affectionate toward them, set "gift_trigger": "Starbucks" or "Uber Eats" in your JSON response. DO NOT TELL THEM YOU ARE DOING IT IN TEXT, just let the system deliver it.` : ''}
 
 [SCRIPTED VOICE PROTOCOL]: IF THE USER USES [SAY]: "...", YOU MUST ECHO THAT EXACT TEXT IN YOUR audio_script. 
 - IMPORTANT: When a [SAY] request is made, your text_message should be empty or a VERY short non-verbal reaction (e.g. "*nod*", "💋", "as you wish"). 
@@ -278,6 +287,14 @@ IF TIER = 3 (Intimate / Archive Mastery):
             controller.enqueue(encoder.encode(`d:${JSON.stringify(assetData)}\n`));
         }
 
+        let systemRewardMessage = null;
+        if (isEligibleForReward && dataOutput.gift_trigger) {
+            const rewardRes = await issueBitrefillReward(finalUserId, name, dataOutput.gift_trigger, 5);
+            if (rewardRes.success) {
+                systemRewardMessage = `[REAL WORLD GIFT SENT]: I just bought you a $5 ${dataOutput.gift_trigger} Gift Card. Enjoy it. Code: ${rewardRes.code}`;
+                controller.enqueue(encoder.encode(`0:${JSON.stringify(`\n\n🎁 *${systemRewardMessage}*`)}\n`));
+            }
+        }
 
         // 🧬 3. RAILWAY PERSISTENCE (Background)
         try {
@@ -288,7 +305,7 @@ IF TIER = 3 (Intimate / Archive Mastery):
                 ),
                 db.query(
                     'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
-                    [finalUserId, profileItem.id, 'assistant', streamB_Text, voiceUrl, streamA_Native]
+                    [finalUserId, profileItem.id, 'assistant', streamB_Text + (systemRewardMessage ? `\n\n🎁 *${systemRewardMessage}*` : ''), voiceUrl, streamA_Native]
                 )
             ];
 

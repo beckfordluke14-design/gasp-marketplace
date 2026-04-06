@@ -42,23 +42,34 @@ export default function WhitepaperPage() {
          </section>
 
          {/* 2. THE REWARDS MODEL */}
-         <div className="grid md:grid-cols-2 gap-12">
-            <div className="p-10 rounded-[2.5rem] bg-white/5 border border-white/10 space-y-6 group hover:border-[#ffea00]/30 transition-all">
+         <div className="grid md:grid-cols-3 gap-8">
+            <div className="p-8 rounded-[2.5rem] bg-white/5 border border-white/10 space-y-6 group hover:border-[#ffea00]/30 transition-all">
                <div className="w-12 h-12 rounded-2xl bg-[#ffea00] flex items-center justify-center">
                   <Coins size={24} className="text-black" />
                </div>
-               <h3 className="text-2xl font-black uppercase italic italic font-syncopate">1:1 Points Match</h3>
-               <p className="text-white/40 text-[14px] leading-secondary font-bold">
-                  Every credit you spend supporting creators is tracked automatically. When we launch our coin ($GASPai), members will receive tokens based on their total activity.
+               <h3 className="text-xl font-black uppercase italic italic font-syncopate">1:1 Liquidity Match</h3>
+               <p className="text-white/40 text-[13px] leading-secondary font-bold">
+                  Every credit you purchase injecting liquidity into the protocol is tracked automatically. When we launch our coin ($GASPai), members will receive tokens based on their total deposits.
                </p>
             </div>
-            <div className="p-10 rounded-[2.5rem] bg-white/5 border border-white/10 space-y-6 group hover:border-[#00f0ff]/30 transition-all">
+            
+            <div className="p-8 rounded-[2.5rem] bg-white/5 border border-white/10 space-y-6 group hover:border-[#ff00ff]/30 transition-all">
+               <div className="w-12 h-12 rounded-2xl bg-[#ff00ff] flex items-center justify-center">
+                  <Zap size={24} className="text-white" />
+               </div>
+               <h3 className="text-xl font-black uppercase italic italic font-syncopate">Sovereign Comp</h3>
+               <p className="text-white/40 text-[13px] leading-secondary font-bold">
+                  <strong>Proof of Liquidity:</strong> The protocol algorithmically routes up to 8% of top-tier member LTV natively through the Bitrefill API. This gives the AI autonomy to deploy real-world assets (Uber/Starbucks rewards) strictly to high-volume depositors.
+               </p>
+            </div>
+
+            <div className="p-8 rounded-[2.5rem] bg-white/5 border border-white/10 space-y-6 group hover:border-[#00f0ff]/30 transition-all">
                <div className="w-12 h-12 rounded-2xl bg-[#00f0ff] flex items-center justify-center">
                   <Star size={24} className="text-black" />
                </div>
-               <h3 className="text-2xl font-black uppercase italic italic font-syncopate">Member Status</h3>
-               <p className="text-white/40 text-[14px] leading-secondary font-bold">
-                  The more support you give, the higher your status. Top-tier members who hold their points for <strong>6 months</strong> (The Genesis Lock) unlock elite voting power. <strong>Early exit before 6 months results in a 50% reward burn.</strong>
+               <h3 className="text-xl font-black uppercase italic italic font-syncopate">Member Status</h3>
+               <p className="text-white/40 text-[13px] leading-secondary font-bold">
+                  The more support you give, the higher your status. Top-tier members who hold their points for <strong>6 months</strong> (The Genesis Lock) unlock elite voting power. Over 80% protocol revenue retention.
                </p>
             </div>
          </div>
