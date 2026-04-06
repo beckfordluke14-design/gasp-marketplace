@@ -217,11 +217,12 @@ export default function ChatDrawer({
               const event = JSON.parse(line.slice(2));
               if (event?.type === 'config') {
                  activeConfig = event;
+                 if (event.isVoice) isVoiceDetected = true;
+                 
                  // 🧬 RANDOMIZED RESPONSE DELAY: scaled by persona state
                  const baseDelay = 1000 + Math.random() * 2000;
                  const finalDelay = baseDelay / (activeConfig.delayMultiplier * speedMult);
                  await wait(finalDelay);
-
               }
               if (event?.type === 'voice_note') {
                  console.log('📡 [Sovereign Stream] Voice Event Received:', !!event.audioUrl ? 'READY' : 'PENDING');
@@ -263,7 +264,7 @@ export default function ChatDrawer({
                         id: `ai-${Date.now()}-${i}`, 
                         role: 'assistant', 
                         content: frag,
-                        audio_script: (i === fragments.length - 1 && isVoiceDetected) ? '...' : null 
+                        audio_script: (i === fragments.length - 1 && (isVoiceDetected || (activeConfig as any).isVoice)) ? '...' : null 
                     }]);
                     
                     if (i < fragments.length - 1) {
@@ -283,7 +284,7 @@ export default function ChatDrawer({
                    if (last?.role === 'assistant' && last.id.startsWith('ai-')) {
                       return [...prev.slice(0, -1), { ...last, content: text }];
                    }
-                   return [...prev, { id: 'ai-' + Date.now(), role: 'assistant', content: text, audio_script: isVoiceDetected ? '...' : null }];
+                   return [...prev, { id: 'ai-' + Date.now(), role: 'assistant', content: text, audio_script: (isVoiceDetected || (activeConfig as any).isVoice) ? '...' : null }];
                  });
               }
             } catch {}

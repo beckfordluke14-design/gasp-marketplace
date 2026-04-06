@@ -70,7 +70,7 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
             <div className="px-4 h-full bg-[#ff00ff] flex items-center gap-2 shrink-0 z-10 shadow-[5px_0_15px_#ff00ff]">
                 <Database size={10} className="text-white animate-pulse" />
                 <span className="text-[7px] md:text-[8px] font-black uppercase text-white tracking-widest italic">
-                  {isSpanish ? 'GASP FEED' : 'GASP FEED'}
+                  {isSpanish ? 'GASP ARCHIVE FEED' : 'GASP ARCHIVE FEED'}
                 </span>
             </div>
             
@@ -108,7 +108,7 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
                 
                 <div className="flex flex-col gap-0.5 cursor-pointer group" onClick={() => router.push('/')}>
                   <div className="flex items-baseline gap-1.5">
-                    <h1 className="text-xl md:text-2xl font-syncopate font-black italic tracking-tighter text-white uppercase leading-none group-hover:text-[#ff00ff] transition-colors">GASP</h1>
+                    <h1 className="text-xl md:text-2xl font-syncopate font-black italic tracking-tighter text-white uppercase leading-none group-hover:text-[#ff00ff] transition-colors">GASP ARCHIVE</h1>
                     <span className="text-[8px] font-black uppercase text-[#ff00ff] tracking-widest italic animate-pulse">
                       {isSpanish ? 'Archivo' : 'Archive'}
                     </span>

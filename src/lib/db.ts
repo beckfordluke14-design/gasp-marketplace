@@ -3,21 +3,23 @@ import { Pool } from 'pg';
 const globalForPool = global as unknown as { pool: Pool };
 
 const getPool = () => {
-  if (globalForPool.pool) return globalForPool.pool;
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    console.error('❌ [DATABASE] FATAL: DATABASE_URL not set in environment.');
-    throw new Error('DATABASE_URL not set.');
-  }
-  const pool = new Pool({
-    connectionString,
-    ssl: { rejectUnauthorized: false },
-    max: 15,
-    idleTimeoutMillis: 10000,
-    connectionTimeoutMillis: 5000, // 🛡️ 5s window for Railway proxy
-  });
-  if (process.env.NODE_ENV !== 'production') globalForPool.pool = pool;
-  return pool;
+    if (globalForPool.pool) return globalForPool.pool;
+    
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+        throw new Error('DATABASE_URL not set.');
+    }
+
+    const pool = new Pool({
+        connectionString,
+        ssl: { rejectUnauthorized: false },
+        max: 10,           // 🛡️ Optimized for SIAT High-Parallelism
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 5000,
+    });
+
+    globalForPool.pool = pool;
+    return pool;
 };
 
 export const db = {

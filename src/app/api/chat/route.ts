@@ -265,7 +265,8 @@ ${userLocale === 'es' ? `
         controller.enqueue(encoder.encode(`2:${JSON.stringify({ 
             type: 'config', 
             delayMultiplier: dailyState.responseSpeedMultiplier, 
-            typingStyle: dailyState.typingStyle 
+            typingStyle: dailyState.typingStyle,
+            isVoice: sendVoice 
         })}\n`));
 
         // 🚀 ATOMIC NEURAL HANDSHAKE: Sending full text chunk to ensure UI cohesion
