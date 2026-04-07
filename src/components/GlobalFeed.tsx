@@ -288,57 +288,28 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], followingId
   useEffect(() => {
     async function load() {
       try {
-        // 🛰️ UNLOCKING DEPTH: Opening the floodgates to 1000+ items
         const mediaRes = await fetch('/api/admin/feed?limit=1000&type=media');
         const mediaData = await mediaRes.json();
         const media = mediaData.posts || [];
         
-        // 🛡️ REVENUE-GRADE FILTER: Remove DELETED artifacts
-        const activeMedia = media.filter((m: any) => !(m.caption || m.content || '').includes('DELETED'));
-
-        // 🧬 NEURAL SYNTHESIS: Ensure EVERY persona in the sidebar has a slot in the feed
-        const postsByPersona = new Map();
-        activeMedia.forEach((m: any) => {
-            if (!postsByPersona.has(String(m.persona_id))) {
-                postsByPersona.set(String(m.persona_id), []);
-            }
-            postsByPersona.get(String(m.persona_id)).push(m);
-        });
-
-        const synthesizedItems: any[] = [];
-        
-        // Ensure every known profile has a presence
-        profiles.forEach(p => {
-            const pId = String(p.id);
-            const personaPosts = postsByPersona.get(pId) || [];
-            if (personaPosts.length > 0) {
-                synthesizedItems.push(...personaPosts);
-            } else {
-                // Return a "Status" post for empty personas so they show up in the feed
-                synthesizedItems.push({
-                    id: `status-${pId}`,
-                    persona_id: pId,
-                    content_type: 'text',
-                    caption: p.status || 'Verified & Online.',
-                    created_at: new Date().toISOString()
-                });
-            }
-        });
+        // 🛡️ Only show real image/video posts — no fake text fallbacks
+        const activeMedia = media.filter((m: any) => 
+            !(m.caption || m.content || '').includes('DELETED') &&
+            (m.content_type === 'image' || m.content_type === 'video') &&
+            m.content_url
+        );
 
         // 🛰️ FEATURED EXTRACTION & PRIORITY SORT
-        const featured = synthesizedItems.filter((m: any) => m.is_featured);
-        const featuredIds = new Set(featured.map(f => f.id));
+        const featured = activeMedia.filter((m: any) => m.is_featured);
+        const featuredIds = new Set(featured.map((f: any) => f.id));
 
-        const remaining = synthesizedItems
+        const remaining = activeMedia
             .filter((m: any) => !featuredIds.has(m.id))
-            .sort((a, b) => {
-               // 1. Followed Status Check
+            .sort((a: any, b: any) => {
                const isAFollowed = followingIds.includes(a.persona_id);
                const isBFollowed = followingIds.includes(b.persona_id);
                if (isAFollowed && !isBFollowed) return -1;
                if (!isAFollowed && isBFollowed) return 1;
-
-               // 2. Post Recency (Tie-breaker)
                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
             });
 
