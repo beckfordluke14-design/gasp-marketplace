@@ -190,6 +190,19 @@ function GlobalFeedItem({
                          </div>
                       </div>
                       <p className="text-xs md:text-sm font-bold text-white uppercase tracking-tight leading-relaxed font-mono whitespace-pre-wrap">{postText}</p>
+                      {postType === 'link' && postUrl && (
+                         <div className="flex flex-col gap-2 pt-2">
+                             <a 
+                                href={postUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="w-full py-3 bg-[#00f0ff]/10 border border-[#00f0ff]/40 text-[#00f0ff] text-[10px] font-black uppercase tracking-widest text-center hover:bg-[#00f0ff] hover:text-black transition-all"
+                             >
+                                {isSpanish ? 'Leer Inteligencia de la Fuente' : 'Read Source Intelligence'}
+                             </a>
+                         </div>
+                      )}
                       <div className="flex items-center justify-between pt-4 border-t border-white/5 opacity-50">
                          <span className="text-[6px] font-black text-white/40 uppercase tracking-widest">
                             {isSpanish ? 'Verificado // Solo Miembros' : 'Verified // Member Access Only'}
@@ -323,7 +336,11 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], followingId
   return (
     <div className="w-full h-full overflow-y-auto bg-black pt-4 pb-32">
       {items.map((broadcast, i) => {
-        const profile = profiles.find(p => p.id === broadcast.persona_id) || initialProfiles[0];
+        // 🧬 Neural Lookup: Search both DB and Initial lists to find the face
+        const profile = profiles.find(p => String(p.id) === String(broadcast.persona_id)) || 
+                       initialProfiles.find(p => String(p.id) === String(broadcast.persona_id)) ||
+                       initialProfiles[0];
+        
         return (
           <div key={broadcast.id} className="snap-start snap-always">
              <GlobalFeedItem 

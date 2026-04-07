@@ -78,7 +78,7 @@ function MarketplaceContent() {
                       ...existing,
                       ...p.personas,
                       id: pid,
-                      image: proxyImg(p.content_url || p.personas.seed_image_url || existing.image)
+                      image: proxyImg(p.personas.seed_image_url || existing.image || p.personas.image)
                    });
                 }
              });

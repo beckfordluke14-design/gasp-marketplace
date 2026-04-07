@@ -108,13 +108,27 @@ export default function ArticleDetail() {
                </button>
             </div>
 
-            <div className="prose prose-invert prose-lg max-w-none">
-               <p className="text-xl md:text-2xl text-white/80 leading-relaxed italic font-light">
-                  {article.content}
-               </p>
-               {/* 🗒️ Additional SEO Fill Text could go here */}
-               <div className="h-20" />
-            </div>
+             <div className="prose prose-invert prose-lg max-w-none">
+                <p className="text-xl md:text-2xl text-white/80 leading-relaxed italic font-light">
+                   {article.content}
+                </p>
+                
+                {/* 🛡️ SOURCE VERIFICATION: Build Trust & SEO Juice */}
+                {article.content_url && !article.content_url.includes('gasp.fun') && (
+                   <div className="mt-12 p-6 bg-white/5 border-l-4 border-[#00f0ff] rounded-r-2xl">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff] mb-2">Intelligence Source Verified</p>
+                      <a 
+                        href={article.content_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-white/60 hover:text-white transition-colors text-xs font-bold underline decoration-[#00f0ff]/40 underline-offset-4"
+                      >
+                         View Original Dispatch via {new URL(article.content_url).hostname.replace('www.', '')}
+                      </a>
+                   </div>
+                )}
+                <div className="h-20" />
+             </div>
 
             <div className="flex items-center justify-between py-10 border-t border-white/10">
                <div className="flex items-center gap-6">

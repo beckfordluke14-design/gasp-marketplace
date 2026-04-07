@@ -47,7 +47,9 @@ export async function GET(req: Request) {
     if (typeFilter === 'text') {
       conditions.push("p.content_type = 'text'");
     } else if (typeFilter === 'media') {
-      conditions.push("(p.content_type = 'image' OR p.content_type = 'video' OR p.content_url IS NOT NULL)");
+      conditions.push("(p.content_type = 'image' OR p.content_type = 'video')");
+      // 🛡️ EXCLUDE SEO ARTICLES: Prevents 'link' types from cluttering the main social scroll
+      conditions.push("p.content_type != 'link'");
     }
 
     if (conditions.length > 0) {
