@@ -247,7 +247,7 @@ ${userLocale === 'es' ? `
     if (sendVoice && streamA_Native) {
         try {
             // 🧬 PREBAKED DNA: Combining vibe and deep vocal DNA for zero-config synthesis
-            const dnaVibe = `[PROMPT_DNA]: ${profileItem.vibe || ''} | [VOCAL_DNA]: ${JSON.stringify(profileItem.vocal_dna || {})}`;
+            const dnaVibe = `[PROMPT_DNA]: ${profileItem.vibe || ''} | [SKIN_TONE]: ${profileItem.skin_tone || ''} | [VOCAL_DNA]: ${JSON.stringify(profileItem.vocal_dna || {})}`;
             const tts = await synthesizeGeminiSpeech(streamA_Native, profileItem?.voice_id || 'Aoede', dnaVibe);
             if (tts.data) {
                 voiceUrl = await uploadSovereignAsset(tts.data, `v5_${finalProfileId}_${Date.now()}.wav`, 'audio/wav');
