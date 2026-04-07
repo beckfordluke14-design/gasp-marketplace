@@ -84,18 +84,34 @@ async function synthesizeReport(persona: any, rawNews: any) {
                 })
             });
             const orData = await orRes.json();
+            if (!orData.choices || orData.choices.length === 0) return null;
             const rawText = orData.choices[0].message.content;
-            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+            
+            // 🧪 HYPER-ROBUST EXTRACTION: Scrub control characters and find first JSON block
+            const cleanedText = rawText.replace(/[\x00-\x1F\x7F-\x9F]/g, " ");
+            const jsonMatch = cleanedText.match(/\{[\s\S]*?\}/); // Non-greedy match
+            
             if (!jsonMatch) return null;
-            return { ...JSON.parse(jsonMatch[0]), personaId: persona.id };
+            try {
+                return { ...JSON.parse(jsonMatch[0]), personaId: persona.id };
+            } catch (jsonErr: any) {
+                console.error(`[Hydra] JSON Parse Error for ${persona.name}: ${jsonErr.message}`, jsonMatch[0]);
+                return null;
+            }
         }
 
         const rawText = data.candidates[0].content.parts[0].text;
-        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        const cleanedText = rawText.replace(/[\x00-\x1F\x7F-\x9F]/g, " ");
+        const jsonMatch = cleanedText.match(/\{[\s\S]*?\}/); // Non-greedy match
         if (!jsonMatch) throw new Error("No JSON found in response");
         
-        const result = JSON.parse(jsonMatch[0]);
-        return { ...result, personaId: persona.id };
+        try {
+            const result = JSON.parse(jsonMatch[0]);
+            return { ...result, personaId: persona.id };
+        } catch (jsonErr: any) {
+            console.error(`[Gemini] JSON Parse Error for ${persona.name}: ${jsonErr.message}`, jsonMatch[0]);
+            return null;
+        }
     } catch (e) {
         console.error(`Neural Synthesis Err: ${persona.name}`, e);
         return null;
@@ -124,9 +140,12 @@ export async function GET() {
         const results = [];
         const BATCH_SIZE = 10;
         
+        console.log(`[Syndicate] ⚡ STARTING MASS-INGRESS FOR ${roster.length} PARTICIPANTS...`);
+        
         for (let i = 0; i < roster.length; i += BATCH_SIZE) {
             const batch = roster.slice(i, i + BATCH_SIZE);
-            console.log(`[Syndicate] 🌊 Processing Wave ${i / BATCH_SIZE + 1}...`);
+            const waveNum = i / BATCH_SIZE + 1;
+            console.log(`[Syndicate] 🌊 WAVE ${waveNum}: Processing ${batch.length} nodes...`);
             
             const batchGathering = await Promise.all(batch.map(async (p) => {
                 const items = await getSniperTargets(p.name);
@@ -134,33 +153,34 @@ export async function GET() {
             }));
             
             const validBatch = batchGathering.filter(pkg => pkg.news);
-            const batchSynthesis = await Promise.all(validBatch.map(pkg => synthesizeReport(pkg.persona, pkg.news)));
-            const batchReports = batchSynthesis.filter((r): r is any => r !== null);
+            console.log(`[Syndicate] 🛰️ WAVE ${waveNum} SNIPRE: ${validBatch.length}/${batch.length} valid intel packages.`);
             
-            for (const report of batchReports) {
-                try {
-                    // 🛡️ SOVEREIGN SANITIZATION: Prevent name crashes (Malia R., etc)
-                    const sanitizedId = String(report.personaId).replace(/[^a-zA-Z0-9-]/g, '-');
-                    
-                    const { rows } = await db.query(`
-                        INSERT INTO posts (persona_id, content_type, caption, content, is_vault, is_gallery, meta)
-                        VALUES ($1, 'text', $2, $3, false, false, $4)
-                        RETURNING id
-                    `, [
-                        sanitizedId,
-                        report.title,
-                        report.content,
-                        JSON.stringify({ heat: report.heat, type: 'brave_ingress', created_at: new Date().toISOString() })
-                    ]);
-                    results.push({ id: rows[0].id });
-                    console.log(`[Success] Briefing Deployed for ${sanitizedId}`);
-                } catch (err: any) {
-                    console.error(`Sovereign Dispatch Failure: ${err.message}`);
+            if (validBatch.length > 0) {
+                const batchSynthesis = await Promise.all(validBatch.map(pkg => synthesizeReport(pkg.persona, pkg.news)));
+                const batchReports = batchSynthesis.filter((r): r is any => r !== null);
+                console.log(`[Syndicate] 🧪 WAVE ${waveNum} NEURAL: ${batchReports.length} briefings successfully synthesized.`);
+                
+                for (const report of batchReports) {
+                    try {
+                        const { rows } = await db.query(`
+                            INSERT INTO posts (persona_id, content_type, caption, content, is_vault, is_gallery, meta)
+                            VALUES ($1, 'text', $2, $3, false, false, $4)
+                            RETURNING id
+                        `, [
+                            report.personaId,
+                            report.title,
+                            report.content,
+                            JSON.stringify({ heat: report.heat, type: 'brave_ingress', created_at: new Date().toISOString() })
+                        ]);
+                        results.push({ id: rows[0].id });
+                    } catch (err: any) {
+                        console.error(`[Syndicate] 🚨 Dispatch Failure for ${report.personaId}:`, err.message);
+                    }
                 }
             }
         }
 
-        console.log(`[Syndicate] ✅ DYNAMIC MASS-INGRESS COMPLETE: ${results.length} Briefings Deployed.`);
+        console.log(`[Syndicate] ✅ MASS-INGRESS COMPLETE: ${results.length} Briefings deployed to the Syndicate Feed.`);
         return NextResponse.json({ success: true, count: results.length });
 
     } catch (e: any) {
