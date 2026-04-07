@@ -9,7 +9,7 @@ export default function RefundPolicy() {
       <div className="fixed top-0 inset-x-0 h-20 bg-black/60 backdrop-blur-3xl border-b border-white/5 z-50 flex items-center px-6 md:px-12">
         <Link href="/" className="flex items-center gap-2 text-white/50 hover:text-white transition-colors group">
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Return to Hub</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Return to Archive</span>
         </Link>
       </div>
 

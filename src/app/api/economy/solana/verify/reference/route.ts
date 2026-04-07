@@ -34,7 +34,9 @@ export async function GET(req: Request) {
 
     for (const endpoint of endpoints) {
         try {
-            connection = new Connection(endpoint, 'confirmed');
+            // 'finalized' enforces absolute blockchain finality (~12 seconds, 32+ confirmations)
+            // No transaction will be processed unless it is mathematically irreversible.
+            connection = new Connection(endpoint, 'finalized');
             // Test connection with a light request
             await connection.getSlot();
             fallbackSuccess = true;
@@ -52,8 +54,9 @@ export async function GET(req: Request) {
     const referencePubkey = new PublicKey(reference);
 
     // 2. Discovery Loop: Reference first, then Treasury Sweep
-    let signatures = await connection.getSignaturesForAddress(referencePubkey, { limit: 1 });
-    let signature = signatures.length > 0 ? signatures[0].signature : null;
+    let signatures = await connection.getSignaturesForAddress(referencePubkey, { limit: 5 });
+    // 🚨 CRITICAL: Only consider CONFIRMED, SUCCESSFUL transactions — filter out failed ones
+    let signature = signatures.find(s => !s.err)?.signature || null;
 
     // Fetch session metadata for exact amount matching
     const { rows: sessionRows } = await db.query(`SELECT metadata FROM p2p_sessions WHERE reference = $1`, [reference]);
@@ -71,6 +74,11 @@ export async function GET(req: Request) {
 
             const fetchedTx = await connection.getParsedTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 });
             if (!fetchedTx || !fetchedTx.meta) continue;
+            // 🚨 CRITICAL: Skip failed transactions — a failed tx still has instructions visible on-chain
+            if (fetchedTx.meta.err !== null) {
+                console.log(`[P2P Treasury Scan] Skipping FAILED tx: ${sigInfo.signature}`);
+                continue;
+            }
 
             const solTransfer = fetchedTx.transaction.message.instructions.find(ix => 
                (ix as any).programId?.toBase58() === '11111111111111111111111111111111' &&
@@ -112,6 +120,16 @@ export async function GET(req: Request) {
 
     if (!tx || !tx.meta) {
       return NextResponse.json({ success: false, error: 'TX_FETCH_FAULT' });
+    }
+
+    // 🚨 CRITICAL SECURITY GATE: Reject failed transactions
+    // A failed Solana tx still shows all instructions in the parsed data.
+    // Without this check, the oracle can be tricked by a failed transfer.
+    if (tx.meta.err !== null) {
+      console.error(`[P2P Audit] REJECTED: Transaction ${signature} FAILED on-chain. Error:`, tx.meta.err);
+      // Mark this session dead so polling stops
+      await db.query(`UPDATE p2p_sessions SET status = 'failed' WHERE reference = $1`, [reference]);
+      return NextResponse.json({ success: false, error: 'TX_FAILED_ON_CHAIN' });
     }
 
     // 🔬 AUDIT: Verify Destination and Amount

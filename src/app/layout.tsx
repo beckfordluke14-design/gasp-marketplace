@@ -10,7 +10,7 @@ const syncopate = Syncopate({ subsets: ["latin"], weight: ['400', '700'], variab
 const SITE_URL = 'https://gasp.fun';
 
 export const metadata: Metadata = {
-  title: 'GASP // Premium Terminal',
+  title: 'GASP // Premium Archive',
   description: 'The official @Gasp. High-status digital media archive and premium creator feed.',
   manifest: "/manifest.json",
   metadataBase: new URL(SITE_URL),
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: 'GASP // Premier Media Terminal',
+    title: 'GASP // Premium Archive',
     description: "The official Gasp. Exclusive digital media archive and premium creator feed.",
     url: SITE_URL,
     siteName: 'Gasp',

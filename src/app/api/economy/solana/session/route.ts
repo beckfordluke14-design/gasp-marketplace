@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     try {
         await db.query(`
           INSERT INTO p2p_sessions (user_id, reference, amount_usd, status, expires_at, metadata)
-          VALUES ($1, $2, $3, 'pending', NOW() + INTERVAL '24 hours', $4)
+          VALUES ($1, $2, $3, 'pending', NOW() + INTERVAL '1 hour', $4)
         `, [userId, reference, amountUsd, JSON.stringify({ expectedSol, priceAtCreation: livePrice })]);
     } catch (dbErr: any) {
         console.error('[P2P DB ERROR]:', dbErr.message);

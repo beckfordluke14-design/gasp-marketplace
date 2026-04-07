@@ -44,6 +44,8 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     const [isPolling, setIsPolling] = useState(false);
     const [txSignature, setTxSignature] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);
+    const [expiryTime, setExpiryTime] = useState<string | null>(null);
+    const [timeLeft, setTimeLeft] = useState<string>('');
     const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
     const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
@@ -64,6 +66,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                     .then(data => {
                         if (data.success && data.session) {
                             setUniqueRef(data.session.reference);
+                            setExpiryTime(data.session.expires_at);
                             setView('p2p');
                             startPolling(data.session.reference);
                         }
@@ -72,6 +75,30 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             }
         }
     }, [userId]);
+
+    // 🕒 COUNTDOWN ENGINE
+    useEffect(() => {
+        if (!expiryTime || view !== 'p2p') return;
+        
+        const tick = () => {
+            const now = new Date().getTime();
+            const end = new Date(expiryTime).getTime();
+            const diff = end - now;
+            
+            if (diff <= 0) {
+                setTimeLeft('00:00');
+                return;
+            }
+            
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+            setTimeLeft(`${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`);
+        };
+        
+        tick();
+        const interval = setInterval(tick, 1000);
+        return () => clearInterval(interval);
+    }, [expiryTime, view]);
 
     const fetchLivePrice = async () => {
         try {
@@ -187,6 +214,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             if (!data.success) throw new Error(data.error);
 
             setUniqueRef(data.reference);
+            setExpiryTime(new Date(Date.now() + 3600000).toISOString()); // local fallback
             setView('p2p');
             startPolling(data.reference);
 
@@ -359,6 +387,14 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                     </div>
                                     <h3 className="text-lg font-syncopate font-black uppercase italic text-white tracking-tighter leading-none">{isPolling ? (isSpanish ? 'VERIFICANDO...' : 'VERIFYING...') : (isSpanish ? 'LIQUIDACIÓN P2P' : 'P2P SETTLEMENT')}</h3>
                                     
+                                    {/* 🕒 REAL-TIME URGENCY: COUNTDOWN */}
+                                    <div className="flex items-center justify-center gap-2">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-white/30 italic">{isSpanish ? 'EXPIRA EN:' : 'EXPIRES IN:'}</span>
+                                        <span className={`text-[12px] font-mono font-black ${timeLeft === '00:00' ? 'text-red-500' : 'text-[#ffea00]'} animate-pulse`}>
+                                            {timeLeft || '60:00'}
+                                        </span>
+                                    </div>
+                                    
                                     <div className="flex flex-col items-center gap-2">
                                         <div className="flex flex-col items-center gap-1 px-5 py-3 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-[1.2rem]">
                                             <div className="flex items-center gap-2">
@@ -406,11 +442,35 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(solanaPayUrl)}`} alt="QR Protocol" className="w-full h-full object-contain" />
                                                 <div className="absolute inset-0 border-[12px] border-white rounded-[2.5rem]" />
                                             </div>
+
+                                            {/* 🧬 SOVEREIGN DIRECTIONS: Step-by-Step for High Conversion */}
+                                            <div className="grid grid-cols-3 gap-4 pt-4 px-8">
+                                                {[
+                                                   { step: 1, label: isSpanish ? 'ESCANEAR' : 'SCAN' },
+                                                   { step: 2, label: isSpanish ? 'CONFIRMAR' : 'SEND' },
+                                                   { step: 3, label: isSpanish ? 'ESPERAR' : 'WAIT' }
+                                                ].map((d) => (
+                                                   <div key={d.step} className="flex flex-col items-center gap-2">
+                                                      <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black text-[#00f0ff]">{d.step}</div>
+                                                      <span className="text-[7px] font-black uppercase tracking-widest text-white/40">{d.label}</span>
+                                                   </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
                                 
-                                <div className="flex flex-col items-center gap-4 pt-2">
+                                <div className="flex flex-col items-center gap-4 pt-6">
+                                    <button 
+                                       onClick={() => {
+                                          if (pollingRef.current) clearInterval(pollingRef.current);
+                                          setUniqueRef(null);
+                                          setView('options');
+                                       }}
+                                       className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 hover:text-red-500 transition-all group flex items-center gap-2"
+                                    >
+                                       <span>{isSpanish ? 'CANCELAR Y REINICIAR' : 'CANCEL & START NEW'}</span>
+                                    </button>
                                     <button onClick={() => setView('options')} className="text-[10px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic hover:text-white transition-all hover:scale-105">{isSpanish ? '← VOLVER' : '← RETURN'}</button>
                                 </div>
                             </div>

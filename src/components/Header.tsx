@@ -112,7 +112,7 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
                     {/* 🧬 ARCHIVE TAG REMOVED PER USER REQUEST */}
                   </div>
                   <span className="hidden md:block text-[6px] font-black uppercase text-white/20 tracking-[0.4em] group-hover:text-white/40 transition-colors italic">
-                    {isSpanish ? 'Terminal de Influencers Sintéticos' : 'Synthetic Influencer Terminal'}
+                    {isSpanish ? 'Archivo de Elite Digital' : 'Premium Archive'}
                   </span>
                 </div>
 

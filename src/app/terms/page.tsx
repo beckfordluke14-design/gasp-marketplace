@@ -9,7 +9,7 @@ export default function TermsOfService() {
       <div className="fixed top-0 inset-x-0 h-20 bg-black/60 backdrop-blur-3xl border-b border-white/5 z-50 flex items-center px-6 md:px-12">
         <Link href="/" className="flex items-center gap-2 text-white/50 hover:text-white transition-colors group">
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Return to Hub</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Return to Archive</span>
         </Link>
       </div>
 
@@ -34,7 +34,7 @@ export default function TermsOfService() {
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">3. Nature of Service</h2>
-                <p>Gasp.fun is an <strong>Institutional Strategic Media Hub</strong> providing a managed interface for <strong>Digital Asset Retrieval and Neural Signal Synchronization</strong>. The intelligence nodes, data points, briefings, and media available on this platform are synthetic combinations of proprietary algorithmic logic and managed AI datasets. You understand that your synchronized uplinks are with artificial intelligence nodes, not human operators.</p>
+                <p><strong>Gasp</strong> (Gasp.fun) is a <strong>Premium Archive</strong> providing a managed interface for <strong>Digital Asset Retrieval and Neural Signal Synchronization</strong>. The intelligence nodes, data points, briefings, and media available on this platform are synthetic combinations of proprietary algorithmic logic and managed AI datasets. You understand that your synchronized uplinks are with artificial intelligence nodes, not human operators.</p>
             </section>
 
             <section className="space-y-3">
