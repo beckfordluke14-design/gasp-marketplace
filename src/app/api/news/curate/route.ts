@@ -44,16 +44,17 @@ async function getSniperTargets(personaName: string) {
 async function synthesizeReport(persona: any, rawNews: any) {
     try {
         const prompt = `
-            YOU ARE ${persona.name}. VIBE: ${persona.vibe}. ROLE: Syndicate Intelligence Node.
-            MISSION: Provide a high-IQ tactical briefing based on current news.
-            Connect the data to your specialized niche or the Syndicate terminal.
+            ROLE: Syndicate Intelligence Analyst representing ${persona.name}. 
+            MISSION: Provide a high-status tactical briefing based on the following news.
+            VIBE: Strategic, Authoritative, Professional.
             
-            NEWS SOURCE: ${rawNews.title} - ${rawNews.description}
+            NEWS SOURCE: ${rawNews.title}
+            NEWS CONTEXT: ${rawNews.description}
             
-            FORMAT (JSON):
+            OUTPUT (JSON ONLY):
             {
-              "title": "[STATUS_TYPE] Short Punchy Headline",
-              "content": "2-3 paragraphs of expert strategic analysis. Sound authoritative.",
+              "title": "[Briefing] Short Tactical Headline",
+              "content": "2-3 paragraphs of expert strategic analysis. Sound professional and institutional.",
               "heat": "High" | "Critical" | "Standard"
             }
         `;
@@ -62,18 +63,38 @@ async function synthesizeReport(persona: any, rawNews: any) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }]}],
-                generationConfig: { responseMimeType: 'application/json' }
+                contents: [{ parts: [{ text: prompt }]}]
             })
         });
         
-        const data = await res.json();
+        let data = await res.json();
         
-        if (!data.candidates || data.candidates.length === 0) {
-            throw new Error(`Gemini synthesis failed for ${persona.name}`);
+        // 🔄 HYDRA FAILOVER: If Gemini fails (Safety/400), pivot to OpenRouter Llama-3
+        if (!data.candidates || data.candidates.length === 0 || res.status !== 200) {
+            console.log(`[Hydra] Pivot to Llama-3 for ${persona.name}...`);
+            const orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "model": "meta-llama/llama-3-70b-instruct",
+                    "messages": [{"role": "system", "content": prompt}]
+                })
+            });
+            const orData = await orRes.json();
+            const rawText = orData.choices[0].message.content;
+            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) return null;
+            return { ...JSON.parse(jsonMatch[0]), personaId: persona.id };
         }
 
-        const result = JSON.parse(data.candidates[0].content.parts[0].text);
+        const rawText = data.candidates[0].content.parts[0].text;
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("No JSON found in response");
+        
+        const result = JSON.parse(jsonMatch[0]);
         return { ...result, personaId: persona.id };
     } catch (e) {
         console.error(`Neural Synthesis Err: ${persona.name}`, e);
@@ -85,51 +106,57 @@ export async function GET() {
     try {
         console.log('[Syndicate] ⚡ INITIATING MASS-INGRESS PULSE...');
         
-        // 🔱 DYNAMIC ROSTER: Processing all participants for maximum SEO coverage
+        // 🔱 TOTAL HYDRA: Processing all participants for maximum saturation
         const { rows: dbPersonas } = await db.query(`
-            SELECT id, name, system_prompt as vibe 
-            FROM personas 
-            WHERE is_active = True
+            SELECT id, name, COALESCE(system_prompt, personality, 'Seductive baddie') as vibe 
+            FROM personas
         `);
         
         const roster = dbPersonas; 
+        console.log(`[Syndicate] 🔱 DYNAMIC ROSTER PULSE: Found ${roster?.length || 0} participants.`);
         
         if (!roster || roster.length === 0) {
+            console.log('[Syndicate] 🚨 ROSTER IS EMPTY IN DB.');
             return NextResponse.json({ success: false, error: 'No active personas found' });
         }
         
-        // 1. Parallel Intelligence Ingress
-        const newsGathering = roster.map(async (p) => {
-            const items = await getSniperTargets(p.name);
-            return { persona: p, news: items[0] }; // Take the top result
-        });
-        
-        const intelligencePackages = await Promise.all(newsGathering);
-        const validPackages = intelligencePackages.filter(pkg => pkg.news);
-
-        // 2. Parallel Neural Synthesis
-        const synthesisTasks = validPackages.map(pkg => synthesizeReport(pkg.persona, pkg.news));
-        const allReports = await Promise.all(synthesisTasks);
-        const reports = allReports.filter((r): r is any => r !== null);
-
-        // 3. Sovereign Dispatch: High-Velocity Feed Update
+        // 🌊 SERIAL WAVE PROTOCOL: Processing 125+ personas in batches of 10 for total stability
         const results = [];
-        for (const report of reports) {
-            try {
-                // Drop directly into the PUBLIC FEED for SEO indexing
-                const { rows } = await db.query(`
-                    INSERT INTO posts (persona_id, content_type, caption, content, is_vault, is_gallery, meta)
-                    VALUES ($1, 'text', $2, $3, false, false, $4)
-                    RETURNING id
-                `, [
-                    report.personaId,
-                    report.title,
-                    report.content,
-                    JSON.stringify({ heat: report.heat, type: 'brave_ingress', created_at: new Date().toISOString() })
-                ]);
-                results.push({ id: rows[0].id });
-            } catch (err) {
-                console.error(`Sovereign Dispatch Failure for ${report.personaId}`);
+        const BATCH_SIZE = 10;
+        
+        for (let i = 0; i < roster.length; i += BATCH_SIZE) {
+            const batch = roster.slice(i, i + BATCH_SIZE);
+            console.log(`[Syndicate] 🌊 Processing Wave ${i / BATCH_SIZE + 1}...`);
+            
+            const batchGathering = await Promise.all(batch.map(async (p) => {
+                const items = await getSniperTargets(p.name);
+                return { persona: p, news: items[0] };
+            }));
+            
+            const validBatch = batchGathering.filter(pkg => pkg.news);
+            const batchSynthesis = await Promise.all(validBatch.map(pkg => synthesizeReport(pkg.persona, pkg.news)));
+            const batchReports = batchSynthesis.filter((r): r is any => r !== null);
+            
+            for (const report of batchReports) {
+                try {
+                    // 🛡️ SOVEREIGN SANITIZATION: Prevent name crashes (Malia R., etc)
+                    const sanitizedId = String(report.personaId).replace(/[^a-zA-Z0-9-]/g, '-');
+                    
+                    const { rows } = await db.query(`
+                        INSERT INTO posts (persona_id, content_type, caption, content, is_vault, is_gallery, meta)
+                        VALUES ($1, 'text', $2, $3, false, false, $4)
+                        RETURNING id
+                    `, [
+                        sanitizedId,
+                        report.title,
+                        report.content,
+                        JSON.stringify({ heat: report.heat, type: 'brave_ingress', created_at: new Date().toISOString() })
+                    ]);
+                    results.push({ id: rows[0].id });
+                    console.log(`[Success] Briefing Deployed for ${sanitizedId}`);
+                } catch (err: any) {
+                    console.error(`Sovereign Dispatch Failure: ${err.message}`);
+                }
             }
         }
 

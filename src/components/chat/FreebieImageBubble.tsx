@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Gift, X, ZoomIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProfileAvatar from '../profile/ProfileAvatar';
+import BrandingOverlay from '../ui/BrandingOverlay';
 
 interface FreebieImageBubbleProps {
   imageUrl:     string;
@@ -107,16 +108,14 @@ export default function FreebieImageBubble({
                 className="rounded-3xl object-contain max-w-[95vw] max-h-[85vh] shadow-[0_0_60px_rgba(255,0,255,0.2)] select-none pointer-events-none"
               />
               
-              {/* 🛡️ SOVEREIGN WATERMARK */}
-              <div className="absolute inset-x-0 bottom-8 flex justify-center pointer-events-none select-none opacity-50 group-hover/media:opacity-70 transition-opacity">
-                 <span className="text-[14px] md:text-[18px] font-black uppercase tracking-[0.6em] text-white italic drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] font-syncopate">
-                    GASP.FUN
-                 </span>
-              </div>
+              {/* 🛡️ SOVEREIGN WATERMARK SYSTEM (Internal Only) */}
+              {!imageUrl.includes('http') || imageUrl.includes('asset.gasp.fun') || !imageUrl.includes('.') ? (
+                <BrandingOverlay showRepeating={true} className="opacity-80" />
+              ) : null}
 
               {/* 🛡️ ANTI-DOWNLOAD MESH */}
               <div 
-                className="absolute inset-0 z-10" 
+                className="absolute inset-0 z-30" 
                 onContextMenu={(e) => e.preventDefault()}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -125,7 +124,7 @@ export default function FreebieImageBubble({
               />
 
               {scale > 1 && (
-                <div className="absolute top-4 right-4 px-3 py-1 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full text-[8px] text-[#ffea00] font-black uppercase tracking-widest z-20">
+                <div className="absolute top-4 right-4 px-3 py-1 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full text-[8px] text-[#ffea00] font-black uppercase tracking-widest z-40">
                    active zoom • tap to reset
                 </div>
               )}

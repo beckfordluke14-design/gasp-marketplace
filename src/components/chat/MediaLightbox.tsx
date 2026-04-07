@@ -159,41 +159,14 @@ export default function MediaLightbox({
                     className="rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] object-contain max-w-[95vw] max-h-[80vh] select-none pointer-events-none border border-white/10"
                   />
 
-                  {/* 🛡️ REPEATING BRAND WATERMARK (Leaked Marketing Engine) */}
-                  <div className="absolute inset-0 pointer-events-none overflow-hidden mix-blend-overlay opacity-60 z-20">
-                      {/* Giant Central Watermark */}
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-35deg] opacity-[0.15] select-none text-center">
-                          <span className="text-[4rem] md:text-[6rem] font-black italic tracking-[0.1em] text-white whitespace-nowrap drop-shadow-2xl">
-                              FOUND ON GASP.FUN
-                          </span>
-                      </div>
-                      
-                      {/* Micro Grid */}
-                      <div className="absolute inset-0 grid grid-cols-3 grid-rows-8 opacity-[0.2]">
-                          {Array.from({ length: 24 }).map((_, i) => (
-                              <div key={i} className="flex items-center justify-center p-4">
-                                  <span className="text-[12px] md:text-sm font-black uppercase tracking-widest -rotate-12 text-white drop-shadow-lg">
-                                      found on gasp.fun
-                                  </span>
-                              </div>
-                          ))}
-                      </div>
-                  </div>
-
-                  {/* VISIBLE BADGE FOR SHARING */}
-                  <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 z-30 pointer-events-none opacity-80">
-                      <div className="px-5 py-3 bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl">
-                          <span className="text-[12px] font-black uppercase tracking-[0.2em] text-white/70 italic">
-                              Found on <span className="text-[#00f0ff]">gasp.fun</span>
-                          </span>
-                      </div>
-                  </div>
-
-                  <BrandingOverlay className="opacity-40" />
+                  {/* 🛡️ SOVEREIGN WATERMARK SYSTEM (Internal Only) */}
+                  {(!currentItem?.url.includes('http') || currentItem?.url.includes('asset.gasp.fun')) && (
+                    <BrandingOverlay showRepeating={true} className="opacity-80" />
+                  )}
 
                   {/* 🛡️ ANTI-DOWNLOAD MESH */}
                   <div 
-                    className="absolute inset-0 z-10" 
+                    className="absolute inset-0 z-30" 
                     onContextMenu={(e) => e.preventDefault()}
                   />
                </motion.div>

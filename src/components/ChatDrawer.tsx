@@ -13,6 +13,7 @@ import { useUser } from './providers/UserProvider';
 import ProfileAvatar from './profile/ProfileAvatar';
 import FreebieImageBubble from './chat/FreebieImageBubble';
 import MediaLightbox from './chat/MediaLightbox';
+import BrandingOverlay from './ui/BrandingOverlay';
 import { getPersonaDailyState, type PersonaDailyState } from '@/lib/masterRandomizer';
 import { COST_VAULT_UNLOCK, COST_PREMIUM_VAULT_UNLOCK } from '@/lib/economy/constants';
 
@@ -739,6 +740,11 @@ export default function ChatDrawer({
                             unoptimized
                             className={`object-cover transition-all ${item.is_vault && !item.is_unlocked ? 'blur-2xl scale-110 opacity-50' : 'opacity-100'}`}
                           />
+                        )}
+
+                        {/* 🛡️ ARCHIVE WATERMARK (Only for unlocked/clear assets) */}
+                        {(!item.is_vault || item.is_unlocked) && (
+                           <BrandingOverlay showRepeating={true} className="opacity-40 group-hover:opacity-100 transition-opacity duration-500" />
                         )}
 
                         {/* Lock overlay */}
