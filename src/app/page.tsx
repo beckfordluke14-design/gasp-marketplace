@@ -63,23 +63,31 @@ function MarketplaceContent() {
           const jsonActive = await resActive.json();
           
           const mergedSet = new Map();
-          if (jsonActive.success) {
-             jsonActive.personas.forEach((p: any) => mergedSet.set(String(p.id), {
-               ...p,
-               image: proxyImg(p.seed_image_url || p.image),
-             }));
+          
+          // 🛡️ STEP 1: Add all Active Personas from the Database
+          if (jsonActive.success && jsonActive.personas) {
+             jsonActive.personas.forEach((p: any) => {
+                const sId = String(p.id);
+                mergedSet.set(sId, {
+                   ...p,
+                   id: sId,
+                   image: proxyImg(p.seed_image_url || p.image)
+                });
+             });
           }
+
+          // 🛡️ STEP 2: Hydrate with data from the Feed (Catch any missing nodes)
           if (jsonFeed.success && jsonFeed.posts) {
              jsonFeed.posts.forEach((p: any) => {
                 if (p.personas) {
-                   const pid = String(p.persona_id);
-                   const existing = mergedSet.get(pid) || {};
-                   mergedSet.set(pid, {
-                      ...existing,
-                      ...p.personas,
-                      id: pid,
-                      image: proxyImg(p.personas.seed_image_url || existing.image || p.personas.image)
-                   });
+                   const sId = String(p.persona_id);
+                   if (!mergedSet.has(sId)) {
+                      mergedSet.set(sId, {
+                         ...p.personas,
+                         id: sId,
+                         image: proxyImg(p.personas.seed_image_url || p.personas.image)
+                      });
+                   }
                 }
              });
           }

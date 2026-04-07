@@ -3,29 +3,18 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const showAll = searchParams.get('all') === 'true';
-
+export async function GET() {
   try {
-    // 🛡️ SOVEREIGN QUERY: Pulling directly from Railway Postgres
-    let queryText = `
-      SELECT id, name, city, country, flag, age, skin_tone, vibe, syndicate_zone, seed_image_url, is_active, status, system_prompt, created_at
-      FROM personas
-    `;
-    
-    if (!showAll) {
-      queryText += " WHERE is_active = true";
-    }
-    
-    queryText += " ORDER BY created_at DESC";
+    // 🛡️ SYNDICATE UNLOCKED: Fetch every single persona managed in the admin (No 'is_active' filter)
+    const { rows: dbPersonas } = await db.query(`
+        SELECT * FROM personas 
+        ORDER BY id DESC
+    `);
 
-    const { rows: personas } = await db.query(queryText);
-
-    // 🧬 INFINITE HUMAN ENGINE: Sanitize technical prompts and randomizing vibes
-    const cleanPersonas = personas.map(p => {
+    // 🧬 HUMANIZATION PROTOCOL: Ensure everyone has a high-status human status
+    const cleanPersonas = (dbPersonas || []).map((p: any) => {
         const technicalPrompts = ['HAIR', 'LACE', 'STYLE', 'PROMPT', 'SYNDICATE', 'SYNCING'];
-        const isTechnical = technicalPrompts.some(term => p.status?.toUpperCase().includes(term));
+        const isTechnical = technicalPrompts.some(term => (p.status || '').toUpperCase().includes(term));
         
         if (!p.status || isTechnical || p.status === 'ONLINE NOW') {
             const humanVibes = [
