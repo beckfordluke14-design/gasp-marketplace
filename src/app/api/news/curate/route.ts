@@ -42,41 +42,61 @@ async function getSniperTargets(personaName: string) {
 
 /** 🧬 NEURAL SYNTHESIS: Generate unique persona-driven report */
 async function synthesizeReport(persona: any, rawNews: any) {
-    const prompt = `
-        YOU ARE ${persona.name}. VIBE: ${persona.vibe}. ROLE: Syndicate Intelligence Node.
-        MISSION: Provide a high-IQ tactical briefing based on current news.
-        Connect the data to your specialized niche or the Syndicate terminal.
-        
-        NEWS SOURCE: ${rawNews.title} - ${rawNews.description}
-        
-        FORMAT (JSON):
-        {
-          "title": "[STATUS_TYPE] Short Punchy Headline",
-          "content": "2-3 paragraphs of expert strategic analysis. Sound authoritative.",
-          "heat": "High" | "Critical" | "Standard"
-        }
-    `;
+    try {
+        const prompt = `
+            YOU ARE ${persona.name}. VIBE: ${persona.vibe}. ROLE: Syndicate Intelligence Node.
+            MISSION: Provide a high-IQ tactical briefing based on current news.
+            Connect the data to your specialized niche or the Syndicate terminal.
+            
+            NEWS SOURCE: ${rawNews.title} - ${rawNews.description}
+            
+            FORMAT (JSON):
+            {
+              "title": "[STATUS_TYPE] Short Punchy Headline",
+              "content": "2-3 paragraphs of expert strategic analysis. Sound authoritative.",
+              "heat": "High" | "Critical" | "Standard"
+            }
+        `;
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }]}],
-            generationConfig: { responseMimeType: 'application/json' }
-        })
-    });
-    
-    const data = await res.json();
-    const result = JSON.parse(data.candidates[0].content.parts[0].text);
-    return { ...result, personaId: persona.id };
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }]}],
+                generationConfig: { responseMimeType: 'application/json' }
+            })
+        });
+        
+        const data = await res.json();
+        
+        if (!data.candidates || data.candidates.length === 0) {
+            throw new Error(`Gemini synthesis failed for ${persona.name}`);
+        }
+
+        const result = JSON.parse(data.candidates[0].content.parts[0].text);
+        return { ...result, personaId: persona.id };
+    } catch (e) {
+        console.error(`Neural Synthesis Err: ${persona.name}`, e);
+        return null;
+    }
 }
 
 export async function GET() {
     try {
         console.log('[Syndicate] ⚡ INITIATING MASS-INGRESS PULSE...');
         
-        // 🔱 UNCAGED ROSTER: Processing all participants for maximum SEO coverage
-        const roster = initialProfiles; 
+        // 🔱 DYNAMIC ROSTER: Processing all participants for maximum SEO coverage
+        const { rows: dbPersonas } = await db.query(`
+            SELECT id, name, system_prompt as vibe 
+            FROM personas 
+            WHERE is_active = True
+        `);
+        
+        const roster = dbPersonas; 
+        
+        if (!roster || roster.length === 0) {
+            return NextResponse.json({ success: false, error: 'No active personas found' });
+        }
         
         // 1. Parallel Intelligence Ingress
         const newsGathering = roster.map(async (p) => {
@@ -88,7 +108,7 @@ export async function GET() {
         const validPackages = intelligencePackages.filter(pkg => pkg.news);
 
         // 2. Parallel Neural Synthesis
-        const synthesisTasks = validPackages.map(pkg => synthesizeReport(pkg.persona, pkg.news));
+        const synthesisTasks = validPackages.map(pkg => synthesizeReport(pkg, pkg.news));
         const reports = await Promise.all(synthesisTasks);
 
         // 3. Sovereign Dispatch: High-Velocity Feed Update
@@ -112,7 +132,7 @@ export async function GET() {
             }
         }
 
-        console.log(`[Syndicate] ✅ MASS-INGRESS COMPLETE: ${results.length} Briefings Deployed.`);
+        console.log(`[Syndicate] ✅ DYNAMIC MASS-INGRESS COMPLETE: ${results.length} Briefings Deployed.`);
         return NextResponse.json({ success: true, count: results.length });
 
     } catch (e: any) {
