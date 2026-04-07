@@ -142,7 +142,7 @@ function GlobalFeedItem({
       onClick={handleInteraction}
     >
        {/* CONTENT LAYER */}
-       <div className={`z-0 bg-transparent flex items-center justify-center ${postType === 'text' ? 'relative w-full' : 'absolute inset-0'}`}>
+       <div className={`z-0 bg-transparent flex items-center justify-center ${postType === 'text' || postType === 'link' ? 'relative w-full h-full' : 'absolute inset-0'}`}>
           {postType === 'video' ? (
              <>
                 <video src={proxyImg(postUrl)} autoPlay loop muted playsInline className={`absolute inset-0 w-full h-full object-cover blur-3xl opacity-30 ${broadcast.is_locked ? 'blur-[100px]' : ''}`} />
@@ -174,51 +174,55 @@ function GlobalFeedItem({
                 )}
              </>
           ) : (
-             <div className="relative z-10 w-full h-full flex items-center justify-center p-6 md:p-12">
-                <div className="max-w-xl w-full p-8 md:p-10 rounded-[2.5rem] bg-black/60 border border-white/5 backdrop-blur-3xl relative overflow-hidden shadow-2xl">
-                   <div className="absolute top-0 left-6 px-4 py-1 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-b-lg">
-                      {isSpanish ? 'Tendencia // Alta-Calor' : 'Trending // High-Heat'}
+             <>
+                 <img src={proxyImg(profile.image)} alt="" className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-30" />
+                 <BrandingOverlay profileName={profile.name} />
+                 <div className="relative z-10 w-full h-full flex items-center justify-center p-6 md:p-12">
+                   <div className="max-w-xl w-full p-8 md:p-10 rounded-[2.5rem] bg-black/60 border border-white/5 backdrop-blur-3xl relative overflow-hidden shadow-2xl">
+                    <div className="absolute top-0 left-6 px-4 py-1 bg-[#ffea00] text-black text-[9px] font-black uppercase italic rounded-b-lg">
+                       {isSpanish ? 'Tendencia // Alta-Calor' : 'Trending // High-Heat'}
+                    </div>
+                    <div className="space-y-6 pt-4">
+                       <div className="flex items-center gap-3" onClick={() => onSelectProfile(profile.id)}>
+                          <img src={proxyImg(profile.image)} className="w-12 h-12 rounded-full border border-[#00f0ff]/40" alt="" />
+                          <div className="flex flex-col">
+                             <span className="text-sm font-black text-white uppercase italic">{profile.name}, {profile.age}</span>
+                             <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">
+                                {isSpanish ? 'Cuenta Verificada' : 'Verified Account'}
+                             </span>
+                          </div>
+                       </div>
+                       <p className="text-xs md:text-sm font-bold text-white uppercase tracking-tight leading-relaxed font-mono whitespace-pre-wrap">{postText}</p>
+                       {postType === 'link' && postUrl && (
+                          <div className="flex flex-col gap-2 pt-2">
+                              <a 
+                                 href={postUrl} 
+                                 target="_blank" 
+                                 rel="noopener noreferrer"
+                                 onClick={(e) => e.stopPropagation()}
+                                 className="w-full py-3 bg-[#00f0ff]/10 border border-[#00f0ff]/40 text-[#00f0ff] text-[10px] font-black uppercase tracking-widest text-center hover:bg-[#00f0ff] hover:text-black transition-all"
+                              >
+                                 {isSpanish ? 'Leer Inteligencia de la Fuente' : 'Read Source Intelligence'}
+                              </a>
+                          </div>
+                       )}
+                       <div className="flex items-center justify-between pt-4 border-t border-white/5 opacity-50">
+                          <span className="text-[6px] font-black text-white/40 uppercase tracking-widest">
+                             {isSpanish ? 'Verificado // Solo Miembros' : 'Verified // Member Access Only'}
+                          </span>
+                          <span className="text-[6px] font-black text-[#ffea00] uppercase tracking-widest italic">
+                             {isSpanish ? 'Encontrado en GASP.FUN' : 'Found on GASP.FUN'}
+                          </span>
+                       </div>
+                    </div>
                    </div>
-                   <div className="space-y-6 pt-4">
-                      <div className="flex items-center gap-3" onClick={() => onSelectProfile(profile.id)}>
-                         <img src={proxyImg(profile.image)} className="w-12 h-12 rounded-full border border-[#00f0ff]/40" alt="" />
-                         <div className="flex flex-col">
-                            <span className="text-sm font-black text-white uppercase italic">{profile.name}, {profile.age}</span>
-                            <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">
-                               {isSpanish ? 'Cuenta Verificada' : 'Verified Account'}
-                            </span>
-                         </div>
-                      </div>
-                      <p className="text-xs md:text-sm font-bold text-white uppercase tracking-tight leading-relaxed font-mono whitespace-pre-wrap">{postText}</p>
-                      {postType === 'link' && postUrl && (
-                         <div className="flex flex-col gap-2 pt-2">
-                             <a 
-                                href={postUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                className="w-full py-3 bg-[#00f0ff]/10 border border-[#00f0ff]/40 text-[#00f0ff] text-[10px] font-black uppercase tracking-widest text-center hover:bg-[#00f0ff] hover:text-black transition-all"
-                             >
-                                {isSpanish ? 'Leer Inteligencia de la Fuente' : 'Read Source Intelligence'}
-                             </a>
-                         </div>
-                      )}
-                      <div className="flex items-center justify-between pt-4 border-t border-white/5 opacity-50">
-                         <span className="text-[6px] font-black text-white/40 uppercase tracking-widest">
-                            {isSpanish ? 'Verificado // Solo Miembros' : 'Verified // Member Access Only'}
-                         </span>
-                         <span className="text-[6px] font-black text-[#ffea00] uppercase tracking-widest italic">
-                            {isSpanish ? 'Encontrado en GASP.FUN' : 'Found on GASP.FUN'}
-                         </span>
-                      </div>
-                   </div>
-                </div>
-             </div>
+                 </div>
+             </>
           )}
        </div>
 
        {/* INTERACTION OVERLAY (HIDDEN FOR TEXT OR WEATHER LOGS) */}
-       {postType !== 'text' && (
+       {postType !== 'text' && postType !== 'link' && (
           <div className="relative z-10 w-full h-full flex flex-col justify-end p-8 md:p-16 pb-32 pointer-events-none">
               <div className="space-y-6 pointer-events-auto">
                   <div className="flex items-center gap-4">

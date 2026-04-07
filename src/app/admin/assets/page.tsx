@@ -265,18 +265,38 @@ export default function AssetAdmin() {
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
 
-                                {personaPosts.filter(p => !isDead(p.content_url) && p.content_type !== 'text').map(p => (
+                                {personaPosts.map(p => (
                                     <div key={p.id} style={{ background: '#080808', padding: '12px', borderRadius: '15px', border: actionId === p.id ? '1px solid #00f0ff' : '1px solid #111' }}>
                                         <div style={{ display: 'flex', gap: '12px' }}>
-                                            <div onClick={() => setPreviewUrl(p.content_url)} style={{ width: '60px', height: '60px', background: '#111', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, cursor: 'pointer' }}>
+                                            <div onClick={() => p.content_url && setPreviewUrl(p.content_url)} style={{ width: '60px', height: '60px', background: '#111', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 {p.content_url?.toLowerCase().endsWith('.mp4') ? (
                                                     <video src={p.content_url} muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                ) : (
+                                                ) : p.content_url ? (
                                                     <img src={p.content_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <div style={{ padding: '5px', textAlign: 'center', color: '#444', fontSize: '8px', fontWeight: 'bold' }}>
+                                                        {p.content_type?.toUpperCase() || 'TEXT'}
+                                                    </div>
                                                 )}
                                             </div>
 
                                             <div style={{ flex: 1, overflow: 'hidden' }}>
+                                                {/* 🏷️ CONTENT PROTOCOL LABEL */}
+                                                <div style={{ marginBottom: '6px' }}>
+                                                    <span style={{ 
+                                                       background: p.content_type === 'link' ? '#00f0ff' : p.content_type === 'video' ? '#ff00ff' : '#222',
+                                                       color: p.content_type === 'link' || p.content_type === 'video' ? '#000' : '#888',
+                                                       padding: '2px 6px',
+                                                       borderRadius: '4px',
+                                                       fontSize: '8px',
+                                                       fontWeight: 'black',
+                                                       marginRight: '6px'
+                                                    }}>
+                                                       {p.content_type?.toUpperCase() || 'TEXT'}
+                                                    </span>
+                                                    <span style={{ fontSize: '8px', color: '#444', fontStyle: 'italic' }}>{new Date(p.created_at).toLocaleDateString()}</span>
+                                                </div>
+
                                                 <div style={{ display: 'flex', gap: '4px', marginBottom: '8px', flexWrap: 'wrap' }}>
                                                     <button onClick={() => runAction({ id: p.id, action: 'toggle_featured' })} style={{ background: p.is_featured ? '#ffea00' : '#111', color: p.is_featured ? '#000' : '#888', border: 'none', padding: '6px', fontWeight: 'bold' }}>{p.is_featured ? '★ PINNED' : '☆ PIN'}</button>
                                                     <button onClick={() => runAction({ id: p.id, action: 'toggle_gallery' })} style={{ background: p.is_gallery ? '#ff6fff' : '#111', color: p.is_gallery ? '#000' : '#444', border: 'none', padding: '6px' }}>GALLERY</button>
