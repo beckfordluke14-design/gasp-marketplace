@@ -10,18 +10,18 @@ const syncopate = Syncopate({ subsets: ["latin"], weight: ['400', '700'], variab
 const SITE_URL = 'https://gasp.fun';
 
 export const metadata: Metadata = {
-  title: 'GASP Archive // Premium Terminal',
-  description: 'The official @GaspArchive. High-status digital media archive and premium creator feed.',
+  title: 'GASP // Premium Terminal',
+  description: 'The official @Gasp. High-status digital media archive and premium creator feed.',
   manifest: "/manifest.json",
   metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'GASP Archive // Premier Media Terminal',
-    description: "The official GaspArchive. Exclusive digital media archive and premium creator feed.",
+    title: 'GASP // Premier Media Terminal',
+    description: "The official Gasp. Exclusive digital media archive and premium creator feed.",
     url: SITE_URL,
-    siteName: 'GaspArchive',
+    siteName: 'Gasp',
     images: [
       {
         url: '/og-image.png',
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GASP Archive',
-    description: "The official @GaspArchive. High-status creator content, exclusive dispatches, and $GASPai member rewards.",
+    title: 'GASP',
+    description: "The official @Gasp. High-status creator content, exclusive dispatches, and $GASPai member rewards.",
     images: ['/og-image.png'],
   },
   icons: {
