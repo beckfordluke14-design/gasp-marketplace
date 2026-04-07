@@ -128,17 +128,31 @@ export default function NewsHub() {
               >
                  <div className="grid grid-cols-1 md:grid-cols-12">
                     {/* Visual Node */}
-                    <div className="md:col-span-5 h-56 md:h-auto relative overflow-hidden">
+                    <div 
+                      onClick={() => {
+                        if (post.content_type === 'link') {
+                          window.open(post.content_url, '_blank');
+                        } else {
+                          router.push(`/news/${personaId}/${post.id}`);
+                        }
+                      }}
+                      className="md:col-span-5 h-56 md:h-auto relative overflow-hidden cursor-pointer bg-white/5"
+                    >
                        <Image 
                          src={post.image_url || profile.image} 
                          alt="" 
                          fill 
-                         className="object-cover group-hover:scale-110 transition-transform duration-700 grayscale-[40%] group-hover:grayscale-0" 
+                         className={`object-cover group-hover:scale-110 transition-transform duration-700 ${!post.image_url ? 'opacity-40 blur-sm scale-125' : 'grayscale-[40%] group-hover:grayscale-0'}`} 
                        />
+                       {!post.image_url && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                             <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40 drop-shadow-md">Verified Hub Log</span>
+                          </div>
+                       )}
                        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-transparent to-transparent hidden md:block" />
                        <div className="absolute top-4 left-4">
                           <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest backdrop-blur-xl border border-white/10 ${post.meta?.heat === 'Critical' ? 'bg-red-500/80 text-white' : 'bg-black/80 text-[#00f0ff]'}`}>
-                             {post.meta?.heat || 'Standard'} Priority
+                             {post.meta?.heat || 'Standard'} Intel
                           </div>
                        </div>
                     </div>
@@ -160,20 +174,24 @@ export default function NewsHub() {
                           "{post.content}"
                        </p>
 
-                       <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
+                       <div className="mt-auto pt-6 border-t border-white/5 space-y-4">
                           <button 
                             onClick={() => router.push(`/?profile=${personaId}`)}
-                            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#00f0ff] hover:text-white transition-colors group/link"
+                            className="w-full flex items-center justify-between px-6 h-12 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] group shadow-[0_10px_30px_rgba(255,255,255,0.1)] hover:bg-[#00f0ff] transition-all"
                           >
-                             Chat with {profile.name} <ChevronRight size={14} className="group-hover/link:translate-x-1 transition-transform" />
+                             <span>Loved the read? Chat with {profile.name}</span>
+                             <MessageSquare size={16} fill="black" />
                           </button>
                           
-                          <div className="flex items-center gap-3">
-                             <button className="text-white/20 hover:text-white transition-colors"><Share2 size={16} /></button>
-                             <div className="h-4 w-px bg-white/10" />
-                             <button className="text-white/20 hover:text-white transition-colors flex items-center gap-2 text-[9px] font-bold">
-                                <MessageSquare size={14} /> 12
-                             </button>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                               <button className="text-white/20 hover:text-white transition-colors"><Share2 size={16} /></button>
+                               <div className="h-4 w-px bg-white/10" />
+                               <button className="text-white/20 hover:text-white transition-colors flex items-center gap-2 text-[9px] font-bold">
+                                  <MessageSquare size={14} /> 12
+                               </button>
+                            </div>
+                            <span className="text-[8px] font-black uppercase text-[#00f0ff]/40 tracking-widest italic">Syndicate Exclusive</span>
                           </div>
                        </div>
                     </div>
