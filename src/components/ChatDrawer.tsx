@@ -504,7 +504,7 @@ export default function ChatDrawer({
                    </div>
                    <div className="flex flex-col gap-0.5">
                       <div className="flex items-center gap-2">
-                         <h3 className="text-lg font-black uppercase text-white leading-none tracking-tighter italic">{profile?.name || ''}</h3>
+                         <h3 className="text-lg font-black uppercase text-white leading-none tracking-tighter italic">{profile?.name || ''}, {profile?.age || ''}</h3>
                          <div className="px-2 py-0.5 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-full flex items-center gap-1">
                             <div className="w-1 h-1 bg-[#00f0ff] rounded-full animate-pulse shadow-[0_0_5px_#00f0ff]" />
                             <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest">ACTIVE</span>

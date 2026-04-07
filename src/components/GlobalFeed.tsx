@@ -183,7 +183,7 @@ function GlobalFeedItem({
                       <div className="flex items-center gap-3" onClick={() => onSelectProfile(profile.id)}>
                          <img src={proxyImg(profile.image)} className="w-12 h-12 rounded-full border border-[#00f0ff]/40" alt="" />
                          <div className="flex flex-col">
-                            <span className="text-sm font-black text-white uppercase italic">{profile.name}</span>
+                            <span className="text-sm font-black text-white uppercase italic">{profile.name}, {profile.age}</span>
                             <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">
                                {isSpanish ? 'Cuenta Verificada' : 'Verified Account'}
                             </span>

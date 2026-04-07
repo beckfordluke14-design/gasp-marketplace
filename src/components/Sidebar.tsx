@@ -192,7 +192,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
         <div className="flex-1 min-w-0 pt-0.5">
            <div className="flex items-center justify-between gap-2 mb-1">
               <span className={`text-[12px] font-black uppercase italic tracking-tighter transition-colors ${unread > 0 ? 'text-[#ff00ff]' : 'text-white'}`}>
-                <GlitchText text={getProfileName(profileItem)} />
+                <GlitchText text={`${getProfileName(profileItem)}, ${profileItem.age}`} />
               </span>
               
               {/* Follow Button */}
