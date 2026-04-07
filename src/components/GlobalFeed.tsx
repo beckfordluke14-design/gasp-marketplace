@@ -16,6 +16,7 @@ interface GlobalFeedProps {
   profiles?: any[];
   deadIds?: Set<string>;
   setDeadIds?: (ids: any) => void;
+  followingIds?: string[];
 }
 
 function GlobalFeedItem({ 
@@ -256,7 +257,7 @@ function GlobalFeedItem({
   );
 }
 
-export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFeedProps) {
+export default function GlobalFeed({ onSelectProfile, profiles = [], followingIds = [] }: GlobalFeedProps) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
@@ -279,7 +280,26 @@ export default function GlobalFeed({ onSelectProfile, profiles = [] }: GlobalFee
 
         const remaining = allItems
             .filter((m: any) => !featuredIds.has(m.id))
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+            .sort((a, b) => {
+               // 1. Followed Status Check
+               const isAFollowed = followingIds.includes(a.persona_id);
+               const isBFollowed = followingIds.includes(b.persona_id);
+               if (isAFollowed && !isBFollowed) return -1;
+               if (!isAFollowed && isBFollowed) return 1;
+
+               // 2. Persona Freshness Score (Boost Newest Drops)
+               const profileA = profiles.find(p => p.id === a.persona_id);
+               const profileB = profiles.find(p => p.id === b.persona_id);
+               const pDateA = new Date(profileA?.created_at || 0).getTime();
+               const pDateB = new Date(profileB?.created_at || 0).getTime();
+               
+               if (Math.abs(pDateA - pDateB) > 3600000) { // If difference > 1h
+                   return pDateB - pDateA; 
+               }
+
+               // 3. Post Recency (Tie-breaker)
+               return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            });
 
         setItems([...featured, ...remaining]);
       } catch (e) {

@@ -210,14 +210,14 @@ function MarketplaceContent() {
 
   const [randomSeed] = useState(() => Math.random());
   
-  const randomizedProfiles = useMemo(() => {
-    // 🎲 RANDOM SHUFFLE
+  const sortedProfiles = useMemo(() => {
+    // 🧬 LATEST-FIRST SYNC: Sorting by creation date for high-velocity drops
     return [...refinedProfiles].sort((a, b) => {
-       const scoreA = (parseInt(String(a.id).substring(0, 8), 16) || 0) * randomSeed;
-       const scoreB = (parseInt(String(b.id).substring(0, 8), 16) || 0) * randomSeed;
-       return scoreB - scoreA; 
+       const dateA = new Date(a.created_at || 0).getTime();
+       const dateB = new Date(b.created_at || 0).getTime();
+       return dateB - dateA;
     });
-  }, [refinedProfiles, randomSeed]);
+  }, [refinedProfiles]);
 
   const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
 
@@ -248,7 +248,7 @@ function MarketplaceContent() {
            <Sidebar 
               onSelectProfile={handleSelectProfile} 
               selectedProfileId={selectedProfileId} 
-              profiles={randomizedProfiles} 
+              profiles={sortedProfiles} 
               view={sidebarView}
               onSetView={handleSetSidebarView}
               onOpenTopUp={() => setIsTopUpOpen(true)}
@@ -261,7 +261,7 @@ function MarketplaceContent() {
                deadIds={deadIds} 
                setDeadIds={setDeadIds} 
                onOpenMenu={() => setShowProfileList(true)} 
-               profiles={randomizedProfiles} 
+               profiles={sortedProfiles} 
                onSelectProfile={handleSelectProfile} 
             />
            
@@ -309,9 +309,10 @@ function MarketplaceContent() {
                    <div className="w-full flex-1 flex flex-col pt-32 md:pt-40">
                       <GlobalFeed 
                          onSelectProfile={handleSelectProfile} 
-                         profiles={randomizedProfiles}
+                         profiles={sortedProfiles}
                          deadIds={deadIds}
                          setDeadIds={setDeadIds}
+                         followingIds={following}
                       />
                    </div>
                  )}
@@ -333,7 +334,7 @@ function MarketplaceContent() {
         {/* 3rd Column Discovery Center */}
         <RightSidebar 
           onSelectProfile={handleSelectProfile} 
-          profiles={randomizedProfiles} 
+          profiles={sortedProfiles} 
           deadIds={deadIds} 
           setDeadIds={setDeadIds} 
         />
@@ -376,7 +377,7 @@ function MarketplaceContent() {
                          onMinimize={() => setMinimizedIds([...minimizedIds, sId])} 
                          onOpenTopUp={() => setIsTopUpOpen(true)}
                          followingIds={following}
-                         profiles={randomizedProfiles}
+                         profiles={sortedProfiles}
                          unreadCounts={unreadCounts}
                          onSelectProfile={handleSelectProfile}
                        />
@@ -418,7 +419,7 @@ function MarketplaceContent() {
                     <Sidebar 
                        onSelectProfile={(id) => { handleSelectProfile(id); setShowProfileList(false); }} 
                        selectedProfileId={selectedProfileId} 
-                       profiles={randomizedProfiles} 
+                       profiles={sortedProfiles} 
                        view={sidebarView}
                        onSetView={handleSetSidebarView}
                     />
@@ -432,7 +433,7 @@ function MarketplaceContent() {
             onSelectChat={() => setShowProfileList(true)} 
             onSelectProfile={handleSelectProfile}
             followingIds={following}
-            profiles={randomizedProfiles}
+            profiles={sortedProfiles}
             unreadCounts={unreadCounts}
             isOpen={openChatIds.length > 0}
             onClose={() => setOpenChatIds([])}

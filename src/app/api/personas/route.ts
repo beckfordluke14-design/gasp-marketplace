@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   try {
     // 🛡️ SOVEREIGN QUERY: Pulling directly from Railway Postgres
     let queryText = `
-      SELECT id, name, city, country, flag, age, skin_tone, vibe, syndicate_zone, seed_image_url, is_active, status, system_prompt 
+      SELECT id, name, city, country, flag, age, skin_tone, vibe, syndicate_zone, seed_image_url, is_active, status, system_prompt, created_at
       FROM personas
     `;
     
