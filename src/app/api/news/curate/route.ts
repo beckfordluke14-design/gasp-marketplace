@@ -108,8 +108,9 @@ export async function GET() {
         const validPackages = intelligencePackages.filter(pkg => pkg.news);
 
         // 2. Parallel Neural Synthesis
+        const synthesisTasks = validPackages.map(pkg => synthesizeReport(pkg.persona, pkg.news));
         const allReports = await Promise.all(synthesisTasks);
-        const reports = allReports.filter(r => r !== null) as any[];
+        const reports = allReports.filter((r): r is any => r !== null);
 
         // 3. Sovereign Dispatch: High-Velocity Feed Update
         const results = [];
