@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RadioReceiver, Activity, Globe, Share2, CornerRightUp, Zap, Clock, Loader2 } from 'lucide-react';
+import { RadioReceiver, Activity, Globe, Share2, CornerRightUp, Zap, Clock, Loader2, MessageSquare } from 'lucide-react';
 
 interface NewsPost {
     id: string;
@@ -10,6 +10,8 @@ interface NewsPost {
     persona_name: string;
     persona_image: string;
     persona_city: string;
+    persona_age: string | number;
+    content_url: string;
     title: string;
     content: string;
     created_at: string;
@@ -93,53 +95,64 @@ export default function NewsFeed() {
                             {/* Persona Header */}
                             <div className="flex items-center gap-4 mb-8">
                                 <div className="w-14 h-14 rounded-2xl overflow-hidden border border-white/10 shrink-0 bg-white/5">
-                                    <img src={item.persona_image || '/placeholder.jpg'} alt="" className="w-full h-full object-cover transition-all duration-500" />
+                                    {(item.persona_image || '').toLowerCase().endsWith('.mp4') ? (
+                                        <video src={item.persona_image} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                                    ) : (
+                                        <img src={item.persona_image || '/placeholder.jpg'} alt="" className="w-full h-full object-cover transition-all duration-500" />
+                                    )}
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-[11px] font-black uppercase text-white tracking-widest leading-none">{item.persona_name}</span>
-                                    <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-[0.2em] italic mt-1">Verified {item.persona_city || 'Sovereign'} Analyst</span>
+                                    <span className="text-[11px] font-black uppercase text-white tracking-widest leading-none">
+                                        {item.persona_name}{item.persona_age ? `, ${item.persona_age}` : ''}
+                                    </span>
                                 </div>
                                 <div className="ml-auto text-white/20 text-[8px] font-black uppercase tracking-widest italic font-mono">
                                     {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} UTC
                                 </div>
                             </div>
 
-                            {/* Note Handshake */}
-                            <div className="flex items-center gap-3 mb-6 bg-[#ff00ff]/5 p-3 rounded-xl border border-[#ff00ff]/10 w-fit">
-                                <div className="w-1.5 h-1.5 rounded-full bg-[#ff00ff] animate-pulse shadow-[0_0_8px_#ff00ff]" />
-                                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#ff00ff] italic">
-                                    {item.persona_name.split(' ')[0]} {isSpanish ? 'COMPARTIÓ UNA NOTA' : 'SHARED A NOTE'}
-                                </span>
-                            </div>
-
-                            <h2 className="text-3xl md:text-5xl font-syncopate font-black italic uppercase tracking-tighter mb-8 leading-tight group-hover:text-white transition-colors text-white/90">
-                                {item.title}
-                            </h2>
+                            <a 
+                                href={item.content_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="block group/title"
+                            >
+                                <h2 className="text-3xl md:text-5xl font-syncopate font-black italic uppercase tracking-tighter mb-8 leading-tight group-hover/title:text-[#00f0ff] transition-colors text-white/90">
+                                    {item.title}
+                                </h2>
+                            </a>
                             
-                            <p className="text-white/60 text-sm md:text-lg font-outfit leading-relaxed mb-10 max-w-3xl border-l-2 border-[#ff00ff]/20 pl-8 py-2">
+                            <p className="text-white/60 text-sm md:text-lg font-outfit leading-relaxed mb-10 max-w-3xl border-l border-white/10 pl-8 py-2">
                                 {item.content}
                             </p>
 
-                            <button 
-                                onClick={() => {
-                                    const profileObj = {
-                                        id: item.persona_id,
-                                        name: item.persona_name,
-                                        image: item.persona_image,
-                                        city: item.meta?.city || 'Global Hub',
-                                    };
-                                    (window as any).onSelectProfile?.(item.persona_id, '', profileObj);
-                                }}
-                                className="w-full h-20 rounded-2xl bg-[#ff00ff]/5 border border-[#ff00ff]/20 flex items-center justify-center gap-4 hover:bg-[#ff00ff]/10 hover:border-[#ff00ff]/40 transition-all group/btn shadow-xl active:scale-[0.98]"
-                            >
-                                <Zap size={18} className="text-[#ff00ff] animate-pulse" />
-                                <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] text-white italic font-syncopate">
-                                    {isSpanish 
-                                        ? `CHAT CON ${item.persona_name.split(' ')[0].toUpperCase()} PARA ANÁLISIS PROFUNDO` 
-                                        : `CHAT W/ ${item.persona_name.split(' ')[0].toUpperCase()} FOR DEEP-DIVE ANALYSIS`}
-                                </span>
-                                <CornerRightUp size={18} className="text-[#ff00ff] group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
-                            </button>
+                            <div className="flex flex-col md:flex-row gap-4">
+                                <a 
+                                    href={item.content_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex-1 h-16 rounded-xl bg-white text-black flex items-center justify-center gap-3 hover:bg-[#00f0ff] transition-all font-syncopate font-black italic text-[10px] tracking-widest uppercase shadow-xl active:scale-[0.98]"
+                                >
+                                    {isSpanish ? 'LEER FUENTE' : 'READ SOURCE'}
+                                    <CornerRightUp size={16} />
+                                </a>
+
+                                <button 
+                                    onClick={() => {
+                                        const profileObj = {
+                                            id: item.persona_id,
+                                            name: item.persona_name,
+                                            image: item.persona_image,
+                                            city: item.persona_city || 'Global Hub',
+                                        };
+                                        (window as any).onSelectProfile?.(item.persona_id, '', profileObj);
+                                    }}
+                                    className="px-8 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3 hover:bg-white/10 transition-all text-white/40 hover:text-white uppercase text-[9px] font-black tracking-widest italic"
+                                >
+                                    <MessageSquare size={16} />
+                                    {isSpanish ? `CHAT CON ${item.persona_name.split(' ')[0]}` : `CHAT W/ ${item.persona_name.split(' ')[0]}`}
+                                </button>
+                            </div>
 
                             <div className="flex items-center justify-between mt-12 pt-8 border-t border-white/5">
                                 <div className="flex items-center gap-3 px-6 py-2 bg-black rounded-full border border-white/5 text-[8px] font-black text-white/30 uppercase tracking-[0.3em] italic">

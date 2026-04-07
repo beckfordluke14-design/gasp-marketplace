@@ -15,6 +15,7 @@ export async function GET() {
                 p.content_url,
                 p.content_type,
                 pers.name as persona_name,
+                pers.age as persona_age,
                 pers.seed_image_url as persona_image,
                 pers.city as persona_city
             FROM posts p

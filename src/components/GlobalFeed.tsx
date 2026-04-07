@@ -184,7 +184,13 @@ function GlobalFeedItem({
                     </div>
                     <div className="space-y-6 pt-4">
                        <div className="flex items-center gap-3" onClick={() => onSelectProfile(profile.id)}>
-                          <img src={proxyImg(profile.image)} className="w-12 h-12 rounded-full border border-[#00f0ff]/40" alt="" />
+                          <div className="w-12 h-12 rounded-full border border-[#00f0ff]/40 overflow-hidden bg-white/5">
+                             {(profile.image || '').toLowerCase().endsWith('.mp4') ? (
+                                <video src={profile.image} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                             ) : (
+                                <img src={proxyImg(profile.image)} className="w-full h-full object-cover" alt="" />
+                             )}
+                          </div>
                           <div className="flex flex-col">
                              <span className="text-sm font-black text-white uppercase italic">{profile.name}, {profile.age}</span>
                              <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">
@@ -282,20 +288,48 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], followingId
   useEffect(() => {
     async function load() {
       try {
-        const mediaRes = await fetch('/api/admin/feed?limit=200&type=media');
+        // 🛰️ UNLOCKING DEPTH: Opening the floodgates to 1000+ items
+        const mediaRes = await fetch('/api/admin/feed?limit=1000&type=media');
         const mediaData = await mediaRes.json();
         const media = mediaData.posts || [];
         
-        // 🛡️ REVENUE-GRADE FILTER: Remove DELETED artifacts from public view
+        // 🛡️ REVENUE-GRADE FILTER: Remove DELETED artifacts
         const activeMedia = media.filter((m: any) => !(m.caption || m.content || '').includes('DELETED'));
 
-        const allItems = [...activeMedia];
+        // 🧬 NEURAL SYNTHESIS: Ensure EVERY persona in the sidebar has a slot in the feed
+        const postsByPersona = new Map();
+        activeMedia.forEach((m: any) => {
+            if (!postsByPersona.has(String(m.persona_id))) {
+                postsByPersona.set(String(m.persona_id), []);
+            }
+            postsByPersona.get(String(m.persona_id)).push(m);
+        });
+
+        const synthesizedItems: any[] = [];
         
-        // 🛰️ FEATURED EXTRACTION: Priority nodes always top
-        const featured = allItems.filter((m: any) => m.is_featured);
+        // Ensure every known profile has a presence
+        profiles.forEach(p => {
+            const pId = String(p.id);
+            const personaPosts = postsByPersona.get(pId) || [];
+            if (personaPosts.length > 0) {
+                synthesizedItems.push(...personaPosts);
+            } else {
+                // Return a "Status" post for empty personas so they show up in the feed
+                synthesizedItems.push({
+                    id: `status-${pId}`,
+                    persona_id: pId,
+                    content_type: 'text',
+                    caption: p.status || 'Verified & Online.',
+                    created_at: new Date().toISOString()
+                });
+            }
+        });
+
+        // 🛰️ FEATURED EXTRACTION & PRIORITY SORT
+        const featured = synthesizedItems.filter((m: any) => m.is_featured);
         const featuredIds = new Set(featured.map(f => f.id));
 
-        const remaining = allItems
+        const remaining = synthesizedItems
             .filter((m: any) => !featuredIds.has(m.id))
             .sort((a, b) => {
                // 1. Followed Status Check
@@ -304,17 +338,7 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], followingId
                if (isAFollowed && !isBFollowed) return -1;
                if (!isAFollowed && isBFollowed) return 1;
 
-               // 2. Persona Freshness Score (Boost Newest Drops)
-               const profileA = profiles.find(p => p.id === a.persona_id);
-               const profileB = profiles.find(p => p.id === b.persona_id);
-               const pDateA = new Date(profileA?.created_at || 0).getTime();
-               const pDateB = new Date(profileB?.created_at || 0).getTime();
-               
-               if (Math.abs(pDateA - pDateB) > 3600000) { // If difference > 1h
-                   return pDateB - pDateA; 
-               }
-
-               // 3. Post Recency (Tie-breaker)
+               // 2. Post Recency (Tie-breaker)
                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
             });
 
@@ -326,7 +350,7 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], followingId
       }
     }
     load();
-  }, []);
+  }, [profiles, followingIds]);
 
   if (loading) return (
      <div className="w-full h-full flex flex-col items-center justify-center bg-black gap-6">
