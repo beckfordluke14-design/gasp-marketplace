@@ -93,10 +93,10 @@ export async function burnCredits(userId: string, amount: number, type: string =
   try {
      const { rows } = await db.query(`
         UPDATE profiles 
-        SET credits = CASE WHEN credits >= $1 THEN credits - $1 ELSE credits END, 
+        SET credit_balance = CASE WHEN credit_balance >= $1 THEN credit_balance - $1 ELSE credit_balance END, 
             updated_at = NOW() 
         WHERE id = $2
-        RETURNING credits as credit_balance
+        RETURNING credit_balance
      `, [amount, userId]);
      
      if (rows.length > 0) {
