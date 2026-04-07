@@ -284,7 +284,7 @@ function MarketplaceContent() {
                      onClick={() => setActiveTab('reports')} 
                      className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'reports' ? 'bg-[#ff00ff] text-white shadow-[0_0_20px_rgba(255,0,255,0.6)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
                   >
-                     {isSpanish ? 'Reportes' : 'Reports'}
+                     {isSpanish ? 'Noticias' : 'News'}
                   </button>
                   <button 
                      onClick={() => setActiveTab('protocol')} 

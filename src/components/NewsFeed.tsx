@@ -9,6 +9,7 @@ interface NewsPost {
     persona_id: string;
     persona_name: string;
     persona_image: string;
+    persona_city: string;
     title: string;
     content: string;
     created_at: string;
@@ -35,7 +36,7 @@ export default function NewsFeed() {
             const res = await fetch('/api/news');
             if (res.ok) {
                 const data = await res.json();
-                setNews(Array.isArray(data) ? data : []);
+                setNews(Array.isArray(data.posts) ? data.posts : []);
             }
         } catch (e) {
             console.error('News load fail', e);
@@ -59,15 +60,15 @@ export default function NewsFeed() {
 
     return (
         <div className="h-full w-full overflow-y-auto overflow-x-hidden flex flex-col pt-20 px-4 md:px-8 pb-32 no-scrollbar">
-             <header className="mb-12 text-center md:text-left flex flex-col md:flex-row md:items-end md:justify-between gap-6 px-4">
+            <header className="mb-12 text-center md:text-left flex flex-col md:flex-row md:items-end md:justify-between gap-6 px-4">
                 <div className="flex flex-col">
                    <h1 className="text-4xl md:text-5xl font-outfit font-black italic uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#ff00ff] to-white/50 flex items-center gap-4">
-                       GASP <span className="text-white">{isSpanish ? 'REPORTES' : 'REPORTS'}</span>
+                       GASP <span className="text-white">{isSpanish ? 'NOTICIAS' : 'NEWS'}</span>
                    </h1>
                    <div className="flex items-center gap-2 mt-2">
                        <RadioReceiver size={12} className="animate-pulse text-[#ff00ff]" /> 
                        <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.4em] italic">
-                            {isSpanish ? 'Transmisiones de Inteligencia Global' : 'Global Intel Transmissions'}
+                            {isSpanish ? 'Inteligencia de Mercado Global' : 'Global Market Intelligence'}
                        </p>
                    </div>
                 </div>
@@ -91,12 +92,12 @@ export default function NewsFeed() {
                         >
                             {/* Persona Header */}
                             <div className="flex items-center gap-4 mb-8">
-                                <div className="w-14 h-14 rounded-2xl overflow-hidden border border-white/10 shrink-0">
-                                    <img src={item.persona_image || '/placeholder.jpg'} alt="" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                                <div className="w-14 h-14 rounded-2xl overflow-hidden border border-white/10 shrink-0 bg-white/5">
+                                    <img src={item.persona_image || '/placeholder.jpg'} alt="" className="w-full h-full object-cover transition-all duration-500" />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-[11px] font-black uppercase text-white tracking-widest">{item.persona_name}</span>
-                                    <span className="text-[8px] font-black text-[#ffea00] uppercase tracking-[0.2em] italic">Verified {item.meta?.city || 'Sovereign'} Analyst</span>
+                                    <span className="text-[11px] font-black uppercase text-white tracking-widest leading-none">{item.persona_name}</span>
+                                    <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-[0.2em] italic mt-1">Verified {item.persona_city || 'Sovereign'} Analyst</span>
                                 </div>
                                 <div className="ml-auto text-white/20 text-[8px] font-black uppercase tracking-widest italic font-mono">
                                     {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} UTC
