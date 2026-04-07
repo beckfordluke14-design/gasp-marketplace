@@ -165,13 +165,11 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     // This avoids importing @solana/web3.js which breaks client-side Next.js bundles.
     const handleDirectPayment = () => {
         const url = buildSolanaPayUrl();
-        // On desktop: try opening in a new tab so the wallet extension can intercept
-        // On mobile: navigate directly to trigger the wallet app deep link
-        if (isMobile) {
-            window.location.href = url;
-        } else {
-            window.open(url, '_blank');
-        }
+        // 🛰️ UNIVERSAL PROTOCOL HANDSHAKE:
+        // By using location.href directly, we trigger the installed wallet's
+        // protocol handler (extension or app) without creating blank tabs
+        // or navigating away if the wallet intercepts the call.
+        window.location.href = url;
     };
 
     const handleSwitchToP2P = async () => {
@@ -227,7 +225,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             params.append('amount', cleanUsd.toFixed(6));
             params.append('spl-token', 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
         } else {
-            const cleanSol = (baseUsd / (solPrice || 79.19)) + dust;
+            const cleanSol = (baseUsd / resolvedSolPrice) + dust;
             params.append('amount', cleanSol.toFixed(9));
         }
 
@@ -241,12 +239,9 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
         
         const solPayUrl = `solana:${SYNDICATE_TREASURY_SOL}?${params.toString()}`;
         
-        // 🧬 MOBILE BREAKOUT: Wrap in Phantom/Solflare universal link if on mobile
-        // This ensures it breaks out of in-app browsers (Twitter/Instagram/Discord)
-        if (isMobile) {
-            return `https://phantom.app/ul/v1/browse/${encodeURIComponent(solPayUrl)}?ref=${encodeURIComponent(window.location.host)}`;
-        }
-        
+        // 🧬 SOVEREIGN HANDOFF:
+        // Use the native solana: scheme to allow ANY installed wallet (Phantom/Solflare/Backpack)
+        // to detect and handle the transaction automatically.
         return solPayUrl;
     };
 
