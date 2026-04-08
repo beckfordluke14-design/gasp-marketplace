@@ -13,7 +13,10 @@ export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   
   // Public Paths
-  if (url.pathname === '/login' || url.pathname === '/' || url.pathname.startsWith('/api') || url.pathname.startsWith('/news')) {
+  const publicPaths = ['/login', '/', '/api', '/news', '/terms', '/privacy', '/refunds', '/contact', '/how-to'];
+  const isPublic = publicPaths.some(p => url.pathname.startsWith(p));
+
+  if (isPublic) {
     if (isAuthed && url.pathname === '/login') {
        return NextResponse.redirect(new URL('/feed', req.url));
     }

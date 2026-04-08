@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RadioReceiver, Activity, Globe, Share2, CornerRightUp, Zap, Clock, Loader2, MessageSquare } from 'lucide-react';
+import Link from "next/link";
 
 interface NewsPost {
     id: string;
@@ -196,6 +197,18 @@ export default function NewsFeed() {
                         </motion.div>
                     ))
                 )}
+                {/* 🛡️ COMPLIANCE FOOTER */}
+                <div className="mt-20 py-12 border-t border-white/5 flex flex-col items-center gap-6">
+                    <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
+                        <Link href="/terms" className="hover:text-[#ff00ff] transition-colors">Terms</Link>
+                        <Link href="/privacy" className="hover:text-[#ff00ff] transition-colors">Privacy</Link>
+                        <Link href="/refunds" className="hover:text-[#ff00ff] transition-colors">Refunds</Link>
+                        <Link href="/contact" className="hover:text-[#ff00ff] transition-colors">Contact</Link>
+                    </div>
+                    <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white/10 italic">
+                        © 2026 Gasp Syndicate // Sovereign Intelligence Archive
+                    </span>
+                </div>
             </div>
         </div>
     );

@@ -526,11 +526,11 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 <span>{isSpanish ? 'Copiar Enlace de Invitación' : 'Copy Invite Link'}</span>
              </button>
              
-             <div className="flex items-center justify-center gap-4 text-[7px] font-black uppercase text-white/20 tracking-[0.2em] flex-wrap">
-                <Link href="/how-to" className="hover:text-white transition-colors">{isSpanish ? 'Cómo' : 'How-To'}</Link>
-                <Link href="/terms" className="hover:text-white transition-colors">{isSpanish ? 'Términos' : 'Terms'}</Link>
-                <Link href="/privacy" className="hover:text-white transition-colors">{isSpanish ? 'Privacidad' : 'Privacy'}</Link>
-                <Link href="/refunds" className="hover:text-white transition-colors">{isSpanish ? 'Reembolsos' : 'Refunds'}</Link>
+             <div className="flex items-center justify-center gap-4 text-[10px] font-black uppercase text-white/40 tracking-[0.2em] flex-wrap mt-2">
+                <Link href="/how-to" className="hover:text-[#00f0ff] transition-colors">{isSpanish ? 'Cómo' : 'How-To'}</Link>
+                <Link href="/terms" className="hover:text-[#00f0ff] transition-colors">{isSpanish ? 'Términos' : 'Terms'}</Link>
+                <Link href="/privacy" className="hover:text-[#00f0ff] transition-colors">{isSpanish ? 'Privacidad' : 'Privacy'}</Link>
+                <Link href="/refunds" className="hover:text-[#00f0ff] transition-colors">{isSpanish ? 'Reembolsos' : 'Refunds'}</Link>
              </div>
              
              <span className="text-[8px] text-white/10 uppercase font-black italic text-center">Version 1.8 // Premium Archive</span>

@@ -349,8 +349,21 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], followingId
                onSelectProfile={onSelectProfile}
              />
           </div>
-        );
+       );
       })}
+
+      {/* 🛡️ COMPLIANCE FOOTER (Final Snap Item) */}
+      <div className="snap-start snap-always py-40 flex flex-col items-center gap-6 shrink-0">
+          <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
+              <Link href="/terms" className="hover:text-[#00f0ff] transition-colors">Terms</Link>
+              <Link href="/privacy" className="hover:text-[#00f0ff] transition-colors">Privacy</Link>
+              <Link href="/refunds" className="hover:text-[#00f0ff] transition-colors">Refunds</Link>
+              <Link href="/contact" className="hover:text-[#00f0ff] transition-colors">Contact</Link>
+          </div>
+          <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white/10 italic text-center px-6">
+              © 2026 Gasp Syndicate // Sovereign Intelligence Archive
+          </span>
+      </div>
     </div>
   );
 }
