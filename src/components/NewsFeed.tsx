@@ -95,7 +95,7 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
     );
 
     return (
-        <div className="h-full w-full overflow-y-auto overflow-x-hidden flex flex-col pt-20 px-4 md:px-8 pb-32 no-scrollbar">
+        <div className="h-full w-full overflow-y-auto overflow-x-hidden flex flex-col pt-44 md:pt-20 px-4 md:px-8 pb-32 no-scrollbar">
             
             {/* 🎭 INTEL THEATER (OVERLAY) */}
             <AnimatePresence>
@@ -104,7 +104,7 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[1000] flex items-center justify-center p-0 md:p-12"
+                        className="fixed inset-0 z-[1000] flex items-start md:items-center justify-center p-0 pt-44 md:p-12"
                     >
                         <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl" onClick={() => setSelectedNews(null)} />
                         
