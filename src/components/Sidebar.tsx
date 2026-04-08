@@ -309,18 +309,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
             {/* 🛰️ MARKET PULSE: WeatherX & Polymarket Sentiment Indicator */}
             {!isMobileUI && <MarketPulseTerminal />}
 
-            {/* 🧬 VIP TOP-UP ACCESS: Prioritized at top for members */}
-            <div className="px-6 mb-8 mt-4">
-               <button 
-                  onClick={() => onOpenTopUp ? onOpenTopUp() : (window as any).openTopUp?.()}
-                  className="w-full h-14 bg-[#00f0ff] text-black rounded-2xl flex items-center justify-center gap-3 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(0,240,255,0.2)] active:scale-95 border-none"
-               >
-                  <div className="w-7 h-7 rounded-full bg-black/10 flex items-center justify-center">
-                     <Zap size={14} className="text-black group-hover:scale-110 transition-transform" />
-                  </div>
-                  <span className="text-[9px] font-black uppercase tracking-widest italic font-syncopate">{isSpanish ? 'AÑADIR CRÉDITOS' : 'ADD CREDITS'}</span>
-               </button>
-            </div>
+
 
             {/* 🛰️ INTELLIGENCE BRIEF (HIDDEN PER USER REQUEST) */}
             {/*
@@ -417,18 +406,24 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                         <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">{isSpanish ? 'Créditos de Terminal' : 'Terminal Credits'}</span>
                     </div>
                  </div>
-                  <button 
-                    onClick={() => onOpenTopUp ? onOpenTopUp() : (window as any).openTopUp?.()}
-                    className="flex-1 w-full py-3 bg-[#00f0ff] text-black text-[9px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-white transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)]"
-                  >
-                    {isSpanish ? 'AÑADIR CRÉDITOS' : 'ADD CREDITS'}
-                  </button>
+
               </div>
            </div>
         )}
       </div>
 
       <div className="p-4 border-t border-white/5 bg-transparent z-10 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
+          {/* 🧬 GLOBAL TOP-UP: Always available */}
+          <div className="px-1 mb-2">
+             <button 
+                onClick={() => onOpenTopUp ? onOpenTopUp() : (window as any).openTopUp?.()}
+                className="w-full h-12 bg-[#00f0ff] text-black rounded-xl flex items-center justify-center gap-3 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(0,240,255,0.2)] active:scale-95 border-none"
+             >
+                <Zap size={14} className="text-black group-hover:scale-125 transition-transform" />
+                <span className="text-[9px] font-black uppercase tracking-widest italic font-syncopate">{isSpanish ? 'AÑADIR CRÉDITOS' : 'ADD CREDITS'}</span>
+             </button>
+          </div>
+
           <div className="hidden lg:flex flex-col gap-6">
               <div className="bg-white/5 border border-white/10 rounded-[1.5rem] p-3 space-y-3 relative overflow-hidden group transition-all">
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#00f0ff]/5 to-transparent pointer-events-none" />

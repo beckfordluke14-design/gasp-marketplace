@@ -153,7 +153,7 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
                                             rel="noopener noreferrer"
                                             className="px-4 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-[8px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all backdrop-blur-md"
                                         >
-                                            Access Direct Node →
+                                            View Full Intel →
                                         </a>
                                     </div>
                                     
@@ -286,23 +286,34 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
                                     </div>
                                 </div>
 
-                                <button onClick={() => setSelectedNews(item)} className="block text-left w-full outline-none mb-6">
+                                <Link 
+                                    href={`/archive/${item.id}`}
+                                    onClick={(e) => { 
+                                        e.preventDefault(); 
+                                        setSelectedNews(item); 
+                                    }} 
+                                    className="block text-left w-full outline-none mb-6"
+                                >
                                     <h2 className="text-3xl md:text-5xl font-syncopate font-black italic uppercase tracking-tighter mb-4 leading-tight hover:text-[#00f0ff] transition-colors text-white/90">
                                         {item.title}
                                     </h2>
-                                </button>
+                                </Link>
                                 
                                 <p className="text-white/60 text-sm md:text-lg font-outfit leading-relaxed mb-10 max-w-3xl border-l border-white/10 pl-8 py-2">
                                     {item.content}
                                 </p>
 
                                 <div className="flex flex-col md:flex-row gap-4 relative z-20">
-                                    <button 
-                                        onClick={(e) => { e.stopPropagation(); setSelectedNews(item); }}
+                                     <Link 
+                                        href={`/archive/${item.id}`}
+                                        onClick={(e) => { 
+                                            e.preventDefault(); 
+                                            setSelectedNews(item); 
+                                        }}
                                         className="flex-1 h-16 rounded-xl bg-white text-black flex items-center justify-center gap-3 hover:bg-[#00f0ff] transition-all font-syncopate font-black italic text-[10px] tracking-widest uppercase shadow-xl"
                                     >
                                         READ INTEL <Zap size={16} />
-                                    </button>
+                                    </Link>
 
                                     <button 
                                         onClick={(e) => { 
