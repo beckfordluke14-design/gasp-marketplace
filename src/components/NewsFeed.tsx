@@ -31,7 +31,7 @@ interface NewsPost {
 export default function NewsFeed() {
     const [news, setNews] = useState<NewsPost[]>([]);
     const [loading, setLoading] = useState(true);
-
+    const [selectedNews, setSelectedNews] = useState<NewsPost | null>(null);
     const [isSpanish, setIsSpanish] = useState(false);
 
     useEffect(() => {
@@ -84,7 +84,6 @@ export default function NewsFeed() {
         </div>
     );
 
-    const [selectedNews, setSelectedNews] = useState<NewsPost | null>(null);
 
     return (
         <div className="h-full w-full overflow-y-auto overflow-x-hidden flex flex-col pt-20 px-4 md:px-8 pb-32 no-scrollbar">
