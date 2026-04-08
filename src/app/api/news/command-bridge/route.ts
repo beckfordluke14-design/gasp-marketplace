@@ -58,6 +58,11 @@ export async function GET(req: Request) {
                 console.error('[Bridge] Neural Failover to Title-Only');
             }
             
+            // 🛡️ PRE-EMPTIVE LOCK: Mark as tweeted immediately upon dispatch 
+            // to ensure no other pulse can pick it up if the bot takes a moment.
+            const metadata = { ...(art.metadata || {}), tweeted: true, tweeted_at: new Date().toISOString() };
+            await db.query('UPDATE posts SET metadata = $1 WHERE id = $2', [JSON.stringify(metadata), art.id]);
+
             return NextResponse.json({ 
                 type: 'POST_ARTICLE', 
                 id: art.id,
