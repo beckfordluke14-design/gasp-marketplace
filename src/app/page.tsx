@@ -284,36 +284,61 @@ function MarketplaceContent() {
             />
            
            <div className="flex-1 flex flex-col relative bg-transparent">
-              {/* DOMINANT TAB NAVIGATION: FLOATING & TRANSPARENT */}
-              <div className="absolute top-20 md:top-24 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2 p-1.5 bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all duration-500 hover:border-white/20">
-                  <button 
-                     onClick={() => setActiveTab('feed')} 
-                     className={`px-6 py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 relative ${activeTab === 'feed' ? 'text-white bg-white/10 shadow-[0_0_20px_rgba(255,255,255,0.1)] border border-white/20' : 'text-white/40 hover:text-white hover:bg-white/5 border border-transparent'}`}
-                  >
-                     {isSpanish ? 'Feed Global' : 'Global Feed'}
-                     {activeTab === 'feed' && <motion.div layoutId="tab-glow" className="absolute inset-0 rounded-xl bg-white/5 blur-md" />}
-                  </button>
-                  <button 
-                     onClick={() => setActiveTab('weather')} 
-                     className={`px-6 py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 relative ${activeTab === 'weather' ? 'text-[#00f0ff] bg-[#00f0ff]/10 shadow-[0_0_20px_rgba(0,240,255,0.2)] border border-[#00f0ff]/30' : 'text-white/40 hover:text-white hover:bg-white/5 border border-transparent'}`}
-                  >
-                     {isSpanish ? 'Clima X' : 'Weather X'}
-                     {activeTab === 'weather' && <motion.div layoutId="tab-glow" className="absolute inset-0 rounded-xl bg-[#00f0ff]/5 blur-md" />}
-                  </button>
-                  <button 
-                     onClick={() => setActiveTab('reports')} 
-                     className={`px-6 py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 relative ${activeTab === 'reports' ? 'text-[#ff00ff] bg-[#ff00ff]/10 shadow-[0_0_20px_rgba(255,0,255,0.2)] border border-[#ff00ff]/30' : 'text-white/40 hover:text-white hover:bg-white/5 border border-transparent'}`}
-                  >
-                     {isSpanish ? 'Noticias' : 'News'}
-                     {activeTab === 'reports' && <motion.div layoutId="tab-glow" className="absolute inset-0 rounded-xl bg-[#ff00ff]/5 blur-md" />}
-                  </button>
-                  <button 
-                     onClick={() => setActiveTab('protocol')} 
-                     className={`px-6 py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 relative ${activeTab === 'protocol' ? 'text-[#ffea00] bg-[#ffea00]/10 shadow-[0_0_20px_rgba(255,234,0,0.2)] border border-[#ffea00]/30' : 'text-white/40 hover:text-white hover:bg-white/5 border border-transparent'}`}
-                  >
-                     {isSpanish ? 'Protocolo' : 'Protocol'}
-                     {activeTab === 'protocol' && <motion.div layoutId="tab-glow" className="absolute inset-0 rounded-xl bg-[#ffea00]/5 blur-md" />}
-                  </button>
+              {/* 🛰️ SOVEREIGN NAVIGATION: GHOST GLASS PILL */}
+              <div className="sticky top-16 md:top-20 z-[100] flex justify-center w-full px-4 pointer-events-none mb-[-3.5rem]">
+                  <div className="flex items-center gap-1 md:gap-3 p-1.5 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all duration-500 w-fit max-w-full overflow-x-auto no-scrollbar">
+                      <button 
+                         onClick={() => setActiveTab('feed')} 
+                         className={`px-4 md:px-6 py-2 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 relative whitespace-nowrap ${activeTab === 'feed' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)] border border-white/10' : 'text-white/30 hover:text-white/60 hover:bg-white/5'}`}
+                      >
+                         <span className="relative z-10">{isSpanish ? 'Feed Global' : 'Global Feed'}</span>
+                         {activeTab === 'feed' && (
+                            <motion.div 
+                               layoutId="tab-glow" 
+                               className="absolute inset-0 rounded-full bg-white/5 shadow-[inset_0_0_15px_rgba(255,255,255,0.1)]" 
+                            />
+                         )}
+                      </button>
+                      
+                      <button 
+                         onClick={() => setActiveTab('reports')} 
+                         className={`px-4 md:px-6 py-2 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 relative whitespace-nowrap ${activeTab === 'reports' ? 'bg-[#ff00ff]/10 text-[#ff00ff] shadow-[0_0_20px_rgba(255,0,255,0.1)] border border-[#ff00ff]/20' : 'text-white/30 hover:text-[#ff00ff]/60 hover:bg-[#ff00ff]/5'}`}
+                      >
+                         <span className="relative z-10">{isSpanish ? 'Noticias' : 'News'}</span>
+                         {activeTab === 'reports' && (
+                            <motion.div 
+                               layoutId="tab-glow" 
+                               className="absolute inset-0 rounded-full bg-[#ff00ff]/5 shadow-[inset_0_0_15px_rgba(255,0,255,0.1)]" 
+                            />
+                         )}
+                      </button>
+
+                      <button 
+                         onClick={() => setActiveTab('weather')} 
+                         className={`px-4 md:px-6 py-2 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 relative whitespace-nowrap ${activeTab === 'weather' ? 'bg-[#00f0ff]/10 text-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.15)] border border-[#00f0ff]/20' : 'text-white/30 hover:text-[#00f0ff]/60 hover:bg-[#00f0ff]/5'}`}
+                      >
+                         <span className="relative z-10">{isSpanish ? 'Clima X' : 'Weather X'}</span>
+                         {activeTab === 'weather' && (
+                            <motion.div 
+                               layoutId="tab-glow" 
+                               className="absolute inset-0 rounded-full bg-[#00f0ff]/5 shadow-[inset_0_0_15px_rgba(0,240,255,0.1)]" 
+                            />
+                         )}
+                      </button>
+
+                      <button 
+                         onClick={() => setActiveTab('protocol')} 
+                         className={`px-4 md:px-6 py-2 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 relative whitespace-nowrap ${activeTab === 'protocol' ? 'bg-[#ffea00]/10 text-[#ffea00] shadow-[0_0_20px_rgba(255,234,0,0.15)] border border-[#ffea00]/20' : 'text-white/30 hover:text-[#ffea00]/60 hover:bg-[#ffea00]/5'}`}
+                      >
+                         <span className="relative z-10">{isSpanish ? 'Protocolo' : 'Protocol'}</span>
+                         {activeTab === 'protocol' && (
+                            <motion.div 
+                               layoutId="tab-glow" 
+                               className="absolute inset-0 rounded-full bg-[#ffea00]/5 shadow-[inset_0_0_15px_rgba(255,234,0,0.1)]" 
+                            />
+                         )}
+                      </button>
+                  </div>
               </div>
 
               {/* STORY TOGGLE PORTAL */}
@@ -327,31 +352,37 @@ function MarketplaceContent() {
               </div>
 
               <div className="flex-1 relative">
-                 {activeTab === 'feed' && (
-                   <div className="w-full flex-1 flex flex-col pt-32 md:pt-40">
-                      <GlobalFeed 
-                         onSelectProfile={handleSelectProfile} 
-                         profiles={sortedProfiles}
-                         deadIds={deadIds}
-                         setDeadIds={setDeadIds}
-                         followingIds={following}
-                      />
-                   </div>
-                 )}
-                 {activeTab === 'weather' && (
-                  <div className="w-full max-w-4xl mx-auto px-4 md:px-6 animate-in fade-in zoom-in duration-500">
-                     <WeatherFeed onOpenTopUp={() => setIsTopUpOpen(true)} />
-                  </div>
-                 )}
-                 {activeTab === 'reports' && (
-                     <NewsFeed />
-                 )}
-                 {activeTab === 'protocol' && (
-                     <ProtocolOverview />
-                 )}
+                 <div className="pt-28 md:pt-36">
+                    {activeTab === 'feed' && (
+                      <div className="w-full flex-1 flex flex-col animate-in fade-in zoom-in-95 duration-500">
+                         <GlobalFeed 
+                            onSelectProfile={handleSelectProfile} 
+                            profiles={sortedProfiles}
+                            deadIds={deadIds}
+                            setDeadIds={setDeadIds}
+                            followingIds={following}
+                         />
+                      </div>
+                    )}
+                    {activeTab === 'weather' && (
+                     <div className="w-full max-w-4xl mx-auto px-4 md:px-6 animate-in fade-in zoom-in-95 duration-500">
+                        <WeatherFeed onOpenTopUp={() => setIsTopUpOpen(true)} />
+                     </div>
+                    )}
+                    {activeTab === 'reports' && (
+                        <div className="animate-in fade-in zoom-in-95 duration-500">
+                           <NewsFeed />
+                        </div>
+                    )}
+                    {activeTab === 'protocol' && (
+                        <div className="animate-in fade-in zoom-in-95 duration-500">
+                           <ProtocolOverview />
+                        </div>
+                    )}
+                 </div>
               </div>
-           </div>
-        </div>
+            </div>
+          </div>
 
         {/* 3rd Column Discovery Center */}
         <RightSidebar 
