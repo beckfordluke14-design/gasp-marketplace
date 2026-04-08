@@ -40,11 +40,19 @@ async function getSniperTargets(personaName: string) {
         console.log(`[Syndicate] 🔍 SNIPER INGRESS: @${personaName} targeting "${query}"`);
         
         const braveRes = await fetch(`https://api.search.brave.com/res/v1/news/search?q=${encodeURIComponent(query)}&count=2`, {
-            headers: { 'X-Subscription-Token': BRAVE_API_KEY }
+            headers: { 'Accept': 'application/json', 'X-Subscription-Token': BRAVE_API_KEY }
         });
+
+        if (!braveRes.ok) {
+            const errorText = await braveRes.text();
+            console.error(`[Syndicate] 🚨 Brave Search API Error (${braveRes.status}): ${errorText}`);
+            return [];
+        }
+
         const braveData = await braveRes.json();
         return braveData.results || [];
-    } catch (e) {
+    } catch (e: any) {
+        console.error(`[Syndicate] 🚨 Sniper Fetch Exception: ${e.message}`);
         return [];
     }
 }
@@ -139,6 +147,11 @@ export async function GET(req: Request) {
 
         console.log('[Syndicate] ⚡ INITIATING MASS-INGRESS PULSE...');
 
+        if (!BRAVE_API_KEY) {
+            console.error('[Syndicate] 🚨 CRITICAL: BRAVE_API_KEY is missing from environment variables.');
+            return NextResponse.json({ success: false, error: 'Brave API Key Missing' }, { status: 500 });
+        }
+
         // 🛡️ COOLDOWN GUARD: Ensure we only pulse once every 60 minutes
         const { rows: lastSync } = await db.query(`
             SELECT created_at FROM posts 
@@ -179,10 +192,13 @@ export async function GET(req: Request) {
             const waveNum = i / BATCH_SIZE + 1;
             console.log(`[Syndicate] 🌊 WAVE ${waveNum}: Processing ${batch.length} nodes...`);
             
-            const batchGathering = await Promise.all(batch.map(async (p) => {
+            const batchGathering = [];
+            for (const p of batch) {
                 const items = await getSniperTargets(p.name);
-                return { persona: p, news: items[0] };
-            }));
+                batchGathering.push({ persona: p, news: items[0] });
+                // 🛡️ RATE LIMIT PROTECTION: 400ms delay between individual sniper pulses
+                await new Promise(r => setTimeout(r, 400));
+            }
             
             const validBatch = batchGathering.filter(pkg => pkg.news);
             console.log(`[Syndicate] 🛰️ WAVE ${waveNum} SNIPRE: ${validBatch.length}/${batch.length} valid intel packages.`);
