@@ -17,8 +17,12 @@ export interface VaultItem {
 
 export interface Broadcast {
   id: string;
-  type: 'image' | 'video' | 'text';
+  type: 'image' | 'video' | 'text' | 'link';
   content: string;
+  title?: string;
+  caption?: string;
+  content_url?: string;
+  media_url?: string;
   image_url?: string;
   video_url?: string;
   lock_price?: number;
@@ -26,6 +30,7 @@ export interface Broadcast {
   is_burner?: boolean;
   likes_count?: number;
   is_locked?: boolean;
+  metadata?: any;
   created_at: string;
 }
 

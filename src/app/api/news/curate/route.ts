@@ -27,8 +27,17 @@ const DEFAULT_KEYWORDS = ["Global Strategic Arbitrage", "Neural Signal Decay", "
 /** 🛰️ BRAVE SNIPRE: Fetch real-time niche intelligence */
 async function getSniperTargets(personaName: string) {
     try {
-        const keywords = PERSONA_NICHES[personaName] || DEFAULT_KEYWORDS;
+        // 🛡️ FUZZY MATCHING: Strip suffix (e.g., "Nova London" -> "Nova")
+        const firstName = personaName.split(' ')[0];
+        const keywords = PERSONA_NICHES[firstName] || PERSONA_NICHES[personaName] || [
+            "Solana DeFi news", 
+            "Crypto market alpha", 
+            "AI technology trends", 
+            "Solana ecosystem updates"
+        ];
+        
         const query = keywords[Math.floor(Math.random() * keywords.length)];
+        console.log(`[Syndicate] 🔍 SNIPER INGRESS: @${personaName} targeting "${query}"`);
         
         const braveRes = await fetch(`https://api.search.brave.com/res/v1/news/search?q=${encodeURIComponent(query)}&count=2`, {
             headers: { 'X-Subscription-Token': BRAVE_API_KEY }

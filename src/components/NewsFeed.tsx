@@ -111,6 +111,15 @@ export default function NewsFeed() {
                                 </div>
                             </div>
 
+                            {/* Activity Status */}
+                            <div className="flex items-center gap-3 mb-6 opacity-80">
+                                <div className="h-[1px] w-6 bg-gradient-to-r from-[#ff00ff] to-transparent" />
+                                <span className="text-[10px] font-black uppercase text-[#ff00ff] tracking-[0.3em] italic flex items-center gap-2">
+                                    <Share2 size={12} />
+                                    {isSpanish ? `${item.persona_name} DESPACHÓ UN BLURB DE GASP` : `${item.persona_name} DISPATCHED A GASP BLURB`}
+                                </span>
+                            </div>
+
                             <a 
                                 href={item.content_url} 
                                 target="_blank" 
