@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Outfit, Syncopate } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from '@/components/providers/UserProvider';
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 
 const inter = Inter({ subsets: ["latin"], weight: ['400', '700', '900'], variable: '--font-inter' });
 const outfit = Outfit({ subsets: ["latin"], weight: ['400', '700', '900'], variable: '--font-outfit' });
@@ -52,7 +53,6 @@ export const viewport: Viewport = {
 };
 
 import Providers from '@/components/providers/Providers';
-import Script from 'next/script';
 
 export default function RootLayout({
   children,
@@ -66,20 +66,7 @@ export default function RootLayout({
         <script src="https://terminal.jup.ag/main-v2.js" defer></script>
       </head>
       <body className="bg-black overflow-x-hidden antialiased selection:bg-[#ff00ff]/30 selection:text-white">
-        {/* 🛰️ GOOGLE INTELLIGENCE TAG */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-9DZHLCD1DN"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-9DZHLCD1DN');
-          `}
-        </Script>
-
+        <GoogleAnalytics />
         <Providers>
           {children}
         </Providers>
