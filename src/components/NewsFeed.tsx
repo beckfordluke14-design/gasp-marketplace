@@ -316,9 +316,9 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     whileInView={{ opacity: 1, scale: 1 }}
                                     viewport={{ once: true }}
-                                    className="relative h-[500px] w-full rounded-[4rem] overflow-hidden group/promo border border-[#ff00ff]/20"
+                                    className="relative h-[650px] md:h-[750px] w-full rounded-[4rem] overflow-hidden group/promo border border-[#ff00ff]/20"
                                 >
-                                    <img src={item.persona_image} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/promo:scale-110" />
+                                    <img src={item.persona_image} alt="" className="absolute inset-0 w-full h-full object-cover object-[center_15%] transition-transform duration-1000 group-hover/promo:scale-110" />
                                     <div className="absolute inset-0 bg-black/10" />
                                     
                                     <div className="absolute inset-x-8 bottom-8 md:inset-x-12 md:bottom-12 flex flex-col items-center text-center">
