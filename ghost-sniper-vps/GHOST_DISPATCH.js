@@ -55,38 +55,55 @@ async function pulse() {
                     console.log(`📥 Downloading assets: ${task.imageUrl}`);
                     await downloadFile(task.imageUrl, tempFile);
 
-                    // 🎨 WATERMARKING PROTOCOL (v8.0) - SHARP NEURAL BURN (WebP+ Support)
+                    // 🎨 WATERMARKING PROTOCOL (v11.0) - VIBRANT SYNDICATE BURN
                     try {
                         const sharp = require('sharp');
-                        console.log("💎 Applying High-Fidelity Neural Burn...");
+                        const fs = require('fs');
+                        console.log("💎 Applying High-Visibility Neural Burn...");
+                        
+                        const inputBuffer = fs.readFileSync(tempFile);
+                        const metadata = await sharp(inputBuffer).metadata();
+                        const w = metadata.width || 800;
+                        const h = metadata.height || 800;
                         
                         const text = "CHAT ON GASP.FUN";
+                        const fontSize = Math.floor(w / 15); // Refined scaling (v11.5)
+                        
                         const svgImage = `
-                            <svg width="800" height="100">
+                            <svg width="${w}" height="${h}">
                                 <style>
-                                    .text { fill: rgba(255, 255, 255, 0.4); font-size: 64px; font-weight: 900; font-family: sans-serif; font-style: italic; }
+                                    .text { 
+                                        fill: #ff00ff; 
+                                        stroke: black; 
+                                        stroke-width: ${Math.max(1, fontSize / 25)}px;
+                                        font-size: ${fontSize}px; 
+                                        font-weight: 900; 
+                                        font-family: sans-serif; 
+                                        font-style: italic; 
+                                        paint-order: stroke;
+                                    }
                                 </style>
-                                <text x="50%" y="50%" text-anchor="middle" class="text">${text}</text>
+                                <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" class="text">${text}</text>
                             </svg>
                         `;
 
-                        const processedBuffer = await sharp(tempFile)
-                            .composite([{
-                                input: Buffer.from(svgImage),
-                                gravity: 'center'
-                            }])
-                            .toBuffer();
+                        const outputTemp = tempFile.replace('.jpg', '_branded.jpg');
+                        await sharp(inputBuffer)
+                            .composite([{ input: Buffer.from(svgImage), blend: 'over' }])
+                            .toFile(outputTemp);
 
-                        const fs = require('fs');
-                        fs.writeFileSync(tempFile, processedBuffer);
-                        console.log("✅ Asset Branded (Sharp Center Burn).");
+                        fs.unlinkSync(tempFile);
+                        fs.renameSync(outputTemp, tempFile);
+                        console.log("✅ Asset Branded (High-Visibility Complete).");
                     } catch (sharpErr) {
                         console.warn("⚠️ Watermark Failed (Non-blocking):", sharpErr.message);
                     }
                 }
 
                 // 2. Connect to the Manual Chrome Instance
-                browser = await chromium.connectOverCDP('http://localhost:9222');
+                browser = await chromium.connectOverCDP('http://localhost:9222', {
+                    timeout: 120000 // Increase to 2 minutes
+                });
                 const context = browser.contexts()[0];
                 const page = await context.newPage();
 
@@ -116,12 +133,20 @@ async function pulse() {
                 await page.keyboard.type(task.payload, { delay: 120 });
                 
                 console.log("🚀 Launching Alpha...");
-                await page.click('[data-testid="tweetButton"]');
+                const postButton = await page.locator('[data-testid="tweetButton"]');
+                await postButton.first().click({ force: true, delay: 500 });
                 
-                // Wait for the box to disappear (success indicator)
-                await page.waitForSelector('[data-testid="tweetTextarea_0"]', { state: 'hidden', timeout: 30000 });
+                // 🛰️ SUCCESS VERIFICATION: Check if box disappears or if we need a retry
+                try {
+                    await page.waitForSelector('[data-testid="tweetTextarea_0"]', { state: 'hidden', timeout: 15000 });
+                    console.log("✅ HIJACK SUCCESSFUL: Digital Archive projection live.");
+                } catch (timeoutErr) {
+                    console.warn("⚠️ Interface Stalled. Attempting secondary dispatch...");
+                    await page.keyboard.press('Control+Enter'); // Standard X post shortcut
+                    await page.waitForTimeout(5000);
+                    console.log("✅ Backup Dispatch Executed.");
+                }
                 
-                console.log("✅ HIJACK SUCCESSFUL: Digital Archive projection live.");
                 await page.close();
             } finally {
                 // Cleanup temp assets
