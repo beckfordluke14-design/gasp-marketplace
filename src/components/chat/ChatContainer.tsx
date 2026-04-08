@@ -213,22 +213,45 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
 
       {/* Input Core */}
       <div className="p-6 bg-black/60 border-t border-white/10">
-         <form onSubmit={handleLocalSubmit} className="relative flex items-center">
-            <input
-              value={input || ''}
-              onChange={handleInputChange}
-              disabled={!historyLoaded || isLoading}
-              onKeyDown={(e) => e.stopPropagation()}
-              placeholder={`message ${profileName.toLowerCase()}...`}
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-xs font-medium outline-none focus:border-[#00f0ff]/40 transition-all text-white placeholder:text-white/20 relative z-[500] pointer-events-auto"
-            />
+         <form onSubmit={handleLocalSubmit} className="relative flex items-center gap-3">
+            {/* 🎤 GUIDED VOICE TRIGGER */}
             <button
-              type="submit"
-              disabled={!input?.trim() || isLoading}
-              className="absolute right-3 p-3 bg-[#00f0ff] text-black rounded-xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)] disabled:opacity-40"
+              type="button"
+              onClick={() => {
+                handleInputChange({ target: { value: '[SAY]: ""' } } as any);
+                // Hint: The user just needs to type between the quotes
+              }}
+              className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-[#00f0ff] hover:border-[#00f0ff]/40 transition-all active:scale-95 group"
+              title="Request Mandated Voice Note"
             >
-               <Send size={16} />
+               <Mic size={20} className="group-hover:animate-pulse" />
             </button>
+
+            {/* 🎁 GIFT QUICK-ACCESS */}
+            <button
+              type="button"
+              className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-[#ff00ff] hover:border-[#ff00ff]/40 transition-all active:scale-95 group"
+            >
+               <Gift size={20} className="group-hover:rotate-12 transition-transform" />
+            </button>
+
+            <div className="relative flex-1">
+               <input
+                 value={input || ''}
+                 onChange={handleInputChange}
+                 disabled={!historyLoaded || isLoading}
+                 onKeyDown={(e) => e.stopPropagation()}
+                 placeholder={`message ${profileName.toLowerCase()}...`}
+                 className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-xs font-medium outline-none focus:border-[#00f0ff]/40 transition-all text-white placeholder:text-white/20 relative z-[500] pointer-events-auto"
+               />
+               <button
+                 type="submit"
+                 disabled={!input?.trim() || isLoading}
+                 className="absolute right-3 top-1/2 -translate-y-1/2 p-3 bg-[#00f0ff] text-black rounded-xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)] disabled:opacity-40"
+               >
+                  <Send size={16} />
+               </button>
+            </div>
          </form>
       </div>
     </div>

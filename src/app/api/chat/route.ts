@@ -249,10 +249,18 @@ ${userLocale === 'es' ? `
     try { dataOutput = JSON.parse(rawContent); } catch(e) {}
 
     const streamB_Text = dataOutput.text_message || "...";
-    const streamA_Native = dataOutput.audio_script || "";
+    let streamA_Native = dataOutput.audio_script || "";
+
+    // 🎙️ MANDATED REPLICATION PROTOCOL (V6.0)
+    // Objective: If the user uses [SAY]: "text", we FORCE the audio_script to be exactly that text.
+    const sayMatch = lastUserMsg.match(/\[SAY\]:\s*["']([^"']+)["']/i);
+    if (sayMatch && sayMatch[1]) {
+        console.log(`🎯 [Neural Say] Mandated Script Detected: "${sayMatch[1]}"`);
+        streamA_Native = sayMatch[1];
+    }
 
     const isVocalArchetype = ['astra-auditor', 'sovereign-node', 'the-archivist'].includes(finalProfileId.toLowerCase());
-    const sendVoice = isVocalArchetype || shouldSendVoiceNote(finalProfileId, streamA_Native.length);
+    const sendVoice = isVocalArchetype || (sayMatch && sayMatch[1]) || shouldSendVoiceNote(finalProfileId, streamA_Native.length);
 
     // 🚀 VOCAL DNA PROVISIONING
     let voiceUrl: string | null = null;
