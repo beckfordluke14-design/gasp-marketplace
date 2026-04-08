@@ -27,11 +27,21 @@ async function downloadFile(url, dest) {
 async function pulse() {
     console.log(`[${new Date().toLocaleTimeString()}] 🔍 Scanning Syndicate ledger for tactical signals...`);
     
+    let task;
     try {
         const res = await axios.get(SYNDICATE_URL);
-        const task = res.data;
+        task = res.data;
+    } catch (err) {
+        if (err.response) {
+            console.error(`❌ Link Failure Status: ${err.response.status}`);
+            console.error(`❌ Error Detail:`, JSON.stringify(err.response.data));
+        } else {
+            console.error(`❌ Link Failure: ${err.message}`);
+        }
+        return;
+    }
 
-        if (task.type === 'POST_ARTICLE') {
+    if (task.type === 'POST_ARTICLE') {
             console.log(`🎯 SIGNAL DETECTED: Dispatching Article #${task.id}`);
 
             let browser;
