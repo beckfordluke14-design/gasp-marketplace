@@ -166,23 +166,20 @@ function MarketplaceContent() {
   }, [searchParams, mounted]);
 
   const refinedProfiles = useMemo(() => {
-    const registry = new Map();
-    
-    // 🛡️ STEP 0: Baseline - Load all initial hardcoded personas
-    initialProfiles.forEach(p => {
-       registry.set(String(p.id), p);
-    });
+    // 🛡️ SOVEREIGN REGISTRY: Only personas approved in Admin (is_active !== false) are permitted.
+    if (!dbProfiles || dbProfiles.length === 0) return [];
 
-    // 🛡️ STEP 1: Enhancement - Layer in Database nodes & apply active filter
-    dbProfiles.forEach(p => {
-       if (p.is_active !== false) {
-          registry.set(String(p.id), { ...registry.get(String(p.id)), ...p });
-       } else {
-          registry.delete(String(p.id));
-       }
-    });
-    
-    return Array.from(registry.values());
+    return dbProfiles
+      .filter(p => p.is_active !== false)
+      .map(dbP => {
+        const staticP = initialProfiles.find(s => String(s.id) === String(dbP.id));
+        return { 
+          ...staticP, 
+          ...dbP,
+          id: String(dbP.id),
+          image: proxyImg(dbP.seed_image_url || dbP.image || staticP?.image)
+        };
+      });
   }, [dbProfiles]);
 
   const handleSelectProfile = async (id: string, initialMsg?: string, profileObj?: any) => {
@@ -432,7 +429,7 @@ function MarketplaceContent() {
        <div className="fixed inset-0 pointer-events-none z-[1000] flex items-end justify-end p-6 gap-4">
           <AnimatePresence>
             {openChatIds.filter(id => !minimizedIds.includes(id)).map((sId, index) => {
-              const p = initialProfiles.find((profileItem: any) => String(profileItem.id) === sId) || chatProfileCache[sId];
+              const p = initialProfiles.find((profileItem: any) => String(profileItem.id) === sId) || dbProfiles.find((profileItem: any) => String(profileItem.id) === sId) || chatProfileCache[sId];
               
               if (!p) return (
                 <motion.div 
