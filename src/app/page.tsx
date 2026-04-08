@@ -50,50 +50,7 @@ function MarketplaceContent() {
   
   const searchParams = useSearchParams();
 
-  // 🛰️ SYNDICATE SYNC: Auto-select profile from URL (News Feed Funnel)
-  useEffect(() => {
-    if (!mounted) return;
-    
-    const profileId = searchParams.get('profile');
-    if (!profileId) return;
 
-    const runSync = async () => {
-        console.log(`🧬 [News Funnel] Hijacking for: ${profileId}`);
-        
-        // 1. Check local registry first
-        const existing = initialProfiles.find(p => String(p.id) === profileId) || 
-                         dbProfiles.find(p => String(p.id) === profileId);
-        
-        if (existing) {
-            handleSelectProfile(profileId);
-            setSidebarView('chats');
-        } else {
-            // 2. Proactive Fetch: If not found, hit the direct API node
-            try {
-                const res = await fetch(`/api/admin/persona/${profileId}`);
-                const data = await res.json();
-                if (data && data.id) {
-                    const hydrated = {
-                        ...data,
-                        image: proxyImg(data.seed_image_url || data.image)
-                    };
-                    setChatProfileCache(prev => ({ ...prev, [profileId]: hydrated }));
-                    handleSelectProfile(profileId, undefined, hydrated);
-                    setSidebarView('chats');
-                }
-            } catch (err) {
-                console.error('[Funnel] Profile hydration failed:', err);
-            }
-        }
-
-        // 3. Hygiene: Clear param to prevent loop
-        const url = new URL(window.location.href);
-        url.searchParams.delete('profile');
-        window.history.replaceState({}, '', url.pathname + url.search);
-    };
-
-    runSync();
-  }, [searchParams, dbProfiles, mounted]);
 
   useEffect(() => { 
     setMounted(true); 
@@ -195,14 +152,6 @@ function MarketplaceContent() {
     }
     setGuestId(gId);
     
-    const pId = searchParams.get('profile');
-    if (pId) handleSelectProfile(pId);
-
-    const tab = searchParams.get('tab');
-    if (tab && ['feed', 'weather', 'reports', 'protocol'].includes(tab)) {
-       setActiveTab(tab as any);
-    }
-
     // 🏦 BANK TRANSFER PENDING DETECTION
     if (searchParams.get('payment_pending') === 'true') {
       setShowPaymentPending(true);
@@ -214,7 +163,7 @@ function MarketplaceContent() {
        window.removeEventListener('gasp_unread_sync_trigger', syncUnreads);
        window.removeEventListener('gasp_sync_follows', handleSyncPulse as EventListener);
     };
-  }, [searchParams]);
+  }, [searchParams, mounted]);
 
   const refinedProfiles = useMemo(() => {
     const registry = new Map();
@@ -240,24 +189,59 @@ function MarketplaceContent() {
     const sId = String(id);
     setSelectedProfileId(sId);
     
-    // 🧠 PROFILE HYDRATE: Ensure profile is cached
-    if (profileObj) {
+    // 🧠 INTELLIGENT HYDRATION: Ensure profile data exists before opening
+    let targetProfile = profileObj || 
+                        initialProfiles.find(p => String(p.id) === sId) || 
+                        dbProfiles.find(p => String(p.id) === sId) ||
+                        chatProfileCache[sId];
+
+    if (!targetProfile) {
+       console.log(`🧬 [Sync] Proactive Hydration triggered for: ${sId}`);
+       try {
+          const res = await fetch(`/api/admin/persona/${sId}`);
+          const data = await res.json();
+          if (data && data.id) {
+             targetProfile = {
+                ...data,
+                id: String(data.id),
+                image: proxyImg(data.seed_image_url || data.image)
+             };
+             setChatProfileCache(prev => ({ ...prev, [sId]: targetProfile }));
+          }
+       } catch (err) {
+          console.error('[Sync] Hydration failed:', err);
+       }
+    } else if (profileObj) {
       setChatProfileCache(prev => ({ ...prev, [sId]: profileObj }));
-    } else {
-      const p = initialProfiles.find(profileItem => String(profileItem.id) === sId) || 
-                dbProfiles.find(profileItem => String(profileItem.id) === sId);
-      if (p) {
-        setChatProfileCache(prev => ({ ...prev, [sId]: p }));
-      } else {
-         // Fallback: Final sync trigger
-         console.warn('[Profile Sync]: Attempting deferred hydrate for:', sId);
-      }
     }
+
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     setOpenChatIds(prev => (isMobile ? [sId] : prev.includes(sId) ? prev : [...prev, sId]));
     setMinimizedIds(prev => prev.filter(m => m !== sId));
     trackEvent('chat_open', sId, { from: 'grid', hasInitialMsg: !!initialMsg });
   };
+
+  // 🛰️ MASTER DISPATCH: High-priority URL Hijack for Persona Engagement
+  useEffect(() => {
+    if (!mounted) return;
+    const profileId = searchParams.get('profile');
+    if (!profileId) return;
+
+    const dispatchChat = async () => {
+        console.log(`🧬 [Master Dispatch] Targeting: ${profileId}`);
+        
+        // 1. Proactive cleanup: Clear param to prevent loop before logic runs
+        const url = new URL(window.location.href);
+        url.searchParams.delete('profile');
+        window.history.replaceState({}, '', url.pathname + url.search);
+
+        // 2. Immediate Force Open: Call with ID (handles sync internally)
+        handleSelectProfile(profileId);
+        setSidebarView('chats');
+    };
+
+    dispatchChat();
+  }, [searchParams, mounted, handleSelectProfile]);
 
   useEffect(() => {
      if (typeof window !== 'undefined') {
