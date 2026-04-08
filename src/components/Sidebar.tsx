@@ -155,7 +155,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
   const followedProfiles = profiles.filter((p: any) => following.includes(p.id)); 
   const otherProfiles = shuffledOthers;
 
-  const renderProfile = (profileItem: any) => {
+  const renderProfile = (profileItem: any, hideStatus = false) => {
     const isSelected = selectedProfileId === profileItem.id;
     const unread = unreadCounts[profileItem.id] || 0;
     const isFollowing = following.includes(profileItem.id);
@@ -188,8 +188,9 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
               {unread > 99 ? '99+' : unread}
             </motion.div>
           )}
-
-          <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-black transition-all ${profileItem.status === 'online' ? 'bg-[#00ff00] shadow-[0_0_10px_#00ff00] animate-pulse' : 'bg-white/10'}`} />
+          {!hideStatus && (
+            <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-black transition-all ${profileItem.status === 'online' ? 'bg-[#00ff00] shadow-[0_0_10px_#00ff00] animate-pulse' : 'bg-white/10'}`} />
+          )}
         </div>
 
 
@@ -230,9 +231,11 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                   <PlusCircle size={12} className={isFollowing ? 'rotate-45 transition-transform' : 'transition-transform'} />
               </button>
            </div>
-           <p className="text-[9px] text-white/30 truncate leading-relaxed">
-              {(profileItem.vibe || profileItem.city || (isSpanish ? 'en línea' : 'online now')).toUpperCase()}
-           </p>
+           {!hideStatus && (
+              <p className="text-[9px] text-white/30 truncate leading-relaxed uppercase">
+                 {(profileItem.vibe || profileItem.city || (isSpanish ? 'en línea' : 'online now'))}
+              </p>
+           )}
         </div>
       </motion.div>
     );
@@ -302,8 +305,18 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 </div>
             </div>
 
-            {/* 🛰️ MARKET PULSE: WeatherX & Polymarket Sentiment Indicator */}
-            <MarketPulseTerminal />
+            {/* 🧬 VIP TOP-UP ACCESS: Prioritized at top for members */}
+            <div className="px-6 mb-8 mt-4">
+               <button 
+                  onClick={() => onOpenTopUp ? onOpenTopUp() : (window as any).openTopUp?.()}
+                  className="w-full h-14 bg-[#00f0ff] text-black rounded-2xl flex items-center justify-center gap-3 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(0,240,255,0.2)] active:scale-95 border-none"
+               >
+                  <div className="w-7 h-7 rounded-full bg-black/10 flex items-center justify-center">
+                     <Zap size={14} className="text-black group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="text-[9px] font-black uppercase tracking-widest italic font-syncopate">{isSpanish ? 'AÑADIR CRÉDITOS' : 'ADD CREDITS'}</span>
+               </button>
+            </div>
 
             {/* 🛰️ INTELLIGENCE BRIEF (HIDDEN PER USER REQUEST) */}
             {/*
@@ -341,7 +354,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                   {isSpanish ? 'Uplinks Prioritarios' : 'Priority Uplinks'}
                 </h2>
                 <div className="space-y-1">
-                  {profiles.filter(p => unreadCounts[p.id] > 0).map(renderProfile)}
+                  {profiles.filter(p => unreadCounts[p.id] > 0).map(p => renderProfile(p))}
                 </div>
               </div>
             )}
@@ -351,18 +364,17 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
               <div className="px-6 mb-8">
                 <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 mb-4 italic">{isSpanish ? 'Sindicato Shadow' : 'Shadow Syndicate'}</h2>
                 <div className="space-y-1">
-                  {followedProfiles.map(renderProfile)}
+                  {followedProfiles.map(p => renderProfile(p))}
                 </div>
               </div>
             )}
 
-            {/* DISCOVERY */}
             <div className="px-6 pb-20">
               <h2 className="text-[9px] font-black uppercase tracking-[0.4em] text-white/20 mb-4 italic">
                 {isSpanish ? 'Descubrimiento Neural' : 'Neural Discovery'}
               </h2>
               <div className="space-y-1">
-                {otherProfiles.map(renderProfile)}
+                {otherProfiles.map((p: any) => renderProfile(p, true))}
               </div>
             </div>
           </>
@@ -506,16 +518,8 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
               </div>
           </div>
 
-          <div className="space-y-4 pt-2 border-t border-white/5">
-             <button 
-                onClick={() => onOpenTopUp ? onOpenTopUp() : (window as any).openTopUp?.()}
-                className="w-full h-12 bg-[#00f0ff] text-black rounded-2xl flex items-center justify-center gap-2 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(0,240,255,0.2)] active:scale-95 border-none"
-             >
-                <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center">
-                   <Zap size={10} className="text-black" />
-                 </div>
-                <span className="text-[8px] font-black uppercase tracking-widest italic font-syncopate">{isSpanish ? 'AÑADIR CRÉDITOS' : 'ADD CREDITS'}</span>
-             </button>
+          <div className="space-y-4 pt-2 border-t border-white/5 opacity-0 pointer-events-none h-0">
+             {/* 🧬 TOP-UP MOVED TO TOP */}
           </div>
 
           <div className="flex flex-col gap-3 pt-2 border-t border-white/5">
