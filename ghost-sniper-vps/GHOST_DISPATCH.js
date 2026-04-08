@@ -23,13 +23,23 @@ async function pulse() {
 
                 // ✍️ Human-Mimic Dispatch with Heavy Timeout
                 console.log("🛰️ Navigating to X Dispatch Center...");
-                await page.goto('https://x.com/compose/post', { timeout: 120000 });
+                await page.goto('https://x.com/compose/post', { 
+                   timeout: 120000, 
+                   waitUntil: 'domcontentloaded' // 🛰️ FAST INGRESS: Don't wait for background bloat
+                });
                 
                 console.log("✍️ Locating Neural Input...");
-                await page.waitForSelector('[data-testid="tweetTextarea_0"]', { timeout: 60000 });
+                // Explicitly wait for the specific UI element, not the whole page lifecycle
+                const tweetBox = await page.waitForSelector('[data-testid="tweetTextarea_0"]', { 
+                   visible: true,
+                   timeout: 60000 
+                });
+                
+                console.log("✍️ Injecting Signal...");
+                await tweetBox.click();
                 
                 // Jittered typing to fool bot detection
-                await page.type('[data-testid="tweetTextarea_0"]', task.payload, { delay: 120 });
+                await page.keyboard.type(task.payload, { delay: 120 });
                 
                 console.log("🚀 Launching Alpha...");
                 await page.click('[data-testid="tweetButton"]');
