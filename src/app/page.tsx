@@ -233,7 +233,11 @@ function MarketplaceContent() {
     });
   }, [refinedProfiles]);
 
-  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
+  const [isSpanish, setIsSpanish] = useState(false);
+
+  useEffect(() => {
+    setIsSpanish(localStorage.getItem('gasp_locale') === 'es');
+  }, []);
 
    return (
     <main className="min-h-screen bg-transparent text-white relative flex flex-col lg:flex-row xl:gap-0">

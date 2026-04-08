@@ -50,7 +50,11 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
   const [recentIds, setRecentIds] = useState<string[]>([]);
   
   // 🌍 GLOBAL LOCALE STATE
-  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
+  const [isSpanish, setIsSpanish] = useState(false);
+
+  useEffect(() => {
+    setIsSpanish(localStorage.getItem('gasp_locale') === 'es');
+  }, []);
 
   // 1. NAV HUB FOR SIDEBAR
   const NavButton = ({ label, icon: Icon, targetView }: { label: string, icon: any, targetView: 'chats' | 'vault' | 'feed' }) => (

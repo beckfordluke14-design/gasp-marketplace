@@ -54,7 +54,11 @@ function GlobalFeedItem({
   const lastTapRef = useRef<number>(0);
 
   // 🌍 GLOBAL LOCALE STATE
-  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
+  const [isSpanish, setIsSpanish] = useState(false);
+
+  useEffect(() => {
+    setIsSpanish(localStorage.getItem('gasp_locale') === 'es');
+  }, []);
   const displayName = getProfileName(profile);
 
   const handleSave = () => {
@@ -283,7 +287,11 @@ function GlobalFeedItem({
 export default function GlobalFeed({ onSelectProfile, profiles = [], followingIds = [] }: GlobalFeedProps) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
+  const [isSpanish, setIsSpanish] = useState(false);
+
+  useEffect(() => {
+    setIsSpanish(localStorage.getItem('gasp_locale') === 'es');
+  }, []);
 
   useEffect(() => {
     async function load() {

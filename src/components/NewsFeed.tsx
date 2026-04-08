@@ -32,7 +32,11 @@ export default function NewsFeed() {
     const [news, setNews] = useState<NewsPost[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
+    const [isSpanish, setIsSpanish] = useState(false);
+
+    useEffect(() => {
+        setIsSpanish(localStorage.getItem('gasp_locale') === 'es');
+    }, []);
 
     const fetchNews = async () => {
         try {
