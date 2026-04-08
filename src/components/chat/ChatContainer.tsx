@@ -108,10 +108,10 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
 
                 return (
                   <motion.div
-                    initial={{ opacity: 0, scale: isGift ? 0.8 : 1, y: 10 }}
+                    initial={{ opacity: 0, scale: isGift ? 0.5 : 1, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     key={m.id}
-                    className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'} gap-2`}
+                    className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'} gap-2 relative`}
                   >
                     {!isGift ? (
                       <div className={`max-w-[85%] px-5 py-3 rounded-[2.5rem] shadow-xl ${
@@ -124,23 +124,37 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
                         </div>
                       </div>
                     ) : (
-                      <motion.div 
-                        initial={{ rotate: -5 }}
-                        animate={{ rotate: [0, -2, 2, -2, 2, 0] }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="max-w-[85%] px-6 py-4 bg-gradient-to-br from-[#ffea00]/20 to-[#ffaa00]/10 border border-[#ffea00]/40 rounded-[2.5rem] rounded-tr-none shadow-[0_0_30px_rgba(255,234,0,0.2)] flex items-center gap-3 relative overflow-hidden group"
-                      >
-                         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ffea00] to-[#ffaa00] flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(255,234,0,0.5)]">
-                            <Gift size={18} className="text-black" />
-                         </div>
-                         <div>
-                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#ffea00] block mb-1">Gift Sent</span>
-                            <div className="text-[14px] font-bold text-white leading-tight">
-                              {giftText}
-                            </div>
-                         </div>
-                      </motion.div>
+                      <div className="relative">
+                        {/* 🎆 NEURAL BURST: Sparkles firing from behind the gift */}
+                        <AnimatePresence>
+                           {(messages.indexOf(m) === messages.length - 1 && !m.audio_url) && (
+                              <GiftParticles />
+                           )}
+                        </AnimatePresence>
+
+                        <motion.div 
+                          initial={{ rotate: -5, scale: 0.8 }}
+                          animate={{ rotate: [0, -4, 4, -4, 4, 0], scale: 1 }}
+                          transition={{ 
+                            duration: 0.6, 
+                            type: 'spring', 
+                            stiffness: 300, 
+                            damping: 15 
+                          }}
+                          className="max-w-[85%] px-6 py-4 bg-gradient-to-br from-[#ff00ff] to-[#7000ff] border border-white/20 rounded-[2.5rem] rounded-tr-none shadow-[0_0_50px_rgba(255,0,255,0.4)] flex items-center gap-3 relative overflow-hidden group ml-auto"
+                        >
+                           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-[0_0_20px_white]">
+                              <Gift size={18} className="text-[#ff00ff]" />
+                           </div>
+                           <div>
+                              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/60 block mb-1">Syndicate Gift Dispatched</span>
+                              <div className="text-[14px] font-black text-white leading-tight uppercase tracking-tighter italic">
+                                {giftText}
+                              </div>
+                           </div>
+                        </motion.div>
+                      </div>
                     )}
 
                     {isRecording && (
