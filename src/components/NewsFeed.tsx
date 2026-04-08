@@ -129,9 +129,9 @@ export default function NewsFeed() {
                             <div className="flex items-center gap-4 mb-8">
                                 <div className="w-14 h-14 rounded-2xl overflow-hidden border border-white/10 shrink-0 bg-white/5">
                                     {(item.persona_image || '').toLowerCase().endsWith('.mp4') ? (
-                                        <video src={item.persona_image} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                                        <video src={item.persona_image} autoPlay muted loop playsInline className="w-full h-full object-cover object-top" />
                                     ) : (
-                                        <img src={item.persona_image || '/placeholder.jpg'} alt="" className="w-full h-full object-cover transition-all duration-500" />
+                                        <img src={item.persona_image || '/placeholder.jpg'} alt="" className="w-full h-full object-cover object-top transition-all duration-500" />
                                     )}
                                 </div>
                                 <div className="flex flex-col">

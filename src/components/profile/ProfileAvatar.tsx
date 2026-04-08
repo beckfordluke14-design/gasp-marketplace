@@ -22,7 +22,7 @@ export default function ProfileAvatar({
   fill, 
   width,
   height,
-  className = 'object-cover object-[center_20%] sm:object-top', // Default to top-focused crop for portraits
+  className = 'object-cover object-top', // Focus on head/top half automatically
   priority = false,
   unoptimized = true,
   onImageError

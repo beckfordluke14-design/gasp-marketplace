@@ -149,7 +149,7 @@ function Orbiter({ p, index, total, rotation, onSelect, unreadCount }: { p: any,
             style={{ x, y, opacity, scale, zIndex }}
             className="absolute left-1/2 top-1/2 -ml-6 -mt-6 pointer-events-auto w-12 h-12 rounded-full border-2 border-white/20 overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)] bg-black/80 backdrop-blur-3xl group"
         >
-            <img src={p.image} className="w-full h-full object-cover group-hover:scale-125 transition-all duration-300" />
+            <img src={p.image} className="w-full h-full object-cover object-top group-hover:scale-125 transition-all duration-300" />
             {unreadCount > 0 && (
                 <div className="absolute inset-0 rounded-full border-2 border-[#ff00ff] animate-ping opacity-50" />
             )}

@@ -190,9 +190,9 @@ function GlobalFeedItem({
                        <div className="flex items-center gap-3" onClick={() => onSelectProfile(profile.id)}>
                           <div className="w-12 h-12 rounded-full border border-[#00f0ff]/40 overflow-hidden bg-white/5">
                              {(profile.image || '').toLowerCase().endsWith('.mp4') ? (
-                                <video src={profile.image} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                                <video src={profile.image} autoPlay muted loop playsInline className="w-full h-full object-cover object-top" />
                              ) : (
-                                <img src={proxyImg(profile.image)} className="w-full h-full object-cover" alt="" />
+                                <img src={proxyImg(profile.image)} className="w-full h-full object-cover object-top" alt="" />
                              )}
                           </div>
                           <div className="flex flex-col">

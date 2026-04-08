@@ -271,7 +271,7 @@ function MarketplaceContent() {
         )}
       </AnimatePresence>
        <div className="hidden lg:flex h-screen sticky top-0 shrink-0 z-[40]">
-           <Sidebar 
+           <Sidebar isMobileUI={false} 
               onSelectProfile={handleSelectProfile} 
               selectedProfileId={selectedProfileId} 
               profiles={sortedProfiles} 
