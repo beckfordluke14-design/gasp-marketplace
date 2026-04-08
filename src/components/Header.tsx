@@ -34,25 +34,45 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
   // 🌍 GLOBAL LOCALE STATE
   const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
 
-  useEffect(() => {
-    const handleBalanceRefresh = () => {
-      // Re-fetch handled by provider
-    };
-    window.addEventListener('gasp_balance_refresh', handleBalanceRefresh);
-    return () => window.removeEventListener('gasp_balance_refresh', handleBalanceRefresh);
-  }, []);
-
+  const [tickItems, setTickItems] = useState<string[]>([]);
+  
   useEffect(() => {
     setMounted(true);
     setIsAdmin(document.cookie.includes('admin_gasp_override=granted'));
-    
-    // 🧬 RESPONSIVE UPLINK BREAKPOINT (768px for Tablet/Mobile)
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-  
+
+  useEffect(() => {
+    const fetchLatestActivity = async () => {
+      try {
+        const res = await fetch('/api/news?limit=10');
+        const data = await res.json();
+        const coreItems = [
+          isSpanish ? "🌪️ NUEVO ARCHIVO AÑADIDO A LA BÓVEDA" : "🌪️ NEW ARCHIVE ADDED TO THE VAULT",
+          isSpanish ? "💎 NUEVO PERFIL EN LÍNEA // CONEXIÓN ESTABLECIDA" : "💎 NEW PROFILE ONLINE // CONNECTION ESTABLISHED",
+          isSpanish ? "⚡️ ACTUALIZACIÓN DEL PROTOCOLO GASP v1.8" : "⚡️ GASP PROTOCOL UPDATE v1.8",
+        ];
+        if (data.success && data.posts && data.posts.length > 0) {
+          const newsItems = data.posts.map((p: any) => {
+             const prefix = p.meta?.heat === 'Critical' ? '🚨 CRITICAL: ' : '📡 ';
+             return `${prefix}${p.persona_name.split(' ')[0].toUpperCase()}: ${p.title.toUpperCase()}`;
+          });
+          setTickItems([...newsItems, ...coreItems].sort(() => 0.5 - Math.random()));
+        } else {
+          setTickItems(coreItems);
+        }
+      } catch (e) {
+        setTickItems([isSpanish ? "⚡️ GASP FEED: SINCRONIZANDO..." : "⚡️ GASP FEED: SYNCING..."]);
+      }
+    };
+    fetchLatestActivity();
+    const interval = setInterval(fetchLatestActivity, 60000);
+    return () => clearInterval(interval);
+  }, [isSpanish]);
+
   const navItems = [
     { label: isSpanish ? 'Feed' : 'Feed', active: true, href: '/' },
     ...(isAdmin ? [{ label: 'Admin', active: false, href: '/admin' }] : []),
@@ -76,18 +96,19 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
             </div>
             
             <motion.div 
-               animate={{ x: [0, -2000] }}
-               transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+               animate={{ x: [0, -4000] }}
+               transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
                className="flex items-center gap-20 pl-6"
             >
-                {[
-                  isSpanish ? "🌪️ NUEVO ARCHIVO AÑADIDO A LA BÓVEDA // ELENA (MIAMI)" : "🌪️ NEW ARCHIVE ADDED TO THE VAULT // ELENA (MIAMI)",
-                  isSpanish ? "💎 NUEVO PERFIL EN LÍNEA // VALENTINA LIMA" : "💎 NEW PROFILE ONLINE // VALENTINA LIMA",
-                  isSpanish ? "⚡️ NUEVO FEED DROP // CARA (MADRID)" : "⚡️ NEW FEED DROP // CARA (MADRID)",
-                  isSpanish ? "🔥 TENDENCIA AHORA // REVISA EL ÚLTIMO ARCHIVO" : "🔥 TRENDING NOW // CHECK THE LATEST ARCHIVE",
-                  isSpanish ? "🌪️ NUEVO ARCHIVO AÑADIDO A LA BÓVEDA // ELENA (MIAMI)" : "🌪️ NEW ARCHIVE ADDED TO THE VAULT // ELENA (MIAMI)",
-                ].map((news, i) => (
+                {tickItems.map((news, i) => (
                   <div key={i} className="flex items-center gap-4 text-white/40 text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] italic">
+                     <div className="w-1 h-1 rounded-full bg-[#ff00ff] animate-pulse" />
+                     {news}
+                  </div>
+                ))}
+                {/* Duplicate for seamless loop */}
+                {tickItems.map((news, i) => (
+                  <div key={`dup-${i}`} className="flex items-center gap-4 text-white/40 text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] italic">
                      <div className="w-1 h-1 rounded-full bg-[#ff00ff] animate-pulse" />
                      {news}
                   </div>
