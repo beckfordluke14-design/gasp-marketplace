@@ -34,7 +34,11 @@ interface NewsPost {
     };
 }
 
-export default function NewsFeed() {
+interface NewsFeedProps {
+    onSelectProfile?: (id: string) => void;
+}
+
+export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
     const [news, setNews] = useState<NewsPost[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedNews, setSelectedNews] = useState<NewsPost | null>(null);
@@ -168,7 +172,14 @@ export default function NewsFeed() {
                                     </div>
 
                                     <button 
-                                        onClick={() => window.location.href = `/?profile=${selectedNews.persona_id}`}
+                                        onClick={() => {
+                                            if (onSelectProfile) {
+                                                onSelectProfile(selectedNews.persona_id);
+                                                setSelectedNews(null);
+                                            } else {
+                                                window.location.href = `/?profile=${selectedNews.persona_id}`;
+                                            }
+                                        }}
                                         className="w-full h-16 md:h-20 rounded-2xl bg-[#ff00ff] text-white font-black italic uppercase tracking-[0.2em] text-sm hover:scale-105 transition-all shadow-[0_0_40px_rgba(255,0,255,0.4)] active:scale-95"
                                     >
                                         Initiate Encounter
@@ -255,7 +266,14 @@ export default function NewsFeed() {
                                     </button>
 
                                     <button 
-                                        onClick={(e) => { e.stopPropagation(); window.location.href = `/?profile=${item.persona_id}`; }}
+                                        onClick={(e) => { 
+                                            e.stopPropagation(); 
+                                            if (onSelectProfile) {
+                                                onSelectProfile(item.persona_id);
+                                            } else {
+                                                window.location.href = `/?profile=${item.persona_id}`; 
+                                            }
+                                        }}
                                         className="px-8 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3 hover:bg-white/10 transition-all text-white hover:text-[#ff00ff] uppercase text-[9px] font-black tracking-widest italic"
                                     >
                                         <MessageSquare size={16} />
@@ -287,7 +305,13 @@ export default function NewsFeed() {
                                             CONNECT W/ {item.persona_name}
                                         </h3>
                                         <button 
-                                            onClick={() => { window.location.href = `/?profile=${item.persona_id}`; }}
+                                            onClick={() => { 
+                                                if (onSelectProfile) {
+                                                    onSelectProfile(item.persona_id);
+                                                } else {
+                                                    window.location.href = `/?profile=${item.persona_id}`; 
+                                                }
+                                            }}
                                             className="px-20 h-20 rounded-2xl bg-[#00f0ff] text-black font-black italic uppercase tracking-[0.2em] text-sm hover:scale-105 transition-all shadow-[0_0_40px_rgba(0,240,255,0.4)]"
                                         >
                                             INITIATE ENCOUNTER
