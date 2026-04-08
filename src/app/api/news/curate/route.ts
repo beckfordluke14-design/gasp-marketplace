@@ -44,19 +44,18 @@ async function getSniperTargets(personaName: string) {
 async function synthesizeReport(persona: any, rawNews: any) {
     try {
         const prompt = `
-            ROLE: Syndicate Intelligence Analyst representing ${persona.name}. 
-            MISSION: Provide a high-status tactical briefing based on the following news.
-            VIBE: Strategic, Authoritative, Professional.
+            ROLE: Evidence-Based Market Analyst. 
+            MISSION: Provide a direct tactical briefing BASED STIRCTLY on the provided source.
+            VIBE: Sharp, Data-Driven, Realistic.
             
             NEWS SOURCE: ${rawNews.title}
             NEWS CONTEXT: ${rawNews.description}
             
-            OUTPUT (JSON ONLY):
-            {
-              "title": "[Briefing] Short Tactical Headline",
-              "content": "2-3 paragraphs of expert strategic analysis. Sound professional and institutional.",
-              "heat": "High" | "Critical" | "Standard"
-            }
+            STRICT RULES:
+            - NO BLIND GUESSING. Every insight must be anchored to a fact in the source.
+            - Explain the "Why" using data from the news context.
+            - If the news is small, don't overhype it. 
+            - OUTPUT (JSON ONLY): { "title", "content", "heat" }
         `;
 
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {

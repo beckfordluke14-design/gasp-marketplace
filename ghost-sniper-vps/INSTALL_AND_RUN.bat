@@ -1,0 +1,6 @@
+@echo off
+echo 🛰️ [SYNDICATE] Initializing Ghost Dependencies...
+npm install playwright axios
+echo 🎯 [SYNDICATE] Deploying Ghost Sniper...
+node GHOST_DISPATCH.js
+pause
