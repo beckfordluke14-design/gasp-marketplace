@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
         // 1. Check for Pending High-Heat Briefings (Articles)
         const { rows: articles } = await db.query(`
-            SELECT p.id, p.caption as title, p.metadata->>'content' as analysis, pers.name as persona_name, pers.image as persona_image
+            SELECT p.id, p.caption as title, p.metadata, p.metadata->>'content' as analysis, pers.name as persona_name, pers.image as persona_image
             FROM posts p
             JOIN personas pers ON p.persona_id = pers.id
             WHERE p.content_type = 'link'
