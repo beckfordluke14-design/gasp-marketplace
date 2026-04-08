@@ -16,7 +16,9 @@ export async function GET(req: Request) {
 
         // 1. Check for Pending High-Heat Briefings (Articles)
         const { rows: articles } = await db.query(`
-            SELECT p.id, p.caption as title, p.metadata, p.metadata->>'content' as analysis, pers.name as persona_name, pers.image as persona_image
+            SELECT p.id, p.caption as title, p.metadata, p.metadata->>'content' as analysis, 
+                   pers.name as persona_name, 
+                   COALESCE(pers.image, pers.avatar_url, pers.profile_image, '') as persona_image
             FROM posts p
             JOIN personas pers ON p.persona_id = pers.id
             WHERE p.content_type = 'link'
@@ -30,7 +32,6 @@ export async function GET(req: Request) {
             const art = articles[0];
             
             // 🧠 NEURAL RE-FRAMING (X-NATIVE STRATEGY)
-            // Instead of just a link, we generate a "Persona-Specific Take" to maximize X reach.
             const prompt = `
                 PERSONA: ${art.persona_name}
                 ARTICLE: ${art.title}
@@ -67,8 +68,7 @@ export async function GET(req: Request) {
                 }
             }
             
-            // 🛡️ PRE-EMPTIVE LOCK: Mark as tweeted immediately upon dispatch 
-            // to ensure no other pulse can pick it up if the bot takes a moment.
+            // 🛡️ PRE-EMPTIVE LOCK
             const metadata = { ...(art.metadata || {}), tweeted: true, tweeted_at: new Date().toISOString() };
             await db.query('UPDATE posts SET metadata = $1 WHERE id = $2', [JSON.stringify(metadata), art.id]);
 
@@ -83,6 +83,8 @@ export async function GET(req: Request) {
         return NextResponse.json({ type: 'IDLE', message: 'No pending tactical commands.' });
 
     } catch (e: any) {
+        // 🔍 Full error logging for debugging
+        console.error('[Command Bridge 500]:', e.message, e.stack);
         return NextResponse.json({ success: false, error: e.message }, { status: 500 });
     }
 }

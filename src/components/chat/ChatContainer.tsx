@@ -234,3 +234,53 @@ export default function ChatContainer({ profileId, profileName, guestId }: ChatC
     </div>
   );
 }
+
+/** 🎇 NEURAL GIFT PARTICLES (Physics Engine) */
+function GiftParticles() {
+  const particles = Array.from({ length: 32 });
+  return (
+    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+      {particles.map((_, i) => (
+        <motion.div
+          key={i}
+          initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
+          animate={{ 
+            x: (Math.random() - 0.5) * 400, 
+            y: (Math.random() - 0.5) * 400,
+            scale: [0, 1, 0.5],
+            opacity: [1, 1, 0],
+            rotate: Math.random() * 360
+          }}
+          transition={{ 
+            duration: 1.2, 
+            ease: "easeOut",
+            delay: Math.random() * 0.1
+          }}
+          className={`absolute w-1.5 h-1.5 rounded-full ${i % 2 === 0 ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'} shadow-[0_0_10px_white]`}
+        />
+      ))}
+      {/* Golden Icons */}
+      {['💎', '✨', '🔥', '💖'].map((emoji, i) => (
+        <motion.div
+           key={`icon-${i}`}
+           initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
+           animate={{ 
+             x: (Math.random() - 0.5) * 300, 
+             y: (Math.random() - 0.5) * 300,
+             scale: [0, 1.5, 0],
+             opacity: [1, 1, 0],
+             rotate: (Math.random() - 0.5) * 90
+           }}
+           transition={{ 
+             duration: 1.5, 
+             ease: "backOut",
+             delay: i * 0.1
+           }}
+           className="absolute text-lg"
+        >
+          {emoji}
+        </motion.div>
+      ))}
+    </div>
+  );
+}
