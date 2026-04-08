@@ -18,7 +18,7 @@ export async function GET(req: Request) {
         const { rows: articles } = await db.query(`
             SELECT p.id, p.caption as title, p.metadata, p.metadata->>'content' as analysis, 
                    pers.name as persona_name, 
-                   pers.image as persona_image
+                   COALESCE(pers.seed_image_url, '') as persona_image
             FROM posts p
             JOIN personas pers ON p.persona_id = pers.id
             WHERE p.content_type = 'link'

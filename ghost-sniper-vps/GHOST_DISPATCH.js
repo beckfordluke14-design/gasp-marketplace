@@ -41,7 +41,8 @@ async function pulse() {
         return;
     }
 
-    if (task.type === 'POST_ARTICLE') {
+    try {
+        if (task.type === 'POST_ARTICLE') {
             console.log(`🎯 SIGNAL DETECTED: Dispatching Article #${task.id}`);
 
             let browser;
@@ -98,7 +99,7 @@ async function pulse() {
                 if (tempFile && fs.existsSync(tempFile)) {
                     fs.unlinkSync(tempFile);
                 }
-                if (browser) await browser.close();
+                if (browser) try { await browser.close(); } catch(e) {}
             }
 
             // Confirm back to the Syndicate
