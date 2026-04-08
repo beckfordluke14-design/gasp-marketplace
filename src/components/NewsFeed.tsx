@@ -138,12 +138,36 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
                                     {selectedNews.content}
                                 </p>
                                 
-                                <div className="p-4 md:p-8 bg-white/5 border border-white/10 rounded-[2rem] mb-12">
-                                    <p className="text-white/20 text-[9px] font-black uppercase tracking-[.4em] mb-4">Intelligence Archive Link</p>
-                                    <iframe 
-                                        src={selectedNews.content_url} 
-                                        className="w-full h-[300px] md:h-[500px] rounded-xl border border-white/5 grayscale hover:grayscale-0 transition-all"
-                                    />
+                                <div className="w-full bg-white/5 border border-white/10 rounded-[3rem] p-4 md:p-8 mb-12 overflow-hidden group/archive">
+                                    <div className="flex items-center justify-between mb-6 px-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-[#00f0ff] animate-ping" />
+                                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic">Shielded Connection Established</span>
+                                        </div>
+                                        <a 
+                                            href={selectedNews.content_url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="px-4 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-[8px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all backdrop-blur-md"
+                                        >
+                                            Access Direct Node →
+                                        </a>
+                                    </div>
+                                    
+                                    <div className="relative w-full h-[300px] md:h-[500px] rounded-[2rem] overflow-hidden border border-white/5 bg-black/40">
+                                        <iframe 
+                                            src={selectedNews.content_url} 
+                                            className="w-full h-full border-none grayscale hover:grayscale-0 transition-all duration-1000 opacity-40 hover:opacity-100"
+                                            title="External Intel Briefing"
+                                        />
+                                        {/* Overlay to catch clicks or signal errors */}
+                                        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 via-transparent to-transparent" />
+                                        
+                                        {/* Fallback Label if blank */}
+                                        <div className="absolute inset-x-0 bottom-0 p-8 text-center pointer-events-none">
+                                            <p className="text-[9px] font-black uppercase tracking-[.6em] text-white/5 italic">Neural Decoding in Progress...</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -171,19 +195,19 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
                                         </p>
                                     </div>
 
-                                    <button 
-                                        onClick={() => {
-                                            if (onSelectProfile) {
-                                                onSelectProfile(selectedNews.persona_id);
-                                                setSelectedNews(null);
-                                            } else {
-                                                window.location.href = `/?profile=${selectedNews.persona_id}`;
-                                            }
-                                        }}
-                                        className="w-full h-16 md:h-20 rounded-2xl bg-[#ff00ff] text-white font-black italic uppercase tracking-[0.2em] text-sm hover:scale-105 transition-all shadow-[0_0_40px_rgba(255,0,255,0.4)] active:scale-95"
-                                    >
-                                        Initiate Encounter
-                                    </button>
+                                        <button 
+                                            onClick={() => {
+                                                if (onSelectProfile) {
+                                                    onSelectProfile(selectedNews.persona_id);
+                                                    setSelectedNews(null);
+                                                } else {
+                                                    window.location.href = `/?profile=${selectedNews.persona_id}`;
+                                                }
+                                            }}
+                                            className="w-full h-16 md:h-20 rounded-2xl bg-[#ff00ff] text-white font-black italic uppercase tracking-[0.2em] text-sm hover:scale-105 transition-all shadow-[0_0_40px_rgba(255,0,255,0.4)] active:scale-95"
+                                        >
+                                            CHAT W/ {selectedNews.persona_name.split(' ')[0]}
+                                        </button>
                                     
                                     <button 
                                         onClick={() => setSelectedNews(null)}
@@ -312,9 +336,9 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
                                                     window.location.href = `/?profile=${item.persona_id}`; 
                                                 }
                                             }}
-                                            className="px-20 h-20 rounded-2xl bg-[#00f0ff] text-black font-black italic uppercase tracking-[0.2em] text-sm hover:scale-105 transition-all shadow-[0_0_40px_rgba(0,240,255,0.4)]"
+                                            className="px-20 h-20 rounded-2xl bg-[#00f0ff] text-black font-black italic uppercase tracking-[0.2em] text-sm hover:scale-105 transition-all shadow-[0_0_40px_rgba(240,255,0,0.4)]"
                                         >
-                                            INITIATE ENCOUNTER
+                                            CHAT W/ {item.persona_name.split(' ')[0]}
                                         </button>
                                     </div>
                                 </motion.div>
