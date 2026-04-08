@@ -178,7 +178,7 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
                                         {(selectedNews.persona_image || '').toLowerCase().endsWith('.mp4') ? (
                                             <video src={selectedNews.persona_image} autoPlay muted loop playsInline className="w-full h-full object-cover" />
                                         ) : (
-                                            <img src={selectedNews.persona_image} alt="" className="w-full h-full object-cover" />
+                                            <img src={selectedNews.persona_image} alt="" className="w-full h-full object-cover object-[center_20%]" />
                                         )}
                                     </div>
                                     <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-widest text-[#ff00ff] mb-2">

@@ -317,7 +317,7 @@ function MarketplaceContent() {
                onSelectProfile={handleSelectProfile} 
             />
            
-           <div className="flex-1 flex flex-col relative bg-transparent pt-[72px] md:pt-20">
+           <div className="flex-1 flex flex-col relative bg-transparent pt-[110px] md:pt-24">
               {/* 🛰️ SOVEREIGN NAVIGATION: GHOST GLASS PILL */}
               <div className="sticky top-[86px] md:top-20 z-[100] flex justify-center w-full px-4 pointer-events-none mb-[-3.5rem]">
                   <div className="flex items-center gap-1 md:gap-3 p-1.5 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all duration-500 w-fit max-w-full overflow-x-auto no-scrollbar">
