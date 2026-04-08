@@ -51,6 +51,25 @@ export default function NewsFeed() {
         fetchNews();
     }, []);
 
+    // 🎯 NEURAL JUMP: Auto-scroll to specific ID from Twitter
+    useEffect(() => {
+        if (!loading && news.length > 0) {
+            const params = new URLSearchParams(window.location.search);
+            const targetId = params.get('id');
+            if (targetId) {
+                setTimeout(() => {
+                    const el = document.getElementById(`news-${targetId}`);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Add a subtle highlight flash
+                        el.style.borderColor = '#ff00ff';
+                        setTimeout(() => el.style.borderColor = '', 2000);
+                    }
+                }, 500);
+            }
+        }
+    }, [loading, news]);
+
     if (loading) return (
         <div className="h-full w-full flex flex-col items-center justify-center bg-black gap-6">
             <Loader2 size={40} className="text-[#ff00ff] animate-spin" />
@@ -87,6 +106,7 @@ export default function NewsFeed() {
                     news.map((item, i) => (
                         <motion.div
                             key={item.id}
+                            id={`news-${item.id}`}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.1 }}

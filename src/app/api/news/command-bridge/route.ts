@@ -28,7 +28,7 @@ export async function GET(req: Request) {
 
         if (articles.length > 0) {
             const art = articles[0];
-            const content = `${art.title}\n\nOur analyst ${art.persona_name} just dropped a tactical briefing on this.\n\nRead Full: https://gasp.fun/news?id=${art.id}`;
+            const content = `${art.title}\n\nFull Intel: https://gasp.fun/news?id=${art.id}`;
             
             return NextResponse.json({ 
                 type: 'POST_ARTICLE', 

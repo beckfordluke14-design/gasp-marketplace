@@ -14,27 +14,39 @@ async function pulse() {
         if (task.type === 'POST_ARTICLE') {
             console.log(`🎯 SIGNAL DETECTED: Dispatching Article #${task.id}`);
 
-            // 🛡️ Connect to the Manual Chrome Instance
-            const browser = await chromium.connectOverCDP('http://localhost:9222');
-            const context = browser.contexts()[0];
-            const page = await context.newPage();
+            let browser;
+            try {
+                // 🛡️ Connect to the Manual Chrome Instance
+                browser = await chromium.connectOverCDP('http://localhost:9222');
+                const context = browser.contexts()[0];
+                const page = await context.newPage();
 
-            // ✍️ Human-Mimic Dispatch
-            await page.goto('https://x.com/compose/post', { waitUntil: 'networkidle' });
-            await page.waitForSelector('[data-testid="tweetTextarea_0"]');
-            
-            // Jittered typing to fool bot detection
-            await page.type('[data-testid="tweetTextarea_0"]', task.payload, { delay: 100 });
-            
-            await page.click('[data-testid="tweetButton"]');
-            console.log("✅ HIJACK SUCCESSFUL: Twitter update live.");
-
-            await page.close();
-            await browser.disconnect();
+                // ✍️ Human-Mimic Dispatch with Heavy Timeout
+                console.log("🛰️ Navigating to X Dispatch Center...");
+                await page.goto('https://x.com/compose/post', { timeout: 120000 });
+                
+                console.log("✍️ Locating Neural Input...");
+                await page.waitForSelector('[data-testid="tweetTextarea_0"]', { timeout: 60000 });
+                
+                // Jittered typing to fool bot detection
+                await page.type('[data-testid="tweetTextarea_0"]', task.payload, { delay: 120 });
+                
+                console.log("🚀 Launching Alpha...");
+                await page.click('[data-testid="tweetButton"]');
+                
+                // Wait for the box to disappear (success indicator)
+                await page.waitForSelector('[data-testid="tweetTextarea_0"]', { state: 'hidden', timeout: 30000 });
+                
+                console.log("✅ HIJACK SUCCESSFUL: Twitter update live.");
+                await page.close();
+            } finally {
+                if (browser) await browser.disconnect();
+            }
 
             // Confirm back to the Syndicate
             await axios.post(SYNDICATE_URL, { id: task.id });
-        } else {
+        }
+ else {
             console.log("💤 Standby: Dashboard is clear.");
         }
     } catch (e) {
