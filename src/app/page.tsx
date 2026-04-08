@@ -56,7 +56,9 @@ function MarketplaceContent() {
         try {
           const [resFeed, resActive] = await Promise.all([
              fetch(`/api/admin/feed?limit=200&t=${Date.now()}`),
-             fetch(`/api/personas?t=${Date.now()}`)
+             fetch(`/api/personas?t=${Date.now()}`),
+             // ── 🛰️ SHADOW pulse: Silently trigger intelligence sync
+             fetch(`/api/news/curate?key=gasp_sovereign_intelligence`).catch(() => null)
           ]);
           
           const jsonFeed = await resFeed.json();

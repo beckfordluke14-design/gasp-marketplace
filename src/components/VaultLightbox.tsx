@@ -117,7 +117,7 @@ const VaultLightbox: React.FC<VaultLightboxProps> = ({ items, initialIndex, onCl
               }}
               className="relative w-full h-full flex items-center justify-center"
             >
-                <div className="relative w-full h-full md:max-w-4xl md:max-h-[80vh] aspect-[3/4] rounded-3xl overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] border border-white/5">
+                <div className="relative w-full h-full md:max-w-4xl md:max-h-[80vh] aspect-[3/4] rounded-3xl overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] border border-white/5" onContextMenu={(e) => e.preventDefault()}>
                     <motion.div 
                         animate={{ scale: zoom }}
                         drag={zoom > 1}
@@ -126,14 +126,18 @@ const VaultLightbox: React.FC<VaultLightboxProps> = ({ items, initialIndex, onCl
                     >
                         <Image 
                           src={currentItem.content_url} 
-                          alt="" 
+                          alt="Secure Asset" 
                           fill 
                           unoptimized 
-                          className="object-contain pointer-events-none" 
+                          className="object-contain pointer-events-none select-none" 
+                          draggable={false}
                         />
                         
+                        {/* 🛡️ ANTI-DOWNLOAD SHIELD */}
+                        <div className="absolute inset-0 z-10 bg-transparent" />
+
                         {/* 🔒 BRAND WATERMARK OVERLAY */}
-                        <BrandingOverlay showRepeating className="opacity-40" />
+                        <BrandingOverlay showRepeating className="opacity-40 z-20" />
                     </motion.div>
                 </div>
             </motion.div>
@@ -165,13 +169,7 @@ const VaultLightbox: React.FC<VaultLightboxProps> = ({ items, initialIndex, onCl
               </div>
           </div>
 
-          <button 
-            onClick={() => window.open(currentItem.content_url, '_blank')}
-            className="flex items-center gap-3 px-8 py-4 bg-white text-black rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
-          >
-            <Download size={16} />
-            Download Original
-          </button>
+          {/* 🛡️ DOWNLOAD DISABLED PER SOVEREIGN PROTOCOL */}
       </div>
 
       {/* Mobile Swipe Indicators */}

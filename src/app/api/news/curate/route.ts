@@ -118,14 +118,38 @@ async function synthesizeReport(persona: any, rawNews: any) {
     }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const { searchParams } = new URL(req.url);
+        const key = searchParams.get('key') || req.headers.get('x-syndicate-key');
+        const secret = process.env.CRON_SECRET || 'gasp_sovereign_intelligence';
+
+        if (key !== secret) {
+            console.log('[Syndicate] 🔐 UNAUTHORIZED INGRESS ATTEMPT BLOCKED.');
+            return NextResponse.json({ success: false, error: 'Unauthorized Clearances Required.' }, { status: 401 });
+        }
+
         console.log('[Syndicate] ⚡ INITIATING MASS-INGRESS PULSE...');
+
+        // 🛡️ COOLDOWN GUARD: Ensure we only pulse once every 60 minutes
+        const { rows: lastSync } = await db.query(`
+            SELECT created_at FROM posts 
+            WHERE content_type = 'link' 
+            AND created_at > NOW() - INTERVAL '60 minutes'
+            LIMIT 1
+        `);
+
+        if (lastSync.length > 0) {
+            const lastTime = new Date(lastSync[0].created_at).toLocaleTimeString();
+            console.log(`[Syndicate] 🛡️ COOLDOWN ACTIVE: Last sync was at ${lastTime}. Skipping pulse.`);
+            return NextResponse.json({ success: true, message: 'Archive is already synchronized for this cycle.' });
+        }
         
         // 🔱 TOTAL HYDRA: Processing all participants for maximum saturation
         const { rows: dbPersonas } = await db.query(`
             SELECT id, name, COALESCE(system_prompt, personality, 'Seductive baddie') as vibe 
             FROM personas
+            WHERE is_active = true
         `);
         
         const roster = dbPersonas; 
@@ -156,21 +180,41 @@ export async function GET() {
             console.log(`[Syndicate] 🛰️ WAVE ${waveNum} SNIPRE: ${validBatch.length}/${batch.length} valid intel packages.`);
             
             if (validBatch.length > 0) {
-                const batchSynthesis = await Promise.all(validBatch.map(pkg => synthesizeReport(pkg.persona, pkg.news)));
+                // 🛡️ DUPLICATE PREVENTION: Check which URLs are already in the archive
+                const urls = validBatch.map(pkg => pkg.news.url);
+                const { rows: existing } = await db.query(
+                    'SELECT content_url FROM posts WHERE content_url = ANY($1)', 
+                    [urls]
+                );
+                const existingUrls = new Set(existing.map(r => r.content_url));
+
+                const freshBatch = validBatch.filter(pkg => !existingUrls.has(pkg.news.url));
+                console.log(`[Syndicate] 🛡️ WAVE ${waveNum} FILTER: ${freshBatch.length}/${validBatch.length} items are fresh.`);
+
+                if (freshBatch.length === 0) continue;
+
+                const batchSynthesis = await Promise.all(freshBatch.map(pkg => 
+                    synthesizeReport(pkg.persona, pkg.news).then(r => r ? { ...r, url: pkg.news.url } : null)
+                ));
                 const batchReports = batchSynthesis.filter((r): r is any => r !== null);
                 console.log(`[Syndicate] 🧪 WAVE ${waveNum} NEURAL: ${batchReports.length} briefings successfully synthesized.`);
                 
                 for (const report of batchReports) {
                     try {
                         const { rows } = await db.query(`
-                            INSERT INTO posts (persona_id, content_type, caption, content, is_vault, is_gallery, meta)
-                            VALUES ($1, 'text', $2, $3, false, false, $4)
+                            INSERT INTO posts (persona_id, content_type, caption, content_url, is_vault, is_gallery, metadata, created_at)
+                            VALUES ($1, 'link', $2, $3, false, false, $4, NOW())
                             RETURNING id
                         `, [
                             report.personaId,
                             report.title,
-                            report.content,
-                            JSON.stringify({ heat: report.heat, type: 'brave_ingress', created_at: new Date().toISOString() })
+                            report.url, // 🛰️ Source URL from Brave
+                            JSON.stringify({ 
+                                content: report.content, 
+                                heat: report.heat, 
+                                type: 'brave_ingress', 
+                                created_at: new Date().toISOString() 
+                            })
                         ]);
                         results.push({ id: rows[0].id });
                     } catch (err: any) {

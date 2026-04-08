@@ -10,7 +10,8 @@ export async function GET() {
             SELECT 
                 p.id,
                 p.persona_id,
-                p.caption as content,
+                p.caption as title,
+                COALESCE(p.metadata->>'content', p.caption) as content,
                 p.created_at,
                 p.content_url,
                 p.content_type,
