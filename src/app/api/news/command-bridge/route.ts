@@ -20,6 +20,7 @@ export async function GET(req: Request) {
             FROM posts p
             JOIN personas pers ON p.persona_id = pers.id
             WHERE p.content_type = 'link'
+            AND pers.is_active = true
             AND (p.metadata->>'tweeted' IS NULL OR p.metadata->>'tweeted' = 'false')
             ORDER BY p.created_at DESC
             LIMIT 1
