@@ -55,36 +55,33 @@ async function pulse() {
                     console.log(`📥 Downloading assets: ${task.imageUrl}`);
                     await downloadFile(task.imageUrl, tempFile);
 
-                    // 🎨 WATERMARKING PROTOCOL (v7.5) - AGGRESSIVE CENTRAL BURN
+                    // 🎨 WATERMARKING PROTOCOL (v8.0) - SHARP NEURAL BURN (WebP+ Support)
                     try {
-                        const Jimp = require('jimp');
-                        console.log("💎 Applying Central Neural Burn...");
-                        const image = await Jimp.read(tempFile);
-                        const font = await Jimp.loadFont(Jimp.FONT_SANS_64_WHITE); 
+                        const sharp = require('sharp');
+                        console.log("💎 Applying High-Fidelity Neural Burn...");
                         
                         const text = "CHAT ON GASP.FUN";
-                        const textWidth = Jimp.measureText(font, text);
-                        const textHeight = Jimp.measureTextHeight(font, text, image.bitmap.width);
-                        
-                        // Calculate center position
-                        const x = (image.bitmap.width / 2) - (textWidth / 2);
-                        const y = (image.bitmap.height / 2) - (textHeight / 2);
-                        
-                        // Burn the CTA through the center with 50% transparency for the "Agency" look
-                        const watermark = new Jimp(image.bitmap.width, image.bitmap.height, 0x00000000);
-                        watermark.print(font, x, y, text);
-                        watermark.opacity(0.4); // 40% opacity for central burn
-                        
-                        image.composite(watermark, 0, 0, {
-                            mode: Jimp.BLEND_SOURCE_OVER,
-                            opacitySource: 1,
-                            opacityDest: 1
-                        });
-                        
-                        await image.writeAsync(tempFile);
-                        console.log("✅ Asset Branded (Central Burn).");
-                    } catch (jimpErr) {
-                        console.warn("⚠️ Watermark Failed (Non-blocking):", jimpErr.message);
+                        const svgImage = `
+                            <svg width="800" height="100">
+                                <style>
+                                    .text { fill: rgba(255, 255, 255, 0.4); font-size: 64px; font-weight: 900; font-family: sans-serif; font-style: italic; }
+                                </style>
+                                <text x="50%" y="50%" text-anchor="middle" class="text">${text}</text>
+                            </svg>
+                        `;
+
+                        const processedBuffer = await sharp(tempFile)
+                            .composite([{
+                                input: Buffer.from(svgImage),
+                                gravity: 'center'
+                            }])
+                            .toBuffer();
+
+                        const fs = require('fs');
+                        fs.writeFileSync(tempFile, processedBuffer);
+                        console.log("✅ Asset Branded (Sharp Center Burn).");
+                    } catch (sharpErr) {
+                        console.warn("⚠️ Watermark Failed (Non-blocking):", sharpErr.message);
                     }
                 }
 
