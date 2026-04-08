@@ -102,10 +102,18 @@ export default function NewsFeed() {
                         <motion.div 
                             initial={{ scale: 0.95, y: 30 }}
                             animate={{ scale: 1, y: 0 }}
-                            className="bg-[#0a0a0a] border border-white/10 w-full max-w-7xl h-full max-h-[900px] rounded-[4rem] overflow-hidden flex flex-col md:flex-row relative z-10 shadow-[0_0_100px_rgba(0,0,0,1)]"
+                            className="bg-[#0a0a0a] border border-white/10 w-full max-w-7xl h-screen md:h-full md:max-h-[900px] rounded-none md:rounded-[4rem] overflow-hidden flex flex-col md:flex-row relative z-10 shadow-[0_0_100px_rgba(0,0,0,1)]"
                         >
-                            {/* Left: Intel Content */}
-                            <div className="flex-1 overflow-y-auto p-8 md:p-16 border-r border-white/5 no-scrollbar">
+                            {/* Mobile Exit */}
+                            <button 
+                                onClick={() => setSelectedNews(null)}
+                                className="md:hidden absolute top-6 right-6 z-[1100] w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white"
+                            >
+                                <Zap size={20} />
+                            </button>
+
+                            {/* Left: Intel Content (Desktop: Bottom, Mobile: Middle) */}
+                            <div className="flex-1 overflow-y-auto p-8 md:p-16 border-b md:border-b-0 md:border-r border-white/5 no-scrollbar order-2 md:order-1">
                                 <div className="mb-8 flex items-center gap-3">
                                     <div className="bg-[#ff00ff] text-white text-[9px] font-black px-6 py-2 rounded-full tracking-[.4em] italic">
                                         RESTRICTED ACCESS
@@ -121,39 +129,39 @@ export default function NewsFeed() {
                                     {selectedNews.content}
                                 </p>
                                 
-                                <div className="p-8 bg-white/5 border border-white/10 rounded-[2rem] mb-12">
+                                <div className="p-4 md:p-8 bg-white/5 border border-white/10 rounded-[2rem] mb-12">
                                     <p className="text-white/20 text-[9px] font-black uppercase tracking-[.4em] mb-4">Original Intelligence Source</p>
                                     <iframe 
                                         src={selectedNews.content_url} 
-                                        className="w-full h-[400px] rounded-xl border border-white/5 grayscale hover:grayscale-0 transition-all opacity-40 hover:opacity-100"
+                                        className="w-full h-[300px] md:h-[400px] rounded-xl border border-white/5 grayscale"
                                     />
                                 </div>
                             </div>
 
-                            {/* Right: The Node Bridge */}
-                            <div className="w-full md:w-[450px] bg-[#0d0d0d] flex flex-col items-center p-12 text-center">
+                            {/* Right: The Node Bridge (Desktop: Side, Mobile: Top/Float) */}
+                            <div className="w-full md:w-[450px] bg-[#0d0d0d] flex flex-col items-center p-8 md:p-12 text-center order-1 md:order-2 shrink-0">
                                 <div className="sticky top-0 flex flex-col items-center w-full">
-                                    <div className="w-48 h-48 rounded-[3rem] overflow-hidden border-2 border-[#ff00ff] shadow-[0_0_40px_rgba(255,0,255,0.2)] mb-8 shrink-0">
+                                    <div className="w-32 h-32 md:w-48 md:h-48 rounded-[2rem] md:rounded-[3rem] overflow-hidden border-2 border-[#ff00ff] shadow-[0_0_40px_rgba(255,0,255,0.2)] mb-6 md:mb-8 shrink-0">
                                         {selectedNews.persona_image.endsWith('.mp4') ? (
                                             <video src={selectedNews.persona_image} autoPlay muted loop playsInline className="w-full h-full object-cover" />
                                         ) : (
                                             <img src={selectedNews.persona_image} alt="" className="w-full h-full object-cover" />
                                         )}
                                     </div>
-                                    <h3 className="text-2xl font-black uppercase italic tracking-widest text-[#ff00ff] mb-2">
+                                    <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-widest text-[#ff00ff] mb-2">
                                         {selectedNews.persona_name}
                                     </h3>
-                                    <p className="text-white/30 text-[10px] font-black uppercase tracking-[.4em] mb-12 italic">
+                                    <p className="hidden md:block text-white/30 text-[10px] font-black uppercase tracking-[.4em] mb-12 italic">
                                         Digital Archive Custodian
                                     </p>
                                     
-                                    <div className="w-full bg-white/5 border border-white/10 rounded-[2.5rem] p-8 mb-8 text-left">
+                                    <div className="w-full bg-white/5 border border-white/10 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 mb-6 md:mb-8 text-left">
                                         <div className="flex items-center gap-2 mb-4">
                                             <div className="w-2 h-2 rounded-full bg-[#00f0ff] animate-ping" />
                                             <span className="text-[#00f0ff] text-[9px] font-black uppercase tracking-widest">Node Status: Active</span>
                                         </div>
-                                        <p className="text-white/60 text-xs italic font-medium leading-relaxed">
-                                            "I've analyzed the raw data for this leak. There are patterns here that the public hasn't seen yet. Connect with me for the full debrief."
+                                        <p className="text-white/60 text-[10px] md:text-xs italic font-medium leading-relaxed">
+                                            "I've analyzed the raw data for this leak... Connect with me for the full debrief."
                                         </p>
                                     </div>
 
@@ -161,14 +169,14 @@ export default function NewsFeed() {
                                         onClick={() => {
                                             window.location.href = `/?profile=${selectedNews.persona_id}`;
                                         }}
-                                        className="w-full h-20 rounded-2xl bg-[#ff00ff] text-white font-black italic uppercase tracking-[0.2em] text-sm hover:scale-105 transition-all shadow-[0_0_40px_rgba(255,0,255,0.4)]"
+                                        className="w-full h-16 md:h-20 rounded-2xl bg-[#ff00ff] text-white font-black italic uppercase tracking-[0.2em] text-sm hover:scale-105 transition-all shadow-[0_0_40px_rgba(255,0,255,0.4)]"
                                     >
                                         Initiate Encounter
                                     </button>
                                     
                                     <button 
                                         onClick={() => setSelectedNews(null)}
-                                        className="mt-6 text-white/20 hover:text-white text-[9px] font-black uppercase tracking-widest transition-all"
+                                        className="hidden md:block mt-6 text-white/20 hover:text-white text-[9px] font-black uppercase tracking-widest transition-all"
                                     >
                                         [ Close Intelligence ]
                                     </button>
@@ -260,9 +268,12 @@ export default function NewsFeed() {
                                     {item.content}
                                 </p>
 
-                                <div className="flex flex-col md:flex-row gap-4">
+                                <div className="flex flex-col md:flex-row gap-4 relative z-50">
                                     <button 
-                                        onClick={() => setSelectedNews(item)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedNews(item);
+                                        }}
                                         className="flex-1 h-16 rounded-xl bg-white text-black flex items-center justify-center gap-3 hover:bg-[#00f0ff] transition-all font-syncopate font-black italic text-[10px] tracking-widest uppercase shadow-xl active:scale-[0.98]"
                                     >
                                         {isSpanish ? 'LEER INTELIGENCIA' : 'READ INTELLIGENCE'}
@@ -270,10 +281,11 @@ export default function NewsFeed() {
                                     </button>
 
                                     <button 
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                            e.stopPropagation();
                                             window.location.href = `/?profile=${item.persona_id}`;
                                         }}
-                                        className="px-8 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3 hover:bg-white/10 transition-all text-white/40 hover:text-white uppercase text-[9px] font-black tracking-widest italic"
+                                        className="px-8 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3 hover:bg-white/10 transition-all text-white hover:text-[#ff00ff] uppercase text-[9px] font-black tracking-widest italic"
                                     >
                                         <MessageSquare size={16} />
                                         {isSpanish ? `CHAT CON ${item.persona_name.split(' ')[0]}` : `CHAT W/ ${item.persona_name.split(' ')[0]}`}
