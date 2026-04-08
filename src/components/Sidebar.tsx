@@ -253,7 +253,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                     localStorage.setItem('gasp_locale', 'en');
                     window.location.reload();
                 }}
-                className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${localStorage.getItem('gasp_locale') === 'es' ? 'text-white/20' : 'bg-[#00f0ff] text-black'}`}
+                className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${isSpanish ? 'text-white/20' : 'bg-[#00f0ff] text-black'}`}
             >
                 EN
             </button>
@@ -262,7 +262,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                     localStorage.setItem('gasp_locale', 'es');
                     window.location.reload();
                 }}
-                className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${localStorage.getItem('gasp_locale') === 'es' ? 'bg-[#ff00ff] text-white' : 'text-white/20'}`}
+                className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${isSpanish ? 'bg-[#ff00ff] text-white' : 'text-white/20'}`}
             >
                 ES
             </button>
@@ -285,7 +285,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                                localStorage.setItem('gasp_locale', 'en');
                                window.location.reload();
                            }}
-                           className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${localStorage.getItem('gasp_locale') === 'es' ? 'text-white/20 hover:text-white' : 'bg-[#00f0ff] text-black shadow-[0_0_10px_rgba(0,240,255,0.4)]'}`}
+                           className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${isSpanish ? 'text-white/20 hover:text-white' : 'bg-[#00f0ff] text-black shadow-[0_0_10px_rgba(0,240,255,0.4)]'}`}
                         >
                             EN
                         </button>
@@ -294,7 +294,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                                localStorage.setItem('gasp_locale', 'es');
                                window.location.reload();
                            }}
-                           className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${localStorage.getItem('gasp_locale') === 'es' ? 'bg-[#ff00ff] text-white shadow-[0_0_10px_rgba(255,0,255,0.4)]' : 'text-white/20 hover:text-white'}`}
+                           className={`px-3 py-1 text-[8px] font-black rounded-lg transition-all ${isSpanish ? 'bg-[#ff00ff] text-white shadow-[0_0_10px_rgba(255,0,255,0.4)]' : 'text-white/20 hover:text-white'}`}
                         >
                             ES
                         </button>
