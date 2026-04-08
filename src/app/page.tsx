@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, MessageSquare } from 'lucide-react';
+import { Zap, MessageSquare, Loader2 } from 'lucide-react';
 import GlobalFeed from '@/components/GlobalFeed';
 import WeatherFeed from '@/components/WeatherFeed';
 import NewsFeed from '@/components/NewsFeed';
@@ -49,6 +49,51 @@ function MarketplaceContent() {
   };
   
   const searchParams = useSearchParams();
+
+  // 🛰️ SYNDICATE SYNC: Auto-select profile from URL (News Feed Funnel)
+  useEffect(() => {
+    if (!mounted) return;
+    
+    const profileId = searchParams.get('profile');
+    if (!profileId) return;
+
+    const runSync = async () => {
+        console.log(`🧬 [News Funnel] Hijacking for: ${profileId}`);
+        
+        // 1. Check local registry first
+        const existing = initialProfiles.find(p => String(p.id) === profileId) || 
+                         dbProfiles.find(p => String(p.id) === profileId);
+        
+        if (existing) {
+            handleSelectProfile(profileId);
+            setSidebarView('chats');
+        } else {
+            // 2. Proactive Fetch: If not found, hit the direct API node
+            try {
+                const res = await fetch(`/api/admin/persona/${profileId}`);
+                const data = await res.json();
+                if (data && data.id) {
+                    const hydrated = {
+                        ...data,
+                        image: proxyImg(data.seed_image_url || data.image)
+                    };
+                    setChatProfileCache(prev => ({ ...prev, [profileId]: hydrated }));
+                    handleSelectProfile(profileId, undefined, hydrated);
+                    setSidebarView('chats');
+                }
+            } catch (err) {
+                console.error('[Funnel] Profile hydration failed:', err);
+            }
+        }
+
+        // 3. Hygiene: Clear param to prevent loop
+        const url = new URL(window.location.href);
+        url.searchParams.delete('profile');
+        window.history.replaceState({}, '', url.pathname + url.search);
+    };
+
+    runSync();
+  }, [searchParams, dbProfiles, mounted]);
 
   useEffect(() => { 
     setMounted(true); 
@@ -291,7 +336,7 @@ function MarketplaceContent() {
                onSelectProfile={handleSelectProfile} 
             />
            
-           <div className="flex-1 flex flex-col relative bg-transparent">
+           <div className="flex-1 flex flex-col relative bg-transparent pt-[72px] md:pt-20">
               {/* 🛰️ SOVEREIGN NAVIGATION: GHOST GLASS PILL */}
               <div className="sticky top-[86px] md:top-20 z-[100] flex justify-center w-full px-4 pointer-events-none mb-[-3.5rem]">
                   <div className="flex items-center gap-1 md:gap-3 p-1.5 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all duration-500 w-fit max-w-full overflow-x-auto no-scrollbar">
@@ -404,11 +449,25 @@ function MarketplaceContent() {
           <AnimatePresence>
             {openChatIds.filter(id => !minimizedIds.includes(id)).map((sId, index) => {
               const p = initialProfiles.find((profileItem: any) => String(profileItem.id) === sId) || chatProfileCache[sId];
+              
               if (!p) return (
-                <motion.div key={sId} initial={{ x: '100%', opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: '100%', opacity: 0 }} className="h-full pointer-events-auto bg-black border-l border-white/5 shadow-2xl">
-                    <div className="flex flex-col items-center justify-center h-full p-10 text-center gap-6">
-                       <Zap className="text-[#ffea00] animate-pulse" size={40} />
-                       <span className="text-[10px] font-black uppercase tracking-[0.2em]">Return to Terminal</span>
+                <motion.div 
+                    key={sId} 
+                    initial={{ x: '100%', opacity: 0 }} 
+                    animate={{ x: 0, opacity: 1 }} 
+                    exit={{ x: '100%', opacity: 0 }} 
+                    className="h-full pointer-events-auto bg-black border-l border-white/5 shadow-2xl w-full max-w-md"
+                >
+                    <div className="flex flex-col items-center justify-center h-full p-10 text-center gap-8">
+                       <div className="relative">
+                          <Zap className="text-[#ffea00] animate-pulse relative z-10" size={48} />
+                          <div className="absolute inset-0 bg-[#ffea00]/20 blur-2xl animate-pulse" />
+                       </div>
+                       <div className="space-y-2">
+                          <p className="text-[12px] font-syncopate font-black uppercase tracking-[0.3em] text-white">Synchronizing...</p>
+                          <p className="text-[9px] font-black uppercase tracking-widest text-white/20 italic">Establishing Sovereign Uplink</p>
+                       </div>
+                       <Loader2 className="text-white/10 animate-spin" size={20} />
                     </div>
                 </motion.div>
               );

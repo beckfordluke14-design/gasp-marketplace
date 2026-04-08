@@ -277,7 +277,7 @@ export default function NewsFeed() {
                                     className="relative h-[500px] w-full rounded-[4rem] overflow-hidden group/promo border border-[#ff00ff]/20"
                                 >
                                     <img src={item.persona_image} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/promo:scale-110" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                                    <div className="absolute inset-0 bg-black/10" />
                                     
                                     <div className="absolute inset-x-8 bottom-8 md:inset-x-12 md:bottom-12 flex flex-col items-center text-center">
                                         <div className="mb-4 flex items-center gap-2 px-6 py-2 bg-[#ff00ff] text-white text-[10px] font-black uppercase tracking-[0.4em] rounded-full shadow-[0_0_30px_rgba(255,0,255,0.4)]">

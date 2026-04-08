@@ -37,14 +37,10 @@ export default function NewsPage() {
 
             {/* 📰 NEWS TERMINAL */}
             <div className="flex-1 h-full relative overflow-hidden bg-black">
-                <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-black to-transparent z-10" />
-                <div className="h-full pt-10">
+                <div className="h-full">
                     <NewsFeed />
                 </div>
             </div>
-            
-            {/* 🛡️ DECORATIVE OVERLAY (SYNDICATE BRANDING) */}
-            <div className="fixed top-0 left-0 w-full h-[100px] bg-gradient-to-b from-black to-transparent pointer-events-none z-50 md:hidden" />
         </main>
     );
 }
