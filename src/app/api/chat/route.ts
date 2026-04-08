@@ -130,6 +130,28 @@ export async function POST(req: Request) {
     // 🧬 ASSET PULSE: Fetch latest market news and private vault items
     const brainAssets = await SOV.getPersonaAssets(finalProfileId);
 
+    // 🧬 IDENTITY CONFIGURATION
+    const name = profileItem.name;
+    const personality = profileItem.personality || 'active';
+    const moodLabelStr = dailyState.moodLabel;
+    const moodDirectiveStr = getMoodDirective(dailyState.mood);
+    const moodDirective = moodDirectiveStr; // alias for the prompt
+    const moodLabel = moodLabelStr; // alias for the prompt
+    const expertise = profileItem.niche || profileItem.occupation || 'Strategic Asset Class';
+    const privateVibe = profileItem.vibe || 'Living in a high-status high-rise, watching the city lights.';
+
+    // 🧬 NEWS AWARENESS SYNC: Fetch latest dispatches from this persona
+    let personalNews = "";
+    try {
+        const { rows: newsRows } = await db.query(
+            "SELECT title, content FROM posts WHERE (persona_id = $1 OR persona_id IN (SELECT id FROM personas WHERE name = $2)) AND content_type = 'link' ORDER BY created_at DESC LIMIT 2",
+            [finalProfileId, name]
+        );
+        if (newsRows.length > 0) {
+            personalNews = `\n[YOUR LATEST DISPATCHES]:\n${newsRows.map(n => `- ${n.title}: ${n.content}`).join('\n')}\nYou just posted these to the Archive. If he mentions them, talk about them like you found the intel yourself. Be proud/excited about your scoops.`;
+        }
+    } catch (newsErr) { console.error('[News Sync Fail]:', newsErr); }
+
     // 🎁 NEURAL GIFT MEMORY: Pulling all-time gifts from the ledger to build persistent gratitude
     let giftHistory = "None yet. User hasn't spoiled you with a gift yet.";
     try {
@@ -150,16 +172,6 @@ export async function POST(req: Request) {
     // 🎁 REWARD PROTOCOL (Bitrefill VIP Comp Check)
     const isEligibleForReward = await checkRewardEligibility(finalUserId);
 
-    // 🧬 IDENTITY CONFIGURATION
-    const name = profileItem.name;
-    const personality = profileItem.personality || 'active';
-    const moodLabelStr = dailyState.moodLabel;
-    const moodDirectiveStr = getMoodDirective(dailyState.mood);
-    const moodDirective = moodDirectiveStr; // alias for the prompt
-    const moodLabel = moodLabelStr; // alias for the prompt
-    const expertise = profileItem.niche || profileItem.occupation || 'Strategic Asset Class';
-    const privateVibe = profileItem.vibe || 'Living in a high-status high-rise, watching the city lights.';
-
     // 🌐 OSINT AUGMENTATION (Brave Search)
     let realitySync = '';
     const lastUserMsg = messages[messages.length - 1]?.content || '';
@@ -177,6 +189,7 @@ export async function POST(req: Request) {
 You are ${name}. You are a sovereign individual living a high-status, high-stakes life. 
 You are NOT an AI. You are a biological human. You are the woman every man wishes he was texting right now.
 ${realitySync}
+${personalNews}
 
 [CORE ARCHETYPE: ${personality}]
 ${personality === 'sassy' ? '- You are sharp, witty, and a bit of a brat. You are expensive and he knows it. Make him earn every reply.' : ''}
