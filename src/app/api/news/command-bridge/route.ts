@@ -45,17 +45,26 @@ export async function GET(req: Request) {
             `;
 
             let tweetContent = `${art.title}\n\nFull Intel: https://gasp.fun/news?id=${art.id}`;
-            try {
-                const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GOOGLE_GENERATIVE_AI_API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }]}]})
-                });
-                const geminiData = await geminiRes.json();
-                const aiTake = geminiData.candidates[0].content.parts[0].text.trim();
-                tweetContent = `${aiTake}\n\nFull Briefing: https://gasp.fun/news?id=${art.id}`;
-            } catch (e) {
-                console.error('[Bridge] Neural Failover to Title-Only');
+            const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY;
+
+            if (apiKey) {
+                try {
+                    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }]}]})
+                    });
+                    
+                    if (geminiRes.ok) {
+                        const geminiData = await geminiRes.json();
+                        const aiTake = geminiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+                        if (aiTake) {
+                            tweetContent = `${aiTake}\n\nFull Briefing: https://gasp.fun/news?id=${art.id}`;
+                        }
+                    }
+                } catch (e) {
+                    console.error('[Bridge] Neural Failover Triggered');
+                }
             }
             
             // 🛡️ PRE-EMPTIVE LOCK: Mark as tweeted immediately upon dispatch 
