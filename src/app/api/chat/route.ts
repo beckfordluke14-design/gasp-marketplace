@@ -259,9 +259,40 @@ ${userLocale === 'es' ? `
     let voiceB64: string | null = null;
     if (sendVoice && streamA_Native) {
         try {
-            // 🧬 PREBAKED DNA: Combining vibe and deep vocal DNA for zero-config synthesis
-            const dnaVibe = `[PROMPT_DNA]: ${profileItem.vibe || ''} | [SKIN_TONE]: ${profileItem.skin_tone || ''} | [VOCAL_DNA]: ${JSON.stringify(profileItem.vocal_dna || {})}`;
-            const tts = await synthesizeGeminiSpeech(streamA_Native, profileItem?.voice_id || 'Aoede', dnaVibe);
+            // 🧬 SOVEREIGN VOCAL IDENTITY RESOLVER v5.8
+            // Root Cause Fix: vocal_dna doesn't exist as a DB column → always blank.
+            // Solution: Cross-reference PERSONA_ARCHETYPES by name to inject pre-baked DNA.
+            const personaFirstName = (profileItem.name || finalProfileId).split(' ')[0].toLowerCase();
+            const archetype = PERSONA_ARCHETYPES.find(a => 
+                a.id.toLowerCase().includes(personaFirstName) ||
+                a.label.toLowerCase().includes(personaFirstName) ||
+                a.systemPrompt.toLowerCase().includes(`you are ${personaFirstName}`)
+            );
+
+            const resolvedDNA     = (archetype?.vocal_dna || {}) as import('@/lib/personaTemplates').VocalDNA;
+            const resolvedSlang   = archetype?.slang || [];
+            const resolvedAccent  = resolvedDNA.accent   || 'Neutral';
+            const resolvedTexture = resolvedDNA.texture  || 'Velvety smooth';
+            const resolvedProsody = resolvedDNA.prosody  || 'Natural and expressive';
+            const resolvedCountry = archetype?.country   || 'International';
+            const resolvedCulture = archetype?.culture   || 'Universal';
+            const resolvedEnergy  = resolvedDNA.energy   || 'hi-fi';
+            const resolvedIntimacy = resolvedDNA.intimacy || 'Warm and engaging';
+
+            // 🎭 High-Fidelity Directive with full personality injection
+            const dnaVibe = `
+You are ${profileItem.name}, a ${resolvedCulture} woman from ${resolvedCountry}.
+ACCENT (MANDATORY — NON-NEGOTIABLE): ${resolvedAccent}. Sound unmistakably like you are from ${resolvedCountry}.
+VOCAL TEXTURE: ${resolvedTexture}.
+PROSODY & RHYTHM: ${resolvedProsody}.
+ENERGY LEVEL: ${resolvedEnergy}.
+INTIMACY: ${resolvedIntimacy}.
+SLANG (use naturally): ${resolvedSlang.slice(0, 5).join(', ')}.
+CRITICAL: Do NOT sound American or generic. Lean heavily into your regional accent and phonetics.
+            `.trim();
+
+            const voiceId = profileItem?.voice_id || (archetype?.engine === 'gemini-2.5' ? 'Kore' : 'Aoede');
+            const tts = await synthesizeGeminiSpeech(streamA_Native, voiceId, dnaVibe);
             if (tts.data) {
                 voiceUrl = await uploadSovereignAsset(tts.data, `v5_${finalProfileId}_${Date.now()}.wav`, 'audio/wav');
                 voiceB64 = tts.data.toString('base64');
