@@ -103,7 +103,7 @@ export async function POST(req: Request) {
                     `SELECT 1 FROM transactions 
                      WHERE (user_id = $1 OR meta->>'ip' = $2) 
                      AND type = 'starter_claim' 
-                     AND created_at > NOW() - INTERVAL '24 hours'
+                     AND created_at > NOW() - INTERVAL '99999 days'
                      LIMIT 1`,
                     [userId, clientIP]
                 );
@@ -119,9 +119,11 @@ export async function POST(req: Request) {
             await db.query('BEGIN');
             try {
                 await db.query(`
-                    UPDATE profiles 
-                    SET credit_balance = credit_balance + 1500, updated_at = NOW()
-                    WHERE id = $1
+                    INSERT INTO profiles (id, credit_balance, created_at, updated_at)
+                    VALUES ($1, 1500, NOW(), NOW())
+                    ON CONFLICT (id) DO UPDATE SET 
+                        credit_balance = profiles.credit_balance + 1500,
+                        updated_at = NOW()
                 `, [userId]);
 
                 await db.query(`
