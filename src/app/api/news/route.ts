@@ -18,7 +18,8 @@ export async function GET() {
                 pers.name as persona_name,
                 pers.age as persona_age,
                 pers.seed_image_url as persona_image,
-                pers.city as persona_city
+                pers.city as persona_city,
+                p.metadata as persona_meta
             FROM posts p
             JOIN personas pers ON p.persona_id = pers.id
             WHERE p.content_type = 'link'

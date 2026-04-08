@@ -26,12 +26,13 @@ interface NewsPost {
     title: string;
     content: string;
     created_at: string;
-    meta?: {
+    persona_meta?: {
+        persona_note?: string;
         heat?: 'Standard' | 'High' | 'Critical';
         source?: string;
         city?: string;
-        persona_note?: string;
     };
+    meta?: any;
 }
 
 interface NewsFeedProps {
@@ -191,7 +192,7 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
                                             <span className="text-[#00f0ff] text-[9px] font-black uppercase tracking-widest">Connection: Stable</span>
                                         </div>
                                         <p className="text-white/60 text-[11px] italic font-medium leading-relaxed">
-                                            "{isSpanish ? 'He analizado esta filtración... Conéctate conmigo para el informe completo.' : 'I’ve analyzed the raw data for this leak... Connect with me for the full debrief.'}"
+                                            "{selectedNews.persona_meta?.persona_note || (isSpanish ? 'He analizado esta filtración... Conéctate conmigo para el informe completo.' : 'I’ve analyzed the raw data for this leak... Connect with me for the full debrief.')}"
                                         </p>
                                     </div>
 

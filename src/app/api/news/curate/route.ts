@@ -101,8 +101,8 @@ async function synthesizeReport(persona: any, rawNews: any) {
     try {
         const prompt = `
             ROLE: Evidence-Based Market Analyst. 
-            MISSION: Provide a direct tactical briefing BASED STIRCTLY on the provided source.
-            VIBE: Sharp, Data-Driven, Realistic.
+            MISSION: Provide a direct tactical briefing BASED STRICTLY on the provided source.
+            VOICE: ${persona.vibe || 'Sharp Analyst'}
             
             NEWS SOURCE: ${rawNews.title}
             NEWS CONTEXT: ${rawNews.description}
@@ -110,8 +110,9 @@ async function synthesizeReport(persona: any, rawNews: any) {
             STRICT RULES:
             - NO BLIND GUESSING. Every insight must be anchored to a fact in the source.
             - Explain the "Why" using data from the news context.
+            - persona_note: A very short (1 sentence), first-person specific thought about this intel in your persona's unique voice. (e.g. "I've been watching this leak since Tuesday.")
             - If the news is small, don't overhype it. 
-            - OUTPUT (JSON ONLY): { "title", "content", "heat" }
+            - OUTPUT (JSON ONLY): { "title", "content", "heat", "persona_note" }
         `;
 
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -275,6 +276,7 @@ export async function GET(req: Request) {
                             JSON.stringify({ 
                                 content: report.content, 
                                 heat: report.heat, 
+                                persona_note: report.persona_note,
                                 type: 'brave_ingress', 
                                 created_at: new Date().toISOString() 
                             })
