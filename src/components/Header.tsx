@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useUser } from './providers/UserProvider';
+import GlitchText from './ui/GlitchText';
 
 interface HeaderProps {
     onOpenMenu?: () => void;
@@ -105,11 +106,12 @@ export default function Header({ onOpenMenu, onOpenTopUp }: HeaderProps) {
                 >
                    <Menu size={18} />
                 </button>
-                
                 <div className="flex flex-col gap-0.5 cursor-pointer group" onClick={() => router.push('/')}>
-                  <div className="flex items-baseline gap-1.5">
-                    <h1 className="text-xl md:text-2xl font-syncopate font-black italic tracking-tighter text-white uppercase leading-none group-hover:text-[#ff00ff] transition-colors whitespace-nowrap">Gasp</h1>
-                    {/* 🧬 ARCHIVE TAG REMOVED PER USER REQUEST */}
+                  <div className="flex items-baseline gap-1.5 overflow-hidden translate-x-[-2px]">
+                    <h1 className="text-xl md:text-2xl font-syncopate font-black italic tracking-tighter text-white uppercase leading-none group-hover:text-[#ff00ff] transition-colors whitespace-nowrap">
+                      <GlitchText text="Gasp" />
+                      <span className="text-[#ff00ff] scale-110 inline-block ml-[1px]">.</span>
+                    </h1>
                   </div>
                   <span className="hidden md:block text-[6px] font-black uppercase text-white/20 tracking-[0.4em] group-hover:text-white/40 transition-colors italic">
                     {isSpanish ? 'Archivo de Elite Digital' : 'Premium Archive'}

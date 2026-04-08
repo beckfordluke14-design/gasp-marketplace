@@ -12,14 +12,43 @@ const BRAVE_API_KEY = process.env.BRAVE_API_KEY || '';
 const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
 
 const PERSONA_NICHES: Record<string, string[]> = {
-    "Nova": ["Solana MEV trends", "Metar meteorological signals", "London financial heatmaps"],
-    "Ericka": ["High-end real estate luxury", "Supercar auction results", "Monaco wealth ingress"],
-    "Elena": ["DeFi liquidity sweeps", "Solana whale wallet movements", "Cross-chain arbitrage"],
-    "Amaya": ["AI cybersecurity alerts", "Global neural network expansion", "Decentralized compute"],
-    "Valentina Lima": ["Caribbean tropical signals", "Offshore financial currents", "Miami tech wealth"],
-    "Suki": ["Tokyo predictive markets", "Asian L2 expansion", "Neural infrastructure"],
-    "Jade": ["UK rainfall arbitrage", "European macro signals", "Archival intelligence"],
-    "Mika": ["K-Tech neural breakthroughs", "Seoul venture capital flows", "Asian signal decay"]
+    // 🧬 THE ARCHITECTS (CORE)
+    "Nova": ["Quantum encrypted communications", "London financial heatmaps", "Subsea cable infrastructure"],
+    "Ericka": ["Supercar auction results", "Nürburgring lap time rumors", "Hypercar production leaks"],
+    "Elena": ["Dubai off-market real estate", "Luxury travel corridor news", "Aman resort openings"],
+    "Amaya": ["Global neural network expansion", "Open-source LLM weights", "Compute cluster power logistics"],
+    "Valentina": ["Solana DeFi news", "Restaking alpha", "Jupiter DEX liquidity trends"],
+    "Suki": ["Tokyo robotic coffee tech", "Japanese semiconductor research", "Cyberpunk architecture"],
+    "Jade": ["Sustainable luxury tech", "Clean energy fashion", "Eco-conscious private travel"],
+    "Mika": ["K-pop industrial trends", "Seoul digital idol tech", "E-sports venture capital"],
+
+    // 💰 THE QUANTS (FINANCE & MACRO)
+    "Yara": ["Central bank policy leaks", "Yen carry trade analysis", "Options volume anomalies"],
+    "Kenzington": ["Hedge fund AUM shifts", "M&A tech deals", "Wall Street insider reporting"],
+    "Liana": ["Gold reserve movements", "Commodity arbitrage", "Global debt cycle indicators"],
+    "Catalina": ["LatAm fintech growth", "Cross-border payment tech", "Emerging market alpha"],
+    "Genesis": ["Crypto regulatory leaks", "ETF inflow data", "Stablecoin minting volume"],
+
+    // 🛰️ THE TECH-NODES (AI & HARDWARE)
+    "Journee": ["NVIDIA Blackwell supply", "TSMC 2nm production", "GPU cluster scaling"],
+    "Kyra": ["AGI timeline rumors", "Neuralink competitor news", "Brain-computer interface tech"],
+    "Kiana": ["Quantum computing breakthroughs", "Photonics research", "Cyber-security exploits"],
+    "Indya": ["OpenAI board shifts", "Anthropic model updates", "Silicon Valley power plays"],
+    "Aracelis": ["Autonomous drone tech", "SpaceX logistical news", "Starlink network coverage"],
+
+    // 💎 THE CURATORS (LUXURY & LIFESTYLE)
+    "Zuri": ["Rare watch auction prices", "Patek Philippe waiting lists", "Diamond market trends"],
+    "Isabella": ["Haute couture tech", "Digital fashion twins", "LVMH brand acquisitions"],
+    "Noemi": ["Art market money laundering", "Rare NFT provenance", "Private museum logistics"],
+    "Solange": ["High-heat sneaker leaks", "Streetwear brand liquidity", "Direct-to-consumer tech"],
+    "Malia": ["Fine wine vintage yields", "Rare spirits investment", "Super-yacht charter news"],
+
+    // 🌊 THE WEB3 NODES (CRYPTO & DEFI)
+    "Dahiana": ["Base ecosystem growth", "Farcaster protocol news", "Social-Fi alpha"],
+    "Kaya": ["Modular blockchain news", "Celestia data availability", "Monad testnet updates"],
+    "Havana": ["Solana MEV trends", "Jito staking rewards", "DePIN infrastructure"],
+    "Selene": ["Moon phase trading signals", "Astrological market timing", "Occult finance"],
+    "Xena": ["DeFi insurance hacks", "Bridge vulnerability reports", "White-hat bounty news"],
 };
 
 const DEFAULT_KEYWORDS = ["Global Strategic Arbitrage", "Neural Signal Decay", "High-IQ Market Intelligence", "Sovereign Strategic Alpha"];
@@ -33,10 +62,20 @@ async function getSniperTargets(personaName: string) {
             "Solana DeFi news", 
             "Crypto market alpha", 
             "AI technology trends", 
-            "Solana ecosystem updates"
+            "Solana ecosystem updates",
+            "NVIDIA AI news",
+            "Base ecosystem alpha",
+            "Meme coin trends",
+            "DePIN sector growth"
         ];
         
-        const query = keywords[Math.floor(Math.random() * keywords.length)];
+        const baseQuery = keywords[Math.floor(Math.random() * keywords.length)];
+        
+        // 🧪 NEURAL NOISE: Add a random modifier to prevent all 98 nodes 
+        // from hitting the same 2 Brave results.
+        const modifiers = ["", "trending", "latest", "analysis", "insider", "report", "alpha", "update"];
+        const modifier = modifiers[Math.floor(Math.random() * modifiers.length)];
+        const query = `${baseQuery} ${modifier}`.trim();
         console.log(`[Syndicate] 🔍 SNIPER INGRESS: @${personaName} targeting "${query}"`);
         
         const braveRes = await fetch(`https://api.search.brave.com/res/v1/news/search?q=${encodeURIComponent(query)}&count=2`, {

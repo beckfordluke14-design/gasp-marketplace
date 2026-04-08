@@ -284,31 +284,35 @@ function MarketplaceContent() {
             />
            
            <div className="flex-1 flex flex-col relative bg-transparent">
-              {/* DOMINANT TAB NAVIGATION */}
-              <div className="absolute top-16 md:top-20 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-1 p-1 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-full shadow-2xl pointer-events-auto">
+              {/* DOMINANT TAB NAVIGATION: FLOATING & TRANSPARENT */}
+              <div className="absolute top-20 md:top-24 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2 p-1.5 bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all duration-500 hover:border-white/20">
                   <button 
                      onClick={() => setActiveTab('feed')} 
-                     className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'feed' ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.4)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                     className={`px-6 py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 relative ${activeTab === 'feed' ? 'text-white bg-white/10 shadow-[0_0_20px_rgba(255,255,255,0.1)] border border-white/20' : 'text-white/40 hover:text-white hover:bg-white/5 border border-transparent'}`}
                   >
                      {isSpanish ? 'Feed Global' : 'Global Feed'}
+                     {activeTab === 'feed' && <motion.div layoutId="tab-glow" className="absolute inset-0 rounded-xl bg-white/5 blur-md" />}
                   </button>
                   <button 
                      onClick={() => setActiveTab('weather')} 
-                     className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'weather' ? 'bg-[#00f0ff] text-black shadow-[0_0_20px_rgba(0,240,255,0.6)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                     className={`px-6 py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 relative ${activeTab === 'weather' ? 'text-[#00f0ff] bg-[#00f0ff]/10 shadow-[0_0_20px_rgba(0,240,255,0.2)] border border-[#00f0ff]/30' : 'text-white/40 hover:text-white hover:bg-white/5 border border-transparent'}`}
                   >
                      {isSpanish ? 'Clima X' : 'Weather X'}
+                     {activeTab === 'weather' && <motion.div layoutId="tab-glow" className="absolute inset-0 rounded-xl bg-[#00f0ff]/5 blur-md" />}
                   </button>
                   <button 
                      onClick={() => setActiveTab('reports')} 
-                     className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'reports' ? 'bg-[#ff00ff] text-white shadow-[0_0_20px_rgba(255,0,255,0.6)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                     className={`px-6 py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 relative ${activeTab === 'reports' ? 'text-[#ff00ff] bg-[#ff00ff]/10 shadow-[0_0_20px_rgba(255,0,255,0.2)] border border-[#ff00ff]/30' : 'text-white/40 hover:text-white hover:bg-white/5 border border-transparent'}`}
                   >
                      {isSpanish ? 'Noticias' : 'News'}
+                     {activeTab === 'reports' && <motion.div layoutId="tab-glow" className="absolute inset-0 rounded-xl bg-[#ff00ff]/5 blur-md" />}
                   </button>
                   <button 
                      onClick={() => setActiveTab('protocol')} 
-                     className={`px-5 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'protocol' ? 'bg-[#ffea00] text-black shadow-[0_0_20px_rgba(255,234,0,0.6)]' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                     className={`px-6 py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 relative ${activeTab === 'protocol' ? 'text-[#ffea00] bg-[#ffea00]/10 shadow-[0_0_20px_rgba(255,234,0,0.2)] border border-[#ffea00]/30' : 'text-white/40 hover:text-white hover:bg-white/5 border border-transparent'}`}
                   >
                      {isSpanish ? 'Protocolo' : 'Protocol'}
+                     {activeTab === 'protocol' && <motion.div layoutId="tab-glow" className="absolute inset-0 rounded-xl bg-[#ffea00]/5 blur-md" />}
                   </button>
               </div>
 

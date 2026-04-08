@@ -16,7 +16,23 @@ export default function GlitchText({ text, className }: { text: string; classNam
       viewport={{ once: true, margin: "-50px" }}
     >
       {/* Base Layer */}
-      <span className="relative z-10">{text}</span>
+      <motion.span 
+        className="relative z-10"
+        variants={{
+          initial: { scale: 0.9, opacity: 0 },
+          animate: { 
+            scale: [0.9, 1.05, 1],
+            opacity: 1,
+            transition: { 
+              duration: 0.4,
+              times: [0, 0.7, 1],
+              ease: "easeOut"
+            }
+          }
+        }}
+      >
+        {text}
+      </motion.span>
       
       {/* Magenta Shift Layer */}
       <motion.span

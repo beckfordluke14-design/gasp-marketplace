@@ -115,8 +115,16 @@ export default function NewsFeed() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.1 }}
-                            className="group relative bg-[#0a0a0a] border border-white/5 p-8 md:p-12 rounded-[3.5rem] hover:border-[#ff00ff]/20 transition-all duration-500"
+                            className={`group relative bg-[#0a0a0a] border p-8 md:p-12 rounded-[3.5rem] transition-all duration-500 ${item.meta?.heat === 'Critical' ? 'border-[#ff00ff]/40 shadow-[0_0_50px_rgba(255,0,255,0.1)]' : 'border-white/5 hover:border-[#ff00ff]/20'}`}
                         >
+                            {/* 🛰️ BREAKING NEURAL FLASH */}
+                            {item.meta?.heat === 'Critical' && (
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30">
+                                    <div className="bg-[#ff00ff] text-white text-[8px] font-black uppercase tracking-[0.6em] px-10 py-2 rounded-full shadow-[0_0_40px_#ff00ff] animate-bounce italic whitespace-nowrap">
+                                        {isSpanish ? 'SEÑAL CRÍTICA' : 'CRITICAL SIGNAL'}
+                                    </div>
+                                </div>
+                            )}
                             {/* Persona Header */}
                             <div className="flex items-center gap-4 mb-8">
                                 <div className="w-14 h-14 rounded-2xl overflow-hidden border border-white/10 shrink-0 bg-white/5">
