@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { initialProfiles } from '@/lib/profiles';
+import { initialProfiles, proxyImg } from '@/lib/profiles';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Send, Sparkles, TrendingUp, Radio, Lock, Volume2, MessageSquare, Camera } from 'lucide-react';
 import Image from 'next/image';
@@ -13,8 +13,10 @@ export default function ProfileLanding() {
   const params = useParams();
   const router = useRouter();
   const profileId = params.profileId as string;
-  const profile = initialProfiles.find(p => p.id.toLowerCase() === profileId.toLowerCase());
-
+  
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+  const [dbProfiles, setDbProfiles] = useState<any[]>([]);
   const [activeCount, setActiveCount] = useState(42);
   const [messages, setMessages] = useState<{ from: 'profile' | 'user'; text?: string; img?: string }[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -24,7 +26,31 @@ export default function ProfileLanding() {
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const others = initialProfiles.filter(p => p.id !== profile?.id).slice(0, 3);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch(`/api/personas?t=${Date.now()}`);
+        const json = await res.json();
+        if (json.success) {
+          const found = json.personas.find((p: any) => p.id.toLowerCase() === profileId.toLowerCase());
+          if (found) {
+            setProfile({
+               ...found,
+               image: proxyImg(found.seed_image_url || found.image)
+            });
+          }
+          setDbProfiles(json.personas);
+        }
+      } catch (e) {
+        console.error('[Profile Fetch Error]:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [profileId]);
+
+  const others = dbProfiles.filter(p => p.id !== profile?.id).slice(0, 3);
 
   // Helper: profile sends a message after a delay with typing indicator
   const profileSays = (text: string, afterMs: number, typingMs = 1400) =>
@@ -40,6 +66,7 @@ export default function ProfileLanding() {
     });
 
   useEffect(() => {
+    if (!profile) return;
     setActiveCount(Math.floor(Math.random() * 30) + 40);
 
     // Stage 1: Natural cold open
@@ -55,15 +82,25 @@ export default function ProfileLanding() {
     })();
 
     return () => { alive = false; };
-  }, []);
+  }, [profile?.id]);
 
-  // Scroll to bottom on new message
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-6">
+        <div className="w-12 h-12 rounded-full border-t-2 border-[#00f0ff] animate-spin shadow-[0_0_20px_#00f0ff44]" />
+        <span className="text-[10px] font-black uppercase text-white/40 tracking-[0.4em] animate-pulse italic">Establishing Neural Link...</span>
+      </div>
+    );
+  }
 
   if (!profile) {
-    return <div className="min-h-screen bg-black flex items-center justify-center text-white font-syncopate">PROFILE NOT FOUND</div>;
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white text-center gap-4 px-10">
+        <h1 className="text-4xl font-syncopate font-black uppercase italic tracking-tighter text-white/20">Access Denied</h1>
+        <p className="text-[10px] uppercase font-black tracking-widest text-[#ff00ff]">This node is currently restricted or offline.</p>
+        <button onClick={() => router.push('/')} className="mt-4 px-8 py-3 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">Back to Global Feed</button>
+      </div>
+    );
   }
 
   const handleConnect = (initialMsg?: string) => {

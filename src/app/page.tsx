@@ -171,8 +171,12 @@ function MarketplaceContent() {
 
   const refinedProfiles = useMemo(() => {
     const registry = new Map();
-    [...dbProfiles, ...initialProfiles].forEach(p => {
-       if (!registry.has(String(p.id))) registry.set(String(p.id), p);
+    // 🛡️ SYNDICATE MASTER FILTER: Only permit approved (Active) nodes from DB.
+    // Static initialProfiles are ignored unless they are also in the DB.
+    dbProfiles.forEach(p => {
+       if (p.is_active !== false) {
+          registry.set(String(p.id), p);
+       }
     });
     return Array.from(registry.values());
   }, [dbProfiles]);

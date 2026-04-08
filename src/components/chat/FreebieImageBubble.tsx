@@ -45,8 +45,13 @@ export default function FreebieImageBubble({
           <img
             src={imageUrl}
             alt="Gift"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onContextMenu={(e) => e.preventDefault()}
+            draggable={false}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 select-none pointer-events-none"
           />
+
+          {/* 🛡️ ANTI-DOWNLOAD SHIELD */}
+          <div className="absolute inset-0 z-10 bg-transparent" />
 
           {/* Overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

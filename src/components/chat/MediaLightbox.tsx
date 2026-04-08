@@ -186,18 +186,7 @@ export default function MediaLightbox({
                     {currentItem?.caption || (isSpanish ? "Transferencia de Archivos Segura" : "Secure File Transfer") + " #"+activeIndex}
                  </p>
                  
-                 <div className="pointer-events-auto">
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(currentItem?.url, '_blank');
-                      }}
-                      className="px-6 py-2.5 bg-white text-black rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center gap-2"
-                    >
-                      <Download size={14} />
-                      {isSpanish ? 'DESCARGAR ORIGINAL' : 'DOWNLOAD ORIGINAL'}
-                    </button>
-                 </div>
+                 {/* 🛡️ DOWNLOAD DISABLED PER SOVEREIGN PROTOCOL */}
               </motion.div>
            </AnimatePresence>
         </div>

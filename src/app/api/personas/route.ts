@@ -5,9 +5,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // 🛡️ SYNDICATE UNLOCKED: Fetch every single persona (No 'is_active' filter)
+    // 🛡️ SYNDICATE LOCKED: Fetch ONLY admin-approved personas
     const { rows: dbPersonas } = await db.query(`
         SELECT * FROM personas 
+        WHERE is_active IS NOT FALSE
         ORDER BY created_at DESC
     `);
 

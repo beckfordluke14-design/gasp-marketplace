@@ -117,20 +117,32 @@ export default function VaultGallery({ items, userBalance, onUnlock }: VaultGall
                                     key="unlocked"
                                     initial={{ opacity: 0, scale: 1.2 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    className="relative w-full h-full"
+                                    className="relative w-full h-full select-none"
+                                    onContextMenu={(e) => e.preventDefault()}
                                 >
-                                    <Image src={item.full_url} alt="" fill unoptimized className="object-cover" />
+                                    <Image 
+                                      src={item.full_url} 
+                                      alt="Secure Asset" 
+                                      fill 
+                                      unoptimized 
+                                      className="object-cover" 
+                                      draggable={false}
+                                    />
+                                    
+                                    {/* 🛡️ ANTI-DOWNLOAD SHIELD */}
+                                    <div className="absolute inset-0 z-10 bg-transparent" />
+
                                     {item.type === 'video' && (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/0 transition-all">
+                                        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20 group-hover:bg-black/0 transition-all pointer-events-none">
                                             <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-xl border border-white/20 flex items-center justify-center">
                                                 <Play size={24} className="text-white fill-current" />
                                             </div>
                                         </div>
                                     )}
-                                    <div className="absolute bottom-6 left-6 right-6 p-4 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl">
+                                    <div className="absolute bottom-6 left-6 right-6 p-4 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl z-30">
                                         <p className="text-[10px] font-medium leading-tight lowercase italic text-white/80">"{item.caption}"</p>
                                     </div>
-                                    <div className="absolute top-6 right-6">
+                                    <div className="absolute top-6 right-6 z-30">
                                          <div className="px-3 py-1 bg-[#ffea00]/20 border border-[#ffea00]/40 rounded-lg flex items-center gap-2">
                                             <CheckCircle2 size={12} className="text-[#ffea00]" />
                                             <span className="text-[8px] font-black uppercase tracking-widest text-[#ffea00]">
