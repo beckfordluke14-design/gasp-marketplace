@@ -173,13 +173,21 @@ function MarketplaceContent() {
 
   const refinedProfiles = useMemo(() => {
     const registry = new Map();
-    // 🛡️ SYNDICATE MASTER FILTER: Only permit approved (Active) nodes from DB.
-    // Static initialProfiles are ignored unless they are also in the DB.
+    
+    // 🛡️ STEP 0: Baseline - Load all initial hardcoded personas
+    initialProfiles.forEach(p => {
+       registry.set(String(p.id), p);
+    });
+
+    // 🛡️ STEP 1: Enhancement - Layer in Database nodes & apply active filter
     dbProfiles.forEach(p => {
        if (p.is_active !== false) {
-          registry.set(String(p.id), p);
+          registry.set(String(p.id), { ...registry.get(String(p.id)), ...p });
+       } else {
+          registry.delete(String(p.id));
        }
     });
+    
     return Array.from(registry.values());
   }, [dbProfiles]);
 
@@ -285,7 +293,7 @@ function MarketplaceContent() {
            
            <div className="flex-1 flex flex-col relative bg-transparent">
               {/* 🛰️ SOVEREIGN NAVIGATION: GHOST GLASS PILL */}
-              <div className="sticky top-16 md:top-20 z-[100] flex justify-center w-full px-4 pointer-events-none mb-[-3.5rem]">
+              <div className="sticky top-[86px] md:top-20 z-[100] flex justify-center w-full px-4 pointer-events-none mb-[-3.5rem]">
                   <div className="flex items-center gap-1 md:gap-3 p-1.5 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all duration-500 w-fit max-w-full overflow-x-auto no-scrollbar">
                       <button 
                          onClick={() => setActiveTab('feed')} 
@@ -352,7 +360,7 @@ function MarketplaceContent() {
               </div>
 
               <div className="flex-1 relative">
-                 <div className="pt-28 md:pt-36">
+                 <div className="">
                     {activeTab === 'feed' && (
                       <div className="w-full flex-1 flex flex-col animate-in fade-in zoom-in-95 duration-500">
                          <GlobalFeed 
@@ -475,6 +483,7 @@ function MarketplaceContent() {
                        profiles={sortedProfiles} 
                        view={sidebarView}
                        onSetView={handleSetSidebarView}
+                       isMobileUI={true}
                     />
                  </div>
               </motion.div>

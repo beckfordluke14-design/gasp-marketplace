@@ -42,9 +42,10 @@ interface SidebarProps {
   view?: 'chats' | 'vault' | 'feed';
   onSetView?: (view: 'chats' | 'vault' | 'feed') => void;
   onOpenTopUp?: () => void;
+  isMobileUI?: boolean;
 }
 
-export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCounts = {}, profiles, view = 'chats', onSetView, onOpenTopUp }: SidebarProps) {
+export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCounts = {}, profiles, view = 'chats', onSetView, onOpenTopUp, isMobileUI = false }: SidebarProps) {
   const { profile } = useUser();
   const [following, setFollowing] = useState<string[]>([]);
   const [recentIds, setRecentIds] = useState<string[]>([]);
@@ -305,6 +306,9 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 </div>
             </div>
 
+            {/* 🛰️ MARKET PULSE: WeatherX & Polymarket Sentiment Indicator */}
+            {!isMobileUI && <MarketPulseTerminal />}
+
             {/* 🧬 VIP TOP-UP ACCESS: Prioritized at top for members */}
             <div className="px-6 mb-8 mt-4">
                <button 
@@ -374,7 +378,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 {isSpanish ? 'Descubrimiento Neural' : 'Neural Discovery'}
               </h2>
               <div className="space-y-1">
-                {otherProfiles.map((p: any) => renderProfile(p, true))}
+                {otherProfiles.map((p: any) => renderProfile(p, isMobileUI))}
               </div>
             </div>
           </>

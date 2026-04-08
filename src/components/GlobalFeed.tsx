@@ -341,7 +341,7 @@ export default function GlobalFeed({ onSelectProfile, profiles = [], followingId
   );
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-black pt-4 pb-32">
+    <div className="w-full h-full overflow-y-auto bg-black pb-32">
       {items.map((broadcast, i) => {
         // 🧬 Neural Lookup: Search both DB and Initial lists to find the face
         const profile = profiles.find(p => String(p.id) === String(broadcast.persona_id)) || 

@@ -38,9 +38,9 @@ export default function RightSidebar({ onSelectProfile, profiles, deadIds, setDe
         <div className="mb-8 flex items-center justify-between">
            <div className="flex items-center gap-2">
               <div className="w-4 h-[1px] bg-[#ff00ff]" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 italic">Active Nodes</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 italic">Verified Profiles</span>
            </div>
-           <span className="text-[8px] font-black text-[#ffea00] uppercase italic tracking-widest animate-pulse">Nodes Online</span>
+           <span className="text-[8px] font-black text-[#ffea00] uppercase italic tracking-widest animate-pulse">Live Now</span>
         </div>
         
         <div className="grid grid-cols-2 gap-3">
