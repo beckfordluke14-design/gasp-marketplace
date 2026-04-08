@@ -11,7 +11,9 @@ import {
     Zap, 
     Clock, 
     Loader2, 
-    MessageSquare 
+    MessageSquare,
+    Lock,
+    Shield
 } from 'lucide-react';
 import Link from "next/link";
 
@@ -155,19 +157,31 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
                                         </a>
                                     </div>
                                     
-                                    <div className="relative w-full h-[300px] md:h-[500px] rounded-[2rem] overflow-hidden border border-white/5 bg-black/40">
+                                    <div className="relative w-full h-[300px] md:h-[500px] rounded-[2rem] overflow-hidden border border-white/5 bg-zinc-950">
+                                        {/* 🛰️ SOVEREIGN SIGNAL BACKDROP (Elite Placeholder) */}
+                                        <div className="absolute inset-0 z-0">
+                                            <img src={selectedNews.persona_image} alt="" className="w-full h-full object-cover opacity-20 blur-2xl scale-110" />
+                                            <div className="absolute inset-0 bg-gradient-to-br from-black via-transparent to-black" />
+                                            
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                                                <div className="w-16 h-16 rounded-full border border-[#00f0ff]/10 flex items-center justify-center mb-4">
+                                                    <Lock size={24} className="text-[#00f0ff] opacity-20 animate-pulse" />
+                                                </div>
+                                                <h3 className="text-[10px] font-syncopate font-black uppercase text-[#00f0ff] tracking-widest mb-1 opacity-40 italic">Signal Masked</h3>
+                                                <p className="text-[8px] text-white/10 font-black uppercase tracking-widest max-w-[200px] leading-relaxed">
+                                                    External node protocols prevent remote extraction. Access direct node for full briefing.
+                                                </p>
+                                            </div>
+                                        </div>
+
                                         <iframe 
                                             src={selectedNews.content_url} 
-                                            className="w-full h-full border-none grayscale hover:grayscale-0 transition-all duration-1000 opacity-40 hover:opacity-100"
+                                            className="w-full h-full border-none grayscale hover:grayscale-0 transition-all duration-1000 opacity-40 hover:opacity-100 relative z-10"
                                             title="External Intel Briefing"
                                         />
-                                        {/* Overlay to catch clicks or signal errors */}
-                                        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 via-transparent to-transparent" />
                                         
-                                        {/* Fallback Label if blank */}
-                                        <div className="absolute inset-x-0 bottom-0 p-8 text-center pointer-events-none">
-                                            <p className="text-[9px] font-black uppercase tracking-[.6em] text-white/5 italic">Neural Decoding in Progress...</p>
-                                        </div>
+                                        {/* Gradient Overlay */}
+                                        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/20 via-transparent to-transparent z-20" />
                                     </div>
                                 </div>
                             </div>
@@ -192,7 +206,7 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
                                             <span className="text-[#00f0ff] text-[9px] font-black uppercase tracking-widest">Connection: Stable</span>
                                         </div>
                                         <p className="text-white/60 text-[11px] italic font-medium leading-relaxed">
-                                            "{selectedNews.persona_meta?.persona_note || (isSpanish ? 'He analizado esta filtración... Conéctate conmigo para el informe completo.' : 'I’ve analyzed the raw data for this leak... Connect with me for the full debrief.')}"
+                                            "{selectedNews.persona_meta?.persona_note || (isSpanish ? 'He analizado esta filtración... Conéctate conmigo para el informe completo.' : 'My full take on this intelligence is ready in the crypt. Connect with me for the briefing.')}"
                                         </p>
                                     </div>
 
