@@ -52,8 +52,40 @@ async function pulse() {
                 // 1. Prepare Media if available
                 if (task.imageUrl) {
                     tempFile = path.join(__dirname, `temp_${task.id}.jpg`);
-                    console.log(`📥 Downloading persona assets: ${task.imageUrl}`);
+                    console.log(`📥 Downloading assets: ${task.imageUrl}`);
                     await downloadFile(task.imageUrl, tempFile);
+
+                    // 🎨 WATERMARKING PROTOCOL (v7.5) - AGGRESSIVE CENTRAL BURN
+                    try {
+                        const Jimp = require('jimp');
+                        console.log("💎 Applying Central Neural Burn...");
+                        const image = await Jimp.read(tempFile);
+                        const font = await Jimp.loadFont(Jimp.FONT_SANS_64_WHITE); 
+                        
+                        const text = "CHAT ON GASP.FUN";
+                        const textWidth = Jimp.measureText(font, text);
+                        const textHeight = Jimp.measureTextHeight(font, text, image.bitmap.width);
+                        
+                        // Calculate center position
+                        const x = (image.bitmap.width / 2) - (textWidth / 2);
+                        const y = (image.bitmap.height / 2) - (textHeight / 2);
+                        
+                        // Burn the CTA through the center with 50% transparency for the "Agency" look
+                        const watermark = new Jimp(image.bitmap.width, image.bitmap.height, 0x00000000);
+                        watermark.print(font, x, y, text);
+                        watermark.opacity(0.4); // 40% opacity for central burn
+                        
+                        image.composite(watermark, 0, 0, {
+                            mode: Jimp.BLEND_SOURCE_OVER,
+                            opacitySource: 1,
+                            opacityDest: 1
+                        });
+                        
+                        await image.writeAsync(tempFile);
+                        console.log("✅ Asset Branded (Central Burn).");
+                    } catch (jimpErr) {
+                        console.warn("⚠️ Watermark Failed (Non-blocking):", jimpErr.message);
+                    }
                 }
 
                 // 2. Connect to the Manual Chrome Instance
