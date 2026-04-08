@@ -39,7 +39,7 @@ export default function PrivacyPolicy() {
 
             <section className="space-y-3">
                 <h2 className="text-xl font-bold text-white uppercase tracking-wider font-syncopate">3. AI Integration & Neural Pipelines</h2>
-                <p>Because our platform utilizes dynamic artificial intelligence nodes to produce strategic responses, the data you submit to a node is processed through the <strong>Google Gemini API infrastructure</strong> (and equivalent LLM pipelines). Any signal data processed by these engines is utilized strictly to formulate character responses and maintain your specific user-bonding session memory. All data is handled according to our secure sovereign protocol.</p>
+                <p>Because our platform utilizes dynamic artificial intelligence nodes to produce strategic responses, the data you submit to a node is processed through our <strong>proprietary neural processing infrastructure</strong> (and associated LLM pipelines). Any signal data processed by these engines is utilized strictly to formulate character responses and maintain your specific user-bonding session memory. All data is handled according to our secure sovereign protocol.</p>
             </section>
 
             <section className="space-y-3">
