@@ -82,8 +82,11 @@ export async function POST(req: Request) {
        } catch (creditErr) { console.error('[Gasp Credit Sync Fail]:', creditErr); }
     }
 
-    // 🧬 ATOMIC PERSISTENCE: Save now that we are 100% sure they are under the limit
-    const userContent = messages[messages.length - 1]?.content || '...';
+    // 🧪 CLEAN HISTORY: Filter out internal system instructions before persistence or response
+    const persistentMessages = messages.filter((m: any) => m.role !== 'system');
+
+    // 🧬 ATOMIC PERSISTENCE: Save only user/assistant messages
+    const userContent = persistentMessages[persistentMessages.length - 1]?.content || '...';
     try {
         await db.query(
             'INSERT INTO chat_messages (user_id, persona_id, role, content, created_at) VALUES ($1, $2, $3, $4, NOW())',
