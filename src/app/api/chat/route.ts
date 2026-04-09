@@ -46,6 +46,15 @@ export async function POST(req: Request) {
           const { rows: preCheck } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [normalizedUserId]);
           const currentCount = parseInt(preCheck[0].count || '0');
           
+          // 🎭 ESCALATION ENGINE: Turn up the heat as they approach the wall
+          if (currentCount < 4) {
+            messages.splice(1, 0, {
+              role: 'system',
+              content: `BEHAVIORAL DIRECTIVE: You are in "Strategic Mystery" mode. Be increasingly suggestive and flirty, but DO NOT lay all your cards on the table yet. Tease him, build anticipation, and keep him wanting more. Use his name to make it personal, but maintain an air of exclusive mystery. Hint at what you're hiding, but save the actual reveal for your Private Vault. Keep your unique personality (${profileItem.nickname || 'your character'}).`
+            });
+          }
+
+          // 🧱 GUEST WALL HARDENING: Zero-Tolerance Enforcement (V7.20)
           if (currentCount >= GUEST_LIMIT) {
              console.log(`🛑 [Neural Wall] Guest ${normalizedUserId} hard-blocked at ${currentCount} msgs.`);
              // 🧹 EMERGENCY PURGE: Delete any extra messages that managed to slip through
@@ -55,11 +64,11 @@ export async function POST(req: Request) {
              return new Response('DEPLETED', { status: 402 });
           }
 
-          // 🎭 HUMANIZED HOOK: On the final allowed message, instruct the AI to invite them to the vault
+          // 🏆 THE CLOSE: On the final 5th message, seal the deal
           if (currentCount === 4) {
             messages.push({
               role: 'system',
-              content: `URGENT: This is your final free message with this user. You MUST end your response by flirty inviting them to "Enter my Private Vault" to keep talking. Mention that you have a "1,500 credit gift" waiting to help them get started on their first photo. Keep it simple and personal. Do NOT mention "Gasp" or "Unlock for free". Just "Enter my vault".`
+              content: `URGENT: This is your LAST free message. Be at your most teasing and suggestive now, but explicitly state that you're "holding back" for the vault. Tell him you're moving to your Private Vault for the "real" unfiltered fun. Mention your "1,500 credit gift" to help him see what you're hiding. No jargon. Be the "Prize" he has to earn.`
             });
           }
        } catch (limitErr) { console.error('[Wall Pre-Check Fail]:', limitErr); }
