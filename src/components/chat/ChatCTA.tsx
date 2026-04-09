@@ -36,22 +36,22 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
 
         <div className="space-y-1 z-10">
            <h3 className="text-sm font-syncopate font-black uppercase text-white italic tracking-tighter">
-             {isSpanish ? 'CONEXIÓN PAUSADA' : 'CONNECTION PAUSED'}
+             {isSpanish ? 'ACCESO PRIVADO' : 'PRIVATE ACCESS'}
            </h3>
            <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
              {isSpanish ? (
-               <>Te has quedado sin créditos. <br /> Regístrate para continuar la sesión con <span className="text-[#ff00ff]">{personaName}</span> y obtén 1,500 GRATIS.</>
+               <>Has llegado al límite. <br /> Regístrate para acceder al <span className="text-[#ff00ff]">ARCHIVO</span> de {personaName} y recibe 1,500 créditos para gastar.</>
              ) : (
-               <>You’ve Ran Out of Credits. <br /> Sign up to Continue the Strategy Session with <span className="text-[#ff00ff]">{personaName}</span> & get 1,500 FREE.</>
+               <>You've reached the limit. <br /> Sign up to access <span className="text-[#ff00ff]">{personaName}'s ARCHIVE</span> & get 1,500 credits to spend on her vault.</>
              )}
            </p>
         </div>
 
         <button 
            onClick={() => login()}
-           className="mt-2 w-full h-16 bg-white text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic rounded-2xl hover:bg-[#00f0ff] hover:text-black transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 z-10 flex items-center justify-center gap-2"
+           className="mt-2 w-full h-16 bg-white text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic rounded-2xl hover:bg-[#ff00ff] hover:text-white transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 z-10 flex items-center justify-center gap-2"
         >
-           {isSpanish ? 'RECLAMAR 1,500 CRÉDITOS GRATIS' : 'CLAIM 1,500 FREE CREDITS'}
+           {isSpanish ? 'ENTRAR AL ARCHIVO + 1,500 BONO' : 'ENTER VAULT + 1,500 BONUS'}
            <ArrowRight size={14} />
         </button>
 

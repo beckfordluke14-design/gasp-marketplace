@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, User, Clock, Shield, Search, RefreshCcw, Activity, Ghost, Zap } from 'lucide-react';
+import { MessageSquare, User, Clock, Shield, Search, RefreshCcw, Activity, Ghost, Zap, Terminal, Eye } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -290,6 +291,3 @@ export default function ConversationMonitor() {
     );
 }
 
-// 🛰️ IMPORTS MISSING FROM BOTCHED EDIT
-import { Ghost, Shield, Zap, RefreshCcw, Terminal, Search, Clock, Eye, MessageSquare, Activity } from 'lucide-react';
-import Link from 'next/link';
