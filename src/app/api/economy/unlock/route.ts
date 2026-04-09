@@ -64,7 +64,7 @@ export async function POST(req: Request) {
       return new Response('Media node not found in any registry', { status: 404 });
     }
 
-    const cost = media.price_credits || 2000; // 🧬 SYNDICATE VAULT COST
+    const cost = media.price_credits || 6000; // 🧬 SYNDICATE VAULT COST
 
     const { rows: existingUnlock } = await db.query('SELECT * FROM user_vault_unlocks WHERE user_id = $1 AND post_id = $2 LIMIT 1', [userId, mediaId]);
 

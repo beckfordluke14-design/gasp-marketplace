@@ -40,9 +40,9 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
            </h3>
            <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
              {isSpanish ? (
-               <>Has llegado al límite. <br /> Regístrate para acceder al <span className="text-[#ff00ff]">ARCHIVO</span> de {personaName} y recibe 2,500 créditos para gastar.</>
+               <>Has llegado al límite. <br /> Regístrate para acceder al <span className="text-[#ff00ff]">ARCHIVO</span> de {personaName} y recibe 1,500 créditos para gastar.</>
              ) : (
-               <>You've reached the limit. <br /> Sign up to access <span className="text-[#ff00ff]">{personaName}'s ARCHIVE</span> & get 2,500 credits to spend on her vault.</>
+               <>You've reached the limit. <br /> Sign up to access <span className="text-[#ff00ff]">{personaName}'s ARCHIVE</span> & get 1,500 credits to spend on her vault.</>
              )}
            </p>
         </div>
@@ -51,7 +51,7 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
            onClick={() => login()}
            className="mt-2 w-full h-16 bg-white text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic rounded-2xl hover:bg-[#ff00ff] hover:text-white transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 z-10 flex items-center justify-center gap-2"
         >
-           {isSpanish ? 'ENTRAR AL ARCHIVO + 2,500 BONO' : 'ENTER VAULT + 2,500 BONUS'}
+           {isSpanish ? 'ENTRAR AL ARCHIVO + 1,500 BONO' : 'ENTER VAULT + 1,500 BONUS'}
            <ArrowRight size={14} />
         </button>
 

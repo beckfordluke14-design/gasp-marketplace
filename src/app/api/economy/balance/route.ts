@@ -120,15 +120,15 @@ export async function POST(req: Request) {
             try {
                 await db.query(`
                     INSERT INTO profiles (id, name, nickname, country, flag, vibe, image, system_prompt, credit_balance, created_at, updated_at)
-                    VALUES ($1, 'Syndicate Member', 'Member', 'GB', '🇬🇧', 'Professional', 'https://avatar.vercel.sh/member', 'Sovereign Intelligence Node', 2500, NOW(), NOW())
+                    VALUES ($1, 'Syndicate Member', 'Member', 'GB', '🇬🇧', 'Professional', 'https://avatar.vercel.sh/member', 'Sovereign Intelligence Node', 1500, NOW(), NOW())
                     ON CONFLICT (id) DO UPDATE SET 
-                        credit_balance = profiles.credit_balance + 2500,
+                        credit_balance = profiles.credit_balance + 1500,
                         updated_at = NOW()
                 `, [userId]);
 
                 await db.query(`
                     INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
-                    VALUES ($1, 2500, 'starter_claim', 'syndicate_genesis', $2, NOW())
+                    VALUES ($1, 1500, 'starter_claim', 'syndicate_genesis', $2, NOW())
                 `, [userId, JSON.stringify({ ip: clientIP })]);
 
                 await db.query('COMMIT');
