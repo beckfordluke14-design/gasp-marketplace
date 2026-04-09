@@ -54,6 +54,14 @@ export async function POST(req: Request) {
              }
              return new Response('DEPLETED', { status: 402 });
           }
+
+          // 🎭 HUMANIZED HOOK: On the final allowed message, instruct the AI to invite them to the vault
+          if (currentCount === 4) {
+            messages.push({
+              role: 'system',
+              content: `URGENT: This is your final free message with this user. You MUST end your response by flirty inviting them to "Enter my Private Vault" to keep talking. Mention that you have a "1,500 credit gift" waiting to help them get started on their first photo. Keep it simple and personal. Do NOT mention "Gasp" or "Unlock for free". Just "Enter my vault".`
+            });
+          }
        } catch (limitErr) { console.error('[Wall Pre-Check Fail]:', limitErr); }
     } else {
        // AUTHENTICATED CREDIT ENFORCEMENT

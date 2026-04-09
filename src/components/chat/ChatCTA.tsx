@@ -36,29 +36,29 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
 
         <div className="space-y-1 z-10">
            <h3 className="text-sm font-syncopate font-black uppercase text-white italic tracking-tighter">
-             {isSpanish ? 'ACCESO PRIVADO' : 'PRIVATE ACCESS'}
+             {isSpanish ? 'ENTRA A MI BÓVEDA PRIVADA' : 'ENTER MY PRIVATE VAULT'}
            </h3>
            <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
              {isSpanish ? (
-               <>Has llegado al límite. <br /> Regístrate para acceder al <span className="text-[#ff00ff]">ARCHIVO</span> de {personaName} y recibe 1,500 créditos para gastar.</>
+               <>Regístrate para ver mi archivo completo y recibe <span className="text-[#ff00ff]">1,500 créditos</span> de regalo para empezar.</>
              ) : (
-               <>You've reached the limit. <br /> Sign up to access <span className="text-[#ff00ff]">{personaName}'s ARCHIVE</span> & get 1,500 credits to spend on her vault.</>
+               <>Join me to see my full archive and get a <span className="text-[#ff00ff]">1,500 credit gift</span> to help you get started.</>
              )}
            </p>
         </div>
 
         <button 
            onClick={() => login()}
-           className="mt-2 w-full h-16 bg-white text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic rounded-2xl hover:bg-[#ff00ff] hover:text-white transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 z-10 flex items-center justify-center gap-2"
+           className="mt-2 w-full h-16 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] font-syncopate italic rounded-2xl hover:bg-[#ff00ff] hover:text-white transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 z-10 flex items-center justify-center gap-2"
         >
-           {isSpanish ? 'ENTRAR AL ARCHIVO + 1,500 BONO' : 'ENTER VAULT + 1,500 BONUS'}
+           {isSpanish ? 'ENTRAR Y RECLAMAR REGALO' : 'ENTER VAULT + 1,500 GIFT'}
            <ArrowRight size={14} />
         </button>
 
         <div className="pt-2 flex items-center gap-2 opacity-30">
            <ShieldPlus size={10} className="text-[#ff00ff]" />
            <span className="text-[7px] font-black uppercase tracking-widest">
-              {isSpanish ? 'Protección de Identidad Soberana Activa' : 'Sovereign Identity Protection Active'}
+              {isSpanish ? 'Conexión Segura Activa' : 'Secure Private Connection Active'}
            </span>
         </div>
       </motion.div>
