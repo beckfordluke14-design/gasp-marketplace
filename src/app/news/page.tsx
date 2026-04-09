@@ -2,11 +2,13 @@
 
 import NewsFeed from '@/components/NewsFeed';
 import Sidebar from '@/components/Sidebar';
+import TopUpDrawer from '@/components/economy/TopUpDrawer';
 import { useState, useEffect } from 'react';
 
 export default function NewsPage() {
     const [selectedProfileId, setSelectedProfileId] = useState('');
     const [dbProfiles, setDbProfiles] = useState<any[]>([]);
+    const [isTopUpOpen, setIsTopUpOpen] = useState(false);
 
     // 🛰️ SYNC: Fetch personas to hydrate the sidebar
     useEffect(() => {
@@ -32,6 +34,7 @@ export default function NewsPage() {
                     }}
                     profiles={dbProfiles}
                     view="feed"
+                    onOpenTopUp={() => setIsTopUpOpen(true)}
                 />
             </div>
 
@@ -41,6 +44,14 @@ export default function NewsPage() {
                     <NewsFeed />
                 </div>
             </div>
+
+            {/* 💳 TOP-UP DRAWER */}
+            {isTopUpOpen && (
+                <TopUpDrawer
+                    isOpen={isTopUpOpen}
+                    onClose={() => setIsTopUpOpen(false)}
+                />
+            )}
         </main>
     );
 }
