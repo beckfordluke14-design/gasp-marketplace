@@ -1,48 +1,77 @@
-const axios = require('axios');
+const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
-const { execSync } = require('child_process');
+const axios = require('axios');
 
-// 🧬 NEURAL BRIDGE: Check for static binary
+const HISTORY_FILE = path.join(__dirname, 'rendered_history.json');
+let history = [];
+if (fs.existsSync(HISTORY_FILE)) {
+    try { history = JSON.parse(fs.readFileSync(HISTORY_FILE)); } catch (e) { history = []; }
+}
+
+/**
+ * 🛰️ GHOST SNIPER: SOVEREIGN VIDEO FACTORY v5.0
+ * Purpose: Direct DB access rendering with Psychological Hooks
+ */
+
+// 1. HARDCODED UPLINK (PUBLIC)
+const pool = new Pool({
+    connectionString: "postgresql://postgres:glrVNXPAMlJbeRzeNEziqUiOfPIXDjOf@gondola.proxy.rlwy.net:54825/railway",
+    ssl: { rejectUnauthorized: false }
+});
+
+// 🧬 NEURAL BRIDGE: FFmpeg Discovery
 try {
     const ffmpegPath = require('ffmpeg-static');
     ffmpeg.setFfmpegPath(ffmpegPath);
-    console.log("💎 Static Neural Bridge Detected.");
 } catch (e) {
-    console.log("⚠️ System FFmpeg path assumed.");
+    console.log("⚠️ Using system FFmpeg path.");
 }
 
-// 🛰️ SYNDICATE CONFIG
-const SYNDICATE_URL = "https://gasp.fun/api/news/command-bridge?key=gasp_sovereign_intelligence";
 const OUTPUT_DIR = path.join(__dirname, 'reels');
-
 if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR);
 
-/**
- * 🎨 NEURAL GLITCH ENGINE v1.0
- * Purpose: Turns static persona assets into high-heat 7s vertical reels.
- */
 async function generateReel() {
-    console.log(`[${new Date().toLocaleTimeString()}] 🧪 Initializing Neural Reel Generation...`);
+    console.log(`[${new Date().toLocaleTimeString()}] 🧪 Scanning Registry for high-heat assets...`);
 
     try {
-        // 1. Fetch Latest High-Status Metadata
-        const res = await axios.get(SYNDICATE_URL);
-        const task = res.data;
+        // 1. Query Database directly for latest active personas
+        const { rows: allPersonas } = await pool.query(`
+            SELECT id, name, seed_image_url 
+            FROM personas 
+            WHERE is_active = true 
+            ORDER BY created_at DESC 
+            LIMIT 50
+        `);
 
-        if (!task || !task.imageUrl) {
-            console.log("💤 Standby: No high-value assets in queue.");
+        // Filter out recently used ones
+        const personas = allPersonas.filter(p => !history.includes(p.id));
+
+        if (personas.length === 0) {
+            console.log("💤 Standby: No fresh personas found. Clearing history to reset cycle.");
+            history = [];
+            fs.writeFileSync(HISTORY_FILE, JSON.stringify(history));
             return;
         }
 
-        const personaName = task.personaName || 'Syndicate Agent';
-        const imagePath = path.join(__dirname, `temp_asset_${task.id}.jpg`);
-        const videoPath = path.join(OUTPUT_DIR, `reel_${task.id}.mp4`);
+        // Pick one at random from the "fresh" list
+        const task = personas[Math.floor(Math.random() * personas.length)];
+        const personaName = task.name;
+        const imageUrl = task.seed_image_url;
+        
+        // Update History to avoid duplicate
+        history.push(task.id);
+        if (history.length > 20) history.shift(); // Keep history lean
+        fs.writeFileSync(HISTORY_FILE, JSON.stringify(history));
+        const taskId = `vps_${Date.now()}`;
+        
+        const imagePath = path.join(__dirname, `temp_${taskId}.jpg`);
+        const videoPath = path.join(OUTPUT_DIR, `reel_${taskId}.mp4`);
 
-        // 2. Extract Asset
-        console.log(`📥 Extracting asset for ${personaName}...`);
-        const response = await axios({ url: task.imageUrl, responseType: 'stream' });
+        // 2. Download Image
+        console.log(`📥 Downloading asset: ${personaName}...`);
+        const response = await axios({ url: imageUrl, responseType: 'stream' });
         const writer = fs.createWriteStream(imagePath);
         response.data.pipe(writer);
 
@@ -51,9 +80,13 @@ async function generateReel() {
             writer.on('error', reject);
         });
 
-        // 3. Transform via FFmpeg (ELITE SYNDICATE BURN v2.0)
-        console.log("⚡ Initiating Elite Neural Render (Chroma + Motion Blur)...");
-        
+        // 3. Selection of Psychological "Hooks"
+        const hooks = ["UNFILTERED ACCESS", "ACCESS DENIED", "THE VAULT IS OPEN", "PRIVATE ARCHIVE"];
+        const selectedHook = hooks[Math.floor(Math.random() * hooks.length)];
+
+        // 4. Render via FFmpeg
+        console.log(`⚡ Rendering Neural Burn: ${selectedHook}...`);
+
         ffmpeg(imagePath)
             .inputOptions(['-loop 1'])
             .outputOptions([
@@ -62,10 +95,10 @@ async function generateReel() {
                    scale=1080:1920:force_original_aspect_ratio=increase,
                    crop=1080:1920,
                    zoompan=z='min(zoom+0.0015,1.25)':d=125:s=1080x1920,
-                   drawbox=y=ih-450:w=iw:h=350:color=black:t=fill,
-                   drawtext=text='ACCESS THE ARCHIVE':fontcolor=white:fontsize=70:fontfile='C\:\\\\Windows\\\\Fonts\\\\arialbd.ttf':x=(w-text_w)/2:y=h-380,
-                   drawtext=text='GASP.FUN':fontcolor=magenta:fontsize=120:fontfile='C\:\\\\Windows\\\\Fonts\\\\arialbd.ttf':x=(w-text_w)/2:y=h-260,
-                   noise=alls=10:allf=t+u
+                   drawbox=y=ih-450:w=iw:h=350:color=black@0.7:t=fill,
+                   drawtext=text='${selectedHook}':fontcolor=white:fontsize=80:fontfile='C\:\\\\Windows\\\\Fonts\\\\arialbd.ttf':x=(w-text_w)/2:y=h-520,
+                   drawtext=text='GASP.FUN':fontcolor=magenta:fontsize=130:fontfile='C\:\\\\Windows\\\\Fonts\\\\arialbd.ttf':x=(w-text_w)/2:y=h-400,
+                   noise=alls=5:allf=t+u
                 `,
                 '-c:v libx264',
                 '-preset medium',
@@ -73,23 +106,19 @@ async function generateReel() {
                 '-pix_fmt yuv420p',
                 '-r 30'
             ])
-            .on('start', (cmd) => console.log("🚀 FFmpeg Launching Alpha..."))
-            .on('error', (err) => console.error("❌ Neural Rendering Failed:", err.message))
+            .on('start', () => console.log("🚀 Render Initiated..."))
+            .on('error', (err) => console.error("❌ Render Failed:", err.message))
             .on('end', () => {
-                console.log(`✅ REEL COMPLETED: ${videoPath}`);
-                // Cleanup
-                fs.unlinkSync(imagePath);
-                // Confirm back to syndicate
-                axios.post(SYNDICATE_URL, { id: task.id, type: 'VIDEO_COMPLETE' })
-                  .catch(e => console.warn("⚠️ Completion Sync Failed:", e.message));
+                console.log(`✅ DISPATCH READY: ${videoPath}`);
+                if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
             })
             .save(videoPath);
 
     } catch (e) {
-        console.error("❌ High-Level Factory Failure:", e.message);
+        console.error("❌ Registry Uplink Failure:", e.message);
     }
 }
 
-// Check every 10 minutes
-setInterval(generateReel, 600000);
+// 🔁 Factory Loop: Generate a new reel every 15 minutes
+setInterval(generateReel, 900000);
 generateReel();

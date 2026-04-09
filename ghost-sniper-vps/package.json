@@ -1,0 +1,13 @@
+{
+  "name": "ghost-sniper-vps",
+  "version": "1.0.0",
+  "description": "Syndicate Video Factory and Auto-Uploader",
+  "main": "GHOST_DISPATCH.js",
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "puppeteer-core": "^21.0.0",
+    "pg": "^8.11.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "axios": "^1.6.0"
+  }
+}
