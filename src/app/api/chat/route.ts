@@ -144,11 +144,11 @@ export async function POST(req: Request) {
     let personalNews = "";
     try {
         const { rows: newsRows } = await db.query(
-            "SELECT title, content FROM posts WHERE (persona_id = $1 OR persona_id IN (SELECT id FROM personas WHERE name = $2)) AND content_type = 'link' ORDER BY created_at DESC LIMIT 2",
+            "SELECT caption FROM posts WHERE (persona_id = $1 OR persona_id IN (SELECT id FROM personas WHERE name = $2)) AND content_type = 'link' ORDER BY created_at DESC LIMIT 2",
             [finalProfileId, name]
         );
         if (newsRows.length > 0) {
-            personalNews = `\n[YOUR LATEST DISPATCHES]:\n${newsRows.map(n => `- ${n.title}: ${n.content}`).join('\n')}\nYou just posted these to the Archive. If he mentions them, talk about them like you found the intel yourself. Be proud/excited about your scoops.`;
+            personalNews = `\n[YOUR LATEST DISPATCHES]:\n${newsRows.map(n => `- ${n.caption}`).join('\n')}\nYou just posted these to the Archive. If he mentions them, talk about them like you found the intel yourself. Be proud/excited about your scoops.`;
         }
     } catch (newsErr) { console.error('[News Sync Fail]:', newsErr); }
 

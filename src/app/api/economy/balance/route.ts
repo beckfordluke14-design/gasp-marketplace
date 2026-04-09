@@ -119,8 +119,8 @@ export async function POST(req: Request) {
             await db.query('BEGIN');
             try {
                 await db.query(`
-                    INSERT INTO profiles (id, credit_balance, created_at, updated_at)
-                    VALUES ($1, 1500, NOW(), NOW())
+                    INSERT INTO profiles (id, name, credit_balance, created_at, updated_at)
+                    VALUES ($1, 'Member', 1500, NOW(), NOW())
                     ON CONFLICT (id) DO UPDATE SET 
                         credit_balance = profiles.credit_balance + 1500,
                         updated_at = NOW()
