@@ -219,6 +219,16 @@ export async function POST(req: Request) {
                 `);
                 return NextResponse.json({ success: true, conversations: rows });
             }
+            case 'get-thread': {
+                const { user_id, persona_id } = payload;
+                if (!user_id || !persona_id) throw new Error('Missing IDs.');
+                const { rows } = await db.query(`
+                    SELECT * FROM chat_messages 
+                    WHERE user_id = $1 AND persona_id = $2 
+                    ORDER BY created_at ASC
+                `, [user_id, persona_id]);
+                return NextResponse.json({ success: true, messages: rows });
+            }
             default:
                 throw new Error('Neural Command Not Recognized.');
         }
