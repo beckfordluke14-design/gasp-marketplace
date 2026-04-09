@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ShieldAlert, Zap, Star, Trash2, LayoutDashboard, Baby, Activity,
-  ArrowRight, Film, Users, BarChart2, ClipboardList, Camera, FileCheck, Layers, Fuel, Radio
+  ArrowRight, Film, Users, BarChart2, ClipboardList, Camera, FileCheck, Layers, Fuel, Radio, MessageSquare
 } from 'lucide-react';
 import Header from '@/components/Header';
 
@@ -141,12 +141,22 @@ export default function AdminHub() {
       ctaIcon: <ArrowRight size={14} />,
     },
     {
+      label: 'Live Conversations',
+      description: 'The Neural Pulse. Watch every live chat signal in real-time. Monitor engagement, detect guest wall hits, and analyze operative behavior.',
+      href: '/admin/conversations',
+      icon: <MessageSquare size={20} />,
+      color: 'text-[#ff00ff]',
+      glow: 'from-[#ff00ff]/10 to-[#ff00ff]/5 border-[#ff00ff]/20',
+      cta: 'Observe Pulse',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
       label: 'Live Monitor',
       description: 'Real-time xAI Video Pipeline health. View successful renders and troubleshoot failures.',
       href: '/admin/monitor',
       icon: <Activity size={20} />,
-      color: 'text-[#ff00ff]',
-      glow: 'from-[#ff00ff]/10 to-[#ff00ff]/5 border-[#ff00ff]/20',
+      color: 'text-[#00f0ff]',
+      glow: 'from-[#00f0ff]/10 to-[#00f0ff]/5 border-[#00f0ff]/20',
       cta: 'Observe Hub',
       ctaIcon: <ArrowRight size={14} />,
     },
