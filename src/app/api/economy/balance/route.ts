@@ -96,20 +96,20 @@ export async function POST(req: Request) {
             
             const clientIP = req.headers.get('x-forwarded-for') || 'unknown';
 
-            // Fault-tolerant duplicate check — table may not exist on first claim
+            // 🔒 IDENTITY CHECK: We now rely solely on Privy User ID for uniqueness. 
+            // IP checks are disabled to allow shared networks (Mobile/Cellular) to convert.
             let alreadyClaimed = false;
             try {
                 const { rows: claims } = await db.query(
                     `SELECT 1 FROM transactions 
-                     WHERE (user_id = $1 OR meta->>'ip' = $2) 
+                     WHERE user_id = $1 
                      AND type = 'starter_claim' 
-                     AND created_at > NOW() - INTERVAL '99999 days'
                      LIMIT 1`,
-                    [userId, clientIP]
+                    [userId]
                 );
                 alreadyClaimed = claims && claims.length > 0;
             } catch {
-                alreadyClaimed = false; // Table missing = no prior claims
+                alreadyClaimed = false; 
             }
 
             if (alreadyClaimed) {
@@ -120,15 +120,15 @@ export async function POST(req: Request) {
             try {
                 await db.query(`
                     INSERT INTO profiles (id, name, nickname, country, flag, vibe, image, system_prompt, credit_balance, created_at, updated_at)
-                    VALUES ($1, 'Syndicate Member', 'Member', 'GB', '🇬🇧', 'Professional', 'https://avatar.vercel.sh/member', 'Sovereign Intelligence Node', 1500, NOW(), NOW())
+                    VALUES ($1, 'Syndicate Member', 'Member', 'GB', '🇬🇧', 'Professional', 'https://avatar.vercel.sh/member', 'Sovereign Intelligence Node', 2500, NOW(), NOW())
                     ON CONFLICT (id) DO UPDATE SET 
-                        credit_balance = profiles.credit_balance + 1500,
+                        credit_balance = profiles.credit_balance + 2500,
                         updated_at = NOW()
                 `, [userId]);
 
                 await db.query(`
                     INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
-                    VALUES ($1, 1500, 'starter_claim', 'syndicate_genesis', $2, NOW())
+                    VALUES ($1, 2500, 'starter_claim', 'syndicate_genesis', $2, NOW())
                 `, [userId, JSON.stringify({ ip: clientIP })]);
 
                 await db.query('COMMIT');
