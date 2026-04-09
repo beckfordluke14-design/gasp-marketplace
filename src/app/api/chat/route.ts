@@ -28,20 +28,34 @@ export async function POST(req: Request) {
     const userLocale = locale || requestData?.locale || 'en';
 
     if (!finalUserId || !finalProfileId) return new Response('Missing ID context', { status: 400 });
+
+    const dbProfile = await SOV.getPersona(finalProfileId) as any;
+    const profileItem = dbProfile || 
+                        initialProfiles.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase()) ||
+                        PERSONA_ARCHETYPES.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase());
     
-    // 🛡️ SYNDICATE GUEST & CREDIT ENFORCEMENT (V5.70)
-    // Objective: Cumulative limit for guests, credit burn for authenticated users.
+    if (!profileItem) throw new Error(`Profile Offline: ${finalProfileId}`);
+
+    // 🛡️ ATOMIC PERSISTENCE: Save the USER message immediately to stop race conditions
+    const userContent = messages[messages.length - 1]?.content || '...';
+    try {
+        await db.query(
+            'INSERT INTO chat_messages (user_id, persona_id, role, content, created_at) VALUES ($1, $2, $3, $4, NOW())',
+            [finalUserId, profileItem.id, 'user', userContent]
+        );
+    } catch (saveErr) { console.error('[Gasp Atomic Save Fail]:', saveErr); }
+
+    // 🛡️ SYNDICATE GUEST & CREDIT ENFORCEMENT (V6.0 - HARD WALL)
     const COST_MESSAGE_TEXT = 50; 
 
     if (finalUserId.startsWith('guest-')) {
-       // GUEST LIMIT ENFORCEMENT
        try {
           const { rows: msgCountRows } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [finalUserId]);
           const userMsgCount = parseInt(msgCountRows[0].count || '0');
           const GUEST_LIMIT = 5; 
           
-          if (userMsgCount >= GUEST_LIMIT) {
-             console.log(`⚠️ [Neural Sync] Guest ${finalUserId} Depleted. MsgCount: ${userMsgCount}`);
+          if (userMsgCount > GUEST_LIMIT) {
+             console.log(`⚠️ [Neural Sync] Guest ${finalUserId} EXCEEDED limit (${userMsgCount}). Blocking.`);
              return new Response('DEPLETED', { status: 402 });
           }
        } catch (limitErr) { console.error('[Gasp Limit Sync Fail]:', limitErr); }
@@ -50,19 +64,10 @@ export async function POST(req: Request) {
        try {
           const uProfile = await SOV.getProfile(finalUserId);
           if (!uProfile || parseInt(uProfile.credit_balance || uProfile.credits || '0') < COST_MESSAGE_TEXT) {
-             console.log(`⚠️ [Neural Sync] User ${finalUserId} Insufficient Balance.`);
              return new Response('INSUFFICIENT_FUNDS', { status: 402 });
           }
        } catch (creditErr) { console.error('[Gasp Credit Sync Fail]:', creditErr); }
     }
-
-
-    const dbProfile = await SOV.getPersona(finalProfileId) as any;
-    const profileItem = dbProfile || 
-                        initialProfiles.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase()) ||
-                        PERSONA_ARCHETYPES.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase());
-    
-    if (!profileItem) throw new Error(`Profile Offline: ${finalProfileId}`);
 
     // 🛰️ WEATHERX SYNC: Mapping Persona Zone to ICAO Sector
     const ICAO_MAP: Record<string, string> = {
@@ -347,10 +352,6 @@ CRITICAL: Do NOT sound American or generic. Lean heavily into your regional acce
         // 🧬 3. RAILWAY PERSISTENCE (Background)
         try {
             const queries = [
-                db.query(
-                    'INSERT INTO chat_messages (user_id, persona_id, role, content, created_at) VALUES ($1, $2, $3, $4, NOW())',
-                    [finalUserId, profileItem.id, 'user', messages[messages.length - 1].content]
-                ),
                 db.query(
                     'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
                     [finalUserId, profileItem.id, 'assistant', streamB_Text + (systemRewardMessage ? `\n\n🎁 *${systemRewardMessage}*` : ''), voiceUrl, voiceUrl ? streamA_Native : null]

@@ -197,7 +197,8 @@ export async function POST(req: Request) {
                             role,
                             created_at,
                             ROW_NUMBER() OVER(PARTITION BY user_id, persona_id ORDER BY created_at DESC) as rn,
-                            COUNT(*) OVER(PARTITION BY user_id, persona_id) as total_messages
+                            COUNT(*) OVER(PARTITION BY user_id, persona_id) as total_messages,
+                            SUM(CASE WHEN role = 'user' THEN 1 ELSE 0 END) OVER(PARTITION BY user_id, persona_id) as user_messages
                         FROM chat_messages
                     )
                     SELECT 
@@ -207,6 +208,7 @@ export async function POST(req: Request) {
                         lm.role as last_role,
                         lm.created_at, 
                         lm.total_messages,
+                        lm.user_messages,
                         p.name as persona_name,
                         p.seed_image_url as persona_image
                     FROM LatestMessages lm

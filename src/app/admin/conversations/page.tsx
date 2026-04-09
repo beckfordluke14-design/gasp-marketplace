@@ -14,6 +14,7 @@ interface Conversation {
     last_role: 'user' | 'assistant';
     created_at: string;
     total_messages: number;
+    user_messages: number;
     persona_name: string;
     persona_image: string;
 }
@@ -158,10 +159,10 @@ export default function ConversationMonitor() {
                                                     <div className="flex items-center gap-2">
                                                         <MessageSquare size={12} className="text-white/20" />
                                                         <p className="text-[9px] font-black uppercase tracking-widest text-white/20">
-                                                            Session Intelligence: {conv.total_messages} messages
+                                                            Session Intelligence: {conv.total_messages} messages ({conv.user_messages} user)
                                                         </p>
                                                     </div>
-                                                    {conv.total_messages >= 5 && isGuest && (
+                                                    {conv.user_messages >= 5 && isGuest && (
                                                         <span className="text-[8px] bg-red-500/20 text-red-500 px-2 py-1 rounded-full font-black uppercase tracking-widest animate-pulse">
                                                             GUEST WALL HIT
                                                         </span>
