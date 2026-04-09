@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { initialProfiles, proxyImg, getProfileName, type Profile, type Broadcast } from '@/lib/profiles';
-import { MessageSquare, Zap, Lock, Heart, Trash2, Star, Brain, X, Save, Pencil, Check, ShieldCheck } from 'lucide-react';
+import { MessageSquare, Zap, Lock, Heart, Trash2, Star, Brain, X, Save, Pencil, Check, ShieldCheck, MessageCircle } from 'lucide-react';
 import { trackEvent } from '@/lib/telemetry';
 import { useUser } from '@/components/providers/UserProvider';
 import Link from 'next/link';
@@ -276,6 +276,17 @@ function GlobalFeedItem({
                         <Star size={20} fill={isFollowing ? 'currentColor' : 'none'} />
                         <span className="text-[9px] font-black uppercase tracking-widest leading-none">{isFollowing ? (isSpanish ? 'Favorito' : 'Favorited') : (isSpanish ? 'Favorito' : 'Favorite')}</span>
                      </button>
+
+                     {/* 💬 CHAT ICON — Always Visible */}
+                     <motion.button
+                       whileHover={{ scale: 1.08 }}
+                       whileTap={{ scale: 0.92 }}
+                       onClick={(e) => { e.stopPropagation(); onSelectProfile(profile.id); }}
+                       className="w-16 h-16 rounded-2xl border border-[#ff00ff]/30 bg-[#ff00ff]/10 flex flex-col items-center justify-center gap-1 backdrop-blur-md hover:bg-[#ff00ff]/20 hover:border-[#ff00ff] hover:shadow-[0_0_25px_rgba(255,0,255,0.3)] transition-all active:scale-90 group"
+                     >
+                        <MessageCircle size={22} className="text-[#ff00ff] group-hover:scale-110 transition-transform" />
+                        <span className="text-[7px] font-black uppercase tracking-widest mt-0.5 text-[#ff00ff]/70 group-hover:text-[#ff00ff] transition-colors">{isSpanish ? 'Chat' : 'Chat'}</span>
+                     </motion.button>
                   </div>
               </div>
           </div>
