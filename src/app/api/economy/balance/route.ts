@@ -119,8 +119,8 @@ export async function POST(req: Request) {
             await db.query('BEGIN');
             try {
                 await db.query(`
-                    INSERT INTO profiles (id, name, credit_balance, created_at, updated_at)
-                    VALUES ($1, 'Member', 1500, NOW(), NOW())
+                    INSERT INTO profiles (id, name, nickname, country, flag, vibe, image, system_prompt, credit_balance, created_at, updated_at)
+                    VALUES ($1, 'Syndicate Member', 'Member', 'GB', '🇬🇧', 'Professional', 'https://avatar.vercel.sh/member', 'Sovereign Intelligence Node', 1500, NOW(), NOW())
                     ON CONFLICT (id) DO UPDATE SET 
                         credit_balance = profiles.credit_balance + 1500,
                         updated_at = NOW()
