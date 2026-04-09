@@ -46,8 +46,28 @@ export default async function ArchiveArticlePage({ params }: { params: { id: str
     const article = post[0];
     if (!article) notFound();
 
+    // 🛰️ JSON-LD: Structured Data for Google News Indexing (Tier 1 Authority)
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'NewsArticle',
+        'headline': article.caption,
+        'description': (article.metadata?.content || article.caption).slice(0, 160),
+        'image': [article.persona_image],
+        'datePublished': article.created_at,
+        'dateModified': article.created_at,
+        'author': [{
+            '@type': 'Person',
+            'name': article.persona_name,
+            'url': `https://gasp.fun/profile/${article.persona_id}`
+        }]
+    };
+
     return (
         <main className="min-h-screen bg-black text-white selection:bg-[#ff00ff] selection:text-white">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <Header />
             
             <div className="pt-32 pb-20 px-4 md:px-8 max-w-5xl mx-auto">
