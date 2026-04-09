@@ -36,38 +36,43 @@ export async function POST(req: Request) {
     
     if (!profileItem) throw new Error(`Profile Offline: ${finalProfileId}`);
 
-    // 🛡️ ATOMIC PERSISTENCE: Save the USER message immediately to stop race conditions
-    const userContent = messages[messages.length - 1]?.content || '...';
-    try {
-        await db.query(
-            'INSERT INTO chat_messages (user_id, persona_id, role, content, created_at) VALUES ($1, $2, $3, $4, NOW())',
-            [finalUserId, profileItem.id, 'user', userContent]
-        );
-    } catch (saveErr) { console.error('[Gasp Atomic Save Fail]:', saveErr); }
-
-    // 🛡️ SYNDICATE GUEST & CREDIT ENFORCEMENT (V6.0 - HARD WALL)
+    // 🛡️ SYNDICATE GUEST & CREDIT ENFORCEMENT (V7.0 - ZERO TOLERANCE)
+    const normalizedUserId = (finalUserId || '').trim();
+    const GUEST_LIMIT = 5; 
     const COST_MESSAGE_TEXT = 50; 
 
-    if (finalUserId.startsWith('guest-')) {
+    if (normalizedUserId.startsWith('guest-')) {
        try {
-          const { rows: msgCountRows } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [finalUserId]);
-          const userMsgCount = parseInt(msgCountRows[0].count || '0');
-          const GUEST_LIMIT = 5; 
+          const { rows: preCheck } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [normalizedUserId]);
+          const currentCount = parseInt(preCheck[0].count || '0');
           
-          if (userMsgCount > GUEST_LIMIT) {
-             console.log(`⚠️ [Neural Sync] Guest ${finalUserId} EXCEEDED limit (${userMsgCount}). Blocking.`);
+          if (currentCount >= GUEST_LIMIT) {
+             console.log(`🛑 [Neural Wall] Guest ${normalizedUserId} hard-blocked at ${currentCount} msgs.`);
+             // 🧹 EMERGENCY PURGE: Delete any extra messages that managed to slip through
+             if (currentCount > GUEST_LIMIT) {
+                await db.query('DELETE FROM chat_messages WHERE id IN (SELECT id FROM chat_messages WHERE user_id = $1 AND role = \'user\' ORDER BY created_at DESC LIMIT $2)', [normalizedUserId, currentCount - GUEST_LIMIT]);
+             }
              return new Response('DEPLETED', { status: 402 });
           }
-       } catch (limitErr) { console.error('[Gasp Limit Sync Fail]:', limitErr); }
+       } catch (limitErr) { console.error('[Wall Pre-Check Fail]:', limitErr); }
     } else {
        // AUTHENTICATED CREDIT ENFORCEMENT
        try {
-          const uProfile = await SOV.getProfile(finalUserId);
+          const uProfile = await SOV.getProfile(normalizedUserId);
           if (!uProfile || parseInt(uProfile.credit_balance || uProfile.credits || '0') < COST_MESSAGE_TEXT) {
              return new Response('INSUFFICIENT_FUNDS', { status: 402 });
           }
        } catch (creditErr) { console.error('[Gasp Credit Sync Fail]:', creditErr); }
     }
+
+    // 🧬 ATOMIC PERSISTENCE: Save now that we are 100% sure they are under the limit
+    const userContent = messages[messages.length - 1]?.content || '...';
+    try {
+        await db.query(
+            'INSERT INTO chat_messages (user_id, persona_id, role, content, created_at) VALUES ($1, $2, $3, $4, NOW())',
+            [normalizedUserId, profileItem.id, 'user', userContent]
+        );
+    } catch (saveErr) { console.error('[Gasp Atomic Save Fail]:', saveErr); }
 
     // 🛰️ WEATHERX SYNC: Mapping Persona Zone to ICAO Sector
     const ICAO_MAP: Record<string, string> = {
