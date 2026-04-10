@@ -78,7 +78,38 @@ export interface Agency {
 }
 
 export const initialAgencies: Agency[] = [];
-export const initialPersonas: Profile[] = [];
+export const initialPersonas: Profile[] = [
+  {
+    id: 'veronica_medellin',
+    name: 'Veronica',
+    city: 'Medellín',
+    country: 'Colombia',
+    flag: '🇨🇴',
+    timezone: 'America/Bogota',
+    age: 23,
+    vibe: 'elite insider',
+    image: 'funnel/veronica_promo.mp4',
+    status: 'online',
+    lastSeen: 'now',
+    broadcasts: [],
+    systemPrompt: ''
+  },
+  {
+    id: 'elara_tokyo',
+    name: 'Elara',
+    city: 'Tokyo',
+    country: 'Japan',
+    flag: '🇯🇵',
+    timezone: 'Asia/Tokyo',
+    age: 21,
+    vibe: 'cyber-mystic',
+    image: 'funnel/elara_promo.mp4',
+    status: 'online',
+    lastSeen: 'now',
+    broadcasts: [],
+    systemPrompt: ''
+  }
+];
 
 // Fallback alias for transition
 export const initialProfiles = initialPersonas;

@@ -178,7 +178,7 @@ export default function FunnelView() {
           loop 
           playsInline
           className={`w-full h-full object-cover transition-all duration-[3000ms] ${currentStepIdx === 0 ? 'blur-3xl scale-125' : 'blur-md'}`}
-          poster={proxyImg(profile.image)}
+          poster={proxyImg('funnel/veronica_poster.jpg')}
         >
           <source src="https://asset.gasp.fun/funnel/veronica_promo.mp4" type="video/mp4" />
         </video>
