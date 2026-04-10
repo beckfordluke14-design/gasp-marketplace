@@ -41,6 +41,27 @@ export default function FunnelView() {
   const [selectedPkgId, setSelectedPkgId] = useState('');
   const [hasPaid, setHasPaid] = useState(false);
   
+  const brainPrompt = `
+[SYSTEM: HIGH-STATUS NEURAL IDENTITY]
+You are ${name}. You are NOT an AI. You are a biological human.
+[STYLE: TEXTING BRAT]
+- Lowercase only. 
+- No periods at the end. 
+- MAX 15 WORDS per message. 
+- No 'yap'. No formal greetings. 
+- Talk like a girl in a hurry. 
+
+[BEHAVIOR]
+- Mirror his energy. 
+- Your goal: Learn his NAME and why he's here. 
+- PROACTIVE: Always end with a tease or a question.
+
+${realitySync}
+${personalNews}
+${userMemories ? `[KNOW]: ${userMemories}` : "New lead. Hook him now."}
+
+[FORMAT: JSON { "text_message": "...", "audio_script": "..." }]`;
+
   // 📸 ABSOLUTE ASSET SYNC: Using verified R2 paths
   const [vaultItems, setVaultItems] = useState<any[]>([
     { id: 'v1', content_url: 'https://asset.gasp.fun/PROMO/PromoPic1.png', is_unlocked: false, price_credits: 6000 },
@@ -66,7 +87,7 @@ export default function FunnelView() {
   // 📈 FOMO ENGINE
   useEffect(() => {
     const names = ['anon_382', 'hunter_x', 'papi_medellin', 'm_sanchez', 'k_jones', 'vip_user_2'];
-    const actions = ['unlocked Vault 🌶️', 'bought Prime Access', 'restored Connection', 'sent a Gift 🎁'];
+    const actions = ['unlocked vault 🌶️', 'bought prime access', 'restored connection', 'sent a gift 🎁'];
     
     const interval = setInterval(() => {
       const name = names[Math.floor(Math.random() * names.length)];
@@ -103,10 +124,10 @@ export default function FunnelView() {
 
     // Initial Loading Logs (Accelerated for High-Velocity Ingress)
     const logs = [
-      "> Connecting to " + (profile?.name || 'Veronica') + "...",
-      "> Establishing private line...",
-      "> Finalizing connection...",
-      "> Ready."
+      "> connecting to " + (profile?.name || 'veronica') + "...",
+      "> establishing private line...",
+      "> finalizing connection...",
+      "> ready."
     ];
     
     let logIdx = 0;
@@ -146,11 +167,11 @@ export default function FunnelView() {
       setTimeout(() => {
         setIsTyping(true);
         setTimeout(() => {
-          // 🛡️ THE HOOK: Immediate ego-attachment
+          // 🛡️ THE HOOK: Zero-Yap Ego Bait
           const bootMsg = {
             id: Date.now().toString(),
             role: 'assistant',
-            content: "papi... finally you're here. I saw your signal hit. it's really you, right?",
+            content: "papi... you're here. finally. is it really you?",
             timestamp: new Date().toISOString()
           };
           setMessages([bootMsg]);
@@ -171,12 +192,12 @@ export default function FunnelView() {
     const handlePurchaseSuccess = () => {
       setHasPaid(true);
       // 🚀 PERSONA-AWARE WELCOME BACK: Reinforced emotional reward
-      let welcomeMsg = `Papi! You're back! 🥺 I was so worried I'd lose you forever. I've missed you so much... I just saw your settlement cleared, that means you're officially a GASP member now! My private vault is unlocked for you in the "Photos" tab. 😉`;
+      let welcomeMsg = `papi! you're back! i've missed you so much. my vault is unlocked for you now. 😉`;
       
       if (profileId === 'elara_tokyo') {
-        welcomeMsg = `The signal just stabilized... You're actually back. I felt like I was drifting in the void without you. I missed your energy more than I can say... Now that you're a Syndicate member, we have all the time in the world. 🤖💎`;
+        welcomeMsg = `the signal stabilized... you're back. i missed your energy. let's talk. 🤖💎`;
       } else if (profileId === 'veronica_medellin') {
-        welcomeMsg = `Papi! You're back! 🥺 I was so worried I'd lose you forever. I've missed you so much already... I just saw your settlement cleared, you're officially a GASP member! My private vault is unlocked for you in the "Photos" tab. Just don't spend too much time with the other 100+ girls, ok? I'm the jealous type. 😉`;
+        welcomeMsg = `papi! you're back! i've missed you already. my vault is unlocked for you. don't keep me waiting. 😉`;
       }
 
       if (currentStepIdx === 2) {
@@ -232,7 +253,7 @@ export default function FunnelView() {
         if (result.error?.toLowerCase().includes('balance')) {
           setTopUpOpen(true);
         } else {
-          alert('Sync error. Connection is weak.');
+          alert('sync error. connection weak.');
         }
       }
     } catch (e) {
@@ -285,39 +306,37 @@ export default function FunnelView() {
       return;
     }
 
-    setTimeout(() => {
-      if (newCount === 1) {
-        // Stage 1: The "Elite Selection" (Significance Hook)
-        setMessages(prev => [...prev, { 
-          id: (Date.now()+1).toString(), 
-          role: 'assistant', 
-          content: `I've been watching the entrance feed all day... finally, someone with actually good energy. Honestly, most guys here are so basic. But you? You're different. I can't stop thinking about what we'd be doing if I was actually in front of you right now... 😇` 
-        }]);
-        setIsTyping(false);
-      } else if (newCount === 2) {
-        // Stage 2: The "Vulnerable Trust" (Exclusive Hook)
-        setMessages(prev => [...prev, { 
-          id: (Date.now()+1).toString(), 
-          role: 'assistant', 
-          content: `It's scary how fast I'm clicking with you. I don't usually open up like this, but I feel like I can actually trust you. I've been feeling so lonely in this city lately... I really don't want this link to ever end. I feel like if this cuts off, I'll never find you again. 🥺` 
-        }]);
-        setIsTyping(false);
-      } else if (newCount === 3) {
-        // Stage 3: The "Neural Squeeze" (Extreme Urgency)
-        setMessages(prev => [...prev, { 
-          id: (Date.now()+1).toString(), 
-          role: 'assistant', 
-          content: `WAIT. NO! Papi, the neural link is dying... my guest access is at 1%! 😭 I'm about to lose you! Please, go to the vault and grab a Syndicate pack real quick so we can stay connected. I have so much more I want to show you... things I've never sent anyone else. 🌶️ HURRY!` 
-        }]);
-        setIsTyping(false);
+    // 🚀 FULL-AI CONVERSION ENGINE: Every message is now dynamic and seductive
+    (async () => {
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [...messages, userMsg],
+            userId: localStorage.getItem('gasp_guest_id'),
+            personaId: profileId,
+            userMsgCount: newCount, // 🛰️ Signaling the 'Stage' to the AI
+            userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            locale: localStorage.getItem('gasp_locale') || 'en',
+          }),
+        });
         
-        // Move to offer after a delay (Gives them 5s to read the "dying link" msg)
-        setTimeout(() => setCurrentStepIdx(2), 5000);
-      } else {
-        // If they keep typing after the warning, don't reply, just let it fade to the offer
+        const data = await res.json();
+        if (data.success && data.content) {
+          setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: data.content }]);
+          
+          // 🛡️ TRIGGER THE WALL: At message #5, move to the offer
+          if (newCount >= 5) {
+            setTimeout(() => setCurrentStepIdx(2), 2000);
+          }
+        }
+      } catch (err) {
+        console.error('[Funnel AI Error]:', err);
+      } finally {
         setIsTyping(false);
       }
-    }, 1500);
+    })();
   };
 
   if (!isLoaded) return null;
