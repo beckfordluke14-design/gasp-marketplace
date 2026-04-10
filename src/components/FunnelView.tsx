@@ -606,14 +606,14 @@ export default function FunnelView() {
                 </h2>
                 
                 {/* 🚨 REWARD BADGE: HIGH-CONTRAST SANS */}
-                <div className="max-w-[320px] mx-auto mt-6 p-5 bg-[#ffea00] rounded-3xl flex flex-col items-center justify-center gap-1 shadow-[0_20px_60px_rgba(255,234,0,0.4)] border-2 border-white transform hover:scale-[1.02] transition-transform">
-                  <span className="text-[12px] font-black uppercase text-black tracking-[0.3em] leading-none mb-1">PROMO: LOYALTY ACTIVATED</span>
-                  <div className="flex flex-col items-center">
-                     <span className="text-3xl font-black text-black leading-tight">1:1 $GaspAi Match</span>
-                     <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest mt-1 italic">GENESIS PHASE EXCLUSIVE</span>
-                  </div>
                 </div>
                 <p className="text-[10px] font-black uppercase text-[#ffea00]/60 tracking-[0.4em] mt-4">Remaining Slots: 142 / 10,000</p>
+                
+                {/* 🛡️ STRIPE AUTHORITY SHIELD */}
+                <div className="flex items-center justify-center gap-2 mt-2 opacity-60">
+                   <div className="px-1.5 py-0.5 bg-white text-black text-[7px] font-black rounded-sm uppercase tracking-tighter">Stripe</div>
+                   <span className="text-[8px] font-black uppercase tracking-widest text-white/80 italic">Verified Identity Gateway · Bank-Level Security</span>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 max-w-md mx-auto gap-6 px-1">
