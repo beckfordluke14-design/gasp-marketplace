@@ -247,7 +247,7 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
       } else {
         // If balance is low, open top up drawer
         if (result.error?.toLowerCase().includes('balance')) {
-          setTopUpOpen(true);
+          setIsTopUpOpen(true);
         } else {
           alert('sync error. connection weak.');
         }
@@ -705,6 +705,7 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
               </div>
 
               <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto">
+                {[
                   { id: 'tier_starter', label: 'Basic Pack', price: 4.99, credits: '5,000', bonus: '100% Match' },
                   { id: 'tier_session', label: 'Prime Access', price: 24.99, credits: '30,000', bonus: '150% Match' },
                   { id: 'tier_whale', label: 'Elite Status', price: 99.99, credits: '120,000', bonus: '200% Match' },
