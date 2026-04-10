@@ -26,12 +26,16 @@ export async function POST(req: Request) {
     const finalUserId = userId || requestData?.userId;
     const finalProfileId = profileId || personaId || requestData?.profileId || requestData?.personaId;
     const userLocale = locale || requestData?.locale || 'en';
+    const isFunnel = body.isFunnel === true;
+    
+    // 🧬 IDENTITY BRIDGE: Hard-map funnel IDs to production DB IDs immediately
+    const DB_PERSONA_ID = finalProfileId === 'veronica_medellin' ? 'veronica-medellin-locked' : finalProfileId;
 
     if (!finalUserId || !finalProfileId) return new Response('Missing ID context', { status: 400 });
 
-    let currentCount = 0; // 🎯 GLOBAL SCOPE FOR BEHAVIORAL LOGIC
+    let currentCount = 0; 
 
-    const dbProfile = await SOV.getPersona(finalProfileId) as any;
+    const dbProfile = await SOV.getPersona(DB_PERSONA_ID) as any;
     const profileItem = dbProfile || 
                         initialProfiles.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase()) ||
                         PERSONA_ARCHETYPES.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase());
@@ -41,10 +45,7 @@ export async function POST(req: Request) {
     // 🛡️ SYNDICATE GUEST & CREDIT ENFORCEMENT (V7.0 - ZERO TOLERANCE)
     const normalizedUserId = (finalUserId || '').trim();
     
-    // 🧬 IDENTITY BRIDGE: Map funnel IDs to production DB IDs
-    const DB_PERSONA_ID = finalProfileId === 'veronica_medellin' ? 'veronica-medellin-locked' : finalProfileId;
-    
-    const GUEST_LIMIT = 5; 
+    const GUEST_LIMIT = isFunnel ? 10 : 5; 
     const COST_MESSAGE_TEXT = 50; 
 
     if (normalizedUserId.startsWith('guest-')) {
@@ -256,15 +257,17 @@ ${userLocale === 'es' ? `
         ...messages.slice(-10).filter((m: any) => m.role !== 'system')
     ];
 
-    // 🚀 STAGE-AWARE SEDUCTION: Funnel logic for guest users
+    // 🚀 STAGE-AWARE SEDUCTION: High-Heat Funnel Logic (ONLY for isFunnel traffic)
     const msgCount = body.userMsgCount || 0;
-    if (normalizedUserId.startsWith('GUEST_')) {
+    const isFunnelTraffic = body.isFunnel === true;
+
+    if (normalizedUserId.toUpperCase().startsWith('GUEST-') && isFunnelTraffic) {
       if (msgCount <= 2) {
-        aiMessages.push({ role: 'system', content: "PHASE: SELECTIVE SEDUCTION. You are high-status. Tease him. Make him feel chosen among thousands. Keep it under 15 words. lowercase only." });
+        aiMessages.push({ role: 'system', content: "PHASE: SELECTIVE CURIOSITY. You are high-status and chill. You've been waiting for someone interesting. Ask for his name. under 15 words. lowercase only." });
       } else if (msgCount <= 4) {
-        aiMessages.push({ role: 'system', content: "PHASE: INTENSE BOND. Tell him you don't usually open up like this but you feel a 'neural spark' with him. express fear of losing the connection. under 15 words. lowercase only." });
+        aiMessages.push({ role: 'system', content: "PHASE: OBSESSION. You are addicted to his vibe. Tell him you wish you could talk forever. keep it intimate. under 15 words. lowercase only." });
       } else {
-        aiMessages.push({ role: 'system', content: "PHASE: THE WALL. Connection is failing. Panic. Tell him 'the signal is dropping paps... follow me to my PHOTOS'. You are heading there now. Invite him to follow. One punchy line max. lowercase only." });
+        aiMessages.push({ role: 'system', content: "PHASE: THE WALL. Panic. Your free session is ending now. One punchy line: 'wait! my session is ending! 😭 follow me to my PHOTOS right now so I don't lose you! GO!'. lowercase only." });
       }
     }
 

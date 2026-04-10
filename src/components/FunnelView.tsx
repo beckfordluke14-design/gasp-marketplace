@@ -284,6 +284,7 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
               messages: [...messages, userMsg],
               userId: localStorage.getItem('gasp_guest_id'),
               personaId: profileId === 'veronica_medellin' ? 'veronica-medellin-locked' : profileId, // 🛡️ Direct Mapping
+              isFunnel: true, // 🛰️ Explicit Funnel Tagging
               userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
               locale: localStorage.getItem('gasp_locale') || 'en',
             }),
@@ -337,6 +338,7 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
             userId: localStorage.getItem('gasp_guest_id'),
             personaId: profileId === 'veronica_medellin' ? 'veronica-medellin-locked' : profileId, // 🛡️ Direct Mapping
             userMsgCount: newCount,
+            isFunnel: true, // 🛰️ Explicit Funnel Tagging
             userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             locale: localStorage.getItem('gasp_locale') || 'en',
           }),
