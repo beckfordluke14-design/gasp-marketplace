@@ -53,7 +53,7 @@ export default function FunnelView() {
   const profileId = searchParams.get('profile') || 'veronica_medellin';
   const profile = initialProfiles.find(p => p.id === profileId) || {
     name: 'Veronica',
-    image: '/ai_girl_hero_funnel_1775829590274.png',
+    image: '/personas/veronica/veronica_hero.webp',
     city: 'Medellín'
   };
 
@@ -445,13 +445,13 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
 
               {activeView === 'chat' ? (
                 <>
-                  {/* 📸 PROMO GALLERY ROW (CONVERSATIONAL BALANCE) */}
+                  {/* 📸 PROMO GALLERY ROW (CRITICAL TEXT CLARITY) */}
                   <div className="px-5 py-2 border-b border-white/5 bg-white/[0.02] grid grid-cols-2 gap-3 shrink-0">
                     {[
                       { id: 1, src: 'PROMO/PromoPic1.png' },
                       { id: 2, src: 'PROMO/PromoPic2.webp' }
                     ].map((p) => (
-                      <div key={p.id} className="max-h-[28vh] aspect-[9/16] mx-auto rounded-xl overflow-hidden border border-white/10 shadow-lg relative group bg-black/40">
+                      <div key={p.id} className="max-h-[25vh] aspect-[9/16] mx-auto rounded-xl overflow-hidden border border-white/10 shadow-md relative group bg-black/40">
                         <img 
                           src={proxyImg(p.src)} 
                           className="w-full h-full object-contain" 
