@@ -11,6 +11,7 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
 import TopUpDrawer from './economy/TopUpDrawer';
+import ProfileAvatar from './profile/ProfileAvatar';
 
 /**
  * 🌪️ THE GASP NEURAL FUNNEL v2.0
@@ -149,6 +150,7 @@ export default function FunnelView() {
   // 🚀 REVENUE RETENTION: Listen for successful top-up
   useEffect(() => {
     const handlePurchaseSuccess = () => {
+      setHasPaid(true);
       // If we are on the offer step, move back to chat with a reward message
       if (currentStepIdx === 2) {
         setMessages(prev => [...prev, {
@@ -227,6 +229,35 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
     
     setIsTyping(true);
     
+    // 🚀 LIVE AI BRIDGE: If the user has paid, connect to the real persona backend
+    if (hasPaid) {
+      (async () => {
+        try {
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              messages: [...messages, userMsg],
+              userId: localStorage.getItem('gasp_guest_id'),
+              personaId: profileId,
+              userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              locale: localStorage.getItem('gasp_locale') || 'en',
+            }),
+          });
+          
+          const data = await res.json();
+          if (data.success && data.content) {
+            setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: data.content }]);
+          }
+        } catch (err) {
+          console.error('[Live Bridge Error]:', err);
+        } finally {
+          setIsTyping(false);
+        }
+      })();
+      return;
+    }
+
     setTimeout(() => {
       if (newCount === 1) {
         // Stage 1: Connection & Hypothetical
@@ -370,8 +401,8 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
               {/* Profile Bar */}
               <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/40">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#ff00ff]/30 bg-black/40 shadow-xl">
-                    <img src={proxyImg('funnel/veronica_poster.jpg')} className="w-full h-full object-cover" alt="" />
+                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#ff00ff]/30 bg-black/40 shadow-xl relative">
+                    <ProfileAvatar src="personas/veronica/veronica_hero.webp" alt={profile.name} fill />
                   </div>
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-2">
@@ -411,14 +442,14 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
               {activeView === 'chat' ? (
                 <>
                   {/* 📸 PROMO GALLERY ROW */}
-                  <div className="px-5 py-3 border-b border-white/5 bg-white/[0.02] flex gap-3 overflow-x-auto no-scrollbar shrink-0">
+                  <div className="px-5 py-3 border-b border-white/5 bg-white/[0.02] flex gap-5 overflow-x-auto no-scrollbar shrink-0">
                     {[
-                      { id: 1, src: proxyImg('PROMO/PromoPic1.png') },
-                      { id: 2, src: proxyImg('PROMO/PromoPic2.webp') }
+                      { id: 1, src: 'PROMO/PromoPic1.png' },
+                      { id: 2, src: 'PROMO/PromoPic2.webp' }
                     ].map((p) => (
-                      <div key={p.id} className="w-28 h-20 rounded-xl overflow-hidden border border-white/10 shrink-0 shadow-lg relative group">
-                        <img src={p.src} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                      <div key={p.id} className="min-w-[180px] h-[270px] rounded-2xl overflow-hidden border border-white/20 shrink-0 shadow-2xl relative group bg-black/40">
+                        <img src={proxyImg(p.src)} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       </div>
                     ))}
                   </div>
@@ -545,13 +576,14 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
                 </h2>
                 
                 {/* 🚨 REWARD BADGE: HIGH-CONTRAST SANS */}
-                <div className="max-w-[280px] mx-auto mt-6 p-4 bg-[#ffea00] rounded-2xl flex flex-col items-center justify-center gap-1 shadow-[0_10px_40px_rgba(255,234,0,0.3)] border-2 border-white">
-                  <span className="text-[12px] font-system-black uppercase text-black tracking-widest leading-none font-sans font-black">LOYALTY REWARD ACTIVE</span>
-                  <div className="flex items-baseline gap-1">
-                     <span className="text-2xl font-system-black text-black font-sans font-black">1:1 $GaspAi Match</span>
+                <div className="max-w-[320px] mx-auto mt-6 p-5 bg-[#ffea00] rounded-3xl flex flex-col items-center justify-center gap-1 shadow-[0_20px_60px_rgba(255,234,0,0.4)] border-2 border-white transform hover:scale-[1.02] transition-transform">
+                  <span className="text-[12px] font-black uppercase text-black tracking-[0.3em] leading-none mb-1">PROMO: LOYALTY ACTIVATED</span>
+                  <div className="flex flex-col items-center">
+                     <span className="text-3xl font-black text-black leading-tight">1:1 $GaspAi Match</span>
+                     <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest mt-1 italic">GENESIS PHASE EXCLUSIVE</span>
                   </div>
                 </div>
-                <p className="text-[9px] font-black uppercase text-[#ffea00] tracking-widest mt-2 animate-pulse">Genesis Phase 1: Ends at 10k accounts</p>
+                <p className="text-[10px] font-black uppercase text-[#ffea00]/60 tracking-[0.4em] mt-4">Remaining Slots: 142 / 10,000</p>
               </div>
 
               <div className="grid grid-cols-1 max-w-md mx-auto gap-6 px-1">
