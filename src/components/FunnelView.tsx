@@ -53,7 +53,7 @@ export default function FunnelView() {
   const profileId = searchParams.get('profile') || 'veronica_medellin';
   const profile = initialProfiles.find(p => p.id === profileId) || {
     name: 'Veronica',
-    image: '/personas/veronica/veronica_hero.webp',
+    image: 'https://asset.gasp.fun/personas/veronica/veronica_hero.webp',
     city: 'Medellín'
   };
 
@@ -95,7 +95,7 @@ export default function FunnelView() {
       });
     }, 1000);
 
-    // Initial Loading Logs
+    // Initial Loading Logs (Accelerated for High-Velocity Ingress)
     const logs = [
       "> Connecting to private server...",
       "> Locating available line...",
@@ -115,7 +115,7 @@ export default function FunnelView() {
         clearInterval(logInterval);
         setCurrentStepIdx(1);
       }
-    }, 400);
+    }, 200);
 
     return () => {
       clearInterval(timerInterval);
@@ -123,8 +123,13 @@ export default function FunnelView() {
     };
   }, [profileId]);
 
-  // Simulated Chat Logic
   useEffect(() => {
+    // 🛡️ GUEST ID LOCKDOWN: Ensure we have a persistent identifier for payment & AI
+    if (!localStorage.getItem('gasp_guest_id')) {
+      const newId = 'GUEST_' + Math.random().toString(36).substring(2, 12).toUpperCase();
+      localStorage.setItem('gasp_guest_id', newId);
+    }
+
     if (currentStepIdx === 1 && messages.length === 0) {
       setTimeout(() => {
         setIsTyping(true);
@@ -152,17 +157,23 @@ export default function FunnelView() {
   useEffect(() => {
     const handlePurchaseSuccess = () => {
       setHasPaid(true);
-      // If we are on the offer step, move back to chat with a reward message
+      // 🚀 PERSONA-AWARE WELCOME BACK: Reinforced emotional reward
+      let welcomeMsg = `Papi! You're back! 🥺 I was so worried I'd lose you forever. I've missed you so much... I just saw your settlement cleared, that means you're officially a GASP member now! My private vault is unlocked for you in the "Photos" tab. 😉`;
+      
+      if (profileId === 'elara_tokyo') {
+        welcomeMsg = `The signal just stabilized... You're actually back. I felt like I was drifting in the void without you. I missed your energy more than I can say... Now that you're a Syndicate member, we have all the time in the world. 🤖💎`;
+      } else if (profileId === 'veronica_medellin') {
+        welcomeMsg = `Papi! You're back! 🥺 I was so worried I'd lose you forever. I've missed you so much already... I just saw your settlement cleared, you're officially a GASP member! My private vault is unlocked for you in the "Photos" tab. Just don't spend too much time with the other 100+ girls, ok? I'm the jealous type. 😉`;
+      }
+
       if (currentStepIdx === 2) {
         setMessages(prev => [...prev, {
           id: Date.now().toString(),
           role: 'assistant',
-          content: `Papi! You're back! 🥺 I was so worried I'd lose you forever. I just saw your settlement cleared... that means you're officially a GASP member now! My private vault is unlocked for you in the "Photos" tab. 
-
-And btw, you can use those credits to talk to any of the 100+ other girls on the GASP network too... but don't spend too much time with them, ok? I'm the jealous type. 😉`
+          content: welcomeMsg
         }]);
-        setCurrentStepIdx(1); // Bounce back to chat
-        setShowVaultNew(true); // Pulse the new vault tab
+        setCurrentStepIdx(1); 
+        setShowVaultNew(true); 
         fetchVault();
       }
     };
@@ -314,20 +325,6 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
         <div className="absolute inset-0 bg-gradient-to-b from-black via-black/40 to-black" />
       </div>
 
-      {/* 🛡️ SOCIAL PROOF TICKER */}
-      <AnimatePresence>
-        {fomoMsg && (
-          <motion.div 
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 50 }}
-            className="fixed bottom-32 left-4 right-4 z-[110] px-4 py-3 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl flex items-center gap-3 shadow-2xl md:left-6 md:right-auto md:w-fit"
-          >
-            <div className="w-2.5 h-2.5 rounded-full bg-[#ffea00] animate-pulse shadow-[0_0_10px_#ffea00]" />
-            <span className="text-[11px] font-bold uppercase tracking-widest text-white">{fomoMsg}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* 🔴 URGENCY HEADER */}
       <div className="relative z-[100] bg-[#0c0c0c]/90 backdrop-blur-xl border-b border-white/10 px-4 py-4 flex items-center justify-between shrink-0">
@@ -405,13 +402,21 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
               {/* Profile Bar */}
               <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/40">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#ff00ff]/30 bg-black/40 shadow-xl relative">
-                    <ProfileAvatar src="personas/veronica/veronica_hero.webp" alt={profile.name} fill />
+                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#ff00ff]/50 bg-black/40 shadow-[0_0_20px_rgba(255,0,255,0.4)] relative">
+                    <ProfileAvatar src="https://asset.gasp.fun/personas/veronica/veronica_hero.webp" alt={profile.name} fill />
+                    <motion.div 
+                      animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="absolute inset-0 border-2 border-[#00f0ff] rounded-full"
+                    />
                   </div>
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-2">
                       <span className="text-white font-black text-[15px] uppercase tracking-wider">{profile.name}</span>
-                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                      <div className="relative">
+                        <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
+                        <div className="absolute inset-0 w-2 h-2 rounded-full bg-green-500 animate-ping opacity-40" />
+                      </div>
                     </div>
                     <span className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em]">{profile.city}</span>
                   </div>
@@ -445,7 +450,24 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
 
               {activeView === 'chat' ? (
                 <>
-                  {/* 📸 PROMO GALLERY ROW (CRITICAL TEXT CLARITY) */}
+                  {/* 🚨 FOMO LIVE PULSE (TOP POSITION) */}
+                  <AnimatePresence>
+                    {fomoMsg && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="px-5 pt-3 pb-1"
+                      >
+                        <div className="bg-white/5 border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 shadow-2xl backdrop-blur-md">
+                          <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse shadow-[0_0_10px_#fbbf24]" />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-white/80">
+                            {fomoMsg}
+                          </span>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   <div className="px-5 py-2 border-b border-white/5 bg-white/[0.02] grid grid-cols-2 gap-3 shrink-0">
                     {[
                       { id: 1, src: 'PROMO/PromoPic1.png' },
@@ -628,8 +650,15 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
                         setSelectedPkgId(pkg.id);
                         setIsTopUpOpen(true);
                     }}
-                    className={`relative p-6 rounded-[2.5rem] border transition-all duration-500 group flex flex-col text-left ${pkg.popular ? 'bg-gradient-to-br from-[#ff00ff]/20 to-black border-[#ff00ff] shadow-[0_20px_50px_rgba(255,0,255,0.2)] scale-[1.03] z-20' : 'bg-black/80 border-white/20'}`}
+                    className={`relative p-6 rounded-[2.5rem] border transition-all duration-500 group flex flex-col text-left ${pkg.popular ? 'bg-gradient-to-br from-[#ff00ff]/20 to-black border-[#ff00ff] shadow-[0_20px_60px_rgba(255,0,255,0.3)] scale-[1.04] z-20 ring-4 ring-[#ffea00]/20' : 'bg-black/80 border-white/20'}`}
                   >
+                    {pkg.popular && (
+                       <motion.div 
+                         animate={{ opacity: [0.3, 0.6, 0.3] }}
+                         transition={{ duration: 3, repeat: Infinity }}
+                         className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffea00]/5 to-transparent skew-x-[-20deg]"
+                       />
+                    )}
                     <div className="flex items-center justify-between mb-8">
                       <div className="flex flex-col gap-1">
                         <span className={`text-[12px] font-black uppercase tracking-[0.3em] mb-1 ${pkg.popular ? 'text-[#ffea00]' : 'text-[#ff00ff]'}`}>{pkg.tag}</span>
