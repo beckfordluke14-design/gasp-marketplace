@@ -365,6 +365,13 @@ export default function FunnelView() {
                   Session <span className="text-[#ff00ff]">Locked</span> <br />
                   <span className="text-white/40 text-2xl">Pick a Pack to continue chatting</span>
                 </h2>
+                
+                {/* 🚨 GENESIS PHASE TICKER */}
+                <div className="max-w-xs mx-auto mt-6 py-2 px-4 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-xl flex items-center justify-center gap-3 animate-pulse">
+                  <div className="w-2 h-2 rounded-full bg-[#ffea00]" />
+                  <span className="text-[9px] font-black uppercase text-[#ffea00] tracking-[0.2em] italic">Genesis Phase 1: 1:1 $GaspAi Match Active</span>
+                </div>
+                <p className="text-[7px] font-black uppercase text-white/20 tracking-widest mt-2 italic">Scarcity: Matching expires after initial 10,000 protocol accounts</p>
               </div>
 
               <div className="grid grid-cols-1 max-w-lg mx-auto gap-5">
