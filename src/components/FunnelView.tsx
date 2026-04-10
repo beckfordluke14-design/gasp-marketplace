@@ -34,7 +34,7 @@ export default function FunnelView() {
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [showVaultNew, setShowVaultNew] = useState(false);
   const [matchingProgress, setMatchingProgress] = useState(0);
-  const [timeLeft, setTimeLeft] = useState('04:54:07');
+  const [timeLeft, setTimeLeft] = useState('00:04:54');
   const [isLoaded, setIsLoaded] = useState(false);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
@@ -127,7 +127,16 @@ export default function FunnelView() {
   }, [profileId]);
 
   useEffect(() => {
-    // 🛡️ GUEST ID LOCKDOWN: Ensure we have a persistent identifier for payment & AI
+    // 🛡️ ATTRIBUTION LOCKDOWN: Capture Traffic Stars data from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const attribution = {
+      source: urlParams.get('utm_source') || urlParams.get('source') || document.referrer || 'Direct',
+      campaign: urlParams.get('utm_campaign') || 'Organic',
+      creative: urlParams.get('utm_content') || 'None'
+    };
+    localStorage.setItem('gasp_attribution', JSON.stringify(attribution));
+
+    // 🛡️ GUEST ID LOCKDOWN
     if (!localStorage.getItem('gasp_guest_id')) {
       const newId = 'GUEST_' + Math.random().toString(36).substring(2, 12).toUpperCase();
       localStorage.setItem('gasp_guest_id', newId);

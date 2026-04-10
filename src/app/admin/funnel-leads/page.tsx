@@ -129,7 +129,7 @@ export default function FunnelLeadsPage() {
                 >
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-[10px] font-mono font-bold text-white/40 tracking-tighter">{lead.user_id}</span>
-                    <span className="text-[9px] font-black uppercase text-green-500">{lead.message_count} MSG</span>
+                    <span className="text-[9px] font-black uppercase text-[#ffea00] bg-[#ffea00]/10 px-2 py-0.5 rounded italic">From: {lead.attribution?.source || 'Unknown'}</span>
                   </div>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500" />

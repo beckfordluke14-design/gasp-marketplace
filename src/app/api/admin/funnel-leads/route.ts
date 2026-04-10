@@ -13,8 +13,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    // 🛡️ INTERCEPT QUERY: Fetch all guest conversations (GUEST_ prefixed IDs)
-    // We group by user_id to see distinct 'Leads'
+    // 🛡️ INTERCEPT QUERY: Fetch all guest conversations from chat_messages table
     const queryText = `
       SELECT 
         m.user_id,
@@ -23,11 +22,12 @@ export async function GET(req: Request) {
         COUNT(m.id) as message_count,
         MAX(m.created_at) as last_activity,
         (
-          SELECT content FROM messages 
+          SELECT content FROM chat_messages 
           WHERE user_id = m.user_id 
           ORDER BY created_at DESC LIMIT 1
-        ) as last_message
-      FROM messages m
+        ) as last_message,
+        '{"source": "TrafficStars"}'::jsonb as attribution -- Mocked until we verify JSON column availability
+      FROM chat_messages m
       LEFT JOIN personas p ON m.persona_id = p.id
       WHERE m.user_id LIKE 'GUEST_%'
       GROUP BY m.user_id, m.persona_id, p.name
