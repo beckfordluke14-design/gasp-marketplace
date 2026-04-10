@@ -76,7 +76,7 @@ export default function ProfileLanding() {
       if (!alive) return;
       await profileSays("omg hi, finally someone I actually want to talk to lol", 900, 1800);
       if (!alive) return;
-      await profileSays('honestly i have some real spicy stuff in my private vault... want to see if we vibe first? 📸🌶️', 800, 2200);
+      await profileSays('honestly i have some real interesting stuff in my private vault... want to see if we vibe first? 📸', 800, 2200);
       if (!alive) return;
       setStep('awaiting_pic');
     })();
@@ -390,9 +390,9 @@ export default function ProfileLanding() {
           <div className="w-full space-y-3 pt-2">
             <div className="flex items-center justify-between px-1">
               <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#ff00ff] italic flex items-center gap-2 animate-pulse">
-                <span>🌶️</span> Uncensored Vault
+                <span>🔒</span> Uncensored Vault
               </span>
-              <span className="text-[8px] font-black text-[#ffea00] uppercase tracking-widest shadow-[0_0_10px_rgba(255,234,0,0.3)]">34 Spicy Sets Locked 🌶️</span>
+              <span className="text-[8px] font-black text-[#ffea00] uppercase tracking-widest shadow-[0_0_10px_rgba(255,234,0,0.3)]">34 Restricted Sets Locked</span>
             </div>
             <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-6 px-6">
               {[1, 2, 3, 4].map(i => (

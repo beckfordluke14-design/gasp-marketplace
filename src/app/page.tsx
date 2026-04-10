@@ -35,7 +35,7 @@ function MarketplaceContent() {
   const [guestId, setGuestId] = useState<string | null>(null);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [sidebarView, setSidebarView] = useState<'chats' | 'vault' | 'feed'>('chats');
-  const [activeTab, setActiveTab] = useState<'feed' | 'weather' | 'reports' | 'protocol'>('feed');
+  const [activeTab, setActiveTab] = useState<'feed' | 'weather' | 'reports' | 'protocol' | 'vault'>('feed');
   const [following, setFollowing] = useState<string[]>([]);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [showPaymentPending, setShowPaymentPending] = useState(false);
@@ -372,6 +372,21 @@ function MarketplaceContent() {
                             />
                          )}
                       </button>
+
+                      <button 
+                         onClick={() => setActiveTab('vault')} 
+                         className={`px-4 md:px-6 py-2 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 relative whitespace-nowrap ${activeTab === 'vault' ? 'bg-[#ff00ff]/10 text-[#ff00ff] shadow-[0_0_20px_rgba(255,0,255,0.1)] border border-[#ff00ff]/20' : 'text-white/30 hover:text-[#ff00ff]/60 hover:bg-[#ff00ff]/5'}`}
+                      >
+                         <span className="relative z-10 flex items-center gap-1">
+                            {isSpanish ? 'Bóveda' : 'Vault'}
+                         </span>
+                         {activeTab === 'vault' && (
+                            <motion.div 
+                               layoutId="tab-glow" 
+                               className="absolute inset-0 rounded-full bg-[#ff00ff]/5 shadow-[inset_0_0_15px_rgba(255,0,255,0.1)]" 
+                            />
+                         )}
+                      </button>
                   </div>
               </div>
 
@@ -411,6 +426,42 @@ function MarketplaceContent() {
                     {activeTab === 'protocol' && (
                         <div className="animate-in fade-in zoom-in-95 duration-500">
                            <ProtocolOverview />
+                        </div>
+                    )}
+                    {activeTab === 'vault' && (
+                        <div className="animate-in fade-in zoom-in-95 duration-500 pb-20">
+                           <div className="px-6 py-10 space-y-10">
+                              <div className="space-y-2">
+                                 <span className="text-[9px] font-black uppercase text-[#ff00ff] tracking-[0.4em]">{isSpanish ? 'Nodo de Acceso a Bóveda' : 'Vault Access Node'}</span>
+                                 <h2 className="text-3xl font-syncopate font-black italic uppercase text-white">{isSpanish ? 'Archivos' : 'Archives'}</h2>
+                              </div>
+                              
+                              <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 flex flex-col gap-6 group max-w-lg">
+                                 <div className="w-12 h-12 rounded-2xl bg-[#ff00ff]/10 border border-[#ff00ff]/30 flex items-center justify-center text-[#ff00ff]">
+                                    <Lock size={24} />
+                                 </div>
+                                 <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-loose">
+                                    {isSpanish 
+                                      ? 'Su saldo de crédito institucional autoriza el acceso a activos de archivo restringidos. Use créditos para desbloquear personas de alto calor y despachos privados.' 
+                                      : 'Your institutional credit balance authorizes access to restricted archival assets. Use credits to unlock high-heat personas and private dispatches.'}
+                                 </p>
+                                 <Link href="/vault" className="w-full py-4 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-xl text-center hover:scale-[1.02] transition-all">
+                                    {isSpanish ? 'Abrir Centro Privado' : 'Open Private Hub'}
+                                 </Link>
+                              </div>
+
+                              <div className="space-y-4">
+                                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">{isSpanish ? 'Su Saldo' : 'Your Balance'}</h2>
+                                 <div className="p-6 rounded-[2rem] bg-white/5 border border-white/10 w-fit min-w-[200px]">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <span className="text-[24px] font-black font-syncopate italic text-white leading-none">
+                                           {profile?.credit_balance?.toLocaleString() || '0'}
+                                        </span>
+                                        <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">{isSpanish ? 'Créditos de Terminal' : 'Terminal Credits'}</span>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
                         </div>
                     )}
                  </div>

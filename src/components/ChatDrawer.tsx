@@ -579,7 +579,7 @@ export default function ChatDrawer({
                         transition={{ repeat: Infinity, duration: 1.5 }}
                         className="absolute -top-1 -right-4 text-[#ff00ff] drop-shadow-[0_0_8px_#ff00ff]"
                       >
-                        <span>🌶️</span>
+                         <span>🌶️</span>
                       </motion.div>
                     )}
                     {chatTab === 'pics' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#ff00ff] shadow-[0_0_15px_#ff00ff]" />}
