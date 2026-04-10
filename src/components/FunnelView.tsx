@@ -6,7 +6,7 @@ import {
   CheckCircle2, ArrowRight, Zap, Shield, Sparkles, 
   User, Search, Heart, MessageSquare, Loader2, CreditCard, 
   Terminal, Activity, ShieldAlert, Lock, Mic, HeartPulse,
-  Send as SendIcon
+  Send, Check
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
@@ -29,6 +29,10 @@ export default function FunnelView() {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [activeView, setActiveView] = useState<'chat' | 'vault'>('chat');
+  const [vaultItems, setVaultItems] = useState<any[]>([]);
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const [showVaultNew, setShowVaultNew] = useState(false);
   const [matchingProgress, setMatchingProgress] = useState(0);
   const [timeLeft, setTimeLeft] = useState('09:54:07');
   const [isLoaded, setIsLoaded] = useState(false);
@@ -140,7 +144,73 @@ export default function FunnelView() {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
-  }, [messages, isTyping]);
+  }, [messages, isTyping, activeView]);
+
+  // 🚀 REVENUE RETENTION: Listen for successful top-up
+  useEffect(() => {
+    const handlePurchaseSuccess = () => {
+      // If we are on the offer step, move back to chat with a reward message
+      if (currentStepIdx === 2) {
+        setMessages(prev => [...prev, {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: `Papi! You're back! 🥺 I was so worried I'd lose you forever. I just saw your settlement cleared... that means you're officially a GASP member now! My private vault is unlocked for you in the "Photos" tab. 
+
+And btw, you can use those credits to talk to any of the 100+ other girls on the GASP network too... but don't spend too much time with them, ok? I'm the jealous type. 😉`
+        }]);
+        setCurrentStepIdx(1); // Bounce back to chat
+        setShowVaultNew(true); // Pulse the new vault tab
+        fetchVault();
+      }
+    };
+
+    window.addEventListener('gasp_balance_refresh', handlePurchaseSuccess);
+    return () => window.removeEventListener('gasp_balance_refresh', handlePurchaseSuccess);
+  }, [currentStepIdx]);
+
+  const fetchVault = async () => {
+    try {
+      const gid = localStorage.getItem('gasp_guest_id');
+      const res = await fetch(`/api/vault?personaId=${profileId}&userId=${gid}`);
+      const data = await res.json();
+      if (data.success) {
+        setVaultItems(data.items || []);
+      }
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    if (profileId) fetchVault();
+  }, [profileId]);
+
+  const handleUnlock = async (item: any) => {
+    if (isUnlocking) return;
+    setIsUnlocking(true);
+    try {
+      const gid = localStorage.getItem('gasp_guest_id');
+      const res = await fetch('/api/economy/unlock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: gid, mediaId: item.id, type: 'vault' })
+      });
+      const result = await res.json();
+      if (result.success) {
+        setVaultItems(prev => prev.map(v => v.id === item.id ? { ...v, is_unlocked: true } : v));
+        // 💸 Force re-fetch of balance to ensure UI sync
+        window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+      } else {
+        // If balance is low, open top up drawer
+        if (result.error?.toLowerCase().includes('balance')) {
+          setTopUpOpen(true);
+        } else {
+          alert('Sync error. Connection is weak.');
+        }
+      }
+    } catch (e) {
+    } finally {
+      setIsUnlocking(false);
+    }
+  };
 
   const [userMsgCount, setUserMsgCount] = useState(0);
 
@@ -317,74 +387,143 @@ export default function FunnelView() {
                 </div>
               </div>
 
-              {/* 📸 PROMO GALLERY ROW */}
-              <div className="px-5 py-3 border-b border-white/5 bg-white/[0.02] flex gap-3 overflow-x-auto no-scrollbar shrink-0">
-                {[
-                  { id: 1, src: proxyImg('PROMO/PromoPic1.png') },
-                  { id: 2, src: proxyImg('PROMO/PromoPic2.webp') }
-                ].map((p) => (
-                  <div key={p.id} className="w-28 h-20 rounded-xl overflow-hidden border border-white/10 shrink-0 shadow-lg relative group">
-                    <img src={p.src} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                  </div>
-                ))}
+              {/* Tab Switcher */}
+              <div className="flex bg-black/60 px-5 pt-2 gap-6 border-b border-white/5 shrink-0">
+                <button 
+                  onClick={() => setActiveView('chat')}
+                  className={`pb-3 text-[10px] font-black uppercase tracking-[0.3em] transition-all relative ${activeView === 'chat' ? 'text-[#ff00ff]' : 'text-white/30 hover:text-white/60'}`}
+                >
+                  Neural Link
+                  {activeView === 'chat' && <motion.div layoutId="tab-underline" className="absolute bottom-0 inset-x-0 h-0.5 bg-[#ff00ff] shadow-[0_0_10px_#ff00ff]" />}
+                </button>
+                <button 
+                  onClick={() => { setActiveView('vault'); setShowVaultNew(false); }}
+                  className={`pb-3 text-[10px] font-black uppercase tracking-[0.3em] transition-all relative flex items-center gap-2 ${activeView === 'vault' ? 'text-[#ff00ff]' : 'text-white/30 hover:text-white/60'}`}
+                >
+                  Archive
+                  {showVaultNew && (
+                    <span className="flex h-1.5 w-1.5 rounded-full bg-[#ff00ff] animate-ping" />
+                  )}
+                  {activeView === 'vault' && <motion.div layoutId="tab-underline" className="absolute bottom-0 inset-x-0 h-0.5 bg-[#ff00ff] shadow-[0_0_10px_#ff00ff]" />}
+                </button>
               </div>
 
-              {/* Chat Thread */}
-              <div 
-                className="flex-1 overflow-y-auto p-5 pb-32 space-y-6 flex flex-col no-scrollbar"
-                ref={scrollRef}
-              >
-                {messages.map((m, i) => (
-                  <motion.div 
-                    key={i}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              {activeView === 'chat' ? (
+                <>
+                  {/* 📸 PROMO GALLERY ROW */}
+                  <div className="px-5 py-3 border-b border-white/5 bg-white/[0.02] flex gap-3 overflow-x-auto no-scrollbar shrink-0">
+                    {[
+                      { id: 1, src: proxyImg('PROMO/PromoPic1.png') },
+                      { id: 2, src: proxyImg('PROMO/PromoPic2.webp') }
+                    ].map((p) => (
+                      <div key={p.id} className="w-28 h-20 rounded-xl overflow-hidden border border-white/10 shrink-0 shadow-lg relative group">
+                        <img src={p.src} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Chat Thread */}
+                  <div 
+                    className="flex-1 overflow-y-auto p-5 pb-32 space-y-6 flex flex-col no-scrollbar"
+                    ref={scrollRef}
                   >
-                    <div className={`max-w-[88%] px-5 py-4 rounded-[1.8rem] text-[15px] font-medium leading-relaxed shadow-lg ${
-                      m.role === 'user' 
-                        ? 'bg-gradient-to-br from-[#ff00ff] to-[#7c3aed] text-white rounded-tr-none border border-white/10' 
-                        : 'bg-white/10 text-white/95 border border-white/10 rounded-tl-none backdrop-blur-md'
-                    }`}>
-                      {m.content}
-                    </div>
-                  </motion.div>
-                ))}
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-white/10 px-5 py-4 rounded-full flex gap-1.5 shadow-xl border border-white/10">
-                      {[0,1,2].map(d => (
+                    {messages.map((m, i) => (
+                      <motion.div 
+                        key={i}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className={`max-w-[88%] px-5 py-4 rounded-[1.8rem] text-[15px] font-medium leading-relaxed shadow-lg ${
+                          m.role === 'user' 
+                            ? 'bg-gradient-to-br from-[#ff00ff] to-[#7c3aed] text-white rounded-tr-none border border-white/10' 
+                            : 'bg-white/10 text-white/95 border border-white/10 rounded-tl-none backdrop-blur-md'
+                        }`}>
+                          {m.content}
+                        </div>
+                      </motion.div>
+                    ))}
+                    {isTyping && (
+                      <div className="flex justify-start">
+                        <div className="bg-white/10 px-5 py-4 rounded-full flex gap-1.5 shadow-xl border border-white/10">
+                          {[0,1,2].map(d => (
+                            <motion.div 
+                              key={d}
+                              animate={{ opacity: [0.3, 1, 0.3] }}
+                              transition={{ duration: 1, repeat: Infinity, delay: d * 0.2 }}
+                              className="w-2 h-2 rounded-full bg-[#ff00ff]"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Input Area (Sticky) */}
+                  <div className="absolute bottom-0 inset-x-0 p-4 pb-8 bg-gradient-to-t from-black via-black to-transparent shrink-0">
+                    <form onSubmit={handleSendMessage} className="relative group max-w-xl mx-auto">
+                      <input 
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder="Type your reply..."
+                        className="w-full h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-6 pr-16 text-[15px] font-bold text-white focus:outline-none focus:border-[#ff00ff] focus:bg-white/15 transition-all shadow-2xl"
+                      />
+                      <button 
+                        type="submit"
+                        className="absolute right-3 top-3 w-10 h-10 rounded-xl bg-[#ff00ff] flex items-center justify-center text-white shadow-[0_0_15px_rgba(255,0,255,0.4)] hover:scale-105 active:scale-95 transition-all"
+                      >
+                        <Send size={18} />
+                      </button>
+                    </form>
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 overflow-y-auto p-5 pb-24 no-scrollbar">
+                  <div className="grid grid-cols-2 gap-4">
+                    {vaultItems.length === 0 ? (
+                      <div className="col-span-2 py-20 flex flex-col items-center justify-center text-center opacity-30 gap-4">
+                         <Lock size={32} />
+                         <span className="text-[10px] font-black uppercase tracking-widest leading-relaxed italic">No archives detected in this node yet.</span>
+                      </div>
+                    ) : (
+                      vaultItems.map((item, idx) => (
                         <motion.div 
-                          key={d}
-                          animate={{ opacity: [0.3, 1, 0.3] }}
-                          transition={{ duration: 1, repeat: Infinity, delay: d * 0.2 }}
-                          className="w-2 h-2 rounded-full bg-[#ff00ff]"
-                        />
-                      ))}
-                    </div>
+                          key={item.id}
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: idx * 0.05 }}
+                          className="relative aspect-[3/4] bg-white/5 rounded-2xl overflow-hidden border border-white/5 group"
+                        >
+                          <img 
+                            src={proxyImg(item.content_url || '')} 
+                            className={`w-full h-full object-cover transition-all duration-1000 ${!item.is_unlocked ? 'blur-2xl scale-110 opacity-40' : 'opacity-100'}`}
+                            alt=""
+                          />
+                          {!item.is_unlocked && (
+                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 bg-black/60 gap-3">
+                              <Lock size={20} className="text-white/40" />
+                              <button 
+                                onClick={() => handleUnlock(item)}
+                                disabled={isUnlocking}
+                                className="w-full py-2.5 bg-white text-black text-[9px] font-black uppercase rounded-xl hover:bg-[#ffea00] transition-all active:scale-95 disabled:opacity-50 shadow-2xl"
+                              >
+                                {isUnlocking ? 'Syncing...' : `Unlock · ${item.price_credits || 6000}cr`}
+                              </button>
+                            </div>
+                          )}
+                          {item.is_unlocked && (
+                             <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center">
+                                <Check size={12} className="text-[#00f0ff]" />
+                             </div>
+                          )}
+                        </motion.div>
+                      ))
+                    )}
                   </div>
-                )}
-              </div>
-
-              {/* Input Area (Sticky) */}
-              <div className="absolute bottom-0 inset-x-0 p-4 pb-8 bg-gradient-to-t from-black via-black to-transparent shrink-0">
-                <form onSubmit={handleSendMessage} className="relative group max-w-xl mx-auto">
-                  <input 
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Type your reply..."
-                    className="w-full h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-6 pr-16 text-[15px] font-bold text-white focus:outline-none focus:border-[#ff00ff] focus:bg-white/15 transition-all shadow-2xl"
-                  />
-                  <button 
-                    type="submit"
-                    className="absolute right-3 top-3 w-10 h-10 rounded-xl bg-[#ff00ff] flex items-center justify-center text-white shadow-[0_0_15px_rgba(255,0,255,0.4)] hover:scale-105 active:scale-95 transition-all"
-                  >
-                    <SendIcon size={20} />
-                  </button>
-                </form>
-              </div>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -461,18 +600,23 @@ export default function FunnelView() {
                         <span className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-2">{pkg.value}</span>
                       </div>
                     </div>
-
-                    <div className={`p-5 rounded-2xl border flex items-center justify-between transition-all ${pkg.popular ? 'bg-[#ff00ff]/20 border-[#ff00ff]/40' : 'bg-white/5 border-white/5'}`}>
-                        <div className="flex flex-col">
-                           <span className="text-[28px] font-black text-white italic tracking-tighter leading-none">{pkg.credits}</span>
-                           <span className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">Credits Included</span>
+                    <div className={`p-5 rounded-2xl border flex flex-col gap-3 transition-all ${pkg.popular ? 'bg-[#ff00ff]/20 border-[#ff00ff]/40' : 'bg-white/5 border-white/5'}`}>
+                        <div className="flex items-center justify-between">
+                           <div className="flex flex-col">
+                              <span className="text-[28px] font-black text-white italic tracking-tighter leading-none">{pkg.credits}</span>
+                              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">Credits Included</span>
+                           </div>
+                           <Zap size={24} className={pkg.popular ? 'text-[#ff00ff] fill-[#ff00ff]' : 'text-white/20'} />
                         </div>
-                        <Zap size={24} className={pkg.popular ? 'text-[#ff00ff] fill-[#ff00ff]' : 'text-white/20'} />
+                        <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+                           <Sparkles size={12} className="text-[#ffea00] animate-pulse" />
+                           <span className="text-[9px] font-black uppercase text-white/60 tracking-widest italic">{isSpanish ? '+ MEMBRESÍA SYNDICATE: EXPLORA 100+ CHICAS' : '+ SYNDICATE MEMBERSHIP: EXPLORE 100+ GIRLS'}</span>
+                        </div>
                     </div>
 
-                    <div className="mt-6 flex items-center gap-2 opacity-80">
+                    <div className="mt-6 flex items-center gap-2 opacity-80 pl-2">
                        <CheckCircle2 size={12} className="text-green-500" />
-                       <span className="text-[10px] font-black uppercase text-white/60 tracking-widest">Instant Vault Unlock 🌶️</span>
+                       <span className="text-[10px] font-black uppercase text-white/60 tracking-widest leading-none">Use credits across 100+ private vaults</span>
                     </div>
 
                     {pkg.popular && (
