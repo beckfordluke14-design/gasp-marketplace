@@ -288,28 +288,34 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     if (!isOpen) return null;
 
     return (
-        <AnimatePresence>
-            <motion.div 
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[20000] flex items-center justify-center p-4 selection:bg-[#00f0ff]/30 text-white"
-            >
-                <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl" onClick={onClose} />
+        <AnimatePresence mode="wait">
+            {isOpen && (
                 <motion.div 
-                    initial={{ scale: 0.95, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 30 }}
-                    className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-[3.5rem] overflow-hidden shadow-[0_0_150px_rgba(0,0,0,0.9)] flex flex-col font-outfit max-h-[90vh]"
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[20000] flex items-center justify-center p-4 selection:bg-[#00f0ff]/30 text-white"
                 >
-                    <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-transparent via-[#00f0ff] to-transparent opacity-60 shrink-0" />
-                    
-                    <div className="p-8 pb-4 flex items-center justify-between shrink-0">
-                        <div className="flex flex-col gap-1 text-left">
-                            <span className="text-[9px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">{isSpanish ? 'SISTEMA DE CRÉDITOS' : 'CREDIT SYSTEM'}</span>
-                            <h2 className="text-2xl font-syncopate font-black uppercase italic text-white leading-none tracking-tighter">{isSpanish ? 'COMPRAR CRÉDITOS' : 'BUY CREDITS'}</h2>
+                    <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl" onClick={onClose} />
+                    <motion.div 
+                        initial={{ scale: 0.95, opacity: 0, y: 30 }} 
+                        animate={{ scale: 1, opacity: 1, y: 0 }} 
+                        exit={{ scale: 0.95, opacity: 0, y: 30 }}
+                        className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-[3.5rem] overflow-hidden shadow-[0_0_150px_rgba(0,0,0,0.9)] flex flex-col font-outfit max-h-[90vh]"
+                    >
+                        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-transparent via-[#00f0ff] to-transparent opacity-60 shrink-0" />
+                        
+                        <div className="p-8 pb-4 flex items-center justify-between shrink-0">
+                            <div className="flex flex-col gap-1 text-left">
+                                <span className="text-[9px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">{isSpanish ? 'SISTEMA DE CRÉDITOS' : 'CREDIT SYSTEM'}</span>
+                                <h2 className="text-2xl font-syncopate font-black uppercase italic text-white leading-none tracking-tighter">{isSpanish ? 'COMPRAR CRÉDITOS' : 'BUY CREDITS'}</h2>
+                            </div>
+                            <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"><X size={20} /></button>
                         </div>
-                        <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"><X size={20} /></button>
-                    </div>
 
-                    <div className="flex-1 p-8 pt-2 overflow-y-auto no-scrollbar pb-10">
+                        <div className="flex-1 p-8 pt-2 overflow-y-auto no-scrollbar pb-10">
                         {view === 'options' && (
+                          <>
                             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                                 {initialPackage && (
                                     <div className="p-6 rounded-[2rem] bg-gasp-neon/5 border border-gasp-neon/20 flex flex-col items-center text-center gap-2">
@@ -413,7 +419,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                         </button>
                                     </>
                                  )}
-                            </div>
+                          </>
                         )}
 
                         {view === 'p2p' && (
@@ -554,6 +560,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                     </div>
                 </motion.div>
             </motion.div>
+            )}
         </AnimatePresence>
     );
 }
