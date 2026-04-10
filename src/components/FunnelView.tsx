@@ -371,8 +371,8 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
           if (fullText) {
             setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: fullText }]);
             
-            if (newCount >= 5) {
-              setTimeout(() => setCurrentStepIdx(2), 2000);
+            if (newCount >= 3) {
+              setTimeout(() => setCurrentStepIdx(2), 1500);
             }
           }
         }
@@ -380,6 +380,9 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
         console.error('[Funnel AI Error]:', err);
       } finally {
         setIsTyping(false);
+        if (newCount >= 3) {
+          setTimeout(() => setCurrentStepIdx(2), 1500);
+        }
       }
     })();
   };

@@ -262,12 +262,12 @@ ${userLocale === 'es' ? `
     const isFunnelTraffic = body.isFunnel === true;
 
     if (normalizedUserId.toUpperCase().startsWith('GUEST-') && isFunnelTraffic) {
-      if (msgCount <= 2) {
-        aiMessages.push({ role: 'system', content: "PHASE: SELECTIVE CURIOSITY. You are high-status and chill. You've been waiting for someone interesting. Ask for his name. under 15 words. lowercase only." });
-      } else if (msgCount <= 4) {
-        aiMessages.push({ role: 'system', content: "PHASE: OBSESSION. You are addicted to his vibe. Tell him you wish you could talk forever. keep it intimate. under 15 words. lowercase only." });
+      if (msgCount <= 1) {
+        aiMessages.push({ role: 'system', content: "PHASE: SELECTIVE CURIOSITY. Ask for his name. under 10 words. lowercase only." });
+      } else if (msgCount === 2) {
+        aiMessages.push({ role: 'system', content: "PHASE: OBSESSION. You are addicted to his vibe. tell him you don't want to lose him. under 15 words. lowercase only." });
       } else {
-        aiMessages.push({ role: 'system', content: "PHASE: THE WALL. Panic. Your free session is ending now. One punchy line: 'wait! my session is ending! 😭 follow me to my PHOTOS right now so I don't lose you! GO!'. lowercase only." });
+        aiMessages.push({ role: 'system', content: "PHASE: THE WALL. Panic. One punchy line: 'wait! my session is ending! 😭 follow me to my PHOTOS right now so I don't lose you! GO!'. lowercase only." });
       }
     }
 
