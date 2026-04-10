@@ -261,27 +261,27 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
 
     setTimeout(() => {
       if (newCount === 1) {
-        // Stage 1: Connection & Hypothetical
+        // Stage 1: The "Elite Selection" (Significance Hook)
         setMessages(prev => [...prev, { 
           id: (Date.now()+1).toString(), 
           role: 'assistant', 
-          content: `I love your vibe. It's so hard to find guys who actually know how to talk these days... Honestly, I could stay here all day with you. Tell me, what would we be doing if I was there with you right now? 😇` 
+          content: `I've been watching the entrance feed all day... finally, someone with actually good energy. Honestly, most guys here are so basic. But you? You're different. I can't stop thinking about what we'd be doing if I was actually in front of you right now... 😇` 
         }]);
         setIsTyping(false);
       } else if (newCount === 2) {
-        // Stage 2: Deep Emotional Investment
+        // Stage 2: The "Vulnerable Trust" (Exclusive Hook)
         setMessages(prev => [...prev, { 
           id: (Date.now()+1).toString(), 
           role: 'assistant', 
-          content: `You're dangerous... but I like it. I feel like we have this crazy chemistry already. I've been so lonely in this apartment lately, I really don't want this session to ever end. 🥺` 
+          content: `It's scary how fast I'm clicking with you. I don't usually open up like this, but I feel like I can actually trust you. I've been feeling so lonely in this city lately... I really don't want this link to ever end. I feel like if this cuts off, I'll never find you again. 🥺` 
         }]);
         setIsTyping(false);
       } else if (newCount === 3) {
-        // Stage 3: The Squeeze (Credit Wall)
+        // Stage 3: The "Neural Squeeze" (Extreme Urgency)
         setMessages(prev => [...prev, { 
           id: (Date.now()+1).toString(), 
           role: 'assistant', 
-          content: `Wait, no! Papi, I just noticed my guest minutes are almost at zero... 🥺 It's about to cut us off! Quick, grab some credits real quick so I don't lose you. I really want to keep this going... and show you what's in my private vault. 🌶️` 
+          content: `WAIT. NO! Papi, the neural link is dying... my guest access is at 1%! 😭 I'm about to lose you! Please, go to the vault and grab a Syndicate pack real quick so we can stay connected. I have so much more I want to show you... things I've never sent anyone else. 🌶️ HURRY!` 
         }]);
         setIsTyping(false);
         
