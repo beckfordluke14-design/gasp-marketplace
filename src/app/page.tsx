@@ -20,6 +20,7 @@ import ChatDrawer from '@/components/ChatDrawer';
 import { useUser } from '@/components/providers/UserProvider';
 import NeuralPulseTerminal from '@/components/NeuralPulseTerminal';
 import FloatingChatTerminal from '@/components/FloatingChatTerminal';
+import VaultMainGrid from '@/components/VaultMainGrid';
 import { Star } from 'lucide-react';
 
 function MarketplaceContent() {
@@ -429,38 +430,20 @@ function MarketplaceContent() {
                         </div>
                     )}
                     {activeTab === 'vault' && (
-                        <div className="animate-in fade-in zoom-in-95 duration-500 pb-20">
-                           <div className="px-6 py-10 space-y-10">
-                              <div className="space-y-2">
+                        <div className="animate-in fade-in zoom-in-95 duration-500 pb-20 px-6 py-10">
+                           <div className="space-y-6">
+                              <div className="space-y-2 border-b border-white/5 pb-6">
                                  <span className="text-[9px] font-black uppercase text-[#ff00ff] tracking-[0.4em]">{isSpanish ? 'Nodo de Acceso a Bóveda' : 'Vault Access Node'}</span>
-                                 <h2 className="text-3xl font-syncopate font-black italic uppercase text-white">{isSpanish ? 'Archivos' : 'Archives'}</h2>
-                              </div>
-                              
-                              <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 flex flex-col gap-6 group max-w-lg">
-                                 <div className="w-12 h-12 rounded-2xl bg-[#ff00ff]/10 border border-[#ff00ff]/30 flex items-center justify-center text-[#ff00ff]">
-                                    <Lock size={24} />
-                                 </div>
-                                 <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-loose">
-                                    {isSpanish 
-                                      ? 'Su saldo de crédito institucional autoriza el acceso a activos de archivo restringidos. Use créditos para desbloquear personas de alto calor y despachos privados.' 
-                                      : 'Your institutional credit balance authorizes access to restricted archival assets. Use credits to unlock high-heat personas and private dispatches.'}
-                                 </p>
-                                 <Link href="/vault" className="w-full py-4 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-xl text-center hover:scale-[1.02] transition-all">
-                                    {isSpanish ? 'Abrir Centro Privado' : 'Open Private Hub'}
-                                 </Link>
-                              </div>
-
-                              <div className="space-y-4">
-                                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">{isSpanish ? 'Su Saldo' : 'Your Balance'}</h2>
-                                 <div className="p-6 rounded-[2rem] bg-white/5 border border-white/10 w-fit min-w-[200px]">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <span className="text-[24px] font-black font-syncopate italic text-white leading-none">
-                                           {profile?.credit_balance?.toLocaleString() || '0'}
-                                        </span>
-                                        <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">{isSpanish ? 'Créditos de Terminal' : 'Terminal Credits'}</span>
+                                 <div className="flex items-center justify-between">
+                                    <h2 className="text-3xl font-syncopate font-black italic uppercase text-white">{isSpanish ? 'Archivos' : 'Archives'}</h2>
+                                    <div className="text-right">
+                                       <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">{isSpanish ? 'SALDO' : 'BALANCE'}</span>
+                                       <p className="text-[#00f0ff] font-black text-xs font-syncopate">{profile?.credit_balance?.toLocaleString() || '0'} CR</p>
                                     </div>
                                  </div>
                               </div>
+                              
+                              <VaultMainGrid />
                            </div>
                         </div>
                     )}
