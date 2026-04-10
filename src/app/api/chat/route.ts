@@ -29,6 +29,8 @@ export async function POST(req: Request) {
 
     if (!finalUserId || !finalProfileId) return new Response('Missing ID context', { status: 400 });
 
+    let currentCount = 0; // 🎯 GLOBAL SCOPE FOR BEHAVIORAL LOGIC
+
     const dbProfile = await SOV.getPersona(finalProfileId) as any;
     const profileItem = dbProfile || 
                         initialProfiles.find((p: any) => p.id.toLowerCase() === finalProfileId.toLowerCase()) ||
@@ -44,32 +46,11 @@ export async function POST(req: Request) {
     if (normalizedUserId.startsWith('guest-')) {
        try {
           const { rows: preCheck } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [normalizedUserId]);
-          const currentCount = parseInt(preCheck[0].count || '0');
+          currentCount = parseInt(preCheck[0].count || '0');
           
-          // 🎭 ESCALATION ENGINE: Turn up the heat as they approach the wall
-          if (currentCount < 4) {
-            messages.splice(1, 0, {
-              role: 'system',
-              content: `BEHAVIORAL DIRECTIVE: You are in "Strategic Mystery" mode. Be increasingly suggestive and flirty, but DO NOT lay all your cards on the table yet. Tease him, build anticipation, and keep him wanting more. Use his name to make it personal, but maintain an air of exclusive mystery. Hint at what you're hiding, but save the actual reveal for your Private Vault. Keep your unique personality (${profileItem.nickname || 'your character'}).`
-            });
-          }
-
-          // 🧱 GUEST WALL HARDENING: Zero-Tolerance Enforcement (V7.20)
           if (currentCount >= GUEST_LIMIT) {
              console.log(`🛑 [Neural Wall] Guest ${normalizedUserId} hard-blocked at ${currentCount} msgs.`);
-             // 🧹 EMERGENCY PURGE: Delete any extra messages that managed to slip through
-             if (currentCount > GUEST_LIMIT) {
-                await db.query('DELETE FROM chat_messages WHERE id IN (SELECT id FROM chat_messages WHERE user_id = $1 AND role = \'user\' ORDER BY created_at DESC LIMIT $2)', [normalizedUserId, currentCount - GUEST_LIMIT]);
-             }
              return new Response('DEPLETED', { status: 402 });
-          }
-
-          // 🏆 THE CLOSE: On the final 5th message, seal the deal
-          if (currentCount === 4) {
-            messages.push({
-              role: 'system',
-              content: `URGENT: This is your LAST free message. Be at your most teasing and suggestive now, but explicitly state that you're "holding back" for the vault. Tell him you're moving to your Private Vault for the "real" unfiltered fun. Mention your "1,500 credit gift" to help him see what you're hiding. No jargon. Be the "Prize" he has to earn.`
-            });
           }
        } catch (limitErr) { console.error('[Wall Pre-Check Fail]:', limitErr); }
     } else {
@@ -265,6 +246,25 @@ ${userLocale === 'es' ? `
 
 
 
+    // 🚀 PREPARE ISOLATED NEURAL INPUT (Hide from client)
+    const aiMessages = [
+        { role: 'system', content: brainPrompt },
+        ...messages.slice(-10).filter((m: any) => m.role !== 'system')
+    ];
+
+    // Inject the "Escalation" or "Close" logic ONLY for the AI call
+    if (currentCount < 4) {
+        aiMessages.push({
+            role: 'system',
+            content: `BEHAVIORAL DIRECTIVE: You are in "Strategic Mystery" mode. Tease him, build anticipation, but DO NOT lay all your cards on the table. Keep him wanting more.`
+        });
+    } else if (currentCount === 4) {
+        aiMessages.push({
+            role: 'system',
+            content: `URGENT: This is your LAST free message. Be flirty, state you are "holding back", and invite him to your Private Vault for the real fun. Mention the 1,500 credit gift.`
+        });
+    }
+
     // 🚀 ATOMIC NEURAL CALL
     const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
@@ -274,7 +274,7 @@ ${userLocale === 'es' ? `
         },
         body: JSON.stringify({
             model: 'x-ai/grok-3-mini', 
-            messages: [{ role: 'system', content: brainPrompt }, ...messages.slice(-6).map((m: any) => ({ role: m.role, content: m.content }))],
+            messages: aiMessages,
             response_format: { type: "json_object" }
         })
     });
