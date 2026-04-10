@@ -41,12 +41,11 @@ export default function FunnelView() {
   const [selectedPkgId, setSelectedPkgId] = useState('');
   const [hasPaid, setHasPaid] = useState(false);
   
-  // 📸 FUNNEL VAULT SEED: Pre-purchase teasers
+  // 📸 REAL DATABASE SYNC: Veronica's high-status vault assets
   const [vaultItems, setVaultItems] = useState<any[]>([
-    { id: 'v1', content_url: 'personas/veronica/vault-1.png', is_unlocked: false, price_credits: 5000 },
-    { id: 'v2', content_url: 'personas/veronica/vault-2.png', is_unlocked: false, price_credits: 5000 },
-    { id: 'v3', content_url: 'personas/veronica/vault-3.png', is_unlocked: false, price_credits: 5000 },
-    { id: 'v4', content_url: 'personas/veronica/veronica_hero.webp', is_unlocked: false, price_credits: 5000 },
+    { id: 'v1', content_url: 'https://asset.gasp.fun/personas/veronica-medellin-locked/vault_1.jpg', is_unlocked: false, price_credits: 6000 },
+    { id: 'v2', content_url: 'https://asset.gasp.fun/personas/veronica-medellin-locked/vault_2.jpg', is_unlocked: false, price_credits: 6000 },
+    { id: 'v3', content_url: 'https://asset.gasp.fun/personas/veronica-medellin-locked/vault_3.jpg', is_unlocked: false, price_credits: 6000 },
   ]);
   
   const [fomoMsg, setFomoMsg] = useState('');
@@ -60,7 +59,7 @@ export default function FunnelView() {
   const profileId = searchParams.get('profile') || 'veronica_medellin';
   const profile = initialProfiles.find(p => p.id === profileId) || {
     name: 'Veronica',
-    image: 'Promo/PromoPic1.png', // Using known-working asset
+    image: 'https://asset.gasp.fun/personas/veronica-medellin-locked/vault_1.jpg', // Using real DB-linked asset
     city: 'Medellín'
   };
 
@@ -104,12 +103,9 @@ export default function FunnelView() {
 
     // Initial Loading Logs (Accelerated for High-Velocity Ingress)
     const logs = [
-      "> Connecting to private server...",
-      "> Locating available line...",
-      "> Verifying access tokens...",
-      "> Found: " + (profile?.name || 'Veronica'),
-      "> Security check passed.",
-      "> Private line established.",
+      "> Connecting to " + (profile?.name || 'Veronica') + "...",
+      "> Establishing private line...",
+      "> Finalizing connection...",
       "> Ready."
     ];
     
@@ -338,7 +334,7 @@ export default function FunnelView() {
         <div className="flex items-center gap-3">
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-2">
-               <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">Neural Linkestablished</span>
+               <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">Connection Stable</span>
                <div className="flex items-center gap-1.5 bg-green-500/10 px-2 py-0.5 rounded-full">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                   <span className="text-[9px] font-black text-green-500">{activeUsers} Online</span>
@@ -349,7 +345,7 @@ export default function FunnelView() {
         </div>
         
         <div className="flex flex-col items-end">
-           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#ff00ff] animate-pulse">Sovereign Session Active</span>
+           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#ff00ff] animate-pulse">Private Session Active</span>
         </div>
       </div>
 
@@ -404,7 +400,7 @@ export default function FunnelView() {
               <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/40">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#ff00ff]/50 bg-black/40 shadow-[0_0_20px_rgba(255,0,255,0.4)] relative">
-                    <ProfileAvatar src="Promo/PromoPic1.png" alt={profile.name} fill />
+                    <ProfileAvatar src="https://asset.gasp.fun/personas/veronica-medellin-locked/vault_1.jpg" alt={profile.name} fill />
                     <motion.div 
                       animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
                       transition={{ duration: 2, repeat: Infinity }}
@@ -434,14 +430,14 @@ export default function FunnelView() {
                   onClick={() => setActiveView('chat')}
                   className={`pb-3 text-[10px] font-black uppercase tracking-[0.3em] transition-all relative ${activeView === 'chat' ? 'text-[#ff00ff]' : 'text-white/30 hover:text-white/60'}`}
                 >
-                  Neural Link
+                  Chat
                   {activeView === 'chat' && <motion.div layoutId="tab-underline" className="absolute bottom-0 inset-x-0 h-0.5 bg-[#ff00ff] shadow-[0_0_10px_#ff00ff]" />}
                 </button>
                 <button 
                   onClick={() => { setActiveView('vault'); setShowVaultNew(false); }}
                   className={`pb-3 text-[10px] font-black uppercase tracking-[0.3em] transition-all relative flex items-center gap-2 ${activeView === 'vault' ? 'text-[#ff00ff]' : 'text-white/30 hover:text-white/60'}`}
                 >
-                  Archive
+                  Photos
                   {showVaultNew && (
                     <span className="flex h-1.5 w-1.5 rounded-full bg-[#ff00ff] animate-ping" />
                   )}
@@ -602,9 +598,9 @@ export default function FunnelView() {
                   <span>Session Terminated</span>
                 </div>
                 <h2 className="text-[32px] md:text-5xl font-black text-white leading-[0.9] tracking-tighter">
-                  CONNECTION <span className="text-[#ff00ff]">LOCKED</span>
+                  SESSION <span className="text-[#ff00ff]">EXPIRED</span>
                 </h2>
-                <p className="text-[13px] font-medium text-white/50 tracking-tight">Access restricted to Syndicate Members only.</p>
+                <p className="text-[13px] font-medium text-white/50 tracking-tight">Purchase credits to continue talking to {profile.name}.</p>
                 
                 {/* 🚨 REWARD BADGE: SIMPLIFIED */}
                 <div className="max-w-[280px] mx-auto mt-4 p-4 bg-[#ffea00] rounded-2xl flex flex-col items-center justify-center gap-1 shadow-2xl border-2 border-white">
@@ -686,10 +682,10 @@ export default function FunnelView() {
                       <div className={`p-5 rounded-[2rem] border ${pkg.popular ? 'bg-black/60 border-[#ffea00]/30' : 'bg-black/40 border-white/10'}`}>
                         <div className="flex items-center gap-3">
                           <Sparkles size={16} className="text-[#ffea00]" />
-                          <span className="text-[11px] font-black uppercase text-white tracking-[0.2em] italic">Syndicate Membership</span>
+                          <span className="text-[11px] font-black uppercase text-white tracking-[0.2em] italic">Platinum Account Access</span>
                         </div>
                         <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.1em] mt-2 leading-relaxed italic">
-                          Credits work across all 100+ personas, private vaults, and neural links.
+                          Credits work for all girls, private photos, and unlimited chatting.
                         </p>
                       </div>
                     </div>
