@@ -38,7 +38,7 @@ export default function FunnelView() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
-  const [selectedPkgId, setSelectedPkgId] = useState('');
+  const [selectedPkgId, setSelectedPkgId] = useState('tier_session'); // Initialize to Prime Access
   const [hasPaid, setHasPaid] = useState(false);
   
   // 📸 ABSOLUTE ASSET SYNC: Using verified R2 paths
@@ -687,7 +687,7 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
               key="offer"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute inset-0 overflow-y-auto px-4 pt-8 pb-32 space-y-10 z-10 no-scrollbar"
+              className="absolute inset-0 overflow-y-auto px-4 pt-8 pb-40 space-y-10 z-10 no-scrollbar"
             >
               <div className="text-center space-y-3 px-2">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-red-500 mb-1">
@@ -697,108 +697,55 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
                 <h2 className="text-[32px] md:text-5xl font-black text-white leading-[0.9] tracking-tighter">
                   SESSION <span className="text-[#ff00ff]">EXPIRED</span>
                 </h2>
-                <p className="text-[13px] font-medium text-white/50 tracking-tight">Purchase credits to continue talking to {profile.name}.</p>
-                
-                {/* 🚨 REWARD BADGE: SIMPLIFIED */}
-                <div className="max-w-[280px] mx-auto mt-4 p-4 bg-[#ffea00] rounded-2xl flex flex-col items-center justify-center gap-1 shadow-2xl border-2 border-white">
-                     <span className="text-[14px] font-black text-black leading-tight uppercase tracking-tighter">1:1 $GaspAi Match Applied</span>
-                     <span className="text-[8px] font-bold text-black/40 uppercase tracking-widest italic leading-none">LIMITED GENESIS PHASE REWARD</span>
-                </div>
-                
-                {/* 🛡️ STRIPE AUTHORITY SHIELD */}
-                <div className="flex items-center justify-center gap-2 mt-4 opacity-60">
+                <p className="text-[13px] font-medium text-white/40 tracking-tight">Purchase credits to continue talking to {profile.name}.</p>
+                <div className="flex items-center justify-center gap-2 mt-4 opacity-40 grayscale">
                    <div className="px-1.5 py-0.5 bg-white text-black text-[7px] font-black rounded-sm uppercase tracking-tighter">Stripe</div>
                    <span className="text-[8px] font-black uppercase tracking-widest text-white/80 italic">Protected Gateway</span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 max-w-md mx-auto gap-6 px-1">
-                {[
-                  { 
-                    id: 'tier_starter', 
-                    label: 'Basic Pack', 
-                    price: 4.99, 
-                    credits: '5,000', 
-                    value: 'BASIC',
-                    tag: 'Essential'
-                  },
-                  { 
-                    id: 'tier_session', 
-                    label: 'Prime Access', 
-                    price: 24.99, 
-                    credits: '30,000', 
-                    value: '6X VALUE',
-                    popular: true,
-                    tag: 'Most Popular' 
-                  },
-                  { 
-                    id: 'tier_whale', 
-                    label: 'Elite Status', 
-                    price: 99.99, 
-                    credits: '120,000', 
-                    value: '24X VALUE',
-                    tag: 'Whale Tier' 
-                  },
+              <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto">
+                  { id: 'tier_starter', label: 'Basic Pack', price: 4.99, credits: '5,000', bonus: '100% Match' },
+                  { id: 'tier_session', label: 'Prime Access', price: 24.99, credits: '30,000', bonus: '150% Match' },
+                  { id: 'tier_whale', label: 'Elite Status', price: 99.99, credits: '120,000', bonus: '200% Match' },
                 ].map((pkg) => (
                   <button 
                     key={pkg.id}
-                    onClick={() => {
-                        setSelectedPkgId(pkg.id);
-                        setIsTopUpOpen(true);
-                    }}
-                    className={`relative p-6 rounded-[2.5rem] border transition-all duration-500 group flex flex-col text-left ${pkg.popular ? 'bg-gradient-to-br from-[#ff00ff]/20 to-black border-[#ff00ff] shadow-[0_20px_60px_rgba(255,0,255,0.3)] scale-[1.04] z-20 ring-4 ring-[#ffea00]/20' : 'bg-black/80 border-white/20'}`}
+                    onClick={() => setSelectedPkgId(pkg.id)}
+                    className={`relative p-5 rounded-3xl border transition-all duration-300 flex items-center justify-between ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] ring-2 ring-[#ff00ff]/30 shadow-[0_0_30px_rgba(255,0,255,0.2)]' : 'bg-white/5 border-white/10'}`}
                   >
-                    {pkg.popular && (
-                       <motion.div 
-                         animate={{ opacity: [0.3, 0.6, 0.3] }}
-                         transition={{ duration: 3, repeat: Infinity }}
-                         className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffea00]/5 to-transparent skew-x-[-20deg]"
-                       />
-                    )}
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="flex flex-col gap-1">
-                        <span className={`text-[12px] font-black uppercase tracking-[0.3em] mb-1 ${pkg.popular ? 'text-[#ffea00]' : 'text-[#ff00ff]'}`}>{pkg.tag}</span>
-                        <span className="text-3xl font-black text-white uppercase tracking-tighter leading-none">{pkg.label}</span>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className={`text-4xl font-black italic tracking-tighter leading-none ${pkg.popular ? 'text-[#ffea00]' : 'text-white'}`}>${pkg.price}</span>
-                        <span className="text-[11px] font-black text-white/40 uppercase tracking-widest mt-2">{pkg.value}</span>
-                      </div>
+                    <div className="flex flex-col gap-1 text-left">
+                       <span className="text-[10px] font-black text-[#ff00ff] uppercase tracking-widest leading-none">{pkg.label}</span>
+                       <div className="flex items-center gap-2">
+                          <span className="text-2xl font-black text-white italic tracking-tighter leading-none">{pkg.credits}</span>
+                          <span className="text-[9px] font-bold text-white/40 uppercase leading-none mt-1">Units</span>
+                       </div>
+                       {pkg.bonus && (
+                          <div className="inline-flex items-center gap-1.5 bg-[#ffea00] px-2 py-0.5 rounded-full w-fit mt-1">
+                             <div className="w-1 h-1 rounded-full bg-black animate-pulse" />
+                             <span className="text-[8px] font-black text-black uppercase tracking-tighter">+{pkg.bonus} applied</span>
+                          </div>
+                       )}
                     </div>
-
-                    <div className={`p-6 rounded-[2.5rem] border flex flex-col gap-5 transition-all duration-300 ${pkg.popular ? 'bg-[#ffea00]/10 border-[#ffea00]/40 shadow-[0_20px_60px_rgba(255,234,0,0.15)]' : 'bg-white/5 border-white/5'}`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-col gap-1">
-                          <span className={`text-5xl font-black italic tracking-tighter leading-none ${pkg.popular ? 'text-[#ffea00]' : 'text-white'}`}>{pkg.credits}</span>
-                          <span className="text-[12px] font-black text-white/40 uppercase tracking-widest mt-1 italic">UNITS GRANTED</span>
-                        </div>
-                        <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center text-white/20">
-                          <Zap size={32} className={pkg.popular ? 'text-[#ffea00] fill-[#ffea00]' : ''} />
-                        </div>
-                      </div>
-                      <div className={`p-5 rounded-[2rem] border ${pkg.popular ? 'bg-black/60 border-[#ffea00]/30' : 'bg-black/40 border-white/10'}`}>
-                        <div className="flex items-center gap-3">
-                          <Sparkles size={16} className="text-[#ffea00]" />
-                          <span className="text-[11px] font-black uppercase text-white tracking-[0.2em] italic">Platinum Account Access</span>
-                        </div>
-                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.1em] mt-2 leading-relaxed italic">
-                          Credits work for all girls, private photos, and private chatting.
-                        </p>
-                      </div>
+                    <div className="text-right flex flex-col items-end">
+                       <span className="text-[14px] font-black text-white italic">${pkg.price}</span>
+                       <div className={`mt-2 w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>
+                          {selectedPkgId === pkg.id && <Check size={12} className="text-white" />}
+                       </div>
                     </div>
-
-                    <div className="mt-8 flex items-center gap-3 opacity-90 pl-3">
-                      <CheckCircle2 size={16} className="text-green-500" />
-                      <span className="text-[11px] font-black uppercase text-white/80 tracking-widest leading-none">Universal Network Access Granted</span>
-                    </div>
-
-                    {pkg.popular && (
-                      <div className="absolute top-0 right-10 -translate-y-1/2 px-5 py-2 bg-[#ff00ff] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-2xl skew-x-[-12deg]">
-                        BEST CHOICE
-                      </div>
-                    )}
                   </button>
                 ))}
+              </div>
+
+              {/* 🚀 SOVEREIGN CHECKOUT CTA */}
+              <div className="sticky bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/80 to-transparent z-[100] mt-8">
+                 <button 
+                   onClick={() => setIsTopUpOpen(true)}
+                   className="w-full max-w-sm mx-auto flex items-center justify-center p-5 bg-[#ff00ff] border-2 border-white/20 rounded-[2rem] text-white text-[13px] font-black uppercase tracking-[0.2em] shadow-[0_15px_40px_rgba(255,0,255,0.4)] hover:scale-[1.02] active:scale-95 transition-all group gap-3"
+                 >
+                    <span>Proceed to Secure Checkout</span>
+                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                 </button>
               </div>
             </motion.div>
           )}
