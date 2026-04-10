@@ -53,6 +53,7 @@ export const viewport: Viewport = {
 };
 
 import Providers from '@/components/providers/Providers';
+import SupportDrawer from '@/components/SupportDrawer';
 
 export default function RootLayout({
   children,
@@ -69,6 +70,7 @@ export default function RootLayout({
         <GoogleAnalytics />
         <Providers>
           {children}
+          <SupportDrawer />
         </Providers>
       </body>
     </html>

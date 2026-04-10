@@ -622,33 +622,41 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
                     }}
                     className={`relative p-6 rounded-[2.5rem] border transition-all duration-500 group flex flex-col text-left ${pkg.popular ? 'bg-gradient-to-br from-[#ff00ff]/20 to-black border-[#ff00ff] shadow-[0_20px_50px_rgba(255,0,255,0.2)] scale-[1.03] z-20' : 'bg-black/80 border-white/20'}`}
                   >
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center justify-between mb-8">
                       <div className="flex flex-col gap-1">
-                        <span className="text-[11px] font-black text-[#ff00ff] uppercase tracking-[0.3em] mb-1">{pkg.tag}</span>
-                        <span className="text-2xl font-black text-white uppercase tracking-tighter leading-none">{pkg.label}</span>
+                        <span className={`text-[12px] font-black uppercase tracking-[0.3em] mb-1 ${pkg.popular ? 'text-[#ffea00]' : 'text-[#ff00ff]'}`}>{pkg.tag}</span>
+                        <span className="text-3xl font-black text-white uppercase tracking-tighter leading-none">{pkg.label}</span>
                       </div>
                       <div className="flex flex-col items-end">
-                        <span className="text-4xl font-black text-white italic tracking-tighter leading-none">${pkg.price}</span>
-                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-2">{pkg.value}</span>
+                        <span className={`text-4xl font-black italic tracking-tighter leading-none ${pkg.popular ? 'text-[#ffea00]' : 'text-white'}`}>${pkg.price}</span>
+                        <span className="text-[11px] font-black text-white/40 uppercase tracking-widest mt-2">{pkg.value}</span>
                       </div>
                     </div>
-                    <div className={`p-5 rounded-2xl border flex flex-col gap-3 transition-all ${pkg.popular ? 'bg-[#ff00ff]/20 border-[#ff00ff]/40' : 'bg-white/5 border-white/5'}`}>
-                        <div className="flex items-center justify-between">
-                           <div className="flex flex-col">
-                              <span className="text-[28px] font-black text-white italic tracking-tighter leading-none">{pkg.credits}</span>
-                              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">Credits Included</span>
-                           </div>
-                           <Zap size={24} className={pkg.popular ? 'text-[#ff00ff] fill-[#ff00ff]' : 'text-white/20'} />
+
+                    <div className={`p-6 rounded-[2.5rem] border flex flex-col gap-5 transition-all duration-300 ${pkg.popular ? 'bg-[#ffea00]/10 border-[#ffea00]/40 shadow-[0_20px_60px_rgba(255,234,0,0.15)]' : 'bg-white/5 border-white/5'}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1">
+                          <span className={`text-5xl font-black italic tracking-tighter leading-none ${pkg.popular ? 'text-[#ffea00]' : 'text-white'}`}>{pkg.credits}</span>
+                          <span className="text-[12px] font-black text-white/40 uppercase tracking-widest mt-1 italic">UNITS GRANTED</span>
                         </div>
-                        <div className="flex items-center gap-2 pt-2 border-t border-white/5">
-                           <Sparkles size={12} className="text-[#ffea00] animate-pulse" />
-                           <span className="text-[9px] font-black uppercase text-white/60 tracking-widest italic">{isSpanish ? '+ MEMBRESÍA SYNDICATE: EXPLORA 100+ CHICAS' : '+ SYNDICATE MEMBERSHIP: EXPLORE 100+ GIRLS'}</span>
+                        <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center text-white/20">
+                          <Zap size={32} className={pkg.popular ? 'text-[#ffea00] fill-[#ffea00]' : ''} />
                         </div>
+                      </div>
+                      <div className={`p-5 rounded-[2rem] border ${pkg.popular ? 'bg-black/60 border-[#ffea00]/30' : 'bg-black/40 border-white/10'}`}>
+                        <div className="flex items-center gap-3">
+                          <Sparkles size={16} className="text-[#ffea00]" />
+                          <span className="text-[11px] font-black uppercase text-white tracking-[0.2em] italic">Syndicate Membership</span>
+                        </div>
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.1em] mt-2 leading-relaxed italic">
+                          Credits work across all 100+ personas, private vaults, and neural links.
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="mt-6 flex items-center gap-2 opacity-80 pl-2">
-                       <CheckCircle2 size={12} className="text-green-500" />
-                       <span className="text-[10px] font-black uppercase text-white/60 tracking-widest leading-none">Use credits across 100+ private vaults</span>
+                    <div className="mt-8 flex items-center gap-3 opacity-90 pl-3">
+                      <CheckCircle2 size={16} className="text-green-500" />
+                      <span className="text-[11px] font-black uppercase text-white/80 tracking-widest leading-none">Universal Network Access Granted</span>
                     </div>
 
                     {pkg.popular && (
