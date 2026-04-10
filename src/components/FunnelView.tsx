@@ -290,6 +290,13 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
             }),
           });
           
+          if (res.status === 402) {
+            // 🛡️ STICKY WALL: If they are blocked, force the CTA immediately
+            setCurrentStepIdx(2);
+            setIsTyping(false);
+            return;
+          }
+          
           if (!res.ok) throw new Error('Signal Interrupted');
           
           const reader = res.body?.getReader();
@@ -343,6 +350,13 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
             locale: localStorage.getItem('gasp_locale') || 'en',
           }),
         });
+
+        if (res.status === 402) {
+            // 🛡️ STICKY WALL: Force CTA on block
+            setCurrentStepIdx(2);
+            setIsTyping(false);
+            return;
+        }
         
         if (!res.ok) throw new Error('Signal Interrupted');
         
