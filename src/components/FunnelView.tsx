@@ -40,6 +40,7 @@ export default function FunnelView() {
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [selectedPkgId, setSelectedPkgId] = useState('');
+  const [hasPaid, setHasPaid] = useState(false);
   
   const [fomoMsg, setFomoMsg] = useState('');
   const [activeUsers, setActiveUsers] = useState(14);
@@ -218,7 +219,7 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || currentStepIdx !== 1) return;
 
     const newCount = userMsgCount + 1;
     setUserMsgCount(newCount);
@@ -275,7 +276,7 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
           content: `You're dangerous... but I like it. I feel like we have this crazy chemistry already. I've been so lonely in this apartment lately, I really don't want this session to ever end. 🥺` 
         }]);
         setIsTyping(false);
-      } else {
+      } else if (newCount === 3) {
         // Stage 3: The Squeeze (Credit Wall)
         setMessages(prev => [...prev, { 
           id: (Date.now()+1).toString(), 
@@ -284,8 +285,11 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
         }]);
         setIsTyping(false);
         
-        // Move to offer after a delay
-        setTimeout(() => setCurrentStepIdx(2), 3500);
+        // Move to offer after a delay (Gives them 5s to read the "dying link" msg)
+        setTimeout(() => setCurrentStepIdx(2), 5000);
+      } else {
+        // If they keep typing after the warning, don't reply, just let it fade to the offer
+        setIsTyping(false);
       }
     }, 1500);
   };
@@ -442,7 +446,7 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
               {activeView === 'chat' ? (
                 <>
                   {/* 📸 PROMO GALLERY ROW */}
-                  <div className="px-5 py-3 border-b border-white/5 bg-white/[0.02] flex gap-5 overflow-x-auto no-scrollbar shrink-0">
+                  <div className="px-5 py-3 border-b border-white/5 bg-white/[0.02] flex gap-5 overflow-x-auto no-scrollbar shrink-0 flex-nowrap">
                     {[
                       { id: 1, src: 'PROMO/PromoPic1.png' },
                       { id: 2, src: 'PROMO/PromoPic2.webp' }
