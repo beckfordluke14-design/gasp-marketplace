@@ -21,8 +21,14 @@ const MASTER_UUID = "master-uuid-1"; // Hardcoded Bypass for Mi Amor Agency
 
 export default function GaspCreatorStudio() {
     const [agency] = useState<Agency>(initialAgencies[0]);
-    const [profiles, setProfiles] = useState<Profile[]>(initialProfiles.filter(p => p.agency_id === agency.id));
+    const [profiles, setProfiles] = useState<Profile[]>(initialProfiles.filter(p => agency && p.agency_id === agency.id));
     
+    if (!agency) return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+            <h1 className="text-white/20 font-syncopate uppercase tracking-widest text-[10px]">Loading Creator Studio...</h1>
+        </div>
+    );
+
     const isMaster = MASTER_UUID === agency.owner_id;
     const profileLimit = 3;
     const hasReachedLimit = !isMaster && profiles.length >= profileLimit;

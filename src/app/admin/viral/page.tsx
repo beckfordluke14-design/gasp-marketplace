@@ -23,6 +23,12 @@ export default function ViralGeneratorPage() {
     const [isGeneratingScenario, setIsGeneratingScenario] = useState(false);
     const [viralCopy, setViralCopy] = useState<any>(null);
     const [mobileEditorOpen, setMobileEditorOpen] = useState(true);
+    
+    if (!selectedPersona) return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+            <h1 className="text-white/20 font-syncopate uppercase tracking-widest text-[10px]">Syncing Viral Engine...</h1>
+        </div>
+    );
 
     const handleRandomizeCode = () => {
         setRewardCode(`${rewardType.substring(0,4).toUpperCase()}-` + Math.random().toString(36).substring(2, 10).toUpperCase());
