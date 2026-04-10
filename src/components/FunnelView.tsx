@@ -34,7 +34,7 @@ export default function FunnelView() {
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [showVaultNew, setShowVaultNew] = useState(false);
   const [matchingProgress, setMatchingProgress] = useState(0);
-  const [timeLeft, setTimeLeft] = useState('09:54:07');
+  const [timeLeft, setTimeLeft] = useState('04:54:07');
   const [isLoaded, setIsLoaded] = useState(false);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
