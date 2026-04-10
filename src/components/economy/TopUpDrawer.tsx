@@ -311,59 +311,69 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                     <div className="flex-1 p-8 pt-2 overflow-y-auto no-scrollbar pb-10">
                         {view === 'options' && (
                             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                                <div className={`relative p-6 rounded-[2rem] border transition-all duration-700 group overflow-hidden bg-white/[0.02] ${isCustom ? 'border-[#00f0ff]/60 shadow-[0_0_50px_rgba(0,240,255,0.1)] ring-1 ring-[#00f0ff]/30' : 'border-white/10'}`}>
-                                    <div className="flex flex-col gap-4 relative z-10 text-left">
-                                        <div className="flex items-center justify-between"><span className="text-[9px] font-black uppercase text-[#00f0ff] tracking-[0.4em] italic leading-none">{isSpanish ? 'MONTO PERSONALIZADO' : 'SET CUSTOM AMOUNT'}</span><span className="text-[8px] font-black text-white/20 uppercase tracking-widest">LIMIT: $30,000</span></div>
-                                        <div className={`flex items-center gap-4 bg-black/40 border rounded-[1.2rem] px-6 py-4 transition-all duration-500 ${isCustom ? 'border-[#fbbf24]/40' : 'border-white/5'}`}>
-                                            <span className={`text-3xl font-syncopate font-black italic ${isCustom ? 'text-white' : 'text-white/20'}`}>$</span>
-                                            <input 
-                                                type="number" 
-                                                value={customAmount} 
-                                                onClick={(e) => { e.stopPropagation(); setIsCustom(true); }} 
-                                                onChange={(e) => {
-                                                    const val = Math.min(30000, parseFloat(e.target.value) || 0).toString();
-                                                    setCustomAmount(val);
-                                                    setIsCustom(true);
-                                                }} 
-                                                className="bg-transparent border-none outline-none text-3xl font-syncopate font-black italic text-white w-full placeholder:text-white/5" 
-                                            />
-                                        </div>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-[10px] font-black uppercase text-white/40 tracking-widest italic">{isSpanish ? 'RECIBES:' : 'YOU RECEIVE:'}</span>
-                                            <span className="text-xl font-syncopate font-black italic text-[#fbbf24] shadow-[0_0_20px_rgba(251,191,36,0.3)]">
-                                                {(parseFloat(customAmount) * 1000).toLocaleString()} 
-                                            </span>
-                                            <span className="text-[10px] font-black text-[#fbbf24]/40 uppercase tracking-tighter mt-1 italic">CR</span>
-                                        </div>
+                                {initialPackage && (
+                                    <div className="p-6 rounded-[2rem] bg-gasp-neon/5 border border-gasp-neon/20 flex flex-col items-center text-center gap-2">
+                                        <span className="text-[10px] font-black uppercase text-gasp-neon tracking-[0.4em]">Ready for deposit</span>
+                                        <h3 className="text-2xl font-syncopate font-black italic uppercase text-white">{selectedPkg.credits.toLocaleString()} Credits</h3>
+                                        <p className="text-xl font-black text-white/60">${selectedPkg.price}</p>
+                                        <button onClick={() => { setSelectedPkgId(''); }} className="text-[9px] font-black text-white/20 uppercase tracking-widest hover:text-white mt-2">← Change Package</button>
                                     </div>
-                                </div>
+                                )}
 
-                                <div className={`grid grid-cols-2 gap-3 transition-all duration-700 ${isCustom ? 'opacity-30' : ''}`}>
-                                    {packages.map((pkg) => (
-                                        <button key={pkg.id} onClick={() => { setSelectedPkgId(pkg.id); setIsCustom(false); }} className={`relative p-4 rounded-[1.5rem] border transition-all duration-300 flex items-center justify-between group overflow-hidden ${(!isCustom && selectedPkgId === pkg.id) ? 'bg-[#fbbf24]/5 border-[#fbbf24]/40 scale-[1.02] shadow-[0_0_30px_rgba(251,191,36,0.1)]' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
-                                            {/* 🎯 CONVERSION BADGES */}
-                                            {pkg.price >= 999 && <div className="absolute top-0 right-0 px-3 py-1 bg-[#fbbf24] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-lg shadow-[0_0_15px_rgba(251,191,36,0.3)] z-20 pulse">BEST VALUE</div>}
-                                            {pkg.popular && <div className="absolute top-0 right-0 px-3 py-1 bg-[#00f0ff] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-lg shadow-[0_0_15px_rgba(0,240,255,0.3)] z-20">POPULAR</div>}
-                                            
-                                            {(!isCustom && selectedPkgId === pkg.id) && <div className="absolute inset-x-0 bottom-0 h-1" style={{ backgroundColor: '#fbbf24' }} />}
-                                            
-                                            <div className="flex flex-col gap-1 text-left relative z-10">
-                                                <span className="text-[7px] font-black uppercase tracking-widest text-white/20 font-syncopate italic leading-none">{pkg.label}</span>
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className="text-xl font-syncopate font-black text-[#fbbf24] italic tracking-tighter drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]">
-                                                        {pkg.credits > 100000 ? (pkg.credits/1000).toFixed(0) + 'K' : pkg.credits.toLocaleString()}
+                                {!initialPackage && (
+                                    <>
+                                        <div className={`relative p-6 rounded-[2rem] border transition-all duration-700 group overflow-hidden bg-white/[0.02] ${isCustom ? 'border-[#00f0ff]/60 shadow-[0_0_50px_rgba(0,240,255,0.15)] ring-1 ring-[#00f0ff]/30' : 'border-white/10'}`}>
+                                            <div className="flex flex-col gap-4 relative z-10 text-left">
+                                                <div className="flex items-center justify-between"><span className="text-[9px] font-black uppercase text-[#00f0ff] tracking-[0.4em] italic leading-none">{isSpanish ? 'MONTO PERSONALIZADO' : 'SET CUSTOM AMOUNT'}</span><span className="text-[8px] font-black text-white/20 uppercase tracking-widest">LIMIT: $30,000</span></div>
+                                                <div className={`flex items-center gap-4 bg-black/40 border rounded-[1.2rem] px-6 py-4 transition-all duration-500 ${isCustom ? 'border-[#fbbf24]/40' : 'border-white/5'}`}>
+                                                    <span className={`text-3xl font-syncopate font-black italic ${isCustom ? 'text-white' : 'text-white/20'}`}>$</span>
+                                                    <input 
+                                                        type="number" 
+                                                        value={customAmount} 
+                                                        onClick={(e) => { e.stopPropagation(); setIsCustom(true); }} 
+                                                        onChange={(e) => {
+                                                            const val = Math.min(30000, parseFloat(e.target.value) || 0).toString();
+                                                            setCustomAmount(val);
+                                                            setIsCustom(true);
+                                                        }} 
+                                                        className="bg-transparent border-none outline-none text-3xl font-syncopate font-black italic text-white w-full placeholder:text-white/5" 
+                                                    />
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="text-[10px] font-black uppercase text-white/40 tracking-widest italic">{isSpanish ? 'RECIBES:' : 'YOU RECEIVE:'}</span>
+                                                    <span className="text-xl font-syncopate font-black italic text-[#fbbf24] shadow-[0_0_20px_rgba(251,191,36,0.3)]">
+                                                        {(parseFloat(customAmount) * 1000).toLocaleString()} 
                                                     </span>
-                                                    <span className="text-[10px] font-black text-[#fbbf24] uppercase tracking-tighter mt-1 italic">CR</span>
+                                                    <span className="text-[10px] font-black text-[#fbbf24]/40 uppercase tracking-tighter mt-1 italic">CR</span>
                                                 </div>
                                             </div>
-                                            
-                                            <div className="flex flex-col items-end relative z-10 transition-all group-hover:translate-x-1">
-                                                <div className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl group-hover:border-white/40 transition-all">
-                                                    <span className="text-lg font-black text-white italic tracking-tighter leading-none">${pkg.price.toFixed(0)}</span>
-                                                </div>
-                                            </div>
-                                        </button>
-                                    ))}
+                                        </div>
+
+                                        <div className={`grid grid-cols-2 gap-3 transition-all duration-700 ${isCustom ? 'opacity-30' : ''}`}>
+                                            {packages.map((pkg) => (
+                                                <button key={pkg.id} onClick={() => { setSelectedPkgId(pkg.id); setIsCustom(false); }} className={`relative p-4 rounded-[1.5rem] border transition-all duration-300 flex items-center justify-between group overflow-hidden ${(!isCustom && selectedPkgId === pkg.id) ? 'bg-[#fbbf24]/5 border-[#fbbf24]/40 scale-[1.02] shadow-[0_0_30px_rgba(251,191,36,0.1)]' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
+                                                    {pkg.price >= 999 && <div className="absolute top-0 right-0 px-3 py-1 bg-[#fbbf24] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-lg shadow-[0_0_15px_rgba(251,191,36,0.3)] z-20 pulse">BEST VALUE</div>}
+                                                    {pkg.popular && <div className="absolute top-0 right-0 px-3 py-1 bg-[#00f0ff] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-lg shadow-[0_0_15px_rgba(0,240,255,0.3)] z-20">POPULAR</div>}
+                                                    {(!isCustom && selectedPkgId === pkg.id) && <div className="absolute inset-x-0 bottom-0 h-1" style={{ backgroundColor: '#fbbf24' }} />}
+                                                    <div className="flex flex-col gap-1 text-left relative z-10">
+                                                        <span className="text-[7px] font-black uppercase tracking-widest text-white/20 font-syncopate italic leading-none">{pkg.label}</span>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="text-xl font-syncopate font-black text-[#fbbf24] italic tracking-tighter drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]">
+                                                                {pkg.credits > 100000 ? (pkg.credits/1000).toFixed(0) + 'K' : pkg.credits.toLocaleString()}
+                                                            </span>
+                                                            <span className="text-[10px] font-black text-[#fbbf24] uppercase tracking-tighter mt-1 italic">CR</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-col items-end relative z-10 transition-all group-hover:translate-x-1">
+                                                        <div className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl group-hover:border-white/40 transition-all">
+                                                            <span className="text-lg font-black text-white italic tracking-tighter leading-none">${pkg.price.toFixed(0)}</span>
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
                                 </div>
 
                                  {isCheckoutPending ? (
