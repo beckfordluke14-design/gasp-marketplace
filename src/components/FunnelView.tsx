@@ -59,14 +59,14 @@ export default function FunnelView() {
   const profileId = searchParams.get('profile') || 'veronica_medellin';
   const profile = initialProfiles.find(p => p.id === profileId) || {
     name: 'Veronica',
-    image: 'https://asset.gasp.fun/personas/veronica-medellin-locked/vault_1.jpg', // Using real DB-linked asset
+    image: 'https://asset.gasp.fun/personas/veronica/veronica_hero.webp', // Using absolute R2 Hero Image
     city: 'Medellín'
   };
 
   // 📈 FOMO ENGINE
   useEffect(() => {
     const names = ['anon_382', 'hunter_x', 'papi_medellin', 'm_sanchez', 'k_jones', 'vip_user_2'];
-    const actions = ['unlocked Vault 🌶️', 'bought Prime Access', 'restored Connection', 'sent a Tip ⚡'];
+    const actions = ['unlocked Vault 🌶️', 'bought Prime Access', 'restored Connection', 'sent a Gift 🎁'];
     
     const interval = setInterval(() => {
       const name = names[Math.floor(Math.random() * names.length)];
@@ -190,8 +190,10 @@ export default function FunnelView() {
       const gid = localStorage.getItem('gasp_guest_id');
       const res = await fetch(`/api/vault?personaId=${profileId}&userId=${gid}`);
       const data = await res.json();
-      if (data.success) {
-        setVaultItems(data.items || []);
+      
+      if (data.success && data.items.length > 0) {
+        // Only overwrite if we have actual unlocked items to show
+        setVaultItems(data.items);
       }
     } catch (e) {}
   };
@@ -400,7 +402,7 @@ export default function FunnelView() {
               <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/40">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#ff00ff]/50 bg-black/40 shadow-[0_0_20px_rgba(255,0,255,0.4)] relative">
-                    <ProfileAvatar src="https://asset.gasp.fun/personas/veronica-medellin-locked/vault_1.jpg" alt={profile.name} fill />
+                    <ProfileAvatar src="https://asset.gasp.fun/personas/veronica/veronica_hero.webp" alt={profile.name} fill />
                     <motion.div 
                       animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
                       transition={{ duration: 2, repeat: Infinity }}
