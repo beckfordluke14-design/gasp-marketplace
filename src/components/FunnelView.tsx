@@ -146,13 +146,14 @@ export default function FunnelView() {
       setTimeout(() => {
         setIsTyping(true);
         setTimeout(() => {
-          setMessages([
-            { 
-              id: '1', 
-              role: 'assistant', 
-              content: `Hey Papi... I was hoping you'd find me today. 😉 I'm so bored, I've just been waiting for someone fun to talk to. How's your day going?` 
-            }
-          ]);
+          // 🛡️ THE HOOK: Immediate ego-attachment
+          const bootMsg = {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: "papi... finally you're here. I saw your signal hit. it's really you, right?",
+            timestamp: new Date().toISOString()
+          };
+          setMessages([bootMsg]);
           setIsTyping(false);
         }, 1500);
       }, 1000);
