@@ -14,6 +14,8 @@ export default function ProfileLanding() {
   const router = useRouter();
   const profileId = params.profileId as string;
   
+  if (profileId === 'funnel') return null;
+  
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [dbProfiles, setDbProfiles] = useState<any[]>([]);

@@ -13,7 +13,7 @@ export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   
   // Public Paths
-  const publicPaths = ['/login', '/', '/api', '/news', '/terms', '/privacy', '/refunds', '/contact', '/how-to'];
+  const publicPaths = ['/login', '/', '/funnel', '/api', '/news', '/terms', '/privacy', '/refunds', '/contact', '/how-to'];
   const isPublic = publicPaths.some(p => url.pathname.startsWith(p));
 
   if (isPublic) {

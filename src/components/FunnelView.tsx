@@ -178,9 +178,9 @@ export default function FunnelView() {
           loop 
           playsInline
           className={`w-full h-full object-cover transition-all duration-[3000ms] ${currentStepIdx === 0 ? 'blur-3xl scale-125' : 'blur-md'}`}
-          poster={profile.image}
+          poster={proxyImg(profile.image)}
         >
-          <source src="/Promo/Veronica.mp4" type="video/mp4" />
+          <source src="https://asset.gasp.fun/funnel/veronica_promo.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black via-black/40 to-black" />
       </div>
