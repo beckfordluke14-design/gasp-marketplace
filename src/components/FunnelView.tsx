@@ -381,7 +381,7 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
       } finally {
         setIsTyping(false);
         if (newCount >= 3) {
-          setTimeout(() => setCurrentStepIdx(2), 1500);
+          setTimeout(() => setCurrentStepIdx(2), 4000);
         }
       }
     })();
