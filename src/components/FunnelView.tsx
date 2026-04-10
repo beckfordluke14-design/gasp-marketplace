@@ -36,6 +36,9 @@ export default function FunnelView() {
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [selectedPkgId, setSelectedPkgId] = useState('');
   
+  const [fomoMsg, setFomoMsg] = useState('');
+  const [activeUsers, setActiveUsers] = useState(14);
+  
   const router = useRouter();
   const searchParams = useSearchParams();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -43,11 +46,32 @@ export default function FunnelView() {
   // Fallback hero profile if none specified
   const profileId = searchParams.get('profile') || 'veronica_medellin';
   const profile = initialProfiles.find(p => p.id === profileId) || {
-    name: 'Verified Subject',
+    name: 'Veronica',
     image: '/ai_girl_hero_funnel_1775829590274.png',
-    age: 22,
-    city: 'Restricted'
+    city: 'Medellín'
   };
+
+  // 📈 FOMO ENGINE
+  useEffect(() => {
+    const names = ['anon_382', 'hunter_x', 'papi_medellin', 'm_sanchez', 'k_jones', 'vip_user_2'];
+    const actions = ['unlocked Vault 🌶️', 'bought Prime Access', 'restored Connection', 'sent a Tip ⚡'];
+    
+    const interval = setInterval(() => {
+      const name = names[Math.floor(Math.random() * names.length)];
+      const action = actions[Math.floor(Math.random() * actions.length)];
+      setFomoMsg(`${name} just ${action}`);
+      setTimeout(() => setFomoMsg(''), 4000);
+    }, 12000);
+
+    const userInterval = setInterval(() => {
+      setActiveUsers(prev => Math.max(12, prev + (Math.random() > 0.5 ? 1 : -1)));
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(userInterval);
+    };
+  }, []);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -144,34 +168,65 @@ export default function FunnelView() {
   if (!isLoaded) return null;
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-[#ff00ff]/30 font-outfit overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-black text-white selection:bg-[#ff00ff]/30 font-outfit overflow-hidden flex flex-col relative">
       
+      {/* 📹 BACKGROUND VIDEO (SILENT LOOP) */}
+      <div className="absolute inset-0 z-0 opacity-40">
+        <video 
+          autoPlay 
+          muted 
+          loop 
+          playsInline
+          className={`w-full h-full object-cover transition-all duration-[3000ms] ${currentStepIdx === 0 ? 'blur-3xl scale-125' : 'blur-md'}`}
+          poster={profile.image}
+        >
+          <source src="/Promo/Veronica.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-black/40 to-black" />
+      </div>
+
+      {/* 🛡️ SOCIAL PROOF TICKER */}
+      <AnimatePresence>
+        {fomoMsg && (
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            className="fixed bottom-32 left-6 z-[100] px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/10 rounded-full flex items-center gap-3 shadow-2xl"
+          >
+            <div className="w-2 h-2 rounded-full bg-[#ffea00] animate-pulse" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/80">{fomoMsg}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* 🔴 URGENCY HEADER */}
-      <div className="relative z-[100] bg-[#0c0c0c] border-b border-white/5 px-6 py-4 flex items-center justify-between">
+      <div className="relative z-[100] bg-[#0c0c0c]/80 backdrop-blur-lg border-b border-white/5 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff00ff] to-[#7c3aed] flex items-center justify-center shadow-[0_0_20px_rgba(255,0,255,0.3)]">
             <Heart size={16} className="text-white fill-white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xs font-black uppercase text-white leading-none tracking-tight">Access Premium</span>
+            <div className="flex items-center gap-2">
+               <span className="text-[10px] font-black uppercase text-white leading-none tracking-tight">Active Link</span>
+               <div className="flex items-center gap-1 bg-green-500/20 px-1.5 py-0.5 rounded">
+                  <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-[8px] font-black text-green-500">{activeUsers} Waiting</span>
+               </div>
+            </div>
             <span className="text-[14px] font-mono font-black text-[#ff00ff] leading-none mt-1">{timeLeft}</span>
           </div>
         </div>
-        <button 
-           onClick={() => setCurrentStepIdx(2)}
-           className="px-5 py-2.5 bg-[#ff00ff] text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-[0_5px_15px_rgba(255,0,255,0.4)] hover:scale-105 active:scale-95 transition-all"
-        >
-          Claim discount
-        </button>
+        
+        <div className="flex flex-col items-end">
+           <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 mb-1 font-outfit">Priority Status</span>
+           <span className="text-[10px] font-black uppercase tracking-widest text-[#00f0ff] animate-pulse">
+              {currentStepIdx === 0 ? 'Syncing...' : 'Connected'}
+           </span>
+        </div>
       </div>
 
       <div className="flex-1 relative flex flex-col overflow-hidden">
-        {/* BG Effects */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#ff00ff]/5 blur-[200px] rounded-full" />
-          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#7c3aed]/5 blur-[200px] rounded-full" />
-        </div>
-
         <AnimatePresence mode="wait">
           {currentStepIdx === 0 && (
             <motion.div 
@@ -188,20 +243,20 @@ export default function FunnelView() {
                      transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
                      className="absolute inset-0 border-t border-[#ff00ff] rounded-full scale-[1.1]"
                    />
-                   <Terminal size={32} className="text-white/20" />
+                   <Terminal className="text-[#ff00ff]" size={32} />
                 </div>
               </div>
 
-              <div className="w-full max-w-sm space-y-3 font-mono">
+              <div className="w-full max-w-xs space-y-2">
                 {terminalLogs.map((log, i) => (
                   <motion.div 
                     key={i} 
-                    initial={{ opacity: 0, x: -10 }} 
+                    initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center gap-3 text-[10px] uppercase font-black tracking-widest"
+                    className="flex items-center gap-3"
                   >
-                    <span className="text-[#ff00ff] font-bold">»</span>
-                    <span className={log.includes('STATUS') || log.includes('CONNECTED') ? 'text-emerald-500' : 'text-white/40'}>
+                    <span className="text-[10px] font-mono text-[#ff00ff] opacity-40 leading-none">{'>'}</span>
+                    <span className="text-[10px] font-mono text-white/60 uppercase tracking-widest leading-none">
                       {log}
                     </span>
                   </motion.div>
@@ -224,59 +279,68 @@ export default function FunnelView() {
                   <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#ff00ff]/30">
                     <img src={proxyImg(profile.image)} className="w-full h-full object-cover" />
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-black uppercase text-white tracking-widest italic">{profile.name}</span>
+                  <div>
                     <div className="flex items-center gap-2">
-                       <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]" />
-                       <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Neural Link Synchronized</span>
+                      <span className="text-white font-black text-sm uppercase tracking-widest">{profile.name}</span>
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                     </div>
+                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">{profile.city} Connection</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-white/20">
-                  <Activity size={16} />
+                <div className="flex items-center gap-3 text-white/40">
+                   <Mic size={18} />
+                   <Activity size={18} />
                 </div>
               </div>
 
-              {/* Messages Container */}
-              <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 no-scrollbar">
-                <div className="flex flex-col items-center gap-3 py-6 opacity-20 border-b border-cyan-500/20">
-                   <ShieldAlert size={20} className="text-cyan-500" />
-                   <p className="text-[8px] uppercase tracking-[0.5em] font-black italic">End-to-End Encrypted Session</p>
-                </div>
-
-                {messages.map((msg) => (
-                  <div key={msg.id} className={`flex ${msg.role === 'assistant' ? 'justify-start' : 'justify-end'}`}>
-                    <div className={`max-w-[85%] px-5 py-3.5 rounded-[1.8rem] text-[14px] leading-relaxed font-medium ${msg.role === 'assistant' ? 'bg-white/5 border border-white/10 text-white/90' : 'bg-[#ff00ff] text-white font-bold shadow-[0_10px_30px_rgba(255,0,255,0.3)]'}`}>
-                      {msg.content}
+              {/* Chat Thread */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col no-scrollbar">
+                {messages.map((m, i) => (
+                  <motion.div 
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`max-w-[85%] px-5 py-4 rounded-[1.5rem] text-sm font-medium ${
+                      m.role === 'user' 
+                        ? 'bg-gradient-to-br from-[#ff00ff] to-[#7c3aed] text-white rounded-tr-none shadow-[0_10px_30px_rgba(255,0,255,0.2)]' 
+                        : 'bg-white/5 text-white/90 border border-white/10 rounded-tl-none'
+                    }`}>
+                      {m.content}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-
                 {isTyping && (
                   <div className="flex justify-start">
-                    <div className="px-5 py-3.5 bg-white/5 border border-white/10 rounded-full flex gap-1.5">
-                      <span className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:-0.3s]" />
-                      <span className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:-0.15s]" />
-                      <span className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce" />
+                    <div className="bg-white/5 px-4 py-3 rounded-2xl flex gap-1">
+                      {[0,1,2].map(d => (
+                        <motion.div 
+                          key={d}
+                          animate={{ opacity: [0.3, 1, 0.3] }}
+                          transition={{ duration: 1, repeat: Infinity, delay: d * 0.2 }}
+                          className="w-1.5 h-1.5 rounded-full bg-white/40"
+                        />
+                      ))}
                     </div>
                   </div>
                 )}
+                <div ref={scrollRef} />
               </div>
 
               {/* Input Area */}
-              <div className="p-8 border-t border-white/5">
-                <form onSubmit={handleSendMessage} className="flex gap-4">
+              <div className="p-6 pt-0 mt-auto shrink-0">
+                <form onSubmit={handleSendMessage} className="relative group">
                   <input 
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder="Type your reply..."
-                    className="flex-1 h-16 bg-white/[0.03] border border-white/10 rounded-2xl px-6 outline-none focus:border-[#ff00ff]/40 transition-all font-medium text-sm"
+                    className="w-full h-16 bg-white/[0.03] border border-white/10 rounded-2xl px-6 pr-16 text-sm font-medium focus:outline-none focus:border-[#ff00ff]/50 focus:bg-white/[0.06] transition-all"
                   />
                   <button 
                     type="submit"
-                    disabled={!inputValue.trim() || isTyping}
-                    className="h-16 w-16 bg-[#ff00ff] text-white rounded-2xl shadow-[0_10px_30px_rgba(255,0,255,0.3)] flex items-center justify-center disabled:opacity-20 transition-all active:scale-95"
+                    className="absolute right-3 top-3 w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-[#ff00ff] transition-all"
                   >
                     <SendIcon size={20} />
                   </button>
@@ -393,35 +457,11 @@ export default function FunnelView() {
                   </div>
                 ))}
               </div>
-
-              <div className="flex flex-col items-center gap-6 pt-10">
-                <button 
-                  onClick={() => setIsTopUpOpen(true)}
-                  className="w-full max-w-lg h-22 rounded-[2rem] bg-gradient-to-r from-[#ff00ff] to-[#7c3aed] text-white font-black uppercase text-[16px] tracking-[0.3em] transition-all shadow-[0_15px_60px_rgba(255,255,255,0.4)] hover:scale-[1.02] active:scale-95 flex flex-col items-center justify-center group"
-                >
-                  <span className="mb-0.5 text-white shadow-sm font-outfit">Continue Chatting</span>
-                  <span className="text-[8px] opacity-60 tracking-[0.5em] font-normal text-white italic">Unlock her private chat & vault</span>
-                </button>
-
-                <div className="flex flex-wrap justify-center gap-10 opacity-20 pt-10 border-t border-white/5 w-full">
-                  <div className="flex items-center gap-3">
-                    <CreditCard size={18} />
-                    <span className="text-[9px] font-black uppercase tracking-widest italic tracking-tighter">Secure Payment</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Shield size={18} />
-                    <span className="text-[9px] font-black uppercase tracking-widest italic tracking-tighter">Instant Credit Sync</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 size={18} />
-                    <span className="text-[9px] font-black uppercase tracking-widest italic tracking-tighter">No Recurring Fees</span>
-                  </div>
-                </div>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
       <TopUpDrawer 
         isOpen={isTopUpOpen} 
         onClose={() => setIsTopUpOpen(false)} 
