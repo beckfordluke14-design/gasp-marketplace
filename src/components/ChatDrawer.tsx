@@ -568,7 +568,16 @@ export default function ChatDrawer({
                  </button>
                  <button onClick={() => setChatTab('pics')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
                     {isSpanish ? 'ARCHIVO' : 'ARCHIVE'}
-                    {chatTab === 'pics' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
+                    {showLimitCTA && chatTab !== 'pics' && (
+                      <motion.div 
+                        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                        transition={{ repeat: Infinity, duration: 1.5 }}
+                        className="absolute -top-1 -right-4 text-[#ff00ff] drop-shadow-[0_0_8px_#ff00ff]"
+                      >
+                        <span>🌶️</span>
+                      </motion.div>
+                    )}
+                    {chatTab === 'pics' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#ff00ff] shadow-[0_0_15px_#ff00ff]" />}
                  </button>
               </div>
           </div>
@@ -778,7 +787,7 @@ export default function ChatDrawer({
                 {showVaultCTA && (
                    <div className="mt-8">
                       <ChatCTA 
-                        type="topup" 
+                        type={idToUse.startsWith('guest-') ? 'signup' : 'topup'} 
                         onAction={onOpenTopUp} 
                         balance={userProfile?.credit_balance || 0}
                       />

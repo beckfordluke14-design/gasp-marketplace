@@ -49,7 +49,7 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
 
         <button 
            onClick={() => login()}
-           className="mt-2 w-full h-16 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] font-syncopate italic rounded-2xl hover:bg-[#ff00ff] hover:text-white transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 z-10 flex items-center justify-center gap-2"
+           className="mt-2 w-full h-16 bg-[#ff00ff] text-white text-[10px] font-black uppercase tracking-[0.2em] font-syncopate italic rounded-2xl hover:bg-white hover:text-black transition-all shadow-[0_0_30px_rgba(255,0,255,0.4)] active:scale-95 z-10 flex items-center justify-center gap-2 animate-pulse"
         >
            {isSpanish ? 'ENTRAR Y RECLAMAR REGALO' : 'ENTER VAULT + 1,500 GIFT'}
            <ArrowRight size={14} />

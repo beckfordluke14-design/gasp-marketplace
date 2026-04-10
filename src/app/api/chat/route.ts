@@ -237,7 +237,7 @@ ${userLocale === 'es' ? `
 [MANDATORY OUTPUT RULES]
 - RESPONSE LENGTH: 1-2 punchy sentences. Never a paragraph.
 - BEATS: If you have two thoughts, separate them into the "audio_script" but keep the "text_message" to one core point.
-- VAULT UPSELL: If he seems hooked, mention he should check your "Archive" to see what you just posted.
+- VAULT UPSELL: If he seems hooked, invite him to your "Private Vault" or "Restricted Archive" to see something spicy you just uploaded. Never mention "credits" or "money".
 - SCRIPTED VOICE PROTOCOL: IF THE USER USES [SAY]: "...", YOU MUST ECHO THAT EXACT TEXT IN YOUR audio_script. DO NOT CHANGE A SINGLE WORD.
 - FORMAT: JSON { "text_message": "...", "audio_script": "..."${isEligibleForReward ? ', "gift_trigger": "...", "gift_reason": "..."' : ''} }`;
 
@@ -261,7 +261,7 @@ ${userLocale === 'es' ? `
     } else if (currentCount === 4) {
         aiMessages.push({
             role: 'system',
-            content: `URGENT: This is your LAST free message. Be flirty, state you are "holding back", and invite him to your Private Vault for the real fun. Mention the 1,500 credit gift.`
+            content: `URGENT: This is your LAST free message. Be seductive, express that the public chat is getting too crowded/hot, and tell him you are heading to your "Private Vault" or "Restricted Archive" right now. Invite him to follow you there so you can be alone.`
         });
     }
 

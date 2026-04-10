@@ -61,8 +61,17 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
   const NavButton = ({ label, icon: Icon, targetView }: { label: string, icon: any, targetView: 'chats' | 'vault' | 'feed' }) => (
     <button 
         onClick={() => onSetView?.(targetView)}
-        className={`flex-1 py-3 flex flex-col items-center gap-1 transition-all border-b-2 ${view === targetView ? 'border-[#ff00ff] text-white shadow-[0_10px_10px_-10px_#ff00ff]' : 'border-transparent text-white/30'}`}
+        className={`flex-1 py-3 flex flex-col items-center gap-1 transition-all border-b-2 relative ${view === targetView ? 'border-[#ff00ff] text-white shadow-[0_10px_10px_-10px_#ff00ff]' : 'border-transparent text-white/30'}`}
     >
+        {targetView === 'vault' && (
+          <motion.div 
+            animate={{ scale: [1, 1.2, 1], filter: ['blur(4px)', 'blur(8px)', 'blur(4px)'] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="absolute -top-1 right-4 text-[#ff00ff] opacity-80"
+          >
+            <span className="text-[12px]">🌶️</span>
+          </motion.div>
+        )}
         <Icon size={18} className={view === targetView ? 'drop-shadow-[0_0_8px_#ff00ff]' : ''} />
         <span className="text-[7px] font-black uppercase tracking-widest">{label}</span>
     </button>
