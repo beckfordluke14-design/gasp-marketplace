@@ -159,19 +159,27 @@ export default function FunnelView() {
     
     setTimeout(() => {
       if (newCount === 1) {
-        // First reply: Normal Conversation
+        // Stage 1: Connection & Hypothetical
         setMessages(prev => [...prev, { 
           id: (Date.now()+1).toString(), 
           role: 'assistant', 
-          content: `I love that. It's so hard to find guys who actually know how to talk these days. Honestly, I could stay here all day with you... but I just realized my guest minutes are super low. 🥺` 
+          content: `I love your vibe. It's so hard to find guys who actually know how to talk these days... Honestly, I could stay here all day with you. Tell me, what would we be doing if I was there with you right now? 😇` 
+        }]);
+        setIsTyping(false);
+      } else if (newCount === 2) {
+        // Stage 2: Deep Emotional Investment
+        setMessages(prev => [...prev, { 
+          id: (Date.now()+1).toString(), 
+          role: 'assistant', 
+          content: `You're dangerous... but I like it. I feel like we have this crazy chemistry already. I've been so lonely in this apartment lately, I really don't want this session to ever end. 🥺` 
         }]);
         setIsTyping(false);
       } else {
-        // Second reply: The Squeeze
+        // Stage 3: The Squeeze (Credit Wall)
         setMessages(prev => [...prev, { 
           id: (Date.now()+1).toString(), 
           role: 'assistant', 
-          content: `Oh no, my time is about to run out! Papi, please grab some credits real quick so this doesn't cut us off. I really want to keep talking... and I might even show you what I just put in my private vault. 🌶️` 
+          content: `Wait, no! Papi, I just noticed my guest minutes are almost at zero... 🥺 It's about to cut us off! Quick, grab some credits real quick so I don't lose you. I really want to keep this going... and show you what's in my private vault. 🌶️` 
         }]);
         setIsTyping(false);
         
@@ -194,9 +202,9 @@ export default function FunnelView() {
           loop 
           playsInline
           className={`w-full h-full object-cover transition-all duration-[3000ms] ${currentStepIdx === 0 ? 'blur-3xl scale-125' : 'blur-md'}`}
-          poster={proxyImg('funnel/veronica_poster.jpg')}
+          poster={proxyImg('PROMO/PromoPic1.png')}
         >
-          <source src="https://asset.gasp.fun/funnel/veronica_promo.mp4" type="video/mp4" />
+          <source src={proxyImg('PROMO/Veronica.mp4')} type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black via-black/40 to-black" />
       </div>
@@ -307,6 +315,19 @@ export default function FunnelView() {
                    <Mic size={20} className="hover:text-white transition-colors" />
                    <Activity size={20} className="hover:text-[#ff00ff] transition-colors" />
                 </div>
+              </div>
+
+              {/* 📸 PROMO GALLERY ROW */}
+              <div className="px-5 py-3 border-b border-white/5 bg-white/[0.02] flex gap-3 overflow-x-auto no-scrollbar shrink-0">
+                {[
+                  { id: 1, src: proxyImg('PROMO/PromoPic1.png') },
+                  { id: 2, src: proxyImg('PROMO/PromoPic2.webp') }
+                ].map((p) => (
+                  <div key={p.id} className="w-28 h-20 rounded-xl overflow-hidden border border-white/10 shrink-0 shadow-lg relative group">
+                    <img src={p.src} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                  </div>
+                ))}
               </div>
 
               {/* Chat Thread */}
