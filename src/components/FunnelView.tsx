@@ -445,15 +445,19 @@ And btw, you can use those credits to talk to any of the 100+ other girls on the
 
               {activeView === 'chat' ? (
                 <>
-                  {/* 📸 PROMO GALLERY ROW */}
-                  <div className="px-5 py-3 border-b border-white/5 bg-white/[0.02] flex gap-5 overflow-x-auto no-scrollbar shrink-0 flex-nowrap">
+                  {/* 📸 PROMO GALLERY ROW (100% VIEWPORT SYMMETRY) */}
+                  <div className="px-5 py-3 border-b border-white/5 bg-white/[0.02] grid grid-cols-2 gap-3 shrink-0">
                     {[
                       { id: 1, src: 'PROMO/PromoPic1.png' },
                       { id: 2, src: 'PROMO/PromoPic2.webp' }
                     ].map((p) => (
-                      <div key={p.id} className="min-w-[180px] h-[270px] rounded-2xl overflow-hidden border border-white/20 shrink-0 shadow-2xl relative group bg-black/40">
-                        <img src={proxyImg(p.src)} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div key={p.id} className="max-h-[38vh] aspect-[9/16] mx-auto rounded-xl overflow-hidden border border-white/10 shadow-xl relative group bg-black/40">
+                        <img 
+                          src={proxyImg(p.src)} 
+                          className="w-full h-full object-contain" 
+                          alt="" 
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent pointer-events-none" />
                       </div>
                     ))}
                   </div>
