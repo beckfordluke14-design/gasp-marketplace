@@ -46,6 +46,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     const [isVerifying, setIsVerifying] = useState(false);
     const [expiryTime, setExpiryTime] = useState<string | null>(null);
     const [timeLeft, setTimeLeft] = useState<string>('');
+    const [isCheckoutPending, setIsCheckoutPending] = useState(false);
     const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
     const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
@@ -152,12 +153,21 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
             });
             const data = await res.json();
             if (data.redirectUrl) {
-                window.location.href = data.redirectUrl;
+                // 🛰️ SOVEREIGN RETENTION: Open in new tab to keep the chat session active in the background.
+                const win = window.open(data.redirectUrl, '_blank');
+                if (win) {
+                    setIsCheckoutPending(true);
+                    setIsLoading(false);
+                } else {
+                    // Fallback if popup was blocked
+                    window.location.href = data.redirectUrl;
+                }
             } else {
                 throw new Error(data.error || 'Fault');
             }
         } catch (err: any) {
             console.error('[TopUp] Stripe session failed:', err);
+            setIsCheckoutPending(false);
             // 🔱 SOVEREIGN PIVOT: If Stripe blocks them, bounce them to the P2P Rail immediately
             const msg = err.message || '';
             if (msg.includes('IP address') || msg.includes('Invalid IP') || msg.includes('not supported')) {
@@ -356,25 +366,43 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                     ))}
                                 </div>
 
-                                <div className="space-y-4 text-center">
-                                    <button onClick={handleStripeCheckout} disabled={isLoading} className="w-full h-20 rounded-[2.5rem] bg-white text-black font-black uppercase text-[12px] tracking-[0.2em] transition-all shadow-[0_20px_100px_rgba(255,255,255,0.2)] flex items-center justify-center gap-5 group hover:scale-[1.02] relative overflow-hidden shrink-0">
-                                        {isLoading ? <Loader2 size={24} className="animate-spin text-black" /> : <CreditCard size={24} fill="black" />}
-                                        <span className="font-syncopate italic tracking-tighter text-base">{isSpanish ? 'PAGAR CON TARJETA' : 'BUY WITH CARD'}</span>
-                                    </button>
-                                </div>
-
-                                 <button onClick={handleSwitchToP2P} 
-                                    className="w-full h-24 rounded-[2.5rem] bg-gradient-to-br from-[#00f0ff]/10 to-transparent border border-[#00f0ff]/30 hover:border-[#00f0ff] transition-all flex items-center justify-center gap-5 group relative overflow-hidden shrink-0 shadow-[0_0_50px_rgba(0,240,255,0.05)] hover:shadow-[0_0_80px_rgba(0,240,255,0.15)]"
-                                 >
-                                    <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#00f0ff] to-transparent opacity-40 shrink-0" />
-                                    <div className="absolute top-0 right-0 px-4 py-1.5 bg-[#00f0ff] text-black text-[8px] font-black uppercase tracking-[0.2em] leading-none rounded-bl-xl shadow-lg z-10 italic">SOVEREIGN CHOICE</div>
-                                    <QrCode size={28} className="text-[#00f0ff] group-hover:scale-110 transition-transform duration-500" />
-                                    <div className="flex flex-col items-start leading-none gap-2 text-left">
-                                        <span className="text-[11px] font-black text-white uppercase tracking-widest font-syncopate italic">{isSpanish ? 'PAGAR CON SOLANA / USDC' : 'PAY WITH SOLANA / USDC'}</span>
-                                        <span className="text-[8px] font-black text-[#00f0ff]/60 uppercase tracking-[0.4em] italic leading-tight group-hover:text-[#00f0ff] transition-colors">{isSpanish ? 'SOLUCIÓN P2P DIRECTA // INSTANTÁNEA' : 'DIRECT P2P SETTLEMENT // INSTANT'}</span>
+                                 {isCheckoutPending ? (
+                                    <div className="p-6 rounded-[2rem] bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-center space-y-4 animate-pulse">
+                                        <div className="flex items-center justify-center gap-3 text-[#00f0ff]">
+                                            <Loader2 size={24} className="animate-spin" />
+                                            <span className="text-sm font-black uppercase tracking-widest font-syncopate italic">Checkout Active</span>
+                                        </div>
+                                        <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest leading-relaxed">
+                                            Follow instructions in the new window.<br/>
+                                            Return here once your deposit is confirmed.
+                                        </p>
+                                        <button onClick={() => setIsCheckoutPending(false)} className="text-[9px] font-black text-[#00f0ff] uppercase tracking-widest hover:underline">
+                                            Return to payment options
+                                        </button>
                                     </div>
-                                    <ArrowRight size={20} className="text-[#00f0ff]/40 group-hover:translate-x-2 transition-all ml-auto mr-5" />
-                                 </button>
+                                 ) : (
+                                    <>
+                                        <div className="space-y-4 text-center">
+                                            <button onClick={handleStripeCheckout} disabled={isLoading} className="w-full h-20 rounded-[2.5rem] bg-white text-black font-black uppercase text-[12px] tracking-[0.2em] transition-all shadow-[0_20px_100px_rgba(255,255,255,0.2)] flex items-center justify-center gap-5 group hover:scale-[1.02] relative overflow-hidden shrink-0">
+                                                {isLoading ? <Loader2 size={24} className="animate-spin text-black" /> : <CreditCard size={24} fill="black" />}
+                                                <span className="font-syncopate italic tracking-tighter text-base">{isSpanish ? 'PAGAR CON TARJETA' : 'BUY WITH CARD'}</span>
+                                            </button>
+                                        </div>
+
+                                        <button onClick={handleSwitchToP2P} 
+                                            className="w-full h-24 rounded-[2.5rem] bg-gradient-to-br from-[#00f0ff]/10 to-transparent border border-[#00f0ff]/30 hover:border-[#00f0ff] transition-all flex items-center justify-center gap-5 group relative overflow-hidden shrink-0 shadow-[0_0_50px_rgba(0,240,255,0.05)] hover:shadow-[0_0_80px_rgba(0,240,255,0.15)]"
+                                        >
+                                            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#00f0ff] to-transparent opacity-40 shrink-0" />
+                                            <div className="absolute top-0 right-0 px-4 py-1.5 bg-[#00f0ff] text-black text-[8px] font-black uppercase tracking-[0.2em] leading-none rounded-bl-xl shadow-lg z-10 italic">SOVEREIGN CHOICE</div>
+                                            <QrCode size={28} className="text-[#00f0ff] group-hover:scale-110 transition-transform duration-500" />
+                                            <div className="flex flex-col items-start leading-none gap-2 text-left">
+                                                <span className="text-[11px] font-black text-white uppercase tracking-widest font-syncopate italic">{isSpanish ? 'PAGAR CON SOLANA / USDC' : 'PAY WITH SOLANA / USDC'}</span>
+                                                <span className="text-[8px] font-black text-[#00f0ff]/60 uppercase tracking-[0.4em] italic leading-tight group-hover:text-[#00f0ff] transition-colors">{isSpanish ? 'SOLUCIÓN P2P DIRECTA // INSTANTÁNEA' : 'DIRECT P2P SETTLEMENT // INSTANT'}</span>
+                                            </div>
+                                            <ArrowRight size={20} className="text-[#00f0ff]/40 group-hover:translate-x-2 transition-all ml-auto mr-5" />
+                                        </button>
+                                    </>
+                                 )}
                             </div>
                         )}
 

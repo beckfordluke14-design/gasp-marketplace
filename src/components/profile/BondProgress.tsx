@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { getBondTier } from '@/lib/economy/bondLogic';
+import { getBondTier } from '@/lib/economy/bondTiers';
 import { Zap, HeartPulse, ShieldCheck, Flame } from 'lucide-react';
 
 interface BondProgressProps {
