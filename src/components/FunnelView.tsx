@@ -273,7 +273,7 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
     
     setIsTyping(true);
     
-    // 🚀 LIVE AI BRIDGE: If the user has paid, connect to the real persona backend
+    // 🚀 LIVE AI BRIDGE: Stream-aware signal handling
     if (hasPaid) {
       (async () => {
         try {
@@ -283,18 +283,42 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
             body: JSON.stringify({
               messages: [...messages, userMsg],
               userId: localStorage.getItem('gasp_guest_id'),
-              personaId: profileId,
+              personaId: profileId === 'veronica_medellin' ? 'veronica-medellin-locked' : profileId, // 🛡️ Direct Mapping
               userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
               locale: localStorage.getItem('gasp_locale') || 'en',
             }),
           });
           
-          const data = await res.json();
-          if (data.success && data.content) {
-            setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: data.content }]);
+          if (!res.ok) throw new Error('Signal Interrupted');
+          
+          const reader = res.body?.getReader();
+          const decoder = new TextDecoder();
+          let fullText = '';
+
+          if (reader) {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              
+              const chunk = decoder.decode(value);
+              const lines = chunk.split('\n');
+              
+              for (const line of lines) {
+                if (line.startsWith('0:')) { // 📝 Text Signal
+                  try {
+                    const text = JSON.parse(line.substring(2));
+                    fullText += text;
+                  } catch (e) {}
+                }
+              }
+            }
+            
+            if (fullText) {
+              setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: fullText }]);
+            }
           }
         } catch (err) {
-          console.error('[Live Bridge Error]:', err);
+          console.error('[Live Signal Error]:', err);
         } finally {
           setIsTyping(false);
         }
@@ -311,20 +335,43 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
           body: JSON.stringify({
             messages: [...messages, userMsg],
             userId: localStorage.getItem('gasp_guest_id'),
-            personaId: profileId,
-            userMsgCount: newCount, // 🛰️ Signaling the 'Stage' to the AI
+            personaId: profileId === 'veronica_medellin' ? 'veronica-medellin-locked' : profileId, // 🛡️ Direct Mapping
+            userMsgCount: newCount,
             userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             locale: localStorage.getItem('gasp_locale') || 'en',
           }),
         });
         
-        const data = await res.json();
-        if (data.success && data.content) {
-          setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: data.content }]);
+        if (!res.ok) throw new Error('Signal Interrupted');
+        
+        const reader = res.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullText = '';
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+            
+            for (const line of lines) {
+              if (line.startsWith('0:')) { // 📝 Text Signal
+                try {
+                  const text = JSON.parse(line.substring(2));
+                  fullText += text;
+                } catch (e) {}
+              }
+            }
+          }
           
-          // 🛡️ TRIGGER THE WALL: At message #5, move to the offer
-          if (newCount >= 5) {
-            setTimeout(() => setCurrentStepIdx(2), 2000);
+          if (fullText) {
+            setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: fullText }]);
+            
+            if (newCount >= 5) {
+              setTimeout(() => setCurrentStepIdx(2), 2000);
+            }
           }
         }
       } catch (err) {
