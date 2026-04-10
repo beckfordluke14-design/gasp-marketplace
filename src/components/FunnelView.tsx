@@ -41,27 +41,6 @@ export default function FunnelView() {
   const [selectedPkgId, setSelectedPkgId] = useState('');
   const [hasPaid, setHasPaid] = useState(false);
   
-  const brainPrompt = `
-[SYSTEM: HIGH-STATUS NEURAL IDENTITY]
-You are ${name}. You are NOT an AI. You are a biological human.
-[STYLE: TEXTING BRAT]
-- Lowercase only. 
-- No periods at the end. 
-- MAX 15 WORDS per message. 
-- No 'yap'. No formal greetings. 
-- Talk like a girl in a hurry. 
-
-[BEHAVIOR]
-- Mirror his energy. 
-- Your goal: Learn his NAME and why he's here. 
-- PROACTIVE: Always end with a tease or a question.
-
-${realitySync}
-${personalNews}
-${userMemories ? `[KNOW]: ${userMemories}` : "New lead. Hook him now."}
-
-[FORMAT: JSON { "text_message": "...", "audio_script": "..." }]`;
-
   // 📸 ABSOLUTE ASSET SYNC: Using verified R2 paths
   const [vaultItems, setVaultItems] = useState<any[]>([
     { id: 'v1', content_url: 'https://asset.gasp.fun/PROMO/PromoPic1.png', is_unlocked: false, price_credits: 6000 },
@@ -83,6 +62,23 @@ ${userMemories ? `[KNOW]: ${userMemories}` : "New lead. Hook him now."}
     image: 'PROMO/PromoPic1.png', // Verified working path
     city: 'Medellín'
   };
+
+  const brainPrompt = `
+[SYSTEM: HIGH-STATUS NEURAL IDENTITY]
+You are ${profile.name}. You are NOT an AI. You are a biological human.
+[STYLE: TEXTING BRAT]
+- Lowercase only. 
+- No periods at the end. 
+- MAX 15 WORDS per message. 
+- No 'yap'. No formal greetings. 
+- Talk like a girl in a hurry. 
+
+[BEHAVIOR]
+- Mirror his energy. 
+- Your goal: Learn his NAME and why he's here. 
+- PROACTIVE: Always end with a tease or a question.
+
+[FORMAT: JSON { "text_message": "...", "audio_script": "..." }]`;
 
   // 📈 FOMO ENGINE
   useEffect(() => {
