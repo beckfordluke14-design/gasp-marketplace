@@ -41,11 +41,11 @@ export default function FunnelView() {
   const [selectedPkgId, setSelectedPkgId] = useState('');
   const [hasPaid, setHasPaid] = useState(false);
   
-  // 📸 REAL DATABASE SYNC: Veronica's high-status vault assets
+  // 📸 ABSOLUTE ASSET SYNC: Using verified R2 paths
   const [vaultItems, setVaultItems] = useState<any[]>([
-    { id: 'v1', content_url: 'https://asset.gasp.fun/personas/veronica-medellin-locked/vault_1.jpg', is_unlocked: false, price_credits: 6000 },
-    { id: 'v2', content_url: 'https://asset.gasp.fun/personas/veronica-medellin-locked/vault_2.jpg', is_unlocked: false, price_credits: 6000 },
-    { id: 'v3', content_url: 'https://asset.gasp.fun/personas/veronica-medellin-locked/vault_3.jpg', is_unlocked: false, price_credits: 6000 },
+    { id: 'v1', content_url: 'https://asset.gasp.fun/PROMO/PromoPic1.png', is_unlocked: false, price_credits: 6000 },
+    { id: 'v2', content_url: 'https://asset.gasp.fun/PROMO/PromoPic2.png', is_unlocked: false, price_credits: 6000 },
+    { id: 'v3', content_url: 'https://asset.gasp.fun/PROMO/PromoPic3.png', is_unlocked: false, price_credits: 6000 },
   ]);
   
   const [fomoMsg, setFomoMsg] = useState('');
@@ -59,7 +59,7 @@ export default function FunnelView() {
   const profileId = searchParams.get('profile') || 'veronica_medellin';
   const profile = initialProfiles.find(p => p.id === profileId) || {
     name: 'Veronica',
-    image: 'https://asset.gasp.fun/personas/veronica/veronica_hero.webp', // Using absolute R2 Hero Image
+    image: 'PROMO/PromoPic1.png', // Verified working path
     city: 'Medellín'
   };
 
@@ -402,11 +402,15 @@ export default function FunnelView() {
               <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/40">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#ff00ff]/50 bg-black/40 shadow-[0_0_20px_rgba(255,0,255,0.4)] relative">
-                    <ProfileAvatar src="https://asset.gasp.fun/personas/veronica/veronica_hero.webp" alt={profile.name} fill />
+                    <img 
+                      src="https://asset.gasp.fun/PROMO/PromoPic1.png" 
+                      alt={profile.name} 
+                      className="absolute inset-0 w-full h-full object-cover object-top scale-110"
+                    />
                     <motion.div 
                       animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
                       transition={{ duration: 2, repeat: Infinity }}
-                      className="absolute inset-0 border-2 border-[#00f0ff] rounded-full"
+                      className="absolute inset-0 border-2 border-[#00f0ff] rounded-full z-10"
                     />
                   </div>
                   <div className="flex flex-col gap-0.5">
@@ -624,7 +628,7 @@ export default function FunnelView() {
                     label: 'Basic Pack', 
                     price: 4.99, 
                     credits: '5,000', 
-                    value: 'ENTRY',
+                    value: 'BASIC',
                     tag: 'Essential'
                   },
                   { 
@@ -687,7 +691,7 @@ export default function FunnelView() {
                           <span className="text-[11px] font-black uppercase text-white tracking-[0.2em] italic">Platinum Account Access</span>
                         </div>
                         <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.1em] mt-2 leading-relaxed italic">
-                          Credits work for all girls, private photos, and unlimited chatting.
+                          Credits work for all girls, private photos, and private chatting.
                         </p>
                       </div>
                     </div>
