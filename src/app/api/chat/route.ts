@@ -40,6 +40,10 @@ export async function POST(req: Request) {
 
     // 🛡️ SYNDICATE GUEST & CREDIT ENFORCEMENT (V7.0 - ZERO TOLERANCE)
     const normalizedUserId = (finalUserId || '').trim();
+    
+    // 🧬 IDENTITY BRIDGE: Map funnel IDs to production DB IDs
+    const DB_PERSONA_ID = finalProfileId === 'veronica_medellin' ? 'veronica-medellin-locked' : finalProfileId;
+    
     const GUEST_LIMIT = 5; 
     const COST_MESSAGE_TEXT = 50; 
 
@@ -71,7 +75,7 @@ export async function POST(req: Request) {
     try {
         await db.query(
             'INSERT INTO chat_messages (user_id, persona_id, role, content, created_at) VALUES ($1, $2, $3, $4, NOW())',
-            [normalizedUserId, profileItem.id, 'user', userContent]
+            [normalizedUserId, DB_PERSONA_ID, 'user', userContent]
         );
     } catch (saveErr) { console.error('[Gasp Atomic Save Fail]:', saveErr); }
 
@@ -96,7 +100,7 @@ export async function POST(req: Request) {
     // 🧠 SOVEREIGN BOND SYNC: Calculating Tier based on Railway Ledger
     const { rows: statsRows } = await db.query(
       'SELECT bond_score FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2',
-      [finalUserId, finalProfileId]
+      [finalUserId, DB_PERSONA_ID]
     );
     const bondScore = parseInt(statsRows[0]?.bond_score || '0');
     
@@ -139,7 +143,7 @@ export async function POST(req: Request) {
     }).format(new Date());
 
     // 🧬 ASSET PULSE: Fetch latest market news and private vault items
-    const brainAssets = await SOV.getPersonaAssets(finalProfileId);
+    const brainAssets = await SOV.getPersonaAssets(DB_PERSONA_ID);
 
     // 🧬 IDENTITY CONFIGURATION
     const name = profileItem.name;
@@ -378,16 +382,16 @@ CRITICAL ERROR PREVENTION: You have previously sounded generic or from the wrong
         try {
              // 🧬 BONDING CURVE SYNC: Increment affinity score atomically
              await db.query(`
-                INSERT INTO user_persona_stats (user_id, persona_id, bond_score, last_chat_at)
-                VALUES ($1, $2, 1, NOW())
+                INSERT INTO user_persona_stats (user_id, persona_id, bond_score)
+                VALUES ($1, $2, 1)
                 ON CONFLICT (user_id, persona_id) DO UPDATE 
-                SET bond_score = user_persona_stats.bond_score + 1, last_chat_at = NOW()
-             `, [finalUserId, profileItem.id]);
+                SET bond_score = user_persona_stats.bond_score + 1
+             `, [finalUserId, DB_PERSONA_ID]);
 
             const queries = [
                 db.query(
                     'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
-                    [finalUserId, profileItem.id, 'assistant', streamB_Text + (systemRewardMessage ? `\n\n🎁 *${systemRewardMessage}*` : ''), voiceUrl, voiceUrl ? streamA_Native : null]
+                    [finalUserId, DB_PERSONA_ID, 'assistant', streamB_Text + (systemRewardMessage ? `\n\n🎁 *${systemRewardMessage}*` : ''), voiceUrl, voiceUrl ? streamA_Native : null]
                 )
             ];
 
