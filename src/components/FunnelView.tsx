@@ -408,6 +408,10 @@ export default function FunnelView() {
                         <div className="flex items-center gap-2 mt-2">
                            <span className="bg-[#ff00ff]/20 text-[#ff00ff] text-[10px] font-black px-2 py-0.5 rounded uppercase">{pkg.tag}</span>
                            <span className="text-[8px] font-black text-[#ffea00] uppercase tracking-widest whitespace-nowrap">+ 1,500 GENESIS GIFT</span>
+                           <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#00f0ff]/10 border border-[#00f0ff]/20 rounded-full">
+                              <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
+                              <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-[0.2em]">1:1 $GaspAi LOYALTY MATCH 💎</span>
+                           </div>
                         </div>
                       </div>
                       
