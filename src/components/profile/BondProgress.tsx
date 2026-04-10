@@ -6,18 +6,51 @@ import { Zap, HeartPulse, ShieldCheck, Flame } from 'lucide-react';
 
 interface BondProgressProps {
   score: number;
+  variant?: 'default' | 'compact';
 }
 
 /**
  * SYSTEM 3: THE 'BOND LEVEL' PROGRESSION
  * Objective: Maximize ARPU via Progression & Sunk Cost Fallacy.
  */
-export default function BondProgress({ score }: BondProgressProps) {
+export default function BondProgress({ score, variant = 'default' }: BondProgressProps) {
   const currentTier = getBondTier(score);
   
   // Calculate percentage toward next tier
   const nextTier = getBondTier(score + 500); // Check for next
   const progressPercent = Math.min((score / 1500) * 100, 100);
+
+  if (variant === 'compact') {
+    return (
+      <div className="space-y-1.5 w-full">
+         <div className="flex items-center justify-between gap-2 px-1">
+            <span className={`text-[7px] font-black uppercase tracking-widest ${currentTier.level >= 4 ? 'text-[#ff00ff]' : 'text-[#00f0ff]'}`}>
+               {currentTier.label.toUpperCase()}
+            </span>
+            <span className="text-[7px] font-black text-white/30 uppercase tracking-widest">
+               {score.toLocaleString()} BP
+            </span>
+         </div>
+         <div className="flex gap-1 h-1 rounded-full overflow-hidden bg-white/5 p-[0.5px]">
+          {[1, 2, 3, 4, 5].map((segment) => {
+              const isActive = segment <= currentTier.level;
+              const isLatest = segment === currentTier.level;
+
+              return (
+                <div 
+                    key={segment}
+                    className={`
+                      flex-1 h-full rounded-full transition-all duration-700
+                      ${isActive ? currentTier.color : 'bg-white/5'}
+                      ${isLatest ? 'animate-pulse shadow-[0_0_8px_currentColor]' : ''}
+                    `}
+                />
+              );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/5 space-y-4">

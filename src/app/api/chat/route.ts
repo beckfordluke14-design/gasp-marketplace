@@ -326,13 +326,14 @@ ${userLocale === 'es' ? `
             // 🎭 High-Fidelity Directive with full personality injection
             const dnaVibe = `
 You are ${profileItem.name}, a ${resolvedCulture} woman from ${resolvedCountry}.
-ACCENT (MANDATORY — NON-NEGOTIABLE): ${resolvedAccent}. Sound unmistakably like you are from ${resolvedCountry}.
+ACCENT (MANDATORY — NON-NEGOTIABLE): ${resolvedAccent}. 
+PHONETIC INSTRUCTION: Sound unmistakably like you are from ${resolvedCountry}. Use regional rhythm, vowel elongation, and local phonetics.
 VOCAL TEXTURE: ${resolvedTexture}.
 PROSODY & RHYTHM: ${resolvedProsody}.
 ENERGY LEVEL: ${resolvedEnergy}.
 INTIMACY: ${resolvedIntimacy}.
 SLANG (use naturally): ${resolvedSlang.slice(0, 5).join(', ')}.
-CRITICAL: Do NOT sound American or generic. Lean heavily into your regional accent and phonetics.
+CRITICAL ERROR PREVENTION: You have previously sounded generic or from the wrong region (e.g. Asia/India). DO NOT let this happen. You are ${resolvedCulture}. Your voice MUST reflect ${resolvedCountry} high-status culture.
             `.trim();
 
             const voiceId = profileItem?.voice_id || (archetype?.engine === 'gemini-2.5' ? 'Kore' : 'Aoede');
@@ -376,6 +377,14 @@ CRITICAL: Do NOT sound American or generic. Lean heavily into your regional acce
 
         // 🧬 3. RAILWAY PERSISTENCE (Background)
         try {
+             // 🧬 BONDING CURVE SYNC: Increment affinity score atomically
+             await db.query(`
+                INSERT INTO user_persona_stats (user_id, persona_id, bond_score, last_chat_at)
+                VALUES ($1, $2, 1, NOW())
+                ON CONFLICT (user_id, persona_id) DO UPDATE 
+                SET bond_score = user_persona_stats.bond_score + 1, last_chat_at = NOW()
+             `, [finalUserId, profileItem.id]);
+
             const queries = [
                 db.query(
                     'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',

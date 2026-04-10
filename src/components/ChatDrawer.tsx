@@ -87,6 +87,7 @@ export default function ChatDrawer({
   const [isRequestingVoice, setIsRequestingVoice] = useState(false);
   const [isDepleted, setIsDepleted] = useState(false);
   const [personaState, setPersonaState] = useState<PersonaDailyState | null>(null);
+  const [bondScore, setBondScore] = useState(0);
 
 
   // 🎁 GIFT PROTOCOL: Charges credits and sends a notification
@@ -318,6 +319,7 @@ export default function ChatDrawer({
            setMessages(result.data.messages || []);
            setVaultItems(result.data.vaultItems || []);
            setIsDepleted(result.data.isDepleted || false);
+           setBondScore(result.data.bondScore || 0);
 
            // Fetch following status
            const gid = localStorage.getItem('gasp_guest_id');
@@ -517,6 +519,9 @@ export default function ChatDrawer({
                             {isSpanish ? 'Conexión Verificada' : 'Verified Connection'}
                          </span>
                       </div>
+                      <div className="mt-1.5 w-full max-w-[140px]">
+                         <BondProgress score={bondScore} variant="compact" />
+                      </div>
                    </div>
                 </div>
 
@@ -567,7 +572,7 @@ export default function ChatDrawer({
                     {chatTab === 'chat' && <motion.div layoutId="chat-tab-line" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]" />}
                  </button>
                  <button onClick={() => setChatTab('pics')} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative ${chatTab === 'pics' ? 'text-white' : 'text-white/30'}`}>
-                    {isSpanish ? 'ARCHIVO' : 'ARCHIVE'}
+                    {isSpanish ? 'ARCHIVO' : 'ARCHIVE'} <span className="animate-pulse">🌶️</span>
                     {showLimitCTA && chatTab !== 'pics' && (
                       <motion.div 
                         animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}

@@ -80,6 +80,12 @@ function LoginForm() {
               </div>
 
                <div className="space-y-4 relative z-50 w-full">
+                  {/* 🧧 CONVERSION HOOK: Show the gift BEFORE the action */}
+                   <div className="flex items-center gap-2 px-4 py-3 bg-white/[0.03] border border-[#ff00ff]/40 rounded-full ring-1 ring-white/5 shadow-[0_0_30px_rgba(255,0,255,0.2)] mb-2 animate-bounce">
+                      <span className="text-[10px]">🌶️</span>
+                      <span className="text-[9px] uppercase font-black tracking-[0.2em] text-[#ff00ff]">Bonus Enabled: 1,500 BP Credits</span>
+                   </div>
+
                   {/* 🛡️ Primary Neural Entry: Email (TOP PRIORITY) */}
                   <button 
                     onClick={() => handleLogin('email')}
@@ -138,11 +144,6 @@ function LoginForm() {
                   </div>
 
                  <div className="pt-6 border-t border-white/5 mt-8 items-center flex flex-col gap-4">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-[#ff00ff]/20 rounded-full ring-1 ring-white/5 shadow-[0_0_20px_rgba(255,0,255,0.1)]">
-                       <ShieldAlert size={12} className="text-[#ff00ff]" />
-                       <span className="text-[8px] uppercase font-black tracking-[0.2em] text-[#ff00ff]">Genesis Bonus: 1,500 BP Credits Enabled</span>
-                    </div>
-                    
                     <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.15em] italic text-center leading-relaxed">
                        Zero-friction neural connection. <br />
                        Your data stays <span className="text-[#00f0ff]">Sovereign</span>.
