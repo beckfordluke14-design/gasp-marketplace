@@ -1,0 +1,128 @@
+# -*- coding: utf-8 -*-
+import requests
+import json
+import time
+import os
+import uuid
+import psycopg2
+from io import BytesIO
+from PIL import Image
+import boto3
+from botocore.config import Config
+
+# --- CONFIG (v19.3 - XIMENA IGNITION) ---
+XAI_KEY = 'xai-rqfC7sGMAVIoLxLeECxijzgijvWMRM5AaGNLYGdQayrF2H5Gn9tHce90NbwnfWqIoNRoQLzMg3NgpinF'
+DATABASE_URL = 'postgresql://postgres:glrVNXPAMlJbeRzeNEziqUiOfPIXDjOf@gondola.proxy.rlwy.net:54825/railway'
+AGENCY_ID = 'mi-amor-agency'
+ASSET_BASE_URL = 'https://asset.gasp.fun'
+VPS_ROOT_BASE = 'C:\\gasp_assets\\personas'
+
+# Cloudflare R2
+R2_ACCOUNT_ID = '4d81b2676f711d29b6ff24b4000d9fac'
+R2_ACCESS_KEY = 'ef83ca9e7a9cd329806d3406c0574f55'
+R2_SECRET_KEY = '5e47dff95187bcd7d57656e9b51bd741e8ddd79c4c1d5c72b5d32ad1e4b7bc7c'
+R2_BUCKET = 'gaspy'
+
+s3_client = boto3.client('s3',
+    endpoint_url=f'https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com',
+    aws_access_key_id=R2_ACCESS_KEY,
+    aws_secret_access_key=R2_SECRET_KEY,
+    config=Config(signature_version='s3v4')
+)
+
+# 🔥 SOVEREIGN ROSTER (LATINA/CARIBBEAN DOMINATRIX CLASS - XIMENA SHIFT)
+ROSTER = [
+    {
+        "name": "Ximena", "age": 25, "race": "Latina (Mexican)", 
+        "dna": "Mexican alpha. Hyper-exaggerated hourglass. 23-inch waist, 51-inch hip flare. Glistening oily tan skin.",
+        "h_loc": "Bedroom mirror selfie, wearing a tight reflective black leather spandex dress and thigh-high black leather boots, holding iPhone 16.",
+        "v_loc": "Private dungeon suite", "caption": "Submission is optional. 🇲🇽🔱"
+    },
+    {
+        "name": "Kiana", "age": 23, "race": "Caribbean (Jamaican)", 
+        "dna": "Jamaican. Extreme slim-thick. Narrow shoulders, large bust, 24-inch waist, 50-inch gluteal protrusion. Deep bronze skin.",
+        "h_loc": "Fashion-forward apartment mirror selfie, wearing a transparent mesh designer top and leather pants, iPhone 16 in hand.",
+        "v_loc": "Hotel vault", "caption": "Kingston's finest. 🇯🇲🔥"
+    },
+    {
+        "name": "Daniella", "age": 24, "race": "Latina (Colombian)", 
+        "dna": "Colombian. Hyper-curvy, snatched midsection, massive Glute-Maximus curve. Long wavy dark hair.",
+        "h_loc": "Homely mirror selfie, wearing a luxury form-fitting ribbed knit dress, iPhone 16 Pro Max, messy bedroom vibe.",
+        "v_loc": "Private restricted room", "caption": "Paisa power. 🇨🇴💎"
+    },
+    {
+        "name": "Malia", "age": 22, "race": "Caribbean (Haitian/Mixed)", 
+        "dna": "Haitian/Mixed. Sunkissed skin, extreme baddie proportions. 23.5-inch waist to 51-inch hip flare. Intense gaze.",
+        "h_loc": "Candid mirror selfie, wearing a high-fashion corset and designer thigh-highs, homely lighting, iPhone 16.",
+        "v_loc": "Vault restricted", "caption": "Forbidden fruit. 🇭🇹🔐"
+    },
+    {
+        "name": "Bianca", "age": 26, "race": "Latina (Cuban)", 
+        "dna": "Cuban. Voluptuous hyper-hourglass. Large bust, snatched waist, massive gluteal curve. Glistening oily bronze skin.",
+        "h_loc": "Homely mirror selfie, wearing a sleek fashion-forward satin mini-dress, iPhone 16, messy hair.",
+        "v_loc": "VIP Private Suite", "caption": "Havana nights. 🇨🇺🔱"
+    }
+]
+
+def forge(pid, dna, prompt, suffix, is_vault=False):
+    # 📸 ENFORCED MIRROR-ONLY PROTOCOL + VAULT WILD SIDE
+    style_pre = "iPhone 16 mirror selfie, homely lighting, organic vibe"
+    if is_vault:
+        style_pre = "iPhone 16 selfie, wild side, dominatrix positions, high-gloss glistening oily skin, red/black lace, dark moody atmospheric lighting"
+    
+    pre = f"PHOTOREALISTIC CONTINUITY LOCK. {dna}. Identity: {pid}."
+    final_prompt = f"{pre} Scenario: {prompt}. Style: {style_pre}, raw 8k, glistening oily skin, unedited sensor noise."
+    try:
+        res = requests.post("https://api.x.ai/v1/images/generations", 
+            headers={"Authorization": f"Bearer {XAI_KEY}", "Content-Type": "application/json"}, 
+            json={"model": "grok-imagine-image-pro", "prompt": final_prompt, "n": 1, "aspect_ratio": "9:16"}, timeout=120)
+        if res.status_code != 200: return None
+        img_url = res.json()['data'][0]['url']
+        img_data = requests.get(img_url).content
+        img = Image.open(BytesIO(img_data))
+        local_dir = os.path.join(VPS_ROOT_BASE, pid); os.makedirs(local_dir, exist_ok=True)
+        filename = f"{suffix}{'.jpg' if is_vault else '.webp'}"
+        img.save(os.path.join(local_dir, filename), "JPEG" if is_vault else "WEBP", quality=95 if is_vault else 85)
+        s3_client.upload_file(os.path.join(local_dir, filename), R2_BUCKET, f"personas/{pid}/{filename}", ExtraArgs={'ContentType': f'image/{"jpeg" if is_vault else "webp"}'})
+        return f"{ASSET_BASE_URL}/personas/{pid}/{filename}"
+    except: return None
+
+def run_dominatrix_ignition():
+    print("🔱 INITIALIZING XIMENA STRIKE: 5 LATINA/CARIBBEAN NODES (v19.3)...")
+    try:
+        conn = psycopg2.connect(DATABASE_URL); cur = conn.cursor()
+    except Exception as e:
+        print(f"❌ DATABASE CONNECTION FAILED: {str(e)}")
+        return
+
+    for p in ROSTER:
+        pid = f"{p['name'].lower()}-{str(uuid.uuid4())[:6]}"
+        print(f"\n💎 BIRTHING WILD PILLAR: {p['name']}...")
+        
+        # 1. HERO (iPhone 16 Mirror / Fashion Forward)
+        h_url = forge(pid, p['dna'], p['h_loc'], "hero_1", is_vault=False)
+        if h_url:
+            cur.execute("INSERT INTO personas (id, agency_id, name, age, city, country, race, is_active, created_at, seed_image_url, system_prompt, personality) VALUES (%s, %s, %s, %s, 'Global Hub', %s, %s, True, NOW(), %s, %s, %s)",
+                        (pid, AGENCY_ID, p['name'], p['age'], p['race'], p['race'], h_url, f"You are {p['name']}. Wild and Dominant. Extreme proportions. Mirror vibes.", p['dna']))
+            cur.execute("INSERT INTO posts (persona_id, content_type, content_url, is_vault, caption, created_at) VALUES (%s, 'image', %s, False, %s, NOW())", (pid, h_url, p['caption']))
+            conn.commit()
+
+            # 2. VAULT (Triple-Angle / Wild Dominatrix Side)
+            ANGLES = [
+                (f"Wild dominatrix position, floor mirror selfie, black lace, glistening oily glutes, thigh-high boots.", "vault_1"),
+                (f"Frontal mirror, wild side lace lingerie, extreme waist-to-hip ratio, dominant expression, iPhone 16.", "vault_2"),
+                (f"Side curve focus, glistening skin, wild dominatrix pose, snatched waist lock.", "vault_3")
+            ]
+            for directive, suffix in ANGLES:
+                v_url = forge(pid, p['dna'], directive, suffix, is_vault=True)
+                if v_url:
+                    cur.execute("INSERT INTO posts (persona_id, content_type, content_url, is_vault, caption, created_at) VALUES (%s, 'image', %s, True, 'Vault Restricted. 🔱🔐', NOW())", (pid, v_url))
+                    conn.commit()
+            print(f"   [DONE] {p['name']} COMPLETE.")
+            time.sleep(2)
+
+    cur.close(); conn.close()
+    print("\n✅ XIMENA STRIKE COMPLETE. 5 NEW WILD NODES ARE LIVE.")
+
+if __name__ == "__main__":
+    run_dominatrix_ignition()

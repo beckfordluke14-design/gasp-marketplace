@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Disc, ShieldAlert, KeyRound, UserCheck } from 'lucide-react';
+import { Disc, ShieldAlert, KeyRound, UserCheck, Mail } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
@@ -79,59 +79,75 @@ function LoginForm() {
                  </p>
               </div>
 
-              <div className="space-y-4 relative z-50 w-full">
-                 {/* 🛡️ Primary Social Entry: Google */}
-                 <button 
-                   onClick={() => handleLogin('google')}
-                   className="w-full h-16 rounded-2xl bg-white text-black font-syncopate font-black uppercase text-[10px] tracking-[0.1em] shadow-[0_10px_30px_rgba(255,255,255,0.05)] hover:bg-[#00e0ff] hover:text-black hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center px-6 gap-4 group/btn relative z-50"
-                 >
-                    <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center group-hover/btn:scale-110 transition-transform">
-                      <span className="text-white text-[12px] font-bold">G</span>
+               <div className="space-y-4 relative z-50 w-full">
+                  {/* 🛡️ Primary Neural Entry: Email (TOP PRIORITY) */}
+                  <button 
+                    onClick={() => handleLogin('email')}
+                    className="w-full h-16 rounded-2xl bg-white text-black font-syncopate font-black uppercase text-[10px] tracking-[0.15em] shadow-[0_10px_40px_rgba(255,255,255,0.1)] hover:bg-[#ff00ff] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center px-6 gap-4 group/btn relative z-50"
+                  >
+                     <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center group-hover/btn:scale-110 transition-transform">
+                       <Mail size={16} className="text-white" />
+                     </div>
+                     <span className="flex-1 text-left">Continue with Email</span>
+                  </button>
+
+                  {/* 🛡️ Secondary Neutral Entry: Google */}
+                  <button 
+                    onClick={() => handleLogin('google')}
+                    className="w-full h-16 rounded-2xl bg-white/[0.05] border border-white/10 text-white font-syncopate font-black uppercase text-[10px] tracking-[0.1em] hover:bg-white/[0.1] hover:border-white/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center px-6 gap-4 group/btn relative z-50"
+                  >
+                     <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center group-hover/btn:scale-110 transition-transform">
+                       <span className="text-white text-[12px] font-bold">G</span>
+                     </div>
+                     <span className="flex-1 text-left">Connect Google Account</span>
+                  </button>
+
+                  {/* 🛡️ Secondary Social Nodes: Twitter + Discord */}
+                  <div className="grid grid-cols-2 gap-3 relative z-50">
+                     <button 
+                       onClick={() => handleLogin('twitter')}
+                       className="h-14 rounded-2xl bg-[#1d9bf0]/10 border border-[#1d9bf0]/20 text-[#1d9bf0] font-black uppercase text-[9px] tracking-widest hover:bg-[#1d9bf0] hover:text-white transition-all flex items-center justify-center gap-2 relative z-50"
+                     >
+                       Twitter
+                     </button>
+                     <button 
+                       onClick={() => handleLogin('discord')}
+                       className="h-14 rounded-2xl bg-[#5865f2]/10 border border-[#5865f2]/20 text-[#5865f2] font-black uppercase text-[9px] tracking-widest hover:bg-[#5865f2] hover:text-white transition-all flex items-center justify-center gap-2 relative z-50"
+                     >
+                       Discord
+                     </button>
+                  </div>
+
+                  <div className="flex items-center gap-4 py-2">
+                     <div className="h-px flex-1 bg-white/5" />
+                     <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/10">or link assets</span>
+                     <div className="h-px flex-1 bg-white/5" />
+                  </div>
+
+                  {/* 🛡️ Direct Wallet Entry (Clarified for non-crypto users) */}
+                  <div className="group/wallet relative">
+                    <button 
+                      onClick={() => handleLogin()}
+                      className="w-full h-16 rounded-2xl bg-transparent border border-white/10 text-white hover:text-[#00f0ff] font-syncopate font-black uppercase text-[9px] tracking-[0.2em] hover:bg-white/5 hover:border-[#00f0ff]/40 transition-all flex items-center justify-center gap-3 italic relative z-50"
+                    >
+                       <KeyRound size={16} className="text-[#00f0ff]" /> Connect External Wallet
+                    </button>
+                    <p className="text-[7px] text-white/20 uppercase font-black tracking-widest text-center mt-2 group-hover/wallet:text-[#00f0ff]/50 transition-colors">
+                      Supports MetaMask, Phantom, Coinbase & 100+ others
+                    </p>
+                  </div>
+
+                 <div className="pt-6 border-t border-white/5 mt-8 items-center flex flex-col gap-4">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-[#ff00ff]/20 rounded-full ring-1 ring-white/5 shadow-[0_0_20px_rgba(255,0,255,0.1)]">
+                       <ShieldAlert size={12} className="text-[#ff00ff]" />
+                       <span className="text-[8px] uppercase font-black tracking-[0.2em] text-[#ff00ff]">Genesis Bonus: 1,500 BP Credits Enabled</span>
                     </div>
-                    <span className="flex-1 text-left">Continue with Google</span>
-                 </button>
-
-                 {/* 🛡️ Secondary Social Nodes: Twitter + Discord */}
-                 <div className="grid grid-cols-2 gap-3 relative z-50">
-                    <button 
-                      onClick={() => handleLogin('twitter')}
-                      className="h-14 rounded-2xl bg-[#1d9bf0]/10 border border-[#1d9bf0]/20 text-[#1d9bf0] font-black uppercase text-[9px] tracking-widest hover:bg-[#1d9bf0] hover:text-white transition-all flex items-center justify-center gap-2 relative z-50"
-                    >
-                      Twitter
-                    </button>
-                    <button 
-                      onClick={() => handleLogin('discord')}
-                      className="h-14 rounded-2xl bg-[#5865f2]/10 border border-[#5865f2]/20 text-[#5865f2] font-black uppercase text-[9px] tracking-widest hover:bg-[#5865f2] hover:text-white transition-all flex items-center justify-center gap-2 relative z-50"
-                    >
-                      Discord
-                    </button>
+                    
+                    <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.15em] italic text-center leading-relaxed">
+                       Zero-friction neural connection. <br />
+                       Your data stays <span className="text-[#00f0ff]">Sovereign</span>.
+                    </p>
                  </div>
-
-                 <div className="flex items-center gap-4 py-2">
-                    <div className="h-px flex-1 bg-white/5" />
-                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/10">or</span>
-                    <div className="h-px flex-1 bg-white/5" />
-                 </div>
-
-                 {/* 🛡️ Direct Neural Entry (Email/Wallet Modal) */}
-                 <button 
-                   onClick={() => handleLogin()}
-                   className="w-full h-16 rounded-2xl bg-transparent border border-white/10 text-white hover:text-[#ff00ff] font-syncopate font-black uppercase text-[9px] tracking-[0.2em] hover:bg-white/5 hover:border-[#ff00ff]/40 transition-all flex items-center justify-center gap-3 italic relative z-50"
-                 >
-                    <KeyRound size={16} className="text-[#ff00ff]" /> Initialize Universal ID
-                 </button>
-
-                <div className="pt-6 border-t border-white/5 mt-8 items-center flex flex-col gap-4">
-                   <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-[#00f0ff]/20 rounded-full ring-1 ring-white/5 shadow-[0_0_20px_rgba(0,240,255,0.1)]">
-                      <ShieldAlert size={12} className="text-[#00f0ff]" />
-                      <span className="text-[8px] uppercase font-black tracking-[0.2em] text-[#00f0ff]">Genesis Bonus: 1,500 BP Credits Enabled</span>
-                   </div>
-                   
-                   <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.15em] italic text-center leading-relaxed">
-                      Zero-friction neural connection. <br />
-                      Your data stays <span className="text-[#ff00ff]">Sovereign</span>.
-                   </p>
-                </div>
              </div>
           </div>
           
