@@ -31,7 +31,6 @@ export default function FunnelView() {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [activeView, setActiveView] = useState<'chat' | 'vault'>('chat');
-  const [vaultItems, setVaultItems] = useState<any[]>([]);
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [showVaultNew, setShowVaultNew] = useState(false);
   const [matchingProgress, setMatchingProgress] = useState(0);
@@ -41,6 +40,14 @@ export default function FunnelView() {
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [selectedPkgId, setSelectedPkgId] = useState('');
   const [hasPaid, setHasPaid] = useState(false);
+  
+  // 📸 FUNNEL VAULT SEED: Pre-purchase teasers
+  const [vaultItems, setVaultItems] = useState<any[]>([
+    { id: 'v1', content_url: 'personas/veronica/vault-1.png', is_unlocked: false, price_credits: 5000 },
+    { id: 'v2', content_url: 'personas/veronica/vault-2.png', is_unlocked: false, price_credits: 5000 },
+    { id: 'v3', content_url: 'personas/veronica/vault-3.png', is_unlocked: false, price_credits: 5000 },
+    { id: 'v4', content_url: 'personas/veronica/veronica_hero.webp', is_unlocked: false, price_credits: 5000 },
+  ]);
   
   const [fomoMsg, setFomoMsg] = useState('');
   const [activeUsers, setActiveUsers] = useState(14);
@@ -53,7 +60,7 @@ export default function FunnelView() {
   const profileId = searchParams.get('profile') || 'veronica_medellin';
   const profile = initialProfiles.find(p => p.id === profileId) || {
     name: 'Veronica',
-    image: 'https://asset.gasp.fun/personas/veronica/veronica_hero.webp',
+    image: 'Promo/PromoPic1.png', // Using known-working asset
     city: 'Medellín'
   };
 
@@ -326,29 +333,23 @@ export default function FunnelView() {
       </div>
 
 
-      {/* 🔴 URGENCY HEADER */}
-      <div className="relative z-[100] bg-[#0c0c0c]/90 backdrop-blur-xl border-b border-white/10 px-4 py-4 flex items-center justify-between shrink-0">
+      {/* 🔴 INSTITUTIONAL HEADER */}
+      <div className="relative z-[100] bg-black/60 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff00ff] to-[#7c3aed] flex items-center justify-center shadow-[0_0_20px_rgba(255,0,255,0.4)]">
-            <Heart size={20} className="text-white fill-white" />
-          </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-2">
-               <span className="text-[11px] font-black uppercase text-white leading-none tracking-tight">Private Session</span>
-               <div className="flex items-center gap-1 bg-green-500/20 px-1.5 py-0.5 rounded-md">
+               <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">Neural Linkestablished</span>
+               <div className="flex items-center gap-1.5 bg-green-500/10 px-2 py-0.5 rounded-full">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                   <span className="text-[9px] font-black text-green-500">{activeUsers} Online</span>
                </div>
             </div>
-            <span className="text-[16px] font-mono font-black text-[#ffea00] leading-none mt-1.5">{timeLeft}</span>
+            <span className="text-[18px] font-mono font-black text-[#ffea00] tracking-tighter leading-none">{timeLeft}</span>
           </div>
         </div>
         
         <div className="flex flex-col items-end">
-           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">Status</span>
-           <span className="text-[11px] font-black uppercase tracking-widest text-green-500 animate-pulse">
-              {currentStepIdx === 0 ? 'Loading...' : 'Active Now'}
-           </span>
+           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#ff00ff] animate-pulse">Sovereign Session Active</span>
         </div>
       </div>
 
@@ -403,7 +404,7 @@ export default function FunnelView() {
               <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/40">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#ff00ff]/50 bg-black/40 shadow-[0_0_20px_rgba(255,0,255,0.4)] relative">
-                    <ProfileAvatar src="https://asset.gasp.fun/personas/veronica/veronica_hero.webp" alt={profile.name} fill />
+                    <ProfileAvatar src="Promo/PromoPic1.png" alt={profile.name} fill />
                     <motion.div 
                       animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
                       transition={{ duration: 2, repeat: Infinity }}
@@ -595,24 +596,26 @@ export default function FunnelView() {
               animate={{ opacity: 1, y: 0 }}
               className="absolute inset-0 overflow-y-auto px-4 pt-8 pb-32 space-y-10 z-10 no-scrollbar"
             >
-              <div className="text-center space-y-4 px-2">
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-500/10 border border-red-500/30 rounded-full text-[11px] font-black uppercase tracking-[0.25em] text-red-500 mb-2">
-                  <Lock size={12} />
-                  <span>Session Expired</span>
+              <div className="text-center space-y-3 px-2">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-red-500 mb-1">
+                  <Lock size={10} />
+                  <span>Session Terminated</span>
                 </div>
-                <h2 className="text-[38px] md:text-5xl font-black text-white leading-[0.85] tracking-tighter">
-                  CONNECTION <span className="text-[#ff00ff]">LOCKED</span> <br />
-                  <span className="text-white/40 text-[20px] tracking-tight mt-2 block">Choose a Pack to keep chatting with Veronica</span>
+                <h2 className="text-[32px] md:text-5xl font-black text-white leading-[0.9] tracking-tighter">
+                  CONNECTION <span className="text-[#ff00ff]">LOCKED</span>
                 </h2>
+                <p className="text-[13px] font-medium text-white/50 tracking-tight">Access restricted to Syndicate Members only.</p>
                 
-                {/* 🚨 REWARD BADGE: HIGH-CONTRAST SANS */}
+                {/* 🚨 REWARD BADGE: SIMPLIFIED */}
+                <div className="max-w-[280px] mx-auto mt-4 p-4 bg-[#ffea00] rounded-2xl flex flex-col items-center justify-center gap-1 shadow-2xl border-2 border-white">
+                     <span className="text-[14px] font-black text-black leading-tight uppercase tracking-tighter">1:1 $GaspAi Match Applied</span>
+                     <span className="text-[8px] font-bold text-black/40 uppercase tracking-widest italic leading-none">LIMITED GENESIS PHASE REWARD</span>
                 </div>
-                <p className="text-[10px] font-black uppercase text-[#ffea00]/60 tracking-[0.4em] mt-4">Remaining Slots: 142 / 10,000</p>
                 
                 {/* 🛡️ STRIPE AUTHORITY SHIELD */}
-                <div className="flex items-center justify-center gap-2 mt-2 opacity-60">
+                <div className="flex items-center justify-center gap-2 mt-4 opacity-60">
                    <div className="px-1.5 py-0.5 bg-white text-black text-[7px] font-black rounded-sm uppercase tracking-tighter">Stripe</div>
-                   <span className="text-[8px] font-black uppercase tracking-widest text-white/80 italic">Verified Identity Gateway · Bank-Level Security</span>
+                   <span className="text-[8px] font-black uppercase tracking-widest text-white/80 italic">Protected Gateway</span>
                 </div>
               </div>
 
