@@ -44,14 +44,14 @@ export default function FunnelView() {
   // 📸 VERIFIED R2 PROMO ASSETS (With Cache-Buster)
   const profile = {
     name: 'VERONICA',
-    image: 'https://asset.gasp.fun/PROMO/PromoPic1.png?v=source_master',
+    image: '/Promo/PromoPic1.png',
     city: 'MEDELLÍN',
     id: 'veronica_medellin'
   };
 
   const galleryImages = [
-    'https://asset.gasp.fun/PROMO/PromoPic1.png?v=source_master',
-    'https://asset.gasp.fun/PROMO/PromoPic2.webp?v=source_master'
+    '/Promo/PromoPic1.png',
+    '/Promo/PromoPic2.webp'
   ];
 
   // 📈 ATTRIBUTION & IDENTITY 
@@ -214,7 +214,7 @@ export default function FunnelView() {
       {/* 📹 BACKGROUND DEPTH */}
       <div className="absolute inset-0 z-0 opacity-40">
         <video autoPlay muted loop playsInline className={`w-full h-full object-cover transition-all duration-[3000ms] ${currentStepIdx === 0 ? 'blur-3xl scale-125' : 'blur-sm'}`} poster={profile.image}>
-          <source src="https://asset.gasp.fun/PROMO/Veronica.mp4?v=source_master" type="video/mp4" />
+          <source src="/Promo/Veronica.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
       </div>
