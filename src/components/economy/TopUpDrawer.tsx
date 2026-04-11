@@ -29,6 +29,15 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     const solanaWallets = wallets.filter(w => (w as any).chainType === 'solana' || w.address?.length > 42);
     
     const [selectedPkgId, setSelectedPkgId] = useState(initialPackage || CREDIT_PACKAGES[0].id);
+    
+    // 🛡️ SELECTION SYNC: Force drawer to update when funnel selection changes
+    useEffect(() => {
+        if (initialPackage) {
+            setSelectedPkgId(initialPackage);
+            setIsCustom(false);
+        }
+    }, [initialPackage, isOpen]);
+
     const [copied, setCopied] = useState(false);
     const [view, setView] = useState<'options' | 'p2p' | 'success'>('options');
     const [userId, setUserId] = useState(propUserId || '');
@@ -350,29 +359,45 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                                     <span className="text-xl font-syncopate font-black italic text-[#fbbf24] shadow-[0_0_20px_rgba(251,191,36,0.3)]">
                                                         {(parseFloat(customAmount) * 1000).toLocaleString()} 
                                                     </span>
-                                                    <span className="text-[10px] font-black text-[#fbbf24]/40 uppercase tracking-tighter mt-1 italic">CR</span>
+                                                    <span className="text-[10px] font-black text-[#fbbf24]/40 uppercase tracking-tighter mt-1 italic">CREDITS</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                     <span className="text-[10px] font-black uppercase text-white/20 tracking-widest italic">{isSpanish ? 'BONO:' : 'BONUS:'}</span>
+                                                     <span className="text-xl font-syncopate font-black italic text-[#00f0ff] animate-pulse">
+                                                         {(parseFloat(customAmount) * 1000).toLocaleString()} 
+                                                     </span>
+                                                     <span className="text-[10px] font-black text-[#00f0ff]/40 uppercase tracking-tighter mt-1 italic">$GASPai</span>
+                                                </div>
+                                                <div className="mt-3 flex items-center gap-2 px-3 py-1.5 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-xl w-fit">
+                                                    <Zap size={10} className="text-[#00f0ff] fill-[#00f0ff]" />
+                                                    <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest">Unlocks Private Vault 🌶️</span>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className={`grid grid-cols-2 gap-3 transition-all duration-700 ${isCustom ? 'opacity-30' : ''}`}>
                                             {packages.map((pkg) => (
-                                                <button key={pkg.id} onClick={() => { setSelectedPkgId(pkg.id); setIsCustom(false); }} className={`relative p-4 rounded-[1.5rem] border transition-all duration-300 flex items-center justify-between group overflow-hidden ${(!isCustom && selectedPkgId === pkg.id) ? 'bg-[#fbbf24]/5 border-[#fbbf24]/40 scale-[1.02] shadow-[0_0_30px_rgba(251,191,36,0.1)]' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
-                                                    {pkg.price >= 999 && <div className="absolute top-0 right-0 px-3 py-1 bg-[#fbbf24] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-lg shadow-[0_0_15px_rgba(251,191,36,0.3)] z-20 pulse">BEST VALUE</div>}
+                                                <button key={pkg.id} onClick={() => { setSelectedPkgId(pkg.id); setIsCustom(false); }} className={`relative p-5 rounded-[2rem] border transition-all duration-300 flex items-center justify-between group overflow-hidden ${(!isCustom && selectedPkgId === pkg.id) ? 'bg-[#ff00ff]/5 border-[#ff00ff]/40 scale-[1.02] shadow-[0_0_40px_rgba(255,0,255,0.1)]' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
+                                                    {pkg.price >= 99 && <div className="absolute top-0 right-0 px-3 py-1 bg-[#ffea00] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-lg shadow-[0_0_15px_rgba(251,191,36,0.3)] z-20 pulse">BEST VALUE</div>}
                                                     {pkg.popular && <div className="absolute top-0 right-0 px-3 py-1 bg-[#00f0ff] text-black text-[7px] font-black uppercase tracking-widest rounded-bl-lg shadow-[0_0_15px_rgba(0,240,255,0.3)] z-20">POPULAR</div>}
-                                                    {(!isCustom && selectedPkgId === pkg.id) && <div className="absolute inset-x-0 bottom-0 h-1" style={{ backgroundColor: '#fbbf24' }} />}
-                                                    <div className="flex flex-col gap-1 text-left relative z-10">
-                                                        <span className="text-[7px] font-black uppercase tracking-widest text-white/20 font-syncopate italic leading-none">{pkg.label}</span>
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span className="text-xl font-syncopate font-black text-[#fbbf24] italic tracking-tighter drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]">
-                                                                {pkg.credits > 100000 ? (pkg.credits/1000).toFixed(0) + 'K' : pkg.credits.toLocaleString()}
+                                                     <div className="flex flex-col gap-1 text-left relative z-10">
+                                                        <span className="text-[8px] font-black uppercase tracking-widest text-white/40 italic leading-none">{pkg.label}</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-2xl font-black text-white italic tracking-tighter shadow-sm">
+                                                                {(pkg.credits).toLocaleString()}
                                                             </span>
-                                                            <span className="text-[10px] font-black text-[#fbbf24] uppercase tracking-tighter mt-1 italic">CR</span>
+                                                            <span className="text-[7px] font-bold text-white/20 uppercase mt-0.5 tracking-tighter">Credits</span>
                                                         </div>
+                                                        <div className="flex items-center gap-1.5 py-0.5">
+                                                            <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
+                                                            <span className="text-[9px] font-black text-[#00f0ff] uppercase tracking-tighter">+{(pkg.credits).toLocaleString()} $GASPai</span>
+                                                        </div>
+                                                        <span className="text-[7px] font-black text-white/40 uppercase tracking-widest mt-0.5 italic">🌶️ UNLOCKS PRIVATE VAULT</span>
                                                     </div>
-                                                    <div className="flex flex-col items-end relative z-10 transition-all group-hover:translate-x-1">
-                                                        <div className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl group-hover:border-white/40 transition-all">
-                                                            <span className="text-lg font-black text-white italic tracking-tighter leading-none">${pkg.price.toFixed(0)}</span>
+                                                    <div className="flex flex-col items-end relative z-10">
+                                                        <span className="text-xl font-black text-white italic tracking-tighter leading-none">${pkg.price.toFixed(0)}</span>
+                                                        <div className={`mt-2 w-5 h-5 rounded-full border-2 flex items-center justify-center ${(!isCustom && selectedPkgId === pkg.id) ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>
+                                                            {(!isCustom && selectedPkgId === pkg.id) && <Check size={12} className="text-white" />}
                                                         </div>
                                                     </div>
                                                 </button>

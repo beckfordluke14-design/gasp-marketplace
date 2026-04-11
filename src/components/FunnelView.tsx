@@ -706,9 +706,9 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
 
               <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto">
                 {[
-                  { id: 'tier_starter', label: 'Basic Pack', price: 4.99, credits: '5,000', bonus: '100% Match' },
-                  { id: 'tier_session', label: 'Prime Access', price: 24.99, credits: '30,000', bonus: '150% Match' },
-                  { id: 'tier_whale', label: 'Elite Status', price: 99.99, credits: '120,000', bonus: '200% Match' },
+                  { id: 'tier_starter', label: 'Basic Pack', price: 4.99, credits: '5,000', bonus: '5,000' },
+                  { id: 'tier_session', label: 'Prime Access', price: 24.99, credits: '30,000', bonus: '30,000', popular: true },
+                  { id: 'tier_whale', label: 'Elite Status', price: 99.99, credits: '120,000', bonus: '120,000' },
                 ].map((pkg) => (
                   <button 
                     key={pkg.id}
@@ -719,14 +719,15 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
                        <span className="text-[10px] font-black text-[#ff00ff] uppercase tracking-widest leading-none">{pkg.label}</span>
                        <div className="flex items-center gap-2">
                           <span className="text-2xl font-black text-white italic tracking-tighter leading-none">{pkg.credits}</span>
-                          <span className="text-[9px] font-bold text-white/40 uppercase leading-none mt-1">Units</span>
+                          <span className="text-[7px] font-bold text-white/20 uppercase mt-1 tracking-tighter">Credits</span>
                        </div>
-                       {pkg.bonus && (
-                          <div className="inline-flex items-center gap-1.5 bg-[#ffea00] px-2 py-0.5 rounded-full w-fit mt-1">
-                             <div className="w-1 h-1 rounded-full bg-black animate-pulse" />
-                             <span className="text-[8px] font-black text-black uppercase tracking-tighter">+{pkg.bonus} applied</span>
-                          </div>
-                       )}
+                       <div className="flex items-center gap-1.5 opacity-80">
+                          <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
+                          <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-tighter">+{pkg.bonus} $GASPai Match</span>
+                       </div>
+                       <div className="mt-1">
+                          <span className="text-[7px] font-black text-white/40 uppercase tracking-widest italic">🌶️ Unlocks Private Vault</span>
+                       </div>
                     </div>
                     <div className="text-right flex flex-col items-end">
                        <span className="text-[14px] font-black text-white italic">${pkg.price}</span>
