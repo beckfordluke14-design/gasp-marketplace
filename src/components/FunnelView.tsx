@@ -197,7 +197,7 @@ export default function FunnelView() {
         setMessages(prev => [...prev, { 
           id: Date.now().toString(), 
           role: 'assistant', 
-          content: `${inputValue}... I knew you looked like you could keep a secret. 😉 Those supermarket aisles were way too public for what I really wanted to show you... check this out:` 
+          content: `I had a feeling about you, ${inputValue}... 😉 I bet you're the type who knows how to keep a secret. Those supermarket aisles were way too public for what I really wanted to show you... check this out:` 
         }]);
         setIsTyping(false);
         
