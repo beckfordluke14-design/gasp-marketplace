@@ -318,6 +318,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                             <div className="flex flex-col gap-1 text-left">
                                 <span className="text-[9px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">{isSpanish ? 'SISTEMA DE CRÉDITOS' : 'CREDIT SYSTEM'}</span>
                                 <h2 className="text-2xl font-syncopate font-black uppercase italic text-white leading-none tracking-tighter">{isSpanish ? 'COMPRAR CRÉDITOS' : 'BUY CREDITS'}</h2>
+                                <p className="text-[8px] font-bold text-[#ff00ff] uppercase tracking-[0.2em] mt-1 italic">Unlock 100s of women on the Gasp network</p>
                             </div>
                             <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"><X size={20} /></button>
                         </div>
@@ -392,7 +393,10 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                                             <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
                                                             <span className="text-[9px] font-black text-[#00f0ff] uppercase tracking-tighter">+{(pkg.credits).toLocaleString()} $GASPai</span>
                                                         </div>
-                                                        <span className="text-[7px] font-black text-white/40 uppercase tracking-widest mt-0.5 italic">🌶️ UNLOCKS PRIVATE VAULT</span>
+                                                        <div className="flex flex-col gap-0.5 mt-0.5">
+                                                            <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">🌶️ UNLOCKS PRIVATE VAULT</span>
+                                                            <span className="text-[6px] font-bold text-[#ff00ff]/60 uppercase tracking-widest leading-none">WORKS FOR 100s OF GIRLS</span>
+                                                        </div>
                                                     </div>
                                                     <div className="flex flex-col items-end relative z-10">
                                                         <span className="text-xl font-black text-white italic tracking-tighter leading-none">${pkg.price.toFixed(0)}</span>

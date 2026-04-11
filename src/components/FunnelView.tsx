@@ -689,22 +689,27 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
               animate={{ opacity: 1, y: 0 }}
               className="absolute inset-0 overflow-y-auto px-4 pt-8 pb-40 space-y-10 z-10 no-scrollbar"
             >
-              <div className="text-center space-y-3 px-2">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-red-500 mb-1">
-                  <Lock size={10} />
-                  <span>Session Terminated</span>
-                </div>
-                <h2 className="text-[32px] md:text-5xl font-black text-white leading-[0.9] tracking-tighter">
-                  SESSION <span className="text-[#ff00ff]">EXPIRED</span>
+              <div className="flex flex-col items-center text-center gap-1 mb-6">
+                <h2 className="text-4xl font-syncopate font-black italic text-white leading-none tracking-tighter">
+                  SESSION <span className="text-[#ff00ff] drop-shadow-[0_0_15px_rgba(255,0,255,0.5)]">EXPIRED</span>
                 </h2>
-                <p className="text-[13px] font-medium text-white/40 tracking-tight">Purchase credits to continue talking to {profile.name}.</p>
+                <p className="text-[13px] font-medium text-white/40 tracking-tight mt-1">Purchase credits to continue talking to {profile.name}.</p>
+                
+                <div className="mt-4 px-4 py-2 bg-[#ff00ff]/10 border border-[#ff00ff]/30 rounded-2xl flex flex-col items-center gap-1 group">
+                   <div className="flex items-center gap-2">
+                      <Sparkles size={12} className="text-[#ff00ff] animate-pulse" />
+                      <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Universal Network Access</span>
+                   </div>
+                   <p className="text-[8px] font-bold text-[#ff00ff] uppercase tracking-widest leading-none">Unlock 100s of women on Gasp.fun</p>
+                </div>
+
                 <div className="flex items-center justify-center gap-2 mt-4 opacity-40 grayscale">
                    <div className="px-1.5 py-0.5 bg-white text-black text-[7px] font-black rounded-sm uppercase tracking-tighter">Stripe</div>
                    <span className="text-[8px] font-black uppercase tracking-widest text-white/80 italic">Protected Gateway</span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto">
+              <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto pb-64">
                 {[
                   { id: 'tier_starter', label: 'Basic Pack', price: 4.99, credits: '5,000', bonus: '5,000' },
                   { id: 'tier_session', label: 'Prime Access', price: 24.99, credits: '30,000', bonus: '30,000', popular: true },
@@ -725,8 +730,9 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
                           <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
                           <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-tighter">+{pkg.bonus} $GASPai Match</span>
                        </div>
-                       <div className="mt-1">
-                          <span className="text-[7px] font-black text-white/40 uppercase tracking-widest italic">🌶️ Unlocks Private Vault</span>
+                       <div className="mt-1 flex flex-col gap-0.5">
+                          <span className="text-[7px] font-black text-white/40 uppercase tracking-widest italic">🌶️ UNLOCKS PRIVATE VAULT</span>
+                          <span className="text-[6px] font-bold text-[#ff00ff]/60 uppercase tracking-widest">Works for 100s of girls</span>
                        </div>
                     </div>
                     <div className="text-right flex flex-col items-end">
@@ -739,8 +745,56 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
                 ))}
               </div>
 
+              {/* 📡 SYNDICATE ROSTER PREVIEW: FULL VERTICAL CARDS */}
+              <div className="w-full mt-6 mb-12 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                 <div className="flex flex-col items-center gap-6">
+                    <div className="flex flex-col items-center gap-1">
+                       <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-[0.4em] italic shadow-[#ffea00]/40 drop-shadow-sm">Syndicate Identities Verified</span>
+                       <div className="h-px w-24 bg-gradient-to-r from-transparent via-[#ffea00]/40 to-transparent" />
+                    </div>
+                    
+                    <div className="w-full overflow-x-auto no-scrollbar pb-6">
+                       <div className="flex items-center gap-4 px-6 min-w-max">
+                          {[
+                            { name: 'OFFICER MOORE', img: 'ROSTER/OfficerMoore.png', tag: 'SECURITY' },
+                            { name: 'NAYELI', img: 'ROSTER/Nayeli.png', tag: 'EXCLUSIVE' },
+                            { name: 'MIKA', img: 'ROSTER/Mika.png', tag: 'ELITE' },
+                            { name: 'JASMINE', img: 'ROSTER/Jasmine.png', tag: 'INTIMATE' }
+                          ].map((p, i) => (
+                            <div key={i} className="relative w-40 h-64 rounded-[2rem] overflow-hidden group shadow-2xl border border-white/10 shrink-0">
+                               <img src={proxyImg(p.img)} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" alt={p.name} />
+                               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+                               
+                               <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                                  <span className="text-[7px] font-black text-white uppercase tracking-tighter">ONLINE</span>
+                                </div>
+
+                               <div className="absolute bottom-5 left-0 right-0 px-4 flex flex-col gap-0.5">
+                                  <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic leading-none">{p.tag}</span>
+                                  <span className="text-[12px] font-black text-white uppercase tracking-tighter leading-none">{p.name}</span>
+                               </div>
+                            </div>
+                          ))}
+                          
+                          {/* 📡 THE '& MORE' TERMINAL CARD */}
+                          <div className="w-40 h-64 rounded-[2rem] border-2 border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-4 group hover:bg-[#ff00ff]/10 hover:border-[#ff00ff]/30 transition-all shrink-0">
+                             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
+                                <span className="text-xl font-black text-white/40 group-hover:text-white">+96</span>
+                             </div>
+                             <div className="text-center">
+                                <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] group-hover:text-[#ff00ff]">& MORE</span>
+                                <p className="text-[6px] font-bold text-white/10 uppercase tracking-widest mt-1">GASP.FUN ROSTER</p>
+                             </div>
+                          </div>
+                       </div>
+                    </div>
+                    <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] italic">Access 100s of women with Universal Credits</p>
+                 </div>
+              </div>
+
               {/* 🚀 SOVEREIGN CHECKOUT CTA */}
-              <div className="sticky bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/80 to-transparent z-[100] mt-8">
+              <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/80 to-transparent z-[100] pt-12">
                  <button 
                    onClick={() => setIsTopUpOpen(true)}
                    className="w-full max-w-sm mx-auto flex items-center justify-center p-5 bg-[#ff00ff] border-2 border-white/20 rounded-[2rem] text-white text-[13px] font-black uppercase tracking-[0.2em] shadow-[0_15px_40px_rgba(255,0,255,0.4)] hover:scale-[1.02] active:scale-95 transition-all group gap-3"
