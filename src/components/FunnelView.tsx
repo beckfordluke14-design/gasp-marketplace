@@ -28,6 +28,9 @@ export default function FunnelView() {
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [selectedPkgId, setSelectedPkgId] = useState('tier_session');
   
+  const [vaultItems, setVaultItems] = useState<any[]>([]);
+  const [loadingVault, setLoadingVault] = useState(false);
+  
   const [timeLeft, setTimeLeft] = useState('04:54');
   const [activeUsers] = useState(14);
   const [fomoMsg, setFomoMsg] = useState('');
@@ -68,6 +71,26 @@ export default function FunnelView() {
     
     setIsLoaded(true);
   }, []);
+
+  // 📂 VAULT INGRESS: Fetch real items from database (Universal Sourcing)
+  useEffect(() => {
+    const fetchVault = async () => {
+      setLoadingVault(true);
+      try {
+        const pid = profileIdFromUrl === 'veronica_medellin' ? 'veronica-medellin-locked' : profileIdFromUrl;
+        const res = await fetch(`/api/vault/teasers?personaId=${pid}&userId=${localStorage.getItem('gasp_guest_id')}`);
+        const data = await res.json();
+        if (data.success) {
+          setVaultItems(data.items || []);
+        }
+      } catch (err) {
+        console.error('[Vault Loader Error]:', err);
+      } finally {
+        setLoadingVault(false);
+      }
+    };
+    fetchVault();
+  }, [profileIdFromUrl]);
 
   // 📈 FOMO ENGINE
   useEffect(() => {
@@ -248,11 +271,24 @@ export default function FunnelView() {
          </div>
 
          <div className="flex items-center gap-8 mt-2 border-b border-white/5">
-            <button className="pb-3 text-[11px] font-black tracking-[0.2em] text-white relative">
+            <button 
+              onClick={() => setActiveTab('NEURAL_LINK')}
+              className={`pb-3 text-[11px] font-black tracking-[0.2em] transition-all relative ${activeTab === 'NEURAL_LINK' ? 'text-white' : 'text-white/30'}`}
+            >
                NEURAL LINK
-               <div className="absolute bottom-[-1.5px] left-0 right-0 h-[3px] bg-[#ff00ff] shadow-[0_0_10px_rgba(255,255,0,0.6)]" />
+               {activeTab === 'NEURAL_LINK' && (
+                 <motion.div layoutId="tab-active" className="absolute bottom-[-1.5px] left-0 right-0 h-[2.5px] bg-[#ff00ff] shadow-[0_0_10px_#ff00ff]" />
+               )}
             </button>
-            <button className="pb-3 text-[11px] font-black tracking-[0.2em] text-white/30 italic">ARCHIVE</button>
+            <button 
+              onClick={() => setActiveTab('ARCHIVE')}
+              className={`pb-3 text-[11px] font-black tracking-[0.2em] transition-all relative ${activeTab === 'ARCHIVE' ? 'text-white' : 'text-white/30 italic'}`}
+            >
+              ARCHIVE
+              {activeTab === 'ARCHIVE' && (
+                <motion.div layoutId="tab-active" className="absolute bottom-[-1.5px] left-0 right-0 h-[2.5px] bg-[#ff00ff] shadow-[0_0_10px_#ff00ff]" />
+              )}
+            </button>
          </div>
       </div>
 
@@ -269,52 +305,116 @@ export default function FunnelView() {
             </motion.div>
           )}
 
-          {currentStepIdx === 1 && (
-            <motion.div key="chat" className="flex-1 flex flex-col overflow-hidden">
-              <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-8 no-scrollbar pb-32">
+           {currentStepIdx === 1 && (
+            <motion.div key="main-content" className="flex-1 flex flex-col overflow-hidden">
+              <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 no-scrollbar pb-32">
                 
-                {/* 📸 HERO GALLERY PREVIEW */}
-                <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-5 duration-1000">
-                   {galleryImages.map((url, i) => (
-                      <div key={i} className="aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative bg-white/5">
-                         <img 
-                           src={url} 
-                           className="w-full h-full object-cover" 
-                           alt="VERONICA" 
-                           referrerPolicy="no-referrer"
-                           crossOrigin="anonymous"
-                           onError={(e) => {
-                              // 🔥 EMERGENCY RECOVERY: If PROMO 2 fails, fallback to PROMO 1 so there is no dead link
-                              if (url.includes('PromoPic2')) {
-                                (e.target as HTMLImageElement).src = galleryImages[0];
-                              }
-                           }}
-                         />
-                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                      </div>
-                   ))}
-                </div>
+                {activeTab === 'NEURAL_LINK' ? (
+                  <div className="space-y-8">
+                    {/* 📸 HERO GALLERY PREVIEW */}
+                    <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-5 duration-1000">
+                       {galleryImages.map((url, i) => (
+                          <div key={i} className="aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative bg-white/5">
+                             <img 
+                               src={url} 
+                               className="w-full h-full object-cover" 
+                               alt="VERONICA" 
+                               referrerPolicy="no-referrer"
+                               crossOrigin="anonymous"
+                               onError={(e) => {
+                                  if (url.includes('PromoPic2')) {
+                                    (e.target as HTMLImageElement).src = galleryImages[0];
+                                  }
+                               }}
+                             />
+                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                          </div>
+                       ))}
+                    </div>
 
-                {messages.map((msg) => (
-                  <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[90%] px-6 py-5 rounded-[1.8rem] text-[15px] normal-case tracking-normal leading-relaxed ${
-                      msg.role === 'user' 
-                        ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-[0_15px_30px_rgba(255,0,255,0.3)]' 
-                        : 'bg-[#151515]/90 backdrop-blur-md text-white border border-white/10 rounded-tl-none font-medium text-white/90'
-                    }`}>
-                      {msg.content}
+                    {messages.map((msg) => (
+                      <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[90%] px-6 py-5 rounded-[1.8rem] text-[15px] normal-case tracking-normal leading-relaxed ${
+                          msg.role === 'user' 
+                            ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-[0_15px_30px_rgba(255,0,255,0.3)]' 
+                            : 'bg-[#151515]/90 backdrop-blur-md text-white border border-white/10 rounded-tl-none font-medium text-white/90'
+                        }`}>
+                          {msg.content}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {isTyping && (
+                       <div className="flex justify-start">
+                          <div className="bg-[#151515]/90 backdrop-blur-md px-6 py-4 rounded-2xl rounded-tl-none flex gap-1.5 items-center">
+                             <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce" />
+                             <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:0.2s]" />
+                             <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:0.4s]" />
+                          </div>
+                       </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-8 animate-in fade-in duration-700">
+                    <div className="flex flex-col gap-2">
+                       <h2 className="text-xl font-black italic tracking-tighter text-white">UNCENSORED ARCHIVE</h2>
+                       <p className="text-[9px] font-black text-white/30 tracking-[0.3em]">SECURE VAULT // VERONICA-MEDELLIN-LOCKED</p>
+                    </div>
+
+                    {loadingVault ? (
+                      <div className="flex flex-col items-center justify-center py-20 gap-4">
+                        <Loader2 className="text-[#ff00ff] animate-spin" size={32} />
+                        <span className="text-[10px] font-black tracking-widest text-[#ff00ff]">DECRYPTING...</span>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-4">
+                        {vaultItems
+                          .filter(item => item.is_vault && !item.caption?.includes('DELETED'))
+                          .map((item, idx) => (
+                          <div key={item.id} className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 bg-white/5 group shadow-2xl">
+                            <img 
+                              src={item.content_url} 
+                              className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" 
+                              alt="Vault Content" 
+                            />
+                            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] group-hover:backdrop-blur-none transition-all duration-500" />
+                            
+                            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 gap-3 opacity-100 group-hover:opacity-0 transition-opacity pointer-events-none">
+                               <div className="w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-white/60">
+                                  <Lock size={18} />
+                               </div>
+                               <span className="text-[8px] font-black tracking-widest text-center uppercase leading-tight">PREMIUM SIGNAL ACCESS</span>
+                            </div>
+
+                            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/40 to-transparent">
+                               <div className="flex items-center justify-between">
+                                  <div className="flex flex-col">
+                                     <span className="text-[7px] font-black text-[#ffea00] tracking-widest leading-none">
+                                        {item.caption?.split('.')[0]?.replace('Vault Restricted', 'CLASSIFIED') || 'CLASSIFIED'}
+                                     </span>
+                                     <span className="text-[10px] font-black text-white tracking-tighter mt-1">INTERNAL_VAULT_{idx + 1}</span>
+                                  </div>
+                                  <div className="w-7 h-7 rounded-lg bg-[#ff00ff]/20 border border-[#ff00ff]/40 flex items-center justify-center">
+                                     <ShoppingBag size={14} className="text-[#ff00ff]" />
+                                  </div>
+                               </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 flex flex-col items-center text-center gap-4">
+                        <Sparkles className="text-[#ffea00]" size={24} />
+                        <div className="space-y-1">
+                           <h3 className="text-sm font-black italic tracking-tight">FULL ACCESS EXPIRES IN {timeLeft}</h3>
+                           <p className="text-[8px] font-black text-white/30 uppercase tracking-widest leading-relaxed">Top up your neural balance to unlock the full archive.</p>
+                        </div>
+                        <button onClick={() => setCurrentStepIdx(2)} className="w-full py-4 bg-[#ff00ff] rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl">
+                           UPGRADE SUBSCRIPTION
+                        </button>
                     </div>
                   </div>
-                ))}
-                
-                {isTyping && (
-                   <div className="flex justify-start">
-                      <div className="bg-[#151515]/90 backdrop-blur-md px-6 py-4 rounded-2xl rounded-tl-none flex gap-1.5 items-center">
-                         <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce" />
-                         <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:0.2s]" />
-                         <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:0.4s]" />
-                      </div>
-                   </div>
                 )}
               </div>
 
