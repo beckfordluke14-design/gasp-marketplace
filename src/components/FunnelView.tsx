@@ -147,6 +147,15 @@ export default function FunnelView() {
   }, [currentStepIdx]);
 
   useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [messages, isTyping]);
+
+  useEffect(() => {
     const handleSuccess = () => {
       setTimeout(() => {
         setCurrentStepIdx(3);
@@ -181,44 +190,37 @@ export default function FunnelView() {
     setInputValue('');
     setIsTyping(true);
     const gid = localStorage.getItem('gasp_guest_id');
-    (async () => {
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [...messages, userMsg],
-            userId: gid,
-            personaId: profileIdFromUrl === 'veronica_medellin' ? 'veronica-medellin-locked' : profileIdFromUrl,
-            isFunnel: true,
-            systemInstruction: `You are VERONICA. The user just arrived from an ad showing you in a grocery store.
-            1. Lean into the fact that they "saw you" in that video. Be playful and flattered.
-            2. Build a "shared secret" connection. You are glad they found you.
-            3. DO NOT ask for their name/age or stall. 
-            4. By the 2nd or 3rd message, pivot to sending a "Private Tease" because you want to show them more than what was in that video.
-            5. Goal: Drive to the GLITCH cutoff after the tease.`,
-            source: 'traffic_stars_funnel'
-          }),
-        });
-
-        if (res.status === 402 || messages.length >= 3) {
-          // 🌩️ THE TEASE & GLITCH SEQUENCE
+    
+    // 🎤 LASER-SHARP NARRATIVE INTERCEPT
+    if (messages.length === 1) {
+      setTimeout(() => {
+        setMessages(prev => [...prev, { 
+          id: Date.now().toString(), 
+          role: 'assistant', 
+          content: `${inputValue}... I knew you looked like you could keep a secret. 😉 Those supermarket aisles were way too public for what I really wanted to show you... check this out:` 
+        }]);
+        setIsTyping(false);
+        
+        // 🌩️ TRIGGER THE TEASE & GLITCH
+        setTimeout(() => {
+          setMessages(prev => [...prev, { 
+            id: 'tease_' + Date.now(), 
+            role: 'assistant', 
+            content: 'tease_module',
+            isTease: true 
+          }]);
+          
+          // ⚡ FINAL HARD CLOSE
           setTimeout(() => {
-            setMessages(prev => [...prev, { 
-              id: 'tease_' + Date.now(), 
-              role: 'assistant', 
-              content: 'tease_module',
-              isTease: true 
-            }]);
-            
-            // ⚡ FINAL HARD CLOSE
-            setTimeout(() => {
-              setCurrentStepIdx(2);
-              setIsTyping(false);
-            }, 1800);
-          }, 800);
-          return;
-        }
+            setCurrentStepIdx(2);
+            setIsTyping(false);
+          }, 3200); // 2.2s reveal + 1s glitch buffer
+        }, 1500);
+      }, 1200);
+      return;
+    }
+
+    (async () => {
 
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();
@@ -364,7 +366,7 @@ export default function FunnelView() {
                                   <motion.div 
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: [0, 1, 0] }}
-                                    transition={{ delay: 1.2, duration: 0.5 }}
+                                    transition={{ delay: 2.2, duration: 0.5 }}
                                     className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-4"
                                   >
                                      <div className="w-14 h-14 rounded-full border-2 border-[#ff00ff] border-t-transparent animate-spin" />
