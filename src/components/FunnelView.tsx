@@ -421,13 +421,23 @@ export default function FunnelView() {
                  className="flex-1 overflow-y-auto no-scrollbar scroll-smooth"
                >
                   <div className="px-10 py-10 space-y-10 pb-40">
-                     <div className="text-center space-y-3 pt-6">
-                        <h2 className="text-6xl font-black italic tracking-tighter text-white leading-none uppercase">Session Expired</h2>
-                        <div className="flex flex-col items-center gap-2">
-                           <div className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full flex items-center gap-2">
-                              <span className="text-[11px] font-black text-white/40 tracking-widest uppercase">Identity Protected</span>
+                     <div className="flex flex-col items-center gap-6 pt-6">
+                        <div className="relative">
+                           <div className="w-20 h-20 rounded-full border-2 border-white/10 p-1 opacity-40 grayscale">
+                              <img src={profile.image} className="w-full h-full object-cover rounded-full" alt={profile.name} />
                            </div>
-                           <p className="text-[12px] text-[#ffea00] tracking-[0.2em] font-black italic uppercase">Re-link now to continue</p>
+                           <div className="absolute inset-0 flex items-center justify-center">
+                              <Lock size={24} className="text-white/20" />
+                           </div>
+                        </div>
+                        <div className="text-center space-y-3">
+                           <h2 className="text-6xl font-black italic tracking-tighter text-white leading-none uppercase">Session Expired</h2>
+                           <div className="flex flex-col items-center gap-2">
+                              <div className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full flex items-center gap-2">
+                                 <span className="text-[11px] font-black text-white/40 tracking-widest uppercase">Identity Protected</span>
+                              </div>
+                              <p className="text-[12px] text-[#ffea00] tracking-[0.2em] font-black italic uppercase">Re-link with {profile.name} to continue</p>
+                           </div>
                         </div>
                      </div>
 
