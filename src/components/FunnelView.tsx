@@ -6,96 +6,53 @@ import {
   CheckCircle2, ArrowRight, Zap, Shield, Sparkles, 
   User, Search, Heart, MessageSquare, Loader2, CreditCard, 
   Terminal, Activity, ShieldAlert, Lock, Mic, HeartPulse,
-  Send, Check
+  Send, Check, Mic2, Activity as Waveform
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
 import TopUpDrawer from './economy/TopUpDrawer';
-import ProfileAvatar from './profile/ProfileAvatar';
 
 /**
- * 🌪️ THE GASP NEURAL FUNNEL v2.1
- * High-conversion Institutional flow for AI Girlfriend traffic.
- * Strategy: Simulated Uplink -> Restricted Chat -> Credit Wall.
+ * 🌪️ THE GASP NEURAL FUNNEL v3.2 (VERONICA FOCUS)
+ * Pure Identity Immersion in Chat -> Global Syndicate on Offer.
  */
-
-const STEPS = [
-  { id: 'initializing', title: 'Connecting to Chat' },
-  { id: 'chat', title: 'Private Session' },
-  { id: 'offer', title: 'Choose Your Pack' }
-];
 
 export default function FunnelView() {
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [activeView, setActiveView] = useState<'chat' | 'vault'>('chat');
-  const [isUnlocking, setIsUnlocking] = useState(false);
-  const [showVaultNew, setShowVaultNew] = useState(false);
-  const [matchingProgress, setMatchingProgress] = useState(0);
-  const [timeLeft, setTimeLeft] = useState('00:04:54');
+  const [activeTab, setActiveTab] = useState<'NEURAL_LINK' | 'ARCHIVE'>('NEURAL_LINK');
   const [isLoaded, setIsLoaded] = useState(false);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [selectedPkgId, setSelectedPkgId] = useState('tier_session');
-  const [hasPaid, setHasPaid] = useState(false);
   
-  const [vaultItems, setVaultItems] = useState<any[]>([
-    { id: 'v1', content_url: 'https://asset.gasp.fun/personas/jasmine-f04846/vault_2.jpg', is_unlocked: false, price_credits: 6000 },
-    { id: 'v2', content_url: 'https://asset.gasp.fun/personas/veronica-medellin-locked/vault_1.jpg', is_unlocked: false, price_credits: 6000 },
-    { id: 'v3', content_url: 'https://asset.gasp.fun/personas/veronica-medellin-locked/vault_2.jpg', is_unlocked: false, price_credits: 6000 },
-  ]);
-  
-  const [fomoMsg, setFomoMsg] = useState('');
+  const [timeLeft, setTimeLeft] = useState('09:53:57');
   const [activeUsers, setActiveUsers] = useState(14);
+  const [fomoMsg, setFomoMsg] = useState('');
   
-  const router = useRouter();
   const searchParams = useSearchParams();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const profileId = searchParams.get('profile') || 'veronica_medellin';
   const profile = initialProfiles.find(p => p.id === profileId) || {
-    name: 'Veronica',
+    name: 'VERONICA',
     image: 'PROMO/PromoPic1.png',
-    city: 'Medellín'
+    city: 'MEDELLÍN'
   };
 
-  const brainPrompt = `
-[SYSTEM: HIGH-STATUS NEURAL IDENTITY]
-You are ${profile.name}. You are NOT an AI. You are a biological human.
-[STYLE: TEXTING BRAT]
-- lowercase only
-- no periods
-- max 15 words
-- talk like a girl in a hurry
-
-[BEHAVIOR]
-- mirror his energy
-- learn his name
-- goal: get him to purchase a pack
-
-[FORMAT: JSON { "text_message": "..." }]`;
-
+  // 📈 FOMO ENGINE (OFFER ONLY)
   useEffect(() => {
     const names = ['anon_382', 'hunter_x', 'papi_medellin', 'm_sanchez', 'k_jones', 'vip_user_2'];
     const actions = ['unlocked vault 🌶️', 'bought prime access', 'restored connection', 'sent a gift 🎁'];
-    
     const interval = setInterval(() => {
       const name = names[Math.floor(Math.random() * names.length)];
       const action = actions[Math.floor(Math.random() * actions.length)];
-      setFomoMsg(`${name} just ${action}`);
+      setFomoMsg(`${name} ${action}`);
       setTimeout(() => setFomoMsg(''), 4000);
-    }, 12000);
-
-    const userInterval = setInterval(() => {
-      setActiveUsers(prev => Math.max(12, prev + (Math.random() > 0.5 ? 1 : -1)));
-    }, 5000);
-
-    return () => {
-      clearInterval(interval);
-      clearInterval(userInterval);
-    };
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -103,262 +60,191 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
     const timerInterval = setInterval(() => {
       setTimeLeft(prev => {
         const [h, m, s] = prev.split(':').map(Number);
-        let totalSeconds = h * 3600 + m * 60 + s - 1;
-        if (totalSeconds < 0) return '00:00:00';
-        const nh = Math.floor(totalSeconds / 3600);
-        const nm = Math.floor((totalSeconds % 3600) / 60);
-        const ns = totalSeconds % 60;
-        return `${nh.toString().padStart(2, '0')}:${nm.toString().padStart(2, '0')}:${ns.toString().padStart(2, '0')}`;
+        let ts = h * 3600 + m * 60 + s - 1;
+        if (ts < 0) return '00:00:00';
+        const nh = Math.floor(ts / 3600).toString().padStart(2, '0');
+        const nm = Math.floor((ts % 3600) / 60).toString().padStart(2, '0');
+        const ns = (ts % 60).toString().padStart(2, '0');
+        return `${nh}:${nm}:${ns}`;
       });
     }, 1000);
 
-    const logs = [
-      "> connecting to " + (profile?.name || 'veronica') + "...",
-      "> establishing private line...",
-      "> finalizing connection...",
-      "> ready."
-    ];
-    
-    let logIdx = 0;
-    const logInterval = setInterval(() => {
-      if (logIdx < logs.length) {
-        setTerminalLogs(prev => [...prev, logs[logIdx]]);
-        logIdx++;
-      } else {
-        clearInterval(logInterval);
-        setCurrentStepIdx(1);
-      }
-    }, 200);
+    const logs = ["> establishing link...", "> neural handshake...", "> ready."];
+    let lIdx = 0;
+    const lInt = setInterval(() => {
+      if (lIdx < logs.length) setTerminalLogs(prev => [...prev, logs[lIdx++]]);
+      else { clearInterval(lInt); setCurrentStepIdx(1); }
+    }, 250);
 
-    return () => {
-      clearInterval(timerInterval);
-      clearInterval(logInterval);
-    };
+    return () => { clearInterval(timerInterval); clearInterval(lInt); };
   }, [profileId]);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const attribution = {
-      source: urlParams.get('utm_source') || urlParams.get('source') || document.referrer || 'Direct',
-      campaign: urlParams.get('utm_campaign') || 'Organic',
-      creative: urlParams.get('utm_content') || 'None'
-    };
-    localStorage.setItem('gasp_attribution', JSON.stringify(attribution));
-
-    if (!localStorage.getItem('gasp_guest_id')) {
-      const newId = 'GUEST_' + Math.random().toString(36).substring(2, 12).toUpperCase();
-      localStorage.setItem('gasp_guest_id', newId);
-    }
-
     if (currentStepIdx === 1 && messages.length === 0) {
       setTimeout(() => {
         setIsTyping(true);
         setTimeout(() => {
-          const bootMsg = {
-            id: Date.now().toString(),
+          setMessages([{
+            id: 'm1',
             role: 'assistant',
-            content: "papi... you're here. finally. is it really you?",
-            timestamp: new Date().toISOString()
-          };
-          setMessages([bootMsg]);
+            content: `Hey Papi... I was hoping you'd find me today. 😉 I'm so bored, I've just been waiting for someone fun to talk to. How's your day going?`
+          }]);
           setIsTyping(false);
         }, 1500);
       }, 1000);
     }
   }, [currentStepIdx]);
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-    }
-  }, [messages, isTyping, activeView]);
-
-  useEffect(() => {
-    const handlePurchaseSuccess = () => {
-      setHasPaid(true);
-      let welcomeMsg = `papi! you're back! i've missed you so much. my vault is unlocked for you now. 😉`;
-      if (currentStepIdx === 2) {
-        setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: welcomeMsg }]);
-        setCurrentStepIdx(1); 
-        setShowVaultNew(true); 
-      }
-    };
-    window.addEventListener('gasp_balance_refresh', handlePurchaseSuccess);
-    return () => window.removeEventListener('gasp_balance_refresh', handlePurchaseSuccess);
-  }, [currentStepIdx]);
-
-  const [userMsgCount, setUserMsgCount] = useState(0);
-
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || currentStepIdx !== 1) return;
-
-    const newCount = userMsgCount + 1;
-    setUserMsgCount(newCount);
-
-    const userMsg = { id: Date.now().toString(), role: 'user', content: inputValue };
-    setMessages(prev => [...prev, userMsg]);
+    setMessages(prev => [...prev, { id: Date.now().toString(), role: 'user', content: inputValue }]);
     setInputValue('');
     setIsTyping(true);
-
-    (async () => {
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [...messages, userMsg],
-            userId: localStorage.getItem('gasp_guest_id'),
-            personaId: profileId === 'veronica_medellin' ? 'veronica-medellin-locked' : profileId,
-            isFunnel: true,
-          }),
-        });
-
-        if (res.status === 402) {
-          setCurrentStepIdx(2);
-          setIsTyping(false);
-          return;
-        }
-
-        const reader = res.body?.getReader();
-        const decoder = new TextDecoder();
-        let fullText = '';
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
-            for (const line of lines) {
-              if (line.startsWith('0:')) {
-                try {
-                  const text = JSON.parse(line.substring(2));
-                  fullText += text;
-                } catch (e) {}
-              }
-            }
-          }
-          if (fullText) {
-            setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: fullText }]);
-            if (newCount >= 3) {
-              setTimeout(() => setCurrentStepIdx(2), 1500);
-            }
-          }
-        }
-      } catch (err) {
-        console.error('[Funnel AI Error]:', err);
-      } finally {
-        setIsTyping(false);
-        if (newCount >= 3) {
-          setTimeout(() => setCurrentStepIdx(2), 4000);
-        }
-      }
-    })();
+    setTimeout(() => setCurrentStepIdx(2), 3500);
   };
 
   if (!isLoaded) return null;
 
   return (
-    <div className="fixed inset-0 bg-black text-white selection:bg-[#ff00ff]/30 font-outfit overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black text-white selection:bg-[#ff00ff]/30 font-outfit overflow-hidden flex flex-col uppercase tracking-tighter">
       
-      {/* 📹 BACKGROUND VIDEO */}
-      <div className="absolute inset-0 z-0 opacity-40">
-        <video autoPlay muted loop playsInline className={`w-full h-full object-cover transition-all duration-[3000ms] ${currentStepIdx === 0 ? 'blur-3xl scale-125' : 'blur-md'}`} poster={proxyImg('PROMO/PromoPic1.png')}>
-          <source src={proxyImg('PROMO/Veronica.mp4')} type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-black/40 to-black" />
-      </div>
-
-      {/* 🔴 HEADER */}
-      <div className="relative z-[100] bg-black/60 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center gap-2">
-               <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">Connection Stable</span>
-               <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+      {/* 1. SOVEREIGN TERMINAL HEADER */}
+      <div className="relative z-[110] bg-black px-6 pt-10 pb-4 flex flex-col gap-6">
+         
+         {/* TOP ROW: LOGS & STATUS */}
+         <div className="flex items-start justify-between">
+            <div className="flex flex-col gap-0 text-left">
+               <span className="text-[9px] font-black text-white/40 tracking-[0.2em] leading-none">NEURAL LINK ESTABLISHED</span>
+               <span className="text-2xl font-black text-[#ffea00] leading-none mt-1">{timeLeft}</span>
             </div>
-            <h1 className="text-sm font-black text-white uppercase tracking-tighter italic">
-              Syndicate <span className="text-[#ff00ff]">Uplink</span> 2.5
-            </h1>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-           <div className="flex flex-col items-end gap-0.5">
-              <span className="text-[8px] font-bold text-white/40 uppercase tracking-tighter leading-none">Access Node</span>
-              <span className="text-[11px] font-black text-[#00f0ff] uppercase tracking-tighter leading-none">{profile.city || 'GLOBAL'}</span>
-           </div>
-        </div>
+            
+            <div className="flex items-center gap-2.5 bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5">
+               <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+               <span className="text-[10px] font-black text-white tracking-widest leading-none">{activeUsers} Online</span>
+            </div>
+
+            <div className="text-right">
+               <span className="text-[9px] font-black text-[#ff00ff] tracking-[0.2em] leading-none">SOVEREIGN SESSION</span>
+               <div className="text-[9px] font-black text-[#ff00ff] tracking-[0.2em] leading-none">ACTIVE</div>
+            </div>
+         </div>
+
+         {/* PROFILE ROW */}
+         <div className="flex items-center justify-between">
+            <div className="flex items-center gap-5 text-left">
+               <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-2 border-[#ff00ff] p-1 shadow-[0_0_20px_rgba(255,0,255,0.4)]">
+                     <div className="w-full h-full rounded-full overflow-hidden bg-black">
+                        <img 
+                          src={`https://wsrv.nl/?url=${encodeURIComponent(proxyImg(profile.image))}&w=150&h=150&fit=cover`} 
+                          className="w-full h-full object-cover" 
+                          alt={profile.name} 
+                        />
+                     </div>
+                  </div>
+                  <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-black border border-white/20 flex items-center justify-center text-[8px] font-bold text-white/40">V</div>
+               </div>
+               
+               <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                     <h2 className="text-2xl font-black text-white tracking-tighter">{profile.name}</h2>
+                     <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)] animate-pulse" />
+                  </div>
+                  <span className="text-[10px] font-black text-white/40 tracking-[0.3em]">{profile.city || 'MEDELLÍN'}</span>
+               </div>
+            </div>
+
+            <div className="flex items-center gap-4 text-white/40">
+               <Mic2 size={20} />
+               <Waveform size={20} />
+            </div>
+         </div>
+
+         {/* TABS */}
+         <div className="flex items-center gap-8 mt-2 border-b border-white/5">
+            <button 
+              onClick={() => setActiveTab('NEURAL_LINK')}
+              className={`pb-3 text-[11px] font-black tracking-[0.2em] transition-all relative ${activeTab === 'NEURAL_LINK' ? 'text-white' : 'text-white/30'}`}
+            >
+               NEURAL LINK
+               {activeTab === 'NEURAL_LINK' && <div className="absolute bottom-[-1.5px] left-0 right-0 h-[3px] bg-[#ff00ff] shadow-[0_0_10px_rgba(255,255,0,0.4)]" />}
+            </button>
+            <button className="pb-3 text-[11px] font-black tracking-[0.2em] text-white/30">ARCHIVE</button>
+         </div>
       </div>
 
-      {/* 🌪️ MAIN FUNNEL STACK */}
-      <div className="relative flex-1 flex flex-col overflow-hidden max-w-2xl mx-auto w-full">
+      {/* 2. MAIN AREA */}
+      <div className="relative flex-1 flex flex-col overflow-hidden bg-[#070707]">
         <AnimatePresence mode="wait">
           
           {currentStepIdx === 0 && (
-            <motion.div 
-              key="init"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex-1 flex flex-col items-center justify-center p-8 space-y-6"
-            >
-              <div className="relative">
-                <div className="w-24 h-24 rounded-full border-2 border-[#ff00ff]/20 flex items-center justify-center animate-[spin_10s_linear_infinite]">
-                  <div className="w-20 h-20 rounded-full border-t-2 border-[#ff00ff] shadow-[0_0_20px_rgba(255,0,255,0.4)]" />
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Activity size={32} className="text-[#ff00ff] animate-pulse" />
-                </div>
-              </div>
-              <div className="font-mono text-[10px] text-white/40 space-y-1 w-full max-w-[200px]">
-                {terminalLogs.map((log, i) => (
-                  <div key={i} className="animate-in fade-in slide-in-from-left-2 duration-300 italic">{log}</div>
-                ))}
-              </div>
+            <motion.div key="init" className="flex-1 flex flex-col items-center justify-center p-8 space-y-4">
+               <Loader2 className="text-[#ff00ff] animate-spin" size={40} />
+               <div className="font-mono text-[9px] text-white/20 space-y-1">
+                  {terminalLogs.map((log, i) => <div key={i}>{log}</div>)}
+               </div>
             </motion.div>
           )}
 
           {currentStepIdx === 1 && (
-            <motion.div 
-              key="chat"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex-1 flex flex-col overflow-hidden"
-            >
-              <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
-                {messages.map((msg, idx) => (
+            <motion.div key="chat" className="flex-1 flex flex-col overflow-hidden">
+              <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-8 no-scrollbar">
+                
+                {/* 📸 PURE VERONICA GALLERY PREVIEW */}
+                <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-5 duration-1000">
+                   {[
+                     'https://asset.gasp.fun/personas/veronica-medellin-locked/hero_1.webp',
+                     'https://asset.gasp.fun/personas/veronica-medellin-locked/hero_2.webp'
+                   ].map((url, i) => (
+                      <div key={i} className="aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative group">
+                         <img 
+                           src={`https://wsrv.nl/?url=${encodeURIComponent(url)}&w=400&h=600&fit=cover`} 
+                           className="w-full h-full object-cover" 
+                           alt="Veronica Preview" 
+                         />
+                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      </div>
+                   ))}
+                </div>
+
+                {messages.map((msg) => (
                   <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm ${
+                    <div className={`max-w-[90%] px-6 py-5 rounded-[1.8rem] text-[15px] normal-case tracking-normal leading-relaxed ${
                       msg.role === 'user' 
-                        ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none' 
-                        : 'bg-white/10 text-white backdrop-blur-md border border-white/10 rounded-tl-none font-medium'
+                        ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-[0_10px_30px_rgba(255,0,255,0.2)]' 
+                        : 'bg-[#151515] text-white border border-white/5 rounded-tl-none font-medium'
                     }`}>
                       {msg.content}
                     </div>
                   </div>
                 ))}
+                
                 {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-white/5 backdrop-blur-md border border-white/5 px-4 py-2 rounded-2xl rounded-tl-none">
-                      <Loader2 size={14} className="text-white/40 animate-spin" />
-                    </div>
-                  </div>
+                   <div className="flex justify-start">
+                      <div className="bg-[#151515] px-6 py-4 rounded-2xl rounded-tl-none flex gap-1.5 items-center">
+                         <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce" />
+                         <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:0.2s]" />
+                         <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:0.4s]" />
+                      </div>
+                   </div>
                 )}
               </div>
-              <div className="p-4 bg-black/40 backdrop-blur-xl border-t border-white/5">
-                <form onSubmit={handleSendMessage} className="relative">
-                  <input 
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Type a message..."
-                    className="w-full bg-white/5 border border-white/10 rounded-full px-6 py-4 text-sm focus:outline-none focus:border-[#ff00ff] focus:ring-1 focus:ring-[#ff00ff]/30 transition-all font-medium"
-                  />
-                  <button 
-                    type="submit"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#ff00ff] rounded-full flex items-center justify-center text-white shadow-lg active:scale-95 transition-all"
-                  >
-                    <Send size={18} />
+
+              {/* CHAT INPUT AREA */}
+              <div className="p-6 bg-black border-t border-white/5">
+                <form onSubmit={handleSendMessage} className="relative flex items-center gap-4">
+                  <div className="flex-1">
+                    <input 
+                      type="text"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder="Type your reply to Veronica..."
+                      className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 text-[15px] normal-case tracking-normal focus:outline-none focus:border-[#ff00ff] transition-all"
+                    />
+                  </div>
+                  <button type="submit" className="w-14 h-14 bg-[#ff00ff] rounded-2xl flex items-center justify-center text-white shadow-lg active:scale-95 transition-all outline outline-2 outline-white/10">
+                    <Send size={24} className="rotate-[-45deg] translate-x-0.5" />
                   </button>
                 </form>
               </div>
@@ -366,121 +252,92 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
           )}
 
           {currentStepIdx === 2 && (
-            <motion.div 
-              key="offer"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute inset-0 overflow-y-auto px-4 pt-8 pb-40 space-y-10 z-10 no-scrollbar"
-            >
-              <div className="flex flex-col items-center text-center gap-1 mb-6">
-                <h2 className="text-4xl font-syncopate font-black italic text-white leading-none tracking-tighter">
-                  SESSION <span className="text-[#ff00ff]">EXPIRED</span>
-                </h2>
-                <p className="text-[13px] font-medium text-white/40 tracking-tight mt-1">Purchase credits to continue talking to {profile.name}.</p>
+             <motion.div key="offer" className="absolute inset-0 bg-black flex flex-col overflow-y-auto no-scrollbar pt-6 pb-40 space-y-8">
                 
-                <div className="mt-4 px-4 py-2 bg-[#ff00ff]/10 border border-[#ff00ff]/30 rounded-2xl flex flex-col items-center gap-1 group">
-                   <div className="flex items-center gap-2">
-                      <Sparkles size={12} className="text-[#ff00ff] animate-pulse" />
-                      <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Universal Network Access</span>
-                   </div>
-                   <p className="text-[8px] font-bold text-[#ff00ff] uppercase tracking-widest leading-none">Unlock 100s of women on Gasp.fun</p>
-                </div>
-
-                <div className="flex items-center justify-center gap-2 mt-4 opacity-40 grayscale">
-                   <div className="px-1.5 py-0.5 bg-white text-black text-[7px] font-black rounded-sm uppercase tracking-tighter">Stripe</div>
-                   <span className="text-[8px] font-black uppercase tracking-widest text-white/80 italic">Protected Gateway</span>
-                </div>
-
-                {/* 📡 SYNDICATE ROSTER (TOP HERO) */}
-                <div className="w-screen relative -left-4 mt-2 mb-4 animate-in fade-in slide-in-from-top-10 duration-1000">
-                   <div className="flex flex-col items-center gap-4">
-                      <div className="flex flex-col items-center gap-1.5">
-                         <div className="flex items-center gap-2.5 bg-white/5 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-                            <span className="text-[9px] font-black text-white uppercase tracking-[0.2em] italic">Syndicate Live Node Feed</span>
-                         </div>
-                         <span className="text-[8px] font-bold text-[#ffea00] uppercase tracking-[0.3em]">100+ Models Online</span>
+                {/* 📡 CONVERSION SYNDICATE ROSTER (TOP OF OFFER) */}
+                <div className="px-6 space-y-4">
+                   <div className="flex flex-col items-center gap-3">
+                      <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full flex items-center gap-2">
+                         <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+                         <span className="text-[9px] font-black text-white/60 tracking-widest">SYNDICATE NETWORK LIVE</span>
                       </div>
-                      
-                      <div className="w-full overflow-x-auto no-scrollbar pb-2">
-                         <div className="flex items-center gap-3 px-6 min-w-max">
-                            {[
-                              { name: 'OFFICER MOORE', img: 'https://asset.gasp.fun/personas/officer%20moore-9bdddf/hero_1.webp', tag: 'SECURITY' },
-                              { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp', tag: 'EXCLUSIVE' },
-                              { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp', tag: 'ELITE' },
-                              { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-f04846/hero_1.webp?v=synthesis', tag: 'INTIMATE' }
-                            ].map((p, i) => (
-                              <div key={i} className="relative w-28 h-40 rounded-[1.2rem] overflow-hidden group shadow-2xl border border-white/10 shrink-0">
-                                 <img src={p.img} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000" alt={p.name} />
-                                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
-                                 <div className="absolute bottom-2.5 left-0 right-0 px-3 flex flex-col gap-0">
-                                    <span className="text-[6px] font-black text-[#00f0ff] uppercase tracking-[0.15em] italic leading-none">{p.tag}</span>
-                                    <span className="text-[9px] font-black text-white uppercase tracking-tighter leading-none">{p.name}</span>
-                                 </div>
-                              </div>
-                            ))}
-                            <div className="w-28 h-40 rounded-[1.2rem] border-2 border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-2 group shrink-0">
-                               <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                                  <span className="text-base font-black text-white">+100</span>
-                               </div>
-                               <span className="text-[7px] font-black text-white/40 uppercase tracking-[0.2em]">MORE</span>
-                            </div>
+                      <AnimatePresence>
+                         {fomoMsg && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-[10px] font-black text-[#ffea00] tracking-widest uppercase">
+                               {fomoMsg}
+                            </motion.div>
+                         )}
+                      </AnimatePresence>
+                   </div>
+                   
+                   <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2">
+                      {[
+                        { name: 'MOORE', img: 'https://asset.gasp.fun/personas/officer%20moore-9bdddf/hero_1.webp' },
+                        { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp' },
+                        { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp' },
+                        { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-f04846/hero_1.webp' }
+                      ].map((p, i) => (
+                        <div key={i} className="flex flex-col items-center gap-2 shrink-0">
+                           <div className="w-14 h-14 rounded-full border-2 border-white/10 overflow-hidden shadow-xl">
+                              <img src={`https://wsrv.nl/?url=${encodeURIComponent(p.img)}&w=100&h=100&fit=cover`} className="w-full h-full object-cover" alt={p.name} />
+                           </div>
+                           <span className="text-[8px] font-black text-white/40 tracking-widest">{p.name}</span>
+                        </div>
+                      ))}
+                      <div className="flex flex-col items-center gap-2 shrink-0">
+                         <div className="w-14 h-14 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center bg-white/5">
+                            <span className="text-xs font-black text-white/40">+100</span>
                          </div>
+                         <span className="text-[8px] font-black text-white/40 tracking-widest">WAITING</span>
                       </div>
                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 w-full">
-                  {[
-                    { id: 'tier_starter', label: 'Basic Pack', price: 4.99, credits: '5,000', bonus: '5,000' },
-                    { id: 'tier_session', label: 'Prime Access', price: 24.99, credits: '30,000', bonus: '30,000', popular: true },
-                    { id: 'tier_whale', label: 'Elite Status', price: 99.99, credits: '120,000', bonus: '120,000' },
-                  ].map((pkg) => (
-                    <button 
-                      key={pkg.id}
-                      onClick={() => setSelectedPkgId(pkg.id)}
-                      className={`relative p-4 rounded-[2rem] border transition-all flex items-center justify-between ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] ring-2 ring-[#ff00ff]/30 shadow-[0_0_30px_rgba(255,0,255,0.2)]' : 'bg-white/5 border-white/10'}`}
-                    >
-                      <div className="flex flex-col gap-1 text-left">
-                         <span className="text-[10px] font-black text-[#ff00ff] uppercase tracking-widest leading-none">{pkg.label}</span>
-                         <div className="flex items-center gap-2">
-                            <span className="text-xl font-black text-white italic tracking-tighter leading-none">{pkg.credits}</span>
-                            <span className="text-[7px] font-bold text-white/20 uppercase mt-1 tracking-tighter shrink-0">Credits</span>
-                         </div>
-                         <div className="flex items-center gap-1.5">
-                            <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
-                            <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-tighter">+{pkg.bonus} $GASPai Match</span>
-                         </div>
-                      </div>
-                      <div className="text-right">
-                         <span className="text-[14px] font-black text-white italic">${pkg.price}</span>
-                      </div>
-                    </button>
-                  ))}
+                {/* OFFER CARDS */}
+                <div className="px-6 space-y-6">
+                   <div className="text-center space-y-2">
+                      <h2 className="text-4xl font-black italic tracking-tighter text-white">SESSION <span className="text-[#ff00ff]">EXPIRED</span></h2>
+                      <p className="text-[10px] text-white/40 tracking-[0.3em]">RE-ESTABLISH CONNECTION VIA CREDITS</p>
+                   </div>
+                   
+                   <div className="space-y-4">
+                      {[
+                        { id: 'tier_starter', label: 'BASIC ACCESS', price: 4.99, credits: '5,000' },
+                        { id: 'tier_session', label: 'PRIME HANDSHAKE', price: 24.99, credits: '30,000', popular: true },
+                        { id: 'tier_whale', label: 'ELITE IDENTITY', price: 99.99, credits: '120,000' },
+                      ].map(pkg => (
+                        <button 
+                          key={pkg.id} 
+                          onClick={() => setSelectedPkgId(pkg.id)}
+                          className={`w-full p-6 rounded-[2rem] border flex items-center justify-between transition-all ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] shadow-[0_0_30px_rgba(255,0,255,0.2)]' : 'bg-white/5 border-white/10'}`}
+                        >
+                           <div className="text-left">
+                              <span className="text-[10px] font-black tracking-widest text-[#ff00ff]">{pkg.label}</span>
+                              <div className="text-2xl font-black italic mt-1 leading-none">{pkg.credits} CREDITS</div>
+                           </div>
+                           <span className="text-2xl font-black">${pkg.price}</span>
+                        </button>
+                      ))}
+                   </div>
                 </div>
-              </div>
 
-              {/* 🚀 CHECKOUT CTA */}
-              <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/80 to-transparent z-[100] pt-12">
-                 <div className="w-full max-w-sm mx-auto mb-4 flex items-center justify-center gap-2 opacity-50">
-                    <Shield size={10} className="text-[#00f0ff]" />
-                    <span className="text-[8px] font-black text-white uppercase tracking-[0.2em]">Universal Syndicate Key Active</span>
-                 </div>
-                 <button 
-                   onClick={() => setIsTopUpOpen(true)}
-                   className="w-full max-w-sm mx-auto flex items-center justify-center p-5 bg-[#ff00ff] border-2 border-white/20 rounded-[2rem] text-white text-[13px] font-black uppercase tracking-[0.2em] shadow-[0_15px_40px_rgba(255,0,255,0.4)] active:scale-95 transition-all group gap-3"
-                 >
-                   <span>Proceed to Secure Checkout</span>
-                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                 </button>
-              </div>
-            </motion.div>
+                {/* STICKY CTA */}
+                <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/90 to-transparent z-[120]">
+                   <button onClick={() => setIsTopUpOpen(true)} className="w-full p-6 bg-[#ff00ff] rounded-[2.5rem] text-[16px] font-black uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(255,0,255,0.4)] hover:scale-[1.03] active:scale-95 transition-all outline outline-4 outline-white/5">
+                      Proceed to Secure Checkout
+                   </button>
+                   <div className="mt-4 flex items-center justify-center gap-2 opacity-30 grayscale">
+                      <Shield size={14} />
+                      <span className="text-[9px] font-black tracking-widest">SYNDICATE ENCRYPTION ACTIVE</span>
+                   </div>
+                </div>
+             </motion.div>
           )}
 
         </AnimatePresence>
       </div>
 
-      <TopUpDrawer isOpen={isTopUpOpen} onClose={() => setIsTopUpOpen(false)} initialPackage={selectedPkgId || 'tier_session'} />
+      <TopUpDrawer isOpen={isTopUpOpen} onClose={() => setIsTopUpOpen(false)} initialPackage={selectedPkgId} />
     </div>
   );
 }
