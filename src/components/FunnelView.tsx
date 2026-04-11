@@ -137,7 +137,7 @@ export default function FunnelView() {
       });
     }, 1000);
 
-    const logs = ["> establishing neural link...", "> bypass active.", "> identity confirmed."];
+    const logs = ["> establishing connection...", "> bypass active.", "> identity confirmed."];
     let lIdx = 0;
     const lInt = setInterval(() => {
       if (lIdx < logs.length) setTerminalLogs(prev => [...prev, logs[lIdx++]]);
@@ -254,19 +254,19 @@ export default function FunnelView() {
       </div>
 
       {/* 🛡️ MASTER EXPERIENCE CONTAINER */}
-      <main className="relative z-10 w-full max-w-[540px] h-screen md:h-[92dvh] flex flex-col bg-black/60 backdrop-blur-3xl md:rounded-[3rem] md:border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 md:my-4">
+      <main className="relative z-10 w-full max-w-[600px] h-screen md:h-[92dvh] flex flex-col bg-black/60 backdrop-blur-3xl md:rounded-[3rem] md:border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 md:my-4">
         
         {/* UPPER STATUS BAR */}
-        {currentStepIdx > 0 && (
+        {currentStepIdx > 0 && currentStepIdx < 3 && (
           <div className="shrink-0 px-8 py-5 flex items-center justify-between border-b border-white/5 bg-black/40 relative z-[110]">
              <div className="flex flex-col text-left">
-                <span className="text-[9px] font-black text-white/40 tracking-[0.2em] leading-none uppercase">Signal Status</span>
+                <span className="text-[9px] font-black text-white/40 tracking-[0.2em] leading-none uppercase italic">Signal Status</span>
                 <span className="text-xl font-black text-[#ffea00] leading-none mt-1">{timeLeft}</span>
              </div>
              
              <div className="flex items-center gap-2.5 bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[10px] font-black text-white tracking-widest leading-none">{activeUsers} Online</span>
+                <span className="text-[10px] font-black text-white tracking-widest leading-none">14 ONLINE</span>
              </div>
 
              <div className="text-right">
@@ -303,7 +303,7 @@ export default function FunnelView() {
                             <h2 className="text-2xl font-black text-white tracking-tighter leading-none">{profile.name}</h2>
                             <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
                          </div>
-                         <span className="text-[10px] font-black text-white/40 tracking-[0.3em] leading-none">{profile.city}</span>
+                         <span className="text-[10px] font-black text-white/40 tracking-[0.3em] leading-none uppercase">{profile.city}</span>
                       </div>
                    </div>
                    <div className="flex items-center gap-4 text-white/40">
@@ -336,7 +336,7 @@ export default function FunnelView() {
                       </div>
                       {messages.map((msg) => (
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[90%] px-6 py-5 rounded-[1.8rem] text-[15px] ${msg.role === 'user' ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-xl' : 'bg-[#151515]/90 border border-white/10 rounded-tl-none font-medium text-white/90'}`}>
+                          <div className={`max-w-[90%] px-6 py-5 rounded-[2rem] text-[15px] ${msg.role === 'user' ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-xl' : 'bg-[#151515]/90 border border-white/10 rounded-tl-none font-medium'}`}>
                             {msg.content}
                           </div>
                         </div>
@@ -363,8 +363,8 @@ export default function FunnelView() {
                               <img src={item.content_url} className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-50" />
                               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 gap-4 bg-black/60 backdrop-blur-sm">
                                  <Lock size={20} className="text-white/40" />
-                                 <button onClick={() => setCurrentStepIdx(2)} className="w-full py-3 bg-white text-black text-[10px] font-black uppercase rounded-xl hover:bg-[#ffea00] active:scale-95 transition-all shadow-xl font-syncopate italic">Unlock Vault</button>
-                                 <span className="text-[7px] font-black text-white/20 tracking-widest">RECORD_NODE_{idx + 1}</span>
+                                 <button onClick={() => setCurrentStepIdx(2)} className="w-full py-4 bg-white text-black text-[10px] font-black uppercase rounded-xl hover:bg-[#ffea00] active:scale-95 transition-all shadow-xl font-syncopate italic">Unlock Vault</button>
+                                 <span className="text-[7px] font-black text-white/20 tracking-widest uppercase">NODE_{idx + 1}</span>
                               </div>
                             </div>
                           ))}
@@ -376,7 +376,7 @@ export default function FunnelView() {
 
                 <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black to-transparent z-[100]">
                   <form onSubmit={handleSendMessage} className="relative flex items-center gap-4">
-                    <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Type reply to Veronica..." className="flex-1 bg-[#111] border border-white/20 rounded-2xl px-6 py-5 text-[15px] focus:outline-none focus:border-[#ff00ff]/50" />
+                    <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Type reply to Veronica..." className="flex-1 bg-[#111] border border-white/20 rounded-2xl px-6 py-5 text-[15px] focus:outline-none focus:border-[#ff00ff]/50 shadow-inner" />
                     <button type="submit" className="w-14 h-14 bg-[#ff00ff] rounded-2xl flex items-center justify-center shadow-xl active:scale-95 transition-all"><Send size={24} className="rotate-[-45deg]" /></button>
                   </form>
                 </div>
@@ -384,77 +384,94 @@ export default function FunnelView() {
             )}
 
             {currentStepIdx === 2 && (
-               <motion.div key="offer" className="absolute inset-0 bg-black flex flex-col overflow-y-auto no-scrollbar pt-10 pb-40 space-y-10">
-                  <div className="px-8 space-y-8">
-                     <div className="text-center space-y-3">
-                        <h2 className="text-5xl font-black italic tracking-tighter text-white leading-none uppercase shadow-sm">Session Expired</h2>
+               <motion.div 
+                 key="offer" 
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 className="flex-1 overflow-y-auto no-scrollbar scroll-smooth"
+               >
+                  <div className="px-10 py-10 space-y-10 pb-40">
+                     <div className="text-center space-y-3 pt-6">
+                        <h2 className="text-6xl font-black italic tracking-tighter text-white leading-none uppercase">Session Expired</h2>
                         <div className="flex flex-col items-center gap-2">
-                           <div className="px-3 py-1 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-full flex items-center gap-2"><span className="text-[10px] font-black text-[#ffea00] tracking-widest uppercase">Encryption Active</span></div>
-                           <p className="text-[11px] text-white/40 tracking-[0.2em] font-black italic">RE-LINK TO UNLOCK 100+ MODELS</p>
+                           <div className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full flex items-center gap-2">
+                              <span className="text-[11px] font-black text-white/40 tracking-widest uppercase">Identity Protected</span>
+                           </div>
+                           <p className="text-[12px] text-[#ffea00] tracking-[0.2em] font-black italic uppercase">Re-link now to continue</p>
                         </div>
                      </div>
+
                      <div className="flex flex-col gap-6">
                         <div className="flex items-center justify-between px-2">
-                           <span className="text-[10px] font-black text-white/40 tracking-widest uppercase">Network Access Modules</span>
-                           <span className="text-[10px] font-black text-[#ffea00] tracking-widest">{fomoMsg || 'WAITING...'}</span>
+                           <span className="text-[10px] font-black text-white/20 tracking-widest uppercase">Top Network Connections</span>
+                           <span className="text-[10px] font-black text-[#ffea00] tracking-widest leading-none">{fomoMsg || 'WAITING...'}</span>
                         </div>
-                        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 px-6 -ml-6 w-screen">
+                        <div className="flex items-center justify-between gap-2.5">
                            {(roster.length > 0 ? roster : [
                              { name: 'MOORE', img: 'https://asset.gasp.fun/personas/officer%20moore-9bdddf/hero_1.webp', tag: 'SECURITY' },
                              { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp', tag: 'EXCLUSIVE' },
                              { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp', tag: 'ELITE' },
                              { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-f04846/hero_1.webp', tag: 'INTIMATE' }
                            ]).map((p, i) => (
-                             <div key={i} className="relative w-36 h-48 rounded-[1.5rem] overflow-hidden bg-white/5 border border-white/10 shrink-0">
+                             <div key={i} className="relative w-[19%] aspect-[3/4.5] rounded-2xl overflow-hidden bg-white/5 border border-white/10 shrink-0 shadow-xl">
                                 <img src={p.img} className="w-full h-full object-cover" alt={p.name} />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-90 shadow-inner" />
-                                <div className="absolute bottom-3 left-4 text-left">
-                                   <div className="text-[6px] font-black text-[#00f0ff] tracking-widest leading-none mb-1 uppercase">{p.tag}</div>
-                                   <div className="text-[14px] font-black text-white italic tracking-tighter">{p.name}</div>
+                                <div className="absolute bottom-2.5 left-2.5 text-left">
+                                   <div className="text-[5px] font-black text-[#00f0ff] tracking-widest mb-0.5 uppercase leading-none">{p.tag}</div>
+                                   <div className="text-[10px] font-black text-white italic tracking-tighter uppercase leading-none">{p.name}</div>
                                 </div>
                              </div>
                            ))}
-                           <div className="relative w-36 h-48 rounded-[1.5rem] overflow-hidden bg-[#ff00ff]/5 border border-[#ff00ff]/30 shrink-0 flex flex-col items-center justify-center gap-2 group cursor-pointer active:scale-95 transition-all">
+                           <div className="relative w-[19%] aspect-[3/4.5] rounded-2xl overflow-hidden bg-[#ff00ff]/5 border border-[#ff00ff]/30 shrink-0 flex flex-col items-center justify-center gap-1.5 group cursor-pointer active:scale-95 transition-all shadow-2xl">
                               <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
-                              <Sparkles size={24} className="text-[#ff00ff] relative z-10" />
+                              <Sparkles size={16} className="text-[#ff00ff] relative z-10" />
                               <div className="relative z-10 text-center">
-                                 <span className="text-[18px] font-black text-white leading-none">& 100+</span><br/>
-                                 <span className="text-[10px] font-black text-[#ff00ff] tracking-[0.3em] uppercase">MORE</span>
+                                 <div className="text-[13px] font-black text-white leading-none">& 100+</div>
+                                 <div className="text-[7px] font-black text-[#ff00ff] tracking-widest uppercase">MORE</div>
                               </div>
                            </div>
                         </div>
                      </div>
+
                      <div className="space-y-4">
                         {[
-                          { id: 'tier_starter', label: 'BASIC PACK', price: 4.99, credits: '5,000', bonus: '5,000', perk: 'Unlock 12 Private Assets' },
-                          { id: 'tier_session', label: 'PRIME ACCESS', price: 24.99, credits: '30,000', bonus: '30,000', perk: 'Priority Uplink + Private Chat', popular: true },
-                          { id: 'tier_whale', label: 'ELITE IDENTITY', price: 99.99, credits: '120,000', bonus: '120,000', perk: 'VIP Access + Unlock ALL Records' },
+                          { id: 'tier_starter', label: 'STARTER PACK', price: 4.99, credits: '5,000', bonus: '5,000', perk: 'Private Chat + Points for Vault Unlocks' },
+                          { id: 'tier_session', label: 'SESSIONS PRO', price: 24.99, credits: '30,000', bonus: '30,000', perk: 'Spicy Records + Private Chat Access', popular: true },
+                          { id: 'tier_whale', label: 'ELITE IDENTITY', price: 99.99, credits: '120,000', bonus: '120,000', perk: 'VIP Priority + Unlock Everything Spicy' },
                         ].map(pkg => (
-                          <button key={pkg.id} onClick={() => setSelectedPkgId(pkg.id)} className={`w-full p-6 py-8 rounded-[2.5rem] border flex items-center justify-between transition-all relative overflow-hidden group ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] shadow-2xl' : 'bg-white/5 border-white/10 opacity-70 hover:opacity-100'}`}>
-                             {pkg.popular && <div className="absolute top-0 right-0 px-4 py-1.5 bg-[#ff00ff] text-white text-[8px] font-black uppercase tracking-widest rounded-bl-xl font-syncopate italic">Most Selected</div>}
+                          <button 
+                            key={pkg.id} 
+                            onClick={() => setSelectedPkgId(pkg.id)} 
+                            className={`w-full p-8 rounded-[2.8rem] border flex items-center justify-between transition-all relative overflow-hidden group ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] shadow-2xl' : 'bg-white/5 border-white/10 opacity-70 hover:opacity-100'}`}
+                          >
+                             {pkg.popular && <div className="absolute top-0 right-0 px-6 py-2 bg-[#ff00ff] text-white text-[9px] font-black uppercase tracking-widest rounded-bl-2xl font-syncopate italic">Selected</div>}
                              <div className="text-left space-y-1">
-                                <span className="text-[10px] font-black text-[#ff00ff] uppercase tracking-widest leading-none">{pkg.label}</span>
-                                <div className="text-3xl font-black italic text-white uppercase tracking-tighter">{pkg.credits} Credits</div>
-                                <div className="flex items-center gap-2 mt-2">
+                                <span className="text-[11px] font-black text-[#ff00ff] uppercase tracking-widest leading-none">{pkg.label}</span>
+                                <div className="text-4xl font-black italic text-white uppercase tracking-tighter leading-none my-1">{pkg.credits} Credits</div>
+                                <div className="flex items-center gap-2 py-1">
                                    <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                                   <span className="text-[10px] font-black text-[#00f0ff] tracking-[0.2em] uppercase">+ {pkg.bonus} $GASPai LOYALTY POINTS</span>
+                                   <span className="text-[11px] font-black text-[#00f0ff] uppercase tracking-widest">+ {pkg.bonus} $GASPai LOYALTY POINTS</span>
                                 </div>
-                                <div className="text-[9px] font-black text-[#ffea00] uppercase tracking-[0.3em] mt-1 pr-4">🌶️ {pkg.perk}</div>
+                                <div className="text-[10px] font-black text-[#ffea00] uppercase tracking-widest py-1 italic">🌶️ {pkg.perk}</div>
                              </div>
-                             <div className="text-right flex flex-col items-end gap-2">
-                                <span className="text-2xl font-black italic text-white leading-none">${pkg.price}</span>
-                                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff] shadow-[0_0_15px_#ff00ff]' : 'border-white/20'}`}>
-                                   {selectedPkgId === pkg.id && <Check size={18} className="text-white" />}
+                             <div className="text-right flex flex-col items-end gap-3">
+                                <span className="text-3xl font-black italic text-white leading-none">${pkg.price}</span>
+                                <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff] shadow-[0_0_20px_#ff00ff]' : 'border-white/20'}`}>
+                                   {selectedPkgId === pkg.id && <Check size={20} className="text-white" />}
                                 </div>
                              </div>
                           </button>
                         ))}
                      </div>
                   </div>
-                  <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/95 to-transparent z-[200] pt-12 text-center">
-                     <button onClick={() => setIsTopUpOpen(true)} className="w-full p-6 bg-[#ff00ff] rounded-[2.6rem] text-[18px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-4 shadow-[0_25px_60px_rgba(255,0,255,0.4)] active:scale-95 group transition-all">
+                  
+                  <div className="fixed bottom-0 left-0 right-0 p-10 bg-gradient-to-t from-black via-black/95 to-transparent z-[200] pt-16 flex justify-center">
+                     <button 
+                       onClick={() => setIsTopUpOpen(true)}
+                       className="w-full max-w-[500px] h-20 bg-[#ff00ff] rounded-[2.8rem] text-[20px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-5 shadow-[0_25px_80px_rgba(255,0,255,0.4)] active:scale-95 group transition-all"
+                     >
                         <span>Secure Checkout</span>
-                        <ArrowRight size={26} className="group-hover:translate-x-2 transition-transform" />
+                        <ArrowRight size={28} className="group-hover:translate-x-2 transition-transform" />
                      </button>
                   </div>
                </motion.div>
@@ -463,25 +480,31 @@ export default function FunnelView() {
              {currentStepIdx === 3 && (
              <motion.div 
                key="success"
-               initial={{ opacity: 0, scale: 0.9 }}
+               initial={{ opacity: 0, scale: 0.95 }}
                animate={{ opacity: 1, scale: 1 }}
-               className="absolute inset-0 bg-black flex flex-col items-center justify-center p-10 text-center space-y-12"
+               className="absolute inset-0 bg-black flex flex-col items-center justify-center p-12 text-center space-y-12"
              >
                 <div className="relative">
-                   <div className="w-24 h-24 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center shadow-[0_0_80px_rgba(0,240,255,0.3)]">
-                      <CheckCircle2 size={48} className="text-[#00f0ff]" />
+                   <div className="w-28 h-28 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center shadow-[0_0_100px_rgba(0,240,255,0.3)]">
+                      <CheckCircle2 size={56} className="text-[#00f0ff]" />
                    </div>
                    <div className="absolute inset-0 rounded-full border border-[#00f0ff]/20 animate-ping" />
                 </div>
-                <div className="space-y-4">
-                   <h2 className="text-4xl font-black italic tracking-tighter text-white leading-none uppercase">You're All Set</h2>
-                   <div className="flex flex-col items-center gap-1">
-                      <span className="text-5xl font-black text-[#ffea00] tracking-tighter leading-none italic uppercase">Credits Loaded</span>
-                      <span className="text-[12px] font-black text-white/40 tracking-[0.4em] uppercase">Access Granted</span>
+                <div className="space-y-6">
+                   <h2 className="text-5xl font-black italic tracking-tighter text-white leading-none uppercase shrink-0">Account Loaded</h2>
+                   <div className="flex flex-col items-center gap-2">
+                      <span className="text-2xl font-black text-[#ffea00] tracking-[0.2em] uppercase italic leading-none">Access Granted</span>
+                      <div className="h-px w-20 bg-white/10 my-2" />
+                      <span className="text-[11px] font-black text-white/30 tracking-[0.4em] uppercase">Identity Verified</span>
                    </div>
                 </div>
                 <div className="w-full space-y-4 pt-10">
-                   <button onClick={() => window.location.href = '/app'} className="w-full py-6 bg-[#ff00ff] rounded-[2rem] text-[18px] font-black uppercase tracking-[0.2em] shadow-[0_20px_60px_rgba(255,0,255,0.4)] transition-all">Start Chatting</button>
+                   <button 
+                     onClick={() => window.location.href = '/app'} 
+                     className="w-full py-7 bg-white text-black rounded-[2.5rem] text-[20px] font-black uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-95"
+                   >
+                     Enter Main Frame
+                   </button>
                 </div>
              </motion.div>
            )}
