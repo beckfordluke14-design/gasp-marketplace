@@ -146,6 +146,20 @@ export default function FunnelView() {
     return () => { clearInterval(timerInterval); clearInterval(lInt); };
   }, [currentStepIdx]);
 
+  // 💰 PURCHASE SUCCESS HANDLER: Bridge from Funnel to App
+  useEffect(() => {
+    const handleSuccess = () => {
+      // Small delay for the confetti/success feel before switching UI
+      setTimeout(() => {
+        setCurrentStepIdx(3);
+        setIsTopUpOpen(false);
+      }, 800);
+    };
+
+    window.addEventListener('gasp_balance_refresh', handleSuccess);
+    return () => window.removeEventListener('gasp_balance_refresh', handleSuccess);
+  }, []);
+
   useEffect(() => {
     if (currentStepIdx === 1 && messages.length === 0) {
       setTimeout(() => {
@@ -434,7 +448,55 @@ export default function FunnelView() {
                </motion.div>
             )}
 
-          </AnimatePresence>
+             {currentStepIdx === 3 && (
+             <motion.div 
+               key="success"
+               initial={{ opacity: 0, scale: 0.9 }}
+               animate={{ opacity: 1, scale: 1 }}
+               className="absolute inset-0 bg-black flex flex-col items-center justify-center p-10 text-center space-y-12"
+             >
+                <div className="relative">
+                   <div className="w-24 h-24 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center shadow-[0_0_80px_rgba(0,240,255,0.3)]">
+                      <CheckCircle2 size={48} className="text-[#00f0ff]" />
+                   </div>
+                   <div className="absolute inset-0 rounded-full border border-[#00f0ff]/20 animate-ping" />
+                </div>
+
+                <div className="space-y-4">
+                   <h2 className="text-4xl font-black italic tracking-tighter text-white leading-none uppercase">You're All Set</h2>
+                   <div className="flex flex-col items-center gap-1">
+                      <span className="text-5xl font-black text-[#ffea00] tracking-tighter leading-none italic">
+                        {selectedPkgId === 'tier_session' ? '60,000' : '10,000'}
+                      </span>
+                      <span className="text-[12px] font-black text-white/40 tracking-[0.4em] uppercase">Credits Verified</span>
+                   </div>
+                </div>
+
+                <div className="w-full space-y-4 pt-10">
+                   <button 
+                     onClick={() => window.location.href = '/app'}
+                     className="w-full py-6 bg-[#ff00ff] rounded-[2rem] text-[18px] font-black uppercase tracking-[0.2em] shadow-[0_20px_60px_rgba(255,0,255,0.4)] hover:scale-105 active:scale-95 transition-all"
+                   >
+                      Start Chatting
+                   </button>
+                   <button 
+                     onClick={() => window.location.href = '/app'}
+                     className="w-full py-4 text-[11px] font-black text-white/20 uppercase tracking-[0.4em] hover:text-white transition-colors"
+                   >
+                      Open Main Frame
+                   </button>
+                </div>
+
+                <div className="absolute bottom-10 left-0 right-0 px-12 opacity-30 grayscale">
+                   <div className="flex items-center justify-center gap-3">
+                      <Shield size={14} className="text-[#00f0ff]" />
+                      <span className="text-[9px] font-black tracking-[0.3em] uppercase italic">Secure Identity Claimed</span>
+                   </div>
+                </div>
+             </motion.div>
+           )}
+
+        </AnimatePresence>
         </div>
       </main>
 
