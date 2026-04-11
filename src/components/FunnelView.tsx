@@ -41,11 +41,11 @@ export default function FunnelView() {
   const [selectedPkgId, setSelectedPkgId] = useState('tier_session'); // Initialize to Prime Access
   const [hasPaid, setHasPaid] = useState(false);
   
-  // 📸 ABSOLUTE ASSET SYNC: Using verified R2 paths
+  // 📸 ABSOLUTE ASSET SYNC: Using verified Production DB paths
   const [vaultItems, setVaultItems] = useState<any[]>([
-    { id: 'v1', content_url: 'https://asset.gasp.fun/PROMO/PromoPic1.png', is_unlocked: false, price_credits: 6000 },
-    { id: 'v2', content_url: 'https://asset.gasp.fun/PROMO/PromoPic2.png', is_unlocked: false, price_credits: 6000 },
-    { id: 'v3', content_url: 'https://asset.gasp.fun/PROMO/PromoPic3.png', is_unlocked: false, price_credits: 6000 },
+    { id: 'v1', content_url: 'https://asset.gasp.fun/personas/jasmine-f04846/vault_2.jpg', is_unlocked: false, price_credits: 6000 },
+    { id: 'v2', content_url: 'https://asset.gasp.fun/personas/veronica-medellin-locked/vault_1.jpg', is_unlocked: false, price_credits: 6000 },
+    { id: 'v3', content_url: 'https://asset.gasp.fun/personas/veronica-medellin-locked/vault_2.jpg', is_unlocked: false, price_credits: 6000 },
   ]);
   
   const [fomoMsg, setFomoMsg] = useState('');
@@ -709,88 +709,92 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto pb-64">
-                {[
-                  { id: 'tier_starter', label: 'Basic Pack', price: 4.99, credits: '5,000', bonus: '5,000' },
-                  { id: 'tier_session', label: 'Prime Access', price: 24.99, credits: '30,000', bonus: '30,000', popular: true },
-                  { id: 'tier_whale', label: 'Elite Status', price: 99.99, credits: '120,000', bonus: '120,000' },
-                ].map((pkg) => (
-                  <button 
-                    key={pkg.id}
-                    onClick={() => setSelectedPkgId(pkg.id)}
-                    className={`relative p-4 md:p-5 rounded-[2rem] border transition-all duration-300 flex items-center justify-between ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] ring-2 ring-[#ff00ff]/30 shadow-[0_0_30px_rgba(255,0,255,0.2)]' : 'bg-white/5 border-white/10'}`}
-                  >
-                    <div className="flex flex-col gap-1 text-left">
-                       <span className="text-[10px] font-black text-[#ff00ff] uppercase tracking-widest leading-none">{pkg.label}</span>
-                       <div className="flex items-center gap-2">
-                          <span className="text-xl md:text-2xl font-black text-white italic tracking-tighter leading-none">{pkg.credits}</span>
-                          <span className="text-[7px] font-bold text-white/20 uppercase mt-1 tracking-tighter shrink-0">Credits</span>
-                       </div>
-                       <div className="flex items-center gap-1.5 opacity-80">
-                          <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
-                          <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-tighter">+{pkg.bonus} $GASPai Match</span>
-                       </div>
-                       <div className="mt-1 flex flex-col gap-0.5">
-                          <span className="text-[7px] font-black text-white/40 uppercase tracking-widest italic leading-none">🌶️ UNLOCKS PRIVATE VAULT</span>
-                          <span className="text-[6px] font-bold text-[#ff00ff]/60 uppercase tracking-widest leading-none">Works for 100s of girls</span>
-                       </div>
-                    </div>
-                    <div className="text-right flex flex-col items-end shrink-0">
-                       <span className="text-[14px] font-black text-white italic">${pkg.price}</span>
-                       <div className={`mt-2 w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>
-                          {selectedPkgId === pkg.id && <Check size={12} className="text-white" />}
-                       </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
+              <div className="flex flex-col gap-8 max-w-sm mx-auto pb-48">
+                {/* 1. PRICING PACKAGES */}
+                <div className="grid grid-cols-1 gap-4">
+                  {[
+                    { id: 'tier_starter', label: 'Basic Pack', price: 4.99, credits: '5,000', bonus: '5,000' },
+                    { id: 'tier_session', label: 'Prime Access', price: 24.99, credits: '30,000', bonus: '30,000', popular: true },
+                    { id: 'tier_whale', label: 'Elite Status', price: 99.99, credits: '120,000', bonus: '120,000' },
+                  ].map((pkg) => (
+                    <button 
+                      key={pkg.id}
+                      onClick={() => setSelectedPkgId(pkg.id)}
+                      className={`relative p-4 md:p-5 rounded-[2rem] border transition-all duration-300 flex items-center justify-between ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] ring-2 ring-[#ff00ff]/30 shadow-[0_0_30px_rgba(255,0,255,0.2)]' : 'bg-white/5 border-white/10'}`}
+                    >
+                      <div className="flex flex-col gap-1 text-left">
+                         <span className="text-[10px] font-black text-[#ff00ff] uppercase tracking-widest leading-none">{pkg.label}</span>
+                         <div className="flex items-center gap-2">
+                            <span className="text-xl md:text-2xl font-black text-white italic tracking-tighter leading-none">{pkg.credits}</span>
+                            <span className="text-[7px] font-bold text-white/20 uppercase mt-1 tracking-tighter shrink-0">Credits</span>
+                         </div>
+                         <div className="flex items-center gap-1.5 opacity-80">
+                            <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
+                            <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-tighter">+{pkg.bonus} $GASPai Match</span>
+                         </div>
+                         <div className="mt-1 flex flex-col gap-0.5">
+                            <span className="text-[7px] font-black text-white/40 uppercase tracking-widest italic leading-none">🌶️ UNLOCKS PRIVATE VAULT</span>
+                            <span className="text-[6px] font-bold text-[#ff00ff]/60 uppercase tracking-widest leading-none">Works for 100s of girls</span>
+                         </div>
+                      </div>
+                      <div className="text-right flex flex-col items-end shrink-0">
+                         <span className="text-[14px] font-black text-white italic">${pkg.price}</span>
+                         <div className={`mt-2 w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>
+                            {selectedPkgId === pkg.id && <Check size={12} className="text-white" />}
+                         </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
 
-              {/* 📡 SYNDICATE ROSTER PREVIEW: FULL VERTICAL CARDS */}
-              <div className="w-full mt-6 mb-12 animate-in fade-in slide-in-from-bottom-10 duration-1000">
-                 <div className="flex flex-col items-center gap-6">
-                    <div className="flex flex-col items-center gap-1">
-                       <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-[0.4em] italic shadow-[#ffea00]/40 drop-shadow-sm">Syndicate Identities Verified</span>
-                       <div className="h-px w-24 bg-gradient-to-r from-transparent via-[#ffea00]/40 to-transparent" />
-                    </div>
-                    
-                    <div className="w-full overflow-x-auto no-scrollbar pb-6">
-                       <div className="flex items-center gap-4 px-6 min-w-max">
-                          {[
-                            { name: 'OFFICER MOORE', img: 'ROSTER/OfficerMoore.png', tag: 'SECURITY' },
-                            { name: 'NAYELI', img: 'ROSTER/Nayeli.png', tag: 'EXCLUSIVE' },
-                            { name: 'MIKA', img: 'ROSTER/Mika.png', tag: 'ELITE' },
-                            { name: 'JASMINE', img: 'ROSTER/Jasmine.png', tag: 'INTIMATE' }
-                          ].map((p, i) => (
-                            <div key={i} className="relative w-40 h-64 rounded-[2rem] overflow-hidden group shadow-2xl border border-white/10 shrink-0">
-                               <img src={proxyImg(p.img)} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" alt={p.name} />
-                               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
-                               
-                               <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                                  <span className="text-[7px] font-black text-white uppercase tracking-tighter">ONLINE</span>
-                                </div>
+                {/* 2. SYNDICATE ROSTER PREVIEW (DIRECTLY UNDERNEATH) */}
+                <div className="w-screen relative -left-4 mt-2 mb-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                   <div className="flex flex-col items-center gap-6">
+                      <div className="flex flex-col items-center gap-1">
+                         <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-[0.4em] italic shadow-[#ffea00]/40 drop-shadow-sm">Syndicate Identities Verified</span>
+                         <div className="h-px w-24 bg-gradient-to-r from-transparent via-[#ffea00]/40 to-transparent" />
+                      </div>
+                      
+                      <div className="w-full overflow-x-auto no-scrollbar pb-6">
+                         <div className="flex items-center gap-4 px-6 min-w-max">
+                            {[
+                              { name: 'OFFICER MOORE', img: 'https://asset.gasp.fun/personas/officer moore-9bdddf/hero_1.webp', tag: 'SECURITY' },
+                              { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp', tag: 'EXCLUSIVE' },
+                              { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp', tag: 'ELITE' },
+                              { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-kingston/hero_1.webp', tag: 'INTIMATE' }
+                            ].map((p, i) => (
+                              <div key={i} className="relative w-40 h-64 rounded-[2rem] overflow-hidden group shadow-2xl border border-white/10 shrink-0">
+                                 <img src={p.img} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" alt={p.name} />
+                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+                                 
+                                 <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                                    <span className="text-[7px] font-black text-white uppercase tracking-tighter">ONLINE</span>
+                                  </div>
 
-                               <div className="absolute bottom-5 left-0 right-0 px-4 flex flex-col gap-0.5">
-                                  <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic leading-none">{p.tag}</span>
-                                  <span className="text-[12px] font-black text-white uppercase tracking-tighter leading-none">{p.name}</span>
+                                 <div className="absolute bottom-5 left-0 right-0 px-4 flex flex-col gap-0.5">
+                                    <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic leading-none">{p.tag}</span>
+                                    <span className="text-[12px] font-black text-white uppercase tracking-tighter leading-none">{p.name}</span>
+                                 </div>
+                              </div>
+                            ))}
+                            
+                            {/* 📡 THE '& MORE' TERMINAL CARD */}
+                            <div className="w-40 h-64 rounded-[2rem] border-2 border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-4 group hover:bg-[#ff00ff]/10 hover:border-[#ff00ff]/30 transition-all shrink-0">
+                               <div className="w-16 h-16 rounded-full bg-white/5 flex flex-col items-center justify-center border border-white/10 group-hover:scale-110 group-hover:border-[#ff00ff]/50 transition-all">
+                                  <span className="text-2xl font-black text-white group-hover:text-[#ff00ff]">+100</span>
+                                  <span className="text-[6px] font-black text-white/20 uppercase tracking-widest italic -mt-1">WOMEN</span>
+                               </div>
+                               <div className="text-center">
+                                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] group-hover:text-white">& MORE</span>
+                                  <p className="text-[6px] font-bold text-white/10 uppercase tracking-[0.1em] mt-1 italic">FULL ROSTER ACCESS</p>
                                </div>
                             </div>
-                          ))}
-                          
-                          {/* 📡 THE '& MORE' TERMINAL CARD */}
-                          <div className="w-40 h-64 rounded-[2rem] border-2 border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-4 group hover:bg-[#ff00ff]/10 hover:border-[#ff00ff]/30 transition-all shrink-0">
-                             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
-                                <span className="text-xl font-black text-white/40 group-hover:text-white">+96</span>
-                             </div>
-                             <div className="text-center">
-                                <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] group-hover:text-[#ff00ff]">& MORE</span>
-                                <p className="text-[6px] font-bold text-white/10 uppercase tracking-widest mt-1">GASP.FUN ROSTER</p>
-                             </div>
-                          </div>
-                       </div>
-                    </div>
-                    <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] italic">Access 100s of women with Universal Credits</p>
-                 </div>
+                         </div>
+                      </div>
+                      <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] italic">Toggle switch required to unlock full syndicate roster</p>
+                   </div>
+                </div>
               </div>
 
               {/* 🚀 SOVEREIGN CHECKOUT CTA */}
