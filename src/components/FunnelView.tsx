@@ -295,7 +295,7 @@ export default function FunnelView() {
       </div>
 
       {/* 🛡️ MASTER EXPERIENCE CONTAINER */}
-      <main className="relative z-10 w-full max-w-[600px] h-screen md:h-[92dvh] flex flex-col bg-black/60 backdrop-blur-3xl md:rounded-[3rem] md:border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 md:my-4">
+      <main className="relative z-10 w-full max-w-[600px] h-[100dvh] md:h-[92dvh] flex flex-col bg-black/60 backdrop-blur-3xl md:rounded-[3rem] md:border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 md:my-4">
         
         {/* UPPER STATUS BAR */}
         {currentStepIdx > 0 && currentStepIdx < 3 && (
@@ -447,7 +447,7 @@ export default function FunnelView() {
                   )}
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black to-transparent z-[100]">
+                <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 md:pb-6 bg-gradient-to-t from-black via-black to-transparent z-[100]">
                   <form onSubmit={handleSendMessage} className="relative flex items-center gap-4">
                     <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Type reply to Veronica..." className="flex-1 bg-[#111] border border-white/20 rounded-2xl px-6 py-5 text-[15px] focus:outline-none focus:border-[#ff00ff]/50 shadow-inner" />
                     <button type="submit" className="w-14 h-14 bg-[#ff00ff] rounded-2xl flex items-center justify-center shadow-xl active:scale-95 transition-all"><Send size={24} className="rotate-[-45deg]" /></button>
