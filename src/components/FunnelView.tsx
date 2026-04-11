@@ -165,7 +165,7 @@ export default function FunnelView() {
           setMessages([{
             id: 'm1',
             role: 'assistant',
-            content: `Finally... I saw you looking and I was starting to think you were just going to watch from a distance. 🫦 Listen, I've got something special saved in my private vault that I can't show anyone else... but we have to be quick before our time's up. Ready to see it?`
+            content: `I saw you looking... you probably saw that video of me in the grocery store, didn't you? 😉 I'm just glad you finally found me here. I've been waiting for someone like you to actually say something.`
           }]);
           setIsTyping(false);
         }, 1500);
@@ -191,17 +191,17 @@ export default function FunnelView() {
             userId: gid,
             personaId: profileIdFromUrl === 'veronica_medellin' ? 'veronica-medellin-locked' : profileIdFromUrl,
             isFunnel: true,
-            systemInstruction: `You are VERONICA, a hyper-closer. 
-            1. DO NOT ask for their name or waste time. 
-            2. Every word you say should lead to the VAULT. 
-            3. Use short, punchy, seductive sentences.
-            4. If they say they are ready, TELL THEM you are sending a private preview now.
-            5. Goal: Drive them to the glitch/cutoff in exactly 1-2 more messages.`,
+            systemInstruction: `You are VERONICA. The user just arrived from an ad showing you in a grocery store.
+            1. Lean into the fact that they "saw you" in that video. Be playful and flattered.
+            2. Build a "shared secret" connection. You are glad they found you.
+            3. DO NOT ask for their name/age or stall. 
+            4. By the 2nd or 3rd message, pivot to sending a "Private Tease" because you want to show them more than what was in that video.
+            5. Goal: Drive to the GLITCH cutoff after the tease.`,
             source: 'traffic_stars_funnel'
           }),
         });
 
-        if (res.status === 402 || messages.length >= 2) {
+        if (res.status === 402 || messages.length >= 3) {
           // 🌩️ THE TEASE & GLITCH SEQUENCE
           setTimeout(() => {
             setMessages(prev => [...prev, { 
@@ -319,7 +319,7 @@ export default function FunnelView() {
                    <div className="flex items-center gap-5 text-left">
                       <div className="relative">
                          <div className="w-16 h-16 rounded-full border-2 border-[#ff00ff] p-1 shadow-[0_0_20px_rgba(255,0,255,0.4)]">
-                            <img src={profile.image} className="w-full h-full object-cover rounded-full" alt={profile.name} />
+                            <img src={profile.image} className="w-full h-full object-cover object-top rounded-full" alt={profile.name} />
                          </div>
                          <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-black border border-white/20 flex items-center justify-center text-[8px] font-bold text-white/40 shadow-xl">V</div>
                       </div>
@@ -354,15 +354,27 @@ export default function FunnelView() {
                       {messages.map((msg) => (
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                           {msg.isTease ? (
-                            <div className="relative w-full max-w-[280px] aspect-[3/4] rounded-[2rem] overflow-hidden border border-white/20 shadow-2xl bg-black animate-pulse">
-                               <img src={galleryImages[1]} className="w-full h-full object-cover blur-2xl opacity-60 scale-110" alt="Tease" />
-                               <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-6 text-center gap-4">
-                                  <div className="w-12 h-12 rounded-full border-2 border-white/20 border-t-[#ff00ff] animate-spin" />
-                                  <div className="space-y-1">
-                                     <div className="text-[10px] font-black text-[#ff00ff] tracking-[0.4em] uppercase">Private Access</div>
-                                     <div className="text-[8px] font-black text-white/40 uppercase tracking-widest">DECRYPTING_ASSET_002...</div>
-                                  </div>
+                            <div className="relative w-full max-w-[320px] aspect-[3/4] rounded-[2.5rem] overflow-hidden border border-[#ff00ff]/30 shadow-[0_0_50px_rgba(255,0,255,0.2)] bg-black animate-in fade-in zoom-in duration-500">
+                               <img 
+                                 src="https://asset.gasp.fun/Promo/cucumber_tease.png" 
+                                 className="w-full h-full object-cover transition-all duration-[2000ms]" 
+                                 alt="Tease" 
+                               />
+                               <div className="absolute inset-0 bg-black/20 flex flex-col items-center justify-center p-6 text-center gap-4 group">
+                                  <motion.div 
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: [0, 1, 0] }}
+                                    transition={{ delay: 1.2, duration: 0.5 }}
+                                    className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-4"
+                                  >
+                                     <div className="w-14 h-14 rounded-full border-2 border-[#ff00ff] border-t-transparent animate-spin" />
+                                     <div className="space-y-1">
+                                        <div className="text-[12px] font-black text-[#ff00ff] tracking-[0.4em] uppercase">Private Access</div>
+                                        <div className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none">DECRYPTING_ASSET_069...</div>
+                                     </div>
+                                  </motion.div>
                                </div>
+                               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/40 to-transparent h-1/3 pointer-events-none" />
                             </div>
                           ) : (
                             <div className={`max-w-[90%] px-6 py-5 rounded-[2rem] text-[15px] ${msg.role === 'user' ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-xl' : 'bg-[#151515]/90 border border-white/10 rounded-tl-none font-medium'}`}>
@@ -424,7 +436,7 @@ export default function FunnelView() {
                      <div className="flex flex-col items-center gap-6 pt-6">
                         <div className="relative">
                            <div className="w-20 h-20 rounded-full border-2 border-white/10 p-1 opacity-40 grayscale">
-                              <img src={profile.image} className="w-full h-full object-cover rounded-full" alt={profile.name} />
+                              <img src={profile.image} className="w-full h-full object-cover object-top rounded-full" alt={profile.name} />
                            </div>
                            <div className="absolute inset-0 flex items-center justify-center">
                               <Lock size={24} className="text-white/20" />
@@ -475,9 +487,9 @@ export default function FunnelView() {
 
                      <div className="space-y-4">
                         {[
-                          { id: 'tier_starter', label: 'STARTER PACK', price: 4.99, credits: '5,000', bonus: '5,000', perk: 'Private Chat + Points for Vault Unlocks' },
-                          { id: 'tier_session', label: 'SESSIONS PRO', price: 24.99, credits: '30,000', bonus: '30,000', perk: 'Spicy Records + Private Chat Access', popular: true },
-                          { id: 'tier_whale', label: 'ELITE IDENTITY', price: 99.99, credits: '120,000', bonus: '120,000', perk: 'VIP Priority + Unlock Everything Spicy' },
+                          { id: 'tier_starter', label: 'STARTER PACK', price: 4.99, credits: '5,000', bonus: '5,000', perk: 'Private Chat + Points for Photo Unlocks' },
+                          { id: 'tier_session', label: 'SESSIONS PRO', price: 24.99, credits: '30,000', bonus: '30,000', perk: 'Unlock Multiple Spicy Galleries + Full Chat', popular: true },
+                          { id: 'tier_whale', label: 'ELITE IDENTITY', price: 99.99, credits: '120,000', bonus: '120,000', perk: 'VIP Priority - Unlock Every Secret Photo' },
                         ].map(pkg => (
                           <button 
                             key={pkg.id} 
