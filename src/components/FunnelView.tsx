@@ -194,29 +194,40 @@ export default function FunnelView() {
     // 🎤 LASER-SHARP NARRATIVE INTERCEPT
     if (messages.length === 1) {
       setTimeout(() => {
+        // Part 1: The Intuition
         setMessages(prev => [...prev, { 
-          id: Date.now().toString(), 
+          id: 'int_1_' + Date.now(), 
           role: 'assistant', 
-          content: `I had a feeling about you, ${inputValue}... 😉 I bet you're the type who knows how to keep a secret. Those supermarket aisles were way too public for what I really wanted to show you... check this out:` 
+          content: `I had a feeling about you, ${inputValue}... 😉` 
         }]);
-        setIsTyping(false);
+        setIsTyping(true); // Start typing Bubble 2
         
-        // 🌩️ TRIGGER THE TEASE & GLITCH
         setTimeout(() => {
+          // Part 2: The Setup
           setMessages(prev => [...prev, { 
-            id: 'tease_' + Date.now(), 
+            id: 'int_2_' + Date.now(), 
             role: 'assistant', 
-            content: 'tease_module',
-            isTease: true 
+            content: `I bet you're the type who knows how to keep a secret. Those supermarket aisles were way too public for what I really wanted to show you...` 
           }]);
+          setIsTyping(true); // Start typing the Tease
           
-          // ⚡ FINAL HARD CLOSE - Extended for visual registration
           setTimeout(() => {
-            setCurrentStepIdx(2);
-            setIsTyping(false);
-          }, 4000); // 2.5s clear reveal + 1.5s glitch transition
-        }, 2500); // 2.5s Reading delay for the text bridge
-      }, 1200);
+            // THE TEASE!
+            setMessages(prev => [...prev, { 
+              id: 'tease_' + Date.now(), 
+              role: 'assistant', 
+              content: 'tease_module',
+              isTease: true 
+            }]);
+            
+            // ⚡ FINAL HARD CLOSE
+            setTimeout(() => {
+              setCurrentStepIdx(2);
+              setIsTyping(false);
+            }, 4000); // Visual registration window
+          }, 1800); // Typing delay for image
+        }, 1500); // Typing delay for bubble 2
+      }, 800);
       return;
     }
 
