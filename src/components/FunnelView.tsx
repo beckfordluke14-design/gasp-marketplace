@@ -371,34 +371,34 @@ export default function FunnelView() {
                         {vaultItems
                           .filter(item => item.is_vault && !item.caption?.includes('DELETED'))
                           .map((item, idx) => (
-                          <div key={item.id} className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 bg-white/5 group shadow-2xl">
+                          <div key={item.id} className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/5 bg-zinc-900 shadow-2xl group">
                             <img 
                               src={item.content_url} 
-                              className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" 
+                              className="absolute inset-0 w-full h-full object-cover transition-all duration-700 blur-3xl scale-110 opacity-50" 
                               alt="Vault Content" 
                             />
-                            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] group-hover:backdrop-blur-none transition-all duration-500" />
                             
-                            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 gap-3 opacity-100 group-hover:opacity-0 transition-opacity pointer-events-none">
-                               <div className="w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-white/60">
-                                  <Lock size={18} />
+                            {/* 🔒 MASTER TERMINAL LOCK (Synced with ChatDrawer) */}
+                            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 gap-4 bg-black/60 backdrop-blur-sm">
+                               <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 mb-2">
+                                  <Lock size={20} />
                                </div>
-                               <span className="text-[8px] font-black tracking-widest text-center uppercase leading-tight">PREMIUM SIGNAL ACCESS</span>
+                               
+                               <div className="w-full space-y-3">
+                                  <button 
+                                    onClick={() => setCurrentStepIdx(2)}
+                                    className="w-full py-3 bg-white text-black text-[10px] font-black uppercase rounded-xl hover:bg-[#ffea00] transition-all shadow-[0_10px_30px_rgba(255,255,255,0.15)] active:scale-95"
+                                  >
+                                     UNLOCK VAULT
+                                  </button>
+                                  <div className="text-center">
+                                     <span className="text-[7px] font-black text-white/20 tracking-[0.4em] uppercase">RESTRICTED_NODE_{idx + 1}</span>
+                                  </div>
+                               </div>
                             </div>
 
-                            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/40 to-transparent">
-                               <div className="flex items-center justify-between">
-                                  <div className="flex flex-col">
-                                     <span className="text-[7px] font-black text-[#ffea00] tracking-widest leading-none">
-                                        {item.caption?.split('.')[0]?.replace('Vault Restricted', 'CLASSIFIED') || 'CLASSIFIED'}
-                                     </span>
-                                     <span className="text-[10px] font-black text-white tracking-tighter mt-1">INTERNAL_VAULT_{idx + 1}</span>
-                                  </div>
-                                  <div className="w-7 h-7 rounded-lg bg-[#ff00ff]/20 border border-[#ff00ff]/40 flex items-center justify-center">
-                                     <ShoppingBag size={14} className="text-[#ff00ff]" />
-                                  </div>
-                               </div>
-                            </div>
+                            {/* SCANLINE OVERLAY */}
+                            <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
                           </div>
                         ))}
                       </div>
