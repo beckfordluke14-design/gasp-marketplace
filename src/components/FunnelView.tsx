@@ -146,16 +146,13 @@ export default function FunnelView() {
     return () => { clearInterval(timerInterval); clearInterval(lInt); };
   }, [currentStepIdx]);
 
-  // 💰 PURCHASE SUCCESS HANDLER: Bridge from Funnel to App
   useEffect(() => {
     const handleSuccess = () => {
-      // Small delay for the confetti/success feel before switching UI
       setTimeout(() => {
         setCurrentStepIdx(3);
         setIsTopUpOpen(false);
       }, 800);
     };
-
     window.addEventListener('gasp_balance_refresh', handleSuccess);
     return () => window.removeEventListener('gasp_balance_refresh', handleSuccess);
   }, []);
@@ -168,7 +165,7 @@ export default function FunnelView() {
           setMessages([{
             id: 'm1',
             role: 'assistant',
-            content: `Hey Papi... I was hoping you'd find me today. 😉 I'm so bored, I've just been waiting for someone fun to talk to. How's your day going?`
+            content: `Hey Papi... I was hoping you'd find me today. 😉 I've just been waiting for someone fun to talk to. How's your day going?`
           }]);
           setIsTyping(false);
         }, 1500);
@@ -249,19 +246,19 @@ export default function FunnelView() {
       </div>
 
       {/* 🛡️ MASTER EXPERIENCE CONTAINER */}
-      <main className="relative z-10 w-full max-w-[480px] h-screen md:h-[92dvh] flex flex-col bg-black/60 backdrop-blur-3xl md:rounded-[3rem] md:border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 md:my-4">
+      <main className="relative z-10 w-full max-w-[540px] h-screen md:h-[92dvh] flex flex-col bg-black/60 backdrop-blur-3xl md:rounded-[3rem] md:border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 md:my-4">
         
-        {/* UPPER STATUS BAR (Visible on Step 1 & 2) */}
+        {/* UPPER STATUS BAR */}
         {currentStepIdx > 0 && (
-          <div className="shrink-0 px-6 py-5 flex items-center justify-between border-b border-white/5 bg-black/40 relative z-[110]">
+          <div className="shrink-0 px-8 py-5 flex items-center justify-between border-b border-white/5 bg-black/40 relative z-[110]">
              <div className="flex flex-col text-left">
-                <span className="text-[9px] font-black text-white/40 tracking-[0.2em] leading-none">NEURAL LINK ACTIVE</span>
+                <span className="text-[9px] font-black text-white/40 tracking-[0.2em] leading-none uppercase">Signal Status</span>
                 <span className="text-xl font-black text-[#ffea00] leading-none mt-1">{timeLeft}</span>
              </div>
              
              <div className="flex items-center gap-2.5 bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[10px] font-black text-white tracking-widest leading-none">14 Online</span>
+                <span className="text-[10px] font-black text-white tracking-widest leading-none">{activeUsers} Online</span>
              </div>
 
              <div className="text-right">
@@ -285,8 +282,7 @@ export default function FunnelView() {
 
              {currentStepIdx === 1 && (
               <motion.div key="main-content" className="flex-1 flex flex-col overflow-hidden">
-                {/* Profile Header (Condensed) */}
-                <div className="px-6 py-6 border-b border-white/5 relative z-20 flex items-center justify-between">
+                <div className="px-8 py-6 border-b border-white/5 relative z-20 flex items-center justify-between">
                    <div className="flex items-center gap-5 text-left">
                       <div className="relative">
                          <div className="w-16 h-16 rounded-full border-2 border-[#ff00ff] p-1 shadow-[0_0_20px_rgba(255,0,255,0.4)]">
@@ -299,7 +295,7 @@ export default function FunnelView() {
                             <h2 className="text-2xl font-black text-white tracking-tighter leading-none">{profile.name}</h2>
                             <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
                          </div>
-                         <span className="text-[10px] font-black text-white/40 tracking-[0.3em] leading-none uppercase">{profile.city}</span>
+                         <span className="text-[10px] font-black text-white/40 tracking-[0.3em] leading-none">{profile.city}</span>
                       </div>
                    </div>
                    <div className="flex items-center gap-4 text-white/40">
@@ -308,19 +304,18 @@ export default function FunnelView() {
                    </div>
                 </div>
 
-                {/* Tabs */}
-                <div className="flex items-center gap-8 px-6 border-b border-white/5">
+                <div className="flex items-center gap-8 px-8 border-b border-white/5">
                    <button onClick={() => setActiveTab('NEURAL_LINK')} className={`pb-3 text-[11px] font-black tracking-[0.2em] transition-all relative ${activeTab === 'NEURAL_LINK' ? 'text-white' : 'text-white/30'}`}>
-                      NEURAL LINK
+                      CHAT
                       {activeTab === 'NEURAL_LINK' && <motion.div layoutId="tab-active" className="absolute bottom-[-1px] left-0 right-0 h-[2.5px] bg-[#ff00ff]" />}
                    </button>
                    <button onClick={() => setActiveTab('ARCHIVE')} className={`pb-3 text-[11px] font-black tracking-[0.2em] transition-all relative ${activeTab === 'ARCHIVE' ? 'text-white' : 'text-white/30'}`}>
-                      ARCHIVE
+                      VAULT
                       {activeTab === 'ARCHIVE' && <motion.div layoutId="tab-active" className="absolute bottom-[-1px] left-0 right-0 h-[2.5px] bg-[#ff00ff]" />}
                    </button>
                 </div>
 
-                <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 no-scrollbar pb-32">
+                <div ref={scrollRef} className="flex-1 overflow-y-auto px-8 py-6 no-scrollbar pb-32">
                   {activeTab === 'NEURAL_LINK' ? (
                     <div className="space-y-8">
                       <div className="grid grid-cols-2 gap-4">
@@ -333,7 +328,7 @@ export default function FunnelView() {
                       </div>
                       {messages.map((msg) => (
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[90%] px-6 py-5 rounded-[1.8rem] text-[15px] ${msg.role === 'user' ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-xl' : 'bg-[#151515]/90 border border-white/10 rounded-tl-none'}`}>
+                          <div className={`max-w-[90%] px-6 py-5 rounded-[1.8rem] text-[15px] ${msg.role === 'user' ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-xl' : 'bg-[#151515]/90 border border-white/10 rounded-tl-none font-medium text-white/90'}`}>
                             {msg.content}
                           </div>
                         </div>
@@ -350,7 +345,7 @@ export default function FunnelView() {
                     </div>
                   ) : (
                     <div className="space-y-8 animate-in fade-in duration-700">
-                      <h2 className="text-xl font-black italic tracking-tighter text-white">UNCENSORED ARCHIVE</h2>
+                      <h2 className="text-xl font-black italic tracking-tighter text-white">UNCENSORED VAULT</h2>
                       {loadingVault ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4"><Loader2 className="text-[#ff00ff] animate-spin" size={32} /></div>
                       ) : (
@@ -360,18 +355,13 @@ export default function FunnelView() {
                               <img src={item.content_url} className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-50" />
                               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 gap-4 bg-black/60 backdrop-blur-sm">
                                  <Lock size={20} className="text-white/40" />
-                                 <button onClick={() => setCurrentStepIdx(2)} className="w-full py-3 bg-white text-black text-[10px] font-black uppercase rounded-xl hover:bg-[#ffea00] active:scale-95 transition-all shadow-xl">UNLOCK VAULT</button>
-                                 <span className="text-[7px] font-black text-white/20 tracking-widest">NODE_{idx + 1}</span>
+                                 <button onClick={() => setCurrentStepIdx(2)} className="w-full py-3 bg-white text-black text-[10px] font-black uppercase rounded-xl hover:bg-[#ffea00] active:scale-95 transition-all shadow-xl font-syncopate italic">Unlock Vault</button>
+                                 <span className="text-[7px] font-black text-white/20 tracking-widest">RECORD_NODE_{idx + 1}</span>
                               </div>
                             </div>
                           ))}
                         </div>
                       )}
-                      <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 flex flex-col items-center text-center gap-4">
-                          <Sparkles className="text-[#ffea00]" size={24} />
-                          <h3 className="text-sm font-black italic tracking-tight uppercase">Full Access Expires in {timeLeft}</h3>
-                          <button onClick={() => setCurrentStepIdx(2)} className="w-full py-4 bg-[#ff00ff] rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl">UPGRADE SUBSCRIPTION</button>
-                      </div>
                     </div>
                   )}
                 </div>
@@ -387,63 +377,77 @@ export default function FunnelView() {
 
             {currentStepIdx === 2 && (
                <motion.div key="offer" className="absolute inset-0 bg-black flex flex-col overflow-y-auto no-scrollbar pt-10 pb-40 space-y-10">
-                  <div className="px-6 space-y-8">
+                  <div className="px-8 space-y-8">
                      <div className="text-center space-y-3">
-                        <h2 className="text-5xl font-black italic tracking-tighter text-white leading-none uppercase">Session Expired</h2>
+                        <h2 className="text-5xl font-black italic tracking-tighter text-white leading-none uppercase shadow-sm">Session Expired</h2>
                         <div className="flex flex-col items-center gap-2">
-                           <div className="px-3 py-1 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-full flex items-center gap-2"><span className="text-[10px] font-black text-[#ffea00] tracking-widest">GASP NEURAL ACTIVE</span></div>
-                           <p className="text-[11px] text-white/40 tracking-[0.2em] font-black italic">RESET UPLINK TO UNLOCK 100+ MODELS</p>
+                           <div className="px-3 py-1 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-full flex items-center gap-2"><span className="text-[10px] font-black text-[#ffea00] tracking-widest uppercase">Encryption Active</span></div>
+                           <p className="text-[11px] text-white/40 tracking-[0.2em] font-black italic">RE-LINK TO UNLOCK 100+ MODELS</p>
                         </div>
                      </div>
                      <div className="flex flex-col gap-6">
                         <div className="flex items-center justify-between px-2">
-                           <span className="text-[10px] font-black text-white/40 tracking-widest">NETWORK ACCESS MODULES</span>
+                           <span className="text-[10px] font-black text-white/40 tracking-widest uppercase">Network Access Modules</span>
                            <span className="text-[10px] font-black text-[#ffea00] tracking-widest">{fomoMsg || 'WAITING...'}</span>
                         </div>
-                        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 relative -left-6 w-screen px-6">
+                        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 px-6 -ml-6 w-screen">
                            {(roster.length > 0 ? roster : [
                              { name: 'MOORE', img: 'https://asset.gasp.fun/personas/officer%20moore-9bdddf/hero_1.webp', tag: 'SECURITY' },
                              { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp', tag: 'EXCLUSIVE' },
                              { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp', tag: 'ELITE' },
                              { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-f04846/hero_1.webp', tag: 'INTIMATE' }
                            ]).map((p, i) => (
-                             <div key={i} className="relative w-32 h-44 rounded-[1.5rem] overflow-hidden bg-white/5 border border-white/10 shrink-0">
+                             <div key={i} className="relative w-36 h-48 rounded-[1.5rem] overflow-hidden bg-white/5 border border-white/10 shrink-0">
                                 <img src={p.img} className="w-full h-full object-cover" alt={p.name} />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-90" />
-                                <div className="absolute bottom-3 left-3 text-left">
-                                   <div className="text-[6px] font-black text-[#00f0ff] uppercase">{p.tag}</div>
-                                   <div className="text-[11px] font-black text-white italic">{p.name}</div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-90 shadow-inner" />
+                                <div className="absolute bottom-3 left-4 text-left">
+                                   <div className="text-[6px] font-black text-[#00f0ff] tracking-widest leading-none mb-1 uppercase">{p.tag}</div>
+                                   <div className="text-[14px] font-black text-white italic tracking-tighter">{p.name}</div>
                                 </div>
                              </div>
                            ))}
-                           
-                           {/* ➕ 100+ MORE MODULE */}
-                           <div className="relative w-32 h-44 rounded-[1.5rem] overflow-hidden bg-[#ff00ff]/5 border border-[#ff00ff]/30 shrink-0 flex flex-col items-center justify-center gap-2 group cursor-pointer active:scale-95 transition-all">
-                              <div className="absolute inset-0 bg-black/40 backdrop-blur-md group-hover:bg-black/20 transition-all" />
-                              <div className="relative z-10 w-10 h-10 rounded-full bg-[#ff00ff]/20 border border-[#ff00ff]/40 flex items-center justify-center text-[#ff00ff]">
-                                 <Sparkles size={18} />
-                              </div>
-                              <div className="relative z-10 flex flex-col items-center">
-                                 <span className="text-[14px] font-black text-white leading-none">& 100+</span>
-                                 <span className="text-[9px] font-black text-[#ff00ff] tracking-widest uppercase mt-0.5">MORE</span>
+                           <div className="relative w-36 h-48 rounded-[1.5rem] overflow-hidden bg-[#ff00ff]/5 border border-[#ff00ff]/30 shrink-0 flex flex-col items-center justify-center gap-2 group cursor-pointer active:scale-95 transition-all">
+                              <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
+                              <Sparkles size={24} className="text-[#ff00ff] relative z-10" />
+                              <div className="relative z-10 text-center">
+                                 <span className="text-[18px] font-black text-white leading-none">& 100+</span><br/>
+                                 <span className="text-[10px] font-black text-[#ff00ff] tracking-[0.3em] uppercase">MORE</span>
                               </div>
                            </div>
                         </div>
                      </div>
                      <div className="space-y-4">
                         {[
-                          { id: 'tier_starter', label: 'BASIC PACK', price: 4.99, credits: '5,000', bonus: '5,000' },
-                          { id: 'tier_session', label: 'PRIME ACCESS', price: 24.99, credits: '30,000', bonus: '30,000', popular: true },
+                          { id: 'tier_starter', label: 'BASIC PACK', price: 4.99, credits: '5,000', bonus: '5,000', perk: 'Unlock 12 Private Assets' },
+                          { id: 'tier_session', label: 'PRIME ACCESS', price: 24.99, credits: '30,000', bonus: '30,000', perk: 'Priority Uplink + Private Chat', popular: true },
+                          { id: 'tier_whale', label: 'ELITE IDENTITY', price: 99.99, credits: '120,000', bonus: '120,000', perk: 'VIP Access + Unlock ALL Records' },
                         ].map(pkg => (
-                          <button key={pkg.id} onClick={() => setSelectedPkgId(pkg.id)} className={`w-full p-6 py-8 rounded-[2.5rem] border flex items-center justify-between transition-all ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff]' : 'bg-white/5 border-white/10'}`}>
-                             <div className="text-left space-y-1"><span className="text-[10px] font-black text-[#ff00ff]">{pkg.label}</span><div className="text-3xl font-black italic text-white uppercase">{pkg.credits} Credits</div></div>
-                             <div className="text-right flex flex-col items-end gap-2"><span className="text-2xl font-black italic">${pkg.price}</span><div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>{selectedPkgId === pkg.id && <Check size={18} className="text-white" />}</div></div>
+                          <button key={pkg.id} onClick={() => setSelectedPkgId(pkg.id)} className={`w-full p-6 py-8 rounded-[2.5rem] border flex items-center justify-between transition-all relative overflow-hidden group ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] shadow-2xl' : 'bg-white/5 border-white/10 opacity-70 hover:opacity-100'}`}>
+                             {pkg.popular && <div className="absolute top-0 right-0 px-4 py-1.5 bg-[#ff00ff] text-white text-[8px] font-black uppercase tracking-widest rounded-bl-xl font-syncopate italic">Most Selected</div>}
+                             <div className="text-left space-y-1">
+                                <span className="text-[10px] font-black text-[#ff00ff] uppercase tracking-widest leading-none">{pkg.label}</span>
+                                <div className="text-3xl font-black italic text-white uppercase tracking-tighter">{pkg.credits} Credits</div>
+                                <div className="flex items-center gap-2 mt-2">
+                                   <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
+                                   <span className="text-[10px] font-black text-[#00f0ff] tracking-[0.2em] uppercase">+ {pkg.bonus} $GASPai LOYALTY POINTS</span>
+                                </div>
+                                <div className="text-[9px] font-black text-[#ffea00] uppercase tracking-[0.3em] mt-1 pr-4">🌶️ {pkg.perk}</div>
+                             </div>
+                             <div className="text-right flex flex-col items-end gap-2">
+                                <span className="text-2xl font-black italic text-white leading-none">${pkg.price}</span>
+                                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff] shadow-[0_0_15px_#ff00ff]' : 'border-white/20'}`}>
+                                   {selectedPkgId === pkg.id && <Check size={18} className="text-white" />}
+                                </div>
+                             </div>
                           </button>
                         ))}
                      </div>
                   </div>
-                  <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black to-transparent z-[200] pt-12 text-center">
-                     <button onClick={() => setIsTopUpOpen(true)} className="w-full p-6 bg-[#ff00ff] rounded-[2.6rem] text-[18px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-4 shadow-2xl active:scale-95"><span>SECURE CHECKOUT</span><ArrowRight size={26}/></button>
+                  <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/95 to-transparent z-[200] pt-12 text-center">
+                     <button onClick={() => setIsTopUpOpen(true)} className="w-full p-6 bg-[#ff00ff] rounded-[2.6rem] text-[18px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-4 shadow-[0_25px_60px_rgba(255,0,255,0.4)] active:scale-95 group transition-all">
+                        <span>Secure Checkout</span>
+                        <ArrowRight size={26} className="group-hover:translate-x-2 transition-transform" />
+                     </button>
                   </div>
                </motion.div>
             )}
@@ -461,42 +465,20 @@ export default function FunnelView() {
                    </div>
                    <div className="absolute inset-0 rounded-full border border-[#00f0ff]/20 animate-ping" />
                 </div>
-
                 <div className="space-y-4">
                    <h2 className="text-4xl font-black italic tracking-tighter text-white leading-none uppercase">You're All Set</h2>
                    <div className="flex flex-col items-center gap-1">
-                      <span className="text-5xl font-black text-[#ffea00] tracking-tighter leading-none italic">
-                        {selectedPkgId === 'tier_session' ? '60,000' : '10,000'}
-                      </span>
-                      <span className="text-[12px] font-black text-white/40 tracking-[0.4em] uppercase">Credits Verified</span>
+                      <span className="text-5xl font-black text-[#ffea00] tracking-tighter leading-none italic uppercase">Credits Loaded</span>
+                      <span className="text-[12px] font-black text-white/40 tracking-[0.4em] uppercase">Access Granted</span>
                    </div>
                 </div>
-
                 <div className="w-full space-y-4 pt-10">
-                   <button 
-                     onClick={() => window.location.href = '/app'}
-                     className="w-full py-6 bg-[#ff00ff] rounded-[2rem] text-[18px] font-black uppercase tracking-[0.2em] shadow-[0_20px_60px_rgba(255,0,255,0.4)] hover:scale-105 active:scale-95 transition-all"
-                   >
-                      Start Chatting
-                   </button>
-                   <button 
-                     onClick={() => window.location.href = '/app'}
-                     className="w-full py-4 text-[11px] font-black text-white/20 uppercase tracking-[0.4em] hover:text-white transition-colors"
-                   >
-                      Open Main Frame
-                   </button>
-                </div>
-
-                <div className="absolute bottom-10 left-0 right-0 px-12 opacity-30 grayscale">
-                   <div className="flex items-center justify-center gap-3">
-                      <Shield size={14} className="text-[#00f0ff]" />
-                      <span className="text-[9px] font-black tracking-[0.3em] uppercase italic">Secure Identity Claimed</span>
-                   </div>
+                   <button onClick={() => window.location.href = '/app'} className="w-full py-6 bg-[#ff00ff] rounded-[2rem] text-[18px] font-black uppercase tracking-[0.2em] shadow-[0_20px_60px_rgba(255,0,255,0.4)] transition-all">Start Chatting</button>
                 </div>
              </motion.div>
            )}
 
-        </AnimatePresence>
+          </AnimatePresence>
         </div>
       </main>
 
