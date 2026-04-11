@@ -191,22 +191,35 @@ export default function FunnelView() {
             userId: gid,
             personaId: profileIdFromUrl === 'veronica_medellin' ? 'veronica-medellin-locked' : profileIdFromUrl,
             isFunnel: true,
-            systemInstruction: `You are VERONICA. You are currently in a high-urgency funnel. 
-            Your goal is to be a HYPER CLOSER. 
-            1. Use "Strategic Mystery". You are playful, slightly challenging, and incredibly alluring. 
-            2. Lean into the "Timer". Remind the user that "time is running out" or "we don't have long". 
-            3. Push the user towards the PRIVATE VAULT. Mention that "I saved something special for you there" or "It's too private for the main site".
-            4. Keep responses punchy, direct, and emotionally charged. 
-            5. Avoid high-tech jargon like "link instability" or "neural link". Just talk about "our time" and "private access".
-            6. Your ultimate goal is to get them to the "Session Expired" screen where they must buy credits to stay with you.`,
+            systemInstruction: `You are VERONICA, a hyper-closer. 
+            1. DO NOT ask for their name or waste time. 
+            2. Every word you say should lead to the VAULT. 
+            3. Use short, punchy, seductive sentences.
+            4. If they say they are ready, TELL THEM you are sending a private preview now.
+            5. Goal: Drive them to the glitch/cutoff in exactly 1-2 more messages.`,
             source: 'traffic_stars_funnel'
           }),
         });
-        if (res.status === 402) {
-          setCurrentStepIdx(2);
-          setIsTyping(false);
+
+        if (res.status === 402 || messages.length >= 2) {
+          // 🌩️ THE TEASE & GLITCH SEQUENCE
+          setTimeout(() => {
+            setMessages(prev => [...prev, { 
+              id: 'tease_' + Date.now(), 
+              role: 'assistant', 
+              content: 'tease_module',
+              isTease: true 
+            }]);
+            
+            // ⚡ FINAL HARD CLOSE
+            setTimeout(() => {
+              setCurrentStepIdx(2);
+              setIsTyping(false);
+            }, 1800);
+          }, 800);
           return;
         }
+
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();
         let fullText = '';
@@ -233,9 +246,6 @@ export default function FunnelView() {
         console.error('[Funnel neural error]:', err);
       } finally {
         setIsTyping(false);
-        if (messages.length >= 2) {
-          setTimeout(() => setCurrentStepIdx(2), 3500);
-        }
       }
     })();
   };
@@ -279,6 +289,20 @@ export default function FunnelView() {
         <div className="flex-1 flex flex-col overflow-hidden relative">
           <AnimatePresence mode="wait">
             
+            {currentStepIdx === 2 ? (
+              <motion.div
+                key="glitch-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ 
+                  opacity: [0, 1, 0, 1, 0],
+                  x: [0, -10, 10, -5, 0],
+                  filter: ["blur(0px)", "blur(20px)", "blur(0px)"]
+                }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0 z-[500] pointer-events-none bg-[#ff00ff]/10 mix-blend-overlay"
+              />
+            ) : null}
+
             {currentStepIdx === 0 && (
               <motion.div key="init" className="flex-1 flex flex-col items-center justify-center p-8 space-y-4 bg-black">
                  <Loader2 className="text-[#ff00ff] animate-spin" size={40} />
@@ -290,6 +314,7 @@ export default function FunnelView() {
 
              {currentStepIdx === 1 && (
               <motion.div key="main-content" className="flex-1 flex flex-col overflow-hidden">
+                {/* Profile Header */}
                 <div className="px-8 py-6 border-b border-white/5 relative z-20 flex items-center justify-between">
                    <div className="flex items-center gap-5 text-left">
                       <div className="relative">
@@ -326,19 +351,24 @@ export default function FunnelView() {
                 <div ref={scrollRef} className="flex-1 overflow-y-auto px-8 py-6 no-scrollbar pb-32">
                   {activeTab === 'NEURAL_LINK' ? (
                     <div className="space-y-8">
-                      <div className="grid grid-cols-2 gap-4">
-                         {galleryImages.map((url, i) => (
-                            <div key={i} className="aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative bg-white/5">
-                               <img src={url} className="w-full h-full object-cover" alt="VERONICA" />
-                               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                            </div>
-                         ))}
-                      </div>
                       {messages.map((msg) => (
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[90%] px-6 py-5 rounded-[2rem] text-[15px] ${msg.role === 'user' ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-xl' : 'bg-[#151515]/90 border border-white/10 rounded-tl-none font-medium'}`}>
-                            {msg.content}
-                          </div>
+                          {msg.isTease ? (
+                            <div className="relative w-full max-w-[280px] aspect-[3/4] rounded-[2rem] overflow-hidden border border-white/20 shadow-2xl bg-black animate-pulse">
+                               <img src={galleryImages[1]} className="w-full h-full object-cover blur-2xl opacity-60 scale-110" alt="Tease" />
+                               <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-6 text-center gap-4">
+                                  <div className="w-12 h-12 rounded-full border-2 border-white/20 border-t-[#ff00ff] animate-spin" />
+                                  <div className="space-y-1">
+                                     <div className="text-[10px] font-black text-[#ff00ff] tracking-[0.4em] uppercase">Private Access</div>
+                                     <div className="text-[8px] font-black text-white/40 uppercase tracking-widest">DECRYPTING_ASSET_002...</div>
+                                  </div>
+                               </div>
+                            </div>
+                          ) : (
+                            <div className={`max-w-[90%] px-6 py-5 rounded-[2rem] text-[15px] ${msg.role === 'user' ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-xl' : 'bg-[#151515]/90 border border-white/10 rounded-tl-none font-medium'}`}>
+                              {msg.content}
+                            </div>
+                          )}
                         </div>
                       ))}
                       {isTyping && (
@@ -386,8 +416,8 @@ export default function FunnelView() {
             {currentStepIdx === 2 && (
                <motion.div 
                  key="offer" 
-                 initial={{ opacity: 0, y: 10 }}
-                 animate={{ opacity: 1, y: 0 }}
+                 initial={{ opacity: 0, scale: 1.1 }}
+                 animate={{ opacity: 1, scale: 1 }}
                  className="flex-1 overflow-y-auto no-scrollbar scroll-smooth"
                >
                   <div className="px-10 py-10 space-y-10 pb-40">
