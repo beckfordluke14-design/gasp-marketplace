@@ -345,26 +345,26 @@ export default function FunnelView() {
 
              {currentStepIdx === 1 && (
               <motion.div key="main-content" className="flex-1 flex flex-col overflow-hidden">
-                {/* Profile Header */}
-                <div className="px-8 py-6 border-b border-white/5 relative z-20 flex items-center justify-between">
+                {/* Profile Header - Optimized for Mobile Height */}
+                <div className="px-8 py-4 border-b border-white/5 relative z-20 flex items-center justify-between bg-black/40 backdrop-blur-md">
                    <div className="flex items-center gap-5 text-left">
                       <div className="relative">
-                         <div className="w-16 h-16 rounded-full border-2 border-[#ff00ff] p-1 shadow-[0_0_20px_rgba(255,0,255,0.4)]">
+                         <div className="w-14 h-14 rounded-full border-2 border-[#ff00ff] p-1 shadow-[0_0_20px_rgba(255,0,255,0.4)]">
                             <img src={profile.image} className="w-full h-full object-cover object-top rounded-full" alt={profile.name} />
                          </div>
                          <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-black border border-white/20 flex items-center justify-center text-[8px] font-bold text-white/40 shadow-xl">V</div>
                       </div>
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-0.5">
                          <div className="flex items-center gap-2">
-                            <h2 className="text-2xl font-black text-white tracking-tighter leading-none">{profile.name}</h2>
-                            <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+                            <h2 className="text-xl font-black text-white tracking-tighter leading-none">{profile.name}</h2>
+                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                          </div>
-                         <span className="text-[10px] font-black text-white/40 tracking-[0.3em] leading-none uppercase">{profile.city}</span>
+                         <span className="text-[9px] font-black text-white/40 tracking-[0.3em] leading-none uppercase">{profile.city}</span>
                       </div>
                    </div>
-                   <div className="flex items-center gap-4 text-white/40">
-                      <Mic2 size={20} />
-                      <Waveform size={20} />
+                   <div className="flex items-center gap-4 text-white/40 shrink-0">
+                      <Mic2 size={18} />
+                      <Waveform size={18} />
                    </div>
                 </div>
 
@@ -379,7 +379,7 @@ export default function FunnelView() {
                    </button>
                 </div>
 
-                <div ref={scrollRef} className="flex-1 overflow-y-auto px-8 py-6 no-scrollbar pb-32">
+                <div ref={scrollRef} className="flex-1 overflow-y-auto px-8 py-6 no-scrollbar pb-[180px]">
                   {activeTab === 'NEURAL_LINK' ? (
                     <div className="space-y-8">
                       {messages.map((msg) => (
