@@ -210,12 +210,12 @@ export default function FunnelView() {
             isTease: true 
           }]);
           
-          // ⚡ FINAL HARD CLOSE
+          // ⚡ FINAL HARD CLOSE - Extended for visual registration
           setTimeout(() => {
             setCurrentStepIdx(2);
             setIsTyping(false);
-          }, 3200); // 2.2s reveal + 1s glitch buffer
-        }, 1500);
+          }, 4000); // 2.5s clear reveal + 1.5s glitch transition
+        }, 2500); // 2.5s Reading delay for the text bridge
       }, 1200);
       return;
     }
@@ -509,7 +509,7 @@ export default function FunnelView() {
                         {[
                           { id: 'tier_starter', label: 'STARTER PACK', price: 4.99, credits: '5,000', bonus: '5,000', perk: 'Private Chat + Points for Photo Unlocks' },
                           { id: 'tier_session', label: 'SESSIONS PRO', price: 24.99, credits: '30,000', bonus: '30,000', perk: 'Unlock Multiple Spicy Galleries + Full Chat', popular: true },
-                          { id: 'tier_whale', label: 'ELITE IDENTITY', price: 99.99, credits: '120,000', bonus: '120,000', perk: 'VIP Priority - Unlock Every Secret Photo' },
+                          { id: 'tier_whale', label: 'ELITE IDENTITY', price: 99.99, credits: '120,000', bonus: '120,000', perk: 'VIP Priority - Unlock 100+ Exclusive Private Photos' },
                         ].map(pkg => (
                           <button 
                             key={pkg.id} 
