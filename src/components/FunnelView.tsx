@@ -709,8 +709,8 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
                 </div>
               </div>
 
-              <div className="flex flex-col gap-8 max-w-sm mx-auto pb-48">
-                {/* 1. PRICING PACKAGES */}
+
+                {/* 2. PRICING PACKAGES */}
                 <div className="grid grid-cols-1 gap-4">
                   {[
                     { id: 'tier_starter', label: 'Basic Pack', price: 4.99, credits: '5,000', bonus: '5,000' },
@@ -747,56 +747,55 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
                   ))}
                 </div>
 
-                {/* 📡 SYNDICATE ROSTER PREVIEW (DIRECTLY UNDERNEATH) */}
-              <div className="w-screen relative -left-4 mt-2 mb-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
-                 <div className="flex flex-col items-center gap-6">
-                    <div className="flex flex-col items-center gap-1.5">
-                       <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                          <span className="text-[11px] font-black text-[#ffea00] uppercase tracking-[0.4em] italic shadow-[#ffea00]/40 drop-shadow-sm">100+ Models Active Online</span>
-                       </div>
-                       <div className="h-px w-32 bg-gradient-to-r from-transparent via-[#ffea00]/40 to-transparent" />
-                    </div>
-                    
-                    <div className="w-full overflow-x-auto no-scrollbar pb-6">
-                       <div className="flex items-center gap-4 px-6 min-w-max">
-                          {[
-                            { name: 'OFFICER MOORE', img: 'https://asset.gasp.fun/personas/officer moore-9bdddf/hero_1.webp', tag: 'SECURITY' },
-                            { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp', tag: 'EXCLUSIVE' },
-                            { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp', tag: 'ELITE' },
-                            { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-kingston/hero_1.webp', tag: 'INTIMATE' }
-                          ].map((p, i) => (
-                            <div key={i} className="relative w-40 h-64 rounded-[2rem] overflow-hidden group shadow-2xl border border-white/10 shrink-0">
-                               <img src={p.img} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" alt={p.name} />
-                               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
-                               
-                               <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
-                                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                                  <span className="text-[7px] font-black text-white uppercase tracking-tighter">ONLINE</span>
-                                </div>
+                {/* 📡 SYNDICATE ROSTER PREVIEW (REINFORCEMENT POSITION) */}
+                <div className="w-screen relative -left-4 mt-8 mb-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                   <div className="flex flex-col items-center gap-4">
+                      <div className="flex flex-col items-center gap-1.5">
+                         <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                            <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-[0.3em] italic shadow-[#ffea00]/40 drop-shadow-sm">100+ Models Active Online</span>
+                         </div>
+                         <div className="h-px w-24 bg-gradient-to-r from-transparent via-[#ffea00]/40 to-transparent" />
+                      </div>
+                      
+                      <div className="w-full overflow-x-auto no-scrollbar pb-2">
+                         <div className="flex items-center gap-3 px-6 min-w-max">
+                            {[
+                              { name: 'OFFICER MOORE', img: 'https://asset.gasp.fun/personas/officer%20moore-9bdddf/hero_1.webp', tag: 'SECURITY' },
+                              { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp', tag: 'EXCLUSIVE' },
+                              { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp', tag: 'ELITE' },
+                              { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-f04846/hero_1.webp?v=synthesis', tag: 'INTIMATE' }
+                            ].map((p, i) => (
+                              <div key={i} className="relative w-32 h-48 rounded-[1.5rem] overflow-hidden group shadow-2xl border border-white/10 shrink-0">
+                                 <img src={p.img} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000" alt={p.name} />
+                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+                                 
+                                 <div className="absolute top-3 left-3 flex items-center gap-1 bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10">
+                                    <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
+                                    <span className="text-[6px] font-black text-white uppercase tracking-tighter">ONLINE</span>
+                                  </div>
 
-                               <div className="absolute bottom-5 left-0 right-0 px-4 flex flex-col gap-0.5">
-                                  <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic leading-none">{p.tag}</span>
-                                  <span className="text-[12px] font-black text-white uppercase tracking-tighter leading-none">{p.name}</span>
+                                 <div className="absolute bottom-3 left-0 right-0 px-3 flex flex-col gap-0">
+                                    <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-widest italic leading-none">{p.tag}</span>
+                                    <span className="text-[10px] font-black text-white uppercase tracking-tighter leading-none">{p.name}</span>
+                                 </div>
+                              </div>
+                            ))}
+                            
+                            {/* 📡 THE '& MORE' TERMINAL CARD */}
+                            <div className="w-32 h-48 rounded-[1.5rem] border-2 border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-2 group hover:bg-[#ff00ff]/10 hover:border-[#ff00ff]/30 transition-all shrink-0">
+                               <div className="w-10 h-10 rounded-full bg-white/5 flex flex-col items-center justify-center border border-white/10 group-hover:scale-110 group-hover:border-[#ff00ff]/50 transition-all">
+                                  <span className="text-lg font-black text-white group-hover:text-[#ff00ff]">+100</span>
+                               </div>
+                               <div className="text-center">
+                                  <span className="text-[8px] font-black text-white/40 uppercase tracking-[0.2em] group-hover:text-white">& MORE</span>
                                </div>
                             </div>
-                          ))}
-                          
-                          {/* 📡 THE '& MORE' TERMINAL CARD */}
-                          <div className="w-40 h-64 rounded-[2rem] border-2 border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-4 group hover:bg-[#ff00ff]/10 hover:border-[#ff00ff]/30 transition-all shrink-0">
-                             <div className="w-16 h-16 rounded-full bg-white/5 flex flex-col items-center justify-center border border-white/10 group-hover:scale-110 group-hover:border-[#ff00ff]/50 transition-all">
-                                <span className="text-2xl font-black text-white group-hover:text-[#ff00ff]">+100</span>
-                                <span className="text-[6px] font-black text-white/20 uppercase tracking-widest italic -mt-1">MODELS</span>
-                             </div>
-                             <div className="text-center">
-                                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] group-hover:text-white">& MORE</span>
-                                <p className="text-[6px] font-bold text-white/10 uppercase tracking-[0.1em] mt-1 italic">UNLIMITED NETWORK ACCESS</p>
-                             </div>
-                          </div>
-                       </div>
-                    </div>
-                 </div>
-              </div>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+
 
               {/* 🚀 SOVEREIGN CHECKOUT CTA */}
               <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/80 to-transparent z-[100] pt-12">
