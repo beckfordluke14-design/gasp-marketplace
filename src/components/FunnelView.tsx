@@ -29,7 +29,9 @@ export default function FunnelView() {
   const [selectedPkgId, setSelectedPkgId] = useState('tier_session');
   
   const [vaultItems, setVaultItems] = useState<any[]>([]);
+  const [roster, setRoster] = useState<any[]>([]);
   const [loadingVault, setLoadingVault] = useState(false);
+  const [loadingRoster, setLoadingRoster] = useState(false);
   
   const [timeLeft, setTimeLeft] = useState('04:54');
   const [activeUsers] = useState(14);
@@ -91,6 +93,37 @@ export default function FunnelView() {
     };
     fetchVault();
   }, [profileIdFromUrl]);
+
+  // 🌍 ROSTER INGRESS: Fetch approved personas for the checkout roster
+  useEffect(() => {
+    const fetchRoster = async () => {
+      setLoadingRoster(true);
+      try {
+        const res = await fetch('/api/rpc/db', {
+          method: 'POST',
+          body: JSON.stringify({ 
+            action: 'query', 
+            payload: { 
+              query: "SELECT id, name, seed_image_url FROM personas WHERE name IN ('Officer Moore', 'Nayeli', 'Mika', 'Jasmine') ORDER BY CASE name WHEN 'Officer Moore' THEN 1 WHEN 'Nayeli' THEN 2 WHEN 'Mika' THEN 3 WHEN 'Jasmine' THEN 4 END" 
+            } 
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.data?.rows) {
+          setRoster(data.data.rows.map((r: any) => ({
+            name: r.name.replace('Officer ', '').toUpperCase(),
+            img: r.seed_image_url,
+            tag: r.name === 'Officer Moore' ? 'SECURITY' : 'EXCLUSIVE'
+          })));
+        }
+      } catch (err) {
+        console.error('[Roster Loader Error]:', err);
+      } finally {
+        setLoadingRoster(false);
+      }
+    };
+    fetchRoster();
+  }, []);
 
   // 📈 FOMO ENGINE
   useEffect(() => {
@@ -461,20 +494,24 @@ export default function FunnelView() {
                          <span className="text-[10px] font-black text-[#ffea00] tracking-widest leading-none shadow-md">{fomoMsg || 'WAITING...'}</span>
                       </div>
                       <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 relative -left-6 w-screen px-6">
-                         {[
+                         {(roster.length > 0 ? roster : [
                            { name: 'MOORE', img: 'https://asset.gasp.fun/personas/officer%20moore-9bdddf/hero_1.webp', tag: 'SECURITY' },
                            { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp', tag: 'EXCLUSIVE' },
                            { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp', tag: 'ELITE' },
                            { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-f04846/hero_1.webp', tag: 'INTIMATE' }
-                         ].map((p, i) => (
-                           <div key={i} className="relative w-32 h-44 rounded-[1.5rem] overflow-hidden group shadow-2xl border border-white/10 shrink-0">
-                              <img 
-                                src={p.img} 
-                                className="w-full h-full object-cover shadow-inner" 
-                                alt={p.name} 
-                                referrerPolicy="no-referrer"
-                                crossOrigin="anonymous"
-                              />
+                         ]).map((p, i) => (
+                           <div key={i} className="relative w-32 h-44 rounded-[1.5rem] overflow-hidden group shadow-2xl border border-white/10 shrink-0 bg-white/5">
+                              {loadingRoster ? (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                   <div className="w-4 h-4 border-2 border-[#ff00ff] border-t-transparent animate-spin rounded-full" />
+                                </div>
+                              ) : (
+                                <img 
+                                  src={p.img} 
+                                  className="w-full h-full object-cover shadow-inner" 
+                                  alt={p.name} 
+                                />
+                              )}
                               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90 shadow-inner" />
                               <div className="absolute bottom-3 left-3 text-left">
                                  <div className="text-[6px] font-black text-[#00f0ff] tracking-widest leading-none mb-1">{p.tag}</div>
