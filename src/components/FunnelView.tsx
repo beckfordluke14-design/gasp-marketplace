@@ -430,7 +430,6 @@ export default function FunnelView() {
                           )}
                         </div>
                       ))}
-                    </div>
                       {isTyping && (
                          <div className="flex justify-start">
                             <div className="bg-[#151515]/90 px-6 py-4 rounded-2xl rounded-tl-none flex gap-1.5 items-center">
@@ -563,13 +562,13 @@ export default function FunnelView() {
                      </div>
                   </div>
                   
-                  <div className="fixed bottom-0 left-0 right-0 p-10 bg-gradient-to-t from-black via-black/95 to-transparent z-[200] pt-16 flex justify-center">
+                  <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/95 to-transparent z-[200] pt-12 flex justify-center">
                      <button 
                        onClick={() => setIsTopUpOpen(true)}
-                       className="w-full max-w-[500px] h-20 bg-[#ff00ff] rounded-[2.8rem] text-[20px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-5 shadow-[0_25px_80px_rgba(255,0,255,0.4)] active:scale-95 group transition-all"
+                       className="w-full max-w-[500px] h-20 bg-[#ff00ff] rounded-[2.5rem] text-[20px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-5 shadow-[0_20px_100px_rgba(255,0,255,0.6)] active:scale-95 group transition-all"
                      >
-                        <span>Secure Checkout</span>
-                        <ArrowRight size={28} className="group-hover:translate-x-2 transition-transform" />
+                        <span className="italic">Secure Checkout</span>
+                        <ArrowRight size={28} className="group-hover:translate-x-3 transition-transform" />
                      </button>
                   </div>
                </motion.div>
