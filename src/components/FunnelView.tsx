@@ -33,6 +33,7 @@ export default function FunnelView() {
   const [fomoMsg, setFomoMsg] = useState('');
   
   const searchParams = useSearchParams();
+  const hasIntercepted = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const profileIdFromUrl = searchParams.get('profile') || 'veronica_medellin';
@@ -193,13 +194,16 @@ export default function FunnelView() {
     const gid = localStorage.getItem('gasp_guest_id');
     
     // 🎤 LASER-SHARP NARRATIVE INTERCEPT
-    if (messages.length === 1) {
+    if (messages.length === 1 && !hasIntercepted.current) {
+      hasIntercepted.current = true;
+      const userName = inputValue.trim();
+      
       setTimeout(() => {
         // Part 1: The Intuition
         setMessages(prev => [...prev, { 
           id: 'int_1_' + Date.now(), 
           role: 'assistant', 
-          content: `I had a feeling about you, ${inputValue}... 😉` 
+          content: `I had a feeling about you, ${userName}... 😉` 
         }]);
         setIsTyping(true); // Start typing Bubble 2
         
@@ -409,12 +413,24 @@ export default function FunnelView() {
                                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/40 to-transparent h-1/3 pointer-events-none" />
                             </div>
                           ) : (
-                            <div className={`max-w-[90%] px-6 py-5 rounded-[2rem] text-[15px] ${msg.role === 'user' ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-xl' : 'bg-[#151515]/90 border border-white/10 rounded-tl-none font-medium'}`}>
-                              {msg.content}
+                            <div className={`flex flex-col gap-3 max-w-[90%] ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                               {msg.images && msg.images.length > 0 && (
+                                 <div className="grid grid-cols-2 gap-2 mb-1 w-full max-w-[340px]">
+                                   {msg.images.map((img, i) => (
+                                     <div key={i} className="aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-lg bg-black">
+                                       <img src={img} className="w-full h-full object-cover object-top" alt="Promo" />
+                                     </div>
+                                   ))}
+                                 </div>
+                               )}
+                               <div className={`px-6 py-5 rounded-[2rem] text-[15px] ${msg.role === 'user' ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-xl' : 'bg-[#151515]/90 border border-white/10 rounded-tl-none font-medium'}`}>
+                                 {msg.content}
+                               </div>
                             </div>
                           )}
                         </div>
                       ))}
+                    </div>
                       {isTyping && (
                          <div className="flex justify-start">
                             <div className="bg-[#151515]/90 px-6 py-4 rounded-2xl rounded-tl-none flex gap-1.5 items-center">
@@ -485,65 +501,63 @@ export default function FunnelView() {
                         </div>
                      </div>
 
-                     <div className="flex flex-col gap-4">
+                     <div className="flex flex-col gap-3">
                         <div className="flex items-center justify-between px-2">
-                           <span className="text-[9px] font-black text-white/20 tracking-widest uppercase">Top Network Connections</span>
-                           <span className="text-[9px] font-black text-[#ffea00] tracking-widest leading-none">{fomoMsg || 'WAITING...'}</span>
+                           <span className="text-[8px] font-black text-white/20 tracking-widest uppercase">Top Network Connections</span>
+                           <span className="text-[8px] font-black text-[#ffea00] tracking-widest leading-none italic">{fomoMsg || 'SECURE CONNECTION'}</span>
                         </div>
-                        <div className="flex items-center justify-between gap-2.5">
+                        <div className="flex items-center justify-between gap-2">
                            {(roster.length > 0 ? roster : [
                              { name: 'MOORE', img: 'https://asset.gasp.fun/personas/officer%20moore-9bdddf/hero_1.webp', tag: 'SECURITY' },
                              { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp', tag: 'EXCLUSIVE' },
                              { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp', tag: 'ELITE' },
                              { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-f04846/hero_1.webp', tag: 'INTIMATE' }
                            ]).map((p, i) => (
-                             <div key={i} className="relative w-[19%] aspect-[3/4.5] rounded-2xl overflow-hidden bg-white/5 border border-white/10 shrink-0 shadow-xl">
+                             <div key={i} className="relative w-[18%] aspect-[3/4.2] rounded-xl overflow-hidden bg-white/5 border border-white/10 shrink-0">
                                 <img src={p.img} className="w-full h-full object-cover" alt={p.name} />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-90 shadow-inner" />
-                                <div className="absolute bottom-2.5 left-2.5 text-left">
-                                   <div className="text-[5px] font-black text-[#00f0ff] tracking-widest mb-0.5 uppercase leading-none">{p.tag}</div>
-                                   <div className="text-[10px] font-black text-white italic tracking-tighter uppercase leading-none">{p.name}</div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-80" />
+                                <div className="absolute bottom-1.5 left-1.5 text-left">
+                                   <div className="text-[4px] font-black text-[#00f0ff] tracking-widest mb-0.5 uppercase leading-none">{p.tag}</div>
+                                   <div className="text-[8px] font-black text-white italic tracking-tighter uppercase leading-none">{p.name}</div>
                                 </div>
                              </div>
                            ))}
-                           <div className="relative w-[19%] aspect-[3/4.5] rounded-2xl overflow-hidden bg-[#ff00ff]/5 border border-[#ff00ff]/30 shrink-0 flex flex-col items-center justify-center gap-1.5 group cursor-pointer active:scale-95 transition-all shadow-2xl">
+                           <div className="relative w-[18%] aspect-[3/4.2] rounded-xl overflow-hidden bg-[#ff00ff]/5 border border-[#ff00ff]/30 shrink-0 flex flex-col items-center justify-center gap-1 group shadow-2xl">
                               <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
-                              <Sparkles size={16} className="text-[#ff00ff] relative z-10" />
+                              <Sparkles size={12} className="text-[#ff00ff] relative z-10" />
                               <div className="relative z-10 text-center">
-                                 <div className="text-[13px] font-black text-white leading-none">& 100+</div>
-                                 <div className="text-[7px] font-black text-[#ff00ff] tracking-widest uppercase">MORE</div>
+                                 <div className="text-[10px] font-black text-white leading-none">& 100+</div>
+                                 <div className="text-[6px] font-black text-[#ff00ff] tracking-widest uppercase">MORE</div>
                               </div>
                            </div>
                         </div>
                      </div>
 
-                     <div className="space-y-4">
+                     <div className="grid grid-cols-3 gap-3">
                         {[
-                          { id: 'tier_starter', label: 'STARTER PACK', price: 4.99, credits: '5,000', bonus: '5,000', perk: 'Private Chat + Points for Photo Unlocks' },
-                          { id: 'tier_session', label: 'SESSIONS PRO', price: 24.99, credits: '30,000', bonus: '30,000', perk: 'Unlock Multiple Spicy Galleries + Full Chat', popular: true },
-                          { id: 'tier_whale', label: 'ELITE IDENTITY', price: 99.99, credits: '120,000', bonus: '120,000', perk: 'VIP Priority - Unlock 100+ Exclusive Private Photos' },
+                          { id: 'tier_starter', label: 'STARTER', price: 4.99, credits: '5K', perk: 'CHAT + UNLOCKS' },
+                          { id: 'tier_session', label: 'ELITE', price: 24.99, credits: '30K', perk: 'PRIVATE VAULT', popular: true },
+                          { id: 'tier_whale', label: 'WHALE', price: 99.99, credits: '120K', perk: 'ALL-ACCESS' },
                         ].map(pkg => (
                           <button 
                             key={pkg.id} 
                             onClick={() => setSelectedPkgId(pkg.id)} 
-                            className={`w-full p-8 rounded-[2.8rem] border flex items-center justify-between transition-all relative overflow-hidden group ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] shadow-2xl' : 'bg-white/5 border-white/10 opacity-70 hover:opacity-100'}`}
+                            className={`p-4 rounded-3xl border flex flex-col items-center justify-between transition-all relative overflow-hidden text-center gap-2 ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] shadow-2xl' : 'bg-white/5 border-white/10 opacity-70 hover:opacity-100'}`}
                           >
-                             {pkg.popular && <div className="absolute top-0 right-0 px-6 py-2 bg-[#ff00ff] text-white text-[9px] font-black uppercase tracking-widest rounded-bl-2xl font-syncopate italic">Selected</div>}
-                             <div className="text-left space-y-1">
-                                <span className="text-[11px] font-black text-[#ff00ff] uppercase tracking-widest leading-none">{pkg.label}</span>
-                                <div className="text-4xl font-black italic text-white uppercase tracking-tighter leading-none my-1">{pkg.credits} Credits</div>
-                                <div className="flex items-center gap-2 py-1">
-                                   <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
-                                   <span className="text-[11px] font-black text-[#00f0ff] uppercase tracking-widest">+ {pkg.bonus} $GASPai LOYALTY POINTS</span>
-                                </div>
-                                <div className="text-[10px] font-black text-[#ffea00] uppercase tracking-widest py-1 italic">🌶️ {pkg.perk}</div>
+                             <div className="space-y-1">
+                                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest leading-none">{pkg.label}</span>
+                                <div className="text-2xl font-black italic text-white uppercase tracking-tighter leading-none">{pkg.credits}</div>
                              </div>
-                             <div className="text-right flex flex-col items-end gap-3">
-                                <span className="text-3xl font-black italic text-white leading-none">${pkg.price}</span>
-                                <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff] shadow-[0_0_20px_#ff00ff]' : 'border-white/20'}`}>
-                                   {selectedPkgId === pkg.id && <Check size={20} className="text-white" />}
-                                </div>
+                             
+                             <div className="space-y-1">
+                                <span className="text-xl font-black italic text-white leading-none">${pkg.price}</span>
+                                <div className="text-[7px] font-black text-[#ffea00] tracking-widest leading-none italic uppercase">{pkg.perk}</div>
                              </div>
+
+                             <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>
+                                {selectedPkgId === pkg.id && <Check size={14} className="text-white" />}
+                             </div>
+                             {pkg.popular && <div className="absolute top-0 right-0 w-8 h-8 bg-[#ff00ff] rounded-bl-xl flex items-center justify-center shadow-lg"><Star size={10} className="fill-white text-white" /></div>}
                           </button>
                         ))}
                      </div>
