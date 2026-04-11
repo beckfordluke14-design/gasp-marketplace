@@ -53,6 +53,20 @@ function MarketplaceContent() {
 
 
 
+  useEffect(() => {
+    // 🛡️ SMART-TRAFFIC GATEKEEPER: New users land in the funnel, Whales land in the app.
+    if (typeof window !== 'undefined') {
+       const hasVisited = localStorage.getItem('gasp_guest_id');
+       const isReturning = localStorage.getItem('gasp_balance_refresh') || hasVisited;
+       
+       if (!isReturning) {
+         console.log('🧬 [Gatekeeper] New User detected. Redirecting to High-Velocity Funnel...');
+         window.location.href = '/funnel';
+         return;
+       }
+    }
+  }, []);
+
   useEffect(() => { 
     setMounted(true); 
     const loadProfiles = async () => {
