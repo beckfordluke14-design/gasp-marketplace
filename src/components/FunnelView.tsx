@@ -532,9 +532,9 @@ export default function FunnelView() {
 
                      <div className="grid grid-cols-3 gap-3">
                         {[
-                          { id: 'tier_starter', label: 'STARTER', price: 4.99, credits: '5,000', perk: 'UNLOCK FIRST SET', points: '5,000' },
-                          { id: 'tier_session', label: 'ELITE', price: 24.99, credits: '30,000', perk: 'FULL PERSONA ACCESS', popular: true, points: '30,000' },
-                          { id: 'tier_whale', label: 'ELITE WHALE', price: 99.99, credits: '120,000', perk: 'UNLIMITED NETWORK VAULT', points: '120,000' },
+                          { id: 'tier_starter', label: 'STARTER', price: 4.99, credits: '5,000', perk: 'VAULT STARTER', points: '5,000' },
+                          { id: 'tier_session', label: 'ELITE', price: 24.99, credits: '30,000', perk: 'PRIVATE VAULT ACCESS', popular: true, points: '30,000' },
+                          { id: 'tier_whale', label: 'ELITE WHALE', price: 99.99, credits: '120,000', perk: 'FULL GLOBAL VAULTS', points: '120,000' },
                         ].map(pkg => (
                           <button 
                             key={pkg.id} 
