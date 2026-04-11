@@ -6,7 +6,7 @@ import {
   CheckCircle2, ArrowRight, Zap, Shield, Sparkles, 
   User, Search, Heart, MessageSquare, Loader2, CreditCard, 
   Terminal, Activity, ShieldAlert, Lock, Mic, HeartPulse,
-  Send, Check, Mic2, Activity as Waveform, ShoppingBag
+  Send, Check, Mic2, Activity as Waveform, ShoppingBag, Star
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
@@ -196,14 +196,12 @@ export default function FunnelView() {
     // 🎤 LASER-SHARP NARRATIVE INTERCEPT
     if (messages.length === 1 && !hasIntercepted.current) {
       hasIntercepted.current = true;
-      const userName = inputValue.trim();
-      
       setTimeout(() => {
         // Part 1: The Intuition
         setMessages(prev => [...prev, { 
           id: 'int_1_' + Date.now(), 
           role: 'assistant', 
-          content: `I had a feeling about you, ${userName}... 😉` 
+          content: `I had a feeling you'd be the type to actually reach out... 😉` 
         }]);
         setIsTyping(true); // Start typing Bubble 2
         
