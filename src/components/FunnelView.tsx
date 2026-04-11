@@ -6,7 +6,7 @@ import {
   CheckCircle2, ArrowRight, Zap, Shield, Sparkles, 
   User, Search, Heart, MessageSquare, Loader2, CreditCard, 
   Terminal, Activity, ShieldAlert, Lock, Mic, HeartPulse,
-  Send, Check, Mic2, Activity as Waveform
+  Send, Check, Mic2, Activity as Waveform, ShoppingBag
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
