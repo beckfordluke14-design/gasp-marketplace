@@ -174,7 +174,8 @@ export default function FunnelView() {
           setMessages([{
             id: 'm1',
             role: 'assistant',
-            content: `I saw you looking... you probably saw that video of me in the grocery store, didn't you? 😉 I'm just glad you finally found me here. I've been waiting for someone like you to actually say something.`
+            content: `I saw you looking... you probably saw that video of me in the grocery store, didn't you? 😉 I'm just glad you finally found me here. I've been waiting for someone like you to actually say something.`,
+            images: [galleryImages[0], galleryImages[1]]
           }]);
           setIsTyping(false);
         }, 1500);
@@ -463,31 +464,31 @@ export default function FunnelView() {
                  animate={{ opacity: 1, scale: 1 }}
                  className="flex-1 overflow-y-auto no-scrollbar scroll-smooth"
                >
-                  <div className="px-10 py-10 space-y-10 pb-40">
-                     <div className="flex flex-col items-center gap-6 pt-6">
+                  <div className="px-10 py-6 space-y-8 pb-32 md:pb-40">
+                     <div className="flex flex-col items-center gap-4 pt-2">
                         <div className="relative">
-                           <div className="w-20 h-20 rounded-full border-2 border-white/10 p-1 opacity-40 grayscale">
+                           <div className="w-16 h-16 rounded-full border-2 border-white/10 p-1 opacity-40 grayscale">
                               <img src={profile.image} className="w-full h-full object-cover object-top rounded-full" alt={profile.name} />
                            </div>
                            <div className="absolute inset-0 flex items-center justify-center">
-                              <Lock size={24} className="text-white/20" />
+                              <Lock size={20} className="text-white/20" />
                            </div>
                         </div>
-                        <div className="text-center space-y-3">
-                           <h2 className="text-6xl font-black italic tracking-tighter text-white leading-none uppercase">Session Expired</h2>
-                           <div className="flex flex-col items-center gap-2">
-                              <div className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full flex items-center gap-2">
-                                 <span className="text-[11px] font-black text-white/40 tracking-widest uppercase">Identity Protected</span>
+                        <div className="text-center space-y-1">
+                           <h2 className="text-4xl font-black italic tracking-tighter text-white leading-none uppercase">Session Expired</h2>
+                           <div className="flex flex-col items-center gap-1">
+                              <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full flex items-center gap-2">
+                                 <span className="text-[9px] font-black text-white/40 tracking-widest uppercase">Identity Protected</span>
                               </div>
-                              <p className="text-[12px] text-[#ffea00] tracking-[0.2em] font-black italic uppercase">Re-link with {profile.name} to continue</p>
+                              <p className="text-[10px] text-[#ffea00] tracking-[0.2em] font-black italic uppercase">Re-link with {profile.name} to continue</p>
                            </div>
                         </div>
                      </div>
 
-                     <div className="flex flex-col gap-6">
+                     <div className="flex flex-col gap-4">
                         <div className="flex items-center justify-between px-2">
-                           <span className="text-[10px] font-black text-white/20 tracking-widest uppercase">Top Network Connections</span>
-                           <span className="text-[10px] font-black text-[#ffea00] tracking-widest leading-none">{fomoMsg || 'WAITING...'}</span>
+                           <span className="text-[9px] font-black text-white/20 tracking-widest uppercase">Top Network Connections</span>
+                           <span className="text-[9px] font-black text-[#ffea00] tracking-widest leading-none">{fomoMsg || 'WAITING...'}</span>
                         </div>
                         <div className="flex items-center justify-between gap-2.5">
                            {(roster.length > 0 ? roster : [
