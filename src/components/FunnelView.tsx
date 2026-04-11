@@ -532,29 +532,35 @@ export default function FunnelView() {
 
                      <div className="grid grid-cols-3 gap-3">
                         {[
-                          { id: 'tier_starter', label: 'STARTER', price: 4.99, credits: '5K', perk: 'CHAT + UNLOCKS' },
-                          { id: 'tier_session', label: 'ELITE', price: 24.99, credits: '30K', perk: 'PRIVATE VAULT', popular: true },
-                          { id: 'tier_whale', label: 'WHALE', price: 99.99, credits: '120K', perk: 'ALL-ACCESS' },
+                          { id: 'tier_starter', label: 'STARTER', price: 4.99, credits: '5,000', perk: 'UNLOCK FIRST SET', points: '5,000' },
+                          { id: 'tier_session', label: 'ELITE', price: 24.99, credits: '30,000', perk: 'FULL PERSONA ACCESS', popular: true, points: '30,000' },
+                          { id: 'tier_whale', label: 'ELITE WHALE', price: 99.99, credits: '120,000', perk: 'UNLIMITED NETWORK VAULT', points: '120,000' },
                         ].map(pkg => (
                           <button 
                             key={pkg.id} 
                             onClick={() => setSelectedPkgId(pkg.id)} 
-                            className={`p-4 rounded-3xl border flex flex-col items-center justify-between transition-all relative overflow-hidden text-center gap-2 ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] shadow-2xl' : 'bg-white/5 border-white/10 opacity-70 hover:opacity-100'}`}
+                            className={`p-3 py-6 rounded-3xl border flex flex-col items-center justify-between transition-all relative overflow-hidden text-center gap-1 ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] shadow-2xl' : 'bg-white/5 border-white/10 opacity-70 hover:opacity-100'}`}
                           >
-                             <div className="space-y-1">
-                                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest leading-none">{pkg.label}</span>
-                                <div className="text-2xl font-black italic text-white uppercase tracking-tighter leading-none">{pkg.credits}</div>
+                             <div className="space-y-0.5 mb-2">
+                                <span className="text-[7px] font-black text-white/40 uppercase tracking-widest leading-none block">{pkg.label}</span>
+                                <div className="text-[1.3rem] font-black italic text-white uppercase tracking-tighter leading-none">{pkg.credits}</div>
+                                <span className="text-[7px] font-black text-white/40 tracking-widest leading-none block">CREDITS</span>
                              </div>
                              
-                             <div className="space-y-1">
-                                <span className="text-xl font-black italic text-white leading-none">${pkg.price}</span>
-                                <div className="text-[7px] font-black text-[#ffea00] tracking-widest leading-none italic uppercase">{pkg.perk}</div>
+                             <div className="space-y-1 py-1 px-1.5 bg-[#00f0ff]/5 border border-[#00f0ff]/20 rounded-xl mb-1 w-full mx-2">
+                                <div className="text-[7px] font-black text-[#00f0ff] tracking-widest leading-none italic uppercase">+ {pkg.points} $GASPai</div>
+                                <div className="text-[4px] font-black text-[#00f0ff]/40 tracking-widest leading-none uppercase">LOYALTY MATCH</div>
                              </div>
 
-                             <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>
-                                {selectedPkgId === pkg.id && <Check size={14} className="text-white" />}
+                             <div className="space-y-0.5 mb-2 px-1">
+                                <span className="text-xl font-black italic text-white leading-none">${pkg.price}</span>
+                                <div className="text-[6px] font-black text-[#ffea00] tracking-widest leading-none italic uppercase h-[10px]">{pkg.perk}</div>
                              </div>
-                             {pkg.popular && <div className="absolute top-0 right-0 w-8 h-8 bg-[#ff00ff] rounded-bl-xl flex items-center justify-center shadow-lg"><Star size={10} className="fill-white text-white" /></div>}
+
+                             <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>
+                                {selectedPkgId === pkg.id && <Check size={12} className="text-white" />}
+                             </div>
+                             {pkg.popular && <div className="absolute top-0 right-0 w-7 h-7 bg-[#ff00ff] rounded-bl-xl flex items-center justify-center shadow-lg"><Star size={10} className="fill-white text-white" /></div>}
                           </button>
                         ))}
                      </div>
