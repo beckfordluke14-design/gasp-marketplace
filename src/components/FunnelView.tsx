@@ -718,24 +718,24 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
                   <button 
                     key={pkg.id}
                     onClick={() => setSelectedPkgId(pkg.id)}
-                    className={`relative p-5 rounded-3xl border transition-all duration-300 flex items-center justify-between ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] ring-2 ring-[#ff00ff]/30 shadow-[0_0_30px_rgba(255,0,255,0.2)]' : 'bg-white/5 border-white/10'}`}
+                    className={`relative p-4 md:p-5 rounded-[2rem] border transition-all duration-300 flex items-center justify-between ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] ring-2 ring-[#ff00ff]/30 shadow-[0_0_30px_rgba(255,0,255,0.2)]' : 'bg-white/5 border-white/10'}`}
                   >
                     <div className="flex flex-col gap-1 text-left">
                        <span className="text-[10px] font-black text-[#ff00ff] uppercase tracking-widest leading-none">{pkg.label}</span>
                        <div className="flex items-center gap-2">
-                          <span className="text-2xl font-black text-white italic tracking-tighter leading-none">{pkg.credits}</span>
-                          <span className="text-[7px] font-bold text-white/20 uppercase mt-1 tracking-tighter">Credits</span>
+                          <span className="text-xl md:text-2xl font-black text-white italic tracking-tighter leading-none">{pkg.credits}</span>
+                          <span className="text-[7px] font-bold text-white/20 uppercase mt-1 tracking-tighter shrink-0">Credits</span>
                        </div>
                        <div className="flex items-center gap-1.5 opacity-80">
                           <div className="w-1 h-1 rounded-full bg-[#00f0ff] animate-pulse" />
                           <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-tighter">+{pkg.bonus} $GASPai Match</span>
                        </div>
                        <div className="mt-1 flex flex-col gap-0.5">
-                          <span className="text-[7px] font-black text-white/40 uppercase tracking-widest italic">🌶️ UNLOCKS PRIVATE VAULT</span>
-                          <span className="text-[6px] font-bold text-[#ff00ff]/60 uppercase tracking-widest">Works for 100s of girls</span>
+                          <span className="text-[7px] font-black text-white/40 uppercase tracking-widest italic leading-none">🌶️ UNLOCKS PRIVATE VAULT</span>
+                          <span className="text-[6px] font-bold text-[#ff00ff]/60 uppercase tracking-widest leading-none">Works for 100s of girls</span>
                        </div>
                     </div>
-                    <div className="text-right flex flex-col items-end">
+                    <div className="text-right flex flex-col items-end shrink-0">
                        <span className="text-[14px] font-black text-white italic">${pkg.price}</span>
                        <div className={`mt-2 w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>
                           {selectedPkgId === pkg.id && <Check size={12} className="text-white" />}
