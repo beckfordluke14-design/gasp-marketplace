@@ -387,7 +387,12 @@ export default function FunnelView() {
                            <span className="text-[10px] font-black text-[#ffea00] tracking-widest">{fomoMsg || 'WAITING...'}</span>
                         </div>
                         <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 relative -left-6 w-screen px-6">
-                           {(roster.length > 0 ? roster : []).map((p, i) => (
+                           {(roster.length > 0 ? roster : [
+                             { name: 'MOORE', img: 'https://asset.gasp.fun/personas/officer%20moore-9bdddf/hero_1.webp', tag: 'SECURITY' },
+                             { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp', tag: 'EXCLUSIVE' },
+                             { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp', tag: 'ELITE' },
+                             { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-f04846/hero_1.webp', tag: 'INTIMATE' }
+                           ]).map((p, i) => (
                              <div key={i} className="relative w-32 h-44 rounded-[1.5rem] overflow-hidden bg-white/5 border border-white/10 shrink-0">
                                 <img src={p.img} className="w-full h-full object-cover" alt={p.name} />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-90" />
@@ -397,6 +402,18 @@ export default function FunnelView() {
                                 </div>
                              </div>
                            ))}
+                           
+                           {/* ➕ 100+ MORE MODULE */}
+                           <div className="relative w-32 h-44 rounded-[1.5rem] overflow-hidden bg-[#ff00ff]/5 border border-[#ff00ff]/30 shrink-0 flex flex-col items-center justify-center gap-2 group cursor-pointer active:scale-95 transition-all">
+                              <div className="absolute inset-0 bg-black/40 backdrop-blur-md group-hover:bg-black/20 transition-all" />
+                              <div className="relative z-10 w-10 h-10 rounded-full bg-[#ff00ff]/20 border border-[#ff00ff]/40 flex items-center justify-center text-[#ff00ff]">
+                                 <Sparkles size={18} />
+                              </div>
+                              <div className="relative z-10 flex flex-col items-center">
+                                 <span className="text-[14px] font-black text-white leading-none">& 100+</span>
+                                 <span className="text-[9px] font-black text-[#ff00ff] tracking-widest uppercase mt-0.5">MORE</span>
+                              </div>
+                           </div>
                         </div>
                      </div>
                      <div className="space-y-4">
