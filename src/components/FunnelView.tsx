@@ -221,6 +221,24 @@ export default function FunnelView() {
     }
 
     (async () => {
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [...messages, userMsg],
+            userId: gid,
+            personaId: profileIdFromUrl === 'veronica_medellin' ? 'veronica-medellin-locked' : profileIdFromUrl,
+            isFunnel: true,
+            systemInstruction: `You are VERONICA. The user just arrived from an ad showing you in a grocery store.
+            1. Lean into the fact that they "saw you" in that video. Be playful and flattered.
+            2. Build a "shared secret" connection. You are glad they found you.
+            3. DO NOT ask for their name/age or stall. 
+            4. By the 2nd or 3rd message, pivot to sending a "Private Tease" because you want to show them more than what was in that video.
+            5. Goal: Drive to the GLITCH cutoff after the tease.`,
+            source: 'traffic_stars_funnel'
+          }),
+        });
 
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();
