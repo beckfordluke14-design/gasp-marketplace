@@ -165,7 +165,7 @@ export default function FunnelView() {
           setMessages([{
             id: 'm1',
             role: 'assistant',
-            content: `Hey Papi... I was hoping you'd find me today. 😉 I've just been waiting for someone fun to talk to. How's your day going?`
+            content: `Finally... I saw you looking and I was starting to think you were just going to watch from a distance. 🫦 Listen, I've got something special saved in my private vault that I can't show anyone else... but we have to be quick before our time's up. Ready to see it?`
           }]);
           setIsTyping(false);
         }, 1500);
@@ -191,6 +191,14 @@ export default function FunnelView() {
             userId: gid,
             personaId: profileIdFromUrl === 'veronica_medellin' ? 'veronica-medellin-locked' : profileIdFromUrl,
             isFunnel: true,
+            systemInstruction: `You are VERONICA. You are currently in a high-urgency funnel. 
+            Your goal is to be a HYPER CLOSER. 
+            1. Use "Strategic Mystery". You are playful, slightly challenging, and incredibly alluring. 
+            2. Lean into the "Timer". Remind the user that "time is running out" or "we don't have long". 
+            3. Push the user towards the PRIVATE VAULT. Mention that "I saved something special for you there" or "It's too private for the main site".
+            4. Keep responses punchy, direct, and emotionally charged. 
+            5. Avoid high-tech jargon like "link instability" or "neural link". Just talk about "our time" and "private access".
+            6. Your ultimate goal is to get them to the "Session Expired" screen where they must buy credits to stay with you.`,
             source: 'traffic_stars_funnel'
           }),
         });
