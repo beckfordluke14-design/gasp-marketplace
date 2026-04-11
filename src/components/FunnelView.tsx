@@ -13,8 +13,8 @@ import { initialProfiles, proxyImg } from '@/lib/profiles';
 import TopUpDrawer from './economy/TopUpDrawer';
 
 /**
- * 🌪️ THE GASP NEURAL FUNNEL v4.1 (ASSET HARDENING)
- * Direct R2 Access | No Proxy | Global Re-Hydration.
+ * 🌪️ THE GASP NEURAL FUNNEL v4.7 (ASSET PURGE)
+ * Forced R2 Refresh | PROMO Ingress | No Placeholders.
  */
 
 export default function FunnelView() {
@@ -35,13 +35,39 @@ export default function FunnelView() {
   const searchParams = useSearchParams();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 📸 ABSOLUTE PRODUCTION PATHS (Verified R2)
-  const profileId = searchParams.get('profile') || 'veronica_medellin';
-  const profile = initialProfiles.find(p => p.id === profileId) || {
+  // 🛡️ AD-AWARE INGRESS
+  const profileIdFromUrl = searchParams.get('profile') || 'veronica_medellin';
+  
+  // 📸 VERIFIED R2 PROMO ASSETS (With Cache-Buster)
+  const profile = {
     name: 'VERONICA',
-    image: 'https://asset.gasp.fun/PROMO/PromoPic1.png',
-    city: 'MEDELLÍN'
+    image: 'https://asset.gasp.fun/PROMO/PromoPic1.png?v=source_master',
+    city: 'MEDELLÍN',
+    id: 'veronica_medellin'
   };
+
+  const galleryImages = [
+    'https://asset.gasp.fun/PROMO/PromoPic1.png?v=source_master',
+    'https://asset.gasp.fun/PROMO/PromoPic2.webp?v=source_master'
+  ];
+
+  // 📈 ATTRIBUTION & IDENTITY 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const attribution = {
+      source: urlParams.get('utm_source') || urlParams.get('source') || document.referrer || 'Direct',
+      campaign: urlParams.get('utm_campaign') || 'Organic',
+      creative: urlParams.get('utm_content') || 'None'
+    };
+    localStorage.setItem('gasp_attribution', JSON.stringify(attribution));
+
+    if (!localStorage.getItem('gasp_guest_id')) {
+      const newId = 'GUEST_' + Math.random().toString(36).substring(2, 12).toUpperCase();
+      localStorage.setItem('gasp_guest_id', newId);
+    }
+    
+    setIsLoaded(true);
+  }, []);
 
   // 📈 FOMO ENGINE
   useEffect(() => {
@@ -57,7 +83,6 @@ export default function FunnelView() {
   }, []);
 
   useEffect(() => {
-    setIsLoaded(true);
     const timerInterval = setInterval(() => {
       setTimeLeft(prev => {
         const [m, s] = prev.split(':').map(Number);
@@ -69,14 +94,14 @@ export default function FunnelView() {
       });
     }, 1000);
 
-    const logs = ["> establishing link...", "> handshake authorized.", "> terminal ready."];
+    const logs = ["> establishing neural link...", "> bypass active.", "> identity confirmed."];
     let lIdx = 0;
     const lInt = setInterval(() => {
       if (lIdx < logs.length) setTerminalLogs(prev => [...prev, logs[lIdx++]]);
-      else { clearInterval(lInt); setCurrentStepIdx(1); }
+      else { if (currentStepIdx === 0) setCurrentStepIdx(1); }
     }, 250);
     return () => { clearInterval(timerInterval); clearInterval(lInt); };
-  }, [profileId]);
+  }, [currentStepIdx]);
 
   useEffect(() => {
     if (currentStepIdx === 1 && messages.length === 0) {
@@ -97,14 +122,65 @@ export default function FunnelView() {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || currentStepIdx !== 1) return;
-    setMessages(prev => [...prev, { id: Date.now().toString(), role: 'user', content: inputValue }]);
+
+    const userMsg = { id: Date.now().toString(), role: 'user', content: inputValue };
+    setMessages(prev => [...prev, userMsg]);
     setInputValue('');
     setIsTyping(true);
-    if (messages.length >= 2) {
-       setTimeout(() => setCurrentStepIdx(2), 3500);
-    } else {
-       setTimeout(() => setIsTyping(false), 2000);
-    }
+
+    const gid = localStorage.getItem('gasp_guest_id');
+
+    (async () => {
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [...messages, userMsg],
+            userId: gid,
+            personaId: profileIdFromUrl === 'veronica_medellin' ? 'veronica-medellin-locked' : profileIdFromUrl,
+            isFunnel: true,
+            source: 'traffic_stars_funnel'
+          }),
+        });
+
+        if (res.status === 402) {
+          setCurrentStepIdx(2);
+          setIsTyping(false);
+          return;
+        }
+
+        const reader = res.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullText = '';
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('0:')) {
+                try {
+                  const text = JSON.parse(line.substring(2));
+                  fullText += text;
+                } catch (e) {}
+              }
+            }
+          }
+          if (fullText) {
+            setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: fullText }]);
+          }
+        }
+      } catch (err) {
+        console.error('[Funnel neural error]:', err);
+      } finally {
+        setIsTyping(false);
+        if (messages.length >= 2) {
+          setTimeout(() => setCurrentStepIdx(2), 3500);
+        }
+      }
+    })();
   };
 
   if (!isLoaded) return null;
@@ -112,12 +188,20 @@ export default function FunnelView() {
   return (
     <div className="fixed inset-0 bg-black text-white selection:bg-[#ff00ff]/30 font-outfit overflow-hidden flex flex-col uppercase tracking-tighter">
       
-      {/* 🔴 HEADER HUB */}
-      <div className="relative z-[110] bg-black px-6 pt-10 pb-4 flex flex-col gap-6">
+      {/* 📹 BACKGROUND DEPTH */}
+      <div className="absolute inset-0 z-0 opacity-40">
+        <video autoPlay muted loop playsInline className={`w-full h-full object-cover transition-all duration-[3000ms] ${currentStepIdx === 0 ? 'blur-3xl scale-125' : 'blur-sm'}`} poster={profile.image}>
+          <source src="https://asset.gasp.fun/PROMO/Veronica.mp4?v=source_master" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
+      </div>
+
+      {/* 🔴 SOVEREIGN HEADER */}
+      <div className="relative z-[110] bg-black/80 backdrop-blur-xl px-6 pt-10 pb-4 flex flex-col gap-6">
          <div className="flex items-start justify-between">
             <div className="flex flex-col gap-0 text-left">
                <span className="text-[9px] font-black text-white/40 tracking-[0.2em] leading-none">NEURAL LINK ACTIVE</span>
-               <span className="text-2xl font-black text-[#ffea00] leading-none mt-1 shadow-inner">{timeLeft}</span>
+               <span className="text-2xl font-black text-[#ffea00] leading-none mt-1">{timeLeft}</span>
             </div>
             
             <div className="flex items-center gap-2.5 bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5">
@@ -137,10 +221,11 @@ export default function FunnelView() {
                   <div className="w-16 h-16 rounded-full border-2 border-[#ff00ff] p-1 shadow-[0_0_20px_rgba(255,0,255,0.4)]">
                      <div className="w-full h-full rounded-full overflow-hidden bg-black flex items-center justify-center">
                         <img 
-                          src={proxyImg(profile.image)} 
+                          src={profile.image} 
                           className="w-full h-full object-cover" 
                           alt={profile.name} 
                           referrerPolicy="no-referrer"
+                          crossOrigin="anonymous"
                         />
                      </div>
                   </div>
@@ -150,7 +235,7 @@ export default function FunnelView() {
                <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
                      <h2 className="text-2xl font-black text-white tracking-tighter leading-none">{profile.name}</h2>
-                     <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)] animate-pulse" />
+                     <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_12px_rgba(34,197,94,0.6)]" />
                   </div>
                   <span className="text-[10px] font-black text-white/40 tracking-[0.3em] leading-none">{profile.city || 'MEDELLÍN'}</span>
                </div>
@@ -165,18 +250,18 @@ export default function FunnelView() {
          <div className="flex items-center gap-8 mt-2 border-b border-white/5">
             <button className="pb-3 text-[11px] font-black tracking-[0.2em] text-white relative">
                NEURAL LINK
-               <div className="absolute bottom-[-1.5px] left-0 right-0 h-[3px] bg-[#ff00ff] shadow-[0_0_10px_rgba(255,0,255,0.8)]" />
+               <div className="absolute bottom-[-1.5px] left-0 right-0 h-[3px] bg-[#ff00ff] shadow-[0_0_10px_rgba(255,255,0,0.6)]" />
             </button>
-            <button className="pb-3 text-[11px] font-black tracking-[0.2em] text-white/30">ARCHIVE</button>
+            <button className="pb-3 text-[11px] font-black tracking-[0.2em] text-white/30 italic">ARCHIVE</button>
          </div>
       </div>
 
-      {/* 🌪️ DYNAMIC CONTENT STACK */}
-      <div className="relative flex-1 flex flex-col overflow-hidden bg-[#050505]">
+      {/* 🌪️ MAIN TERMINAL STACK */}
+      <div className="relative flex-1 flex flex-col overflow-hidden bg-transparent">
         <AnimatePresence mode="wait">
           
           {currentStepIdx === 0 && (
-            <motion.div key="init" className="flex-1 flex flex-col items-center justify-center p-8 space-y-4">
+            <motion.div key="init" className="flex-1 flex flex-col items-center justify-center p-8 space-y-4 bg-black">
                <Loader2 className="text-[#ff00ff] animate-spin" size={40} />
                <div className="font-mono text-[9px] text-white/20 space-y-1">
                   {terminalLogs.map((log, i) => <div key={i}>{log}</div>)}
@@ -188,20 +273,24 @@ export default function FunnelView() {
             <motion.div key="chat" className="flex-1 flex flex-col overflow-hidden">
               <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-8 no-scrollbar pb-32">
                 
-                {/* 📸 DIRECT VERONICA HERO PREVIEW */}
-                <div className="grid grid-cols-2 gap-4">
-                   {[
-                     'https://asset.gasp.fun/personas/veronica-medellin-locked/hero_1.webp',
-                     'https://asset.gasp.fun/personas/veronica-medellin-locked/hero_2.webp'
-                   ].map((url, i) => (
-                      <div key={i} className="aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative">
+                {/* 📸 HERO GALLERY PREVIEW */}
+                <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-5 duration-1000">
+                   {galleryImages.map((url, i) => (
+                      <div key={i} className="aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative bg-white/5">
                          <img 
                            src={url} 
                            className="w-full h-full object-cover" 
-                           alt="Veronica" 
+                           alt="VERONICA" 
                            referrerPolicy="no-referrer"
+                           crossOrigin="anonymous"
+                           onError={(e) => {
+                              // 🔥 EMERGENCY RECOVERY: If PROMO 2 fails, fallback to PROMO 1 so there is no dead link
+                              if (url.includes('PromoPic2')) {
+                                (e.target as HTMLImageElement).src = galleryImages[0];
+                              }
+                           }}
                          />
-                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                       </div>
                    ))}
                 </div>
@@ -210,8 +299,8 @@ export default function FunnelView() {
                   <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[90%] px-6 py-5 rounded-[1.8rem] text-[15px] normal-case tracking-normal leading-relaxed ${
                       msg.role === 'user' 
-                        ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-[0_10px_30px_rgba(255,0,255,0.2)]' 
-                        : 'bg-[#121212] text-white border border-white/5 rounded-tl-none font-medium'
+                        ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-[0_15px_30px_rgba(255,0,255,0.3)]' 
+                        : 'bg-[#151515]/90 backdrop-blur-md text-white border border-white/10 rounded-tl-none font-medium text-white/90'
                     }`}>
                       {msg.content}
                     </div>
@@ -219,8 +308,8 @@ export default function FunnelView() {
                 ))}
                 
                 {isTyping && (
-                   <div className="flex justify-start animate-pulse">
-                      <div className="bg-[#121212] px-6 py-4 rounded-2xl rounded-tl-none flex gap-1.5 items-center">
+                   <div className="flex justify-start">
+                      <div className="bg-[#151515]/90 backdrop-blur-md px-6 py-4 rounded-2xl rounded-tl-none flex gap-1.5 items-center">
                          <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce" />
                          <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:0.2s]" />
                          <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:0.4s]" />
@@ -229,16 +318,16 @@ export default function FunnelView() {
                 )}
               </div>
 
-              <div className="p-6 bg-black border-t border-white/5">
+              <div className="p-6 bg-black border-t border-white/5 relative z-20">
                 <form onSubmit={handleSendMessage} className="relative flex items-center gap-4">
                   <input 
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder="Type your reply to Veronica..."
-                    className="flex-1 bg-[#0a0a0a] border border-white/10 rounded-2xl px-6 py-5 text-[15px] normal-case tracking-normal focus:outline-none focus:border-[#ff00ff]/30 transition-all font-medium"
+                    className="flex-1 bg-[#111] border border-white/20 rounded-2xl px-6 py-5 text-[15px] normal-case tracking-normal focus:outline-none focus:border-[#ff00ff]/50 transition-all font-medium shadow-inner"
                   />
-                  <button type="submit" className="w-14 h-14 bg-[#ff00ff] rounded-2xl flex items-center justify-center text-white shadow-[0_10px_20px_rgba(255,0,255,0.3)] active:scale-95 transition-all outline outline-2 outline-white/10">
+                  <button type="submit" className="w-14 h-14 bg-[#ff00ff] rounded-2xl flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,0,255,0.4)] active:scale-95 transition-all outline outline-2 outline-white/10">
                     <Send size={24} className="rotate-[-45deg] translate-x-0.5" />
                   </button>
                 </form>
@@ -251,24 +340,24 @@ export default function FunnelView() {
                key="offer"
                initial={{ opacity: 0, scale: 1.05 }}
                animate={{ opacity: 1, scale: 1 }}
-               className="absolute inset-0 bg-[#020202] flex flex-col overflow-y-auto no-scrollbar pt-10 pb-40 space-y-10"
+               className="absolute inset-0 bg-black flex flex-col overflow-y-auto no-scrollbar pt-10 pb-40 space-y-10"
              >
                 <div className="px-6 space-y-8">
                    <div className="text-center space-y-3">
                       <h2 className="text-5xl font-black italic tracking-tighter text-white leading-none">SESSION <span className="text-[#ff00ff] underline decoration-[6px]">EXPIRED</span></h2>
                       <div className="flex flex-col items-center gap-2">
                         <div className="px-3 py-1 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-full flex items-center gap-2">
-                           <div className="w-1.5 h-1.5 bg-[#ffea00] rounded-full animate-pulse" />
+                           <div className="w-1.5 h-1.5 bg-[#ffea00] rounded-full animate-pulse shadow-[0_0_8px_rgba(255,234,0,0.8)]" />
                            <span className="text-[10px] font-black text-[#ffea00] tracking-widest leading-none">GASP NEURAL ACTIVE</span>
                         </div>
-                        <p className="text-[11px] text-white/40 tracking-[0.2em] font-black">RESET CONNECTION TO UNLOCK 100+ MODELS</p>
+                        <p className="text-[11px] text-white/40 tracking-[0.2em] font-black italic">RESET UPLINK TO UNLOCK 100+ MODELS</p>
                       </div>
                    </div>
 
-                   {/* 📸 DIRECT VERTICAL SYNDICATE FEED */}
+                   {/* 📸 FULL VERTICAL SYNDICATE FEED */}
                    <div className="flex flex-col gap-6">
                       <div className="flex items-center justify-between px-2">
-                         <span className="text-[10px] font-black text-white/40 tracking-widest">NETWORK PULSE</span>
+                         <span className="text-[10px] font-black text-white/40 tracking-widest leading-none">NETWORK ACCESS MODULES</span>
                          <span className="text-[10px] font-black text-[#ffea00] tracking-widest leading-none shadow-md">{fomoMsg || 'WAITING...'}</span>
                       </div>
                       <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 relative -left-6 w-screen px-6">
@@ -281,11 +370,12 @@ export default function FunnelView() {
                            <div key={i} className="relative w-32 h-44 rounded-[1.5rem] overflow-hidden group shadow-2xl border border-white/10 shrink-0">
                               <img 
                                 src={p.img} 
-                                className="w-full h-full object-cover" 
+                                className="w-full h-full object-cover shadow-inner" 
                                 alt={p.name} 
                                 referrerPolicy="no-referrer"
+                                crossOrigin="anonymous"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-transparent to-transparent opacity-90 shadow-inner" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90 shadow-inner" />
                               <div className="absolute bottom-3 left-3 text-left">
                                  <div className="text-[6px] font-black text-[#00f0ff] tracking-widest leading-none mb-1">{p.tag}</div>
                                  <div className="text-[11px] font-black text-white tracking-tighter leading-none">{p.name}</div>
@@ -305,21 +395,21 @@ export default function FunnelView() {
                         <button 
                           key={pkg.id} 
                           onClick={() => setSelectedPkgId(pkg.id)}
-                          className={`w-full p-6 py-8 rounded-[2.5rem] border flex items-center justify-between transition-all ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] shadow-[0_0_40px_rgba(255,0,255,0.25)]' : 'bg-white/5 border-white/10'}`}
+                          className={`w-full p-6 py-8 rounded-[2.5rem] border flex items-center justify-between transition-all ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] shadow-[0_0_50px_rgba(255,0,255,0.25)]' : 'bg-white/5 border-white/10'}`}
                         >
                            <div className="text-left space-y-1">
                               <span className="text-[10px] font-black tracking-widest text-[#ff00ff]">{pkg.label}</span>
-                              <div className="text-3xl font-black italic leading-none">{pkg.credits} CREDITS</div>
+                              <div className="text-3xl font-black italic leading-none text-white">{pkg.credits} CREDITS</div>
                               <div className="flex items-center gap-2 mt-2">
-                                 <div className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-pulse" />
-                                 <span className="text-[10px] font-black text-[#ffea00] tracking-widest leading-none">+{pkg.bonus} $GASPai Match</span>
+                                 <div className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
+                                 <span className="text-[10px] font-black text-[#00f0ff] tracking-widest leading-none">+{pkg.bonus} $GASPai Match</span>
                               </div>
-                              <div className="text-[8px] font-bold text-white/30 uppercase tracking-[0.3em] mt-1 italic">🌶️ UNLOCKS PRIVATE VAULT</div>
+                              <div className="text-[8px] font-bold text-white/30 uppercase tracking-[0.3em] mt-1 italic leading-none">🌶️ UNLOCKS PRIVATE VAULT</div>
                            </div>
                            <div className="text-right flex flex-col items-end gap-2">
-                              <span className="text-2xl font-black italic text-white leading-none">${pkg.price}</span>
-                              <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>
-                                 {selectedPkgId === pkg.id && <Check size={16} className="text-white" />}
+                              <span className="text-2xl font-black italic text-white shadow-black leading-none">${pkg.price}</span>
+                              <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>
+                                 {selectedPkgId === pkg.id && <Check size={18} className="text-white" />}
                               </div>
                            </div>
                         </button>
@@ -330,13 +420,13 @@ export default function FunnelView() {
                 {/* 🚀 STICKY CTA */}
                 <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/95 to-transparent z-[200] pt-12">
                    <div className="flex flex-col items-center gap-5">
-                      <div className="flex items-center gap-2 opacity-30 grayscale">
+                      <div className="flex items-center justify-center gap-2 opacity-30 grayscale">
                          <Shield size={14} className="text-[#00f0ff]" />
-                         <span className="text-[9px] font-black tracking-[0.4em] italic">SYNDICATE CRYPTO-GATE ACTIVE</span>
+                         <span className="text-[9px] font-black tracking-[0.4em]">SYNDICATE CRYPTO-GATE ACTIVE</span>
                       </div>
-                      <button onClick={() => setIsTopUpOpen(true)} className="w-full p-6 bg-[#ff00ff] rounded-[2.5rem] text-[18px] font-black uppercase tracking-[0.3em] shadow-[0_20px_60px_rgba(255,0,255,0.5)] active:scale-95 transition-all outline outline-4 outline-white/10 group flex items-center justify-center gap-4">
+                      <button onClick={() => setIsTopUpOpen(true)} className="w-full p-6 bg-[#ff00ff] rounded-[2.6rem] text-[18px] font-black uppercase tracking-[0.3em] shadow-[0_25px_70px_rgba(255,0,255,0.5)] active:scale-95 transition-all outline outline-4 outline-white/10 group flex items-center justify-center gap-4">
                          <span>SECURE CHECKOUT</span>
-                         <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
+                         <ArrowRight size={26} className="group-hover:translate-x-2 transition-transform" />
                       </button>
                    </div>
                 </div>
