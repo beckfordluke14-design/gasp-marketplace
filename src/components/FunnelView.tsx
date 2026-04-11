@@ -747,64 +747,69 @@ You are ${profile.name}. You are NOT an AI. You are a biological human.
                   ))}
                 </div>
 
-                {/* 2. SYNDICATE ROSTER PREVIEW (DIRECTLY UNDERNEATH) */}
-                <div className="w-screen relative -left-4 mt-2 mb-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
-                   <div className="flex flex-col items-center gap-6">
-                      <div className="flex flex-col items-center gap-1">
-                         <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-[0.4em] italic shadow-[#ffea00]/40 drop-shadow-sm">Syndicate Identities Verified</span>
-                         <div className="h-px w-24 bg-gradient-to-r from-transparent via-[#ffea00]/40 to-transparent" />
-                      </div>
-                      
-                      <div className="w-full overflow-x-auto no-scrollbar pb-6">
-                         <div className="flex items-center gap-4 px-6 min-w-max">
-                            {[
-                              { name: 'OFFICER MOORE', img: 'https://asset.gasp.fun/personas/officer moore-9bdddf/hero_1.webp', tag: 'SECURITY' },
-                              { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp', tag: 'EXCLUSIVE' },
-                              { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp', tag: 'ELITE' },
-                              { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-kingston/hero_1.webp', tag: 'INTIMATE' }
-                            ].map((p, i) => (
-                              <div key={i} className="relative w-40 h-64 rounded-[2rem] overflow-hidden group shadow-2xl border border-white/10 shrink-0">
-                                 <img src={p.img} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" alt={p.name} />
-                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
-                                 
-                                 <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                                    <span className="text-[7px] font-black text-white uppercase tracking-tighter">ONLINE</span>
-                                  </div>
+                {/* 📡 SYNDICATE ROSTER PREVIEW (DIRECTLY UNDERNEATH) */}
+              <div className="w-screen relative -left-4 mt-2 mb-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                 <div className="flex flex-col items-center gap-6">
+                    <div className="flex flex-col items-center gap-1.5">
+                       <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                          <span className="text-[11px] font-black text-[#ffea00] uppercase tracking-[0.4em] italic shadow-[#ffea00]/40 drop-shadow-sm">100+ Models Active Online</span>
+                       </div>
+                       <div className="h-px w-32 bg-gradient-to-r from-transparent via-[#ffea00]/40 to-transparent" />
+                    </div>
+                    
+                    <div className="w-full overflow-x-auto no-scrollbar pb-6">
+                       <div className="flex items-center gap-4 px-6 min-w-max">
+                          {[
+                            { name: 'OFFICER MOORE', img: 'https://asset.gasp.fun/personas/officer moore-9bdddf/hero_1.webp', tag: 'SECURITY' },
+                            { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp', tag: 'EXCLUSIVE' },
+                            { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp', tag: 'ELITE' },
+                            { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-kingston/hero_1.webp', tag: 'INTIMATE' }
+                          ].map((p, i) => (
+                            <div key={i} className="relative w-40 h-64 rounded-[2rem] overflow-hidden group shadow-2xl border border-white/10 shrink-0">
+                               <img src={p.img} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" alt={p.name} />
+                               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+                               
+                               <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
+                                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                                  <span className="text-[7px] font-black text-white uppercase tracking-tighter">ONLINE</span>
+                                </div>
 
-                                 <div className="absolute bottom-5 left-0 right-0 px-4 flex flex-col gap-0.5">
-                                    <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic leading-none">{p.tag}</span>
-                                    <span className="text-[12px] font-black text-white uppercase tracking-tighter leading-none">{p.name}</span>
-                                 </div>
-                              </div>
-                            ))}
-                            
-                            {/* 📡 THE '& MORE' TERMINAL CARD */}
-                            <div className="w-40 h-64 rounded-[2rem] border-2 border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-4 group hover:bg-[#ff00ff]/10 hover:border-[#ff00ff]/30 transition-all shrink-0">
-                               <div className="w-16 h-16 rounded-full bg-white/5 flex flex-col items-center justify-center border border-white/10 group-hover:scale-110 group-hover:border-[#ff00ff]/50 transition-all">
-                                  <span className="text-2xl font-black text-white group-hover:text-[#ff00ff]">+100</span>
-                                  <span className="text-[6px] font-black text-white/20 uppercase tracking-widest italic -mt-1">WOMEN</span>
-                               </div>
-                               <div className="text-center">
-                                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] group-hover:text-white">& MORE</span>
-                                  <p className="text-[6px] font-bold text-white/10 uppercase tracking-[0.1em] mt-1 italic">FULL ROSTER ACCESS</p>
+                               <div className="absolute bottom-5 left-0 right-0 px-4 flex flex-col gap-0.5">
+                                  <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic leading-none">{p.tag}</span>
+                                  <span className="text-[12px] font-black text-white uppercase tracking-tighter leading-none">{p.name}</span>
                                </div>
                             </div>
-                         </div>
-                      </div>
-                      <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] italic">Toggle switch required to unlock full syndicate roster</p>
-                   </div>
-                </div>
+                          ))}
+                          
+                          {/* 📡 THE '& MORE' TERMINAL CARD */}
+                          <div className="w-40 h-64 rounded-[2rem] border-2 border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-4 group hover:bg-[#ff00ff]/10 hover:border-[#ff00ff]/30 transition-all shrink-0">
+                             <div className="w-16 h-16 rounded-full bg-white/5 flex flex-col items-center justify-center border border-white/10 group-hover:scale-110 group-hover:border-[#ff00ff]/50 transition-all">
+                                <span className="text-2xl font-black text-white group-hover:text-[#ff00ff]">+100</span>
+                                <span className="text-[6px] font-black text-white/20 uppercase tracking-widest italic -mt-1">MODELS</span>
+                             </div>
+                             <div className="text-center">
+                                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] group-hover:text-white">& MORE</span>
+                                <p className="text-[6px] font-bold text-white/10 uppercase tracking-[0.1em] mt-1 italic">UNLIMITED NETWORK ACCESS</p>
+                             </div>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
               </div>
 
               {/* 🚀 SOVEREIGN CHECKOUT CTA */}
               <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/80 to-transparent z-[100] pt-12">
+                 <div className="w-full max-w-sm mx-auto mb-4 flex items-center justify-center gap-2 opacity-50">
+                    <Shield size={10} className="text-[#00f0ff]" />
+                    <span className="text-[8px] font-black text-white uppercase tracking-[0.2em]">Universal Syndicate Key Active</span>
+                 </div>
                  <button 
                    onClick={() => setIsTopUpOpen(true)}
                    className="w-full max-w-sm mx-auto flex items-center justify-center p-5 bg-[#ff00ff] border-2 border-white/20 rounded-[2rem] text-white text-[13px] font-black uppercase tracking-[0.2em] shadow-[0_15px_40px_rgba(255,0,255,0.4)] hover:scale-[1.02] active:scale-95 transition-all group gap-3"
                  >
-                    <span>Proceed to Secure Checkout</span>
-                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                   <span>Proceed to Secure Checkout</span>
+                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                  </button>
               </div>
             </motion.div>
