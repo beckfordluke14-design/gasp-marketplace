@@ -66,6 +66,42 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
             </div>
 
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
+                {/* ⚡️ PRIORITY SMART LINK: GLOBAL SYNC ⚡️ */}
+                <motion.button
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    onClick={() => {
+                        const guestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
+                        const tid = guestId || `guest_${Math.random().toString(36).substring(7)}`;
+                        window.open(`https://trianglerockers.com/1890112?tracking_id=${tid}`, '_blank');
+                    }}
+                    className="w-full group bg-[#00fff2]/5 border-2 border-[#00fff2] p-5 rounded-2xl transition-all duration-300 flex items-center justify-between text-left relative overflow-hidden shadow-[0_0_30px_rgba(0,255,242,0.2)] active:scale-95"
+                >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00fff2]/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    
+                    <div className="flex items-center gap-4 relative z-10">
+                        <div className="w-14 h-14 rounded-xl bg-black border border-[#00fff2]/50 flex items-center justify-center text-[#00fff2] animate-pulse">
+                            <Zap size={28} fill="currentColor" />
+                        </div>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[7px] font-black bg-[#00fff2] text-black px-2 py-0.5 rounded tracking-[0.2em] italic animate-bounce">URGENT</span>
+                                <h4 className="text-[11px] font-black tracking-widest uppercase italic text-[#00fff2]">
+                                    PRIORITY UPLINK: GLOBAL SYNC
+                                </h4>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[8px] font-black text-white/90 tracking-widest uppercase bg-white/10 px-2 py-0.5 rounded-md italic border border-white/20">
+                                    +1,500 $GASP REWARD
+                                </span>
+                                <span className="text-[6px] font-black text-[#00fff2]/70 uppercase tracking-widest italic animate-pulse">60s COMPLETION</span>
+                            </div>
+                        </div>
+                    </div>
+                </motion.button>
+
+                <div className="h-[1px] w-full bg-white/5 my-4" />
+
                 {missions.length > 0 ? missions.map((mission, idx) => (
                     <motion.button
                         key={mission.id}
