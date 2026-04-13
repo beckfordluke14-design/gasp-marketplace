@@ -96,28 +96,36 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!ready) return;
 
-    if (authenticated && user) {
+    const guestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
+    const activeUserId = user?.id || guestId;
+
+    if (activeUserId) {
        // Identity Handshake
-       fetchProfile(user.id, user);
+       fetchProfile(activeUserId, user);
 
        // 🛰️ HIGH-VELOCITY BALANCE SYNC: Instant Revenue Capture
        const interval = setInterval(() => {
-          fetchProfile(user.id, user);
+          fetchProfile(activeUserId, user);
        }, 10000); // 10s Polling during launch window
        
        return () => clearInterval(interval);
     } else {
-       setProfile(null);
-       setLoading(false);
+       if (!guestId) {
+          setProfile(null);
+          setLoading(false);
+       }
     }
   }, [ready, authenticated, user?.id]);
 
   useEffect(() => {
-    if (!authenticated || !user?.id) return;
+    const guestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
+    const activeUserId = user?.id || guestId;
+
+    if (!activeUserId) return;
     
     // 🛰️ EVENT-DRIVEN SYNC: Refresh balance on manual triggers
     const handleRefresh = async () => {
-       fetchProfile(user.id, user);
+       fetchProfile(activeUserId, user);
     };
     
     window.addEventListener('gasp_balance_refresh', handleRefresh);

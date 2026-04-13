@@ -21,8 +21,8 @@ export async function GET(req: NextRequest) {
         const data = await res.json();
         
         // 🧪 VELOCITY OPTIMIZATION: Filter for Instant-Gratification offers (Sweepstakes, Installs)
-        // We hide "Surveys" to prevent user drop-off.
-        const filtered = (data.offers || []).filter((offer: any) => {
+        // We prioritize non-survey offers to prevent user drop-off.
+        let finalOffers = (data.offers || []).filter((offer: any) => {
             const lowQuality = ['survey', 'questionnaire', 'opinion', 'poll'].some(term => 
                 offer.title.toLowerCase().includes(term) || 
                 offer.adcopy.toLowerCase().includes(term)
@@ -30,9 +30,16 @@ export async function GET(req: NextRequest) {
             return !lowQuality;
         });
 
-        // 🧬 SORT BY VELOCITY: Prioritize recognizable "WINS" (iPhone, CashApp, Amazon)
-        const prioritized = filtered.sort((a: any, b: any) => {
-            const highValue = ['win', 'iphone', 'cashapp', 'amazon', 'gift card', 'ps5', 'xbox'];
+        // 🛡️ SMART FALLBACK: If the high-velocity filter kills all offers, show everything.
+        // Better to show a survey than an empty screen.
+        if (finalOffers.length === 0) {
+            console.warn('[Mission Relay] Hyper-Velocity results empty. Falling back to global feed.');
+            finalOffers = data.offers || [];
+        }
+
+        // 🧬 SORT BY RECOGNITION: Prioritize high-intent brands (iPhone, CashApp, Amazon, PayPal)
+        const prioritized = finalOffers.sort((a: any, b: any) => {
+            const highValue = ['win', 'iphone', 'cashapp', 'amazon', 'paypal', 'gift card', 'ps5', 'xbox', '60s', 'minute'];
             const scoreA = highValue.some(term => a.title.toLowerCase().includes(term)) ? 1 : 0;
             const scoreB = highValue.some(term => b.title.toLowerCase().includes(term)) ? 1 : 0;
             return scoreB - scoreA;

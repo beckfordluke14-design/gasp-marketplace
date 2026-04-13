@@ -11,8 +11,8 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-echo [SYNDICATE] Installing Neural Bridges (Playwright/Axios)...
-call npm install playwright axios --no-audit --no-fund
+echo [SYNDICATE] Installing Neural Bridges (Playwright/Axios/Sharp)...
+call npm install playwright axios sharp --no-audit --no-fund
 if %errorlevel% neq 0 (
     echo [ERROR] Dependency installation failed. Check your internet connection.
     pause

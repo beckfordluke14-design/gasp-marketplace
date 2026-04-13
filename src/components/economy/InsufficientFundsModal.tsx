@@ -115,40 +115,40 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
               </div>
 
               <div className="w-full space-y-4 pb-8">
-                {/* 🛡️ PATH ALPHA: INSTANT ACCESS */}
+                {/* 🛡️ PATH ALPHA: FREE ACCESS (HIGH-VELOCITY CONVERSION) */}
                 <div className="space-y-2">
                    <div className="flex items-center gap-2 px-2">
+                      <div className="h-[1px] flex-1 bg-[#00fff2]/20" />
+                      <span className="text-[7px] font-black text-[#00fff2] tracking-[0.3em] uppercase italic">PATH ALPHA: FREE ACCESS</span>
+                      <div className="h-[1px] flex-1 bg-[#00fff2]/20" />
+                   </div>
+                  <button 
+                    onClick={() => setShowQuests(true)}
+                    className="w-full h-18 rounded-2xl bg-[#00fff2] text-black text-[11px] font-black uppercase tracking-[0.3em] font-syncopate italic hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_40px_rgba(0,255,242,0.4)] flex flex-col items-center justify-center group animate-pulse"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Zap size={16} fill="currentColor" className="group-hover:rotate-12 transition-transform" />
+                      {isSpanish ? 'GANA CRÉDITOS' : 'EARN FREE CREDITS'}
+                    </div>
+                    <span className="text-[8px] opacity-70 tracking-[0.2em] mt-1 uppercase font-black">
+                      {isSpanish ? 'SÓLO 60 SEGUNDOS' : 'COMPLETE 60s MISSION'}
+                    </span>
+                  </button>
+                </div>
+
+                {/* 🛡️ PATH BETA: INSTANT PURCHASE */}
+                <div className="space-y-2 opacity-50 hover:opacity-100 transition-opacity">
+                   <div className="flex items-center gap-2 px-2">
                       <div className="h-[1px] flex-1 bg-white/10" />
-                      <span className="text-[7px] font-black text-white/30 tracking-[0.3em] uppercase italic">PATH ALPHA: INSTANT</span>
+                      <span className="text-[7px] font-black text-white/30 tracking-[0.3em] uppercase italic">PATH BETA: INSTANT</span>
                       <div className="h-[1px] flex-1 bg-white/10" />
                    </div>
                   <button 
                     onClick={() => { onClose(); onOpenTopUp(); }}
-                    className="w-full h-16 rounded-2xl bg-[#ffea00] text-black text-[11px] font-black uppercase tracking-[0.3em] font-syncopate italic hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_40px_rgba(255,234,0,0.4)] flex items-center justify-center gap-3"
+                    className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white text-[9px] font-black uppercase tracking-[0.3em] hover:bg-white/10 transition-all flex items-center justify-center gap-3"
                   >
-                    <Diamond size={16} fill="currentColor" />
-                    {isSpanish ? 'AÑADIR CRÉDITOS' : 'BUY CREDITS INSTANT'}
-                  </button>
-                </div>
-                
-                {/* 🛡️ PATH BETA: FREE ACCESS */}
-                <div className="space-y-2">
-                   <div className="flex items-center gap-2 px-2">
-                      <div className="h-[1px] flex-1 bg-white/10" />
-                      <span className="text-[7px] font-black text-[#ffea00]/40 tracking-[0.3em] uppercase italic">PATH BETA: MISSIONS</span>
-                      <div className="h-[1px] flex-1 bg-white/10" />
-                   </div>
-                  <button 
-                    onClick={() => setShowQuests(true)}
-                    className="w-full h-15 rounded-2xl bg-[#ffea00]/5 border border-[#ffea00]/20 text-[#ffea00] text-[10px] font-black uppercase tracking-[0.2em] font-syncopate italic hover:bg-[#ffea00]/10 hover:scale-[1.02] active:scale-95 transition-all flex flex-col items-center justify-center shadow-[0_10px_40px_rgba(255,234,0,0.05)] group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Zap size={12} className="group-hover:animate-pulse" />
-                      {isSpanish ? 'GANA CRÉDITOS' : 'EARN FREE CREDITS'}
-                    </div>
-                    <span className="text-[7px] opacity-60 tracking-[0.2em] mt-1 uppercase font-black">
-                      {isSpanish ? 'MISIÓN SYNDICATE' : 'COMPLETE 60s MISSION'}
-                    </span>
+                    <Diamond size={12} fill="currentColor" />
+                    {isSpanish ? 'COMPRAR AHORA' : 'BUY CREDITS INSTANT'}
                   </button>
                 </div>
                  
