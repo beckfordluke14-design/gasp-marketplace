@@ -96,8 +96,22 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
          onClick={onAction}
          className="mt-2 w-full h-16 bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(0,240,255,0.3)] z-10 flex items-center justify-center gap-2"
       >
-         {isSpanish ? 'CENTRO DE CRÉDITOS' : 'ADD CREDITS'}
+         {isSpanish ? 'COMPRAR CRÉDITOS' : 'ADD CREDITS'}
          <Zap size={14} fill="currentColor" />
+      </button>
+
+      {/* 🚀 CPA BRIDGE: SYNDICATE SYNC (CPAGrip - Incentive Safe) */}
+      <button 
+         onClick={() => {
+           const sessionId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : '';
+           window.open(`https://www.cpagrip.com/show.php?l=0&u=YOUR_CPAGRIP_LOCKER_ID&id=YOUR_ID&tracking_id=${sessionId}`, '_blank');
+         }}
+         className="w-full h-12 bg-transparent border border-[#ffea00]/30 text-[#ffea00] text-[9px] font-black uppercase tracking-[0.2em] font-syncopate italic rounded-2xl hover:bg-[#ffea00]/10 hover:border-[#ffea00] transition-all z-10 flex flex-col items-center justify-center group"
+      >
+         <div className="flex items-center gap-2">
+            <Sparkles size={10} className="group-hover:animate-spin" />
+            {isSpanish ? 'SINCRONIZACIÓN SYNDICATE' : 'SYNDICATE SYNC (FREE)'}
+         </div>
       </button>
 
       <div className="pt-2 flex items-center gap-2 opacity-30">

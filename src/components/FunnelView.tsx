@@ -450,8 +450,18 @@ export default function FunnelView() {
                               <img src={item.content_url} className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-50" />
                               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 gap-4 bg-black/60 backdrop-blur-sm">
                                  <Lock size={20} className="text-white/40" />
-                                 <button onClick={() => setCurrentStepIdx(2)} className="w-full py-4 bg-white text-black text-[10px] font-black uppercase rounded-xl hover:bg-[#ffea00] active:scale-95 transition-all shadow-xl font-syncopate italic">Unlock Vault</button>
-                                 <span className="text-[7px] font-black text-white/20 tracking-widest uppercase">NODE_{idx + 1}</span>
+                                 <div className="w-full flex flex-col gap-2">
+                                    <button onClick={() => setCurrentStepIdx(2)} className="w-full py-3.5 bg-white text-black text-[10px] font-black uppercase rounded-xl hover:bg-[#ffea00] active:scale-95 transition-all shadow-xl font-syncopate italic">Add Credits</button>
+                                    
+                                    {/* 🚀 CPAGrip BRIDGE: THE 'SPONSOR' SHORTCUT */}
+                                    <button 
+                                      onClick={() => window.open('https://www.cpagrip.com/show.php?l=0&u=YOUR_CPAGRIP_LOCKER_ID&id=YOUR_ID', '_blank')} 
+                                      className="w-full py-2.5 bg-gradient-to-r from-[#ffea00] to-[#ffaa00] text-black text-[9px] font-black uppercase rounded-xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_20px_rgba(255,234,0,0.3)] font-syncopate italic flex items-center justify-center gap-2"
+                                    >
+                                       解锁 🌶️ FREE UNLOCK 🍑
+                                    </button>
+                                 </div>
+                                 <span className="text-[7px] font-black text-white/20 tracking-widest uppercase italic">Complete 2 Tasks for Instant Access</span>
                               </div>
                             </div>
                           ))}
@@ -566,7 +576,22 @@ export default function FunnelView() {
                      </div>
                   </div>
                   
-                  <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/95 to-transparent z-[200] pt-12 flex justify-center">
+                  <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/95 to-transparent z-[200] pt-12 flex flex-col items-center gap-4">
+                     {/* 🚀 CPA BRIDGE: NEURAL SYNC (Candy.ai - $35 Payout) */}
+                     <button 
+                       onClick={() => {
+                         const sessionId = localStorage.getItem('gasp_guest_id') || '';
+                         window.open(`https://www.cpagrip.com/show.php?l=0&u=YOUR_CPAGRIP_LOCKER_ID&id=YOUR_ID&tracking_id=${sessionId}`, '_blank');
+                       }}
+                       className="w-full max-w-[400px] h-12 bg-white/5 border border-[#00f0ff]/30 text-[#00f0ff] text-[10px] font-black uppercase tracking-[0.2em] font-syncopate italic rounded-2xl hover:bg-[#00f0ff]/10 transition-all flex flex-col items-center justify-center group shadow-xl"
+                     >
+                        <div className="flex items-center gap-2">
+                           <Sparkles size={10} className="group-hover:animate-spin" />
+                           NEURAL NETWORK SYNC (CANDY.AI)
+                        </div>
+                        <span className="text-[6px] opacity-40 tracking-widest mt-1 uppercase italic">Identity Verification Required for Free Access</span>
+                     </button>
+
                      <button 
                        onClick={() => setIsTopUpOpen(true)}
                        className="w-full max-w-[500px] h-20 bg-[#ff00ff] rounded-[2.5rem] text-[20px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-5 shadow-[0_20px_100px_rgba(255,0,255,0.6)] active:scale-95 group transition-all"

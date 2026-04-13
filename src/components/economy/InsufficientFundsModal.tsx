@@ -1,10 +1,12 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Diamond, AlertCircle, Zap } from 'lucide-react';
+import { X, Diamond, AlertCircle, Zap, ArrowLeft, Shield } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useUser } from '../providers/UserProvider';
 import { formatCredits } from '@/lib/format';
+
+import SyndicateMissionBoard from './SyndicateMissionBoard';
 
 interface InsufficientFundsModalProps {
   isOpen: boolean;
@@ -14,15 +16,22 @@ interface InsufficientFundsModalProps {
 }
 
 /**
- * 🛰️ INSUFFICIENT FUNDS MODAL v9.0 // MULTI-LOCALE CONVERSION HUB
- * Strategy: High-Status billing urgency with 100% Bilingual Sync (EN/ES).
+ * 🛰️ INSUFFICIENT FUNDS MODAL v11.0 // AUTOMATED MISSION BOARD INTEGRATION
+ * Strategy: High-Status billing urgency with 100% Automated CPA Stacking.
  */
 export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, personaName }: InsufficientFundsModalProps) {
   const { profile } = useUser();
   const [balance, setBalance] = useState<number | null>(null);
+  const [showQuests, setShowQuests] = useState(false);
 
   // 🌍 GLOBAL LOCALE STATE
   const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
+
+  useEffect(() => {
+    if (!isOpen) {
+        setShowQuests(false); // Reset state when closed
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     async function fetchBalance() {
@@ -46,7 +55,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
   if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
         {/* Backdrop */}
         <motion.div 
@@ -57,68 +66,102 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
           className="absolute inset-0 bg-black/80 backdrop-blur-md"
         />
 
-        {/* Modal */}
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative w-full max-w-[400px] bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-8 shadow-[0_20px_100px_rgba(0,0,0,0.8)] overflow-hidden"
-        >
-          {/* Decorative Glitch Background */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#ffea00] to-transparent opacity-50" />
-          
-          <button 
-            onClick={onClose}
-            className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all hover:bg-white/10"
-          >
-            <X size={18} />
-          </button>
-
-          <div className="flex flex-col items-center text-center">
-            <div className="w-20 h-20 rounded-full bg-[#ffea00]/10 border border-[#ffea00]/20 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(255,234,0,0.15)]">
-               <Zap size={32} className="text-[#ffea00] animate-pulse" />
-            </div>
-
-            <h3 className="text-2xl font-syncopate font-black uppercase italic text-white tracking-tighter mb-2">
-               {balance && balance > 0 
-                 ? (isSpanish ? 'CRÉDITOS INSUFICIENTES' : 'NOT ENOUGH CREDITS')
-                 : (isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS')}
-            </h3>
-            
-            <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-8 max-w-[320px] italic">
-               {personaName ? (
-                   isSpanish ? (
-                       <>CHATEAR CON <span className="text-[#ffea00]">{personaName.toUpperCase()}</span> PARA CONTINUAR. SE REQUIERE ASIGNACIÓN DE CRÉDITOS PARA MANTENER LA CONEXIÓN. 🗝️🛡️</>
-                   ) : (
-                       <>CHAT W/ <span className="text-[#ffea00]">{personaName}</span> TO CONTINUE. Allocation of Credits Required to Maintain Connection. 🗝️🛡️</>
-                   )
-               ) : (
-                   isSpanish ? (
-                       <>SE REQUIERE ASIGNACIÓN DE <span className="text-[#ffea00]">CRÉDITOS DEL SISTEMA</span> PARA ACCEDER AL ENLACE SEGURO DEL ARCHIVO. 🛡️🛰️</>
-                   ) : (
-                       <>Allocation of <span className="text-[#ffea00]">System Credits</span> Required to Access Secure Archive Uplink. 🛡️🛰️</>
-                   )
-               )}
-            </p>
-
-            <div className="w-full space-y-3">
+        {showQuests ? (
+            <motion.div
+                key="quests"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-md"
+            >
+                <SyndicateMissionBoard onClose={onClose} />
                 <button 
-                  onClick={() => {
-                    onClose();
-                    onOpenTopUp();
-                  }}
-                  className="w-full h-16 rounded-2xl bg-[#ffea00] text-black text-[11px] font-black uppercase tracking-[0.3em] font-syncopate italic hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_40px_rgba(255,234,0,0.4)] flex items-center justify-center gap-3"
+                    onClick={() => setShowQuests(false)}
+                    className="absolute -top-12 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase tracking-[0.4em] text-white/20 hover:text-white transition-all flex items-center gap-2"
                 >
-                   <Diamond size={16} fill="currentColor" />
-                   {isSpanish ? 'AÑADIR CRÉDITOS' : 'ADD CREDITS'}
+                    <ArrowLeft size={10} />
+                    {isSpanish ? 'VOLVER' : 'GO BACK'}
                 </button>
-               
-               <button 
-                 onClick={onClose}
-                 className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white/40 text-[10px] font-black uppercase tracking-[0.2em] hover:text-white transition-all shadow-xl"
-               >
-                  {isSpanish ? 'DESCARTAR' : 'DISMISS'}
-               </button>
+            </motion.div>
+        ) : (
+            <motion.div
+              key="main"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-[400px] bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-8 shadow-[0_20px_100px_rgba(0,0,0,0.8)] overflow-hidden"
+            >
+              {/* Decorative Glitch Background */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#ffea00] to-transparent opacity-50" />
+              
+              <button 
+                onClick={onClose}
+                className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all hover:bg-white/10"
+              >
+                <X size={18} />
+              </button>
+    
+              <div className="flex flex-col items-center text-center">
+                <div className="w-20 h-20 rounded-full bg-[#ffea00]/10 border border-[#ffea00]/20 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(255,234,0,0.15)]">
+                   <Zap size={32} className="text-[#ffea00] animate-pulse" />
+                </div>
+    
+                <h3 className="text-2xl font-syncopate font-black uppercase italic text-white tracking-tighter mb-2">
+                   {balance && balance > 0 
+                     ? (isSpanish ? 'CRÉDITOS INSUFICIENTES' : 'NOT ENOUGH CREDITS')
+                     : (isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS')}
+                </h3>
+                
+                <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-8 max-w-[320px] italic">
+                   {personaName ? (
+                       isSpanish ? (
+                           <>CHATEAR CON <span className="text-[#ffea00]">{personaName.toUpperCase()}</span> PARA CONTINUAR. SE REQUIERE ASIGNACIÓN DE CRÉDITOS PARA MANTENER LA CONEXIÓN. 🗝️🛡️</>
+                       ) : (
+                           <>CHAT W/ <span className="text-[#ffea00]">{personaName}</span> TO CONTINUE. Allocation of Credits Required to Maintain Connection. 🗝️🛡️</>
+                       )
+                   ) : (
+                       isSpanish ? (
+                           <>SE REQUIERE ASIGNACIÓN DE <span className="text-[#ffea00]">CRÉDITOS DEL SISTEMA</span> PARA ACCEDER AL ENLACE SEGURO DEL ARCHIVO. 🛡️🛰️</>
+                       ) : (
+                           <>Allocation of <span className="text-[#ffea00]">System Credits</span> Required to Access Secure Archive Uplink. 🛡️🛰️</>
+                       )
+                   )}
+                </p>
+    
+                <div className="w-full space-y-3">
+                    <button 
+                      onClick={() => {
+                        onClose();
+                        onOpenTopUp();
+                      }}
+                      className="w-full h-16 rounded-2xl bg-[#ffea00] text-black text-[11px] font-black uppercase tracking-[0.3em] font-syncopate italic hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_40px_rgba(255,234,0,0.4)] flex items-center justify-center gap-3"
+                    >
+                       <Diamond size={16} fill="currentColor" />
+                       {isSpanish ? 'AÑADIR CRÉDITOS' : 'ADD CREDITS'}
+                    </button>
+    
+                    {/* 🚀 CPA BRIDGE: SYNDICATE QUEST STACK ($9.00 - $12.00 Profit) */}
+                    <button 
+                      onClick={() => setShowQuests(true)}
+                      className="w-full h-15 rounded-2xl bg-[#ffea00]/5 border border-[#ffea00]/20 text-[#ffea00] text-[10px] font-black uppercase tracking-[0.2em] font-syncopate italic hover:bg-[#ffea00]/10 hover:scale-[1.02] active:scale-95 transition-all flex flex-col items-center justify-center shadow-[0_10px_40px_rgba(255,234,0,0.05)] group"
+                    >
+                       <div className="flex items-center gap-2">
+                           <Shield size={12} className="group-hover:animate-pulse" />
+                           {isSpanish ? 'INICIAR MISIÓN SYNDICATE' : 'SYNDICATE QUEST (FREE)'}
+                       </div>
+                       <span className="text-[6px] opacity-40 tracking-widest mt-1">
+                           {isSpanish ? 'GANA 10,000 CRÉDITOS AHORA' : 'EARN 10,000 $GASP CREDITS NOW'}
+                       </span>
+                    </button>
+                   
+                   <button 
+                     onClick={onClose}
+                     className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white/40 text-[9px] font-black uppercase tracking-[0.2em] hover:text-white transition-all"
+                   >
+                      {isSpanish ? 'DESCARTAR' : 'DISMISS'}
+                   </button>
+                </div>
+              </div>
             </div>
           </div>
 
