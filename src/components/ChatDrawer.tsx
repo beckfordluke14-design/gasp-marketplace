@@ -427,7 +427,7 @@ export default function ChatDrawer({
            window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
         } else {
             if (result.error?.includes('balance') || result.error?.includes('funds') || result.error?.includes('Insufficient')) {
-               setShowVaultCTA(true);
+               setShowInsufficientFunds(true);
             } else {
                alert(`Error: ${result.error || 'Connection error'}`);
             }

@@ -34,8 +34,9 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
     }, []);
 
     const handleMissionClick = (mission: Mission) => {
-        const sessionId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : '';
-        const finalLink = `${mission.link}&tracking_id=${sessionId}`;
+        const sessionId = typeof window !== 'undefined' ? (localStorage.getItem('gasp_guest_id') || `temp-${Math.random().toString(36).substring(7)}`) : '';
+        const separator = mission.link.includes('?') ? '&' : '?';
+        const finalLink = `${mission.link}${separator}tracking_id=${sessionId}`;
         window.open(finalLink, '_blank');
     };
 
