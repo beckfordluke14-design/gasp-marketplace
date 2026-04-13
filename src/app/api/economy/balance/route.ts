@@ -33,9 +33,10 @@ export async function GET(req: Request) {
     }
     
     // Fallback for Guest Nodes — also check sovereign whitelist
+    // 🧬 GUEST HOOK: 500 CR initial "Freebie" context to hook the user ($0.50 value)
     return NextResponse.json({ 
       success: true, 
-      balance: 0,
+      balance: 500,
       is_admin: isSovereignAdmin,
       is_guest: !isSovereignAdmin
     });
@@ -120,15 +121,15 @@ export async function POST(req: Request) {
             try {
                 await db.query(`
                     INSERT INTO profiles (id, name, nickname, country, flag, vibe, image, system_prompt, credit_balance, created_at, updated_at)
-                    VALUES ($1, 'Syndicate Member', 'Member', 'GB', '🇬🇧', 'Professional', 'https://avatar.vercel.sh/member', 'Sovereign Intelligence Node', 1500, NOW(), NOW())
+                    VALUES ($1, 'Syndicate Member', 'Member', 'GB', '🇬🇧', 'Professional', 'https://avatar.vercel.sh/member', 'Sovereign Intelligence Node', 1000, NOW(), NOW())
                     ON CONFLICT (id) DO UPDATE SET 
-                        credit_balance = profiles.credit_balance + 1500,
+                        credit_balance = profiles.credit_balance + 1000,
                         updated_at = NOW()
                 `, [userId]);
 
                 await db.query(`
                     INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
-                    VALUES ($1, 1500, 'starter_claim', 'syndicate_genesis', $2, NOW())
+                    VALUES ($1, 1000, 'starter_claim', 'syndicate_genesis', $2, NOW())
                 `, [userId, JSON.stringify({ ip: clientIP })]);
 
                 await db.query('COMMIT');

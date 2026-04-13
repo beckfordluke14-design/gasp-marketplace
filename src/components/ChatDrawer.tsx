@@ -146,7 +146,7 @@ export default function ChatDrawer({
     // 🛡️ FRONTEND CREDIT ENFORCEMENT: Block transmit if balance is depleted
     const COST_MESSAGE_TEXT = 50;
     const balance = userProfile?.credit_balance || 0;
-    if (!idToUse.startsWith('guest-') && balance < COST_MESSAGE_TEXT) {
+    if (balance < COST_MESSAGE_TEXT) {
        setShowInsufficientFunds(true);
        return;
     }

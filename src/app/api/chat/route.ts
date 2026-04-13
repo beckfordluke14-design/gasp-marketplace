@@ -42,20 +42,30 @@ export async function POST(req: Request) {
     
     if (!profileItem) throw new Error(`Profile Offline: ${finalProfileId}`);
 
-    // 🛡️ SYNDICATE GUEST & CREDIT ENFORCEMENT (V7.0 - ZERO TOLERANCE)
+    // 🛡️ SYNDICATE GUEST & CREDIT ENFORCEMENT (V8.0 - MISSION AWARE)
     const normalizedUserId = (finalUserId || '').trim();
-    
     const GUEST_LIMIT = isFunnel ? 10 : 5; 
     const COST_MESSAGE_TEXT = 50; 
 
     if (normalizedUserId.startsWith('guest-')) {
        try {
-          const { rows: preCheck } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [normalizedUserId]);
-          currentCount = parseInt(preCheck[0].count || '0');
-          
-          if (currentCount >= GUEST_LIMIT) {
-             console.log(`🛑 [Neural Wall] Guest ${normalizedUserId} hard-blocked at ${currentCount} msgs.`);
-             return new Response('DEPLETED', { status: 402 });
+          // 🏮 CHECK AQUIRED CREDITS FIRST: If a guest did a mission, they are VIP
+          const { rows: guestData } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1 LIMIT 1', [normalizedUserId]);
+          const guestBalance = guestData?.[0]?.credit_balance || 0;
+
+          if (guestBalance >= COST_MESSAGE_TEXT) {
+             // Guest has credits (likely from a Mission) -> Burn and allow.
+             await db.query('UPDATE profiles SET credit_balance = credit_balance - $1, updated_at = NOW() WHERE id = $2', [COST_MESSAGE_TEXT, normalizedUserId]);
+             console.log(`📡 [Mission Access] Guest ${normalizedUserId} burning mission credits.`);
+          } else {
+             // Standard Guest Path -> Check the free message limit
+             const { rows: preCheck } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [normalizedUserId]);
+             currentCount = parseInt(preCheck[0].count || '0');
+             
+             if (currentCount >= GUEST_LIMIT) {
+                console.log(`🛑 [Neural Wall] Guest ${normalizedUserId} hard-blocked at ${currentCount} msgs (No Mission Credits).`);
+                return new Response('DEPLETED', { status: 402 });
+             }
           }
        } catch (limitErr) { console.error('[Wall Pre-Check Fail]:', limitErr); }
     } else {
