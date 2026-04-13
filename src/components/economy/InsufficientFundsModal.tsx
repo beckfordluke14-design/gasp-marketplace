@@ -162,11 +162,9 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                    </button>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Bottom Security Tag */}
-          <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-center gap-2 opacity-20">
+              {/* Bottom Security Tag */}
+              <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-center gap-2 opacity-20">
              <AlertCircle size={10} />
              <span className="text-[7px] font-black uppercase tracking-widest italic">
                 {isSpanish ? 'Centro de Medios Estratégicos Soberano // Interfaz Segura' : 'Sovereign Strategic Media Hub // Secure Interface'}
