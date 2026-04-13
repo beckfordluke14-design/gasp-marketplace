@@ -174,8 +174,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                     <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M13 10V3L4 14H11V21L20 10H13Z"/></svg>
                 </div>
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-[#00fff2] tracking-[0.3em] uppercase italic">Bounty Infused</span>
-                    <span className="text-xl font-black text-white italic tracking-tighter">+{bountyAlert.amount.toLocaleString()} $GASP</span>
+                    <span className="text-[10px] font-black text-[#00fff2] tracking-[0.4em] uppercase italic">Credits Loaded</span>
+                    <span className="text-xl font-black text-white italic tracking-tighter">+{bountyAlert.amount.toLocaleString()} <span className="text-[10px] text-[#00fff2]">$GASP</span></span>
                 </div>
             </div>
         </div>

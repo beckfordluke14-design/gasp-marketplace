@@ -66,14 +66,15 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
             </div>
 
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
-                {/* ⚡️ PRIORITY SMART LINK: GLOBAL SYNC ⚡️ */}
+                {/* ⚡️ PRIORITY SMART LINK: OGADS SYNC ⚡️ */}
                 <motion.button
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     onClick={() => {
                         const guestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
                         const tid = guestId || `guest_${Math.random().toString(36).substring(7)}`;
-                        window.open(`https://trianglerockers.com/1890112?tracking_id=${tid}`, '_blank');
+                        // 🚀 OGADS PURE TRACKING INTEGRATION
+                        window.open(`YOUR_OGADS_SMART_LINK?aff_sub=${tid}`, '_blank');
                     }}
                     className="w-full group bg-[#00fff2]/5 border-2 border-[#00fff2] p-6 rounded-2xl transition-all duration-300 flex items-center justify-between text-left relative overflow-hidden shadow-[0_0_50px_rgba(0,255,242,0.3)] active:scale-95 mb-6"
                 >
