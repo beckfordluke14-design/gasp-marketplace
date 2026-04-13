@@ -20,7 +20,9 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
     useEffect(() => {
         async function fetchMissions() {
             try {
-                const res = await fetch('/api/economy/missions');
+                const guestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
+                const tid = guestId || `guest_${Math.random().toString(36).substring(7)}`;
+                const res = await fetch(`/api/economy/missions?trackingId=${tid}`);
                 const data = await res.json();
                 if (data.success) {
                     setMissions(data.missions);

@@ -7,14 +7,17 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
     const userId = "76614";
     const pubkey = "8bd95e1c09ee9d064aaea6f28427974c";
-    const key = "b820c00efb2b75d05913c939001baab2";
+    const key = "b820c00efb2b75d05913c939001baab2"; // Confirmed Private Key
     
     // 🛡️ SECURITY: Detect User IP and Agent to pass to CPAGrip
-    // This ensures the feed shows offers the user can ACTUALLY complete.
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || req.headers.get('x-real-ip');
     const ua = req.headers.get('user-agent');
     
-    const url = `https://www.cpagrip.com/common/offer_feed_json.php?user_id=${userId}&pubkey=${pubkey}&key=${key}${ip ? `&ip=${ip}` : ''}${ua ? `&ua=${encodeURIComponent(ua)}` : ''}`;
+    // 🛰️ IDENTITY SYNC: Pass the visitor's ID to CPAGrip for tracking
+    const { searchParams } = new URL(req.url);
+    const trackingId = searchParams.get('trackingId') || 'syndicate_guest';
+    
+    const url = `https://www.cpagrip.com/common/offer_feed_json.php?user_id=${userId}&pubkey=${pubkey}&key=${key}&showmobile=yes&showall=yes${trackingId ? `&tracking_id=${trackingId}` : ''}${ip ? `&ip=${ip}` : ''}${ua ? `&ua=${encodeURIComponent(ua || '')}` : ''}`;
 
     try {
         const res = await fetch(url, { cache: 'no-store' });
