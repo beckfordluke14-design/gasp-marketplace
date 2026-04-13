@@ -71,35 +71,42 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.05 }}
                         onClick={() => handleMissionClick(mission)}
-                        className="w-full group bg-white/5 border border-white/10 hover:border-[#ffea00] hover:bg-white/10 p-4 rounded-2xl transition-all duration-300 flex items-center justify-between text-left relative overflow-hidden"
+                        className={`w-full group bg-white/5 border ${idx < 3 ? 'border-[#00fff2]/30 shadow-[0_0_20px_rgba(0,255,242,0.05)]' : 'border-white/10'} hover:border-[#00fff2] hover:bg-[#00fff2]/5 p-4 rounded-2xl transition-all duration-300 flex items-center justify-between text-left relative overflow-hidden`}
                     >
+                        {/* ⚡️ FASTEST BADGE */}
+                        {idx < 3 && (
+                            <div className="absolute top-0 right-0 bg-[#00fff2] px-2 py-0.5 rounded-bl-lg">
+                                <span className="text-[6px] font-black text-black uppercase tracking-widest italic">60s COMPLETION</span>
+                            </div>
+                        )}
+
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-black border border-white/10 flex items-center justify-center text-[#ffea00] group-hover:scale-110 transition-transform">
+                            <div className={`w-12 h-12 rounded-xl bg-black border ${idx < 3 ? 'border-[#00fff2]/30 text-[#00fff2]' : 'border-white/10 text-[#ffea00]'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                                 {mission.type?.includes('Desktop') ? <Monitor size={20} /> : <Smartphone size={20} />}
                             </div>
                             <div className="space-y-1">
-                                <h4 className="text-[10px] font-black tracking-widest uppercase italic text-white group-hover:text-[#ffea00] transition-colors leading-tight line-clamp-1">
+                                <h4 className={`text-[10px] font-black tracking-widest uppercase italic ${idx < 3 ? 'text-[#00fff2]' : 'text-white'} group-hover:text-[#00fff2] transition-colors leading-tight line-clamp-1`}>
                                     {mission.title}
                                 </h4>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[7px] font-black text-[#ffea00] tracking-widest uppercase bg-[#ffea00]/10 px-2 py-0.5 rounded-md italic shadow-[0_0_10px_#ffea0033] border border-[#ffea00]/20">
+                                    <span className={`text-[7px] font-black ${idx < 3 ? 'text-[#00fff2] bg-[#00fff2]/10 border-[#00fff2]/20' : 'text-[#ffea00] bg-[#ffea00]/10 border-[#ffea00]/20'} tracking-widest uppercase px-2 py-0.5 rounded-md italic shadow-[0_0_10px_rgba(0,255,242,0.2)] border`}>
                                         +{(mission.payout % 1 <= 0.5 ? Math.floor(mission.payout) : Math.ceil(mission.payout)) * 1000} $GASP REWARD
                                     </span>
-                                    <div className="flex items-center gap-1 opacity-20">
-                                        <Target size={6} className="text-[#ffea00]" />
-                                        <span className="text-[5px] font-black uppercase tracking-widest">Syndicate Precision</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <ArrowRight size={14} className="text-white/20 group-hover:text-[#ffea00] group-hover:translate-x-1 transition-all" />
+                        <ArrowRight size={14} className="text-white/20 group-hover:text-[#00fff2] group-hover:translate-x-1 transition-all" />
                     </motion.button>
                 )) : (
                     <div className="py-20 text-center opacity-40">
-                        <Target size={32} className="mx-auto mb-4 opacity-10" />
-                        <p className="text-[9px] font-black uppercase tracking-widest italic leading-relaxed">
-                            No Missions Available in your sector.<br/>Please check back in 05:00
+                        <div className="relative w-12 h-12 mx-auto mb-6">
+                            <Target size={48} className="absolute inset-0 text-[#00fff2] animate-ping opacity-20" />
+                            <Target size={48} className="absolute inset-0 text-white/10" />
+                        </div>
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] italic leading-relaxed text-[#00fff2]">
+                            Tactical Node Scanning...<br/>
+                            <span className="text-white/40">Refreshing Sector in 05:00</span>
                         </p>
                     </div>
                 )}

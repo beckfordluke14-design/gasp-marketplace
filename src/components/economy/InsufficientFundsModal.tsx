@@ -131,7 +131,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                       {isSpanish ? 'GANA CRÉDITOS' : 'EARN FREE CREDITS'}
                     </div>
                     <span className="text-[8px] opacity-70 tracking-[0.2em] mt-1 uppercase font-black">
-                      {isSpanish ? 'SÓLO 60 SEGUNDOS' : 'COMPLETE 60s MISSION'}
+                      {isSpanish ? 'MISIÓN DE 60 SEGUNDOS' : '60-SECOND QUICK MISSION'}
                     </span>
                   </button>
                 </div>
