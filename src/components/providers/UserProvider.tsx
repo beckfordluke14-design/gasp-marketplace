@@ -146,9 +146,40 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     window.location.href = '/login';
   };
 
+  const [prevBalance, setPrevBalance] = useState<number | null>(null);
+  const [bountyAlert, setBountyAlert] = useState<{ amount: number; active: boolean }>({ amount: 0, active: false });
+
+  useEffect(() => {
+    if (profile?.credit_balance !== undefined) {
+      if (prevBalance !== null && profile.credit_balance > prevBalance) {
+        const diff = profile.credit_balance - prevBalance;
+        if (diff > 0) {
+            setBountyAlert({ amount: diff, active: true });
+            setTimeout(() => setBountyAlert(prev => ({ ...prev, active: false })), 5000);
+        }
+      }
+      setPrevBalance(profile.credit_balance);
+    }
+  }, [profile?.credit_balance]);
+
   return (
     <UserContext.Provider value={{ user, session: null, profile, loading, refreshProfile, signOut, ready, authenticated, login }}>
       {children}
+      
+      {/* 🚀 REAL-TIME BOUNTY NOTIFICATION */}
+      {bountyAlert.active && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] animate-bounce pointer-events-none">
+            <div className="bg-black/90 border-2 border-[#00fff2] px-6 py-3 rounded-2xl shadow-[0_0_50px_rgba(0,255,242,0.4)] flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-[#00fff2] flex items-center justify-center text-black">
+                    <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M13 10V3L4 14H11V21L20 10H13Z"/></svg>
+                </div>
+                <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-[#00fff2] tracking-[0.3em] uppercase italic">Bounty Infused</span>
+                    <span className="text-xl font-black text-white italic tracking-tighter">+{bountyAlert.amount.toLocaleString()} $GASP</span>
+                </div>
+            </div>
+        </div>
+      )}
     </UserContext.Provider>
   );
 }

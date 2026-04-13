@@ -6,27 +6,46 @@ import { db } from '@/lib/db';
  * Automatically converts successful surveys into User Credits.
  * Payout Rate: 1,000 credits per $1.00 USD Payout.
  */
-export async function GET(req: NextRequest) {
-    const { searchParams } = new URL(req.url);
-    
-    // CPAGrip Parameters
-    const userId = searchParams.get('uid');
-    const payoutRaw = searchParams.get('payout');
-    const txId = searchParams.get('txid'); // CPAGrip transaction ID for idempotency
+// 🛰️ SYNDICATE POSTBACK ENGINE (CPAGrip)
+export async function POST(req: NextRequest) { return handleCallback(req); }
+export async function GET(req: NextRequest) { return handleCallback(req); }
 
-    // Validation
-    if (!userId || !payoutRaw || !txId) {
+async function handleCallback(req: NextRequest) {
+    let uid, payoutRaw, txid, password;
+
+    if (req.method === 'POST') {
+        const formData = await req.formData().catch(() => null);
+        if (formData) {
+            uid = formData.get('tracking_id');
+            payoutRaw = formData.get('payout');
+            txid = formData.get('offer_id');
+            password = formData.get('password');
+        }
+    } else {
+        const { searchParams } = new URL(req.url);
+        uid = searchParams.get('uid');
+        payoutRaw = searchParams.get('payout');
+        txid = searchParams.get('txid');
+        password = searchParams.get('password');
+    }
+
+    // 🛡️ SECURITY CHECK: Verify CPAGrip Identity
+    const secureKey = process.env.CPAGRIP_POSTBACK_PASSWORD || 'gasp_secure';
+    if (password && password !== secureKey) {
+        console.warn('[CPA_CALLBACK] Invalid Password Attempted');
+        return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!uid || !payoutRaw || !txid) {
         return NextResponse.json({ success: false, error: 'Missing mandatory tracking parameters' }, { status: 400 });
     }
 
-    const payout = parseFloat(payoutRaw);
-    if (isNaN(payout) || payout <= 0) {
-        return NextResponse.json({ success: false, error: 'Invalid payout value' }, { status: 400 });
-    }
+    const userId = String(uid);
+    const payout = parseFloat(String(payoutRaw));
+    const txId = String(txid);
 
-    // 🔱 SYNDICATE PRECISION CALCULATION
-    // Rule: Decimals 0.5 and below round DOWN. Above 0.5 rounds UP.
-    const totalCredits = (payout % 1 <= 0.5 ? Math.floor(payout) : Math.ceil(payout)) * 1000;
+    // 🔱 SYNDICATE PRECISION CALCULATION: 1,000 Credits per $1.00 USD (Standard Rounding)
+    const totalCredits = Math.round(payout) * 1000;
 
     console.log(`[CPA_CALLBACK] Processing: ${userId} // Payout: $${payout} // Credits: ${totalCredits}`);
 
@@ -44,16 +63,32 @@ export async function GET(req: NextRequest) {
         // 🏗️ ATOMIC FUNDING TRANSACTION
         await db.query('BEGIN');
 
-        // 1. Update User Balance
-        await db.query(
-            `UPDATE profiles SET 
-                credit_balance = credit_balance + $2, 
-                updated_at = NOW() 
-             WHERE id = $1`,
+        // 1. Try updating a Registered Profile first
+        const { rowCount: profileUpdated } = await db.query(
+            `UPDATE profiles SET credit_balance = credit_balance + $2, updated_at = NOW() WHERE id = $1`,
             [userId, totalCredits]
         );
 
-        // 2. record the transaction for audit/admin logs
+        // 2. If no profile was updated, try updating an Anonymous Guest Sync
+        if (profileUpdated === 0) {
+            console.log(`[CPA_CALLBACK] No profile found for ${userId}. Attaching reward to Guest Sync.`);
+            
+            // Check if guest exists, if not create them (Genesis Sync)
+            const { rowCount: guestUpdated } = await db.query(
+                `UPDATE anonymous_guest_sync SET balance = balance + $2, updated_at = NOW() WHERE guest_id = $1`,
+                [userId, totalCredits]
+            );
+
+            if (guestUpdated === 0) {
+                // If guest doesn't exist yet, seed them with the reward
+                await db.query(
+                    `INSERT INTO anonymous_guest_sync (guest_id, balance, created_at) VALUES ($1, $2, NOW())`,
+                    [userId, totalCredits]
+                );
+            }
+        }
+
+        // 3. Record the transaction for audit/admin logs
         await db.query(
             `INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
              VALUES ($1, $2, 'reward', 'cpagrip', $3, NOW())`,
@@ -61,7 +96,7 @@ export async function GET(req: NextRequest) {
                 txId, 
                 payoutUsd: payout,
                 creditsIssued: totalCredits,
-                source: 'survey_locker'
+                isGuest: profileUpdated === 0
             })]
         );
 

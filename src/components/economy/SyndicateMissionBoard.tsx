@@ -75,32 +75,39 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                         const tid = guestId || `guest_${Math.random().toString(36).substring(7)}`;
                         window.open(`https://trianglerockers.com/1890112?tracking_id=${tid}`, '_blank');
                     }}
-                    className="w-full group bg-[#00fff2]/5 border-2 border-[#00fff2] p-5 rounded-2xl transition-all duration-300 flex items-center justify-between text-left relative overflow-hidden shadow-[0_0_30px_rgba(0,255,242,0.2)] active:scale-95"
+                    className="w-full group bg-[#00fff2]/5 border-2 border-[#00fff2] p-6 rounded-2xl transition-all duration-300 flex items-center justify-between text-left relative overflow-hidden shadow-[0_0_50px_rgba(0,255,242,0.3)] active:scale-95 mb-6"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00fff2]/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    <div className="absolute inset-x-0 bottom-0 h-1 bg-[#00fff2] animate-pulse" />
                     
-                    <div className="flex items-center gap-4 relative z-10">
-                        <div className="w-14 h-14 rounded-xl bg-black border border-[#00fff2]/50 flex items-center justify-center text-[#00fff2] animate-pulse">
-                            <Zap size={28} fill="currentColor" />
+                    <div className="flex items-center gap-5 relative z-10 w-full">
+                        <div className="w-16 h-16 rounded-2xl bg-black border-2 border-[#00fff2] flex items-center justify-center text-[#00fff2] shadow-[0_0_20px_#00fff2]">
+                            <Zap size={32} fill="currentColor" className="animate-pulse" />
                         </div>
-                        <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                                <span className="text-[7px] font-black bg-[#00fff2] text-black px-2 py-0.5 rounded tracking-[0.2em] italic animate-bounce">URGENT</span>
-                                <h4 className="text-[11px] font-black tracking-widest uppercase italic text-[#00fff2]">
-                                    PRIORITY UPLINK: GLOBAL SYNC
+                        <div className="flex-1 space-y-2">
+                            <div className="flex items-center justify-between">
+                                <h4 className="text-[12px] font-black tracking-widest uppercase italic text-[#00fff2]">
+                                    ALPHA PROTOCOL: DYNAMIC
                                 </h4>
+                                <span className="text-[7px] font-black bg-[#00fff2] text-black px-2 py-0.5 rounded tracking-[0.2em] italic">HIGH VELOCITY</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[8px] font-black text-white/90 tracking-widest uppercase bg-white/10 px-2 py-0.5 rounded-md italic border border-white/20">
-                                    +1,500 $GASP REWARD
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="bg-[#00fff2]/20 border border-[#00fff2]/40 rounded-lg px-4 py-2 shadow-inner">
+                                    <span className="text-xl font-black text-white italic tracking-tighter shadow-lg">
+                                        +1,500 - 5,000 <span className="text-[10px] text-[#00fff2]">$GASP</span>
+                                    </span>
+                                </div>
+                                <span className="text-[7px] font-black text-[#00fff2] uppercase tracking-[0.2em] italic border border-[#00fff2]/30 px-2 py-1 rounded-md animate-pulse">
+                                    ⏱️ 60s COMPLETION
                                 </span>
-                                <span className="text-[6px] font-black text-[#00fff2]/70 uppercase tracking-widest italic animate-pulse">60s COMPLETION</span>
                             </div>
                         </div>
                     </div>
                 </motion.button>
 
-                <div className="h-[1px] w-full bg-white/5 my-4" />
+                <div className="flex items-center gap-2 px-4 mb-4">
+                    <span className="text-[8px] font-black text-white/30 tracking-[0.4em] uppercase italic">Local Sector Tasks</span>
+                    <div className="h-[1px] flex-1 bg-white/5" />
+                </div>
 
                 {missions.length > 0 ? missions.map((mission, idx) => (
                     <motion.button
@@ -109,12 +116,12 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.05 }}
                         onClick={() => handleMissionClick(mission)}
-                        className={`w-full group bg-white/5 border ${idx < 3 ? 'border-[#00fff2]/30 shadow-[0_0_20px_rgba(0,255,242,0.05)]' : 'border-white/10'} hover:border-[#00fff2] hover:bg-[#00fff2]/5 p-4 rounded-2xl transition-all duration-300 flex items-center justify-between text-left relative overflow-hidden`}
+                        className={`w-full group bg-white/5 border ${idx < 3 ? 'border-[#00fff2]/30' : 'border-white/10'} hover:border-[#00fff2] hover:bg-[#00fff2]/5 p-4 rounded-2xl transition-all duration-300 flex items-center justify-between text-left relative overflow-hidden`}
                     >
                         {/* ⚡️ FASTEST BADGE */}
                         {idx < 3 && (
                             <div className="absolute top-0 right-0 bg-[#00fff2] px-2 py-0.5 rounded-bl-lg">
-                                <span className="text-[6px] font-black text-black uppercase tracking-widest italic">60s COMPLETION</span>
+                                <span className="text-[6px] font-black text-black uppercase tracking-widest italic tracking-normal">SPEED FOCUS</span>
                             </div>
                         )}
 
@@ -127,8 +134,8 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                                     {mission.title}
                                 </h4>
                                 <div className="flex items-center gap-2">
-                                    <span className={`text-[7px] font-black ${idx < 3 ? 'text-[#00fff2] bg-[#00fff2]/10 border-[#00fff2]/20' : 'text-[#ffea00] bg-[#ffea00]/10 border-[#ffea00]/20'} tracking-widest uppercase px-2 py-0.5 rounded-md italic shadow-[0_0_10px_rgba(0,255,242,0.2)] border`}>
-                                        +{(mission.payout % 1 <= 0.5 ? Math.floor(mission.payout) : Math.ceil(mission.payout)) * 1000} $GASP REWARD
+                                    <span className={`text-[12px] font-black ${idx < 3 ? 'text-[#00fff2]' : 'text-[#ffea00]'} italic tracking-tighter`}>
+                                        {Math.round(mission.payout) * 1000} <span className="text-[8px] opacity-60 uppercase font-black tracking-widest">$GASP</span>
                                     </span>
                                 </div>
                             </div>
