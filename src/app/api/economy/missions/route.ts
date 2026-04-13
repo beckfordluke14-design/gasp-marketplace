@@ -20,14 +20,31 @@ export async function GET(req: NextRequest) {
         const res = await fetch(url, { cache: 'no-store' });
         const data = await res.json();
         
-        // 🧪 OPTIMIZATION: Filter for High-Intent / High-Payout categories only
-        const missions = (data.offers || []).slice(0, 10).map((offer: any) => ({
+        // 🧪 VELOCITY OPTIMIZATION: Filter for Instant-Gratification offers (Sweepstakes, Installs)
+        // We hide "Surveys" to prevent user drop-off.
+        const filtered = (data.offers || []).filter((offer: any) => {
+            const lowQuality = ['survey', 'questionnaire', 'opinion', 'poll'].some(term => 
+                offer.title.toLowerCase().includes(term) || 
+                offer.adcopy.toLowerCase().includes(term)
+            );
+            return !lowQuality;
+        });
+
+        // 🧬 SORT BY VELOCITY: Prioritize recognizable "WINS" (iPhone, CashApp, Amazon)
+        const prioritized = filtered.sort((a: any, b: any) => {
+            const highValue = ['win', 'iphone', 'cashapp', 'amazon', 'gift card', 'ps5', 'xbox'];
+            const scoreA = highValue.some(term => a.title.toLowerCase().includes(term)) ? 1 : 0;
+            const scoreB = highValue.some(term => b.title.toLowerCase().includes(term)) ? 1 : 0;
+            return scoreB - scoreA;
+        });
+
+        const missions = prioritized.slice(0, 10).map((offer: any) => ({
             id: offer.offerid,
             title: offer.title,
             description: offer.adcopy,
             payout: parseFloat(offer.payout),
             link: offer.link,
-            type: offer.type, // Desktop vs Mobile
+            type: offer.type, 
             category: offer.category
         }));
 

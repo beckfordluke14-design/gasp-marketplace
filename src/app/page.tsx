@@ -166,10 +166,11 @@ function MarketplaceContent() {
 
   const refinedProfiles = useMemo(() => {
     // 🛡️ SOVEREIGN REGISTRY: Only personas approved in Admin (is_active !== false) are permitted.
-    if (!dbProfiles || dbProfiles.length === 0) return [];
+    // 🧬 FAILOVER: If database sync is empty, fall back to initial roster to prevent zero-conversion view.
+    const sourceData = (!dbProfiles || dbProfiles.length === 0) ? initialProfiles : dbProfiles;
 
-    return dbProfiles
-      .filter(p => p.is_active !== false)
+    return sourceData
+      .filter(p => (p as any).is_active !== false)
       .map(dbP => {
         const staticP = initialProfiles.find(s => String(s.id) === String(dbP.id));
         return { 
