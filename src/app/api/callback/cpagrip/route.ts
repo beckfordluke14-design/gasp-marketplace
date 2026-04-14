@@ -45,7 +45,14 @@ async function handleCallback(req: NextRequest) {
     const txId = String(txid);
 
     // 🔱 SYNDICATE PRECISION CALCULATION: 1,000 Credits per $1.00 USD (Standard Rounding)
-    const totalCredits = Math.round(payout) * 1000;
+    let totalCredits = Math.round(payout) * 1000;
+
+    // 🧬 ALLOCATION MATCH: If compliance is true, ensure first-time sync awards the 9,000 promised units.
+    const isCompliance = true; // Use SYNDICATE_CONFIG.compliance if available
+    if (isCompliance) {
+        // Checking if this is the first reward for this user via a separate query below.
+        // We will override totalCredits if we find no previous transactions.
+    }
 
     console.log(`[CPA_CALLBACK] Processing: ${userId} // Payout: $${payout} // Credits: ${totalCredits}`);
 
@@ -58,6 +65,18 @@ async function handleCallback(req: NextRequest) {
 
         if (existing.length > 0) {
             return NextResponse.json({ success: true, message: 'Transaction already processed' });
+        }
+
+        // 🧬 FIRST-TIME MATCH CHECK:
+        const { rows: history } = await db.query(
+            `SELECT 1 FROM transactions WHERE user_id = $1 AND type = 'reward' LIMIT 1`,
+            [userId]
+        );
+        
+        const isFirstTime = history.length === 0;
+        if (isFirstTime && isCompliance) {
+            console.log(`[CPA_CALLBACK] First-Time Sync Detected for ${userId}. Overriding to 9,000 Units.`);
+            totalCredits = 9000;
         }
 
         // 🏗️ ATOMIC FUNDING TRANSACTION
