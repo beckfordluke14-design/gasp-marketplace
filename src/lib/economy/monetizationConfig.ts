@@ -5,8 +5,11 @@
 
 export const SYNDICATE_CONFIG = {
     // 🚦 PROVIDER MODE: 'OGADS' | 'TRAFEE'
-    // Switch to 'TRAFEE' once approved for 5x payouts.
     provider: 'OGADS', 
+
+    // 🛡️ COMPLIANCE MODE: Set to TRUE to hide 'Credits/Rewards' for Trafee approval.
+    // Set to FALSE once approved to show the high-conversion 'Free Credits' labels.
+    compliance: true,
 
     // 🔗 SMART LINKS
     ogads_link: 'https://appchecker.space/sl/3181j',

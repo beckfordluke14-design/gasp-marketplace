@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useUser } from '../providers/UserProvider';
 import { formatCredits } from '@/lib/format';
 import SyndicateMissionBoard from './SyndicateMissionBoard';
+import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
 
 interface InsufficientFundsModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
   const [balance, setBalance] = useState<number | null>(null);
   const [showQuests, setShowQuests] = useState(false);
   const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
+  const isCompliance = SYNDICATE_CONFIG.compliance;
 
   useEffect(() => {
     if (!isOpen) setShowQuests(false);
@@ -93,33 +95,34 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
               </div>
 
               <h3 className="text-2xl font-syncopate font-black uppercase italic text-white tracking-tighter mb-2">
-                {balance && balance > 0 
+                {isCompliance ? (isSpanish ? 'IDENTIDAD PENDIENTE' : 'IDENTITY PENDING') : (balance && balance > 0 
                   ? (isSpanish ? 'CRÉDITOS INSUFICIENTES' : 'NOT ENOUGH CREDITS')
-                  : (isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS')}
+                  : (isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS'))}
               </h3>
               
               <div className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-8 max-w-[320px] italic">
                 {personaName ? (
                    isSpanish ? (
-                     <>CHATEAR CON <span className="text-[#ffea00]">{personaName.toUpperCase()}</span> PARA CONTINUAR. SE REQUIERE ASIGNACIÓN DE CRÉDITOS PARA MANTENER LA CONEXIÓN. 🗝️🛡️</>
+                     <>{isCompliance ? 'SINCRONIZACIÓN SEGURA CON' : 'CHATEAR CON'} <span className="text-[#ffea00]">{personaName.toUpperCase()}</span> {isCompliance ? 'REQUERIDA PARA MANTENER LA RUTA DE LA SEÑAL' : 'PARA CONTINUAR. SE REQUIERE ASIGNACIÓN DE CRÉDITOS PARA MANTENER LA CONEXIÓN'}. 🗝️🛡️</>
                    ) : (
-                     <>CHAT W/ <span className="text-[#ffea00]">{personaName}</span> TO CONTINUE. Allocation of Credits Required to Maintain Connection. 🗝️🛡️</>
+                     <>{isCompliance ? 'Secure Sync with' : 'CHAT W/'} <span className="text-[#ffea00]">{personaName}</span> {isCompliance ? 'Required to Maintain Signal Path' : 'TO CONTINUE. Allocation of Credits Required to Maintain Connection'}. 🗝️🛡️</>
                    )
                 ) : (
                    isSpanish ? (
-                     <>SE REQUIERE ASIGNACIÓN DE <span className="text-[#ffea00]">CRÉDITOS DEL SISTEMA</span> PARA ACCEDER AL ENLACE SEGURO DEL ARCHIVO. 🛡️🛰️</>
+                     <>SE REQUIERE ASIGNACIÓN DE <span className="text-[#ffea00]">{isCompliance ? 'IDENTIDAD SEGURA' : 'CRÉDITOS DEL SISTEMA'}</span> PARA ACCEDER AL ENLACE SEGURO DEL ARCHIVO. 🛡️🛰️</>
                    ) : (
-                     <>Allocation of <span className="text-[#ffea00]">System Credits</span> Required to Access Secure Archive Uplink. 🛡️🛰️</>
+                     <>Allocation of <span className="text-[#ffea00]">{isCompliance ? 'Secure Identity' : 'System Credits'}</span> Required to Access Secure Archive Uplink. 🛡️🛰️</>
                    )
                 )}
               </div>
 
               <div className="w-full space-y-4 pb-8">
-                {/* 🛡️ PATH ALPHA: FREE ACCESS (HIGH-VELOCITY CONVERSION) */}
                 <div className="space-y-2">
                    <div className="flex items-center gap-2 px-2">
                       <div className="h-[1px] flex-1 bg-[#00fff2]/20" />
-                      <span className="text-[7px] font-black text-[#00fff2] tracking-[0.3em] uppercase italic">PATH ALPHA: FREE ACCESS</span>
+                      <span className="text-[7px] font-black text-[#00fff2] tracking-[0.3em] uppercase italic">
+                          {isCompliance ? 'PATH ALPHA: SECURE LINK' : 'PATH ALPHA: FREE ACCESS'}
+                      </span>
                       <div className="h-[1px] flex-1 bg-[#00fff2]/20" />
                    </div>
                   <button 
@@ -128,15 +131,14 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                   >
                     <div className="flex items-center gap-2">
                       <Zap size={16} fill="currentColor" className="group-hover:rotate-12 transition-transform" />
-                      {isSpanish ? 'GANA CRÉDITOS' : 'EARN FREE CREDITS'}
+                      {isCompliance ? (isSpanish ? 'ESTABLECER ENLACE' : 'ESTABLISH SECURE LINK') : (isSpanish ? 'GANA CRÉDITOS' : 'EARN FREE CREDITS')}
                     </div>
                     <span className="text-[8px] opacity-70 tracking-[0.2em] mt-1 uppercase font-black">
-                      {isSpanish ? 'MISIÓN DE 60 SEGUNDOS' : '60-SECOND QUICK MISSION'}
+                      {isCompliance ? (isSpanish ? 'PROTOCOLO DE 60 SEGUNDOS' : '60-SECOND PROTOCOL CLEARANCE') : (isSpanish ? 'MISIÓN DE 60 SEGUNDOS' : '60-SECOND QUICK MISSION')}
                     </span>
                   </button>
                 </div>
 
-                {/* 🛡️ PATH BETA: INSTANT PURCHASE */}
                 <div className="space-y-2 opacity-50 hover:opacity-100 transition-opacity">
                    <div className="flex items-center gap-2 px-2">
                       <div className="h-[1px] flex-1 bg-white/10" />
@@ -148,7 +150,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                     className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white text-[9px] font-black uppercase tracking-[0.3em] hover:bg-white/10 transition-all flex items-center justify-center gap-3"
                   >
                     <Diamond size={12} fill="currentColor" />
-                    {isSpanish ? 'COMPRAR AHORA' : 'BUY CREDITS INSTANT'}
+                    {isCompliance ? (isSpanish ? 'CLEARANCE INSTANTÁNEO' : 'INSTANT CLEARANCE') : (isSpanish ? 'COMPRAR AHORA' : 'BUY CREDITS INSTANT')}
                   </button>
                 </div>
                  

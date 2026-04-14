@@ -6,6 +6,7 @@ import { X, Zap, ShieldCheck, CreditCard, QrCode, ArrowRight, CheckCircle2, Aler
 import { CREDIT_PACKAGES, SYNDICATE_TREASURY_SOL } from '@/lib/economy/constants';
 import { useUser } from '../providers/UserProvider';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
 
 
 interface TopUpDrawerProps {
@@ -59,6 +60,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
     const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
     const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
+    const isCompliance = SYNDICATE_CONFIG.compliance;
 
     const solanaAddress = (user?.linkedAccounts?.find(a => (a as any).type === 'wallet' && (a as any).chainType === 'solana') as any)?.address;
 
@@ -316,9 +318,15 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                         
                         <div className="p-8 pb-4 flex items-center justify-between shrink-0">
                             <div className="flex flex-col gap-1 text-left">
-                                <span className="text-[9px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">{isSpanish ? 'SISTEMA DE CRÉDITOS' : 'CREDIT SYSTEM'}</span>
-                                <h2 className="text-2xl font-syncopate font-black uppercase italic text-white leading-none tracking-tighter">{isSpanish ? 'COMPRAR CRÉDITOS' : 'BUY CREDITS'}</h2>
-                                <p className="text-[8px] font-bold text-[#ff00ff] uppercase tracking-[0.2em] mt-1 italic">Unlock 100s of women on the Gasp network</p>
+                                <span className="text-[9px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">
+                                    {isCompliance ? (isSpanish ? 'SISTEMA DE IDENTIDAD' : 'IDENTITY SYSTEM') : (isSpanish ? 'SISTEMA DE CRÉDITOS' : 'CREDIT SYSTEM')}
+                                </span>
+                                <h2 className="text-2xl font-syncopate font-black uppercase italic text-white leading-none tracking-tighter">
+                                    {isCompliance ? (isSpanish ? 'ASIGNACIÓN DE IDENTIDAD' : 'IDENTITY ALLOCATION') : (isSpanish ? 'COMPRAR CRÉDITOS' : 'BUY CREDITS')}
+                                </h2>
+                                <p className="text-[8px] font-bold text-[#ff00ff] uppercase tracking-[0.2em] mt-1 italic">
+                                    {isCompliance ? 'Secure authentication for sovereign network access' : 'Unlock 100s of women on the Gasp network'}
+                                </p>
                             </div>
                             <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"><X size={20} /></button>
                         </div>
