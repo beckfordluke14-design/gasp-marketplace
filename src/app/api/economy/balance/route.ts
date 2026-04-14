@@ -56,13 +56,13 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true, balance: 350 });
         }
 
-        // 🏦 STARTER CLAIM (1,500 CR - For actual Registered Users)
+        // 🏦 STARTER CLAIM (1,000 CR - For actual Registered Users)
         if (action === 'starter_claim') {
             await db.query(`
-                INSERT INTO profiles (id, credit_balance) VALUES ($1, 1500) 
-                ON CONFLICT (id) DO UPDATE SET credit_balance = GREATEST(profiles.credit_balance, 1500)
+                INSERT INTO profiles (id, credit_balance) VALUES ($1, 1000) 
+                ON CONFLICT (id) DO UPDATE SET credit_balance = GREATEST(profiles.credit_balance, 1000)
             `, [userId]);
-            return NextResponse.json({ success: true, balance: 1500 });
+            return NextResponse.json({ success: true, balance: 1000 });
         }
 
         return NextResponse.json({ success: false, error: 'Invalid Action' }, { status: 400 });

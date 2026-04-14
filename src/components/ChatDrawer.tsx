@@ -86,6 +86,7 @@ export default function ChatDrawer({
   const [isDepleted, setIsDepleted] = useState(false);
   const [personaState, setPersonaState] = useState<PersonaDailyState | null>(null);
   const [bondScore, setBondScore] = useState(0);
+  const [itemToUnlock, setItemToUnlock] = useState<any | null>(null);
 
   const sendGift = async (emoji: string, cost: number) => {
     if (isProcessing) return;
@@ -338,6 +339,23 @@ export default function ChatDrawer({
   };
 
   const unlockItem = async (item: any) => {
+     // 🧬 ADAPTIVE GATEWAY: Check balance BEFORE showing confirmation
+     const cost = item.price_credits || 6000;
+     const currentBalance = userProfile?.credit_balance || 0;
+
+     if (currentBalance < cost) {
+        // Force them into the offer wall immediately (The aggressive Window Shopper Trap)
+        setShowInsufficientFunds(true);
+        setItemToUnlock(null); 
+        return;
+     }
+
+     // 🛡️ CONFIRMATION PROTOCOL: If they can afford it, ask twice
+     if (!itemToUnlock || itemToUnlock.id !== item.id) {
+        setItemToUnlock(item);
+        return;
+     }
+
      setIsProcessing(true);
      try {
         const res = await fetch('/api/economy/unlock', {
@@ -348,6 +366,7 @@ export default function ChatDrawer({
         if (result.success) {
            setVaultItems(prev => prev.map(v => v.id === item.id || v.mediaId === item.id ? { ...v, is_unlocked: true } : v));
            window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+           setItemToUnlock(null);
         } else {
             if (result.error?.includes('balance') || result.error?.includes('funds') || result.error?.includes('Insufficient')) {
                setShowInsufficientFunds(true);
@@ -599,10 +618,28 @@ export default function ChatDrawer({
                         <Image src={proxyImg(item.content_url)} alt="Vault Media" fill unoptimized className={`object-cover transition-all ${item.is_vault && !item.is_unlocked ? 'blur-2xl opacity-50' : ''}`} />
                         {item.is_vault && !item.is_unlocked && (
                           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4 gap-3 bg-black/60">
-                            <Lock size={18} className="text-white/50" />
-                            <button onClick={(e) => { e.stopPropagation(); unlockItem(item); }} className="w-full py-2.5 bg-white text-black text-[9px] font-black uppercase rounded-xl hover:bg-[#ffea00] disabled:opacity-50 shadow-lg">
-                               {isProcessing ? '...' : (isSpanish ? 'DESBLOQUEAR' : 'UNLOCK') + ` · ${item.price_credits || 6000}cr`}
-                            </button>
+                            {itemToUnlock?.id === item.id ? (
+                               <div className="w-full space-y-3 animate-in fade-in zoom-in duration-300">
+                                  <div className="text-center">
+                                     <p className="text-[10px] font-black uppercase text-[#ffea00] tracking-widest mb-1">{isSpanish ? 'CONFIRMAR COMPRA' : 'CONFIRM PURCHASE'}</p>
+                                     <p className="text-[7px] text-white/40 uppercase tracking-widest italic">{isSpanish ? 'SALDO ACTUAL:' : 'CURRENT BALANCE:'} {userProfile?.credit_balance?.toLocaleString() || 0} CR</p>
+                                  </div>
+                                  <button onClick={(e) => { e.stopPropagation(); unlockItem(item); }} disabled={isProcessing} className="w-full py-3 bg-[#ffea00] text-black text-[10px] font-black uppercase rounded-xl shadow-[0_0_20px_rgba(255,234,0,0.4)] flex items-center justify-center gap-2">
+                                     {isProcessing ? <div className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin" /> : <Diamond size={12} fill="currentColor" />}
+                                     {isSpanish ? `SÍ, DESBLOQUEAR (${item.price_credits || 6000} CR)` : `YES, UNLOCK (${item.price_credits || 6000} CR)`}
+                                  </button>
+                                  <button onClick={(e) => { e.stopPropagation(); setItemToUnlock(null); }} className="w-full py-2 bg-white/5 border border-white/10 text-white/40 text-[8px] font-black uppercase rounded-xl hover:text-white transition-all">
+                                     {isSpanish ? 'CANCELAR' : 'CANCEL'}
+                                  </button>
+                               </div>
+                            ) : (
+                               <>
+                                  <Lock size={18} className="text-white/50 group-hover:text-[#ffea00] transition-colors" />
+                                  <button onClick={(e) => { e.stopPropagation(); unlockItem(item); }} className="w-full py-2.5 bg-white text-black text-[9px] font-black uppercase rounded-xl hover:bg-[#ffea00] disabled:opacity-50 shadow-lg">
+                                     {isProcessing ? '...' : (isSpanish ? 'DESBLOQUEAR' : 'UNLOCK') + ` · ${item.price_credits || 6000}cr`}
+                                  </button>
+                               </>
+                            )}
                           </div>
                         )}
                       </div>

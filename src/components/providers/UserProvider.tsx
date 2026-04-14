@@ -54,7 +54,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         if (isNewUser && !data.is_admin) {
           const isActuallyGuest = userId.startsWith('guest-');
           const claimAction = isActuallyGuest ? 'guest_genesis' : 'starter_claim';
-          const bonusAmount = isActuallyGuest ? 350 : 1500;
+          const bonusAmount = isActuallyGuest ? 350 : 1000;
 
           fetch('/api/economy/balance', {
               method: 'POST',
@@ -175,20 +175,48 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     <UserContext.Provider value={{ user, session: null, profile, loading, refreshProfile, signOut, ready, authenticated, login }}>
       {children}
       
-      {/* 🚀 REAL-TIME BOUNTY NOTIFICATION */}
-      {bountyAlert.active && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] animate-bounce pointer-events-none">
-            <div className="bg-black/90 border-2 border-[#00fff2] px-6 py-3 rounded-2xl shadow-[0_0_50px_rgba(0,255,242,0.4)] flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-[#00fff2] flex items-center justify-center text-black">
-                    <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M13 10V3L4 14H11V21L20 10H13Z"/></svg>
-                </div>
-                <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-[#00fff2] tracking-[0.4em] uppercase italic">Credits Loaded</span>
-                    <span className="text-xl font-black text-white italic tracking-tighter">+{bountyAlert.amount.toLocaleString()} <span className="text-[10px] text-[#00fff2]">CREDITS</span></span>
-                </div>
-            </div>
-        </div>
-      )}
+      {/* 🚀 REAL-TIME BOUNTY NOTIFICATION: CINEMATIC PULSE */}
+      <AnimatePresence>
+        {bountyAlert.active && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.5, y: -50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 1.2, filter: 'blur(20px)' }}
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none"
+          >
+              <div className="relative">
+                  {/* 🧬 NEURAL RADIANCE: Outer Glow Pulse */}
+                  <motion.div 
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute inset-0 bg-[#ffea00] blur-3xl opacity-30 rounded-full"
+                  />
+                  
+                  <div className="bg-black/95 border-2 border-[#ffea00] px-8 py-5 rounded-[2rem] shadow-[0_0_80px_rgba(255,234,0,0.3)] flex items-center gap-6 relative z-10 overflow-hidden">
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#ffea00]/10 to-transparent pointer-events-none" />
+                      
+                      <div className="w-14 h-14 rounded-full bg-[#ffea00] flex items-center justify-center text-black shadow-[0_0_20px_#ffea00]">
+                          <Zap size={28} fill="currentColor" />
+                      </div>
+                      
+                      <div className="flex flex-col">
+                          <span className="text-[10px] font-black text-[#ffea00] tracking-[0.5em] uppercase italic leading-none mb-1">
+                             {profile?.id?.startsWith('guest-') ? 'GIFT RECEIVED' : 'WELCOME BONUS'}
+                          </span>
+                          <div className="flex items-center gap-3">
+                             <span className="text-3xl font-syncopate font-black text-white italic tracking-tighter leading-none">
+                                +{bountyAlert.amount.toLocaleString()} 
+                             </span>
+                             <div className="px-2 py-1 bg-white/10 rounded flex items-center gap-1 border border-white/10">
+                                <span className="text-[11px] font-black text-[#ffea00] uppercase tracking-widest">CREDITS</span>
+                             </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </UserContext.Provider>
   );
 }
