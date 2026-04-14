@@ -76,7 +76,7 @@ export default function SyndicateMissionBoard() {
                         <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-[0.5em] italic mb-1">REAL-TIME MISSION TRACKER</span>
                         <div className="flex items-end justify-between">
                             <h4 className="text-4xl font-syncopate font-black italic text-white uppercase tracking-tighter tabular-nums leading-none">
-                                {balance.toLocaleString()} <span className="text-[12px] text-white/30 tracking-widest not-italic">CR</span>
+                                {(balance || 0).toLocaleString()} <span className="text-[12px] text-white/30 tracking-widest not-italic">CR</span>
                             </h4>
                             <div className="flex flex-col items-end leading-none translate-y-2">
                                 <span className="text-[12px] font-black text-white italic tracking-tighter">GOAL: 6,000 CR</span>
@@ -153,7 +153,7 @@ export default function SyndicateMissionBoard() {
                         <div className="flex flex-col items-end gap-3 shrink-0 relative z-10">
                             <div className="flex items-center gap-2 px-4 py-2 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-2xl shadow-[0_0_20px_rgba(255,234,0,0.1)]">
                                 <Zap size={14} className="text-[#ffea00] fill-[#ffea00]" />
-                                <span className="text-lg font-syncopate font-black italic text-[#ffea00] tabular-nums">+{mission.payout.toLocaleString()}</span>
+                                <span className="text-lg font-syncopate font-black italic text-[#ffea00] tabular-nums">+{(mission.payout || 0).toLocaleString()}</span>
                             </div>
                             <div className="flex items-center gap-2 text-[#00f0ff] opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
                                 <span className="text-[10px] font-black uppercase tracking-widest italic">STEP 1: UNLOCK</span>

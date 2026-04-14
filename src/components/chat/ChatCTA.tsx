@@ -84,11 +84,7 @@ export default function ChatCTA({ type, onAction, personaName, balance }: ChatCT
              : (isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS')}
          </h3>
          <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
-           {isSpanish ? (
-             <>Actualmente tienes <span className="text-white font-syncopate">{balance !== undefined ? balance.toLocaleString() : '---'}</span>. <br /> Añade créditos para mantener el Sincronismo.</>
-           ) : (
-             <>You currently have <span className="text-white font-syncopate">{balance !== undefined ? balance.toLocaleString() : '---'}</span>. <br /> Add credits to maintain Sync Lock.</>
-           )}
+             <>{isSpanish ? 'Actualmente tienes' : 'You currently have'} <span className="text-white font-syncopate">{(balance ?? 0).toLocaleString()}</span>. <br /> {isSpanish ? 'Añade créditos para mantener el Sincronismo.' : 'Add credits to maintain Sync Lock.'}</>
          </p>
       </div>
 
