@@ -11,6 +11,7 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
 import TopUpDrawer from './economy/TopUpDrawer';
+import VoiceNoteBubble from './chat/VoiceNoteBubble';
 import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
 
 export default function FunnelView() {
@@ -207,15 +208,41 @@ export default function FunnelView() {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            const chunk = decoder.decode(value);
+            const chunk = decoder.decode(value, { stream: true });
             const lines = chunk.split('\n');
             for (const line of lines) {
               if (line.startsWith('0:')) {
-                try { fullText += JSON.parse(line.substring(2)); } catch (e) {}
+                try { 
+                  const text = JSON.parse(line.substring(2)); 
+                  setMessages(prev => {
+                    const last = prev[prev.length - 1];
+                    if (last?.role === 'assistant' && !last.isTease) {
+                      return [...prev.slice(0, -1), { ...last, content: text }];
+                    }
+                    return [...prev, { id: 'v-' + Date.now(), role: 'assistant', content: text }];
+                  });
+                } catch (e) {}
+              } else if (line.startsWith('2:')) {
+                try {
+                  const event = JSON.parse(line.substring(2));
+                  if (event?.type === 'voice_note' && event.audioUrl) {
+                    setMessages(prev => {
+                      const last = prev[prev.length - 1];
+                      if (last?.role === 'assistant') {
+                        return [...prev.slice(0, -1), { 
+                          ...last, 
+                          media_url: event.audioUrl, 
+                          type: 'voice',
+                          audio_translation: event.audio_translation || null 
+                        }];
+                      }
+                      return prev;
+                    });
+                  }
+                } catch (e) {}
               }
             }
           }
-          if (fullText) setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: fullText }]);
         }
       } catch (err) { console.error(err); } finally { setIsTyping(false); }
     })();
@@ -344,6 +371,18 @@ export default function FunnelView() {
                               </div>
                            </div>
                         </div>
+                      ) : m.type === 'voice' && m.media_url ? (
+                         <div className="w-full max-w-[90%]">
+                            <VoiceNoteBubble 
+                               audioUrl={m.media_url} 
+                               profileImage={profile.image}
+                               profileName={profile.name}
+                               translation={m.audio_translation}
+                               isUnlocked={true}
+                               isEnglish={true}
+                               onUnlockTranslation={async () => true}
+                            />
+                         </div>
                       ) : (
                         <div className={`max-w-[85%] px-6 py-4 rounded-[2rem] text-[16px] leading-relaxed relative ${
                           m.role === 'assistant' 
