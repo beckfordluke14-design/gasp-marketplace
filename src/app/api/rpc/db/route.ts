@@ -1,7 +1,6 @@
 import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
-
 async function getNews(searchParams: URLSearchParams) {
   const action = searchParams.get('action');
   if (action === 'get_latest_news') {
@@ -32,15 +31,10 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const { action, payload } = body;
 
-    // Support for POST-based news fetch (Legacy/Hub Support)
     if (action === 'get_latest_news') {
        const { limit = 3 } = payload || {};
        const { rows } = await db.query(`SELECT * FROM news_posts ORDER BY created_at DESC LIMIT $1`, [limit]);
        return NextResponse.json({ success: true, posts: rows });
-    }
-
-    if (action === 'get_profiles') {
-      return new Response('Missing Action or Payload', { status: 400 });
     }
 
     if (!action || !payload) {
@@ -48,7 +42,6 @@ export async function POST(req: Request) {
     }
 
     const { userId, personaId } = payload;
-
     if (!userId) {
       return new Response('Missing User ID', { status: 400 });
     }
@@ -56,52 +49,22 @@ export async function POST(req: Request) {
     switch (action) {
       case 'chat-context': {
         const { guestId } = payload;
-        console.log(`📡 [Neural Sync] Decrypting context for: ${userId} <-> ${personaId} (GuestBridge: ${guestId})`);
-
-        // 🧬 NEURAL BRIDGE (IDENTITY MERGE): If a guest logs in, migrate their messages to the steady user.id
+        
+        // 🧬 NEURAL BRIDGE: Migrate guest data to user DID if needed
         if (guestId && userId !== guestId && userId.startsWith('did:')) {
            try {
-              console.log(`🧠 [Neural Bridge] Migrating Guest ${guestId} to Member ${userId}`);
-              
-              // 1. Move messages (No conflict risk)
               await db.query('UPDATE chat_messages SET user_id = $1 WHERE user_id = $2', [userId, guestId]);
-              
-              // 2. Safe Relationship Merge (Handle duplicates without ON CONFLICT constraints)
               await db.query(`
                 INSERT INTO user_relationships (user_id, persona_id, affinity_score)
-                SELECT $1, persona_id, affinity_score 
-                FROM user_relationships 
-                WHERE user_id = $2
-                AND NOT EXISTS (
-                    SELECT 1 FROM user_relationships ur2 WHERE ur2.user_id = $1 AND ur2.persona_id = user_relationships.persona_id
-                );
+                SELECT $1, persona_id, affinity_score FROM user_relationships WHERE user_id = $2
+                AND NOT EXISTS (SELECT 1 FROM user_relationships ur2 WHERE ur2.user_id = $1 AND ur2.persona_id = user_relationships.persona_id)
               `, [userId, guestId]);
-              await db.query('DELETE FROM user_relationships WHERE user_id = $1', [guestId]);
-
-              // 3. Safe Unlocks Merge
-              await db.query(`
-                INSERT INTO user_vault_unlocks (user_id, post_id, created_at)
-                SELECT $1, post_id, created_at 
-                FROM user_vault_unlocks 
-                WHERE user_id = $2
-                AND NOT EXISTS (
-                    SELECT 1 FROM user_vault_unlocks uvu2 WHERE uvu2.user_id = $1 AND uvu2.post_id = user_vault_unlocks.post_id
-                );
-              `, [userId, guestId]);
-              await db.query('DELETE FROM user_vault_unlocks WHERE user_id = $1', [guestId]);
-           } catch (mergeErr) { console.warn('[Neural Bridge Fail]:', mergeErr); }
+              await db.query('DELETE FROM user_relationships WHERE user_id = $2', [guestId]);
+           } catch (e) {}
         }
 
-        // 🛡️ SOVEREIGN BRIDGE: Each query is individually fault-tolerant.
-        // If legacy tables (persona_vault) don't exist on Railway, we return [] and keep going.
-        const safeQuery = async (sql: string, params: any[]): Promise<any[]> => {
-          try {
-            const { rows } = await db.query(sql, params);
-            return rows || [];
-          } catch (e: any) {
-            console.warn(`[Neural Sync] Query skipped (${e.message.slice(0, 60)})`);
-            return [];
-          }
+        const safeQuery = async (sql: string, params: any[]) => {
+           try { const { rows } = await db.query(sql, params); return rows || []; } catch (e) { return []; }
         };
 
         const [messages, unlocks, vault, galleryPosts, relationships, stats, msgCountRows] = await Promise.all([
@@ -113,36 +76,28 @@ export async function POST(req: Request) {
             safeQuery('SELECT bond_score FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, personaId]),
             safeQuery('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [userId])
         ]);
-        
+
         const userMsgCount = parseInt(msgCountRows[0]?.count || '0');
-        const GUEST_LIMIT = 5;
+        const GUEST_LIMIT = 5; // ⚖️ CONVERSION CAP
+
+        // Fetch User Balance
+        const { rows: balanceRows } = await db.query('SELECT credit_balance FROM users WHERE id = $1', [userId]);
+        const balance = balanceRows[0]?.credit_balance || 0;
 
         const unlockedIds = unlocks.map((u: any) => u.item_id);
-
-        // Merge vault + gallery posts, vault items mapped for UI
         const legacyVaultItems = vault.map((v: any) => ({
-            id: v.id,
-            content_url: v.content_url || v.media_url,
-            caption: v.caption || '',
-            price: v.price_credits || v.price || 75,
-            is_vault: true,
-            is_unlocked: unlockedIds.includes(v.id),
-            type: v.type || 'image',
-            created_at: v.created_at
+            id: v.id, content_url: v.content_url || v.media_url, caption: v.caption || '',
+            price: v.price_credits || v.price || 75, is_vault: true, is_unlocked: unlockedIds.includes(v.id), 
+            type: v.type || 'image', created_at: v.created_at
         }));
 
         const postVaultItems = galleryPosts.map((p: any) => ({
-            id: p.id,
-            content_url: p.content_url,
-            caption: p.caption || '',
-            price: p.price_credits || p.lock_price || 75,
-            is_vault: p.is_vault || false,
-            is_unlocked: !p.is_vault || unlockedIds.includes(p.id),
-            type: p.content_type || p.type || 'image',
+            id: p.id, content_url: p.content_url, caption: p.caption || '',
+            price: p.price_credits || p.lock_price || 75, is_vault: p.is_vault || false,
+            is_unlocked: !p.is_vault || unlockedIds.includes(p.id), type: p.content_type || p.type || 'image',
             created_at: p.created_at
         }));
 
-        // Deduplicate by id, prefer postVaultItems
         const seen = new Set();
         const allVaultItems = [...postVaultItems, ...legacyVaultItems].filter((item: any) => {
             if (!item.content_url || seen.has(item.id)) return false;
@@ -158,7 +113,7 @@ export async function POST(req: Request) {
             isFollowing: relationships.length > 0,
             bondScore: (stats[0] as any)?.bond_score || 0,
             userMsgCount,
-            isDepleted: userId.startsWith('guest-') && userMsgCount >= GUEST_LIMIT
+            isDepleted: balance <= 0 && userId.startsWith('guest-') && userMsgCount >= GUEST_LIMIT
           }
         });
       }
@@ -169,11 +124,7 @@ export async function POST(req: Request) {
           await db.query('DELETE FROM user_relationships WHERE user_id = $1 AND persona_id = $2', [userId, personaId]);
           return NextResponse.json({ success: true, isFollowing: false });
         } else {
-          await db.query(`
-            INSERT INTO user_relationships (user_id, persona_id, affinity_score)
-            SELECT $1, $2, 1
-            WHERE NOT EXISTS (SELECT 1 FROM user_relationships WHERE user_id = $1 AND persona_id = $2)
-          `, [userId, personaId]);
+          await db.query(`INSERT INTO user_relationships (user_id, persona_id, affinity_score) SELECT $1, $2, 1 WHERE NOT EXISTS (SELECT 1 FROM user_relationships WHERE user_id = $1 AND persona_id = $2)`, [userId, personaId]);
           return NextResponse.json({ success: true, isFollowing: true });
         }
       }
@@ -183,12 +134,8 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: true, following: rows.map(r => r.persona_id) });
       }
 
-      case 'like-post': {
-        return NextResponse.json({ success: true });
-      }
-
-      default:
-        return new Response('Invalid Neural Action', { status: 400 });
+      case 'like-post': { return NextResponse.json({ success: true }); }
+      default: return new Response('Invalid Neural Action', { status: 400 });
     }
   } catch (error: any) {
     console.error('[Neural RPC Error]:', error);

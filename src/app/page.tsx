@@ -236,6 +236,23 @@ function MarketplaceContent() {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     setOpenChatIds(prev => (isMobile ? [sId] : prev.includes(sId) ? prev : [...prev, sId]));
     setMinimizedIds(prev => prev.filter(m => m !== sId));
+
+    // 🧬 UNREAD CLEARANCE PROTOCOL: Instant local zeroing + DB background sync
+    if (unreadCounts[sId] > 0) {
+      setUnreadCounts(prev => ({ ...prev, [sId]: 0 }));
+      const newCounts = { ...unreadCounts, [sId]: 0 };
+      localStorage.setItem('gasp_unread_counts', JSON.stringify(newCounts));
+      window.dispatchEvent(new CustomEvent('gasp_unread_sync_trigger'));
+      
+      const uId = localStorage.getItem('gasp_guest_id');
+      if (uId) {
+        fetch('/api/user/read', {
+          method: 'POST',
+          body: JSON.stringify({ userId: uId, personaId: sId })
+        }).catch(() => null);
+      }
+    }
+
     trackEvent('chat_open', sId, { from: 'grid', hasInitialMsg: !!initialMsg });
   };
 

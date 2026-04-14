@@ -15,12 +15,11 @@ export async function GET(req: NextRequest) {
 
     try {
         // 🧬 UNREAD LOGIC: 
-        // For now, we count assistant messages sent in the last 24 hours.
-        // This acts as a 'Hot Lead' indicator for the frontend to pulse the menu button.
+        // Only count messages where is_read is FALSE.
         const { rows } = await db.query(
             `SELECT persona_id, COUNT(*) as count 
              FROM chat_messages 
-             WHERE user_id = $1 AND role = 'assistant' AND created_at > NOW() - INTERVAL '24 hours'
+             WHERE user_id = $1 AND role = 'assistant' AND is_read = FALSE
              GROUP BY persona_id`,
             [userId]
         );

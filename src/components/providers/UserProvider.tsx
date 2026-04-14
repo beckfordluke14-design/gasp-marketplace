@@ -50,15 +50,24 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             nickname: data.nickname || privyUser?.google?.name?.split(' ')[0] || privyUser?.email?.address?.split('@')[0] || 'Syndicate Member'
         });
 
-        // 🧬 GENESIS HANDSHAKE: One-time 1,500 CR signup bonus for brand-new users only
+        // 🧬 TIERED GENESIS PROTOCOL
         if (isNewUser && !data.is_admin) {
+          const isActuallyGuest = userId.startsWith('guest-');
+          const claimAction = isActuallyGuest ? 'guest_genesis' : 'starter_claim';
+          const bonusAmount = isActuallyGuest ? 350 : 1500;
+
           fetch('/api/economy/balance', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId, action: 'starter_claim' })
+              body: JSON.stringify({ userId, action: claimAction })
           }).then(r => r.json()).then(async claimData => {
               if (claimData.success) {
-                console.log('🏦 [Genesis] 1,500 CR Bonus Provisioned.');
+                console.log(`🏦 [Genesis] ${bonusAmount} CR Bonus Provisioned for ${isActuallyGuest ? 'Guest' : 'Member'}.`);
+                
+                // ⚡️ TRIGGER VISUAL FLASH
+                setBountyAlert({ amount: bonusAmount, active: true });
+                setTimeout(() => setBountyAlert(prev => ({ ...prev, active: false })), 5000);
+
                 const fresh = await fetch(`/api/economy/balance?userId=${userId}`).then(r => r.json());
                 if (fresh.success) {
                   setProfile((prev: any) => prev ? { ...prev, credit_balance: fresh.balance } : prev);

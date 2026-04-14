@@ -9,16 +9,10 @@ export async function GET(req: Request) {
 
   if (!userId) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
-  // 🛡️ SOVEREIGN ADMIN WHITELIST — These IDs ALWAYS have admin clearance
-  // The system owner's identity is hardcoded here as a failsafe
-  const SOVEREIGN_ADMIN_IDS = new Set([
-    'did:privy:cmn8nxsbd016o0cl4ryjg0thn', // Platform Owner (Privy ID)
-  ]);
-
+  const SOVEREIGN_ADMIN_IDS = new Set(['did:privy:cmn8nxsbd016o0cl4ryjg0thn']);
   const isSovereignAdmin = SOVEREIGN_ADMIN_IDS.has(userId || '');
 
   try {
-    // 🛡️ SINGLE SOURCE OF TRUTH: profiles table is the authoritative credit node
     const { rows: profiles } = await db.query(
         'SELECT credit_balance, is_admin, nickname FROM profiles WHERE id = $1 LIMIT 1', 
         [userId]
@@ -32,136 +26,47 @@ export async function GET(req: Request) {
        });
     }
     
-    // Fallback for Guest Nodes — also check sovereign whitelist
-    // 🧬 GUEST HOOK: 500 CR initial "Freebie" context to hook the user ($0.50 value)
+    // 🧬 GUEST FALLBACK: 0 until they trigger the Genesis Handshake
     return NextResponse.json({ 
       success: true, 
-      balance: 500,
-      is_admin: isSovereignAdmin,
-      is_guest: !isSovereignAdmin
+      balance: 0,
+      is_guest: true,
+      needs_initialization: true
     });
 
-
   } catch (error: any) {
-    console.error('[Balance API] Pulse Failure:', error.message);
-    return NextResponse.json({ 
-      success: false, 
-      error: `Neural Sync Failure: ${error.message}` 
-    }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
-    const { userId, action, amount, type, meta, payload } = await req.json();
+    const { userId, action, amount } = await req.json();
     if (!userId) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
     try {
-        // ── ACTION: SPEND CREDITS ──
         if (action === 'spend') {
-            if (!amount || amount <= 0) return NextResponse.json({ success: false, error: 'Invalid amount' }, { status: 400 });
-
-            // Atomic deduction: only succeeds if balance >= amount
-            const { rows: updated } = await db.query(`
-                UPDATE profiles 
-                SET credit_balance = credit_balance - $1, updated_at = NOW()
-                WHERE id = $2 AND credit_balance >= $1
-                RETURNING credit_balance
-            `, [amount, userId]);
-
-            if (updated.length === 0) {
-                const { rows: check } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1', [userId]);
-                const currentBal = check[0]?.credit_balance ?? 0;
-                return NextResponse.json({ 
-                    success: false, 
-                    error: 'Insufficient Balance', 
-                    balance: currentBal 
-                }, { status: 402 });
-            }
-
-            // Log transaction
-            try {
-                await db.query(`
-                    INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
-                    VALUES ($1, $2, $3, 'syndicate_core', $4, NOW())
-                `, [userId, amount, type || 'spend', JSON.stringify(meta || {})]);
-            } catch (logErr: any) {
-                console.warn('[Economy] Transaction log failed (non-blocking):', logErr.message);
-            }
-
+            const { rows: updated } = await db.query(`UPDATE profiles SET credit_balance = credit_balance - $1 WHERE id = $2 AND credit_balance >= $1 RETURNING credit_balance`, [amount, userId]);
+            if (updated.length === 0) return NextResponse.json({ success: false, error: 'Insufficient Balance' }, { status: 402 });
             return NextResponse.json({ success: true, balance: updated[0].credit_balance });
         }
 
-        // ── ACTION: STARTER CLAIM ──
-        if (action === 'starter_claim') {
-            console.log(`🏦 [Economy] Processing Starter Claim (1,500 bp) for ${userId}...`);
-            
-            const clientIP = req.headers.get('x-forwarded-for') || 'unknown';
-
-            // 🔒 IDENTITY CHECK: We now rely solely on Privy User ID for uniqueness. 
-            // IP checks are disabled to allow shared networks (Mobile/Cellular) to convert.
-            let alreadyClaimed = false;
-            try {
-                const { rows: claims } = await db.query(
-                    `SELECT 1 FROM transactions 
-                     WHERE user_id = $1 
-                     AND type = 'starter_claim' 
-                     LIMIT 1`,
-                    [userId]
-                );
-                alreadyClaimed = claims && claims.length > 0;
-            } catch {
-                alreadyClaimed = false; 
-            }
-
-            if (alreadyClaimed) {
-               return NextResponse.json({ success: false, error: 'Genesis bonus already claimed on this device.' }, { status: 403 });
-            }
-
-            await db.query('BEGIN');
-            try {
-                await db.query(`
-                    INSERT INTO profiles (id, name, nickname, country, flag, vibe, image, system_prompt, credit_balance, created_at, updated_at)
-                    VALUES ($1, 'Syndicate Member', 'Member', 'GB', '🇬🇧', 'Professional', 'https://avatar.vercel.sh/member', 'Sovereign Intelligence Node', 1000, NOW(), NOW())
-                    ON CONFLICT (id) DO UPDATE SET 
-                        credit_balance = profiles.credit_balance + 1000,
-                        updated_at = NOW()
-                `, [userId]);
-
-                await db.query(`
-                    INSERT INTO transactions (user_id, amount, type, provider, meta, created_at)
-                    VALUES ($1, 1000, 'starter_claim', 'syndicate_genesis', $2, NOW())
-                `, [userId, JSON.stringify({ ip: clientIP })]);
-
-                await db.query('COMMIT');
-                return NextResponse.json({ success: true, message: 'Genesis Credits Claimed' });
-            } catch (err) {
-                await db.query('ROLLBACK');
-                throw err;
-            }
+        // 🧬 GUEST GENESIS (350 CR)
+        if (action === 'guest_genesis') {
+            await db.query(`INSERT INTO profiles (id, credit_balance) VALUES ($1, 350) ON CONFLICT (id) DO NOTHING`, [userId]);
+            return NextResponse.json({ success: true, balance: 350 });
         }
 
-        // ── ACTION: IDENTITY SYNC (Capture Email for Re-engagement) ──
-        if (action === 'sync') {
-            const { email, nickname } = payload || {};
-            if (!email) return NextResponse.json({ success: false, error: 'Email required for sync' }, { status: 400 });
-
-            console.log(`📡 [Identity] Syncing Node: ${userId} (${email})`);
-
+        // 🏦 STARTER CLAIM (1,500 CR - For actual Registered Users)
+        if (action === 'starter_claim') {
             await db.query(`
-                INSERT INTO profiles (id, email, nickname, updated_at)
-                VALUES ($1, $2, $3, NOW())
-                ON CONFLICT (id) DO UPDATE SET 
-                    email = COALESCE(profiles.email, EXCLUDED.email),
-                    nickname = COALESCE(profiles.nickname, EXCLUDED.nickname),
-                    updated_at = NOW()
-            `, [userId, email, nickname]);
-
-            return NextResponse.json({ success: true, message: 'Identity Synced' });
+                INSERT INTO profiles (id, credit_balance) VALUES ($1, 1500) 
+                ON CONFLICT (id) DO UPDATE SET credit_balance = GREATEST(profiles.credit_balance, 1500)
+            `, [userId]);
+            return NextResponse.json({ success: true, balance: 1500 });
         }
 
         return NextResponse.json({ success: false, error: 'Invalid Action' }, { status: 400 });
     } catch (e: any) {
-        console.error('[Economy] Action Failure:', e.message);
         return NextResponse.json({ success: false, error: e.message }, { status: 500 });
     }
 }

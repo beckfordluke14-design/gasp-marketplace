@@ -130,7 +130,9 @@ export default function ChatDrawer({
     const speedMult = personaState?.responseSpeedMultiplier || (0.8 + Math.random() * 1.5);
     const COST_MESSAGE_TEXT = 50;
     const balance = userProfile?.credit_balance || 0;
-    if (balance < COST_MESSAGE_TEXT) {
+    
+    // 🛡️ INTERACTIVE PAYWALL: Instead of disabling, we trigger the CTA on attempt
+    if (balance < COST_MESSAGE_TEXT || isDepleted) {
        setShowInsufficientFunds(true);
        return;
     }
@@ -540,6 +542,17 @@ export default function ChatDrawer({
                    </div>
                 )}
                 <div id="chat-bottom-anchor" className="h-[150px] shrink-0" />
+                
+                {/* 🧧 CONVERSION CTA: Injected when limit is hit */}
+                {isDepleted && (
+                   <div className="pb-10 pt-4 animate-in zoom-in fade-in duration-700">
+                      <ChatCTA 
+                        type={idToUse.startsWith('guest-') ? 'signup' : 'topup'} 
+                        onAction={() => idToUse.startsWith('guest-') ? login() : onOpenTopUp()} 
+                        personaName={profile?.name} 
+                      />
+                   </div>
+                )}
               </div>
             ) : (
               <div className="pb-20">
@@ -606,19 +619,26 @@ export default function ChatDrawer({
               </AnimatePresence>
 
               <div className="relative group/input p-[1px] rounded-[2.5rem] overflow-hidden border border-white/10 focus-within:border-[#00f0ff]/50 transition-all">
-                 <form onSubmit={(e) => { e.preventDefault(); handleLocalSubmit(); }} className={`relative z-10 bg-[#0a0a0a] rounded-[2.5rem] p-2 pr-2.5 pl-5 flex items-center gap-4 shadow-2xl ${isDepleted ? 'grayscale opacity-50' : ''}`}>
+                 <form onSubmit={(e) => { e.preventDefault(); handleLocalSubmit(); }} className={`relative z-10 bg-[#0a0a0a] rounded-[2.5rem] p-2 pr-2.5 pl-5 flex items-center gap-4 shadow-2xl`}>
                     <div className="flex items-center gap-5 text-white/40">
-                       <button type="button" onClick={requestVoiceNote} disabled={isRequestingVoice || isLoading || isDepleted} className={`transition-colors ${isRequestingVoice ? 'text-[#00f0ff] animate-pulse' : 'hover:text-[#00f0ff]'}`}>
+                       <button type="button" onClick={requestVoiceNote} disabled={isRequestingVoice || isLoading} className={`transition-colors ${isRequestingVoice ? 'text-[#00f0ff] animate-pulse' : 'hover:text-[#00f0ff]'}`}>
                          <Mic size={22} />
                        </button>
-                       <button type="button" onClick={() => (isDepleted ? setShowLimitCTA(true) : setShowGifts(!showGifts))} className="hover:text-[#ff00ff]">
+                       <button type="button" onClick={() => (isDepleted ? setShowInsufficientFunds(true) : setShowGifts(!showGifts))} className="hover:text-[#ff00ff]">
                           <Gift size={22} className={showGifts ? 'text-[#ff00ff]' : ''} />
                        </button>
                     </div>
                     <div className="flex-1 relative flex items-center">
-                       <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder={isDepleted ? "DISABLED..." : `chat w/ ${profile?.name}...`} className="w-full bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none" disabled={isLoading || isDepleted} />
+                       <input 
+                         type="text" 
+                         value={input} 
+                         onChange={(e) => setInput(e.target.value)} 
+                         placeholder={isDepleted ? (isSpanish ? "DESBLOQUEAR CHAT..." : "UNLOCK CHAT...") : (isSpanish ? `chatear con ${profile?.name}...` : `chat w/ ${profile?.name}...`)} 
+                         className="w-full bg-transparent py-4 text-sm text-white placeholder:text-zinc-600 outline-none" 
+                         disabled={isLoading} 
+                       />
                     </div>
-                    <button type="submit" disabled={!(input || '').trim() || isLoading || isDepleted} className="w-12 h-12 rounded-full bg-[#ff00ff] flex items-center justify-center text-black shadow-lg hover:scale-110 active:scale-90 transition-all disabled:opacity-30">
+                    <button type="submit" disabled={!(input || '').trim() || isLoading} className="w-12 h-12 rounded-full bg-[#ff00ff] flex items-center justify-center text-black shadow-lg hover:scale-110 active:scale-90 transition-all disabled:opacity-30">
                        <Send size={20} className="mr-0.5" />
                     </button>
                  </form>

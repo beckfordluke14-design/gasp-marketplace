@@ -186,7 +186,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-[#ff00ff] text-black text-[9px] font-black rounded-full flex items-center justify-center border-2 border-black shadow-[0_0_15px_rgba(255,0,255,0.6)] z-10"
+              className="absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1.5 bg-[#ff00ff] text-black text-[9px] font-black rounded-full flex items-center justify-center border-2 border-black shadow-[0_0_15px_rgba(255,0,255,0.6)] z-10 pointer-events-none"
             >
               {unread > 99 ? '99+' : unread}
             </motion.div>
