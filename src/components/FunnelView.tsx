@@ -254,62 +254,6 @@ export default function FunnelView() {
             {currentStepIdx === 1 && (
               <motion.div key="main" className="flex-1 flex flex-col overflow-hidden">
                 <div className="px-8 py-4 border-b border-white/5 flex items-center gap-5">
-                   <div className="w-14 h-14 rounded-full border-2 border-[#ff00ff] p-1 shadow-lg"><img src={profile.image} className="w-full h-full object-cover rounded-full" /></div>
-                   <div className="flex flex-col"><h2 className="text-xl font-black text-white">{profile.name}</h2><span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{profile.city}</span></div>
-                </div>
-                <div className="flex px-8 border-b border-white/5 gap-8">
-                   <button onClick={() => setActiveTab('NEURAL_LINK')} className={`pb-3 text-[11px] font-black tracking-widest relative ${activeTab === 'NEURAL_LINK' ? 'text-white' : 'text-white/30'}`}>CHAT {activeTab === 'NEURAL_LINK' && <motion.div layoutId="t" className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#ff00ff]" />}</button>
-                   <button onClick={() => setActiveTab('ARCHIVE')} className={`pb-3 text-[11px] font-black tracking-widest relative ${activeTab === 'ARCHIVE' ? 'text-white' : 'text-white/30'}`}>VAULT {activeTab === 'ARCHIVE' && <motion.div layoutId="t" className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#ff00ff]" />}</button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-4">
-                      {vaultItems.filter(v => v.is_vault).map(item => (
-                        <div key={item.id} className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/5 bg-zinc-900 shadow-2xl">
-                           <img src={item.content_url} className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-50" />
-                           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 gap-4 bg-black/60 backdrop-blur-sm">
-                              <Lock size={20} className="text-white/40" />
-                              <button onClick={() => setCurrentStepIdx(2)} className="w-full py-3 bg-white text-black text-[10px] font-black uppercase rounded-xl">Unlock Now</button>
-                              <button onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }} className="w-full py-2.5 bg-gradient-to-r from-[#00fff2] to-[#0088ff] text-black text-[9px] font-black uppercase rounded-xl">Verification Unlock 🌶️</button>
-                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black to-transparent">
-                  <form onSubmit={handleSendMessage} className="relative flex gap-4"><input type="text" value={inputValue} onChange={e => setInputValue(e.target.value)} placeholder="Message Veronica..." className="flex-1 bg-[#111] border border-white/20 rounded-2xl px-6 py-5 text-[15px] focus:outline-none" /><button type="submit" className="w-14 h-14 bg-[#ff00ff] rounded-2xl flex items-center justify-center shadow-xl"><Send size={24} className="rotate-[-45deg]" /></button></form>
-                </div>
-              </motion.div>
-            )}
-
-            {currentStepIdx === 2 && (
-               <motion.div key="offer" initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
-                  <div className="px-8 py-6 space-y-6 pb-40">
-                     <div className="flex flex-col items-center gap-4">
-                        <div className="relative"><div className="w-20 h-20 rounded-full border-2 border-[#ff00ff]/30 p-1 bg-black"><img src={profile.image} className="w-full h-full object-cover rounded-full opacity-60" /></div><Lock size={24} className="absolute inset-0 m-auto text-[#ff00ff]" /></div>
-                        <div className="text-center">
-                           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#ff0000]/20 border border-[#ff0000]/50 rounded-full mb-3 animate-pulse">
-                              <ShieldAlert size={12} className="text-[#ff0000]" />
-                              <span className="text-[10px] font-black text-[#ff0000] uppercase tracking-widest">SECURE LINK EXPIRES IN {formatTimeInfo(timeLeft)}</span>
-                           </div>
-                           <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">VIP ACCESS LOCKED</h2>
-                           <p className="text-[10px] text-[#ffea00] font-black uppercase mt-2">6,000 CREDITS REQUIRED TO RESTORE LINK</p>
-                        </div>
-                     </div>
-
-                     {/* 🎭 FUNNEL PERSONA HOOK (COMPLIANT) */}
-                     <div className="w-full relative py-2">
-                        <div className="absolute -top-1 left-6 px-3 py-1 bg-[#ff00ff] rounded-md text-[8px] font-black text-white uppercase italic shadow-[0_0_15px_#ff00ff] z-10">Private Note from {profile.name}</div>
-                        <div className="p-5 bg-white/5 border border-[#ff00ff]/30 rounded-3xl text-left relative overflow-hidden shadow-xl">
-                           <div className="absolute inset-0 bg-gradient-to-br from-[#ff00ff]/10 to-transparent pointer-events-none" />
-                           <p className="text-[12px] font-medium text-white/90 leading-relaxed relative z-10 italic">
-                               "that little preview was literally the tamest thing in my vault lol 😏 the real stuff is WAY more 🍑🌶️ than that. earn 6,000 credits for <span className=\"text-[#ffea00] font-black\">FREE</span> by tapping below — takes 2 mins and then you'll see exactly why I can't just post this anywhere..."
-                           </p>
-                        </div>
-                     </div>
-
-                     {/* 🎁 THE ENDOWED PROGRESS ILLUSION (500 CR GIFT) */}
-                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.5, type: 'spring' }} className="w-full">
                         <div className="bg-[#00ffcc]/10 border border-[#00ffcc]/30 rounded-2xl p-4 flex items-center justify-between overflow-hidden relative shadow-[0_0_20px_rgba(0,255,204,0.15)]">
                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00ffcc]/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
                            <div className="flex items-center gap-4 relative z-10">
