@@ -99,21 +99,51 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                   ? (isSpanish ? 'CRÉDITOS INSUFICIENTES' : 'NOT ENOUGH CREDITS')
                   : (isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS'))}
               </h3>
-              
-              <div className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-8 max-w-[320px] italic">
+
+              {/* 🎭 HIGH-CONVERTING PERSONA MOTIVATION BUBBLE */}
+              {personaName && (
+                 <div className="w-full mb-6 relative px-2">
+                    <div className="absolute -top-3 left-6 px-3 py-1 bg-[#ff00ff] rounded-md text-[8px] font-black text-white uppercase italic shadow-[0_0_15px_#ff00ff] z-10">
+                       A Message From {personaName}
+                    </div>
+                    <div className="p-4 pt-5 bg-white/5 border border-[#ff00ff]/30 rounded-2xl text-left relative overflow-hidden shadow-xl">
+                       <div className="absolute inset-0 bg-gradient-to-br from-[#ff00ff]/10 to-transparent pointer-events-none" />
+                       <p className="text-[12px] font-medium text-white/90 leading-relaxed relative z-10 italic">
+                          "I really want to show you what's in my <span className="text-[#ff00ff] font-bold">Private Vault</span> baby... but you need credits. The good news is <span className="text-[#ffea00] font-black">it is 100% FREE!</span> My sponsors will give you the credits if you just do one quick task for them. I'm waiting for you... 💋"
+                       </p>
+                    </div>
+                 </div>
+              )}
+
+              <div className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black leading-relaxed mb-6 max-w-[320px] italic">
                 {personaName ? (
                    isSpanish ? (
-                     <>{isCompliance ? 'SINCRONIZACIÓN SEGURA CON' : 'CHATEAR CON'} <span className="text-[#ffea00]">{personaName.toUpperCase()}</span> {isCompliance ? 'REQUERIDA PARA MANTENER LA RUTA DE LA SEÑAL' : 'PARA CONTINUAR. SE REQUIERE ASIGNACIÓN DE CRÉDITOS PARA MANTENER LA CONEXIÓN'}. 🗝️🛡️</>
+                     <><span className="text-[#ffea00]">100% GRATIS.</span> COMPLETA 1 TAREA PARA OBTENER CRÉDITOS. 🗝️🛡️</>
                    ) : (
-                     <>{isCompliance ? 'Secure Sync with' : 'CHAT W/'} <span className="text-[#ffea00]">{personaName}</span> {isCompliance ? 'Required to Maintain Signal Path' : 'TO CONTINUE. Allocation of Credits Required to Maintain Connection'}. 🗝️🛡️</>
+                     <><span className="text-[#ffea00]">100% FREE.</span> COMPLETE 1 TASK TO EARN CREDITS INSTANTLY. 🗝️🛡️</>
                    )
                 ) : (
                    isSpanish ? (
-                     <>SE REQUIERE ASIGNACIÓN DE <span className="text-[#ffea00]">{isCompliance ? 'IDENTIDAD SEGURA' : 'CRÉDITOS DEL SISTEMA'}</span> PARA ACCEDER AL ENLACE SEGURO DEL ARCHIVO. 🛡️🛰️</>
+                     <>SE REQUIEREN <span className="text-[#ffea00]">CRÉDITOS DEL SISTEMA</span> PARA ACCEDER AL ARCHIVO. 🛡️🛰️</>
                    ) : (
-                     <>Allocation of <span className="text-[#ffea00]">{isCompliance ? 'Secure Identity' : 'System Credits'}</span> Required to Access Secure Archive Uplink. 🛡️🛰️</>
+                     <>SYSTEM <span className="text-[#ffea00]">CREDITS REQUIRED</span> TO ACCESS ARCHIVE UPLINK. 🛡️🛰️</>
                    )
                 )}
+              </div>
+
+              {/* 🍼 DUMMY-PROOF INSTRUCTIONS */}
+              <div className="w-full grid grid-cols-3 gap-2 mb-8 px-2">
+                 {[
+                   { s: '01', t: isSpanish ? 'ELIJA' : 'CHOOSE', d: isSpanish ? 'UNA MISIÓN' : 'A MISSION' },
+                   { s: '02', t: isSpanish ? 'TERMINE' : 'FINISH', d: isSpanish ? 'EN 60 SEG' : 'IN 60 SEC' },
+                   { s: '03', t: isSpanish ? 'LISTO' : 'DONE', d: isSpanish ? 'CHAT LIBRE' : 'FREE CHAT' }
+                 ].map((step, i) => (
+                    <div key={i} className="flex flex-col items-center p-2 bg-white/5 border border-white/10 rounded-xl">
+                       <span className="text-[8px] font-black text-[#ffea00] mb-1 italic">{step.s}</span>
+                       <span className="text-[7px] font-black text-white uppercase tracking-widest">{step.t}</span>
+                       <span className="text-[5px] font-black text-white/30 uppercase tracking-widest mt-0.5">{step.d}</span>
+                    </div>
+                 ))}
               </div>
 
               <div className="w-full space-y-4 pb-8">

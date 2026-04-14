@@ -3,105 +3,68 @@ import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
 
 /**
  * 🛰️ SYNDICATE MISSION RELAY
- * Returns the curated SOI mission stack synced with the Master Switch.
+ * Returns the curated OGAds SOI mission stack.
  */
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const trackingId = searchParams.get('trackingId') || 'syndicate_guest';
     const SMART_LINK = SYNDICATE_CONFIG.getSmartLink(trackingId);
 
-    // 🔥 GENEROUS TIERS — Rounded up for maximum "Greed Factor"
-    // $2.88 -> 3000 | $2.50 -> 2500 | $2.00 -> 2200
+    // 🧬 OGADS CORE STACK (Verified Conversion Velocity)
     const missions = [
         {
             id: 'og_71281',
-            title: 'Get $1,000 Mystery Gift Box!',
-            description: 'Enter your email for a chance to win a $1,000 Mystery Gift Box. US only.',
+            title: 'Unlock $1,000 Mystery Gift Box',
+            description: 'Enter your email to clear the signal and unlock the Mystery Box rewards.',
             payout: 3000,
             link: SMART_LINK,
-            type: 'Email Submit',
-            network: 'Ogads'
-        },
-        {
-            id: 'og_57464',
-            title: 'Win a $100 PayPal Gift Card!',
-            description: 'Submit your email for a chance to win a $100 PayPal Gift Card. Fast and easy.',
-            payout: 2500,
-            link: SMART_LINK,
-            type: 'Email Submit',
-            network: 'Ogads'
+            type: 'Identity Clearance',
+            network: 'OGAds'
         },
         {
             id: 'og_69344',
-            title: 'Get $750 to your CashApp!',
-            description: 'Enter your details for a chance to receive $750 directly to your CashApp.',
+            title: 'Verify $750 CashApp Uplink',
+            description: 'Provide email to verify your CashApp eligibility and unlock archive access.',
             payout: 2500,
             link: SMART_LINK,
-            type: 'Email Submit',
-            network: 'Ogads'
-        },
-        {
-            id: 'og_59475',
-            title: 'Win a $100 Chick-Fil-A Gift Card!',
-            description: 'Complete a quick form for a chance to win a $100 Chick-Fil-A Gift Card.',
-            payout: 2500,
-            link: SMART_LINK,
-            type: 'Email Submit',
-            network: 'Ogads'
-        },
-        {
-            id: 'og_68838',
-            title: 'Win a new iPhone 17!',
-            description: 'Enter your email for a chance to win the brand new iPhone 17. Limited time.',
-            payout: 2500,
-            link: SMART_LINK,
-            type: 'Email Submit',
-            network: 'Ogads'
+            type: 'Account Sync',
+            network: 'OGAds'
         },
         {
             id: 'og_71456',
-            title: 'Get $1,000 Kroger vs Aldi Voucher!',
-            description: 'Which store do you prefer? Enter your email and win a $1,000 shopping voucher.',
-            payout: 2500,
+            title: 'Claim $1,000 Kroger Voucher',
+            description: 'Choose your preferred node to clear the scan.',
+            payout: 2400,
             link: SMART_LINK,
-            type: 'Email Submit',
-            network: 'Ogads'
+            type: 'Lead Gen',
+            network: 'OGAds'
         },
         {
             id: 'og_70774',
-            title: 'Win $50,000 Cash!',
-            description: 'Enter your email for a chance to win $50,000 in our sweepstakes. US residents only.',
+            title: 'Win $50,000 Cash Sweepstakes',
+            description: 'High-value node clearance required for deep-archive access.',
             payout: 2500,
             link: SMART_LINK,
-            type: 'Email Submit',
-            network: 'Ogads'
+            type: 'Core Handshake',
+            network: 'OGAds'
         },
         {
-            id: 'og_68283',
-            title: 'Win an Adidas Gift Card!',
-            description: 'Try your luck — submit your email for a chance to win an Adidas Gift Card.',
-            payout: 2500,
-            link: SMART_LINK,
-            type: 'Email Submit',
-            network: 'Ogads'
-        },
-        {
-            id: 'og_68793',
-            title: 'Win Amazon $1,000 Gift Card!',
-            description: 'Enter your email for a chance to win a $1,000 Amazon Gift Card. Fast entry.',
+            id: 'og_57464',
+            title: 'Win $100 PayPal Gift Card',
+            description: 'Fast entry email submit to restore neural link.',
             payout: 2000,
             link: SMART_LINK,
-            type: 'Email Submit',
-            network: 'Ogads'
+            type: 'Identity Sync',
+            network: 'OGAds'
         },
         {
-            id: 'og_65107',
-            title: '$500 Walmart Voucher — Enter Now!',
-            description: 'Don\'t miss out! Submit your email for a chance to win a $500 Walmart voucher.',
+            id: 'og_43399',
+            title: 'Install Opera GX Portal',
+            description: 'Instant node activation via browser portal installation.',
             payout: 2000,
             link: SMART_LINK,
-            type: 'Email Submit',
-            network: 'Ogads'
+            type: 'Node Install',
+            network: 'OGAds'
         }
     ];
 

@@ -5,11 +5,11 @@
 
 export const SYNDICATE_CONFIG = {
     // 🚦 PROVIDER MODE: 'OGADS' | 'TRAFEE' | 'MLEAD'
-    provider: 'MLEAD', 
+    provider: 'OGADS', 
 
     // 🛡️ COMPLIANCE MODE: Set to TRUE to hide 'Credits/Rewards' for Trafee/Mlead audits.
     // Set to FALSE once approved to show the high-conversion 'Free Credits' labels.
-    compliance: true,
+    compliance: false,
 
     // 🔗 SMART LINKS
     ogads_link: 'https://appchecker.space/sl/3181j',

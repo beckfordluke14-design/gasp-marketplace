@@ -161,6 +161,7 @@ export default function ChatDrawer({
           personaId: profileId,
           userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           locale: typeof window !== 'undefined' ? (localStorage.getItem('gasp_locale') || 'en') : 'en',
+          userBalance: balance,
         }),
       });
 
@@ -507,20 +508,27 @@ export default function ChatDrawer({
                 })}
                 
                 {/* 🦾 NEURAL SYNC HAPTICS */}
-                {(isTyping || isRequestingVoice || isPersonaRecording) && (
-                   <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                      <div className="flex items-center gap-2 px-2">
-                         <div className={`w-1 h-1 rounded-full ${isRequestingVoice || isPersonaRecording ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'} animate-pulse shadow-[0_0_8px_currentColor]`} />
-                         {(isRequestingVoice || isPersonaRecording) && (
-                             <span className="text-[7px] font-black uppercase tracking-widest text-[#ff00ff] italic">
-                                {isSpanish ? 'Grabando Audio...' : 'RECORDING...'}
+                {/* 🧬 NEURAL FEEDBACK: Typing / Recording Indicator */}
+                 {(isTyping || isPersonaRecording) && (
+                    <div className="flex items-start gap-4 animate-in fade-in slide-in-from-left-4 duration-500">
+                       <div className="w-10 h-10 rounded-full border border-white/5 overflow-hidden shrink-0 mt-2 relative">
+                          <Image src={proxyImg(profile?.image)} alt={profile?.name || ''} fill className="object-cover blur-[2px]" />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                             {isPersonaRecording ? <Mic size={14} className="text-[#00f0ff] animate-pulse" /> : <div className="w-1 h-1 bg-white rounded-full animate-bounce" />}
+                          </div>
+                       </div>
+                       <div className="space-y-1.5 flex flex-col items-start max-w-[80%]">
+                          <div className="bg-white/5 border border-white/10 px-5 py-3.5 rounded-[1.8rem] rounded-tl-none shadow-xl flex items-center gap-3">
+                             <div className="flex gap-1.5">
+                                <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0 }} className={`w-1.5 h-1.5 rounded-full ${isPersonaRecording ? 'bg-[#00f0ff]' : 'bg-white/40'}`} />
+                                <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0.2 }} className={`w-1.5 h-1.5 rounded-full ${isPersonaRecording ? 'bg-[#00f0ff]' : 'bg-white/40'}`} />
+                                <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0.4 }} className={`w-1.5 h-1.5 rounded-full ${isPersonaRecording ? 'bg-[#00f0ff]' : 'bg-white/40'}`} />
+                             </div>
+                             <span className={`text-[10px] font-black uppercase tracking-widest italic ${isPersonaRecording ? 'text-[#00f0ff]' : 'text-white/40'}`}>
+                                {isPersonaRecording 
+                                  ? (isSpanish ? 'GRABANDO NOTA...' : 'RECORDING VOICE...') 
+                                  : (isSpanish ? 'ESCRIBIENDO...' : 'TYPING...')}
                              </span>
-                          )}
-                      </div>
-                      <div className="flex items-start gap-2">
-                         <div className="px-5 py-3.5 bg-white/5 backdrop-blur-3xl border border-white/5 rounded-[2rem] flex gap-1.5 items-center">
-                            {(isRequestingVoice || isPersonaRecording) ? (
-                               <div className="flex items-center gap-3 pr-2">
                                   <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }} transition={{ repeat: Infinity, duration: 1 }} className="text-[#ff00ff]">
                                      <Mic size={16} />
                                   </motion.div>
