@@ -64,10 +64,10 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
             <div className="flex items-center justify-between pb-4 border-b border-white/5">
                 <div className="flex flex-col text-left">
                     <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white leading-none">
-                        {isCompliance ? 'IDENTITY TERMINAL' : 'MISSION BOARD'}
+                        {isCompliance ? 'SECURE ACCESS TERMINAL' : 'MISSION BOARD'}
                     </h2>
                     <p className="text-[8px] text-white/40 uppercase tracking-[0.2em] font-medium mt-1">
-                        {isCompliance ? 'SECURE IDENTITY BRIDGE ACTIVE' : 'Global Reward Uplink Active'}
+                        {isCompliance ? 'ARCHIVE CLEARANCE PROTOCOL ACTIVE' : 'Global Reward Uplink Active'}
                     </p>
                 </div>
                 
@@ -110,7 +110,7 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                         <div className="flex items-start gap-3 px-3 py-2 bg-black/40 rounded-xl border border-white/5">
                             <span className="text-[8px] font-black text-[#ffea00] mt-1 italic">03 //</span>
                             <p className="text-[9px] font-black uppercase tracking-widest leading-relaxed text-white/50">
-                                <span className="text-[#ffea00]">{isCompliance ? 'SECURE CLEARANCE:' : 'GET YOUR CREDITS:'}</span> {isCompliance ? 'Verification units added upon clearance.' : 'Credits are added instantly after you finish.'} <br/>
+                                <span className="text-[#ffea00]">{isCompliance ? 'SECURE SYNC REQUIRED' : 'GET YOUR CREDITS'}:</span> {isCompliance ? 'Allocation units matched upon signal clearance.' : 'Credits are added instantly after you finish.'} <br/>
                                 <span className="text-[7px] text-white/40 italic">⏱️ {isCompliance ? 'TYPICAL CLEARANCE: < 60 SECONDS.' : 'MOST TASKS TAKE LESS THAN 60 SECONDS.'}</span>
                             </p>
                         </div>
@@ -152,7 +152,7 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                                 <div className="flex items-center gap-2">
                                     <span className={`text-[12px] font-black ${idx < 3 ? 'text-[#00fff2]' : 'text-[#ffea00]'} italic tracking-tighter`}>
                                         +{Math.round(mission.payout).toLocaleString()} <span className="text-[8px] opacity-60 uppercase font-black tracking-widest">
-                                            {isCompliance ? 'UNITS' : 'CREDITS'}
+                                            {isCompliance ? 'ALLOCATED' : 'CREDITS'}
                                         </span>
                                     </span>
                                 </div>

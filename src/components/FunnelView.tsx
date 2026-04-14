@@ -142,8 +142,8 @@ export default function FunnelView() {
             systemInstruction: `You are VERONICA. The user saw your grocery store reveal. 
             1. Be playful, build a shared secret. 
             2. Pivot to the "Syndicate Gateway" as a necessary technical step to continue the private link.
-            3. Frame the reward as a "Syndicate Performance Match" — let them know their access will be fully cleared and loaded once they sync identity.
-            4. Goal: Drive to the GLITCH cutoff after the tease.`,
+            3. Urgency: The signal is flagging a 9,000 unit allocation. Tell them to 'Sync ID' or 'Hit Verification' now before the link drops.
+            4. Tone: Aggressive, short, and urgent. No fluff.`,
             source: 'traffic_stars_funnel'
           }),
         });
@@ -252,13 +252,13 @@ export default function FunnelView() {
                   <div className="px-10 py-6 space-y-10 pb-40">
                      <div className="flex flex-col items-center gap-4">
                         <div className="relative"><div className="w-16 h-16 rounded-full border-2 border-white/10 p-1 grayscale opacity-50"><img src={profile.image} className="w-full h-full object-cover rounded-full" /></div><Lock size={20} className="absolute inset-0 m-auto text-white/20" /></div>
-                        <div className="text-center"><h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Signal Interrupted</h2><p className="text-[10px] text-[#ffea00] font-black uppercase mt-2">Sync Identity to Restore Private Bridge</p></div>
+                        <div className="text-center"><h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">SIGNAL INTERRUPTED</h2><p className="text-[10px] text-[#ffea00] font-black uppercase mt-2">NETWORK ALLOCATION SYNC PENDING</p></div>
                      </div>
                      <div className="grid grid-cols-3 gap-3">
                         {[{ id: 't1', credits: '5,000', price: '$4.99' }, { id: 't2', credits: '30,000', price: '$24.99' }, { id: 't3', credits: '120,000', price: '$99.99' }].map(pkg => (
                           <div key={pkg.id} onClick={() => setSelectedPkgId(pkg.id)} className={`p-4 py-8 rounded-3xl border text-center transition-all ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff]' : 'bg-white/5 border-white/10 opacity-70'}`}>
                              <div className="text-2xl font-black italic leading-none">{pkg.credits}</div>
-                             <div className="text-[7px] font-black text-white/40 uppercase mt-1">Credits</div>
+                             <div className="text-[7px] font-black text-white/40 uppercase mt-1">Allocation Units</div>
                              <div className="text-lg font-black italic text-white mt-4">{pkg.price}</div>
                           </div>
                         ))}
@@ -266,8 +266,8 @@ export default function FunnelView() {
                   </div>
                   <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/95 to-transparent flex flex-col items-center gap-4">
                      <button onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }} className="w-full max-w-[400px] h-12 bg-white/5 border border-[#00fff2]/30 text-[#00fff2] text-[10px] font-black uppercase italic rounded-2xl hover:bg-[#00fff2]/10 transition-all flex flex-col items-center justify-center group shadow-xl">
-                        <div className="flex items-center gap-2"><Sparkles size={10} className="group-hover:animate-spin" /> GATEWAY: IDENTITY VERIFICATION</div>
-                        <span className="text-[6px] opacity-40 uppercase tracking-widest mt-1">Establish Neural Sync for Instant Clearance</span>
+                        <div className="flex items-center gap-2"><Sparkles size={10} className="group-hover:animate-spin" /> SYNC ID: UNLOCK SECURE ARCHIVE ACCESS</div>
+                        <span className="text-[6px] opacity-40 uppercase tracking-widest mt-1">9,000 UNIT ALLOCATION READY FOR CLEARANCE</span>
                      </button>
                      <button onClick={() => setIsTopUpOpen(true)} className="w-full max-w-[500px] h-20 bg-[#ff00ff] rounded-[3rem] text-[20px] font-black uppercase tracking-widest flex items-center justify-center gap-5 shadow-[0_20px_100px_rgba(255,0,255,0.6)] active:scale-95 group"><span className="italic">Secure Checkout</span><ArrowRight size={28} className="group-hover:translate-x-3 transition-all" /></button>
                   </div>

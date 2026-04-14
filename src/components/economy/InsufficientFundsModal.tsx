@@ -131,10 +131,10 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                   >
                     <div className="flex items-center gap-2">
                       <Zap size={16} fill="currentColor" className="group-hover:rotate-12 transition-transform" />
-                      {isCompliance ? (isSpanish ? 'ESTABLECER ENLACE' : 'ESTABLISH SECURE LINK') : (isSpanish ? 'GANA CRÉDITOS' : 'EARN FREE CREDITS')}
+                      {isCompliance ? (isSpanish ? 'DETECTAR ASIGNACIÓN' : 'DETECT NETWORK ALLOCATION') : (isSpanish ? 'GANA CRÉDITOS' : 'EARN FREE CREDITS')}
                     </div>
                     <span className="text-[8px] opacity-70 tracking-[0.2em] mt-1 uppercase font-black">
-                      {isCompliance ? (isSpanish ? 'PROTOCOLO DE 60 SEGUNDOS' : '60-SECOND PROTOCOL CLEARANCE') : (isSpanish ? 'MISIÓN DE 60 SEGUNDOS' : '60-SECOND QUICK MISSION')}
+                      {isCompliance ? (isSpanish ? 'SINCRONIZACIÓN PENDIENTE' : 'ALLOCATION SYNC PENDING') : (isSpanish ? 'MISIÓN DE 60 SEGUNDOS' : '60-SECOND QUICK MISSION')}
                     </span>
                   </button>
                 </div>
@@ -150,7 +150,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                     className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white text-[9px] font-black uppercase tracking-[0.3em] hover:bg-white/10 transition-all flex items-center justify-center gap-3"
                   >
                     <Diamond size={12} fill="currentColor" />
-                    {isCompliance ? (isSpanish ? 'CLEARANCE INSTANTÁNEO' : 'INSTANT CLEARANCE') : (isSpanish ? 'COMPRAR AHORA' : 'BUY CREDITS INSTANT')}
+                    {isCompliance ? (isSpanish ? 'SINCRONIZACIÓN RÁPIDA' : 'INSTANT SYNC MATCH') : (isSpanish ? 'COMPRAR AHORA' : 'BUY CREDITS INSTANT')}
                   </button>
                 </div>
                  

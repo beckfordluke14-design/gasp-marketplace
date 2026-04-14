@@ -245,8 +245,14 @@ function MarketplaceContent() {
         (window as any).onSelectProfile = handleSelectProfile;
         (window as any).onSetActiveTab = setActiveTab;
         (window as any).openTopUp = () => {
-          // 🛰️ FUNNEL WARP: Intercept Top-Up calls on main site and bounce to Funnel
-          window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`;
+          // 🛰️ COMPLIANCE-AWARE WARP: 
+          // Only suck them into the funnel if we are in PROFIT mode.
+          // If in audit mode (compliance: true), just open the safe board here.
+          if (SYNDICATE_CONFIG.compliance) {
+            setIsTopUpOpen(true);
+          } else {
+            window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`;
+          }
         };
      }
   }, [handleSelectProfile]);
@@ -306,13 +312,19 @@ function MarketplaceContent() {
               profiles={sortedProfiles} 
               view={sidebarView}
               onSetView={handleSetSidebarView}
-              onOpenTopUp={() => { window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`; }}
+              onOpenTopUp={() => {
+                if (SYNDICATE_CONFIG.compliance) setIsTopUpOpen(true);
+                else window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`;
+              }}
            />
        </div>
        
        <div className="flex-1 flex flex-col relative h-full">
             <Header 
-               onOpenTopUp={() => { window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`; }} 
+               onOpenTopUp={() => {
+                  if (SYNDICATE_CONFIG.compliance) setIsTopUpOpen(true);
+                  else window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`;
+               }} 
                deadIds={deadIds} 
                setDeadIds={setDeadIds} 
                onOpenMenu={() => setShowProfileList(true)} 
@@ -418,7 +430,10 @@ function MarketplaceContent() {
                     )}
                     {activeTab === 'weather' && (
                      <div className="w-full max-w-4xl mx-auto px-4 md:px-6 animate-in fade-in zoom-in-95 duration-500">
-                        <WeatherFeed onOpenTopUp={() => setIsTopUpOpen(true)} />
+                        <WeatherFeed onOpenTopUp={() => {
+                           if (SYNDICATE_CONFIG.compliance) setIsTopUpOpen(true);
+                           else window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`;
+                        }} />
                      </div>
                     )}
                     {activeTab === 'reports' && (
@@ -512,7 +527,10 @@ function MarketplaceContent() {
                          profile={p} 
                          onClose={() => handleCloseChat(sId)} 
                          onMinimize={() => setMinimizedIds([...minimizedIds, sId])} 
-                         onOpenTopUp={() => { window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`; }}
+                         onOpenTopUp={() => {
+                           if (SYNDICATE_CONFIG.compliance) setIsTopUpOpen(true);
+                           else window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`;
+                         }}
                          followingIds={following}
                          profiles={sortedProfiles}
                          unreadCounts={unreadCounts}
