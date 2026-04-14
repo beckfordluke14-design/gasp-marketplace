@@ -14,10 +14,14 @@ export async function GET(req: Request) {
   try {
     console.log(`🔓 [Vault API] Fetching collection for: ${userId}`);
     
-    // 🛡️ SOVEREIGN QUERY: Joining Unlocks + Posts + Personas
+    // 🛡️ SOVEREIGN QUERY: Images/videos only, vault-flagged, active public personas, valid URLs
     const queryText = `
       SELECT 
-        p.*,
+        p.id,
+        p.content_url,
+        p.content_type,
+        p.is_vault,
+        p.created_at,
         json_build_object(
           'id', pers.id,
           'name', pers.name,
@@ -27,6 +31,12 @@ export async function GET(req: Request) {
       INNER JOIN posts p ON u.post_id = p.id
       INNER JOIN personas pers ON p.persona_id = pers.id
       WHERE u.user_id = $1
+        AND p.is_vault = true
+        AND p.content_url IS NOT NULL
+        AND p.content_url != ''
+        AND p.content_type IN ('image', 'video')
+        AND pers.is_active = true
+        AND (p.caption NOT ILIKE '%DELETED%' OR p.caption IS NULL)
       ORDER BY u.created_at DESC
     `;
 
