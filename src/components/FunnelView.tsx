@@ -363,7 +363,6 @@ export default function FunnelView() {
                   </div>
 
                   {/* 🍼 THE STEPS */}
-                  <div className="grid grid-cols-1 gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div className="p-6 border border-[#ffea00]/30 bg-[#ffea00]/5 rounded-3xl flex items-center gap-6 relative overflow-hidden group">
                         <div className="absolute inset-y-0 left-0 w-1 bg-[#ffea00]" />
