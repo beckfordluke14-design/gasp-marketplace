@@ -12,8 +12,7 @@ export default function GlitchText({ text, className }: { text: string; classNam
     <motion.span
       className={`relative inline-block ${className}`}
       initial="initial"
-      whileInView="animate"
-      viewport={{ once: true, margin: "-50px" }}
+      animate="animate"
     >
       {/* Base Layer */}
       <motion.span 
