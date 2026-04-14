@@ -78,46 +78,36 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
 
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
                 {/* ⚡️ PRIORITY SMART LINK: OGADS SYNC ⚡️ */}
-                <motion.button
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    onClick={() => {
-                        const guestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
-                        const tid = guestId || `guest_${Math.random().toString(36).substring(7)}`;
-                        // 🚀 OGADS PURE TRACKING INTEGRATION: ALPHA SYNC
-                        window.open(`https://appchecker.space/sl/3181j?aff_sub=${tid}`, '_blank');
-                    }}
-                    className="w-full group bg-[#00fff2]/5 border-2 border-[#00fff2] p-6 rounded-2xl transition-all duration-300 flex items-center justify-between text-left relative overflow-hidden shadow-[0_0_50px_rgba(0,255,242,0.3)] active:scale-95 mb-6"
-                >
-                    <div className="absolute inset-x-0 bottom-0 h-1 bg-[#00fff2] animate-pulse" />
-                    
-                    <div className="flex items-center gap-5 relative z-10 w-full">
-                        <div className="w-16 h-16 rounded-2xl bg-black border-2 border-[#00fff2] flex items-center justify-center text-[#00fff2] shadow-[0_0_20px_#00fff2]">
-                            <Zap size={32} fill="currentColor" className="animate-pulse" />
+                {/* 🎯 PROTOCOL DIRECTIVE: Clear Instructions for Honesty */}
+                <div className="bg-[#00fff2]/5 border border-[#00fff2]/20 rounded-2xl p-4 mb-8 space-y-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#00fff2] flex items-center justify-center shadow-[0_0_15px_#00fff2]">
+                            <Target size={16} className="text-black" />
                         </div>
-                        <div className="flex-1 space-y-2">
-                            <div className="flex items-center justify-between">
-                                <h4 className="text-[12px] font-black tracking-widest uppercase italic text-[#00fff2]">
-                                    ALPHA PROTOCOL: DYNAMIC
-                                </h4>
-                                <div className="flex gap-2">
-                                    <span className="text-[7px] font-black bg-[#00fff2]/20 border border-[#00fff2]/50 text-[#00fff2] px-2 py-0.5 rounded tracking-[0.2em] italic animate-pulse">MULTI-USE ACTIVE</span>
-                                    <span className="text-[7px] font-black bg-[#00fff2] text-black px-2 py-0.5 rounded tracking-[0.2em] italic">HIGH VELOCITY</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center justify-between gap-4">
-                                <div className="bg-[#00fff2]/20 border border-[#00fff2]/40 rounded-lg px-4 py-2 shadow-inner">
-                                    <span className="text-xl font-black text-white italic tracking-tighter shadow-lg">
-                                        +1,500 - 5,000 <span className="text-[10px] text-[#00fff2]">CREDITS</span>
-                                    </span>
-                                </div>
-                                <span className="text-[7px] font-black text-[#00fff2] uppercase tracking-[0.2em] italic border border-[#00fff2]/30 px-2 py-1 rounded-md animate-pulse">
-                                    ⏱️ 60s COMPLETION
-                                </span>
-                            </div>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] italic text-[#00fff2]">Protocol Directive</h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-2">
+                        <div className="flex items-start gap-3 px-3 py-2 bg-black/40 rounded-xl border border-white/5">
+                            <span className="text-[8px] font-black text-[#ffea00] mt-1 italic">01 //</span>
+                            <p className="text-[9px] font-black uppercase tracking-widest leading-relaxed text-white/50">
+                                <span className="text-white">PICK A TASK:</span> Choose any mission from the list below.
+                            </p>
+                        </div>
+                        <div className="flex items-start gap-3 px-3 py-2 bg-black/40 rounded-xl border border-white/5">
+                            <span className="text-[8px] font-black text-[#ffea00] mt-1 italic">02 //</span>
+                            <p className="text-[9px] font-black uppercase tracking-widest leading-relaxed text-white/50">
+                                <span className="text-[#00fff2]">USE REAL INFO:</span> You must enter <span className="text-[#00fff2] underline decoration-dotted">Real Data</span> to unlock your reward.
+                            </p>
+                        </div>
+                        <div className="flex items-start gap-3 px-3 py-2 bg-black/40 rounded-xl border border-white/5">
+                            <span className="text-[8px] font-black text-[#ffea00] mt-1 italic">03 //</span>
+                            <p className="text-[9px] font-black uppercase tracking-widest leading-relaxed text-white/50">
+                                <span className="text-[#ffea00]">GET YOUR CREDITS:</span> Credits are added instantly after you finish.
+                            </p>
                         </div>
                     </div>
-                </motion.button>
+                </div>
 
                 <div className="flex items-center gap-2 px-4 mb-4">
                     <span className="text-[8px] font-black text-white/30 tracking-[0.4em] uppercase italic">Local Sector Tasks</span>
@@ -183,7 +173,7 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                     </div>
                 </div>
                 <p className="text-[7px] text-center text-white/20 font-black uppercase tracking-[0.3em] leading-relaxed italic">
-                    Credits Infused Automatically upon Mission Clearance.
+                    Credits Added Automatically upon Mission Clearance.
                 </p>
             </div>
         </div>
