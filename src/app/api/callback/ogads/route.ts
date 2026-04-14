@@ -27,7 +27,15 @@ async function handleCallback(req: NextRequest) {
     }
 
     const userId = String(aff_sub);
-    const payout = parseFloat(String(payoutRaw || '0'));
+    const rawPayout = parseFloat(String(payoutRaw || '0'));
+    
+    // 🔱 SYNDICATE GENEROUS MATCHER: Match the high-payout tiers from the board
+    // $2.80+ -> 3000 | $2.20+ -> 2500 | $1.50+ -> 2000
+    let payout = rawPayout;
+    if (rawPayout >= 2.80) payout = 3.00;
+    else if (rawPayout >= 2.20) payout = 2.50;
+    else if (rawPayout >= 1.50) payout = 2.00;
+    else payout = Math.ceil(rawPayout * 10) / 10; // Standard 10c rounding for low tiers
 
     try {
         // 🔱 USE OFFICIAL ECONOMY ENGINE
@@ -38,7 +46,8 @@ async function handleCallback(req: NextRequest) {
             txId: conversionId,
             meta: { 
                 network: 'ogads',
-                payoutRaw 
+                rawPayout,
+                generousMatch: payout > rawPayout
             }
         });
 

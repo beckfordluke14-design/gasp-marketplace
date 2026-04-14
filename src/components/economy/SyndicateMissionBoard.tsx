@@ -150,7 +150,7 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                                 </h4>
                                 <div className="flex items-center gap-2">
                                     <span className={`text-[12px] font-black ${idx < 3 ? 'text-[#00fff2]' : 'text-[#ffea00]'} italic tracking-tighter`}>
-                                        {Math.round(mission.payout) * 1000} <span className="text-[8px] opacity-60 uppercase font-black tracking-widest">$GASP</span>
+                                        +{Math.round(mission.payout).toLocaleString()} <span className="text-[8px] opacity-60 uppercase font-black tracking-widest">CREDITS</span>
                                     </span>
                                 </div>
                             </div>
