@@ -15,7 +15,7 @@ export async function issueCredits({
 }: {
   userId: string;
   actualAmountUsd: number;
-  provider: 'stripe_onramp' | 'helio';
+  provider: 'stripe_onramp' | 'helio' | 'ogads' | 'cpagrip';
   txId: string;
   meta?: Record<string, any>;
 }) {

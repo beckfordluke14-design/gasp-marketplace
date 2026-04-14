@@ -53,9 +53,21 @@ export async function GET(req: NextRequest) {
             
             const priorityVal = scoreB - scoreA;
             if (priorityVal !== 0) return priorityVal;
-            return b.payout - a.payout;
+            return parseFloat(b.payout || '0') - parseFloat(a.payout || '0');
         })
-        .slice(0, 25);
+        .slice(0, 25).map(o => {
+            const payout = parseFloat(o.payout || '0');
+            const credits = Math.ceil((payout * 1000) / 10) * 10;
+            return {
+                id: o.id,
+                title: o.name,
+                description: o.description,
+                payout: credits, // Show the exact number of credits they get
+                link: o.link,
+                type: o.type,
+                network: o.network
+            };
+        });
 
         return NextResponse.json({ success: true, missions });
     } catch (err) {

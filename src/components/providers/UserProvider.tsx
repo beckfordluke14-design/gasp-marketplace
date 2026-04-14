@@ -175,7 +175,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 </div>
                 <div className="flex flex-col">
                     <span className="text-[10px] font-black text-[#00fff2] tracking-[0.4em] uppercase italic">Credits Loaded</span>
-                    <span className="text-xl font-black text-white italic tracking-tighter">+{bountyAlert.amount.toLocaleString()} <span className="text-[10px] text-[#00fff2]">$GASP</span></span>
+                    <span className="text-xl font-black text-white italic tracking-tighter">+{bountyAlert.amount.toLocaleString()} <span className="text-[10px] text-[#00fff2]">CREDITS</span></span>
                 </div>
             </div>
         </div>

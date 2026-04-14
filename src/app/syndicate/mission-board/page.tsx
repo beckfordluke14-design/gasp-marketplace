@@ -1,3 +1,5 @@
+'use client';
+
 import SyndicateMissionBoard from '@/components/economy/SyndicateMissionBoard';
 import { motion } from 'framer-motion';
 import { Shield, CheckCircle2, ArrowRight } from 'lucide-react';

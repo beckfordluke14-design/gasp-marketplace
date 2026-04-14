@@ -51,16 +51,23 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
         );
     }
 
+    const totalPotential = Math.round(missions.reduce((sum, m) => sum + (m.payout || 0), 0) * 1000);
+
     return (
         <div className="p-6 bg-[#050505] border border-white/10 rounded-[2.5rem] shadow-2xl space-y-8 relative overflow-hidden max-h-[85vh] flex flex-col">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#ffea00] via-transparent to-[#ffea00] opacity-20" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00fff2] via-transparent to-[#00fff2] opacity-20" />
             
-            <div className="text-center space-y-1">
-                <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white">MISSION BOARD</h2>
-                <div className="flex items-center justify-center gap-2">
-                    <div className="px-3 py-0.5 bg-[#ffea00]/5 border border-[#ffea00]/20 rounded-full flex items-center gap-1.5">
-                        <Globe size={8} className="text-[#ffea00]" />
-                        <span className="text-[7px] font-black text-[#ffea00] tracking-[0.2em] uppercase italic">LIVE NODE UPLINK ACTIVE</span>
+            <div className="flex items-center justify-between pb-4 border-b border-white/5">
+                <div className="flex flex-col text-left">
+                    <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white leading-none">MISSION BOARD</h2>
+                    <p className="text-[8px] text-white/40 uppercase tracking-[0.2em] font-medium mt-1">Global Reward Uplink Active</p>
+                </div>
+                
+                {/* 🧧 LIQUIDITY BADGE: THE GREED FACTOR */}
+                <div className="flex flex-col items-end">
+                    <div className="bg-[#00fff2]/10 border border-[#00fff2]/30 px-3 py-1 rounded-lg">
+                        <span className="text-[8px] font-black text-[#00fff2] uppercase tracking-widest block text-right italic">Stash Potential</span>
+                        <span className="text-sm font-black text-white italic">+{totalPotential.toLocaleString()} <span className="text-[10px] text-[#00fff2]">CREDITS</span></span>
                     </div>
                 </div>
             </div>
@@ -73,8 +80,8 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                     onClick={() => {
                         const guestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
                         const tid = guestId || `guest_${Math.random().toString(36).substring(7)}`;
-                        // 🚀 OGADS PURE TRACKING INTEGRATION
-                        window.open(`YOUR_OGADS_SMART_LINK?aff_sub=${tid}`, '_blank');
+                        // 🚀 OGADS PURE TRACKING INTEGRATION: ALPHA SYNC
+                        window.open(`https://appchecker.space/sl/3181j?aff_sub=${tid}`, '_blank');
                     }}
                     className="w-full group bg-[#00fff2]/5 border-2 border-[#00fff2] p-6 rounded-2xl transition-all duration-300 flex items-center justify-between text-left relative overflow-hidden shadow-[0_0_50px_rgba(0,255,242,0.3)] active:scale-95 mb-6"
                 >
