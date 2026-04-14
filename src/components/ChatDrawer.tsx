@@ -61,6 +61,7 @@ export default function ChatDrawer({
   const [chatTab, setChatTab] = useState<'chat' | 'pics'>('chat');
   const [vaultItems, setVaultItems] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [isPersonaRecording, setIsPersonaRecording] = useState(false);
   const [showGifts, setShowGifts] = useState(false);
   const [activeGift, setActiveGift] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -219,7 +220,10 @@ export default function ChatDrawer({
               const event = JSON.parse(line.slice(2));
               if (event?.type === 'config') {
                  activeConfig = event;
-                 if (event.isVoice) isVoiceDetected = true;
+                 if (event.isVoice) {
+                    isVoiceDetected = true;
+                    setIsPersonaRecording(true);
+                 }
                  
                  // 🧬 RANDOMIZED RESPONSE DELAY: scaled by persona state
                  const baseDelay = 1000 + Math.random() * 2000;
@@ -299,6 +303,7 @@ export default function ChatDrawer({
     } finally {
       setIsLoading(false);
       setIsTyping(false);
+      setIsPersonaRecording(false);
       // 💸 Trigger instant balance refresh in the header after credit burn
       window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
     }
@@ -356,9 +361,17 @@ export default function ChatDrawer({
 
   useEffect(() => {
     if (scrollRef.current && chatTab === 'chat') {
-        scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+        // 🧬 SOVEREIGN SCROLL: Use a small timeout to ensure DOM has rendered the new status bubbles
+        setTimeout(() => {
+            const anchor = document.getElementById('chat-bottom-anchor');
+            if (anchor) {
+                anchor.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            } else {
+                scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+            }
+        }, 100);
     }
-  }, [messages, chatData, isLoading, chatTab]);
+  }, [messages, chatData, isLoading, chatTab, isTyping, isPersonaRecording, isRequestingVoice]);
 
   const handleLocalSubmit = () => {
     sendMessage(input);
@@ -602,9 +615,9 @@ export default function ChatDrawer({
                   return (
                     <div key={msg.id || idx} className={`flex flex-col ${isAssistant ? 'items-start' : 'items-end'} gap-2`}>
                        {/* EXCLUSIVE RENDERING LOGIC: Voice OR Text, not both */}
-                       {(msg.type === 'voice' || msg.audio_script) && (msg.media_url || liveVoiceUrl) ? (
+                       {(msg.type === 'voice' || msg.audio_script) && msg.media_url ? (
                           <VoiceNoteBubble 
-                             audioUrl={msg.media_url || liveVoiceUrl} 
+                             audioUrl={msg.media_url} 
                              profileImage={profile?.image}
                              profileName={profile?.name}
                              translation={msg.audio_translation}
@@ -652,11 +665,11 @@ export default function ChatDrawer({
                    <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
                       <div className="flex items-center gap-2 px-2">
                          <div className={`w-1 h-1 rounded-full ${isRequestingVoice ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'} animate-pulse shadow-[0_0_8px_currentColor]`} />
-                         {isRequestingVoice && (
-                            <span className="text-[7px] font-black uppercase tracking-widest text-[#ff00ff] italic">
-                               {isSpanish ? 'Generando Voz...' : 'Generating Voice...'}
-                            </span>
-                         )}
+                         {(isRequestingVoice || isPersonaRecording) && (
+                             <span className="text-[7px] font-black uppercase tracking-widest text-[#ff00ff] italic">
+                                {isSpanish ? 'Grabando Audio...' : 'RECORDING...'}
+                             </span>
+                          )}
                       </div>
                       <div className="flex items-start gap-2">
                          <div className="px-4 py-3 bg-white/5 backdrop-blur-3xl border border-white/5 rounded-full flex gap-1.5 items-center">

@@ -21,18 +21,32 @@ export default function Header({ onOpenMenu, onOpenTopUp }: any) {
   const { user, profile } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [unreadTotal, setUnreadTotal] = useState(0);
 
   // 🌍 GLOBAL LOCALE STATE
   const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
   const [tickItems, setTickItems] = useState<string[]>([]);
-  
+
   useEffect(() => {
     setMounted(true);
     setIsAdmin(document.cookie.includes('admin_gasp_override=granted'));
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
+    
+    // 📩 UNREAD SYNC: Watch for new message events
+    const syncUnreads = () => {
+       const stored = JSON.parse(localStorage.getItem('gasp_unread_counts') || '{}');
+       const total = Object.values(stored).reduce((a: any, b: any) => a + Number(b), 0);
+       setUnreadTotal(total);
+    };
+    syncUnreads();
+    
+    window.addEventListener('gasp_unread_sync_trigger', syncUnreads);
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    return () => {
+        window.removeEventListener('gasp_unread_sync_trigger', syncUnreads);
+        window.removeEventListener('resize', checkMobile);
+    };
   }, []);
 
   useEffect(() => {
@@ -86,7 +100,12 @@ export default function Header({ onOpenMenu, onOpenTopUp }: any) {
         <header className="h-12 md:h-14 bg-black/80 backdrop-blur-3xl flex items-center justify-between px-4 md:px-12 pointer-events-auto border-b border-white/5">
             
             <div className="flex items-center gap-3 md:gap-10">
-                <button onClick={onOpenMenu} className="lg:hidden w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40"><Menu size={16} /></button>
+                <button onClick={onOpenMenu} className="relative lg:hidden w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40">
+                    <Menu size={16} />
+                    {unreadTotal > 0 && (
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#ff00ff] rounded-full animate-pulse shadow-[0_0_10px_#ff00ff]" />
+                    )}
+                </button>
                 <div className="flex flex-col gap-0.5 cursor-pointer group" onClick={() => router.push('/')}>
                   <h1 className="text-lg md:text-2xl font-syncopate font-black italic tracking-tighter text-white uppercase leading-none group-hover:text-[#ff00ff] transition-colors"><GlitchText text="Gasp" /><span className="text-[#ff00ff]">.</span></h1>
                   <span className="hidden md:block text-[6px] font-black uppercase text-white/20 tracking-[0.4em] italic font-syncopate">{isSpanish ? 'ARCHIVO ELITE' : 'PREMIUM ARCHIVE'}</span>
