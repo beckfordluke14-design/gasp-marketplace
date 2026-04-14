@@ -24,8 +24,11 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                 const tid = guestId || `guest_${Math.random().toString(36).substring(7)}`;
                 const res = await fetch(`/api/economy/missions?trackingId=${tid}`);
                 const data = await res.json();
-                if (data.success) {
+                console.log('[MissionBoard] API Response:', data);
+                if (data.success && Array.isArray(data.missions)) {
                     setMissions(data.missions);
+                } else {
+                    console.error('[MissionBoard] Bad response:', data);
                 }
             } catch (err) {
                 console.error('[Mission Board Failure]:', err);
@@ -51,7 +54,8 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
         );
     }
 
-    const totalPotential = Math.round(missions.reduce((sum, m) => sum + (m.payout || 0), 0) * 1000);
+    // payout is already stored as credits (e.g. 2300), no need to multiply again
+    const totalPotential = Math.round(missions.reduce((sum, m) => sum + (m.payout || 0), 0));
 
     return (
         <div className="p-6 bg-[#050505] border border-white/10 rounded-[2.5rem] shadow-2xl space-y-8 relative overflow-hidden max-h-[85vh] flex flex-col">
