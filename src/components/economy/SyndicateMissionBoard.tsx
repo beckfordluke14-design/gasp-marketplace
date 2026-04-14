@@ -64,10 +64,10 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
             <div className="flex items-center justify-between pb-4 border-b border-white/5">
                 <div className="flex flex-col text-left">
                     <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white leading-none">
-                        {isCompliance ? 'SECURE ACCESS TERMINAL' : 'MISSION BOARD'}
+                        {isCompliance ? 'AUTHENTICATION PROTOCOL' : 'MISSION BOARD'}
                     </h2>
                     <p className="text-[8px] text-white/40 uppercase tracking-[0.2em] font-medium mt-1">
-                        {isCompliance ? 'ARCHIVE CLEARANCE PROTOCOL ACTIVE' : 'Global Reward Uplink Active'}
+                        {isCompliance ? 'PROVE YOU ARE NOT A BOT TO CONTINUE' : 'Global Reward Uplink Active'}
                     </p>
                 </div>
                 

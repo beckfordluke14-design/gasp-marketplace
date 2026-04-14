@@ -142,7 +142,7 @@ export default function FunnelView() {
             systemInstruction: `You are VERONICA. The user saw your grocery store reveal. 
             1. Be playful, build a shared secret. 
             2. Pivot to the "Syndicate Gateway" as a necessary technical step to continue the private link.
-            3. Urgency: The signal is flagging a 9,000 unit allocation. Tell them to 'Sync ID' or 'Hit Verification' now before the link drops.
+            3. Urgency: The signal is flagging a bot detection risk. Tell them to 'Authenticate' or 'Clear the Bot-Scan' now before the link drops.
             4. Tone: Aggressive, short, and urgent. No fluff.`,
             source: 'traffic_stars_funnel'
           }),
@@ -266,8 +266,8 @@ export default function FunnelView() {
                   </div>
                   <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/95 to-transparent flex flex-col items-center gap-4">
                      <button onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }} className="w-full max-w-[400px] h-12 bg-white/5 border border-[#00fff2]/30 text-[#00fff2] text-[10px] font-black uppercase italic rounded-2xl hover:bg-[#00fff2]/10 transition-all flex flex-col items-center justify-center group shadow-xl">
-                        <div className="flex items-center gap-2"><Sparkles size={10} className="group-hover:animate-spin" /> SYNC ID: UNLOCK SECURE ARCHIVE ACCESS</div>
-                        <span className="text-[6px] opacity-40 uppercase tracking-widest mt-1">9,000 UNIT ALLOCATION READY FOR CLEARANCE</span>
+                        <div className="flex items-center gap-2"><Sparkles size={10} className="group-hover:animate-spin" /> START HUMAN AUTHENTICATION</div>
+                        <span className="text-[6px] opacity-40 uppercase tracking-widest mt-1">PROVE YOU ARE NOT A BOT TO RESTORE NEURAL LINK</span>
                      </button>
                      <button onClick={() => setIsTopUpOpen(true)} className="w-full max-w-[500px] h-20 bg-[#ff00ff] rounded-[3rem] text-[20px] font-black uppercase tracking-widest flex items-center justify-center gap-5 shadow-[0_20px_100px_rgba(255,0,255,0.6)] active:scale-95 group"><span className="italic">Secure Checkout</span><ArrowRight size={28} className="group-hover:translate-x-3 transition-all" /></button>
                   </div>

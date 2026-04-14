@@ -131,10 +131,10 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                   >
                     <div className="flex items-center gap-2">
                       <Zap size={16} fill="currentColor" className="group-hover:rotate-12 transition-transform" />
-                      {isCompliance ? (isSpanish ? 'DETECTAR ASIGNACIÓN' : 'DETECT NETWORK ALLOCATION') : (isSpanish ? 'GANA CRÉDITOS' : 'EARN FREE CREDITS')}
+                      {isCompliance ? (isSpanish ? 'VERIFICACIÓN HUMANA' : 'START HUMAN AUTHENTICATION') : (isSpanish ? 'GANA CRÉDITOS' : 'EARN FREE CREDITS')}
                     </div>
                     <span className="text-[8px] opacity-70 tracking-[0.2em] mt-1 uppercase font-black">
-                      {isCompliance ? (isSpanish ? 'SINCRONIZACIÓN PENDIENTE' : 'ALLOCATION SYNC PENDING') : (isSpanish ? 'MISIÓN DE 60 SEGUNDOS' : '60-SECOND QUICK MISSION')}
+                      {isCompliance ? (isSpanish ? 'PASAR ESCANEO DE BOT' : 'PROVE YOU ARE NOT A BOT') : (isSpanish ? 'MISIÓN DE 60 SEGUNDOS' : '60-SECOND QUICK MISSION')}
                     </span>
                   </button>
                 </div>
