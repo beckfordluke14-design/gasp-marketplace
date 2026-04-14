@@ -252,49 +252,155 @@ export default function FunnelView() {
             )}
 
             {currentStepIdx === 1 && (
-              <motion.div key="main" className="flex-1 flex flex-col overflow-hidden">
-                <div className="px-8 py-4 border-b border-white/5 flex items-center gap-5">
-                        <div className="bg-[#00ffcc]/10 border border-[#00ffcc]/30 rounded-2xl p-4 flex items-center justify-between overflow-hidden relative shadow-[0_0_20px_rgba(0,255,204,0.15)]">
-                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00ffcc]/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-                           <div className="flex items-center gap-4 relative z-10">
-                              <div className="w-12 h-12 rounded-full bg-[#00ffcc]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_#00ffcc]">
-                                 <span className="text-[#00ffcc] text-xl">🎁</span>
-                              </div>
-                              <div className="flex flex-col text-left">
-                                 <span className="text-[10px] font-black text-[#00ffcc] uppercase tracking-widest leading-none mb-1">{profile.name} SENT A GIFT</span>
-                                 <span className="text-[18px] font-black text-white italic leading-none">+500 CR</span>
-                              </div>
+              <motion.div 
+                key="chat" 
+                initial={{ opacity: 0, x: 20 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                exit={{ opacity: 0, x: -20 }}
+                className="flex-1 flex flex-col overflow-hidden"
+              >
+                {/* 💬 CHAT FEED */}
+                <div 
+                  ref={scrollRef}
+                  className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide pb-24"
+                >
+                  {messages.map((m) => (
+                    <motion.div 
+                      key={m.id}
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      className={`flex ${m.role === 'assistant' ? 'justify-start' : 'justify-end'}`}
+                    >
+                      {m.isTease ? (
+                        <div className="w-full max-w-[85%] bg-white/5 border border-[#ffea00]/30 rounded-3xl p-4 space-y-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                           <div className="flex items-center gap-3 mb-2">
+                             <div className="w-8 h-8 rounded-full bg-[#ffea00]/20 flex items-center justify-center">
+                               <Sparkles size={16} className="text-[#ffea00]" />
+                             </div>
+                             <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-widest">Incoming Preview...</span>
                            </div>
-                           <div className="flex flex-col items-end relative z-10">
-                              <span className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">REMAINING</span>
-                              <span className="text-[14px] font-black text-[#ffea00] italic leading-none">5,500 CR</span>
+                           <div className="aspect-[4/5] rounded-2xl bg-white/10 overflow-hidden relative group">
+                              <img src={vaultItems[0]?.url || proxyImg(profile.id + '-1')} className="w-full h-full object-cover blur-[20px] scale-110" alt="Preview" />
+                              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md">
+                                 <Lock size={32} className="text-[#ffea00] mb-3 animate-pulse" />
+                                 <span className="text-[14px] font-black text-white italic">MEDIA INTERCEPTED</span>
+                                 <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-2">Signal Security Protocol Active</span>
+                              </div>
                            </div>
                         </div>
-                     </motion.div>
+                      ) : (
+                        <div className={`max-w-[80%] px-5 py-3 rounded-2xl text-[15px] font-medium leading-relaxed ${
+                          m.role === 'assistant' 
+                            ? 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none' 
+                            : 'bg-[#ffea00] text-black font-bold rounded-tr-none shadow-[0_5px_15px_rgba(255,234,0,0.2)]'
+                        }`}>
+                          {m.content}
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                  
+                  {isTyping && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+                      <div className="bg-white/5 border border-white/10 px-5 py-3 rounded-2xl rounded-tl-none flex gap-1 items-center">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
 
-                     {/* 🍼 THE BABYSITTER STEPS */}
-                     <div className="grid grid-cols-3 gap-2">
-                        <div className="p-3 border border-[#ffea00]/30 bg-[#ffea00]/5 rounded-2xl flex flex-col items-center text-center">
-                           <span className="text-[10px] font-black text-[#ffea00] mb-1 italic leading-none">01</span>
-                           <span className="text-[7px] font-bold text-white/80 uppercase tracking-widest italic">TAP FREE ACCESS</span>
+                {/* ⌨️ INPUT AREA */}
+                <div className="p-6 bg-gradient-to-t from-black via-black/80 to-transparent">
+                  <form onSubmit={handleSendMessage} className="relative group">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-[#ffea00]/20 to-[#00f0ff]/20 rounded-2xl blur opacity-30 group-focus-within:opacity-100 transition duration-1000"></div>
+                    <div className="relative flex items-center gap-3">
+                      <input 
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder="Reply to Veronica..."
+                        className="flex-1 h-14 bg-black/40 border border-white/10 rounded-2xl px-6 text-white placeholder:text-white/20 focus:outline-none focus:border-[#ffea00]/50 transition-all font-bold backdrop-blur-xl"
+                      />
+                      <button type="submit" className="w-14 h-14 bg-[#ffea00] rounded-2xl flex items-center justify-center text-black shadow-[0_10px_30px_rgba(255,234,0,0.2)] hover:scale-105 active:scale-95 transition-all">
+                        <Send size={20} />
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </motion.div>
+            )}
+
+            {currentStepIdx === 2 && (
+              <motion.div 
+                key="offer" 
+                initial={{ opacity: 0, scale: 0.95 }} 
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex-1 flex flex-col overflow-hidden"
+              >
+                <div className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-hide pb-40">
+                  {/* 🎁 GIFT BANNER */}
+                  <div className="bg-[#00ffcc]/10 border border-[#00ffcc]/30 rounded-[2rem] p-6 flex items-center justify-between overflow-hidden relative shadow-[0_0_40px_rgba(0,255,204,0.15)]">
+                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00ffcc]/10 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
+                     <div className="flex items-center gap-5 relative z-10">
+                        <div className="w-16 h-16 rounded-full bg-[#00ffcc]/20 flex items-center justify-center shrink-0 shadow-[0_0_20px_#00ffcc]">
+                           <span className="text-[#00ffcc] text-2xl">🎁</span>
                         </div>
-                        <div className="p-3 border border-[#ffea00]/30 bg-[#ffea00]/5 rounded-2xl flex flex-col items-center text-center">
-                           <span className="text-[10px] font-black text-[#ffea00] mb-1 italic leading-none">02</span>
-                           <span className="text-[7px] font-bold text-white/80 uppercase tracking-widest italic">REAL EMAIL</span>
+                        <div className="flex flex-col text-left">
+                           <span className="text-[11px] font-black text-[#00ffcc] uppercase tracking-widest leading-none mb-1">{profile.name} SENT A GIFT</span>
+                           <span className="text-[22px] font-black text-white italic leading-none">+500 CR</span>
                         </div>
-                        <div className="p-3 border border-[#ffea00]/30 bg-[#ffea00]/5 rounded-2xl flex flex-col items-center text-center">
-                           <span className="text-[10px] font-black text-[#ffea00] mb-1 italic leading-none">03</span>
-                           <span className="text-[7px] font-bold text-white/80 uppercase tracking-widest italic">VAULT UNLOCKS</span>
+                     </div>
+                     <div className="flex flex-col items-end relative z-10">
+                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">REMAINING</span>
+                        <span className="text-[16px] font-black text-[#ffea00] italic leading-none">5,500 CR</span>
+                     </div>
+                  </div>
+
+                  <div className="text-center space-y-3">
+                    <h2 className="text-3xl font-black italic uppercase tracking-tighter leading-none">Security Intercept ⚠️</h2>
+                    <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em]">Identity Verification Required</p>
+                  </div>
+
+                  {/* 🍼 THE STEPS */}
+                  <div className="grid grid-cols-1 gap-4">
+                     <div className="p-6 border border-[#ffea00]/30 bg-[#ffea00]/5 rounded-3xl flex items-center gap-6 relative overflow-hidden group">
+                        <div className="absolute inset-y-0 left-0 w-1 bg-[#ffea00]" />
+                        <span className="text-4xl font-black text-[#ffea00]/20 italic group-hover:text-[#ffea00]/40 transition-colors">01</span>
+                        <div className="flex flex-col">
+                           <span className="text-[16px] font-black text-white uppercase italic">TAP FREE ACCESS</span>
+                           <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">Authorized Neural Link Gateway</span>
+                        </div>
+                        <Zap size={20} className="ml-auto text-[#ffea00] animate-pulse" />
+                     </div>
+                     <div className="p-6 border border-white/10 bg-white/5 rounded-3xl flex items-center gap-6 opacity-60">
+                        <span className="text-4xl font-black text-white/10 italic">02</span>
+                        <div className="flex flex-col">
+                           <span className="text-[16px] font-black text-white uppercase italic">REAL EMAIL ONLY</span>
+                           <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">Destination for Credit Drop</span>
+                        </div>
+                     </div>
+                     <div className="p-6 border border-white/10 bg-white/5 rounded-3xl flex items-center gap-6 opacity-60">
+                        <span className="text-4xl font-black text-white/10 italic">03</span>
+                        <div className="flex flex-col">
+                           <span className="text-[16px] font-black text-white uppercase italic">VAULT UNLOCKS</span>
+                           <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">Full Media Access Granted</span>
                         </div>
                      </div>
                   </div>
-                  <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/95 to-transparent flex flex-col items-center gap-3">
-                     <button onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }} className="w-full max-w-[500px] h-20 bg-[#ffea00] rounded-[3rem] text-black text-[20px] font-black uppercase tracking-widest flex items-center justify-center gap-4 shadow-[0_15px_50px_rgba(255,234,0,0.3)] hover:scale-[1.02] active:scale-95 transition-all group shrink-0">
-                        <Zap size={24} className="fill-black" />
-                        <span className="italic font-syncopate tracking-tighter">GET FREE ACCESS</span>
-                        <ArrowRight size={24} className="group-hover:translate-x-2 transition-all opacity-50" />
-                     </button>
-                     <button
+                </div>
+
+                {/* ⚡️ ACTION AREA */}
+                <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/95 to-transparent flex flex-col items-center gap-4">
+                   <button onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }} className="w-full max-w-[500px] h-20 bg-[#ffea00] rounded-[3rem] text-black text-[22px] font-black uppercase tracking-widest flex items-center justify-center gap-5 shadow-[0_20px_60px_rgba(255,234,0,0.4)] hover:scale-[1.02] active:scale-95 transition-all group shrink-0 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                      <Zap size={28} className="fill-black" />
+                      <span className="italic">GET FREE ACCESS</span>
+                      <ArrowRight size={28} className="group-hover:translate-x-2 transition-all opacity-40" />
+                   </button>
+                   
+                   <div className="flex flex-col w-full items-center gap-3">
+                      <button
                         onClick={async () => {
                           const gid = localStorage.getItem('gasp_guest_id') || '';
                           const res = await fetch(`/api/economy/balance?userId=${gid}`);
@@ -305,20 +411,26 @@ export default function FunnelView() {
                             alert(`Your balance is ${data.balance || 0} CR. You need 6,000 CR. Complete the offer and try again!`);
                           }
                         }}
-                        className="w-full max-w-[500px] py-4 border-2 border-[#ffea00]/40 rounded-2xl text-[#ffea00] text-[11px] font-black uppercase tracking-widest hover:bg-[#ffea00]/10 active:scale-95 transition-all flex items-center justify-center gap-3"
+                        className="w-full max-w-[500px] py-4 border-2 border-[#ffea00]/30 rounded-2xl text-[#ffea00] text-[12px] font-black uppercase tracking-[0.2em] hover:bg-[#ffea00]/10 active:scale-95 transition-all flex items-center justify-center gap-3 italic"
                       >
-                        <Shield size={14} className="animate-pulse" /> I completed it — check my credits
+                        <Shield size={16} className="animate-pulse" /> VERIFY COMPLETION SIGNAL
                       </button>
-                     <div className="flex items-center justify-center gap-2 mt-2 opacity-50">
-                        <span className="w-2 h-2 rounded-full bg-[#00f0ff] animate-ping" />
-                        <span className="text-[8px] font-black uppercase tracking-widest text-[#00f0ff] italic">STATUS: WAITING FOR COMPLETION SIGNAL...</span>
-                     </div>
-                     <button onClick={() => setIsTopUpOpen(true)} className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] italic hover:text-white transition-colors py-2 flex items-center gap-2 mt-2">
-                        <CreditCard size={12} /> OR BUY CREDITS DIRECTLY
-                     </button>
-                  </div>
-               </motion.div>
+                      
+                      <div className="flex items-center justify-center gap-3 opacity-50">
+                        <div className="flex gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-ping" />
+                        </div>
+                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic">SCANNING FOR INBOUND CREDITS...</span>
+                      </div>
+
+                      <button onClick={() => setIsTopUpOpen(true)} className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic hover:text-white transition-colors py-2 flex items-center gap-2">
+                        <CreditCard size={14} /> INSTANT ACCESS WITH TOP-UP
+                      </button>
+                   </div>
+                </div>
+              </motion.div>
             )}
+            
 
             {currentStepIdx === 3 && (
                <motion.div key="s" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="absolute inset-0 bg-black flex flex-col items-center justify-center p-10 text-center gap-6">
