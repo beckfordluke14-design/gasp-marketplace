@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Zap } from 'lucide-react';
 
 interface UserContextType {
   user: any | null; // Privy User
