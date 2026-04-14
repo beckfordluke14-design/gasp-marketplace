@@ -46,11 +46,37 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 gap-4">
-                <div className="w-10 h-10 border-2 border-[#ffea00] border-t-transparent rounded-full animate-spin shadow-[0_0_15px_#ffea0044]" />
-                <p className="text-[8px] font-black uppercase tracking-[0.4em] text-[#ffea00] animate-pulse italic">
-                    {isCompliance ? 'ESTABLISHING SECURE SIGNAL...' : 'Syncing Syndicate Feed...'}
-                </p>
+            <div className="flex flex-col items-center justify-center py-24 gap-8 relative overflow-hidden">
+                {/* 🧬 NEURAL SCAN ANIMATION */}
+                <div className="relative w-32 h-32 flex items-center justify-center">
+                    <motion.div 
+                        animate={{ rotate: 360 }} 
+                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                        className="absolute inset-0 border-t-2 border-b-2 border-[#00fff2] rounded-full opacity-20"
+                    />
+                    <motion.div 
+                        animate={{ rotate: -360 }} 
+                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                        className="absolute inset-4 border-l-2 border-r-2 border-[#ffea00] rounded-full opacity-30"
+                    />
+                    <div className="w-16 h-16 rounded-full bg-[#00fff2]/5 border border-[#00fff2]/20 flex items-center justify-center relative overflow-hidden">
+                        <motion.div 
+                            animate={{ y: [-20, 20, -20] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00fff2]/40 to-transparent h-4"
+                        />
+                        <Target size={24} className="text-[#00fff2] animate-pulse" />
+                    </div>
+                </div>
+
+                <div className="flex flex-col items-center gap-2">
+                    <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[#00fff2] animate-pulse italic">
+                        {isCompliance ? 'INITIATING BIOMETRIC SCAN...' : 'ESTABLISHING SYNC...'}
+                    </p>
+                    <span className="text-[7px] font-black text-white/20 uppercase tracking-widest italic font-mono">
+                        {isCompliance ? 'Neural Node Hash: 0x' + Math.random().toString(16).slice(2, 10).toUpperCase() : 'Bypassing Node Gate...'}
+                    </span>
+                </div>
             </div>
         );
     }
