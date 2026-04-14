@@ -142,21 +142,21 @@ export default function SyndicateMissionBoard() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.1 }}
                         onClick={() => handleMissionClick(mission)}
-                        className="group relative w-full bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-6 hover:border-[#00f0ff]/40 hover:bg-[#00f0ff]/5 transition-all flex items-center justify-between overflow-hidden shadow-2xl"
+                        className="group relative w-full bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-6 hover:border-[#00f0ff]/40 hover:bg-[#00f0ff]/5 transition-all flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-6 overflow-hidden shadow-2xl"
                     >
-                        <div className="flex flex-col gap-2 text-left relative z-10 shrink-0">
+                        <div className="flex flex-col gap-2 text-left relative z-10 flex-1 min-w-0">
                             <span className="text-[9px] font-black text-[#00f0ff] uppercase tracking-widest italic">{mission.type}</span>
-                            <h5 className="text-lg font-syncopate font-black italic text-white uppercase tracking-tighter leading-none">{mission.title}</h5>
-                            <p className="text-[10px] font-black text-white/30 uppercase tracking-widest leading-tight pr-10">{mission.description}</p>
+                            <h5 className="text-lg sm:text-lg font-syncopate font-black italic text-white uppercase tracking-tighter leading-none truncate sm:whitespace-normal">{mission.title}</h5>
+                            <p className="text-[10px] font-black text-white/30 uppercase tracking-widest leading-tight sm:pr-10">{mission.description}</p>
                         </div>
 
-                        <div className="flex flex-col items-end gap-3 shrink-0 relative z-10">
+                        <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 shrink-0 relative z-10 border-t sm:border-t-0 border-white/5 pt-4 sm:pt-0">
                             <div className="flex items-center gap-2 px-4 py-2 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-2xl shadow-[0_0_20px_rgba(255,234,0,0.1)]">
                                 <Zap size={14} className="text-[#ffea00] fill-[#ffea00]" />
                                 <span className="text-lg font-syncopate font-black italic text-[#ffea00] tabular-nums">+{(mission.payout || 0).toLocaleString()}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-[#00f0ff] opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
-                                <span className="text-[10px] font-black uppercase tracking-widest italic">STEP 1: UNLOCK</span>
+                            <div className="flex items-center gap-2 text-[#00f0ff] opacity-60 sm:opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                                <span className="text-[10px] font-black uppercase tracking-widest italic">{isSpanish ? 'ABRIR NODO' : 'OPEN NODE'}</span>
                                 <ArrowRight size={14} />
                             </div>
                         </div>
@@ -165,6 +165,17 @@ export default function SyndicateMissionBoard() {
                         <div className="absolute inset-y-0 left-0 w-1 bg-[#00f0ff] opacity-0 group-hover:opacity-100 transition-opacity" />
                     </motion.button>
                 ))}
+
+                {/* 🧭 MISSION GUIDANCE */}
+                <div className="mt-4 p-6 bg-white/5 border border-white/10 rounded-[2rem] flex flex-col gap-3">
+                   <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-[#ffea00] animate-pulse" />
+                      <span className="text-[9px] font-black text-white uppercase tracking-widest italic">PRO-TIP: REPEATING OFFERS?</span>
+                   </div>
+                   <p className="text-[10px] text-white/40 leading-relaxed uppercase font-bold text-left italic">
+                      If you see the same page twice, it means your <span className="text-white">last entry wasn't confirmed.</span> Finish the task fully with real info and wait 60 seconds for your credits to arrive.
+                   </p>
+                </div>
             </div>
 
             <div className="p-10 opacity-10 flex flex-col items-center gap-2 border-t border-white/5">

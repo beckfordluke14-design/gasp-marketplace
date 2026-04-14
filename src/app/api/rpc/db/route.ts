@@ -75,7 +75,7 @@ export async function POST(req: Request) {
             safeQuery('SELECT * FROM chat_messages WHERE user_id = $1 AND persona_id = $2 ORDER BY created_at ASC', [userId, safePid]),
             safeQuery('SELECT post_id as item_id FROM user_vault_unlocks WHERE user_id = $1', [userId]),
             safeQuery('SELECT * FROM persona_vault WHERE persona_id = $1 ORDER BY created_at DESC', [safePid]),
-            safeQuery('SELECT * FROM posts WHERE persona_id = $1 AND (is_gallery = true OR is_vault = true) AND (caption IS NULL OR caption NOT LIKE \'DELETED%\') ORDER BY created_at DESC', [safePid]),
+            safeQuery('SELECT * FROM posts WHERE persona_id = $1 AND (is_vault = true OR (is_gallery = true AND (caption IS NULL OR caption NOT LIKE \'DELETED%\'))) ORDER BY created_at DESC', [safePid]),
             safeQuery('SELECT * FROM user_relationships WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, safePid]),
             safeQuery('SELECT bond_score FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, safePid]),
             safeQuery('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [userId])
@@ -84,8 +84,8 @@ export async function POST(req: Request) {
         const userMsgCount = parseInt(msgCountRows[0]?.count || '0');
         const GUEST_LIMIT = 5; // ⚖️ CONVERSION CAP
 
-        // Fetch User Balance
-        const { rows: balanceRows } = await db.query('SELECT credit_balance FROM users WHERE id = $1', [userId]);
+        // Fetch User Balance (from profiles table)
+        const { rows: balanceRows } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1', [userId]);
         const balance = balanceRows[0]?.credit_balance || 0;
 
         const unlockedIds = unlocks.map((u: any) => u.item_id);
@@ -97,7 +97,8 @@ export async function POST(req: Request) {
 
         const postVaultItems = galleryPosts.map((p: any) => ({
             id: p.id, content_url: p.content_url, caption: p.caption || '',
-            price: p.price_credits || p.lock_price || 75, is_vault: p.is_vault || false,
+            price_credits: p.price_credits || p.lock_price || 6000,
+            price: p.price_credits || p.lock_price || 6000, is_vault: p.is_vault || false,
             is_unlocked: !p.is_vault || unlockedIds.includes(p.id), type: p.content_type || p.type || 'image',
             created_at: p.created_at
         }));
@@ -146,3 +147,6 @@ export async function POST(req: Request) {
     return new Response(error.message, { status: 500 });
   }
 }
+
+
+
