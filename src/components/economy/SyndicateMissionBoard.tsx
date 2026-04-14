@@ -96,12 +96,15 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                                 <h4 className="text-[12px] font-black tracking-widest uppercase italic text-[#00fff2]">
                                     ALPHA PROTOCOL: DYNAMIC
                                 </h4>
-                                <span className="text-[7px] font-black bg-[#00fff2] text-black px-2 py-0.5 rounded tracking-[0.2em] italic">HIGH VELOCITY</span>
+                                <div className="flex gap-2">
+                                    <span className="text-[7px] font-black bg-[#00fff2]/20 border border-[#00fff2]/50 text-[#00fff2] px-2 py-0.5 rounded tracking-[0.2em] italic animate-pulse">MULTI-USE ACTIVE</span>
+                                    <span className="text-[7px] font-black bg-[#00fff2] text-black px-2 py-0.5 rounded tracking-[0.2em] italic">HIGH VELOCITY</span>
+                                </div>
                             </div>
                             <div className="flex items-center justify-between gap-4">
                                 <div className="bg-[#00fff2]/20 border border-[#00fff2]/40 rounded-lg px-4 py-2 shadow-inner">
                                     <span className="text-xl font-black text-white italic tracking-tighter shadow-lg">
-                                        +1,500 - 5,000 <span className="text-[10px] text-[#00fff2]">$GASP</span>
+                                        +1,500 - 5,000 <span className="text-[10px] text-[#00fff2]">CREDITS</span>
                                     </span>
                                 </div>
                                 <span className="text-[7px] font-black text-[#00fff2] uppercase tracking-[0.2em] italic border border-[#00fff2]/30 px-2 py-1 rounded-md animate-pulse">
