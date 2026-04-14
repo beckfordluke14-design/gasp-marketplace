@@ -155,7 +155,7 @@ export async function POST(req: Request) {
 
     // 🧬 ASSET PULSE: Fetch latest market news and private vault items
     const brainAssets = await SOV.getPersonaAssets(DB_PERSONA_ID);
-    const hasVaultPic = (brainAssets || []).some((a: any) => a.price > 0 || String(a.caption).toLowerCase().includes('vault') || a.is_premium);
+    const hasVaultPic = (brainAssets?.vault || []).some((a: any) => a.price > 0 || String(a.caption).toLowerCase().includes('vault') || a.is_premium);
 
     // 🧬 IDENTITY CONFIGURATION
     const name = profileItem.name;

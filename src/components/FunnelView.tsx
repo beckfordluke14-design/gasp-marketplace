@@ -233,12 +233,56 @@ export default function FunnelView() {
       </div>
 
       <main className="relative z-10 w-full max-w-[600px] h-[100dvh] md:h-[92dvh] flex flex-col bg-black/60 backdrop-blur-3xl md:rounded-[3rem] border-white/10 shadow-2xl overflow-hidden md:my-4">
-        {currentStepIdx > 0 && currentStepIdx < 3 && (
-          <div className="shrink-0 px-8 py-5 flex items-center justify-between border-b border-white/5 bg-black/40">
-             <div className="flex flex-col"><span className="text-[9px] font-black text-white/40 uppercase italic">Signal Path</span><span className="text-xl font-black text-[#ffea00] leading-none mt-1">{formatTimeInfo(timeLeft)}</span></div>
-             <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /><span className="text-[10px] font-black text-white tracking-widest">14 ONLINE</span></div>
+        {/* 🛸 SOVEREIGN HEADER: ASSET 01 */}
+        <div className="shrink-0 pt-10 pb-4 px-6 md:px-10 flex flex-col gap-5 border-b border-white/5 bg-black/40 relative">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">NEURAL LINK ESTABLISHED</span>
+              <span className="text-[20px] font-black text-[#ffea00] italic leading-none tracking-tighter">09:53:57</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00ffcc] animate-pulse" />
+                <span className="text-[9px] font-black text-white tracking-[0.1em]">14 Online</span>
+              </div>
+              <span className="text-[9px] font-black text-[#ff00ff] uppercase tracking-[0.2em]">SOVEREIGN SESSION ACTIVE</span>
+            </div>
           </div>
-        )}
+
+          {/* 🧬 PROFILE BAR */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full border-2 border-[#ff00ff]/40 p-0.5 shadow-[0_0_20px_rgba(255,0,255,0.2)]">
+                <div className="w-full h-full rounded-full overflow-hidden border border-white/20">
+                  <img src="/Promo/PromoPic1.png" className="w-full h-full object-cover" alt="Veronica" />
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <span className="text-[16px] font-black text-white uppercase italic tracking-wide">VERONICA</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#00ffcc]" />
+                </div>
+                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">MEDELLÍN</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-white/40">
+              <Mic size={18} />
+              <HeartPulse size={18} />
+            </div>
+          </div>
+
+          {/* ⚡️ TABS */}
+          <div className="flex items-center gap-8 mt-2">
+            <button className="relative pb-2" onClick={() => setActiveTab('NEURAL_LINK')}>
+              <span className={`text-[11px] font-black uppercase tracking-[0.2em] transition-colors ${activeTab === 'NEURAL_LINK' ? 'text-[#ff00ff]' : 'text-white/30'}`}>CHAT</span>
+              {activeTab === 'NEURAL_LINK' && <motion.div layoutId="tab-u" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ff00ff]" />}
+            </button>
+            <button className="relative pb-2" onClick={() => setActiveTab('ARCHIVE')}>
+              <span className={`text-[11px] font-black uppercase tracking-[0.2em] transition-colors ${activeTab === 'ARCHIVE' ? 'text-[#ff00ff]' : 'text-white/30'}`}>ARCHIVE</span>
+              {activeTab === 'ARCHIVE' && <motion.div layoutId="tab-u" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ff00ff]" />}
+            </button>
+          </div>
+        </div>
 
         <div className="flex-1 flex flex-col overflow-hidden relative">
           <AnimatePresence mode="wait">
@@ -262,8 +306,20 @@ export default function FunnelView() {
                 {/* 💬 CHAT FEED */}
                 <div 
                   ref={scrollRef}
-                  className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide pb-24"
+                  className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide pb-24"
                 >
+                  {/* 🖼️ INITIAL GALLERY BLOCK: PROMO ASSETS */}
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="aspect-[3/5] rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
+                      <img src="/Promo/PromoPic1.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Promo" />
+                      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent" />
+                    </motion.div>
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }} className="aspect-[3/5] rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
+                      <img src="/Promo/PromoPic2.webp" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Promo" />
+                      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent" />
+                    </motion.div>
+                  </div>
+
                   {messages.map((m) => (
                     <motion.div 
                       key={m.id}
@@ -277,24 +333,25 @@ export default function FunnelView() {
                              <div className="w-8 h-8 rounded-full bg-[#ffea00]/20 flex items-center justify-center">
                                <Sparkles size={16} className="text-[#ffea00]" />
                              </div>
-                             <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-widest">Incoming Preview...</span>
+                             <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-widest">Incoming Private Preview...</span>
                            </div>
                            <div className="aspect-[4/5] rounded-2xl bg-white/10 overflow-hidden relative group">
-                              <img src={vaultItems[0]?.url || proxyImg(profile.id + '-1')} className="w-full h-full object-cover blur-[20px] scale-110" alt="Preview" />
-                              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md">
+                              <img src="/Promo/cucumber_tease.png" className="w-full h-full object-cover blur-[18px] scale-110" alt="Special Tease" />
+                              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
                                  <Lock size={32} className="text-[#ffea00] mb-3 animate-pulse" />
-                                 <span className="text-[14px] font-black text-white italic">MEDIA INTERCEPTED</span>
-                                 <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-2">Signal Security Protocol Active</span>
+                                 <span className="text-[14px] font-black text-white italic lowercase">media intercepted</span>
+                                 <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-2">{profile.name} ACCESS ONLY</span>
                               </div>
                            </div>
                         </div>
                       ) : (
-                        <div className={`max-w-[80%] px-5 py-3 rounded-2xl text-[15px] font-medium leading-relaxed ${
+                        <div className={`max-w-[85%] px-6 py-4 rounded-[2rem] text-[16px] leading-relaxed relative ${
                           m.role === 'assistant' 
-                            ? 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none' 
-                            : 'bg-[#ffea00] text-black font-bold rounded-tr-none shadow-[0_5px_15px_rgba(255,234,0,0.2)]'
+                            ? 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none font-medium' 
+                            : 'bg-[#ffea00] text-black font-black rounded-tr-none shadow-[0_10px_30px_rgba(255,234,0,0.2)]'
                         }`}>
                           {m.content}
+                          {m.role === 'assistant' && <div className="absolute -left-1 top-0 w-4 h-4 bg-white/5 rounded-full blur-xl" />}
                         </div>
                       )}
                     </motion.div>
@@ -312,18 +369,18 @@ export default function FunnelView() {
                 </div>
 
                 {/* ⌨️ INPUT AREA */}
-                <div className="p-6 bg-gradient-to-t from-black via-black/80 to-transparent">
-                  <form onSubmit={handleSendMessage} className="relative group">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-[#ffea00]/20 to-[#00f0ff]/20 rounded-2xl blur opacity-30 group-focus-within:opacity-100 transition duration-1000"></div>
-                    <div className="relative flex items-center gap-3">
+                <div className="px-6 py-8 bg-gradient-to-t from-black via-black/80 to-transparent">
+                  <form onSubmit={handleSendMessage} className="relative group max-w-[500px] mx-auto">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-[#ff00ff]/20 to-[#00f0ff]/20 rounded-[2rem] blur opacity-30 group-focus-within:opacity-100 transition duration-1000"></div>
+                    <div className="relative flex items-center gap-3 bg-[#1a1a1a] p-2 rounded-[2.5rem] border border-white/10 backdrop-blur-3xl shadow-2xl">
                       <input 
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Reply to Veronica..."
-                        className="flex-1 h-14 bg-black/40 border border-white/10 rounded-2xl px-6 text-white placeholder:text-white/20 focus:outline-none focus:border-[#ffea00]/50 transition-all font-bold backdrop-blur-xl"
+                        placeholder="Type your reply..."
+                        className="flex-1 bg-transparent border-none px-6 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:ring-0 font-bold"
                       />
-                      <button type="submit" className="w-14 h-14 bg-[#ffea00] rounded-2xl flex items-center justify-center text-black shadow-[0_10px_30px_rgba(255,234,0,0.2)] hover:scale-105 active:scale-95 transition-all">
-                        <Send size={20} />
+                      <button type="submit" className="w-12 h-12 bg-[#ff00ff] rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-105 active:scale-95 transition-all outline-none">
+                        <Send size={18} />
                       </button>
                     </div>
                   </form>
