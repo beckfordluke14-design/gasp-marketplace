@@ -139,8 +139,32 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: true, following: rows.map(r => r.persona_id) });
       }
 
+      case 'log-funnel-lead': {
+        // 📊 Upsert a minimal profile record for this funnel visitor
+        const { guestId, firstMessage, source, campaign, creative } = payload;
+        const gid = guestId || userId;
+        try {
+          await db.query(`
+            INSERT INTO profiles (id, nickname, credit_balance, metadata, created_at, updated_at)
+            VALUES ($1, $2, 350, $3, NOW(), NOW())
+            ON CONFLICT (id) DO UPDATE SET
+              metadata = profiles.metadata || $3,
+              updated_at = NOW()
+          `, [
+            gid,
+            `guest_${gid.slice(-6)}`,
+            JSON.stringify({ funnel_source: source, campaign, creative, first_message: firstMessage, entry_at: new Date().toISOString() })
+          ]);
+        } catch (e: any) {
+          // Non-fatal — log but don't crash
+          console.warn('[Funnel Lead Log] Non-fatal:', e.message);
+        }
+        return NextResponse.json({ success: true });
+      }
+
       case 'like-post': { return NextResponse.json({ success: true }); }
       default: return new Response('Invalid Neural Action', { status: 400 });
+
     }
   } catch (error: any) {
     console.error('[Neural RPC Error]:', error);

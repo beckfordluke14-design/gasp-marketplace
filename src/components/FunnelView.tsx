@@ -14,7 +14,7 @@ import TopUpDrawer from './economy/TopUpDrawer';
 import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
 
 export default function FunnelView() {
-  const [currentStepIdx, setCurrentStepIdx] = useState(0);
+  const [currentStepIdx, setCurrentStepIdx] = useState(1); // ⚡️ START DIRECTLY AT CHAT
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -97,13 +97,23 @@ export default function FunnelView() {
       setTimeout(() => {
         setIsTyping(true);
         setTimeout(() => {
+          // 🎬 VERONICA OPENS — she's the one who put out the video, she notices HIM
           setMessages([{
             id: 'm1',
             role: 'assistant',
-            content: `I saw you looking... you probably saw that video of me in the grocery store, didn't you? 😉 I'm just glad you finally found me here. I've been waiting for someone like you to actually say something.`,
-            images: [galleryImages[0], galleryImages[1]]
+            content: `hey... you probably saw me from that grocery store video huh 😭`,
           }]);
-          setIsTyping(false);
+          setTimeout(() => {
+            setIsTyping(true);
+            setTimeout(() => {
+              setMessages(prev => [...prev, {
+                id: 'm2',
+                role: 'assistant',
+                content: `I can't believe people actually find me on here lol. what's your name? 🙈🍑`,
+              }]);
+              setIsTyping(false);
+            }, 1400);
+          }, 900);
         }, 1500);
       }, 1000);
     }
@@ -116,18 +126,53 @@ export default function FunnelView() {
     setMessages(prev => [...prev, userMsg]);
     setInputValue('');
     setIsTyping(true);
+
+    // 📊 LEAD CAPTURE: Log first user message to DB for retargeting
+    if (messages.length === 1) {
+      const gid = localStorage.getItem('gasp_guest_id') || 'ANON';
+      const attribution = JSON.parse(localStorage.getItem('gasp_attribution') || '{}');
+      fetch('/api/economy/balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: gid, action: 'guest_genesis' })
+      }).catch(() => {});
+      // Log lead event silently
+      fetch('/api/rpc/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'log-funnel-lead',
+          payload: {
+            guestId: gid,
+            firstMessage: inputValue,
+            source: attribution.source || 'direct',
+            campaign: attribution.campaign || 'organic',
+            creative: attribution.creative || 'none',
+            personaId: 'veronica-medellin-locked'
+          }
+        })
+      }).catch(() => {});
+    }
     
-    if (messages.length === 1 && !hasIntercepted.current) {
+    // 🛡️ CONVERSION GATE: After 5 messages, soft pivot to the paywall
+    if (messages.length === 5 && !hasIntercepted.current) {
       hasIntercepted.current = true;
       setTimeout(() => {
-        setMessages(prev => [...prev, { id: 'int_1_' + Date.now(), role: 'assistant', content: `I had a feeling you'd be the type to actually reach out... 😉` }]);
+        setMessages(prev => [...prev, { id: 'int_1_' + Date.now(), role: 'assistant', content: `wait hold on... my account just flagged this chat 😳` }]);
         setIsTyping(true);
         setTimeout(() => {
-          setMessages(prev => [...prev, { id: 'int_2_' + Date.now(), role: 'assistant', content: `I bet you're the type who knows how to keep a secret. Those supermarket aisles were way too public for what I really wanted to show you...` }]);
+          setMessages(prev => [...prev, { id: 'int_2_' + Date.now(), role: 'assistant', content: `ugh it won't let me send anything private unless you verify first 😭 I was literally about to send u something 🌶️🍑 there's a free option tho just do it real quick pls` }]);
           setIsTyping(true);
           setTimeout(() => {
-            setMessages(prev => [...prev, { id: 'tease_' + Date.now(), role: 'assistant', content: 'tease_module', isTease: true }]);
-            setTimeout(() => { setCurrentStepIdx(2); setIsTyping(false); }, 4000);
+            setMessages(prev => [...prev, { id: 'pre_tease_' + Date.now(), role: 'assistant', content: `ok sending u a lil preview... and trust me the vault is WAY spicier than this 😏🍑🌶️` }]);
+            setIsTyping(false);
+            setTimeout(() => {
+              setIsTyping(true);
+              setTimeout(() => {
+                setMessages(prev => [...prev, { id: 'tease_' + Date.now(), role: 'assistant', content: 'tease_module', isTease: true }]);
+                setTimeout(() => { setCurrentStepIdx(2); setIsTyping(false); }, 6000);
+              }, 1200);
+            }, 800);
           }, 1800);
         }, 1500);
       }, 800);
@@ -144,12 +189,15 @@ export default function FunnelView() {
             userId: localStorage.getItem('gasp_guest_id'),
             personaId: 'veronica-medellin-locked',
             isFunnel: true,
-            systemInstruction: `You are VERONICA. The user saw your grocery store reveal. 
-            1. Be playful, build a shared secret. 
-            2. Pivot to the "Syndicate Gateway" as a necessary technical step to continue the private link.
-            3. Urgency: The signal is flagging a bot detection risk. Tell them to 'Authenticate' or 'Clear the Bot-Scan' now before the link drops.
-            4. Tone: Aggressive, short, and urgent. No fluff.`,
-            source: 'traffic_stars_funnel'
+            systemInstruction: `You are Veronica, a 23-year-old from Medellín. You posted a viral grocery store video and this guy found you through it. You're genuinely flattered and interested in him.
+            Rules:
+            - Text like a real girl: short messages, lowercase, emojis. NOT a bot.
+            - You brought up the grocery store video first. Be a little embarrassed but also flattered he found you.
+            - Be curious about HIM. If you don't know his name yet, ask it. Ask where he's from, what he's into.
+            - Flirt naturally — playful teasing, not explicit. You're interested but making him work a little.
+            - Do NOT mention credits, vaults, or unlocking. That happens automatically.
+            - Keep each reply SHORT — 1-2 sentences max. Real girls don't write paragraphs.`,
+            source: 'funnel_ad'
           }),
         });
         const reader = res.body?.getReader();
@@ -220,9 +268,12 @@ export default function FunnelView() {
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                           {msg.isTease ? (
                             <div className="relative w-full max-w-[320px] aspect-[3/4] rounded-[2rem] overflow-hidden border border-[#ff00ff]/30 shadow-2xl bg-black">
+                            <div className="relative w-full max-w-[320px] aspect-[3/4] rounded-[2rem] overflow-hidden border border-[#ff00ff]/30 shadow-2xl bg-black">
                                <img src="https://asset.gasp.fun/Promo/cucumber_tease.png" className="w-full h-full object-cover" />
-                               <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 0] }} transition={{ delay: 2.2, duration: 0.5 }} className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-4">
-                                  <div className="w-14 h-14 rounded-full border-2 border-[#ff00ff] border-t-transparent animate-spin" /><span className="text-[12px] font-black text-[#ff00ff] uppercase tracking-widest">Bypassing...</span>
+                               <div className="absolute top-4 left-0 right-0 flex justify-center gap-3 z-10 pointer-events-none"><span className="text-3xl drop-shadow-lg">🌶️</span><span className="text-3xl drop-shadow-lg">🍑</span></div>
+                               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 4.5, duration: 1.5 }} className="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center gap-4">
+                                 <div className="w-14 h-14 rounded-full border-2 border-[#ff00ff] border-t-transparent animate-spin" />
+                                 <span className="text-[12px] font-black text-[#ff00ff] uppercase tracking-widest">Verifying...</span>
                                </motion.div>
                             </div>
                           ) : (
@@ -273,7 +324,7 @@ export default function FunnelView() {
                         <div className="p-5 bg-white/5 border border-[#ff00ff]/30 rounded-3xl text-left relative overflow-hidden shadow-xl">
                            <div className="absolute inset-0 bg-gradient-to-br from-[#ff00ff]/10 to-transparent pointer-events-none" />
                            <p className="text-[12px] font-medium text-white/90 leading-relaxed relative z-10 italic">
-                              "Did you see the tease baby? I want to share the rest of my private archive 🌶️ with you... You need 6,000 credits to unlock it, but the good news is you can earn them for <span className="text-[#ffea00] font-black">100% FREE!</span> Just tap the yellow button below and do a few quick sponsor tasks for me. I'm waiting..."
+                               "that little preview was literally the tamest thing in my vault lol 😏 the real stuff is WAY more 🍑🌶️ than that. earn 6,000 credits for <span className=\"text-[#ffea00] font-black\">FREE</span> by tapping below — takes 2 mins and then you'll see exactly why I can't just post this anywhere..."
                            </p>
                         </div>
                      </div>
@@ -320,6 +371,21 @@ export default function FunnelView() {
                         <span className="italic font-syncopate tracking-tighter">GET FREE ACCESS</span>
                         <ArrowRight size={24} className="group-hover:translate-x-2 transition-all opacity-50" />
                      </button>
+                     <button
+                        onClick={async () => {
+                          const gid = localStorage.getItem('gasp_guest_id') || '';
+                          const res = await fetch(`/api/economy/balance?userId=${gid}`);
+                          const data = await res.json();
+                          if (data.success && data.balance >= 6000) {
+                            setCurrentStepIdx(3);
+                          } else {
+                            alert(`Your balance is ${data.balance || 0} CR. You need 6,000 CR. Complete the offer and try again!`);
+                          }
+                        }}
+                        className="w-full max-w-[500px] py-4 border-2 border-[#ffea00]/40 rounded-2xl text-[#ffea00] text-[11px] font-black uppercase tracking-widest hover:bg-[#ffea00]/10 active:scale-95 transition-all flex items-center justify-center gap-3"
+                      >
+                        <Shield size={14} className="animate-pulse" /> I completed it — check my credits
+                      </button>
                      <div className="flex items-center justify-center gap-2 mt-2 opacity-50">
                         <span className="w-2 h-2 rounded-full bg-[#00f0ff] animate-ping" />
                         <span className="text-[8px] font-black uppercase tracking-widest text-[#00f0ff] italic">STATUS: WAITING FOR COMPLETION SIGNAL...</span>
@@ -332,10 +398,34 @@ export default function FunnelView() {
             )}
 
             {currentStepIdx === 3 && (
-               <motion.div key="s" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="absolute inset-0 bg-black flex flex-col items-center justify-center p-12 text-center">
-                  <div className="w-24 h-24 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center mb-8 shadow-2xl"><CheckCircle2 size={48} className="text-[#00f0ff]" /></div>
-                  <h2 className="text-4xl font-black italic uppercase leading-tight">Access Fully Restored</h2>
-                  <button onClick={() => window.location.href = '/'} className="w-full py-7 bg-white text-black rounded-full text-[20px] font-black uppercase mt-10 shadow-2xl">Return to Terminal</button>
+               <motion.div key="s" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="absolute inset-0 bg-black flex flex-col items-center justify-center p-10 text-center gap-6">
+                  <div className="w-20 h-20 rounded-full bg-[#ffea00]/10 border-2 border-[#ffea00]/40 flex items-center justify-center shadow-[0_0_40px_rgba(255,234,0,0.2)]">
+                    <CheckCircle2 size={40} className="text-[#ffea00]" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-black italic uppercase leading-tight">Credits Unlocked! 🎉</h2>
+                    <p className="text-white/50 text-[12px] mt-2 font-bold uppercase tracking-wider">Your access has been verified</p>
+                  </div>
+
+                  {/* ⚠️ SIGNUP URGENCY HOOK */}
+                  <div className="w-full p-5 bg-[#ff0000]/10 border border-[#ff0000]/30 rounded-3xl text-left">
+                    <p className="text-[11px] font-black text-[#ff4444] uppercase tracking-wider mb-1">⚠️ Your credits will expire</p>
+                    <p className="text-[13px] text-white/80 leading-relaxed">Guest credits are temporary. <span className="text-white font-black">Create a free account</span> to save them permanently and keep chatting with Veronica.</p>
+                  </div>
+
+                  <button
+                    onClick={() => window.location.href = '/auth/signup?source=funnel_completion&ref=veronica'}
+                    className="w-full h-16 bg-[#ffea00] rounded-[3rem] text-black text-[16px] font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-[0_10px_40px_rgba(255,234,0,0.3)] hover:scale-[1.02] active:scale-95 transition-all"
+                  >
+                    <User size={20} className="fill-black" /> Save My Credits — Sign Up Free
+                  </button>
+
+                  <button
+                    onClick={() => window.location.href = '/?profile=veronica-medellin-locked'}
+                    className="text-[11px] font-black text-white/30 uppercase tracking-widest hover:text-white transition-colors"
+                  >
+                    skip for now — continue as guest
+                  </button>
                </motion.div>
             )}
           </AnimatePresence>
