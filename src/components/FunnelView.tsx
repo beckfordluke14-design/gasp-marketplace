@@ -155,17 +155,17 @@ export default function FunnelView() {
       }).catch(() => {});
     }
     
-    // 🛡️ CONVERSION GATE: After 5 messages, soft pivot to the paywall
+    // 🛡️ CONVERSION GATE: After 5 messages, pivot aggressively to the paywall
     if (messages.length === 5 && !hasIntercepted.current) {
       hasIntercepted.current = true;
       setTimeout(() => {
-        setMessages(prev => [...prev, { id: 'int_1_' + Date.now(), role: 'assistant', content: `wait hold on... my account just flagged this chat 😳` }]);
+        setMessages(prev => [...prev, { id: 'int_1_' + Date.now(), role: 'assistant', content: `hold on... my session just got flagged 😳` }]);
         setIsTyping(true);
         setTimeout(() => {
-          setMessages(prev => [...prev, { id: 'int_2_' + Date.now(), role: 'assistant', content: `ugh it won't let me send anything private unless you verify first 😭 I was literally about to send u something 🌶️🍑 there's a free option tho just do it real quick pls` }]);
+          setMessages(prev => [...prev, { id: 'int_2_' + Date.now(), role: 'assistant', content: `ugh it says i can't send you anything private until u verify first... there's a 100% free option tho just do it real quick papi pls! 🙏🌶️` }]);
           setIsTyping(true);
           setTimeout(() => {
-            setMessages(prev => [...prev, { id: 'pre_tease_' + Date.now(), role: 'assistant', content: `ok sending u a lil preview... and trust me the vault is WAY spicier than this 😏🍑🌶️` }]);
+            setMessages(prev => [...prev, { id: 'pre_tease_' + Date.now(), role: 'assistant', content: `ok sending u a lil preview... and trust me the vault is WAY spicier than this 😏🍑` }]);
             setIsTyping(false);
             setTimeout(() => {
               setIsTyping(true);
@@ -216,10 +216,33 @@ export default function FunnelView() {
                   const text = JSON.parse(line.substring(2)); 
                   setMessages(prev => {
                     const last = prev[prev.length - 1];
+                    const assistantMsgCount = prev.filter(m => m.role === 'assistant').length;
+                    
+                    // 🧬 UNIVERSAL SEDUCTION LOOP: High-fidelity "Golden Assets" that always tie in
+                    const GoldenAssets = [
+                      'https://asset.gasp.fun/voices/veronica_1_hook.wav', // "mmm wow papi..." (KORE)
+                      'https://asset.gasp.fun/voices/veronica_2_bond.wav', // "i love your vibe..." (KORE)
+                      'https://asset.gasp.fun/voices/veronica_3_tease.wav', // "youre so bad papi..." (KORE)
+                      'https://asset.gasp.fun/voices/veronica_4_close.wav'  // "wait my link is dying! follow me!" (KORE)
+                    ];
+
+                    const staticVoice = GoldenAssets[assistantMsgCount] || null;
+
                     if (last?.role === 'assistant' && !last.isTease) {
-                      return [...prev.slice(0, -1), { ...last, content: text }];
+                      return [...prev.slice(0, -1), { 
+                        ...last, 
+                        content: text, 
+                        media_url: staticVoice || last.media_url,
+                        type: staticVoice ? 'voice' : last.type
+                      }];
                     }
-                    return [...prev, { id: 'v-' + Date.now(), role: 'assistant', content: text }];
+                    return [...prev, { 
+                      id: 'v-' + Date.now(), 
+                      role: 'assistant', 
+                      content: text,
+                      media_url: staticVoice,
+                      type: staticVoice ? 'voice' : 'text'
+                    }];
                   });
                 } catch (e) {}
               } else if (line.startsWith('2:')) {
@@ -521,7 +544,7 @@ export default function FunnelView() {
                    <button onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }} className="w-full max-w-[500px] h-16 md:h-20 bg-[#ffea00] rounded-[3rem] text-black text-[18px] md:text-[22px] font-black uppercase tracking-widest flex items-center justify-center gap-5 shadow-[0_20px_60px_rgba(255,234,0,0.4)] hover:scale-[1.02] active:scale-95 transition-all group shrink-0 relative overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
                       <Zap size={24} className="fill-black" />
-                      <span className="italic">ACCESS TASK BOARD</span>
+                      <span className="italic">START FREE MISSION ⚡️</span>
                       <ArrowRight size={24} className="group-hover:translate-x-2 transition-all opacity-40" />
                    </button>
                    
