@@ -589,6 +589,9 @@ export default function ChatDrawer({
                             setSelectedLightboxIndex(itemIndex >= 0 ? itemIndex : 0);
                             setLightboxItems(viewableItems);
                             setLightboxOpen(true);
+                          } else {
+                            // 🏹 WINDOW SHOPPER TRAP: Clicking the blurred card directly triggers the unlock flow
+                            unlockItem(item);
                           }
                         }}
                         className="relative aspect-[3/4] bg-zinc-900/80 rounded-2xl overflow-hidden border border-white/5 cursor-pointer group"

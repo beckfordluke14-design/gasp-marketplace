@@ -187,6 +187,39 @@ export async function POST(req: Request) {
                     throw e;
                 }
             }
+            case 'get-funnel-conversations': {
+                const { rows } = await db.query(`
+                    WITH LatestMessages AS (
+                        SELECT 
+                            user_id, 
+                            persona_id, 
+                            content, 
+                            role,
+                            created_at,
+                            ROW_NUMBER() OVER(PARTITION BY user_id, persona_id ORDER BY created_at DESC) as rn,
+                            COUNT(*) OVER(PARTITION BY user_id, persona_id) as total_messages,
+                            SUM(CASE WHEN role = 'user' THEN 1 ELSE 0 END) OVER(PARTITION BY user_id, persona_id) as user_messages
+                        FROM chat_messages
+                        WHERE is_funnel = true
+                    )
+                    SELECT 
+                        lm.user_id, 
+                        lm.persona_id, 
+                        lm.content as last_message, 
+                        lm.role as last_role,
+                        lm.created_at, 
+                        lm.total_messages,
+                        lm.user_messages,
+                        p.name as persona_name,
+                        p.seed_image_url as persona_image
+                    FROM LatestMessages lm
+                    LEFT JOIN personas p ON lm.persona_id = p.id
+                    WHERE lm.rn = 1
+                    ORDER BY lm.created_at DESC
+                    LIMIT 200
+                `);
+                return NextResponse.json({ success: true, conversations: rows });
+            }
             case 'get-conversations': {
                 const { rows } = await db.query(`
                     WITH LatestMessages AS (
@@ -200,6 +233,7 @@ export async function POST(req: Request) {
                             COUNT(*) OVER(PARTITION BY user_id, persona_id) as total_messages,
                             SUM(CASE WHEN role = 'user' THEN 1 ELSE 0 END) OVER(PARTITION BY user_id, persona_id) as user_messages
                         FROM chat_messages
+                        WHERE is_funnel IS NOT TRUE
                     )
                     SELECT 
                         lm.user_id, 

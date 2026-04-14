@@ -5,12 +5,14 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const personaId = searchParams.get('personaId');
+  const personaIdRaw = searchParams.get('personaId');
   const userId = searchParams.get('userId');
 
-  if (!personaId) {
+  if (!personaIdRaw) {
     return NextResponse.json({ success: false, error: 'Missing Persona ID' }, { status: 400 });
   }
+  
+  const personaId = personaIdRaw.toLowerCase();
 
   try {
     // 🛡️ TEASER ENGINE: Fetch ALL vault posts for this persona

@@ -405,8 +405,12 @@ CRITICAL ERROR PREVENTION: You have previously sounded generic or from the wrong
 
             const queries = [
                 db.query(
-                    'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
-                    [finalUserId, DB_PERSONA_ID, 'assistant', streamB_Text + (systemRewardMessage ? `\n\n🎁 *${systemRewardMessage}*` : ''), voiceUrl, voiceUrl ? streamA_Native : null]
+                    'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, is_funnel, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())',
+                    [finalUserId, DB_PERSONA_ID, 'assistant', streamB_Text + (systemRewardMessage ? `\n\n🎁 *${systemRewardMessage}*` : ''), voiceUrl, voiceUrl ? streamA_Native : null, isFunnel]
+                ),
+                db.query(
+                   'INSERT INTO chat_messages (user_id, persona_id, role, content, is_funnel, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
+                   [finalUserId, DB_PERSONA_ID, 'user', messages[messages.length - 1].content, isFunnel]
                 )
             ];
 

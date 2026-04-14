@@ -80,7 +80,7 @@ export interface Agency {
 export const initialAgencies: Agency[] = [];
 export const initialPersonas: Profile[] = [
   {
-    id: 'veronica_medellin',
+    id: 'veronica-medellin-locked',
     name: 'Veronica',
     city: 'Medellín',
     country: 'Colombia',
@@ -95,7 +95,7 @@ export const initialPersonas: Profile[] = [
     systemPrompt: ''
   },
   {
-    id: 'elara_tokyo',
+    id: 'elara-tokyo',
     name: 'Elara',
     city: 'Tokyo',
     country: 'Japan',

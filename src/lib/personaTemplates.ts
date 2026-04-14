@@ -24,7 +24,7 @@ export interface PersonaArchetype {
 export const PERSONA_ARCHETYPES: PersonaArchetype[] = [
     // === CATEGORY: CARIBBEAN & LATINA HEAT (1-10) ===
     {
-        id: 'veronica_medellin',
+        id: 'veronica-medellin-locked',
         label: 'Medellín Nightlife Scout (Veronica)',
         zone: 'col_medellin_paisa',
         culture: 'Colombian (Paisa)',

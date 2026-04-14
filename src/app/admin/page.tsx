@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ShieldAlert, Zap, Star, Trash2, LayoutDashboard, Baby, Activity,
-  ArrowRight, Film, Users, BarChart2, ClipboardList, Camera, FileCheck, Layers, Fuel, Radio, MessageSquare
+  ArrowRight, Film, Users, BarChart2, ClipboardList, Camera, FileCheck, Layers, Fuel, Radio, MessageSquare, Target
 } from 'lucide-react';
 import Header from '@/components/Header';
 
@@ -148,6 +148,16 @@ export default function AdminHub() {
       color: 'text-[#ff00ff]',
       glow: 'from-[#ff00ff]/10 to-[#ff00ff]/5 border-[#ff00ff]/20',
       cta: 'Observe Pulse',
+      ctaIcon: <ArrowRight size={14} />,
+    },
+    {
+      label: 'Funnel Intelligence 🎯',
+      description: 'The Campaign Pulse. Monitor high-intent ad traffic across the conversion funnel. Trace leads from ad-clicks to vault-unlocks.',
+      href: '/admin/funnel-intel',
+      icon: <Target size={20} />,
+      color: 'text-[#ffea00]',
+      glow: 'from-[#ffea00]/10 to-[#ffea00]/5 border-[#ffea00]/20',
+      cta: 'Observe Funnel',
       ctaIcon: <ArrowRight size={14} />,
     },
     {

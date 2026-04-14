@@ -47,7 +47,7 @@ export default function FunnelView() {
   const hasIntercepted = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const profile = { name: 'VERONICA', image: '/Promo/PromoPic1.png', city: 'MEDELLÍN', id: 'veronica_medellin' };
+  const profile = { name: 'VERONICA', image: '/Promo/PromoPic1.png', city: 'MEDELLÍN', id: 'veronica-medellin-locked' };
   const galleryImages = ['/Promo/PromoPic1.png', '/Promo/PromoPic2.webp'];
 
   useEffect(() => {

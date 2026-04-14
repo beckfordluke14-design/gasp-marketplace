@@ -67,13 +67,17 @@ export async function POST(req: Request) {
            try { const { rows } = await db.query(sql, params); return rows || []; } catch (e) { return []; }
         };
 
+        // 🧬 IDENTITY SYNC: Sanitize and bridge IDs
+        const pid = (personaId || '').toLowerCase();
+        const safePid = pid === 'veronica_medellin' ? 'veronica-medellin-locked' : pid;
+
         const [messages, unlocks, vault, galleryPosts, relationships, stats, msgCountRows] = await Promise.all([
-            safeQuery('SELECT * FROM chat_messages WHERE user_id = $1 AND persona_id = $2 ORDER BY created_at ASC', [userId, personaId]),
+            safeQuery('SELECT * FROM chat_messages WHERE user_id = $1 AND persona_id = $2 ORDER BY created_at ASC', [userId, safePid]),
             safeQuery('SELECT post_id as item_id FROM user_vault_unlocks WHERE user_id = $1', [userId]),
-            safeQuery('SELECT * FROM persona_vault WHERE persona_id = $1 ORDER BY created_at DESC', [personaId]),
-            safeQuery('SELECT * FROM posts WHERE persona_id = $1 AND (is_gallery = true OR is_vault = true) AND (caption IS NULL OR caption NOT LIKE \'DELETED%\') ORDER BY created_at DESC', [personaId]),
-            safeQuery('SELECT * FROM user_relationships WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, personaId]),
-            safeQuery('SELECT bond_score FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, personaId]),
+            safeQuery('SELECT * FROM persona_vault WHERE persona_id = $1 ORDER BY created_at DESC', [safePid]),
+            safeQuery('SELECT * FROM posts WHERE persona_id = $1 AND (is_gallery = true OR is_vault = true) AND (caption IS NULL OR caption NOT LIKE \'DELETED%\') ORDER BY created_at DESC', [safePid]),
+            safeQuery('SELECT * FROM user_relationships WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, safePid]),
+            safeQuery('SELECT bond_score FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, safePid]),
             safeQuery('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [userId])
         ]);
 

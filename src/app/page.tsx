@@ -289,7 +289,7 @@ function MarketplaceContent() {
           if (SYNDICATE_CONFIG.compliance) {
             setIsTopUpOpen(true);
           } else {
-            window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`;
+            window.location.href = `/funnel?profile=veronica-medellin-locked&source=syndicate_warp&utm_source=internal`;
           }
         };
      }
@@ -352,7 +352,7 @@ function MarketplaceContent() {
               onSetView={handleSetSidebarView}
               onOpenTopUp={() => {
                 if (SYNDICATE_CONFIG.compliance) setIsTopUpOpen(true);
-                else window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`;
+                else window.location.href = `/funnel?profile=veronica-medellin-locked&source=syndicate_warp&utm_source=internal`;
               }}
            />
        </div>
@@ -361,7 +361,7 @@ function MarketplaceContent() {
             <Header 
                onOpenTopUp={() => {
                   if (SYNDICATE_CONFIG.compliance) setIsTopUpOpen(true);
-                  else window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`;
+                  else window.location.href = `/funnel?profile=veronica-medellin-locked&source=syndicate_warp&utm_source=internal`;
                }} 
                deadIds={deadIds} 
                setDeadIds={setDeadIds} 
@@ -470,7 +470,7 @@ function MarketplaceContent() {
                      <div className="w-full max-w-4xl mx-auto px-4 md:px-6 animate-in fade-in zoom-in-95 duration-500">
                         <WeatherFeed onOpenTopUp={() => {
                            if (SYNDICATE_CONFIG.compliance) setIsTopUpOpen(true);
-                           else window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`;
+                           else window.location.href = `/funnel?profile=veronica-medellin-locked&source=syndicate_warp&utm_source=internal`;
                         }} />
                      </div>
                     )}
@@ -567,7 +567,7 @@ function MarketplaceContent() {
                          onMinimize={() => setMinimizedIds([...minimizedIds, sId])} 
                          onOpenTopUp={() => {
                            if (SYNDICATE_CONFIG.compliance) setIsTopUpOpen(true);
-                           else window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`;
+                           else window.location.href = `/funnel?profile=veronica-medellin-locked&source=syndicate_warp&utm_source=internal`;
                          }}
                          followingIds={following}
                          profiles={sortedProfiles}
