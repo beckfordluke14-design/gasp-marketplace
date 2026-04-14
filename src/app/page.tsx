@@ -244,7 +244,10 @@ function MarketplaceContent() {
      if (typeof window !== 'undefined') {
         (window as any).onSelectProfile = handleSelectProfile;
         (window as any).onSetActiveTab = setActiveTab;
-        (window as any).openTopUp = () => setIsTopUpOpen(true);
+        (window as any).openTopUp = () => {
+          // 🛰️ FUNNEL WARP: Intercept Top-Up calls on main site and bounce to Funnel
+          window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`;
+        };
      }
   }, [handleSelectProfile]);
 
@@ -303,13 +306,13 @@ function MarketplaceContent() {
               profiles={sortedProfiles} 
               view={sidebarView}
               onSetView={handleSetSidebarView}
-              onOpenTopUp={() => setIsTopUpOpen(true)}
+              onOpenTopUp={() => { window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`; }}
            />
        </div>
        
        <div className="flex-1 flex flex-col relative h-full">
             <Header 
-               onOpenTopUp={() => setIsTopUpOpen(true)} 
+               onOpenTopUp={() => { window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`; }} 
                deadIds={deadIds} 
                setDeadIds={setDeadIds} 
                onOpenMenu={() => setShowProfileList(true)} 
@@ -509,7 +512,7 @@ function MarketplaceContent() {
                          profile={p} 
                          onClose={() => handleCloseChat(sId)} 
                          onMinimize={() => setMinimizedIds([...minimizedIds, sId])} 
-                         onOpenTopUp={() => setIsTopUpOpen(true)}
+                         onOpenTopUp={() => { window.location.href = `/funnel?profile=veronica_medellin&source=syndicate_warp&utm_source=internal`; }}
                          followingIds={following}
                          profiles={sortedProfiles}
                          unreadCounts={unreadCounts}
