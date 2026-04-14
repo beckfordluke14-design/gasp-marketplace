@@ -15,31 +15,28 @@ export async function GET(req: NextRequest) {
 
     try {
         // 🧬 UNREAD LOGIC: 
-        // We look for assistant messages that don't have a corresponding 'read' entry.
-        // Or simpler: Just count messages newer than the last viewed timestamp in localstorage 
-        // (but since we want server-side truth, we'll check chat_messages vs user metadata)
-        
-        // For now, let's use a simpler approach: 
-        // Return counts of messages sent in the last 24 hours that might be new.
-        const { rows } = await db.query(`
-            const { rows } = await db.query(
-                `SELECT persona_id, COUNT(*) as count 
-                 FROM chat_messages 
-                 WHERE user_id = $1 AND role = 'assistant' AND created_at > NOW() - INTERVAL '24 hours'
-                 GROUP BY persona_id`,
-                [userId]
-            );
-        `);
+        // For now, we count assistant messages sent in the last 24 hours.
+        // This acts as a 'Hot Lead' indicator for the frontend to pulse the menu button.
+        const { rows } = await db.query(
+            `SELECT persona_id, COUNT(*) as count 
+             FROM chat_messages 
+             WHERE user_id = $1 AND role = 'assistant' AND created_at > NOW() - INTERVAL '24 hours'
+             GROUP BY persona_id`,
+            [userId]
+        );
 
-        // Note: Real production unread logic usually requires a 'last_read_at' column per persona.
-        // We will mock it here by checking the database for the message stack.
+        const unreadMap: Record<string, number> = {};
+        rows.forEach(r => {
+            unreadMap[r.persona_id] = parseInt(r.count || '0');
+        });
         
         return NextResponse.json({ 
             success: true, 
-            unreads: {} // This will be hydrated by the client logic
+            unreads: unreadMap
         });
 
     } catch (err) {
+        console.error('[Unread Radar Fail]:', err);
         return NextResponse.json({ success: false }, { status: 500 });
     }
 }

@@ -101,13 +101,33 @@ function MarketplaceContent() {
     };
     loadProfiles();
 
-    const syncUnreads = () => {
-       const stored = JSON.parse(localStorage.getItem('gasp_unread_counts') || '{}');
-       setUnreadCounts(stored);
-       const unreadTotal = Object.values(stored).reduce((a: any, b: any) => a + Number(b), 0);
-       window.dispatchEvent(new CustomEvent('gasp_unread_sync', { detail: unreadTotal }));
+    const syncUnreads = async () => {
+       let uId = localStorage.getItem('gasp_guest_id');
+       if (!uId) return;
+
+       try {
+           const res = await fetch(`/api/user/unreads?userId=${uId}`);
+           const data = await res.json();
+           if (data.success && data.unreads) {
+               localStorage.setItem('gasp_unread_counts', JSON.stringify(data.unreads));
+               setUnreadCounts(data.unreads);
+               const unreadTotal = Object.values(data.unreads).reduce((a: any, b: any) => a + Number(b), 0);
+               window.dispatchEvent(new CustomEvent('gasp_unread_sync_trigger'));
+               window.dispatchEvent(new CustomEvent('gasp_unread_sync', { detail: unreadTotal }));
+           }
+       } catch (e) {
+           // Fallback to local
+           const stored = JSON.parse(localStorage.getItem('gasp_unread_counts') || '{}');
+           setUnreadCounts(stored);
+       }
     };
     syncUnreads();
+    
+    // 🧬 SOVEREIGN RADAR: Daily state might bring new messages, check every 60s
+    const unreadInterval = setInterval(syncUnreads, 60000);
+
+    const handleManualSync = () => syncUnreads();
+    window.addEventListener('gasp_unread_sync_trigger', handleManualSync);
 
     const syncFollows = async () => {
         let gid = localStorage.getItem('gasp_guest_id');
@@ -159,7 +179,8 @@ function MarketplaceContent() {
     }
 
     return () => {
-       window.removeEventListener('gasp_unread_sync_trigger', syncUnreads);
+       clearInterval(unreadInterval);
+       window.removeEventListener('gasp_unread_sync_trigger', handleManualSync);
        window.removeEventListener('gasp_sync_follows', handleSyncPulse as EventListener);
     };
   }, [searchParams, mounted]);
