@@ -260,27 +260,6 @@ export default function FunnelView() {
                 <div className="flex px-8 border-b border-white/5 gap-8">
                    <button onClick={() => setActiveTab('NEURAL_LINK')} className={`pb-3 text-[11px] font-black tracking-widest relative ${activeTab === 'NEURAL_LINK' ? 'text-white' : 'text-white/30'}`}>CHAT {activeTab === 'NEURAL_LINK' && <motion.div layoutId="t" className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#ff00ff]" />}</button>
                    <button onClick={() => setActiveTab('ARCHIVE')} className={`pb-3 text-[11px] font-black tracking-widest relative ${activeTab === 'ARCHIVE' ? 'text-white' : 'text-white/30'}`}>VAULT {activeTab === 'ARCHIVE' && <motion.div layoutId="t" className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#ff00ff]" />}</button>
-                </div>
-                <div ref={scrollRef} className="flex-1 overflow-y-auto px-8 py-6 pb-[180px] no-scrollbar">
-                  {activeTab === 'NEURAL_LINK' ? (
-                    <div className="space-y-8">
-                      {messages.map(msg => (
-                        <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          {msg.isTease ? (
-                            <div className="relative w-full max-w-[320px] aspect-[3/4] rounded-[2rem] overflow-hidden border border-[#ff00ff]/30 shadow-2xl bg-black">
-                            <div className="relative w-full max-w-[320px] aspect-[3/4] rounded-[2rem] overflow-hidden border border-[#ff00ff]/30 shadow-2xl bg-black">
-                               <img src="https://asset.gasp.fun/Promo/cucumber_tease.png" className="w-full h-full object-cover" />
-                               <div className="absolute top-4 left-0 right-0 flex justify-center gap-3 z-10 pointer-events-none"><span className="text-3xl drop-shadow-lg">🌶️</span><span className="text-3xl drop-shadow-lg">🍑</span></div>
-                               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 4.5, duration: 1.5 }} className="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center gap-4">
-                                 <div className="w-14 h-14 rounded-full border-2 border-[#ff00ff] border-t-transparent animate-spin" />
-                                 <span className="text-[12px] font-black text-[#ff00ff] uppercase tracking-widest">Verifying...</span>
-                               </motion.div>
-                            </div>
-                          ) : (
-                            <div className={`px-6 py-4 rounded-[2rem] text-[15px] ${msg.role === 'user' ? 'bg-[#ff00ff] text-white italic rounded-tr-none' : 'bg-[#151515]/90 border border-white/10 rounded-tl-none'}`}>{msg.content}</div>
-                          )}
-                        </div>
-                      ))}
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 gap-4">
