@@ -77,25 +77,16 @@ export default function FunnelView() {
     fetchVault();
   }, []);
 
+  // 🖥️ TERMINAL BOOT SEQUENCE (runs once)
   useEffect(() => {
-    const timerInterval = setInterval(() => {
-      setTimeLeft(prev => {
-        const [m, s] = prev.split(':').map(Number);
-        let total = m * 60 + s - 1;
-        if (total < 0) return '00:00';
-        const nm = Math.floor(total / 60).toString().padStart(2, '0');
-        const ns = (total % 60).toString().padStart(2, '0');
-        return `${nm}:${ns}`;
-      });
-    }, 1000);
     const logs = ["> establishing connection...", "> bypass active.", "> identity confirmed."];
     let lIdx = 0;
     const lInt = setInterval(() => {
       if (lIdx < logs.length) setTerminalLogs(prev => [...prev, logs[lIdx++]]);
-      else { if (currentStepIdx === 0) setCurrentStepIdx(1); }
+      else { setCurrentStepIdx(1); clearInterval(lInt); }
     }, 250);
-    return () => { clearInterval(timerInterval); clearInterval(lInt); };
-  }, [currentStepIdx]);
+    return () => clearInterval(lInt);
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -196,7 +187,7 @@ export default function FunnelView() {
       <main className="relative z-10 w-full max-w-[600px] h-[100dvh] md:h-[92dvh] flex flex-col bg-black/60 backdrop-blur-3xl md:rounded-[3rem] border-white/10 shadow-2xl overflow-hidden md:my-4">
         {currentStepIdx > 0 && currentStepIdx < 3 && (
           <div className="shrink-0 px-8 py-5 flex items-center justify-between border-b border-white/5 bg-black/40">
-             <div className="flex flex-col"><span className="text-[9px] font-black text-white/40 uppercase italic">Signal Path</span><span className="text-xl font-black text-[#ffea00] leading-none mt-1">{timeLeft}</span></div>
+             <div className="flex flex-col"><span className="text-[9px] font-black text-white/40 uppercase italic">Signal Path</span><span className="text-xl font-black text-[#ffea00] leading-none mt-1">{formatTimeInfo(timeLeft)}</span></div>
              <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /><span className="text-[10px] font-black text-white tracking-widest">14 ONLINE</span></div>
           </div>
         )}
