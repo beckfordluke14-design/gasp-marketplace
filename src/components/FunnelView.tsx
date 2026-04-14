@@ -11,6 +11,7 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
 import TopUpDrawer from './economy/TopUpDrawer';
+import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
 
 export default function FunnelView() {
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
@@ -193,43 +194,19 @@ export default function FunnelView() {
     setIsTyping(true);
     const gid = localStorage.getItem('gasp_guest_id');
     
-    // 🎤 LASER-SHARP NARRATIVE INTERCEPT
     if (messages.length === 1 && !hasIntercepted.current) {
       hasIntercepted.current = true;
       setTimeout(() => {
-        // Part 1: The Intuition
-        setMessages(prev => [...prev, { 
-          id: 'int_1_' + Date.now(), 
-          role: 'assistant', 
-          content: `I had a feeling you'd be the type to actually reach out... 😉` 
-        }]);
-        setIsTyping(true); // Start typing Bubble 2
-        
+        setMessages(prev => [...prev, { id: 'int_1_' + Date.now(), role: 'assistant', content: `I had a feeling you'd be the type to actually reach out... 😉` }]);
+        setIsTyping(true);
         setTimeout(() => {
-          // Part 2: The Setup
-          setMessages(prev => [...prev, { 
-            id: 'int_2_' + Date.now(), 
-            role: 'assistant', 
-            content: `I bet you're the type who knows how to keep a secret. Those supermarket aisles were way too public for what I really wanted to show you...` 
-          }]);
-          setIsTyping(true); // Start typing the Tease
-          
+          setMessages(prev => [...prev, { id: 'int_2_' + Date.now(), role: 'assistant', content: `I bet you're the type who knows how to keep a secret. Those supermarket aisles were way too public for what I really wanted to show you...` }]);
+          setIsTyping(true);
           setTimeout(() => {
-            // THE TEASE!
-            setMessages(prev => [...prev, { 
-              id: 'tease_' + Date.now(), 
-              role: 'assistant', 
-              content: 'tease_module',
-              isTease: true 
-            }]);
-            
-            // ⚡ FINAL HARD CLOSE
-            setTimeout(() => {
-              setCurrentStepIdx(2);
-              setIsTyping(false);
-            }, 4000); // Visual registration window
-          }, 1800); // Typing delay for image
-        }, 1500); // Typing delay for bubble 2
+            setMessages(prev => [...prev, { id: 'tease_' + Date.now(), role: 'assistant', content: 'tease_module', isTease: true }]);
+            setTimeout(() => { setCurrentStepIdx(2); setIsTyping(false); }, 4000);
+          }, 1800);
+        }, 1500);
       }, 800);
       return;
     }
@@ -247,9 +224,7 @@ export default function FunnelView() {
             systemInstruction: `You are VERONICA. The user just arrived from an ad showing you in a grocery store.
             1. Lean into the fact that they "saw you" in that video. Be playful and flattered.
             2. Build a "shared secret" connection. You are glad they found you.
-            3. DO NOT ask for their name/age or stall. 
-            4. By the 2nd or 3rd message, pivot to sending a "Private Tease" because you want to show them more than what was in that video.
-            5. Goal: Drive to the GLITCH cutoff after the tease.`,
+            3. Goal: Drive to the GLITCH cutoff after the tease.`,
             source: 'traffic_stars_funnel'
           }),
         });
@@ -297,10 +272,8 @@ export default function FunnelView() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/80" />
       </div>
 
-      {/* 🛡️ MASTER EXPERIENCE CONTAINER */}
       <main className="relative z-10 w-full max-w-[600px] h-[100dvh] md:h-[92dvh] flex flex-col bg-black/60 backdrop-blur-3xl md:rounded-[3rem] md:border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 md:my-4">
         
-        {/* UPPER STATUS BAR */}
         {currentStepIdx > 0 && currentStepIdx < 3 && (
           <div className="shrink-0 px-8 py-5 flex items-center justify-between border-b border-white/5 bg-black/40 relative z-[110]">
              <div className="flex flex-col text-left">
@@ -323,7 +296,7 @@ export default function FunnelView() {
         <div className="flex-1 flex flex-col overflow-hidden relative">
           <AnimatePresence mode="wait">
             
-            {currentStepIdx === 2 ? (
+            {currentStepIdx === 2 && (
               <motion.div
                 key="glitch-overlay"
                 initial={{ opacity: 0 }}
@@ -335,7 +308,7 @@ export default function FunnelView() {
                 transition={{ duration: 0.5 }}
                 className="absolute inset-0 z-[500] pointer-events-none bg-[#ff00ff]/10 mix-blend-overlay"
               />
-            ) : null}
+            )}
 
             {currentStepIdx === 0 && (
               <motion.div key="init" className="flex-1 flex flex-col items-center justify-center p-8 space-y-4 bg-black">
@@ -348,14 +321,12 @@ export default function FunnelView() {
 
              {currentStepIdx === 1 && (
               <motion.div key="main-content" className="flex-1 flex flex-col overflow-hidden">
-                {/* Profile Header - Optimized for Mobile Height */}
                 <div className="px-8 py-4 border-b border-white/5 relative z-20 flex items-center justify-between bg-black/40 backdrop-blur-md">
                    <div className="flex items-center gap-5 text-left">
                       <div className="relative">
                          <div className="w-14 h-14 rounded-full border-2 border-[#ff00ff] p-1 shadow-[0_0_20px_rgba(255,0,255,0.4)]">
                             <img src={profile.image} className="w-full h-full object-cover object-top rounded-full" alt={profile.name} />
                          </div>
-                         <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-black border border-white/20 flex items-center justify-center text-[8px] font-bold text-white/40 shadow-xl">V</div>
                       </div>
                       <div className="flex flex-col gap-0.5">
                          <div className="flex items-center gap-2">
@@ -364,10 +335,6 @@ export default function FunnelView() {
                          </div>
                          <span className="text-[9px] font-black text-white/40 tracking-[0.3em] leading-none uppercase">{profile.city}</span>
                       </div>
-                   </div>
-                   <div className="flex items-center gap-4 text-white/40 shrink-0">
-                      <Mic2 size={18} />
-                      <Waveform size={18} />
                    </div>
                 </div>
 
@@ -389,18 +356,9 @@ export default function FunnelView() {
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                           {msg.isTease ? (
                             <div className="relative w-full max-w-[320px] aspect-[3/4] rounded-[2.5rem] overflow-hidden border border-[#ff00ff]/30 shadow-[0_0_50px_rgba(255,0,255,0.2)] bg-black animate-in fade-in zoom-in duration-500">
-                               <img 
-                                 src="https://asset.gasp.fun/Promo/cucumber_tease.png" 
-                                 className="w-full h-full object-cover transition-all duration-[2000ms]" 
-                                 alt="Tease" 
-                               />
+                               <img src="https://asset.gasp.fun/Promo/cucumber_tease.png" className="w-full h-full object-cover" alt="Tease" />
                                <div className="absolute inset-0 bg-black/20 flex flex-col items-center justify-center p-6 text-center gap-4 group">
-                                  <motion.div 
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: [0, 1, 0] }}
-                                    transition={{ delay: 2.2, duration: 0.5 }}
-                                    className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-4"
-                                  >
+                                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 0] }} transition={{ delay: 2.2, duration: 0.5 }} className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-4">
                                      <div className="w-14 h-14 rounded-full border-2 border-[#ff00ff] border-t-transparent animate-spin" />
                                      <div className="space-y-1">
                                         <div className="text-[12px] font-black text-[#ff00ff] tracking-[0.4em] uppercase">Private Access</div>
@@ -408,35 +366,15 @@ export default function FunnelView() {
                                      </div>
                                   </motion.div>
                                </div>
-                               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/40 to-transparent h-1/3 pointer-events-none" />
                             </div>
                           ) : (
                             <div className={`flex flex-col gap-3 max-w-[90%] ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                               {msg.images && msg.images.length > 0 && (
-                                 <div className="grid grid-cols-2 gap-2 mb-1 w-full max-w-[340px]">
-                                   {msg.images.map((img, i) => (
-                                     <div key={i} className="aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-lg bg-black">
-                                       <img src={img} className="w-full h-full object-cover object-top" alt="Promo" />
-                                     </div>
-                                   ))}
-                                 </div>
-                               )}
-                               <div className={`px-6 py-5 rounded-[2rem] text-[15px] ${msg.role === 'user' ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-xl' : 'bg-[#151515]/90 border border-white/10 rounded-tl-none font-medium'}`}>
-                                 {msg.content}
-                               </div>
+                               <div className={`px-6 py-5 rounded-[2rem] text-[15px] ${msg.role === 'user' ? 'bg-[#ff00ff] text-white font-bold italic rounded-tr-none shadow-xl' : 'bg-[#151515]/90 border border-white/10 rounded-tl-none font-medium'}`}>{msg.content}</div>
                             </div>
                           )}
                         </div>
                       ))}
-                      {isTyping && (
-                         <div className="flex justify-start">
-                            <div className="bg-[#151515]/90 px-6 py-4 rounded-2xl rounded-tl-none flex gap-1.5 items-center">
-                               <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce" />
-                               <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:0.2s]" />
-                               <div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:0.4s]" />
-                            </div>
-                         </div>
-                      )}
+                      {isTyping && <div className="flex justify-start"><div className="bg-[#151515]/90 px-6 py-4 rounded-2xl rounded-tl-none flex gap-1.5 items-center"><div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce" /><div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:0.2s]" /><div className="w-1.5 h-1.5 bg-[#ff00ff] rounded-full animate-bounce [animation-delay:0.4s]" /></div></div>}
                     </div>
                   ) : (
                     <div className="space-y-8 animate-in fade-in duration-700">
@@ -445,23 +383,24 @@ export default function FunnelView() {
                         <div className="flex flex-col items-center justify-center py-20 gap-4"><Loader2 className="text-[#ff00ff] animate-spin" size={32} /></div>
                       ) : (
                         <div className="grid grid-cols-2 gap-4">
-                          {vaultItems.filter(v => v.is_vault && !v.caption?.includes('DELETED')).map((item, idx) => (
+                          {vaultItems.filter(v => v.is_vault).map((item, idx) => (
                             <div key={item.id} className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/5 bg-zinc-900 group shadow-2xl">
                               <img src={item.content_url} className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-50" />
                               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 gap-4 bg-black/60 backdrop-blur-sm">
                                  <Lock size={20} className="text-white/40" />
                                  <div className="w-full flex flex-col gap-2">
-                                    <button onClick={() => setCurrentStepIdx(2)} className="w-full py-3.5 bg-white text-black text-[10px] font-black uppercase rounded-xl hover:bg-[#ffea00] active:scale-95 transition-all shadow-xl font-syncopate italic">Add Credits</button>
-                                    
-                                    {/* 🚀 CPAGrip BRIDGE: THE 'SPONSOR' SHORTCUT */}
+                                    <button onClick={() => setCurrentStepIdx(2)} className="w-full py-3.5 bg-white text-black text-[10px] font-black uppercase rounded-xl hover:bg-[#ffea00] shadow-xl font-syncopate italic">Add Credits</button>
                                     <button 
-                                      onClick={() => window.open('https://www.cpagrip.com/show.php?l=0&u=YOUR_CPAGRIP_LOCKER_ID&id=YOUR_ID', '_blank')} 
-                                      className="w-full py-2.5 bg-gradient-to-r from-[#ffea00] to-[#ffaa00] text-black text-[9px] font-black uppercase rounded-xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_20px_rgba(255,234,0,0.3)] font-syncopate italic flex items-center justify-center gap-2"
+                                      onClick={() => {
+                                        const tid = localStorage.getItem('gasp_guest_id') || `guest_${Math.random().toString(36).substring(7)}`;
+                                        window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank');
+                                      }}
+                                      className="w-full py-2.5 bg-gradient-to-r from-[#00fff2] to-[#0088ff] text-black text-[9px] font-black uppercase rounded-xl shadow-[0_5px_20px_rgba(0,255,242,0.3)] font-syncopate italic flex items-center justify-center gap-2"
                                     >
-                                       解锁 🌶️ FREE UNLOCK 🍑
+                                       任务 🌶️ FREE UNLOCK 🍑
                                     </button>
                                  </div>
-                                 <span className="text-[7px] font-black text-white/20 tracking-widest uppercase italic">Complete 2 Tasks for Instant Access</span>
+                                 <span className="text-[7px] font-black text-white/20 tracking-widest uppercase italic">Complete 1 Task for Instant Access</span>
                               </div>
                             </div>
                           ))}
@@ -471,7 +410,7 @@ export default function FunnelView() {
                   )}
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 md:pb-6 bg-gradient-to-t from-black via-black to-transparent z-[100]">
+                <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 bg-gradient-to-t from-black via-black to-transparent z-[100]">
                   <form onSubmit={handleSendMessage} className="relative flex items-center gap-4">
                     <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Type reply to Veronica..." className="flex-1 bg-[#111] border border-white/20 rounded-2xl px-6 py-5 text-[15px] focus:outline-none focus:border-[#ff00ff]/50 shadow-inner" />
                     <button type="submit" className="w-14 h-14 bg-[#ff00ff] rounded-2xl flex items-center justify-center shadow-xl active:scale-95 transition-all"><Send size={24} className="rotate-[-45deg]" /></button>
@@ -481,121 +420,56 @@ export default function FunnelView() {
             )}
 
             {currentStepIdx === 2 && (
-               <motion.div 
-                 key="offer" 
-                 initial={{ opacity: 0, scale: 1.1 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 className="flex-1 overflow-y-auto no-scrollbar scroll-smooth"
-               >
-                  <div className="px-10 py-6 space-y-8 pb-32 md:pb-40">
+               <motion.div key="offer" initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
+                  <div className="px-10 py-6 space-y-8 pb-32">
                      <div className="flex flex-col items-center gap-4 pt-2">
                         <div className="relative">
-                           <div className="w-16 h-16 rounded-full border-2 border-white/10 p-1 opacity-40 grayscale">
-                              <img src={profile.image} className="w-full h-full object-cover object-top rounded-full" alt={profile.name} />
-                           </div>
-                           <div className="absolute inset-0 flex items-center justify-center">
-                              <Lock size={20} className="text-white/20" />
-                           </div>
+                           <div className="w-16 h-16 rounded-full border-2 border-white/10 p-1 opacity-40 grayscale"><img src={profile.image} className="w-full h-full object-cover object-top rounded-full" alt={profile.name} /></div>
+                           <div className="absolute inset-0 flex items-center justify-center"><Lock size={20} className="text-white/20" /></div>
                         </div>
                         <div className="text-center space-y-1">
                            <h2 className="text-4xl font-black italic tracking-tighter text-white leading-none uppercase">Session Expired</h2>
-                           <div className="flex flex-col items-center gap-1">
-                              <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full flex items-center gap-2">
-                                 <span className="text-[9px] font-black text-white/40 tracking-widest uppercase">Identity Protected</span>
-                              </div>
-                              <p className="text-[10px] text-[#ffea00] tracking-[0.2em] font-black italic uppercase">Re-link with {profile.name} to continue</p>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between px-2">
-                           <span className="text-[8px] font-black text-white/20 tracking-widest uppercase">Top Network Connections</span>
-                           <span className="text-[8px] font-black text-[#ffea00] tracking-widest leading-none italic">{fomoMsg || 'SECURE CONNECTION'}</span>
-                        </div>
-                        <div className="flex items-center justify-between gap-2">
-                           {(roster.length > 0 ? roster : [
-                             { name: 'MOORE', img: 'https://asset.gasp.fun/personas/officer%20moore-9bdddf/hero_1.webp', tag: 'SECURITY' },
-                             { name: 'NAYELI', img: 'https://asset.gasp.fun/personas/nayeli-79b5a9/hero_1.webp', tag: 'EXCLUSIVE' },
-                             { name: 'MIKA', img: 'https://asset.gasp.fun/personas/mika-e29e80/hero_1.webp', tag: 'ELITE' },
-                             { name: 'JASMINE', img: 'https://asset.gasp.fun/personas/jasmine-f04846/hero_1.webp', tag: 'INTIMATE' }
-                           ]).map((p, i) => (
-                             <div key={i} className="relative w-[18%] aspect-[3/4.2] rounded-xl overflow-hidden bg-white/5 border border-white/10 shrink-0">
-                                <img src={p.img} className="w-full h-full object-cover" alt={p.name} />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-80" />
-                                <div className="absolute bottom-1.5 left-1.5 text-left">
-                                   <div className="text-[4px] font-black text-[#00f0ff] tracking-widest mb-0.5 uppercase leading-none">{p.tag}</div>
-                                   <div className="text-[8px] font-black text-white italic tracking-tighter uppercase leading-none">{p.name}</div>
-                                </div>
-                             </div>
-                           ))}
-                           <div className="relative w-[18%] aspect-[3/4.2] rounded-xl overflow-hidden bg-[#ff00ff]/5 border border-[#ff00ff]/30 shrink-0 flex flex-col items-center justify-center gap-1 group shadow-2xl">
-                              <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
-                              <Sparkles size={12} className="text-[#ff00ff] relative z-10" />
-                              <div className="relative z-10 text-center">
-                                 <div className="text-[10px] font-black text-white leading-none">& 100+</div>
-                                 <div className="text-[6px] font-black text-[#ff00ff] tracking-widest uppercase">MORE</div>
-                              </div>
-                           </div>
+                           <p className="text-[10px] text-[#ffea00] tracking-[0.2em] font-black italic uppercase">Re-link with {profile.name} to continue</p>
                         </div>
                      </div>
 
                      <div className="grid grid-cols-3 gap-3">
                         {[
-                          { id: 'tier_starter', label: 'STARTER', price: 4.99, credits: '5,000', perk: 'VAULT STARTER', points: '5,000' },
-                          { id: 'tier_session', label: 'ELITE', price: 24.99, credits: '30,000', perk: 'PRIVATE VAULT ACCESS', popular: true, points: '30,000' },
-                          { id: 'tier_whale', label: 'ELITE WHALE', price: 99.99, credits: '120,000', perk: 'FULL GLOBAL VAULTS', points: '120,000' },
+                          { id: 'tier_starter', credits: '5,000', price: 4.99, points: '5,000' },
+                          { id: 'tier_session', credits: '30,000', price: 24.99, points: '30,000' },
+                          { id: 'tier_whale', credits: '120,000', price: 99.99, points: '120,000' },
                         ].map(pkg => (
-                          <button 
-                            key={pkg.id} 
-                            onClick={() => setSelectedPkgId(pkg.id)} 
-                            className={`p-3 py-6 rounded-3xl border flex flex-col items-center justify-between transition-all relative overflow-hidden text-center gap-1 ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff] shadow-2xl' : 'bg-white/5 border-white/10 opacity-70 hover:opacity-100'}`}
-                          >
-                             <div className="space-y-0.5 mb-2">
-                                <span className="text-[7px] font-black text-white/40 uppercase tracking-widest leading-none block">{pkg.label}</span>
-                                <div className="text-[1.3rem] font-black italic text-white uppercase tracking-tighter leading-none">{pkg.credits}</div>
-                                <span className="text-[7px] font-black text-white/40 tracking-widest leading-none block">CREDITS</span>
+                          <button key={pkg.id} onClick={() => setSelectedPkgId(pkg.id)} className={`p-3 py-6 rounded-3xl border flex flex-col items-center justify-between transition-all relative overflow-hidden text-center gap-1 ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff]' : 'bg-white/5 border-white/10 opacity-70'}`}>
+                             <div className="space-y-0.5">
+                                <div className="text-[1.3rem] font-black italic text-white tracking-tighter leading-none">{pkg.credits}</div>
+                                <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">CREDITS</span>
                              </div>
-                             
-                             <div className="space-y-1 py-1 px-1.5 bg-[#00f0ff]/5 border border-[#00f0ff]/20 rounded-xl mb-1 w-full mx-2">
-                                <div className="text-[7px] font-black text-[#00f0ff] tracking-widest leading-none italic uppercase">+ {pkg.points} $GASPai</div>
-                                <div className="text-[4px] font-black text-[#00f0ff]/40 tracking-widest leading-none uppercase">LOYALTY MATCH</div>
+                             <div className="px-1.5 bg-[#00f0ff]/5 border border-[#00f0ff]/20 rounded-xl my-2">
+                                <div className="text-[7px] font-black text-[#00f0ff] italic">+ {pkg.points} CREDITS</div>
                              </div>
-
-                             <div className="space-y-0.5 mb-2 px-1">
-                                <span className="text-xl font-black italic text-white leading-none">${pkg.price}</span>
-                                <div className="text-[6px] font-black text-[#ffea00] tracking-widest leading-none italic uppercase h-[10px]">{pkg.perk}</div>
-                             </div>
-
-                             <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>
-                                {selectedPkgId === pkg.id && <Check size={12} className="text-white" />}
-                             </div>
-                             {pkg.popular && <div className="absolute top-0 right-0 w-7 h-7 bg-[#ff00ff] rounded-bl-xl flex items-center justify-center shadow-lg"><Star size={10} className="fill-white text-white" /></div>}
+                             <span className="text-xl font-black italic text-white leading-none">${pkg.price}</span>
+                             <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${selectedPkgId === pkg.id ? 'border-[#ff00ff] bg-[#ff00ff]' : 'border-white/20'}`}>{selectedPkgId === pkg.id && <Check size={12} className="text-white" />}</div>
                           </button>
                         ))}
                      </div>
                   </div>
                   
                   <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/95 to-transparent z-[200] pt-12 flex flex-col items-center gap-4">
-                     {/* 🚀 CPA BRIDGE: NEURAL SYNC (Candy.ai - $35 Payout) */}
                      <button 
-                       onClick={() => {
-                         const sessionId = localStorage.getItem('gasp_guest_id') || '';
-                         window.open(`https://www.cpagrip.com/show.php?l=0&u=YOUR_CPAGRIP_LOCKER_ID&id=YOUR_ID&tracking_id=${sessionId}`, '_blank');
-                       }}
-                       className="w-full max-w-[400px] h-12 bg-white/5 border border-[#00f0ff]/30 text-[#00f0ff] text-[10px] font-black uppercase tracking-[0.2em] font-syncopate italic rounded-2xl hover:bg-[#00f0ff]/10 transition-all flex flex-col items-center justify-center group shadow-xl"
-                     >
-                        <div className="flex items-center gap-2">
-                           <Sparkles size={10} className="group-hover:animate-spin" />
-                           NEURAL NETWORK SYNC (CANDY.AI)
-                        </div>
-                        <span className="text-[6px] opacity-40 tracking-widest mt-1 uppercase italic">Identity Verification Required for Free Access</span>
-                     </button>
+                        onClick={() => {
+                          const tid = localStorage.getItem('gasp_guest_id') || `guest_${Math.random().toString(36).substring(7)}`;
+                          window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank');
+                        }}
+                        className="w-full max-w-[400px] h-12 bg-white/5 border border-[#00fff2]/30 text-[#00fff2] text-[10px] font-black uppercase tracking-[0.2em] font-syncopate italic rounded-2xl hover:bg-[#00fff2]/10 transition-all flex flex-col items-center justify-center group"
+                      >
+                         <div className="flex items-center gap-2">
+                            <Sparkles size={10} className="group-hover:animate-spin" />
+                            NETWORK SYNC: IDENTITY VERIFICATION
+                         </div>
+                         <span className="text-[6px] opacity-40 uppercase tracking-widest mt-1 text-center">Establish Secure Connection for Private Access</span>
+                      </button>
 
-                     <button 
-                       onClick={() => setIsTopUpOpen(true)}
-                       className="w-full max-w-[500px] h-20 bg-[#ff00ff] rounded-[2.5rem] text-[20px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-5 shadow-[0_20px_100px_rgba(255,0,255,0.6)] active:scale-95 group transition-all"
-                     >
+                     <button onClick={() => setIsTopUpOpen(true)} className="w-full max-w-[500px] h-20 bg-[#ff00ff] rounded-[2.5rem] text-[20px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-5 shadow-[0_20px_100px_rgba(255,0,255,0.6)] active:scale-95 group transition-all">
                         <span className="italic">Secure Checkout</span>
                         <ArrowRight size={28} className="group-hover:translate-x-3 transition-transform" />
                      </button>
@@ -604,34 +478,10 @@ export default function FunnelView() {
             )}
 
              {currentStepIdx === 3 && (
-             <motion.div 
-               key="success"
-               initial={{ opacity: 0, scale: 0.95 }}
-               animate={{ opacity: 1, scale: 1 }}
-               className="absolute inset-0 bg-black flex flex-col items-center justify-center p-12 text-center space-y-12"
-             >
-                <div className="relative">
-                   <div className="w-28 h-28 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center shadow-[0_0_100px_rgba(0,240,255,0.3)]">
-                      <CheckCircle2 size={56} className="text-[#00f0ff]" />
-                   </div>
-                   <div className="absolute inset-0 rounded-full border border-[#00f0ff]/20 animate-ping" />
-                </div>
-                <div className="space-y-6">
-                   <h2 className="text-5xl font-black italic tracking-tighter text-white leading-none uppercase shrink-0">Account Loaded</h2>
-                   <div className="flex flex-col items-center gap-2">
-                      <span className="text-2xl font-black text-[#ffea00] tracking-[0.2em] uppercase italic leading-none">Access Granted</span>
-                      <div className="h-px w-20 bg-white/10 my-2" />
-                      <span className="text-[11px] font-black text-white/30 tracking-[0.4em] uppercase">Identity Verified</span>
-                   </div>
-                </div>
-                <div className="w-full space-y-4 pt-10">
-                   <button 
-                     onClick={() => window.location.href = '/app'} 
-                     className="w-full py-7 bg-white text-black rounded-[2.5rem] text-[20px] font-black uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-95"
-                   >
-                     Enter Main Frame
-                   </button>
-                </div>
+             <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="absolute inset-0 bg-black flex flex-col items-center justify-center p-12 text-center space-y-12">
+                <div className="relative"><div className="w-28 h-28 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center shadow-[0_0_100px_rgba(0,240,255,0.3)]"><CheckCircle2 size={56} className="text-[#00f0ff]" /></div></div>
+                <h2 className="text-5xl font-black italic tracking-tighter text-white uppercase shrink-0">Account Loaded</h2>
+                <button onClick={() => window.location.href = '/'} className="w-full py-7 bg-white text-black rounded-[2.5rem] text-[20px] font-black uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-95">Enter Main Frame</button>
              </motion.div>
            )}
 

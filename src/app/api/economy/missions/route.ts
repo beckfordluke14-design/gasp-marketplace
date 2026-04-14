@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
 
 /**
  * 🛰️ SYNDICATE MISSION RELAY
- * Returns the curated SOI mission stack loaded into the Ogads Smart Link.
- * The Smart Link handles offer rotation per device/country.
+ * Returns the curated SOI mission stack synced with the Master Switch.
  */
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const trackingId = searchParams.get('trackingId') || 'syndicate_guest';
-    const SMART_LINK = `https://appchecker.space/sl/3181j?aff_sub=${trackingId}`;
+    const SMART_LINK = SYNDICATE_CONFIG.getSmartLink(trackingId);
 
     // 🔥 GENEROUS TIERS — Rounded up for maximum "Greed Factor"
     // $2.88 -> 3000 | $2.50 -> 2500 | $2.00 -> 2200
