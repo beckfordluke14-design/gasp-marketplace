@@ -364,68 +364,101 @@ export default function FunnelView() {
 
                   {/* 🍼 THE STEPS */}
                   <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div className="p-6 border border-[#ffea00]/30 bg-[#ffea00]/5 rounded-3xl flex items-center gap-6 relative overflow-hidden group">
                         <div className="absolute inset-y-0 left-0 w-1 bg-[#ffea00]" />
                         <span className="text-4xl font-black text-[#ffea00]/20 italic group-hover:text-[#ffea00]/40 transition-colors">01</span>
                         <div className="flex flex-col">
-                           <span className="text-[16px] font-black text-white uppercase italic">TAP FREE ACCESS</span>
-                           <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">Authorized Neural Link Gateway</span>
+                           <span className="text-[14px] font-black text-white uppercase italic">TAP REWARD SELECTION</span>
+                           <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-1">Authorized Neural Link Gateway</span>
                         </div>
-                        <Zap size={20} className="ml-auto text-[#ffea00] animate-pulse" />
+                        <Zap size={18} className="ml-auto text-[#ffea00] animate-pulse" />
                      </div>
-                     <div className="p-6 border border-white/10 bg-white/5 rounded-3xl flex items-center gap-6 opacity-60">
+                     <div className="p-6 border border-white/10 bg-white/5 rounded-3xl flex items-center gap-6">
                         <span className="text-4xl font-black text-white/10 italic">02</span>
                         <div className="flex flex-col">
-                           <span className="text-[16px] font-black text-white uppercase italic">REAL EMAIL ONLY</span>
-                           <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">Destination for Credit Drop</span>
+                           <span className="text-[14px] font-black text-white uppercase italic">COMPLETE DATA TASK</span>
+                           <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-1">Verification Signal Required</span>
                         </div>
                      </div>
-                     <div className="p-6 border border-white/10 bg-white/5 rounded-3xl flex items-center gap-6 opacity-60">
-                        <span className="text-4xl font-black text-white/10 italic">03</span>
-                        <div className="flex flex-col">
-                           <span className="text-[16px] font-black text-white uppercase italic">VAULT UNLOCKS</span>
-                           <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">Full Media Access Granted</span>
+                  </div>
+
+                  {/* 📊 REWARD MATRIX: SHOWING POTENTIAL */}
+                  <div className="space-y-4 pt-4">
+                     <div className="flex items-center gap-2 mb-2 px-2 text-left">
+                        <span className="text-[8px] font-black text-[#00f0ff] tracking-[0.4em] uppercase italic">REWARD INFUSION MATRIX</span>
+                        <div className="h-[1px] flex-1 bg-[#00f0ff]/10" />
+                     </div>
+                     
+                     <div className="grid grid-cols-1 gap-3">
+                        {/* BASIC TASK */}
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between group hover:border-[#ffea00]/30 transition-all">
+                           <div className="flex flex-col">
+                              <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-widest">Entry Verification</span>
+                              <span className="text-lg font-black text-white italic">2,500 - 5,000 Credits</span>
+                           </div>
+                           <div className="px-3 py-1 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-lg text-[#ffea00] text-[10px] font-black uppercase tracking-widest">Low Effort</div>
+                        </div>
+
+                        {/* ADVANCED TASK */}
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/20 flex items-center justify-between group hover:border-[#00f0ff]/30 transition-all scale-[1.02] shadow-[0_0_30px_rgba(0,240,255,0.05)] border-l-[#00f0ff] border-l-2">
+                           <div className="flex flex-col">
+                              <span className="text-[10px] font-black text-[#00f0ff] uppercase tracking-widest">High-Intent Survey</span>
+                              <span className="text-lg font-black text-white italic">12,000 - 25,000 Credits</span>
+                           </div>
+                           <div className="px-3 py-1 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-lg text-[#00f0ff] text-[10px] font-black uppercase tracking-widest">Popular</div>
+                        </div>
+
+                        {/* INSTITUTIONAL TASK */}
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between group hover:border-[#ff00ff]/30 transition-all">
+                           <div className="flex flex-col">
+                              <span className="text-[10px] font-black text-[#ff00ff] uppercase tracking-widest">System Optimization</span>
+                              <span className="text-lg font-black text-white italic">50,000+ Credits</span>
+                           </div>
+                           <div className="px-3 py-1 bg-[#ff00ff]/10 border border-[#ff00ff]/30 rounded-lg text-[#ff00ff] text-[10px] font-black uppercase tracking-widest">Elite Reward</div>
                         </div>
                      </div>
                   </div>
                 </div>
 
                 {/* ⚡️ ACTION AREA */}
-                <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/95 to-transparent flex flex-col items-center gap-4">
-                   <button onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }} className="w-full max-w-[500px] h-20 bg-[#ffea00] rounded-[3rem] text-black text-[22px] font-black uppercase tracking-widest flex items-center justify-center gap-5 shadow-[0_20px_60px_rgba(255,234,0,0.4)] hover:scale-[1.02] active:scale-95 transition-all group shrink-0 relative overflow-hidden">
+                <div className="fixed bottom-0 left-0 right-0 p-6 md:p-8 bg-gradient-to-t from-black via-black/95 to-transparent flex flex-col items-center gap-4 z-[600]">
+                   <button onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }} className="w-full max-w-[500px] h-16 md:h-20 bg-[#ffea00] rounded-[3rem] text-black text-[18px] md:text-[22px] font-black uppercase tracking-widest flex items-center justify-center gap-5 shadow-[0_20px_60px_rgba(255,234,0,0.4)] hover:scale-[1.02] active:scale-95 transition-all group shrink-0 relative overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-                      <Zap size={28} className="fill-black" />
-                      <span className="italic">GET FREE ACCESS</span>
-                      <ArrowRight size={28} className="group-hover:translate-x-2 transition-all opacity-40" />
+                      <Zap size={24} className="fill-black" />
+                      <span className="italic">ACCESS TASK BOARD</span>
+                      <ArrowRight size={24} className="group-hover:translate-x-2 transition-all opacity-40" />
                    </button>
                    
                    <div className="flex flex-col w-full items-center gap-3">
-                      <button
-                        onClick={async () => {
-                          const gid = localStorage.getItem('gasp_guest_id') || '';
-                          const res = await fetch(`/api/economy/balance?userId=${gid}`);
-                          const data = await res.json();
-                          if (data.success && data.balance >= 6000) {
-                            setCurrentStepIdx(3);
-                          } else {
-                            alert(`Your balance is ${data.balance || 0} CR. You need 6,000 CR. Complete the offer and try again!`);
-                          }
-                        }}
-                        className="w-full max-w-[500px] py-4 border-2 border-[#ffea00]/30 rounded-2xl text-[#ffea00] text-[12px] font-black uppercase tracking-[0.2em] hover:bg-[#ffea00]/10 active:scale-95 transition-all flex items-center justify-center gap-3 italic"
-                      >
-                        <Shield size={16} className="animate-pulse" /> VERIFY COMPLETION SIGNAL
-                      </button>
-                      
-                      <div className="flex items-center justify-center gap-3 opacity-50">
-                        <div className="flex gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-ping" />
-                        </div>
-                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic">SCANNING FOR INBOUND CREDITS...</span>
+                      <div className="grid grid-cols-2 gap-3 w-full max-w-[500px]">
+                        <button
+                          onClick={async () => {
+                            const gid = localStorage.getItem('gasp_guest_id') || '';
+                            const res = await fetch(`/api/economy/balance?userId=${gid}`);
+                            const data = await res.json();
+                            if (data.success && data.balance >= 6000) {
+                              setCurrentStepIdx(3);
+                            } else {
+                              alert(`Insufficient Signal: ${data.balance || 0} / 6,000 CR. Complete a task and try again!`);
+                            }
+                          }}
+                          className="flex-1 py-4 border-2 border-white/10 rounded-2xl text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-2 italic"
+                        >
+                          <Shield size={14} /> VERIFY SIGNAL
+                        </button>
+                        
+                        <button onClick={() => setIsTopUpOpen(true)} className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl text-white/40 text-[10px] font-black uppercase tracking-widest hover:text-white transition-all flex items-center justify-center gap-2 italic">
+                          <CreditCard size={14} /> BUY INSTANT
+                        </button>
                       </div>
-
-                      <button onClick={() => setIsTopUpOpen(true)} className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic hover:text-white transition-colors py-2 flex items-center gap-2">
-                        <CreditCard size={14} /> INSTANT ACCESS WITH TOP-UP
-                      </button>
+                      
+                      <div className="flex items-center justify-center gap-3 opacity-30 mt-1">
+                        <div className="flex gap-1">
+                          <span className="w-1 h-1 rounded-full bg-[#00f0ff] animate-ping" />
+                        </div>
+                        <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic">SCANNING INBOUND...</span>
+                      </div>
                    </div>
                 </div>
               </motion.div>

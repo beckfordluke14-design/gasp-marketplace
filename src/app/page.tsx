@@ -22,6 +22,7 @@ import NeuralPulseTerminal from '@/components/NeuralPulseTerminal';
 import FloatingChatTerminal from '@/components/FloatingChatTerminal';
 import VaultMainGrid from '@/components/VaultMainGrid';
 import { Star } from 'lucide-react';
+import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
 
 function MarketplaceContent() {
   const [mounted, setMounted] = useState(false);
@@ -58,7 +59,6 @@ function MarketplaceContent() {
           const [resFeed, resActive] = await Promise.all([
              fetch(`/api/admin/feed?limit=200&t=${Date.now()}`),
              fetch(`/api/personas?t=${Date.now()}`),
-             // ── 🛰️ SHADOW pulse: Silently trigger intelligence sync
              fetch(`/api/news/curate?key=gasp_sovereign_intelligence`).catch(() => null)
           ]);
           
@@ -67,7 +67,6 @@ function MarketplaceContent() {
           
           const mergedSet = new Map();
           
-          // 🛡️ STEP 1: Add all Active Personas from the Database
           if (jsonActive.success && jsonActive.personas) {
              jsonActive.personas.forEach((p: any) => {
                 const sId = String(p.id);
@@ -79,7 +78,6 @@ function MarketplaceContent() {
              });
           }
 
-          // 🛡️ STEP 2: Hydrate with data from the Feed (Catch any missing nodes)
           if (jsonFeed.success && jsonFeed.posts) {
              jsonFeed.posts.forEach((p: any) => {
                 if (p.personas) {
@@ -116,14 +114,12 @@ function MarketplaceContent() {
                window.dispatchEvent(new CustomEvent('gasp_unread_sync', { detail: unreadTotal }));
            }
        } catch (e) {
-           // Fallback to local
            const stored = JSON.parse(localStorage.getItem('gasp_unread_counts') || '{}');
            setUnreadCounts(stored);
        }
     };
     syncUnreads();
     
-    // 🧬 SOVEREIGN RADAR: Daily state might bring new messages, check every 60s
     const unreadInterval = setInterval(syncUnreads, 60000);
 
     const handleManualSync = () => syncUnreads();
@@ -145,11 +141,9 @@ function MarketplaceContent() {
 
     const handleSyncPulse = (e: any) => {
       const detail = e.detail;
-      console.log('📡 [Signal Pulse] Sync Follows:', detail);
       if (detail && detail.personaId) {
         setFollowing(prev => {
           const isF = detail.isFollowing;
-          console.log(`🧬 [Sync] Updating persona ${detail.personaId} state to: ${isF}`);
           if (isF) {
             return prev.includes(detail.personaId) ? prev : [...prev, detail.personaId];
           } else {
@@ -171,10 +165,8 @@ function MarketplaceContent() {
     }
     setGuestId(gId);
     
-    // 🏦 BANK TRANSFER PENDING DETECTION
     if (searchParams.get('payment_pending') === 'true') {
       setShowPaymentPending(true);
-      // Clean the URL so it doesn't show on refresh
       window.history.replaceState({}, '', '/');
     }
 
@@ -186,8 +178,6 @@ function MarketplaceContent() {
   }, [searchParams, mounted]);
 
   const refinedProfiles = useMemo(() => {
-    // 🛡️ SOVEREIGN REGISTRY: Only personas approved in Admin (is_active !== false) are permitted.
-    // 🧬 FAILOVER: If database sync is empty, fall back to initial roster to prevent zero-conversion view.
     const sourceData = (!dbProfiles || dbProfiles.length === 0) ? initialProfiles : dbProfiles;
 
     return sourceData
@@ -207,14 +197,12 @@ function MarketplaceContent() {
     const sId = String(id);
     setSelectedProfileId(sId);
     
-    // 🧠 INTELLIGENT HYDRATION: Ensure profile data exists before opening
     let targetProfile = profileObj || 
                         initialProfiles.find(p => String(p.id) === sId) || 
                         dbProfiles.find(p => String(p.id) === sId) ||
                         chatProfileCache[sId];
 
     if (!targetProfile) {
-       console.log(`🧬 [Sync] Proactive Hydration triggered for: ${sId}`);
        try {
           const res = await fetch(`/api/admin/persona/${sId}`);
           const data = await res.json();
@@ -237,7 +225,6 @@ function MarketplaceContent() {
     setOpenChatIds(prev => (isMobile ? [sId] : prev.includes(sId) ? prev : [...prev, sId]));
     setMinimizedIds(prev => prev.filter(m => m !== sId));
 
-    // 🧬 UNREAD CLEARANCE PROTOCOL: Instant local zeroing + DB background sync
     if (unreadCounts[sId] > 0) {
       setUnreadCounts(prev => ({ ...prev, [sId]: 0 }));
       const newCounts = { ...unreadCounts, [sId]: 0 };
@@ -256,21 +243,15 @@ function MarketplaceContent() {
     trackEvent('chat_open', sId, { from: 'grid', hasInitialMsg: !!initialMsg });
   };
 
-  // 🛰️ MASTER DISPATCH: High-priority URL Hijack for Persona Engagement
   useEffect(() => {
     if (!mounted) return;
     const profileId = searchParams.get('profile');
     if (!profileId) return;
 
     const dispatchChat = async () => {
-        console.log(`🧬 [Master Dispatch] Targeting: ${profileId}`);
-        
-        // 1. Proactive cleanup: Clear param to prevent loop before logic runs
         const url = new URL(window.location.href);
         url.searchParams.delete('profile');
         window.history.replaceState({}, '', url.pathname + url.search);
-
-        // 2. Immediate Force Open: Call with ID (handles sync internally)
         handleSelectProfile(profileId);
         setSidebarView('chats');
     };
@@ -282,16 +263,7 @@ function MarketplaceContent() {
      if (typeof window !== 'undefined') {
         (window as any).onSelectProfile = handleSelectProfile;
         (window as any).onSetActiveTab = setActiveTab;
-        (window as any).openTopUp = () => {
-          // 🛰️ COMPLIANCE-AWARE WARP: 
-          // Only suck them into the funnel if we are in PROFIT mode.
-          // If in audit mode (compliance: true), just open the safe board here.
-          if (SYNDICATE_CONFIG.compliance) {
-            setIsTopUpOpen(true);
-          } else {
-            window.location.href = `/funnel?profile=veronica-medellin-locked&source=syndicate_warp&utm_source=internal`;
-          }
-        };
+        (window as any).openTopUp = () => setIsTopUpOpen(true);
      }
   }, [handleSelectProfile]);
 
@@ -303,10 +275,7 @@ function MarketplaceContent() {
   const { profile } = useUser();
   const idToUse = profile?.id || guestId || '';
 
-  const [randomSeed] = useState(() => Math.random());
-  
   const sortedProfiles = useMemo(() => {
-    // 🧬 LATEST-FIRST SYNC: Sorting by creation date for high-velocity drops
     return [...refinedProfiles].sort((a, b) => {
        const dateA = new Date(a.created_at || 0).getTime();
        const dateB = new Date(b.created_at || 0).getTime();
@@ -323,7 +292,6 @@ function MarketplaceContent() {
    return (
     <main className="min-h-screen bg-transparent text-white relative flex flex-col lg:flex-row xl:gap-0">
 
-      {/* 🏦 BANK TRANSFER PENDING BANNER */}
       <AnimatePresence>
         {showPaymentPending && (
           <motion.div
@@ -350,19 +318,13 @@ function MarketplaceContent() {
               profiles={sortedProfiles} 
               view={sidebarView}
               onSetView={handleSetSidebarView}
-              onOpenTopUp={() => {
-                if (SYNDICATE_CONFIG.compliance) setIsTopUpOpen(true);
-                else window.location.href = `/funnel?profile=veronica-medellin-locked&source=syndicate_warp&utm_source=internal`;
-              }}
+              onOpenTopUp={() => setIsTopUpOpen(true)}
            />
        </div>
        
        <div className="flex-1 flex flex-col relative h-full">
             <Header 
-               onOpenTopUp={() => {
-                  if (SYNDICATE_CONFIG.compliance) setIsTopUpOpen(true);
-                  else window.location.href = `/funnel?profile=veronica-medellin-locked&source=syndicate_warp&utm_source=internal`;
-               }} 
+               onOpenTopUp={() => setIsTopUpOpen(true)} 
                deadIds={deadIds} 
                setDeadIds={setDeadIds} 
                onOpenMenu={() => setShowProfileList(true)} 
@@ -371,7 +333,6 @@ function MarketplaceContent() {
             />
            
            <div className="flex-1 flex flex-col relative bg-transparent pt-[110px] md:pt-24">
-              {/* 🛰️ SOVEREIGN NAVIGATION: GHOST GLASS PILL */}
               <div className="sticky top-[86px] md:top-20 z-[100] flex justify-center w-full px-4 pointer-events-none mb-[-3.5rem]">
                   <div className="flex items-center gap-1 md:gap-3 p-1.5 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto transition-all duration-500 w-fit max-w-full overflow-x-auto no-scrollbar">
                       <button 
@@ -443,7 +404,6 @@ function MarketplaceContent() {
                   </div>
               </div>
 
-              {/* STORY TOGGLE PORTAL */}
               <div className="absolute right-6 top-4 z-50 flex items-center gap-3">
                  <button 
                    onClick={() => setShowStories(!showStories)}
@@ -467,12 +427,9 @@ function MarketplaceContent() {
                       </div>
                     )}
                     {activeTab === 'weather' && (
-                     <div className="w-full max-w-4xl mx-auto px-4 md:px-6 animate-in fade-in zoom-in-95 duration-500">
-                        <WeatherFeed onOpenTopUp={() => {
-                           if (SYNDICATE_CONFIG.compliance) setIsTopUpOpen(true);
-                           else window.location.href = `/funnel?profile=veronica-medellin-locked&source=syndicate_warp&utm_source=internal`;
-                        }} />
-                     </div>
+                      <div className="w-full max-w-4xl mx-auto px-4 md:px-6 animate-in fade-in zoom-in-95 duration-500">
+                         <WeatherFeed onOpenTopUp={() => setIsTopUpOpen(true)} />
+                      </div>
                     )}
                     {activeTab === 'reports' && (
                         <div className="animate-in fade-in zoom-in-95 duration-500">
@@ -497,7 +454,6 @@ function MarketplaceContent() {
                                     </div>
                                  </div>
                               </div>
-                              
                               <VaultMainGrid />
                            </div>
                         </div>
@@ -507,7 +463,6 @@ function MarketplaceContent() {
             </div>
           </div>
 
-        {/* 3rd Column Discovery Center */}
         <RightSidebar 
           onSelectProfile={handleSelectProfile} 
           profiles={sortedProfiles} 
@@ -520,27 +475,7 @@ function MarketplaceContent() {
             {openChatIds.filter(id => !minimizedIds.includes(id)).map((sId, index) => {
               const p = initialProfiles.find((profileItem: any) => String(profileItem.id) === sId) || dbProfiles.find((profileItem: any) => String(profileItem.id) === sId) || chatProfileCache[sId];
               
-              if (!p) return (
-                <motion.div 
-                    key={sId} 
-                    initial={{ x: '100%', opacity: 0 }} 
-                    animate={{ x: 0, opacity: 1 }} 
-                    exit={{ x: '100%', opacity: 0 }} 
-                    className="h-full pointer-events-auto bg-black border-l border-white/5 shadow-2xl w-full max-w-md"
-                >
-                    <div className="flex flex-col items-center justify-center h-full p-10 text-center gap-8">
-                       <div className="relative">
-                          <Zap className="text-[#ffea00] animate-pulse relative z-10" size={48} />
-                          <div className="absolute inset-0 bg-[#ffea00]/20 blur-2xl animate-pulse" />
-                       </div>
-                       <div className="space-y-2">
-                          <p className="text-[12px] font-syncopate font-black uppercase tracking-[0.3em] text-white">Synchronizing...</p>
-                          <p className="text-[9px] font-black uppercase tracking-widest text-white/20 italic">Establishing Sovereign Uplink</p>
-                       </div>
-                       <Loader2 className="text-white/10 animate-spin" size={20} />
-                    </div>
-                </motion.div>
-              );
+              if (!p) return null;
               return (
                 <motion.div 
                    key={sId} 
@@ -565,10 +500,7 @@ function MarketplaceContent() {
                          profile={p} 
                          onClose={() => handleCloseChat(sId)} 
                          onMinimize={() => setMinimizedIds([...minimizedIds, sId])} 
-                         onOpenTopUp={() => {
-                           if (SYNDICATE_CONFIG.compliance) setIsTopUpOpen(true);
-                           else window.location.href = `/funnel?profile=veronica-medellin-locked&source=syndicate_warp&utm_source=internal`;
-                         }}
+                         onOpenTopUp={() => setIsTopUpOpen(true)}
                          followingIds={following}
                          profiles={sortedProfiles}
                          unreadCounts={unreadCounts}
@@ -581,21 +513,20 @@ function MarketplaceContent() {
           </AnimatePresence>
        </div>
        {minimizedIds.length > 0 && (
-         <div className="fixed bottom-6 left-6 z-[2000] flex flex-col gap-3">
-            {minimizedIds.map(id => (
-               <motion.div key={id} initial={{ scale: 0, x: -20 }} animate={{ scale: 1, x: 0 }} onClick={() => setMinimizedIds(prev => prev.filter(m => m !== id))} className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-all group relative">
-                  <MessageSquare size={18} className="text-[#00f0ff] group-hover:scale-110 transition-transform" />
-                  <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#ff00ff] shadow-[0_0_10px_#ff00ff]" />
-               </motion.div>
-            ))}
-         </div>
+          <div className="fixed bottom-6 left-6 z-[2000] flex flex-col gap-3">
+             {minimizedIds.map(id => (
+                <motion.div key={id} initial={{ scale: 0, x: -20 }} animate={{ scale: 1, x: 0 }} onClick={() => setMinimizedIds(prev => prev.filter(m => m !== id))} className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-all group relative">
+                   <MessageSquare size={18} className="text-[#00f0ff] group-hover:scale-110 transition-transform" />
+                   <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#ff00ff] shadow-[0_0_10px_#ff00ff]" />
+                </motion.div>
+             ))}
+          </div>
        )}
        {isTopUpOpen && (
-         <div className="fixed inset-0 z-[5000] pointer-events-auto bg-black/80 backdrop-blur-md">
-            <TopUpDrawer onClose={() => setIsTopUpOpen(false)} userId={idToUse} />
-         </div>
+          <div className="fixed inset-0 z-[5000] pointer-events-auto bg-black/80 backdrop-blur-md">
+             <TopUpDrawer onClose={() => setIsTopUpOpen(false)} userId={idToUse} />
+          </div>
        )}
-        {/* MOBILE PROFILE DRAWER */}
         <AnimatePresence>
            {showProfileList && (
               <motion.div 
@@ -604,7 +535,6 @@ function MarketplaceContent() {
                 exit={{ x: '-100%' }}
                 className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-3xl lg:hidden overflow-y-auto"
               >
-                 {/* 🚀 MAIN OPERATIONS CENTER */}
                  <div className="pt-36 lg:pt-32 pb-32">
                     <button onClick={() => setShowProfileList(false)} className="mb-4 text-[#00f0ff] uppercase text-[10px] font-black">
                        {isSpanish ? '← Cerrar Acceso' : '← Close Access'}
@@ -622,16 +552,15 @@ function MarketplaceContent() {
            )}
         </AnimatePresence>
 
-         {/* 🧬 INTELLIGENT CHAT TERMINAL: Standalone glassy orbiter for Favorites & Unreads */}
-         <FloatingChatTerminal 
-            onSelectChat={() => setShowProfileList(true)} 
-            onSelectProfile={handleSelectProfile}
-            followingIds={following}
-            profiles={sortedProfiles}
-            unreadCounts={unreadCounts}
-            isOpen={openChatIds.length > 0}
-            onClose={() => setOpenChatIds([])}
-         />
+          <FloatingChatTerminal 
+             onSelectChat={() => setShowProfileList(true)} 
+             onSelectProfile={handleSelectProfile}
+             followingIds={following}
+             profiles={sortedProfiles}
+             unreadCounts={unreadCounts}
+             isOpen={openChatIds.length > 0}
+             onClose={() => setOpenChatIds([])}
+          />
 
      </main>
   );

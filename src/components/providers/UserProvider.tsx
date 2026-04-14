@@ -56,7 +56,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         if (isNewUser && !data.is_admin) {
           const isActuallyGuest = userId.startsWith('guest-');
           const claimAction = isActuallyGuest ? 'guest_genesis' : 'starter_claim';
-          const bonusAmount = isActuallyGuest ? 350 : 1000;
+          const bonusAmount = isActuallyGuest ? 250 : 1000;
 
           fetch('/api/economy/balance', {
               method: 'POST',
@@ -107,7 +107,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!ready) return;
 
-    const guestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
+    let guestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
+    
+    // 🧬 INITIALIZE GUEST IDENTITY: Ensure brand new landers have an ID for the bonus signal
+    if (!guestId && !user?.id) {
+       guestId = `guest-${Math.random().toString(36).substring(2, 11)}`;
+       localStorage.setItem('gasp_guest_id', guestId);
+       console.log('🛰️ [Identity] New Guest Node Assigned:', guestId);
+    }
+
     const activeUserId = user?.id || guestId;
 
     if (activeUserId) {
@@ -121,10 +129,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
        
        return () => clearInterval(interval);
     } else {
-       if (!guestId) {
-          setProfile(null);
-          setLoading(false);
-       }
+       setProfile(null);
+       setLoading(false);
     }
   }, [ready, authenticated, user?.id]);
 
