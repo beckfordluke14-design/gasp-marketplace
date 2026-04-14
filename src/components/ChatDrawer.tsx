@@ -529,7 +529,7 @@ export default function ChatDrawer({
                                   ? (isSpanish ? 'GRABANDO NOTA...' : 'RECORDING VOICE...') 
                                   : (isSpanish ? 'ESCRIBIENDO...' : 'TYPING...')}
                              </span>
-                                  <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }} transition={{ repeat: Infinity, duration: 1 }} className="text-[#ff00ff]">
+                                  {isPersonaRecording ? (<div className="flex items-center gap-2"><motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }} transition={{ repeat: Infinity, duration: 1 }} className="text-[#ff00ff]">
                                      <Mic size={16} />
                                   </motion.div>
                                   <div className="flex gap-1 items-end h-3">

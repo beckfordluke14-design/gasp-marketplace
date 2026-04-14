@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 
 /**
  * 🛰️ SYNDICATE POSTBACK NODE v1.0
@@ -29,12 +29,10 @@ export async function GET(req: NextRequest) {
 
         // 🛡️ ATOMIC DEPOSIT
         // Update the Guest's balance in the DB instantly.
-        const updatedUser = await prisma.guest.update({
-            where: { id: guestId },
-            data: {
-                credits: { increment: creditValue }
-            }
-        });
+        const { rows } = await db.query(
+            'UPDATE profiles SET credit_balance = COALESCE(credit_balance, 0) + $1, updated_at = NOW() WHERE id = $2 RETURNING credit_balance',
+            [creditValue, guestId]
+        );
 
         console.log(`[POSTBACK SUCCESS] Node ${offerId} cleared for Guest ${guestId}. +${creditValue} CR.`);
 

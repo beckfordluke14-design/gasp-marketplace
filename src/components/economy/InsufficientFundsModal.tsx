@@ -128,8 +128,8 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                    ) : (
                      <>SYSTEM <span className="text-[#ffea00]">CREDITS REQUIRED</span> TO ACCESS ARCHIVE UPLINK. 🛡️🛰️</>
                    )
-                   </div>
-               )}
+                 )}
+               </div>
 
                {/* 🎁 THE ENDOWED PROGRESS ILLUSION (500 CR GIFT) */}
                {personaName && (
@@ -146,7 +146,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                      </div>
                   </motion.div>
                )}
-              </div>
+
 
               {/* 🍼 DUMMY-PROOF INSTRUCTIONS */}
               <div className="w-full grid grid-cols-3 gap-2 mb-8 px-2">
