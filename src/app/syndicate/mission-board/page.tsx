@@ -4,10 +4,18 @@ import SyndicateMissionBoard from '@/components/economy/SyndicateMissionBoard';
 import { motion } from 'framer-motion';
 import { Shield, CheckCircle2, ArrowRight } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import Link from 'next/link';
 
 function SyndicatePortalContent() {
+    // 🛡️ GHOST SHIELD: ENFORCE NO-REFERRER FOR OUTGOING OGADS CLICKS
+    useEffect(() => {
+        const meta = document.createElement('meta');
+        meta.name = "referrer";
+        meta.content = "no-referrer";
+        document.getElementsByTagName('head')[0].appendChild(meta);
+    }, []);
+
     const searchParams = useSearchParams();
     const isSuccess = searchParams.get('status') === 'success';
 
