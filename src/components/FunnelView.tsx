@@ -249,27 +249,68 @@ export default function FunnelView() {
 
             {currentStepIdx === 2 && (
                <motion.div key="offer" initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
-                  <div className="px-10 py-6 space-y-10 pb-40">
+                  <div className="px-8 py-6 space-y-6 pb-40">
                      <div className="flex flex-col items-center gap-4">
-                        <div className="relative"><div className="w-16 h-16 rounded-full border-2 border-white/10 p-1 grayscale opacity-50"><img src={profile.image} className="w-full h-full object-cover rounded-full" /></div><Lock size={20} className="absolute inset-0 m-auto text-white/20" /></div>
-                        <div className="text-center"><h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">SIGNAL INTERRUPTED</h2><p className="text-[10px] text-[#ffea00] font-black uppercase mt-2">NETWORK ALLOCATION SYNC PENDING</p></div>
+                        <div className="relative"><div className="w-20 h-20 rounded-full border-2 border-[#ff00ff]/30 p-1 bg-black"><img src={profile.image} className="w-full h-full object-cover rounded-full opacity-60" /></div><Lock size={24} className="absolute inset-0 m-auto text-[#ff00ff]" /></div>
+                        <div className="text-center"><h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">VIP ACCESS LOCKED</h2><p className="text-[10px] text-[#ffea00] font-black uppercase mt-2">6,000 CREDITS REQUIRED TO RESTORE LINK</p></div>
                      </div>
-                     <div className="grid grid-cols-3 gap-3">
-                        {[{ id: 't1', credits: '5,000', price: '$4.99' }, { id: 't2', credits: '30,000', price: '$24.99' }, { id: 't3', credits: '120,000', price: '$99.99' }].map(pkg => (
-                          <div key={pkg.id} onClick={() => setSelectedPkgId(pkg.id)} className={`p-4 py-8 rounded-3xl border text-center transition-all ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/10 border-[#ff00ff]' : 'bg-white/5 border-white/10 opacity-70'}`}>
-                             <div className="text-2xl font-black italic leading-none">{pkg.credits}</div>
-                             <div className="text-[7px] font-black text-white/40 uppercase mt-1">Allocation Units</div>
-                             <div className="text-lg font-black italic text-white mt-4">{pkg.price}</div>
-                          </div>
-                        ))}
+
+                     {/* 🎭 FUNNEL PERSONA HOOK (COMPLIANT) */}
+                     <div className="w-full relative py-2">
+                        <div className="absolute -top-1 left-6 px-3 py-1 bg-[#ff00ff] rounded-md text-[8px] font-black text-white uppercase italic shadow-[0_0_15px_#ff00ff] z-10">Private Note from {profile.name}</div>
+                        <div className="p-5 bg-white/5 border border-[#ff00ff]/30 rounded-3xl text-left relative overflow-hidden shadow-xl">
+                           <div className="absolute inset-0 bg-gradient-to-br from-[#ff00ff]/10 to-transparent pointer-events-none" />
+                           <p className="text-[12px] font-medium text-white/90 leading-relaxed relative z-10 italic">
+                              "Did you see the tease baby? I want to share the rest of my private archive 🌶️ with you... You need 6,000 credits to unlock it, but the good news is you can earn them for <span className="text-[#ffea00] font-black">100% FREE!</span> Just tap the yellow button below and do a few quick sponsor tasks for me. I'm waiting..."
+                           </p>
+                        </div>
+                     </div>
+
+                     {/* 🎁 THE ENDOWED PROGRESS ILLUSION (500 CR GIFT) */}
+                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.5, type: 'spring' }} className="w-full">
+                        <div className="bg-[#00ffcc]/10 border border-[#00ffcc]/30 rounded-2xl p-4 flex items-center justify-between overflow-hidden relative shadow-[0_0_20px_rgba(0,255,204,0.15)]">
+                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00ffcc]/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                           <div className="flex items-center gap-4 relative z-10">
+                              <div className="w-12 h-12 rounded-full bg-[#00ffcc]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_#00ffcc]">
+                                 <span className="text-[#00ffcc] text-xl">🎁</span>
+                              </div>
+                              <div className="flex flex-col text-left">
+                                 <span className="text-[10px] font-black text-[#00ffcc] uppercase tracking-widest leading-none mb-1">{profile.name} SENT A GIFT</span>
+                                 <span className="text-[18px] font-black text-white italic leading-none">+500 CR</span>
+                              </div>
+                           </div>
+                           <div className="flex flex-col items-end relative z-10">
+                              <span className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">REMAINING</span>
+                              <span className="text-[14px] font-black text-[#ffea00] italic leading-none">5,500 CR</span>
+                           </div>
+                        </div>
+                     </motion.div>
+
+                     {/* 🍼 THE BABYSITTER STEPS */}
+                     <div className="grid grid-cols-3 gap-2">
+                        <div className="p-3 border border-[#ffea00]/30 bg-[#ffea00]/5 rounded-2xl flex flex-col items-center text-center">
+                           <span className="text-[10px] font-black text-[#ffea00] mb-1 italic leading-none">01</span>
+                           <span className="text-[7px] font-bold text-white/80 uppercase tracking-widest italic">TAP FREE ACCESS</span>
+                        </div>
+                        <div className="p-3 border border-[#ffea00]/30 bg-[#ffea00]/5 rounded-2xl flex flex-col items-center text-center">
+                           <span className="text-[10px] font-black text-[#ffea00] mb-1 italic leading-none">02</span>
+                           <span className="text-[7px] font-bold text-white/80 uppercase tracking-widest italic">REAL EMAIL</span>
+                        </div>
+                        <div className="p-3 border border-[#ffea00]/30 bg-[#ffea00]/5 rounded-2xl flex flex-col items-center text-center">
+                           <span className="text-[10px] font-black text-[#ffea00] mb-1 italic leading-none">03</span>
+                           <span className="text-[7px] font-bold text-white/80 uppercase tracking-widest italic">VAULT UNLOCKS</span>
+                        </div>
                      </div>
                   </div>
-                  <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/95 to-transparent flex flex-col items-center gap-4">
-                     <button onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }} className="w-full max-w-[400px] h-12 bg-white/5 border border-[#00fff2]/30 text-[#00fff2] text-[10px] font-black uppercase italic rounded-2xl hover:bg-[#00fff2]/10 transition-all flex flex-col items-center justify-center group shadow-xl">
-                        <div className="flex items-center gap-2"><Sparkles size={10} className="group-hover:animate-spin" /> START HUMAN AUTHENTICATION</div>
-                        <span className="text-[6px] opacity-40 uppercase tracking-widest mt-1">PROVE YOU ARE NOT A BOT TO RESTORE NEURAL LINK</span>
+                  <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/95 to-transparent flex flex-col items-center gap-3">
+                     <button onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }} className="w-full max-w-[500px] h-20 bg-[#ffea00] rounded-[3rem] text-black text-[20px] font-black uppercase tracking-widest flex items-center justify-center gap-4 shadow-[0_15px_50px_rgba(255,234,0,0.3)] hover:scale-[1.02] active:scale-95 transition-all group shrink-0">
+                        <Zap size={24} className="fill-black" />
+                        <span className="italic font-syncopate tracking-tighter">GET FREE ACCESS</span>
+                        <ArrowRight size={24} className="group-hover:translate-x-2 transition-all opacity-50" />
                      </button>
-                     <button onClick={() => setIsTopUpOpen(true)} className="w-full max-w-[500px] h-20 bg-[#ff00ff] rounded-[3rem] text-[20px] font-black uppercase tracking-widest flex items-center justify-center gap-5 shadow-[0_20px_100px_rgba(255,0,255,0.6)] active:scale-95 group"><span className="italic">Secure Checkout</span><ArrowRight size={28} className="group-hover:translate-x-3 transition-all" /></button>
+                     <button onClick={() => setIsTopUpOpen(true)} className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] italic hover:text-white transition-colors py-2 flex items-center gap-2">
+                        <CreditCard size={12} /> OR BUY CREDITS DIRECTLY
+                     </button>
                   </div>
                </motion.div>
             )}

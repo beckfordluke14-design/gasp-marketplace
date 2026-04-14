@@ -109,7 +109,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                     <div className="p-4 pt-5 bg-white/5 border border-[#ff00ff]/30 rounded-2xl text-left relative overflow-hidden shadow-xl">
                        <div className="absolute inset-0 bg-gradient-to-br from-[#ff00ff]/10 to-transparent pointer-events-none" />
                        <p className="text-[12px] font-medium text-white/90 leading-relaxed relative z-10 italic">
-                          "I really want to show you what's in my <span className="text-[#ff00ff] font-bold">Private Vault</span> baby... but you need credits. The good news is <span className="text-[#ffea00] font-black">it is 100% FREE!</span> My sponsors will give you the credits if you just do one quick task for them. I'm waiting for you... 💋"
+                          "I really want to show you what's in my <span className="text-[#ff00ff] font-bold">Private Archive 🌶️</span> baby... but you need credits. The good news is you can earn them for <span className="text-[#ffea00] font-black">100% FREE!</span> My sponsors will give you the credits if you just do a few quick tasks for them. I'm waiting for you... 💋"
                        </p>
                     </div>
                  </div>
@@ -128,7 +128,24 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                    ) : (
                      <>SYSTEM <span className="text-[#ffea00]">CREDITS REQUIRED</span> TO ACCESS ARCHIVE UPLINK. 🛡️🛰️</>
                    )
-                )}
+                   </div>
+               )}
+
+               {/* 🎁 THE ENDOWED PROGRESS ILLUSION (500 CR GIFT) */}
+               {personaName && (
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.5, type: 'spring' }} className="w-full px-2 mb-6">
+                     <div className="bg-[#00ffcc]/10 border border-[#00ffcc]/30 rounded-xl p-3 flex items-center gap-4 overflow-hidden relative shadow-[0_0_20px_rgba(0,255,204,0.15)]">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00ffcc]/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                        <div className="w-10 h-10 rounded-full bg-[#00ffcc]/20 flex items-center justify-center shrink-0 shadow-[0_0_10px_#00ffcc]">
+                           <span className="text-[#00ffcc] text-lg">🎁</span>
+                        </div>
+                        <div className="flex flex-col text-left relative z-10">
+                           <span className="text-[9px] font-black text-[#00ffcc] uppercase tracking-widest leading-none mb-1">{personaName} SENT A GIFT</span>
+                           <span className="text-[16px] font-black text-white italic leading-none">+500 CR <span className="text-white/40 text-[10px] font-bold ml-1 tracking-normal">(5,500 CR REMAINING)</span></span>
+                        </div>
+                     </div>
+                  </motion.div>
+               )}
               </div>
 
               {/* 🍼 DUMMY-PROOF INSTRUCTIONS */}
