@@ -103,7 +103,8 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                         <div className="flex items-start gap-3 px-3 py-2 bg-black/40 rounded-xl border border-white/5">
                             <span className="text-[8px] font-black text-[#ffea00] mt-1 italic">03 //</span>
                             <p className="text-[9px] font-black uppercase tracking-widest leading-relaxed text-white/50">
-                                <span className="text-[#ffea00]">GET YOUR CREDITS:</span> Credits are added instantly after you finish.
+                                <span className="text-[#ffea00]">GET YOUR CREDITS:</span> Credits are added instantly after you finish. <br/>
+                                <span className="text-[7px] text-white/40 italic">⏱️ MOST TASKS TAKE LESS THAN 60 SECONDS.</span>
                             </p>
                         </div>
                     </div>
