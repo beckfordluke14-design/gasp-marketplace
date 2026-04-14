@@ -8,6 +8,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useUser } from './providers/UserProvider';
 import GlitchText from './ui/GlitchText';
+import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
 
 /**
  * 🛰️ SIAT: SYNTHETIC INFLUENCER ARCHIVE TERMINAL (V12.1)
@@ -107,7 +108,9 @@ export default function Header({ onOpenMenu, onOpenTopUp }: any) {
                               <Zap size={10} className="text-[#ffea00] fill-[#ffea00]" />
                               <span className="text-[10px] md:text-[13px] font-black text-white italic">{(profile?.credit_balance || 0).toLocaleString()}</span>
                             </div>
-                            <span className="hidden xs:block text-[5px] md:text-[6px] font-black text-white/30 uppercase tracking-widest mt-0.5 ml-3.5">CREDITS</span>
+                            <span className="hidden xs:block text-[5px] md:text-[6px] font-black text-white/30 uppercase tracking-widest mt-0.5 ml-3.5">
+                                {SYNDICATE_CONFIG.compliance ? 'UNITS' : 'CREDITS'}
+                            </span>
                         </div>
                         <button className="h-6 md:h-7 px-2 md:px-4 rounded-full bg-[#ffea00] text-black text-[7px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg border-none">ADD</button>
                     </div>

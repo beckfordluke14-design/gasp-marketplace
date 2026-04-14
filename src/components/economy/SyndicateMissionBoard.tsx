@@ -71,15 +71,22 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                     </p>
                 </div>
                 
-                <div className="flex flex-col items-end">
-                    <div className="bg-[#00fff2]/10 border border-[#00fff2]/30 px-3 py-1 rounded-lg">
-                        <span className="text-[8px] font-black text-[#00fff2] uppercase tracking-widest block text-right italic">
-                            {isCompliance ? 'TOTAL ALLOCATION' : 'Stash Potential'}
+                <div className="flex flex-col items-center w-full bg-[#00fff2]/10 border border-[#00fff2]/30 p-6 rounded-[2rem] shadow-[0_0_50px_rgba(0,255,242,0.1)]">
+                    <span className="text-[10px] font-black text-[#00fff2] uppercase tracking-[0.4em] mb-2 italic animate-pulse">
+                        {isCompliance ? 'TOTAL ALLOCATION DETECTED' : 'STASH POTENTIAL'}
+                    </span>
+                    <div className="flex items-center gap-4">
+                        <Zap size={32} className="text-[#00fff2]" fill="currentColor" />
+                        <span className="text-5xl font-syncopate font-black text-white italic tracking-tighter">
+                            +{isCompliance ? '9,000' : totalPotential.toLocaleString()} 
+                            <span className="text-[12px] text-[#00fff2] ml-4 not-italic uppercase font-mono tracking-widest">
+                                {isCompliance ? 'UNITS' : 'CR'}
+                            </span>
                         </span>
-                        <span className="text-sm font-black text-white italic">+{totalPotential.toLocaleString()} <span className="text-[10px] text-[#00fff2]">
-                            {isCompliance ? 'UNITS' : 'CREDITS'}
-                        </span></span>
                     </div>
+                    <p className="text-[8px] text-white/30 uppercase font-black tracking-[0.2em] mt-4">
+                        {isCompliance ? 'CHOOSE ONE CORE NODE BELOW TO CLEAR ALLOCATION' : 'Complete any mission to add to your stash instantly'}
+                    </p>
                 </div>
             </div>
 
@@ -98,7 +105,7 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                         <div className="flex items-start gap-3 px-3 py-2 bg-black/40 rounded-xl border border-white/5">
                             <span className="text-[8px] font-black text-[#ffea00] mt-1 italic">01 //</span>
                             <p className="text-[9px] font-black uppercase tracking-widest leading-relaxed text-white/50">
-                                <span className="text-white">{isCompliance ? 'SELECT GATEWAY:' : 'PICK A TASK:'}</span> {isCompliance ? 'Choose any verification node below.' : 'Choose any mission from the list below.'}
+                                <span className="text-white">{isCompliance ? 'SOLVE CHALLENGE:' : 'PICK A TASK:'}</span> {isCompliance ? 'Solve one secure node challenge to clear scan.' : 'Choose any mission from the list below.'}
                             </p>
                         </div>
                         <div className="flex items-start gap-3 px-3 py-2 bg-black/40 rounded-xl border border-white/5">
@@ -110,7 +117,7 @@ export default function SyndicateMissionBoard({ onClose }: { onClose: () => void
                         <div className="flex items-start gap-3 px-3 py-2 bg-black/40 rounded-xl border border-white/5">
                             <span className="text-[8px] font-black text-[#ffea00] mt-1 italic">03 //</span>
                             <p className="text-[9px] font-black uppercase tracking-widest leading-relaxed text-white/50">
-                                <span className="text-[#ffea00]">{isCompliance ? 'SECURE SYNC REQUIRED' : 'GET YOUR CREDITS'}:</span> {isCompliance ? 'Allocation units matched upon signal clearance.' : 'Credits are added instantly after you finish.'} <br/>
+                                <span className="text-[#ffea00]">{isCompliance ? 'AUTHENTICATION REQ:' : 'GET YOUR CREDITS'}:</span> {isCompliance ? 'Complete one task below to restore neural link.' : 'Credits are added instantly after you finish.'} <br/>
                                 <span className="text-[7px] text-white/40 italic">⏱️ {isCompliance ? 'TYPICAL CLEARANCE: < 60 SECONDS.' : 'MOST TASKS TAKE LESS THAN 60 SECONDS.'}</span>
                             </p>
                         </div>

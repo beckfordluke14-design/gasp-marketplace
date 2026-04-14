@@ -28,6 +28,7 @@ import { useUser } from '@/components/providers/UserProvider';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
 import Link from 'next/link';
 import GlitchText from './ui/GlitchText';
+import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
 
 import NeuralPulseTerminal from './NeuralPulseTerminal';
 import MarketPulseTerminal from './intel/MarketPulseTerminal';
@@ -49,6 +50,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
   const { profile } = useUser();
   const [following, setFollowing] = useState<string[]>([]);
   const [recentIds, setRecentIds] = useState<string[]>([]);
+  const isCompliance = SYNDICATE_CONFIG.compliance;
   
   // 🌍 GLOBAL LOCALE STATE
   const [isSpanish, setIsSpanish] = useState(false);
@@ -403,7 +405,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                         <span className="text-[24px] font-black font-syncopate italic text-white leading-none">
                            {profile?.credit_balance?.toLocaleString() || '0'}
                         </span>
-                        <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">{isSpanish ? 'Créditos de Terminal' : 'Terminal Credits'}</span>
+                        <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest italic">{isCompliance ? (isSpanish ? 'Unidades de Terminal' : 'Terminal Units') : (isSpanish ? 'Créditos de Terminal' : 'Terminal Credits')}</span>
                     </div>
                  </div>
 
@@ -420,7 +422,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
                 className="w-full h-12 bg-[#00f0ff] text-black rounded-xl flex items-center justify-center gap-3 hover:bg-white transition-all group shadow-[0_8px_35px_rgba(0,240,255,0.2)] active:scale-95 border-none"
              >
                 <Zap size={14} className="text-black group-hover:scale-125 transition-transform" />
-                <span className="text-[9px] font-black uppercase tracking-widest italic font-syncopate">{isSpanish ? 'AÑADIR CRÉDITOS' : 'ADD CREDITS'}</span>
+                <span className="text-[9px] font-black uppercase tracking-widest italic font-syncopate">{isCompliance ? (isSpanish ? 'AÑADIR UNIDADES' : 'ADD UNITS') : (isSpanish ? 'AÑADIR CRÉDITOS' : 'ADD CREDITS')}</span>
              </button>
           </div>
 

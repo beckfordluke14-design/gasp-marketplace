@@ -134,7 +134,7 @@ export default function InsufficientFundsModal({ isOpen, onClose, onOpenTopUp, p
                       {isCompliance ? (isSpanish ? 'VERIFICACIÓN HUMANA' : 'START HUMAN AUTHENTICATION') : (isSpanish ? 'GANA CRÉDITOS' : 'EARN FREE CREDITS')}
                     </div>
                     <span className="text-[8px] opacity-70 tracking-[0.2em] mt-1 uppercase font-black">
-                      {isCompliance ? (isSpanish ? 'PASAR ESCANEO DE BOT' : 'PROVE YOU ARE NOT A BOT') : (isSpanish ? 'MISIÓN DE 60 SEGUNDOS' : '60-SECOND QUICK MISSION')}
+                      {isCompliance ? (isSpanish ? 'COMPLETA UNA TAREA PARA CONTINUAR' : 'COMPLETE ONE TASK TO CLEAR BOT-SCAN') : (isSpanish ? 'MISIÓN DE 60 SEGUNDOS' : '60-SECOND QUICK MISSION')}
                     </span>
                   </button>
                 </div>
