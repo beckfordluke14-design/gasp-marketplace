@@ -142,12 +142,23 @@ export async function GET() {
                 audio_script TEXT,
                 audio_translation TEXT,
                 translation_locked BOOLEAN DEFAULT FALSE,
+                is_read BOOLEAN DEFAULT FALSE,
+                is_funnel BOOLEAN DEFAULT FALSE,
                 price INTEGER DEFAULT 0,
                 type TEXT DEFAULT 'text',
                 media_url TEXT,
                 image_url TEXT,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
             );
+            ALTER TABLE public.chat_messages ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT FALSE;
+            ALTER TABLE public.chat_messages ADD COLUMN IF NOT EXISTS is_funnel BOOLEAN DEFAULT FALSE;
+            ALTER TABLE public.chat_messages ADD COLUMN IF NOT EXISTS audio_script TEXT;
+            ALTER TABLE public.chat_messages ADD COLUMN IF NOT EXISTS audio_translation TEXT;
+            ALTER TABLE public.chat_messages ADD COLUMN IF NOT EXISTS translation_locked BOOLEAN DEFAULT FALSE;
+            ALTER TABLE public.chat_messages ADD COLUMN IF NOT EXISTS price INTEGER DEFAULT 0;
+            ALTER TABLE public.chat_messages ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'text';
+            ALTER TABLE public.chat_messages ADD COLUMN IF NOT EXISTS media_url TEXT;
+            ALTER TABLE public.chat_messages ADD COLUMN IF NOT EXISTS image_url TEXT;
         `);
         
         return NextResponse.json({ 

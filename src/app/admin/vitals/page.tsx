@@ -156,12 +156,37 @@ export default function AdminVitals() {
                         </div>
                         <p className="text-[8px] font-black uppercase tracking-[.4em] text-white/20 mt-4">Active Profiles</p>
                     </div>
-                    <button 
-                        onClick={() => window.location.reload()}
-                        className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all font-syncopate"
-                    >
-                        Sync Pulse
-                    </button>
+                    <div className="grid grid-cols-1 gap-4">
+                        <button 
+                            onClick={() => window.location.reload()}
+                            className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all font-syncopate"
+                        >
+                            Sync Pulse
+                        </button>
+                        <button 
+                            onClick={async (e) => {
+                                const btn = e.currentTarget;
+                                btn.innerText = 'Repairing...';
+                                try {
+                                    const res = await fetch('/api/admin/migrate');
+                                    const json = await res.json();
+                                    if (json.success) {
+                                        alert('🏁 Neural Schema Repaired: is_read and is_funnel columns established.');
+                                        window.location.reload();
+                                    } else {
+                                        alert('❌ Repair Failed: ' + (json.error || 'Unknown Error'));
+                                    }
+                                } catch (err) {
+                                    alert('❌ Signal lost during repair.');
+                                } finally {
+                                    btn.innerText = 'Repair Node Schema';
+                                }
+                            }}
+                            className="w-full py-4 bg-[#ff00ff]/10 border border-[#ff00ff]/30 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#ff00ff]/20 transition-all font-syncopate text-[#ff00ff]"
+                        >
+                            Repair Node Schema
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

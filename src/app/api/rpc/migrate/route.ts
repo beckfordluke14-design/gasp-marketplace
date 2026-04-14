@@ -24,8 +24,14 @@ export async function GET() {
         content TEXT NOT NULL,
         media_url TEXT,
         audio_script TEXT,
+        is_read BOOLEAN DEFAULT FALSE,
+        is_funnel BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      )
+      );
+      ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT FALSE;
+      ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS is_funnel BOOLEAN DEFAULT FALSE;
+      ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS media_url TEXT;
+      ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS audio_script TEXT;
     `);
 
     await db.query(`
