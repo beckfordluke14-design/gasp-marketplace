@@ -27,8 +27,22 @@ export default function FunnelView() {
   const [vaultItems, setVaultItems] = useState<any[]>([]);
   const [loadingVault, setLoadingVault] = useState(false);
   
-  const [timeLeft, setTimeLeft] = useState('04:54');
+  const [timeLeft, setTimeLeft] = useState(599); // 9 minutes 59 seconds
+
+  useEffect(() => {
+    if (currentStepIdx !== 2) return;
+    const interval = setInterval(() => {
+       setTimeLeft(prev => prev > 0 ? prev - 1 : 0);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [currentStepIdx]);
   
+  const formatTimeInfo = (seconds: number) => {
+     const m = Math.floor(seconds / 60);
+     const s = seconds % 60;
+     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
   const searchParams = useSearchParams();
   const hasIntercepted = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -252,7 +266,14 @@ export default function FunnelView() {
                   <div className="px-8 py-6 space-y-6 pb-40">
                      <div className="flex flex-col items-center gap-4">
                         <div className="relative"><div className="w-20 h-20 rounded-full border-2 border-[#ff00ff]/30 p-1 bg-black"><img src={profile.image} className="w-full h-full object-cover rounded-full opacity-60" /></div><Lock size={24} className="absolute inset-0 m-auto text-[#ff00ff]" /></div>
-                        <div className="text-center"><h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">VIP ACCESS LOCKED</h2><p className="text-[10px] text-[#ffea00] font-black uppercase mt-2">6,000 CREDITS REQUIRED TO RESTORE LINK</p></div>
+                        <div className="text-center">
+                           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#ff0000]/20 border border-[#ff0000]/50 rounded-full mb-3 animate-pulse">
+                              <ShieldAlert size={12} className="text-[#ff0000]" />
+                              <span className="text-[10px] font-black text-[#ff0000] uppercase tracking-widest">SECURE LINK EXPIRES IN {formatTimeInfo(timeLeft)}</span>
+                           </div>
+                           <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">VIP ACCESS LOCKED</h2>
+                           <p className="text-[10px] text-[#ffea00] font-black uppercase mt-2">6,000 CREDITS REQUIRED TO RESTORE LINK</p>
+                        </div>
                      </div>
 
                      {/* 🎭 FUNNEL PERSONA HOOK (COMPLIANT) */}
@@ -308,7 +329,11 @@ export default function FunnelView() {
                         <span className="italic font-syncopate tracking-tighter">GET FREE ACCESS</span>
                         <ArrowRight size={24} className="group-hover:translate-x-2 transition-all opacity-50" />
                      </button>
-                     <button onClick={() => setIsTopUpOpen(true)} className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] italic hover:text-white transition-colors py-2 flex items-center gap-2">
+                     <div className="flex items-center justify-center gap-2 mt-2 opacity-50">
+                        <span className="w-2 h-2 rounded-full bg-[#00f0ff] animate-ping" />
+                        <span className="text-[8px] font-black uppercase tracking-widest text-[#00f0ff] italic">STATUS: WAITING FOR COMPLETION SIGNAL...</span>
+                     </div>
+                     <button onClick={() => setIsTopUpOpen(true)} className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] italic hover:text-white transition-colors py-2 flex items-center gap-2 mt-2">
                         <CreditCard size={12} /> OR BUY CREDITS DIRECTLY
                      </button>
                   </div>
