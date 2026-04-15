@@ -93,7 +93,7 @@ export default function FunnelView() {
     const fetchVault = async () => {
        setLoadingVault(true);
        try {
-          const res = await fetch(`/api/vault/teasers?id=veronica-medellin-locked&userId=${localStorage.getItem('gasp_guest_id')}`);
+          const res = await fetch(`/api/vault/teasers?personaId=veronica-medellin-locked&userId=${localStorage.getItem('gasp_guest_id')}`);
           const data = await res.json();
           if (data.success && data.items) {
              // 🧬 HARD DEDUPLICATION: Ensure unique Content URLs only
@@ -239,12 +239,15 @@ export default function FunnelView() {
                         setIsTyping(false);
 
                         setTimeout(() => {
+                           // 🧬 USE REAL VAULT ITEM (not promo) - pick 2nd item for variety
+                           const teaseVaultItem = vaultItems.find((v: any) => v.content_url) || null;
                            setMessages(prev => [...prev, { 
                              id: 'tease_' + Date.now(), 
                              role: 'assistant', 
                              content: 'tease_module', 
                              isTease: true,
-                             media_url: vaultItems[0]?.content_url || null
+                             media_url: teaseVaultItem?.content_url || null,
+                             vaultItemId: teaseVaultItem?.id || null
                            }]);
                            
                            // 🛑 FINAL BRIDGE TO CTA
@@ -365,19 +368,20 @@ export default function FunnelView() {
                 try {
                   const data = JSON.parse(line.substring(2));
                   if (data.type === 'voice_note' && data.audioUrl) {
+                     // 🎙️ VOICE NOTE SEQUENCE: Show recording indicator then attach audio
+                     setIsTyping(false);
+                     setIsRecording(true);
                      setTimeout(() => {
-                        setIsRecording(true);
-                        setTimeout(() => {
-                           setIsRecording(false);
-                           setMessages(prev => {
-                              const last = prev[prev.length - 1];
-                              if (last?.role === 'assistant') {
-                                return [...prev.slice(0, -1), { ...last, media_url: data.audioUrl, type: 'voice' }];
-                              }
-                              return prev;
-                           });
-                        }, 3200); 
-                     }, 1200);
+                        setIsRecording(false);
+                        setMessages(prev => {
+                           const last = prev[prev.length - 1];
+                           if (last?.role === 'assistant') {
+                             return [...prev.slice(0, -1), { ...last, media_url: data.audioUrl, type: 'voice' }];
+                           }
+                           // If no message yet, create one
+                           return [...prev, { id: 'voice-' + Date.now(), role: 'assistant', content: '...', media_url: data.audioUrl, type: 'voice' }];
+                        });
+                     }, 2800);
                   }
                 } catch (e) {}
               }
