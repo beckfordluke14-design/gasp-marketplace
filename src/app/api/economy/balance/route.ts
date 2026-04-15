@@ -53,7 +53,11 @@ export async function POST(req: Request) {
 
         // 🧬 GUEST GENESIS (250 CR)
         if (action === 'guest_genesis') {
-            await db.query(`INSERT INTO profiles (id, credit_balance) VALUES ($1, 250) ON CONFLICT (id) DO NOTHING`, [userId]);
+            await db.query(`
+                INSERT INTO profiles (id, credit_balance) 
+                VALUES ($1, 250) 
+                ON CONFLICT (id) DO UPDATE SET credit_balance = GREATEST(profiles.credit_balance, 250)
+            `, [userId]);
             return NextResponse.json({ success: true, balance: 250 });
         }
 

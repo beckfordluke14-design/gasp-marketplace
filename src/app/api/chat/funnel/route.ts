@@ -53,23 +53,45 @@ You are Veronica, a 23-year-old from Medellín.
 Respond in JSON: { "text_message": "..." }
 `;
 
-    const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
-        },
-        body: JSON.stringify({
-            model: 'x-ai/grok-3-mini', 
-            messages: [
-                { role: 'system', content: brainPrompt },
-                ...messages.slice(-10)
-            ],
-            response_format: { type: "json_object" }
-        })
-    });
+    let orResult: any;
+    try {
+        const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'x-ai/grok-2-mini', // 🧬 ECONOMY STABLE (Cheapest & Fastest)
+                messages: [
+                    { role: 'system', content: brainPrompt },
+                    ...messages.slice(-10)
+                ],
+                response_format: { type: "json_object" }
+            })
+        });
+        orResult = await orResponse.json();
+        if (!orResult.choices?.[0]) throw new Error('Primary Brain Offline');
+    } catch (e) {
+        console.warn('[Funnel Fallback Triggered]: Primary model failed. Routing to Grok-2 core.');
+        const fbResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'x-ai/grok-2', // 🛡️ GROK STABLE FALLBACK
+                messages: [
+                    { role: 'system', content: brainPrompt },
+                    ...messages.slice(-10)
+                ],
+                response_format: { type: "json_object" }
+            })
+        });
+        orResult = await fbResponse.json();
+    }
 
-    const orResult = await orResponse.json();
     if (orResult.error) {
        console.error('[OpenRouter Error]:', orResult.error);
        throw new Error('Brain disconnect');

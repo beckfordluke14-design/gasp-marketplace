@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, MessageSquare, Loader2, ArrowRight } from 'lucide-react';
+import { Zap, MessageSquare, Loader2, ArrowRight, X } from 'lucide-react';
 import GlobalFeed from '@/components/GlobalFeed';
 import WeatherFeed from '@/components/WeatherFeed';
 import NewsFeed from '@/components/NewsFeed';
@@ -44,6 +44,7 @@ function MarketplaceContent() {
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [showPaymentPending, setShowPaymentPending] = useState(false);
   const [showCreditFlash, setShowCreditFlash] = useState(false);
+  const [showRadar, setShowRadar] = useState(true);
   
   const handleSetSidebarView = (view: 'chats' | 'vault' | 'feed') => {
      if (view === 'feed') {
@@ -173,6 +174,8 @@ function MarketplaceContent() {
           body: JSON.stringify({ userId: gId, action: 'guest_genesis' })
        }).then(() => {
           setShowCreditFlash(true);
+          // ⚡️ INSTANT WALLET REFRESH
+          window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
           setTimeout(() => setShowCreditFlash(false), 4500);
        }).catch(() => {});
     }
@@ -576,15 +579,21 @@ function MarketplaceContent() {
 
           {/* 🛰️ NEURAL MISSION RADAR (Homepage Pull-in for Guests) */}
           <AnimatePresence>
-            {!authenticated && mounted && (
+            {!authenticated && mounted && showRadar && (
               <motion.div 
                 initial={{ x: 100, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: 100, opacity: 0 }}
-                className="fixed bottom-24 right-6 z-[45] max-w-[280px] bg-black/80 backdrop-blur-3xl border border-[#ffea00]/30 rounded-[2rem] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] group cursor-pointer"
-                onClick={() => router.push('/funnel?src=home_radar')}
+                className="fixed bottom-24 right-6 z-[45] max-w-[280px] bg-black/80 backdrop-blur-3xl border border-[#ffea00]/30 rounded-[2rem] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] group relative"
               >
-                 <div className="flex items-center gap-4">
+                 <button 
+                   onClick={(e) => { e.stopPropagation(); setShowRadar(false); }}
+                   className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/20 hover:text-white transition-colors z-10"
+                 >
+                   <X size={10} />
+                 </button>
+
+                 <div className="flex items-center gap-4 cursor-pointer" onClick={() => router.push('/funnel?src=home_radar')}>
                     <div className="w-14 h-14 rounded-2xl overflow-hidden border border-[#ffea00]/40 shrink-0">
                        <img src="/Promo/PromoPic1.png" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Hot" />
                     </div>
@@ -610,8 +619,14 @@ function MarketplaceContent() {
                 initial={{ opacity: 0, scale: 0.8, y: 50, x: '-50%' }} 
                 animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }} 
                 exit={{ opacity: 0, scale: 1.1, y: -50, x: '-50%' }}
-                className="fixed top-32 left-1/2 z-[5000] w-[300px] bg-black/80 backdrop-blur-2xl border-2 border-[#00ffcc] rounded-[2rem] p-6 flex flex-col items-center gap-4 shadow-[0_0_80px_rgba(0,255,204,0.3)]"
+                className="fixed top-32 left-1/2 z-[5000] w-[300px] bg-black/80 backdrop-blur-2xl border-2 border-[#00ffcc] rounded-[2rem] p-6 flex flex-col items-center gap-4 shadow-[0_0_80px_rgba(0,255,204,0.3)] relative"
               >
+                  <button 
+                    onClick={() => setShowCreditFlash(false)}
+                    className="absolute top-4 right-4 text-white/20 hover:text-white transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
                   <div className="w-14 h-14 rounded-full bg-[#00ffcc]/20 flex items-center justify-center border border-[#00ffcc]/50">
                     <Zap size={28} className="text-[#00ffcc] fill-[#00ffcc] animate-pulse" />
                   </div>
