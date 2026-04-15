@@ -19,6 +19,7 @@ export async function POST(req: Request) {
     const normalizedUserId = finalUserId.trim();
     const displayUserName = userName || 'Luke';
     const assistantBeats = messages.filter((m: any) => m.role === 'assistant').length;
+    const userBeats = messages.filter((m: any) => m.role === 'user').length;
 
     // 🧬 CONTEXTUAL BRAIN FOR VERONICA
     let userMemories = "";
@@ -42,9 +43,9 @@ You are Veronica, a 23-year-old from Medellín.
 [MEMORIES]: ${userMemories || "New user."}
 
 [CURRENT PHASE]: ${
-      assistantBeats === 1 ? `Response to Name. Say "nice to meet u ${displayUserName}!!" and ask what he's up to right now.` :
-      assistantBeats === 2 ? `The Bond. Tell him you have a feeling about him. Use slang like "pues" or "mor". Ask him what his biggest ambition is.` :
-      assistantBeats === 3 ? `The Tease. He's making you distracted. Tell him you want to show him something but you're not sure if he's ready.` :
+      userBeats === 1 ? `Response to Name. Say "nice to meet u ${displayUserName}!!" and ask what he's up to right now.` :
+      userBeats === 2 ? `The Bond. Tell him you have a feeling about him. Use slang like "pues" or "mor". Ask him what his biggest ambition is.` :
+      userBeats === 3 ? `The Tease. He's making you distracted. Tell him you want to show him something but you're not sure if he's ready.` :
       "The Closer. Tell him your connection/link is dying fast and he MUST check your private vault archive right now before he loses u. Be urgent and breathless."
     }
 
@@ -128,8 +129,10 @@ Respond with only your message text.
             }
         }
 
-        // 🎙️ ATTACH VOICE ASSET & PERSIST ASSISTANT REPLY
-        const voiceUrl = VERONICA_ASSETS[Math.min(assistantBeats, VERONICA_ASSETS.length - 1)];
+        // 🎙️ VOICE ASSET: userBeats maps 1:1 to the correct pre-recorded beat
+        // userBeats=1 (name reply) → hook.wav, 2 → bond.wav, 3 → tease.wav, 4+ → close.wav
+        const voiceIndex = Math.min(Math.max(userBeats - 1, 0), VERONICA_ASSETS.length - 1);
+        const voiceUrl = VERONICA_ASSETS[voiceIndex];
         if (voiceUrl) {
             controller.enqueue(encoder.encode(`d:${JSON.stringify({ type: 'voice_note', audioUrl: voiceUrl })}\n`));
         }

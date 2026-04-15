@@ -368,19 +368,19 @@ export default function FunnelView() {
                 try {
                   const data = JSON.parse(line.substring(2));
                   if (data.type === 'voice_note' && data.audioUrl) {
-                     // 🎙️ VOICE NOTE SEQUENCE: Show recording indicator then attach audio
+                     // 🎙️ VOICE NOTE: Show recording, then ADD as separate bubble after text
                      setIsTyping(false);
                      setIsRecording(true);
                      setTimeout(() => {
                         setIsRecording(false);
-                        setMessages(prev => {
-                           const last = prev[prev.length - 1];
-                           if (last?.role === 'assistant') {
-                             return [...prev.slice(0, -1), { ...last, media_url: data.audioUrl, type: 'voice' }];
-                           }
-                           // If no message yet, create one
-                           return [...prev, { id: 'voice-' + Date.now(), role: 'assistant', content: '...', media_url: data.audioUrl, type: 'voice' }];
-                        });
+                        // ADD a new voice bubble — do NOT replace the text message
+                        setMessages(prev => [...prev, { 
+                          id: 'voice-' + Date.now(), 
+                          role: 'assistant', 
+                          media_url: data.audioUrl, 
+                          type: 'voice',
+                          content: ''
+                        }]);
                      }, 2800);
                   }
                 } catch (e) {}
@@ -635,7 +635,7 @@ export default function FunnelView() {
                                    ) : (
                                      <VoiceNoteBubble 
                                        audioUrl={m.media_url} 
-                                       profileImage="/Promo/Veronica_Profile.png" 
+                                       profileImage={profile.image} 
                                        profileName="Veronica" 
                                        translation={m.audio_translation} 
                                        isUnlocked={true} 
