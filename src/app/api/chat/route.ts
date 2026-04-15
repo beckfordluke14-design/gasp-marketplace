@@ -303,18 +303,25 @@ ${hasVaultPic ? `- CONVERSION BRIDGE: His current balance is ${body.userBalance 
             'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
         },
         body: JSON.stringify({
-            model: 'x-ai/grok-2', 
+            model: 'x-ai/grok-3-mini', 
             messages: aiMessages,
             response_format: { type: "json_object" }
         })
     });
 
     const orResult = await orResponse.json();
+
+    // 🛡️ EMERGENCY DIAGNOSIS: Log if OpenRouter is returning an error
+    if (!orResponse.ok || orResult.error) {
+        console.error('[OpenRouter Fail]:', JSON.stringify(orResult));
+    }
+
     const rawContent = orResult.choices?.[0]?.message?.content || "";
     let dataOutput: any = { text_message: rawContent, audio_script: "" };
     try { dataOutput = JSON.parse(rawContent); } catch(e) {}
 
-    const streamB_Text = dataOutput.text_message || "";
+    // 🛡️ FAILSAFE: If AI returned nothing usable, use a natural fallback
+    const streamB_Text = dataOutput.text_message?.trim() || "hey give me a sec... 🙈";
     let streamA_Native = dataOutput.audio_script || "";
 
     // 🎙️ MANDATED REPLICATION PROTOCOL (V6.0)
