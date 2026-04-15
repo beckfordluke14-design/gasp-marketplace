@@ -52,6 +52,7 @@ export default function ChatCTA({ onAction, personaName }: ChatCTAProps) {
          </div>
       </div>
 
+      {/* ⚡️ PRIMARY CTA: EARN */}
       <button 
          onClick={() => {
             const sessionId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : '';
@@ -61,9 +62,9 @@ export default function ChatCTA({ onAction, personaName }: ChatCTAProps) {
       >
          <div className="flex items-center gap-2">
             <Zap size={18} className="fill-black text-black" />
-            <span className="text-[18px] font-black text-black italic uppercase tracking-tighter">EARN FREE CREDITS</span>
+            <span className="text-[18px] font-black text-black italic uppercase tracking-tighter">CLAIM FREE CREDITS</span>
          </div>
-         <span className="text-[8px] font-black text-black/40 uppercase tracking-widest">60-SECOND QUICK MISSION</span>
+         <span className="text-[8px] font-black text-black/60 uppercase tracking-widest">COMPLETE 1 SIMPLE TASK (60 SECS)</span>
       </button>
 
       <button 
