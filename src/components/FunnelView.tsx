@@ -114,7 +114,10 @@ export default function FunnelView() {
       if (lIdx < logs.length) {
         setTerminalLogs(prev => [...prev, logs[lIdx++]]);
       } else {
-        setTimeout(() => setCurrentStepIdx(1), 1000); // Transition to Chat
+        setTimeout(() => {
+          setCurrentStepIdx(1);
+          localStorage.setItem('gasp_funnel_step', '1');
+        }, 1000); // Transition to Chat
         clearInterval(lInt);
       }
     }, 1200); // Slightly slower to build tension
@@ -140,6 +143,16 @@ export default function FunnelView() {
     const sInt = setInterval(checkStatus, 5000); 
     return () => clearInterval(sInt);
   }, [showStatusHub]);
+
+  // 🧬 RESTORE PROGRESS
+  useEffect(() => {
+    const savedStep = localStorage.getItem('gasp_funnel_step');
+    if (savedStep && !isNaN(parseInt(savedStep))) {
+        const stepIdx = parseInt(savedStep);
+        // Only restore if they were deep in the funnel
+        if (stepIdx > 1) setCurrentStepIdx(stepIdx);
+    }
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -225,7 +238,10 @@ export default function FunnelView() {
                            }]);
                            
                            // 🛑 FINAL BRIDGE TO CTA
-                           setTimeout(() => { setCurrentStepIdx(2); }, 12000);
+                           setTimeout(() => { 
+                             setCurrentStepIdx(2); 
+                             localStorage.setItem('gasp_funnel_step', '2');
+                           }, 12000);
                         }, 2500);
                      }, 3000);
                   }, 4000);
@@ -404,9 +420,17 @@ export default function FunnelView() {
                 </button>
               )}
               {authenticated && (
-                <div className="px-3 py-1.5 rounded-full bg-white/5 border border-[#00ffcc]/30 flex items-center gap-2">
-                  <CheckCircle2 size={10} className="text-[#00ffcc]" />
-                  <span className="text-[9px] font-black text-[#00ffcc] tracking-[0.1em]">VERIFIED</span>
+                <div className="flex items-center gap-2">
+                   <div className="px-3 py-1.5 rounded-full bg-white/5 border border-[#00ffcc]/30 flex items-center gap-2">
+                     <CheckCircle2 size={10} className="text-[#00ffcc]" />
+                     <span className="text-[9px] font-black text-[#00ffcc] tracking-[0.1em]">VERIFIED</span>
+                   </div>
+                   <button 
+                     onClick={() => window.location.href = '/'}
+                     className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-bold text-white/40 hover:text-white transition-colors"
+                   >
+                     EXPLORE HUB 🛰️
+                   </button>
                 </div>
               )}
               <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex items-center gap-2">

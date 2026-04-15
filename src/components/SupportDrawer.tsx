@@ -27,7 +27,7 @@ export default function SupportDrawer() {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [messages, setMessages] = useState<any[]>([
-    { role: 'assistant', content: "Welcome to GASP Support. How can I help you today, Papi? 🌪️" }
+    { role: 'assistant', content: "Welcome to GASP Support. How can we assist you with your account today? (Please allow up to 24 hours for a response) 🛠️" }
   ]);
   const [inputValue, setInputValue] = useState('');
 
@@ -82,17 +82,9 @@ export default function SupportDrawer() {
     setInputValue('');
 
     if (step === 'problem') {
-       setProblem(inputValue);
-       setTimeout(() => {
-         setMessages(prev => [...prev, { 
-           role: 'assistant', 
-           content: "Understood. I've logged the issue. What's your email so we can reach out if we need more info? 📧" 
-         }]);
-         setStep('email');
-       }, 800);
+       setProblem(prev => prev + (prev ? "\n" : "") + inputValue);
     } else if (step === 'email') {
        setEmail(inputValue);
-       // Final step will trigger submission
     }
   };
 
@@ -162,19 +154,21 @@ export default function SupportDrawer() {
                ))}
 
                {step === 'success' && (
-                  <motion.div 
+                   <motion.div 
                     initial={{ opacity: 0, scale: 0.9 }} 
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center justify-center p-6 bg-[#ffea00]/5 border border-[#ffea00]/20 rounded-3xl gap-3 text-center"
+                    className="flex flex-col items-center justify-center p-6 bg-[#00ffcc]/5 border border-[#00ffcc]/20 rounded-3xl gap-3 text-center"
                    >
-                     <CheckCircle2 size={32} className="text-[#ffea00]" />
+                     <CheckCircle2 size={32} className="text-[#00ffcc]" />
                      <div className="space-y-1">
-                        <p className="text-[11px] font-black text-white uppercase tracking-widest leading-none">Ticket Manifested</p>
+                        <p className="text-[11px] font-black text-white uppercase tracking-widest leading-none">CLAIM LOGGED #{Math.floor(Math.random() * 900000) + 100000}</p>
                         <p className="text-[9px] font-bold text-white/40 leading-relaxed">
-                           Our syndicate team has your flight data. <br/> Reach out via email soon.
+                           Your data has been manifested in our hub. <br/> 
+                           Please allow <span className="text-white">24 hours</span> for a manual response.
                         </p>
                      </div>
                   </motion.div>
+                )}
                )}
 
                {isSubmitting && (
@@ -201,6 +195,24 @@ export default function SupportDrawer() {
                         <Send size={16} />
                      </button>
                   </div>
+                  
+                  {step === 'problem' && messages.length > 1 && (
+                     <div className="mt-3 flex justify-center">
+                        <button 
+                          type="button" 
+                          onClick={() => {
+                            setMessages(prev => [...prev, { 
+                              role: 'assistant', 
+                              content: "Understood. Our team will need to contact you—please provide your email address to secure this support ticket. 📧" 
+                            }]);
+                            setStep('email');
+                          }}
+                          className="px-4 py-2 rounded-full bg-[#00ffcc]/10 border border-[#00ffcc]/30 text-[#00ffcc] text-[10px] font-black uppercase tracking-widest hover:bg-[#00ffcc]/20 transition-all"
+                        >
+                          PROCEED TO PROVIDE EMAIL →
+                        </button>
+                     </div>
+                   )}
                   <div className="mt-4 flex items-center justify-center gap-4 opacity-30">
                      <div className="flex items-center gap-1.5 grayscale">
                         <AlertCircle size={10} className="text-white" />
