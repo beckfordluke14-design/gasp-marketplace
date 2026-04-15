@@ -13,8 +13,10 @@ import { initialProfiles, proxyImg } from '@/lib/profiles';
 import TopUpDrawer from './economy/TopUpDrawer';
 import VoiceNoteBubble from './chat/VoiceNoteBubble';
 import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
+import { useUser } from './providers/UserProvider';
 
 export default function FunnelView() {
+  const { authenticated, login, profile: userProfile } = useUser();
   const [currentStepIdx, setCurrentStepIdx] = useState(0); // ⚡️ START AT LOADING
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -392,6 +394,21 @@ export default function FunnelView() {
               </span>
             </div>
             <div className="flex items-center gap-3">
+              {!authenticated && (
+                <button 
+                  onClick={() => login()}
+                  className="px-3 py-1.5 rounded-full bg-[#ffea00] border border-[#ffea00] flex items-center gap-2 hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,234,0,0.3)] group"
+                >
+                  <Shield size={10} className="text-black" />
+                  <span className="text-[9px] font-black text-black tracking-[0.1em]">SECURE ACCOUNT</span>
+                </button>
+              )}
+              {authenticated && (
+                <div className="px-3 py-1.5 rounded-full bg-white/5 border border-[#00ffcc]/30 flex items-center gap-2">
+                  <CheckCircle2 size={10} className="text-[#00ffcc]" />
+                  <span className="text-[9px] font-black text-[#00ffcc] tracking-[0.1em]">VERIFIED</span>
+                </div>
+              )}
               <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#00ffcc] animate-pulse" />
                 <span className="text-[9px] font-black text-white tracking-[0.1em]">14 Online</span>
@@ -702,11 +719,17 @@ export default function FunnelView() {
                     <Shield size={14} /> VERIFY & CLAIM CREDITS
                   </button>
 
-                  <div className="text-center space-y-4">
-                    <button onClick={() => setIsTopUpOpen(true)} className="group inline-block">
-                      <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] group-hover:text-[#ffea00] transition-colors border-b border-white/10 pb-1">OR BUY GASP CREDITS INSTANTLY — $19.99</span>
-                    </button>
-                    <div className="flex items-center justify-center gap-3 opacity-10 pt-2">
+                  <div className="text-center space-y-4 pt-2">
+                    <div className="flex flex-col gap-3">
+                      <button onClick={() => { setSelectedPkgId('tier_starter'); setIsTopUpOpen(true); }} className="group">
+                        <span className="text-[11px] font-black text-[#00ffcc] uppercase tracking-[0.2em] group-hover:text-white transition-colors border-b border-[#00ffcc]/20 pb-1">OR GET STARTER ACCESS — $4.99</span>
+                      </button>
+                      <button onClick={() => { setSelectedPkgId('tier_entry'); setIsTopUpOpen(true); }} className="group">
+                        <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] group-hover:text-[#ffea00] transition-colors">FULL MEMBER ACCESS — $19.99</span>
+                      </button>
+                    </div>
+                    
+                    <div className="flex items-center justify-center gap-3 opacity-10 pt-4">
                       <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white">GASP.FUN ECOSYSTEM SECURE</span>
                     </div>
                   </div>

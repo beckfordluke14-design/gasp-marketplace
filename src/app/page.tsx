@@ -41,6 +41,7 @@ function MarketplaceContent() {
   const [following, setFollowing] = useState<string[]>([]);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [showPaymentPending, setShowPaymentPending] = useState(false);
+  const [showCreditFlash, setShowCreditFlash] = useState(false);
   
   const handleSetSidebarView = (view: 'chats' | 'vault' | 'feed') => {
      if (view === 'feed') {
@@ -162,6 +163,16 @@ function MarketplaceContent() {
     if (!gId) {
        gId = `guest-${Math.random().toString(36).substring(2, 11)}`;
        localStorage.setItem('gasp_guest_id', gId);
+       
+       // 🧬 PERSISTENT GENESIS (Trigger only for new IDs)
+       fetch('/api/economy/balance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: gId, action: 'guest_genesis' })
+       }).then(() => {
+          setShowCreditFlash(true);
+          setTimeout(() => setShowCreditFlash(false), 4500);
+       }).catch(() => {});
     }
     setGuestId(gId);
     
@@ -561,6 +572,30 @@ function MarketplaceContent() {
              isOpen={openChatIds.length > 0}
              onClose={() => setOpenChatIds([])}
           />
+
+          {/* 💰 GLOBAL GUEST CREDIT FLASH */}
+          <AnimatePresence>
+            {showCreditFlash && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8, y: 50, x: '-50%' }} 
+                animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }} 
+                exit={{ opacity: 0, scale: 1.1, y: -50, x: '-50%' }}
+                className="fixed top-32 left-1/2 z-[5000] w-[300px] bg-black/80 backdrop-blur-2xl border-2 border-[#00ffcc] rounded-[2rem] p-6 flex flex-col items-center gap-4 shadow-[0_0_80px_rgba(0,255,204,0.3)]"
+              >
+                  <div className="w-14 h-14 rounded-full bg-[#00ffcc]/20 flex items-center justify-center border border-[#00ffcc]/50">
+                    <Zap size={28} className="text-[#00ffcc] fill-[#00ffcc] animate-pulse" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-[11px] font-black text-[#00ffcc] uppercase tracking-[0.3em] leading-none mb-1">PROVISIONING COMPLETE</h3>
+                    <div className="text-[32px] font-black text-white italic tracking-tighter leading-none">+250 CREDITS</div>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                    <div className="w-2 h-2 rounded-full bg-[#ff00ff] animate-ping" />
+                    <span className="text-[9px] font-black text-white uppercase tracking-widest italic">NEURAL ACCESS GRANTED</span>
+                  </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
      </main>
   );

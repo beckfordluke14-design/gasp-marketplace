@@ -19,9 +19,9 @@ export async function GET(req: Request) {
   const shortId = baseId.split('-')[0];
 
   try {
-    // 🛡️ TEASER ENGINE: Precision & Fallback Search
+    // 🛡️ TEASER ENGINE: Precision & Fallback Search with Deduplication
     const queryText = `
-      SELECT 
+      SELECT DISTINCT ON (p.content_url)
         p.*,
         EXISTS (
           SELECT 1 FROM user_vault_unlocks u 
@@ -30,7 +30,7 @@ export async function GET(req: Request) {
       FROM posts p
       WHERE (LOWER(p.persona_id) = $1 OR LOWER(p.persona_id) = $2 OR LOWER(p.persona_id) = $3) 
         AND p.is_vault = TRUE
-      ORDER BY p.created_at DESC
+      ORDER BY p.content_url, p.created_at DESC
     `;
 
     const { rows: items } = await db.query(queryText, [rawId, baseId, shortId, userId || 'GUEST_0']);
