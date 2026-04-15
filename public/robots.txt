@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /news/
+Allow: /archive/
+Allow: /profile/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+
+Sitemap: https://gasp.fun/sitemap.xml
