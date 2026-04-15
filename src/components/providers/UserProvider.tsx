@@ -124,8 +124,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
        const interval = setInterval(() => {
           fetchProfile(activeUserId, user);
        }, 60000); // 60s Polling — real-time updates via gasp_balance_refresh events
+
+       // 🛰️ EVENT-DRIVEN SYNC: Refresh balance on manual triggers
+       const handleRefresh = () => fetchProfile(activeUserId, user);
+       window.addEventListener('gasp_balance_refresh', handleRefresh);
+       window.addEventListener('gasp_sync_follows', handleRefresh);
        
-       return () => clearInterval(interval);
+       return () => {
+          clearInterval(interval);
+          window.removeEventListener('gasp_balance_refresh', handleRefresh);
+          window.removeEventListener('gasp_sync_follows', handleRefresh);
+       };
     } else {
        setProfile(null);
        setLoading(false);
@@ -133,11 +142,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, [ready, authenticated, user?.id]);
 
   useEffect(() => {
-    const guestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
-    const activeUserId = user?.id || guestId;
-
-    if (!activeUserId) return;
-    
     // 🧬 IDENTITY HANDOFF: When a user authenticates, migrate their guest credits once
     if (authenticated && user?.id) {
        const storedGuestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
@@ -160,19 +164,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           }).catch(e => console.error('[Handoff Error]:', e));
        }
     }
-    
-    // 🛰️ EVENT-DRIVEN SYNC: Refresh balance on manual triggers
-    const handleRefresh = async () => {
-       fetchProfile(activeUserId, user);
-    };
-    
-    window.addEventListener('gasp_balance_refresh', handleRefresh);
-    window.addEventListener('gasp_sync_follows', handleRefresh);
-    
-    return () => {
-       window.removeEventListener('gasp_balance_refresh', handleRefresh);
-       window.removeEventListener('gasp_sync_follows', handleRefresh);
-    };
   }, [authenticated, user?.id]);
 
   const refreshProfile = async () => {

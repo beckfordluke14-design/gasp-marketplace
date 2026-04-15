@@ -44,7 +44,7 @@ export default function ChatDrawer({
   unreadCounts = {},
   onSelectProfile = () => {}
 }: ChatDrawerProps) {
-  const { profile: userProfile, login } = useUser();
+  const { profile: userProfile, login, loading: isUserLoading } = useUser();
 
   const [guestId] = useState<string>(() => {
     if (typeof window === 'undefined') return 'guest-ssr';
@@ -91,7 +91,7 @@ export default function ChatDrawer({
   const sendGift = async (emoji: string, cost: number) => {
     if (isProcessing) return;
     const balance = userProfile?.credit_balance ?? 0;
-    if (balance < cost && dbLoaded) {
+    if (dbLoaded && !isUserLoading && userProfile !== null && balance < cost) {
        setShowInsufficientFunds(true);
        return;
     }
@@ -128,9 +128,9 @@ export default function ChatDrawer({
     const COST_MESSAGE_TEXT = 50;
     const balance = userProfile?.credit_balance ?? 0;
     
-    // 🛡️ CREDIT WALL: Only trigger if profile is FULLY LOADED and balance is CONFIRMED low.
-    // Do NOT fire if userProfile is null (still loading) — that's a false positive.
-    if (dbLoaded && userProfile !== null && userProfile !== undefined && balance < COST_MESSAGE_TEXT) {
+    // 🛡️ ADAPTIVE CREDIT GATE: Only block if both global and local sync are confirmed.
+    // This prevents the "0 Credits" flash during initial identity synchronization.
+    if (dbLoaded && !isUserLoading && userProfile !== null && balance < COST_MESSAGE_TEXT) {
        setShowInsufficientFunds(true);
        return;
     }
@@ -335,10 +335,10 @@ export default function ChatDrawer({
         body: JSON.stringify({ userId, action: 'spend', amount: 1000, type: 'voice_note_request', meta: { personaId: profileId, script: scriptText } })
       });
       const spendData = await spendRes.json();
-      if (!spendData.success) {
-        setShowInsufficientFunds(true);
-        return;
-      }
+    if (dbLoaded && !isUserLoading && userProfile !== null && (userProfile?.credit_balance || 0) < 1000) {
+      setShowInsufficientFunds(true);
+      return;
+    }
       window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
       await sendMessage(isSpanish ? `[SAY]: "${scriptText}". Di esto exactamente en una nota de voz.` : `[SAY]: "${scriptText}". Say this exactly in a voice note.`);
       setInput('');
@@ -353,8 +353,9 @@ export default function ChatDrawer({
      // 🧬 ADAPTIVE GATEWAY: Check balance BEFORE showing confirmation
      const cost = item.price_credits || 6000;
      const currentBalance = userProfile?.credit_balance || 0;
+     const isReady = dbLoaded && !isUserLoading && userProfile !== null;
 
-     if (currentBalance < cost) {
+     if (isReady && currentBalance < cost) {
         // Force them into the offer wall immediately (The aggressive Window Shopper Trap)
         setShowInsufficientFunds(true);
         setItemToUnlock(null); 
