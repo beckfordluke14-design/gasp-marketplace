@@ -260,6 +260,7 @@ export default function FunnelView() {
             userId: localStorage.getItem('gasp_guest_id'),
             personaId: 'veronica-medellin-locked',
             isFunnel: true,
+            userName: userName,
             systemInstruction: `You are Veronica, a 23-year-old from Medellín. 
             - Text like a real girl: short messages, lowercase, emojis.
             - You brought up the grocery store video first. Be flirty and naturally curious.

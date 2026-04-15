@@ -21,7 +21,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { messages, userId, personaId, profileId, userTimezone, locale, data: requestData } = body;
+    const { messages, userId, personaId, profileId, userTimezone, locale, userName, data: requestData } = body;
     
     const finalUserId = userId || requestData?.userId;
     const finalProfileId = profileId || personaId || requestData?.profileId || requestData?.personaId;
