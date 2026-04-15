@@ -117,7 +117,7 @@ export default function FunnelView() {
                 setMessages(prev => [...prev, {
                   id: 'm2',
                   role: 'assistant',
-                  content: `I can't believe people actually find me on here lol. what's your name? 🙈🍑`,
+                  content: `I can't believe people actually find me on here lol. what's your name? 🙈`,
                   type: 'text'
                 }]);
              }, 3000); // 🧬 Simulate 3s typing/presence
@@ -133,43 +133,60 @@ export default function FunnelView() {
     if (lastMsg?.media_url?.includes('veronica_4_close.wav') && !hasIntercepted.current && !isRecording) {
       hasIntercepted.current = true;
       
-      // 🥒 STAGE 1: The "Accidental" Leak (Blurred Vault Tease)
+      // 🥒 STAGE 1: The "Accidental" Leak (Cucumber)
       setTimeout(() => {
+         const leakId = 'leak_' + Date.now();
          setMessages(prev => [...prev, { 
-           id: 'leak_' + Date.now(), 
+           id: leakId, 
            role: 'assistant', 
            content: 'oops... i was just sending this to a friend 😭', 
            media_url: '/Promo/cucumber_tease.png',
            media_type: 'image'
          }]);
          
-         // 🌡️ STAGE 2: The Pivot (Flirty Text)
+         // 🎭 STAGE 2: THE "UNSEND" (Psychological Trap)
          setTimeout(() => {
-            setIsTyping(true);
+            setMessages(prev => prev.map(m => m.id === leakId ? { ...m, isUnsent: true, content: 'Message unsent', media_url: null } : m));
+            
+            // 🌡️ STAGE 3: The Fluster
             setTimeout(() => {
-               setMessages(prev => [...prev, { 
-                 id: 'pivot_' + Date.now(), 
-                 role: 'assistant', 
-                 content: 'actually... since u saw that... i have way better ones in my private vault if u want the link? 🌶️' 
-               }]);
-               setIsTyping(false);
-
-               // 🍑 STAGE 3: The High-Value Tease (Real Blurred Vault Asset)
+               setIsTyping(true);
                setTimeout(() => {
                   setMessages(prev => [...prev, { 
-                    id: 'tease_' + Date.now(), 
+                    id: 'fluster_' + Date.now(), 
                     role: 'assistant', 
-                    content: 'tease_module', 
-                    isTease: true,
-                    // Pass the real asset URL if we have one
-                    media_url: vaultItems.length > 0 ? vaultItems[0].content_url : null
+                    content: 'OMG ignore ignore!! 😭 I didn’t mean to send that here... how do I delete it??' 
                   }]);
-                  
-                  // Final move to the wall
-                  setTimeout(() => { setCurrentStepIdx(2); }, 6000);
-               }, 3000);
-            }, 2000);
-         }, 3000);
+                  setIsTyping(false);
+
+                  // 🌡️ STAGE 4: The Pivot
+                  setTimeout(() => {
+                     setIsTyping(true);
+                     setTimeout(() => {
+                        setMessages(prev => [...prev, { 
+                          id: 'pivot_' + Date.now(), 
+                          role: 'assistant', 
+                          content: 'actually... since u saw it... i have way better ones in my private vault if u want the link? 🌶️' 
+                        }]);
+                        setIsTyping(false);
+
+                        // 🍑 STAGE 5: The High-Value Tease
+                        setTimeout(() => {
+                           setMessages(prev => [...prev, { 
+                             id: 'tease_' + Date.now(), 
+                             role: 'assistant', 
+                             content: 'tease_module', 
+                             isTease: true,
+                             media_url: vaultItems.length > 0 ? vaultItems[0].content_url : null
+                           }]);
+                           
+                           setTimeout(() => { setCurrentStepIdx(2); }, 6000);
+                        }, 3000);
+                     }, 3000);
+                  }, 4000);
+               }, 2000);
+            }, 1000);
+         }, 3000); // ⏱️ Delete after 3s
       }, 2000); 
     }
   }, [messages, isRecording]);
@@ -446,11 +463,11 @@ export default function FunnelView() {
                       ) : (
                          <div className={`flex flex-col gap-2 w-full ${m.role === 'assistant' ? 'items-start' : 'items-end'}`}>
                              {m.content && m.content !== '...' && m.content !== '' && (
-                               <div className={`max-w-[85%] px-6 py-4 rounded-[2rem] text-[16px] leading-relaxed relative ${m.role === 'assistant' ? 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none font-medium' : 'bg-[#ffea00] text-black font-black rounded-tr-none shadow-[0_10px_30px_rgba(255,234,0,0.2)]'}`}>
+                               <div className={`max-w-[85%] px-6 py-4 rounded-[2rem] text-[16px] leading-relaxed relative ${m.role === 'assistant' ? 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none font-medium' : 'bg-[#ffea00] text-black font-black rounded-tr-none shadow-[0_10px_30px_rgba(255,234,0,0.2)]'} ${m.isUnsent ? 'opacity-30 italic font-normal text-[12px] py-2 px-4' : ''}`}>
                                  {m.content}
                                </div>
                              )}
-                             {m.media_url && (
+                             {m.media_url && !m.isUnsent && (
                                 <div className="w-full max-w-[90%]">
                                    {m.media_type === 'image' ? (
                                      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative aspect-[4/5] bg-white/5">
@@ -484,13 +501,31 @@ export default function FunnelView() {
                   )}
                 </div>
 
-                {/* ⌨️ INPUT AREA */}
-                <div className="px-6 py-8 bg-gradient-to-t from-black via-black/80 to-transparent">
-                  <form onSubmit={handleSendMessage} className="relative group max-w-[500px] mx-auto">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-[#ff00ff]/20 to-[#00f0ff]/20 rounded-[2rem] blur opacity-30 group-focus-within:opacity-100 transition duration-1000"></div>
-                    <div className="relative flex items-center gap-3 bg-[#1a1a1a] p-2 rounded-[2.5rem] border border-white/10 backdrop-blur-3xl shadow-2xl">
-                      <input value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Type your reply..." className="flex-1 bg-transparent border-none px-6 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:ring-0 font-bold" />
-                      <button type="submit" className="w-12 h-12 bg-[#ff00ff] rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-105 active:scale-95 transition-all outline-none">
+                {/* ⌨️ INPUT AREA (SIMPLIFIED & HIGH-CONVERSION) */}
+                <div className="px-6 py-6 bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-4">
+                  
+                  {/* 🎁 FAST-TRACK SHORTCUT */}
+                  <div className="flex items-center justify-center gap-3">
+                    <button 
+                      onClick={() => setCurrentStepIdx(2)}
+                      className="flex-1 py-3 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-2xl flex items-center justify-center gap-2 group hover:bg-[#ffea00]/20 transition-all"
+                    >
+                       <Zap size={14} className="fill-[#ffea00] text-[#ffea00] group-hover:animate-pulse" />
+                       <span className="text-[10px] font-black text-white uppercase tracking-widest italic tracking-tighter">EARN FREE CREDITS</span>
+                    </button>
+                    <button 
+                      onClick={() => setIsTopUpOpen(true)}
+                      className="flex-1 py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-white/40 hover:text-white transition-all"
+                    >
+                       <CreditCard size={14} />
+                       <span className="text-[10px] font-black uppercase tracking-widest italic tracking-tighter italic">BUY INSTANT</span>
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSendMessage} className="relative group max-w-[500px] mx-auto w-full">
+                    <div className="relative flex items-center gap-3 bg-[#131313] p-1.5 rounded-[3rem] border border-white/10 backdrop-blur-3xl">
+                      <input value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Type a flirty reply..." className="flex-1 bg-transparent border-none px-6 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:ring-0 font-bold" />
+                      <button type="submit" className="w-12 h-12 bg-[#ffea00] rounded-full flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,234,0,0.3)] hover:scale-105 active:scale-95 transition-all">
                         <Send size={18} />
                       </button>
                     </div>
