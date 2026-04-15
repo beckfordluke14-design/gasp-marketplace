@@ -288,10 +288,6 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
 
                                 <Link 
                                     href={`/archive/${item.id}`}
-                                    onClick={(e) => { 
-                                        e.preventDefault(); 
-                                        setSelectedNews(item); 
-                                    }} 
                                     className="block text-left w-full outline-none mb-6"
                                 >
                                     <h2 className="text-3xl md:text-5xl font-syncopate font-black italic uppercase tracking-tighter mb-4 leading-tight hover:text-[#00f0ff] transition-colors text-white/90">
