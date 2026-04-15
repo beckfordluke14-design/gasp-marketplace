@@ -239,7 +239,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                              </div>
                                          </div>
                                          <div className="flex flex-col items-end relative z-10">
-                                             <span className={`text-2xl font-black italic leading-none transition-all ${selectedPkgId === pkg.id ? 'text-[#ffea00]' : 'text-white'}`}>${pkg.price.toFixed(0)}</span>
+                                             <span className={`text-2xl font-black italic leading-none transition-all ${selectedPkgId === pkg.id ? 'text-[#ffea00]' : 'text-white'}`}>${pkg.priceUsd.toFixed(0)}</span>
                                              {selectedPkgId === pkg.id && (
                                                 <div className="absolute -top-1 -right-1">
                                                    <Check size={12} className="text-[#ffea00]" />
@@ -247,7 +247,7 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                              )}
                                          </div>
                                          
-                                         {pkg.label === 'MOST POPULAR' && (
+                                         {pkg.id === 'tier_session' && (
                                             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#ffea00] px-3 py-1 rounded-full shadow-lg">
                                                <span className="text-[7px] font-black text-black uppercase tracking-widest italic">BEST VALUE</span>
                                             </div>
