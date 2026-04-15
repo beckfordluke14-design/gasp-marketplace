@@ -34,13 +34,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // 3. Fetch all Intelligence Dispatches (Archive Stories)
-  const { rows: posts } = await db.query('SELECT id, created_at FROM posts ORDER BY created_at DESC')
-  const articleRoutes = posts.map((post) => ({
-    url: `${baseUrl}/archive/${post.id}`,
-    lastModified: new Date(post.created_at),
-    changeFrequency: 'monthly' as const,
-    priority: 0.6,
-  }))
+  const { rows: posts } = await db.query('SELECT id, caption as title, created_at FROM posts ORDER BY created_at DESC')
+  const articleRoutes = posts.map((post) => {
+    // 🧬 SLUGIFY: Transform "Solana Breakout" -> "solana-breakout"
+    const slug = (post.title || 'intelligence')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+    
+    return {
+      url: `${baseUrl}/archive/${post.id}?slug=${slug}`,
+      lastModified: new Date(post.created_at),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    };
+  })
 
   return [...coreRoutes, ...personaRoutes, ...articleRoutes]
 }

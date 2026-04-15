@@ -287,7 +287,11 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
                                 </div>
 
                                 <Link 
-                                    href={`/archive/${item.id}`}
+                                    href={`/archive/${item.id}?slug=${(item.title || 'intel').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')}`}
+                                    onClick={(e) => { 
+                                        e.preventDefault(); 
+                                        setSelectedNews(item); 
+                                    }}
                                     className="block text-left w-full outline-none mb-6"
                                 >
                                     <h2 className="text-3xl md:text-5xl font-syncopate font-black italic uppercase tracking-tighter mb-4 leading-tight hover:text-[#00f0ff] transition-colors text-white/90">
@@ -301,7 +305,7 @@ export default function NewsFeed({ onSelectProfile }: NewsFeedProps) {
 
                                 <div className="flex flex-col md:flex-row gap-4 relative z-20">
                                      <Link 
-                                        href={`/archive/${item.id}`}
+                                        href={`/archive/${item.id}?slug=${(item.title || 'intel').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')}`}
                                         onClick={(e) => { 
                                             e.preventDefault(); 
                                             setSelectedNews(item); 
