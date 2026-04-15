@@ -596,121 +596,88 @@ export default function FunnelView() {
 
             {currentStepIdx === 2 && (
               <motion.div 
-                key="offer" 
+                key="wall" 
                 initial={{ opacity: 0, scale: 0.95 }} 
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex-1 flex flex-col overflow-hidden"
+                className="flex-1 flex flex-col p-4 space-y-3 overflow-y-auto scrollbar-hide pb-20"
               >
-                <div className="flex-1 overflow-y-auto p-8 space-y-10 scrollbar-hide pb-40">
-                  {/* 🎁 THE "GIFT" ANCHOR */}
-                  <div className="bg-[#00ffcc]/10 border border-[#00ffcc]/30 rounded-[2rem] p-6 flex items-center justify-between overflow-hidden relative shadow-[0_0_40px_rgba(0,255,204,0.15)]">
-                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00ffcc]/10 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
-                     <div className="flex items-center gap-5 relative z-10">
-                        <div className="w-16 h-16 rounded-full bg-[#00ffcc]/20 flex items-center justify-center shrink-0 shadow-[0_0_20px_#00ffcc]">
-                           <span className="text-[#00ffcc] text-2xl">🎁</span>
-                        </div>
-                        <div className="flex flex-col text-left">
-                           <span className="text-[11px] font-black text-[#00ffcc] uppercase tracking-widest leading-none mb-1">YOUR FIRST GIFT</span>
-                           <span className="text-[22px] font-black text-white italic leading-none">+500 CREDITS</span>
-                        </div>
-                     </div>
-                     <div className="flex flex-col items-end relative z-10">
-                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">NEED</span>
-                        <span className="text-[16px] font-black text-[#ffea00] italic leading-none">5,500 MORE</span>
-                     </div>
-                  </div>
-
-                  {/* 🚨 THE CLEAR STATUS */}
-                  <div className="text-center space-y-3">
-                    <h2 className="text-4xl font-black italic uppercase tracking-tighter leading-none text-white">VAULT IS LOCKED 🔒</h2>
-                    <p className="text-[#ffea00] text-[12px] font-black uppercase tracking-[0.2em]">Complete 3 Easy Tasks to Unlock My Photos</p>
-                  </div>
-
-                  {/* 📊 THE MASTER PROGRESS HUB */}
-                  <div className="space-y-6">
-                    <div className="bg-white/5 border border-white/10 p-8 rounded-[3rem] text-center space-y-6 relative overflow-hidden">
-                       <div className="absolute top-0 right-0 p-4">
-                          <Activity size={16} className="text-[#00f0ff] animate-pulse" />
-                       </div>
-                       
-                       <div className="space-y-2">
-                          <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">PROGRESS TO UNLOCK</div>
-                          <div className="text-5xl font-black text-white italic">{Math.floor((missionCount / 3) * 100)}%</div>
-                       </div>
-
-                       {/* THE PROGRESS BAR */}
-                       <div className="h-4 bg-white/5 rounded-full overflow-hidden border border-white/10 p-0.5">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.max(5, (missionCount / 3) * 100)}%` }}
-                            className="h-full bg-gradient-to-r from-[#ffea00] via-[#00ffcc] to-[#ff00ff] rounded-full shadow-[0_0_20px_rgba(0,255,204,0.5)]"
-                          />
-                       </div>
-
-                       <p className="text-[11px] text-white/50 font-bold italic leading-relaxed">
-                         {missionCount === 0 ? "You're only 3 quick tasks away from getting my private archive papi... just tap below!" : 
-                          missionCount < 3 ? `Finish the next ${3 - missionCount} tasks to see everything... I waiting for u 💋` : 
-                          "Everything is ready! Tap VERIFY below to see your photos! 🔥"}
-                       </p>
+                {/* 🎁 REWARD BANNER (Compact) */}
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#00ffcc]/10 to-transparent border border-[#00ffcc]/30 p-4">
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00ffcc] to-[#33ffaa] flex items-center justify-center shadow-[0_0_20px_rgba(0,255,204,0.3)]">
+                        <span className="text-xl">🎁</span>
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-[#00ffcc] uppercase tracking-widest leading-none mb-1">YOUR FIRST GIFT</h4>
+                        <div className="text-[20px] font-black text-white italic leading-none">+500 CREDITS</div>
+                      </div>
                     </div>
-
-                    {/* ⚡️ THE ONE TRUE PATH (BIG BUTTON) */}
-                    <button 
-                      onClick={() => { 
-                        const tid = localStorage.getItem('gasp_guest_id') || 'G'; 
-                        window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); 
-                        // Note: Real verification happens via the Verify button polling the DB
-                      }} 
-                      className={`w-full h-24 rounded-[3rem] text-black text-[22px] font-black uppercase tracking-widest flex flex-col items-center justify-center shadow-2xl hover:scale-[1.02] active:scale-95 transition-all group relative overflow-hidden ${missionCount >= 3 ? 'bg-[#00ffcc] shadow-[0_20px_60px_rgba(0,255,204,0.4)]' : 'bg-[#ffea00] shadow-[0_20px_60px_rgba(255,234,0,0.4)]'}`}
-                    >
-                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-                       <div className="flex items-center gap-3">
-                          <Zap size={24} className="fill-black" />
-                          <span className="italic">{missionCount >= 3 ? "SYSTEM READY" : `GET FREE CREDITS — TASK ${missionCount + 1}/3`}</span>
-                          <ArrowRight size={24} className="group-hover:translate-x-2 transition-all opacity-40" />
-                       </div>
-                       <span className="text-[9px] font-black opacity-40 uppercase tracking-widest mt-1">NO PAYMENT REQUIRED • 100% FREE</span>
-                    </button>
+                    <div className="text-right">
+                      <div className="text-[8px] font-bold text-white/40 uppercase tracking-tighter leading-none mb-1">NEED</div>
+                      <div className="text-[14px] font-black text-[#ffea00] italic leading-none">5,500 MORE</div>
+                    </div>
                   </div>
                 </div>
 
-                {/* 🛡️ THE FINAL ACTIONS */}
-                <div className="shrink-0 p-8 bg-black/80 border-t border-white/5 backdrop-blur-xl flex flex-col items-center gap-6 relative">
-                   <div className="grid grid-cols-1 gap-4 w-full max-w-[500px]">
-                      <button
-                        onClick={async () => {
-                          const gid = localStorage.getItem('gasp_guest_id') || '';
-                          const res = await fetch(`/api/economy/balance?userId=${gid}`);
-                          const data = await res.json();
-                          if (data.success && data.balance >= 6000) {
-                            setCurrentStepIdx(3);
-                          } else {
-                            alert(`Insufficient Credits! You need 6,000 to unlock Veronica. Keep earning by tapping the yellow button above!`);
-                          }
-                        }}
-                        className={`w-full py-6 border-2 rounded-[2.5rem] text-[14px] font-black uppercase tracking-[0.2em] hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-3 italic ${missionCount >= 3 ? 'border-[#00ffcc] text-[#00ffcc] shadow-[0_0_30px_rgba(0,255,204,0.2)]' : 'border-white/10 text-white/40'}`}
-                      >
-                        <Shield size={18} /> VERIFY & UNLOCK VAULT
-                      </button>
-                      
-                      <div className="text-center">
-                         <button 
-                           onClick={() => setIsTopUpOpen(true)} 
-                           className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] hover:text-[#ffea00] transition-colors decoration-[#ffea00]/30 underline underline-offset-8 decoration-2"
-                         >
-                           Too slow? Buy Credits Instantly — $19.99
-                         </button>
-                      </div>
-                   </div>
-                   
-                   <div className="flex items-center gap-3 opacity-20">
-                      <div className="flex gap-1">
-                        <span className="w-1 h-1 rounded-full bg-[#00ffcc] animate-ping" />
-                      </div>
-                      <span className="text-[8px] font-black uppercase tracking-[0.5em] italic text-white">
-                        SOVEREIGN UPLINK SECURE
+                {/* 🔒 STATUS HEADER (Dense) */}
+                <div className="text-center py-2">
+                  <h2 className="text-[28px] font-black text-white uppercase italic tracking-tighter leading-none flex items-center justify-center gap-2">
+                    VAULT IS LOCKED <span className="text-2xl">🔒</span>
+                  </h2>
+                  <p className="text-[10px] font-black text-[#ffea00] uppercase tracking-[0.2em] mt-2">COMPLETE 3 EASY TASKS TO UNLOCK MY PHOTOS</p>
+                </div>
+
+                {/* 📋 THE SMART LINK BUTTON (The "Action") */}
+                <button 
+                  onClick={() => { 
+                    const tid = localStorage.getItem('gasp_guest_id') || 'G'; 
+                    window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); 
+                  }}
+                  className={`w-full p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 transition-all group relative overflow-hidden ${missionCount >= 3 ? 'bg-[#00ffcc] border-[#00ffcc] text-black shadow-[0_0_40px_rgba(0,255,204,0.3)]' : 'bg-white/5 border-[#ffea00]/40 text-white shadow-[0_0_30px_rgba(255,234,0,0.1)]'}`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Zap size={18} className={missionCount >= 3 ? "fill-black" : "text-[#ffea00]"} />
+                    <span className="text-[16px] font-black uppercase italic tracking-widest">
+                      {missionCount >= 3 ? "GO TO VAULT" : `START TASK ${missionCount + 1}/3`}
+                    </span>
+                    <ArrowRight size={18} className="opacity-40 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                  <span className="text-[9px] font-bold opacity-50 uppercase tracking-widest">NO PAYMENT REQUIRED • 100% FREE</span>
+                </button>
+
+                {/* 🛡️ SECONDARY CTAs (Huddled together) */}
+                <div className="pt-2 space-y-4">
+                  <button
+                    onClick={async () => {
+                      const gid = localStorage.getItem('gasp_guest_id') || '';
+                      const res = await fetch(`/api/economy/balance?userId=${gid}`);
+                      const data = await res.json();
+                      if (data.success && data.balance >= 6000) {
+                        setCurrentStepIdx(3);
+                      } else {
+                        alert(`Not enough credits yet! Complete tasks above or buy instant access below.`);
+                      }
+                    }}
+                    className="w-full py-4 border border-white/10 rounded-2xl text-[12px] font-black text-white/50 uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
+                  >
+                    <Shield size={14} /> VERIFY & UNLOCK VAULT
+                  </button>
+
+                  <div className="text-center space-y-4">
+                    <button 
+                      onClick={() => setIsTopUpOpen(true)}
+                      className="group inline-block"
+                    >
+                      <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] group-hover:text-[#ffea00] transition-colors border-b border-white/10 pb-1">
+                        TOO SLOW? BUY CREDITS INSTANTLY — $19.99
                       </span>
-                   </div>
+                    </button>
+                    
+                    <div className="flex items-center justify-center gap-3 opacity-10 pt-2">
+                      <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white">SOVEREIGN UPLINK SECURE</span>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             )}
