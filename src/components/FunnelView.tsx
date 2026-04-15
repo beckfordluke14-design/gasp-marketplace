@@ -259,12 +259,7 @@ export default function FunnelView() {
             userId: typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : 'ANON',
             personaId: 'veronica-medellin-locked',
             isFunnel: true,
-            userName: userName || 'papi',
-            systemInstruction: `You are Veronica, a 23-year-old from Medellín. 
-            - Text like a real girl: short messages, lowercase, emojis.
-            - You brought up the grocery store video first. Be flirty and naturally curious.
-            - If you don't know his name yet, ask it. 
-            - Call him "papi" naturally in your text.`,
+            userName: userMsg?.content || 'papi',
             source: 'funnel_ad'
           }),
         });
