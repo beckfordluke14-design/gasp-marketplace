@@ -1,8 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Zap, Diamond, ArrowRight, UserPlus, ShieldPlus } from 'lucide-react';
-import { useUser } from '../providers/UserProvider';
+import { Zap, Diamond } from 'lucide-react';
 
 interface ChatCTAProps {
   type: 'signup' | 'topup';
@@ -11,111 +10,83 @@ interface ChatCTAProps {
   balance?: number;
 }
 
-/**
- * 🛰️ STRATEGIC CHAT CTA v9.0 // MULTI-LOCALE CONVERSION ENGINE
- * Strategy: High-Status In-Stream Prompts with 100% Bilingual Sync (EN/ES).
- */
-export default function ChatCTA({ type, onAction, personaName, balance }: ChatCTAProps) {
-  const { login } = useUser();
-
-  // 🌍 GLOBAL LOCALE STATE
+export default function ChatCTA({ onAction, personaName }: ChatCTAProps) {
   const isSpanish = typeof window !== 'undefined' && localStorage.getItem('gasp_locale') === 'es';
-
-  if (type === 'signup') {
-    return (
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="mx-2 my-8 p-6 bg-gradient-to-br from-[#111] to-[#050505] border border-white/10 rounded-[2.5rem] flex flex-col items-center gap-4 text-center shadow-2xl relative overflow-hidden group"
-      >
-        <div className="absolute inset-0 bg-gradient-to-tr from-[#ff00ff]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        
-        <div className="w-14 h-14 bg-[#ff00ff]/20 rounded-full flex items-center justify-center mb-1 border border-[#ff00ff]/30 shadow-[0_0_40px_rgba(255,0,255,0.2)]">
-           <UserPlus size={24} className="text-[#ff00ff] animate-pulse" />
-        </div>
-
-        <div className="space-y-1 z-10">
-           <h3 className="text-sm font-syncopate font-black uppercase text-white italic tracking-tighter">
-             {isSpanish ? 'ENTRA A MI BÓVEDA PRIVADA' : 'ENTER MY PRIVATE VAULT'}
-           </h3>
-           <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
-             {isSpanish ? (
-               <>Regístrate para ver mi archivo completo y recibe <span className="text-[#ff00ff]">1,500 créditos</span> de regalo para empezar.</>
-             ) : (
-               <>Join me to see my full archive and get a <span className="text-[#ff00ff]">1,500 credit gift</span> to help you get started.</>
-             )}
-           </p>
-        </div>
-
-        <button 
-           onClick={() => login()}
-           className="mt-2 w-full h-16 bg-[#ff00ff] text-white text-[10px] font-black uppercase tracking-[0.2em] font-syncopate italic rounded-2xl hover:bg-white hover:text-black transition-all shadow-[0_0_30px_rgba(255,0,255,0.4)] active:scale-95 z-10 flex items-center justify-center gap-2 animate-pulse"
-        >
-           {isSpanish ? 'ENTRAR Y RECLAMAR REGALO' : 'ENTER VAULT + 1,500 GIFT'}
-           <ArrowRight size={14} />
-        </button>
-
-        <div className="pt-2 flex items-center gap-2 opacity-30">
-           <ShieldPlus size={10} className="text-[#ff00ff]" />
-           <span className="text-[7px] font-black uppercase tracking-widest">
-              {isSpanish ? 'Conexión Segura Activa' : 'Secure Private Connection Active'}
-           </span>
-        </div>
-      </motion.div>
-    );
-  }
 
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95, y: 10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      className="mx-2 my-8 p-6 bg-gradient-to-br from-[#111] to-[#050505] border border-white/10 rounded-[2.5rem] flex flex-col items-center gap-4 text-center shadow-2xl relative overflow-hidden group"
+      className="mx-2 my-8 p-6 bg-black border border-white/10 rounded-[2.5rem] flex flex-col items-center gap-6 text-center shadow-2xl relative overflow-hidden"
     >
-      <div className="absolute inset-0 bg-gradient-to-tr from-[#00f0ff]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-[#00f0ff]/5 to-transparent pointer-events-none" />
       
-      <div className="w-14 h-14 bg-[#00f0ff]/20 rounded-full flex items-center justify-center mb-1 border border-[#00f0ff]/30 shadow-[0_0_40px_rgba(0,240,255,0.2)]">
-         <Diamond size={24} className="text-[#00f0ff]" />
+      <div className="flex flex-col items-center gap-2">
+         <div className="bg-[#ff00ff] px-4 py-1.5 rounded-lg rotate-[-1deg] shadow-[0_0_20px_rgba(255,0,255,0.4)]">
+            <span className="text-[10px] font-black italic text-white uppercase tracking-tighter">
+               {isSpanish ? `MENSAJE DE ${personaName}` : `A MESSAGE FROM ${personaName}`}
+            </span>
+         </div>
+         <h2 className="text-[28px] font-black text-white italic uppercase tracking-tighter leading-none mt-2">
+            {isSpanish ? 'CRÉDITOS INSUFICIENTES' : 'NOT ENOUGH CREDITS'}
+         </h2>
       </div>
 
-      <div className="space-y-1 z-10">
-         <h3 className="text-sm font-syncopate font-black uppercase text-white italic tracking-tighter">
-           {balance && balance > 0 
-             ? (isSpanish ? 'CRÉDITOS INSUFICIENTES' : 'NOT ENOUGH CREDITS')
-             : (isSpanish ? 'SIN CRÉDITOS' : 'OUT OF CREDITS')}
-         </h3>
-         <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[240px] font-black">
-             <>{isSpanish ? 'Actualmente tienes' : 'You currently have'} <span className="text-white font-syncopate">{(balance ?? 0).toLocaleString()}</span>. <br /> {isSpanish ? 'Añade créditos para mantener el Sincronismo.' : 'Add credits to maintain Sync Lock.'}</>
-         </p>
+      <p className="text-[10px] text-white/50 uppercase tracking-widest leading-relaxed max-w-[280px] font-black italic">
+         "I really want to show you what's in my <span className="text-[#ff00ff]">Private Archive</span> 🌶️ baby... but you need credits."
+      </p>
+
+      <div className="w-full p-4 bg-white/5 border border-[#00f0ff]/20 rounded-2xl flex items-center justify-between group">
+         <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#00f0ff]/10 flex items-center justify-center">
+               <Gift size={20} className="text-[#00f0ff] animate-pulse" />
+            </div>
+            <div className="text-left">
+               <span className="text-[8px] font-black text-[#00f0ff] uppercase tracking-widest block mb-0.5">{personaName} SENT A GIFT</span>
+               <span className="text-[16px] font-black text-white italic">+500 CR</span>
+            </div>
+         </div>
+         <div className="text-right">
+            <span className="text-[8px] font-black text-white/20 uppercase block tracking-tighter italic">REMAINING</span>
+            <span className="text-[14px] font-black text-[#ffea00] italic">5,500</span>
+         </div>
       </div>
+
+      <button 
+         onClick={() => {
+            const sessionId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : '';
+            window.open(`https://gasp.fun/mission?id=${sessionId}`, '_blank');
+         }}
+         className="w-full py-4 bg-[#00f0ff] rounded-2xl flex flex-col items-center justify-center gap-1 shadow-[0_0_30px_rgba(0,240,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all group"
+      >
+         <div className="flex items-center gap-2">
+            <Zap size={18} className="fill-black text-black" />
+            <span className="text-[18px] font-black text-black italic uppercase tracking-tighter">EARN FREE CREDITS</span>
+         </div>
+         <span className="text-[8px] font-black text-black/40 uppercase tracking-widest">60-SECOND QUICK MISSION</span>
+      </button>
 
       <button 
          onClick={onAction}
-         className="mt-2 w-full h-16 bg-[#00f0ff] text-black text-[10px] font-black uppercase tracking-[0.3em] font-syncopate italic rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(0,240,255,0.3)] z-10 flex items-center justify-center gap-2"
+         className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-white/40 hover:text-white transition-all uppercase tracking-[0.2em] font-black text-[10px] italic"
       >
-         {isSpanish ? 'COMPRAR CRÉDITOS' : 'ADD CREDITS'}
-         <Zap size={14} fill="currentColor" />
+         <Diamond size={14} />
+         {isSpanish ? 'COMPRAR CRÉDITOS' : 'BUY CREDITS INSTANT'}
       </button>
 
-      {/* 🚀 CPA BRIDGE: SYNDICATE SYNC (CPAGrip - Incentive Safe) */}
-      <button 
-         onClick={() => {
-           const sessionId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : '';
-           window.open(`https://www.cpagrip.com/show.php?l=0&u=YOUR_CPAGRIP_LOCKER_ID&id=YOUR_ID&tracking_id=${sessionId}`, '_blank');
-         }}
-         className="w-full h-12 bg-transparent border border-[#ffea00]/30 text-[#ffea00] text-[9px] font-black uppercase tracking-[0.2em] font-syncopate italic rounded-2xl hover:bg-[#ffea00]/10 hover:border-[#ffea00] transition-all z-10 flex flex-col items-center justify-center group"
-      >
-         <div className="flex items-center gap-2">
-            <Sparkles size={10} className="group-hover:animate-spin" />
-            {isSpanish ? 'SINCRONIZACIÓN SYNDICATE' : 'SYNDICATE SYNC (FREE)'}
-         </div>
+      <button className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] hover:text-white/60 transition-colors">
+         DISMISS UPLINK
       </button>
-
-      <div className="pt-2 flex items-center gap-2 opacity-30">
-         <ShieldPlus size={10} className="text-[#ff00ff]" />
-         <span className="text-[7px] font-black uppercase tracking-widest">
-            {isSpanish ? 'Puente Soberano Instantáneo' : 'Instant Sovereign Bridge'}
-         </span>
-      </div>
     </motion.div>
   );
 }
+
+const Gift = ({ size, className }: any) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="20 12 20 22 4 22 4 12"></polyline>
+    <rect x="2" y="7" width="20" height="5"></rect>
+    <line x1="12" y1="22" x2="12" y2="7"></line>
+    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+  </svg>
+);
