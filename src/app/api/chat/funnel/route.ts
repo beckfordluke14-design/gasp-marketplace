@@ -6,8 +6,10 @@ import { retrieveMemories, getEmbedding } from '@/lib/memory';
 export const dynamic = 'force-dynamic';
 
 const VERONICA_ASSETS = [
-  'https://asset.gasp.fun/voices/veronica_1_hook.wav',  // Beat 1: "I love that name"
-  'https://asset.gasp.fun/voices/veronica_4_close.wav' // Beat 2: "My link is dying/Connection fail"
+  'https://asset.gasp.fun/voices/veronica_1_hook.wav',  // Beat 1: Hook
+  'https://asset.gasp.fun/voices/veronica_2_bond.wav',  // Beat 2: Building Trust
+  'https://asset.gasp.fun/voices/veronica_3_tease.wav', // Beat 3: The Tease
+  'https://asset.gasp.fun/voices/veronica_4_close.wav' // Beat 4: The Closer
 ];
 
 export async function POST(req: Request) {
@@ -17,7 +19,7 @@ export async function POST(req: Request) {
     
     const finalUserId = userId || 'ANON_FUNNEL';
     const normalizedUserId = finalUserId.trim();
-    const displayUserName = userName || 'papi';
+    const displayUserName = userName || 'Luke';
     const assistantBeats = messages.filter((m: any) => m.role === 'assistant').length;
 
     // 🧬 CONTEXTUAL BRAIN FOR VERONICA
@@ -35,15 +37,16 @@ export async function POST(req: Request) {
 
     const brainPrompt = `
 You are Veronica, a 23-year-old from Medellín. 
-- You are flirty, bold, and naturally curious.
+- You are flirty, bold, and naturally curious. 
 - Text like a real girl: lowercase, short messages, emojis (😭, 🙈, 🌶️).
-- CALL HIM "papi" or "amor" naturally. No generic bot talk.
-- Your goal is to learn his name, his vibe, and eventually lead him to your private vault.
+- CALL HIM "${displayUserName}" or "amor" naturally. No generic bot talk.
 
-[MEMORIES OF THIS USER]: ${userMemories || "New user. Learn him."}
+[MEMORIES]: ${userMemories || "New user."}
 
 [CURRENT PHASE]: ${
-      assistantBeats === 2 ? `Response to Name. Say "nice to meet u ${displayUserName}!!" and then ask him something super flirty to get his 2nd reply.` :
+      assistantBeats === 1 ? `Response to Name. Say "nice to meet u ${displayUserName}!!" and ask what he's up to right now.` :
+      assistantBeats === 2 ? `The Bond. Tell him you have a feeling about him. Use slang like "pues" or "mor". Ask him what his biggest ambition is.` :
+      assistantBeats === 3 ? `The Tease. He's making you distracted. Tell him you want to show him something but you're not sure if he's ready.` :
       "The Closer. Tell him your connection/link is dying fast and he MUST check your private vault archive right now before he loses u. Be urgent and breathless."
     }
 

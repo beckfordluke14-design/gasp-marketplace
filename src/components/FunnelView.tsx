@@ -50,11 +50,11 @@ export default function FunnelView() {
   // 📈 LIVE FOMO TICKER SAMPLES
   const [fomoIndex, setFomoIndex] = useState(0);
   const fomoMessages = [
-    'User_9389 just claimed 6,000 Credits ⚡️',
-    'AnonBoi38 just redeemed his Reward 🎁',
-    'LuckieLuke just entered the Private Vault 🌶️',
-    'GaspFan_22 just completed Mission 3/3 🔥',
-    'ZestyGyal just unlocked Sitewide access 💎'
+    'User_9389 just claimed his reward ⚡️',
+    'Veronica just sent a 🌶️ link...',
+    'Secure Vault Gateway Active',
+    '348 Agents Viewing Archive',
+    'LuckieLuke just joined the Syndicate'
   ];
 
   useEffect(() => {
@@ -345,10 +345,16 @@ export default function FunnelView() {
   return (
     <div className="min-h-screen bg-black text-white font-outfit overflow-hidden flex items-center justify-center">
       <div className="fixed inset-0 z-0">
-        <video autoPlay muted loop playsInline className={`w-full h-full object-cover transition-all ${currentStepIdx === 0 ? 'blur-3xl' : 'blur-sm'}`}>
+        <video 
+          autoPlay 
+          muted 
+          loop 
+          playsInline 
+          className={`w-full h-full object-cover transition-all duration-1000 ${currentStepIdx === 0 ? 'blur-3xl' : 'blur-none opacity-60'}`}
+        >
           <source src="/Promo/Veronica.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/90 to-black" />
       </div>
 
       <main className="relative z-10 w-full max-w-[600px] h-[100dvh] md:h-[92dvh] flex flex-col bg-black/60 backdrop-blur-3xl md:rounded-[3rem] border-white/10 shadow-2xl overflow-hidden md:my-4">
