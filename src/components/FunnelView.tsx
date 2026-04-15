@@ -15,7 +15,7 @@ import VoiceNoteBubble from './chat/VoiceNoteBubble';
 import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
 
 export default function FunnelView() {
-  const [currentStepIdx, setCurrentStepIdx] = useState(1); // ⚡️ START DIRECTLY AT CHAT
+  const [currentStepIdx, setCurrentStepIdx] = useState(0); // ⚡️ START AT LOADING
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -98,14 +98,23 @@ export default function FunnelView() {
     fetchVault();
   }, []);
 
-  // 🖥️ TERMINAL BOOT SEQUENCE (runs once)
+  // 🖥️ PREMIUM BOOT SEQUENCE
   useEffect(() => {
-    const logs = ["> establishing connection...", "> bypass active.", "> identity confirmed."];
+    const logs = [
+      "INITIALIZING SECURE UPLINK...", 
+      "BYPASSING LOCAL RESTRICTIONS...", 
+      "CONNECTING TO VERONICA'S HUB...",
+      "IDENTITY CONFIRMED // GUEST_SESSION"
+    ];
     let lIdx = 0;
     const lInt = setInterval(() => {
-      if (lIdx < logs.length) setTerminalLogs(prev => [...prev, logs[lIdx++]]);
-      else { setCurrentStepIdx(1); clearInterval(lInt); }
-    }, 250);
+      if (lIdx < logs.length) {
+        setTerminalLogs(prev => [...prev, logs[lIdx++]]);
+      } else {
+        setTimeout(() => setCurrentStepIdx(1), 1000); // Transition to Chat
+        clearInterval(lInt);
+      }
+    }, 1200); // Slightly slower to build tension
     return () => clearInterval(lInt);
   }, []);
 
@@ -413,6 +422,57 @@ export default function FunnelView() {
 
         <div className="flex-1 flex flex-col overflow-hidden relative">
           <AnimatePresence mode="wait">
+            {currentStepIdx === 0 && (
+              <motion.div 
+                key="loading" 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0, scale: 1.1 }}
+                className="absolute inset-0 flex flex-col items-center justify-center p-12 z-50 bg-black/40 backdrop-blur-xl"
+              >
+                <div className="relative w-48 h-48 mb-12">
+                   <motion.div 
+                     animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                     transition={{ duration: 2, repeat: Infinity }}
+                     className="absolute inset-0 rounded-full bg-[#ffea00]/20 border border-[#ffea00]/40 blur-2xl"
+                   />
+                   <div className="absolute inset-0 rounded-full border-2 border-[#ffea00]/10 flex items-center justify-center">
+                      <Zap size={48} className="text-[#ffea00] animate-pulse" />
+                   </div>
+                   <svg className="absolute inset-0 w-full h-full -rotate-90">
+                      <motion.circle
+                        cx="96" cy="96" r="90"
+                        stroke="#ffea00"
+                        strokeWidth="2"
+                        fill="transparent"
+                        strokeDasharray="565"
+                        initial={{ strokeDashoffset: 565 }}
+                        animate={{ strokeDashoffset: 0 }}
+                        transition={{ duration: 5, ease: "linear" }}
+                      />
+                   </svg>
+                </div>
+                
+                <div className="space-y-4 text-center">
+                   <h2 className="text-[12px] font-black uppercase tracking-[0.5em] text-[#ffea00] italic">
+                      Establishing Secure Node
+                   </h2>
+                   <div className="flex flex-col gap-2">
+                      {terminalLogs.slice(-2).map((log, i) => (
+                        <motion.p 
+                          key={log + i}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-[9px] font-mono text-white/40 uppercase tracking-widest"
+                        >
+                          {log}
+                        </motion.p>
+                      ))}
+                   </div>
+                </div>
+              </motion.div>
+            )}
+
             {activeTab === 'NEURAL_LINK' && currentStepIdx === 1 && (
               <motion.div 
                 key="chat" 
