@@ -253,7 +253,10 @@ export default function FunnelView() {
           headers: { 'Content-Type': 'application/json' },
           signal: controller.signal,
           body: JSON.stringify({
-            messages: currentMessages,
+            messages: [
+               ...messages.map(m => ({ role: m.role, content: m.content })),
+               { role: 'user', content: userMsg.content }
+            ],
             userId: localStorage.getItem('gasp_guest_id'),
             personaId: 'veronica-medellin-locked',
             isFunnel: true,

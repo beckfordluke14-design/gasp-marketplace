@@ -281,15 +281,16 @@ ${hasVaultPic ? `- CONVERSION BRIDGE: His current balance is ${body.userBalance 
     const assistantBeats = persistentMessages.filter((m: any) => m.role === 'assistant').length;
 
     if (normalizedUserId.toUpperCase().startsWith('GUEST-') && isFunnelTraffic) {
-      if (assistantBeats === 1) {
-        // She already sent m1 & m2. The next assistant msg will be Beat 3 (m3).
-        aiMessages.push({ role: 'system', content: "PHASE: THE HOOK. He just responded to your greeting. In your text_message, respond to what he said, but then end with a flirty comment about his name. In your audio_script, you MUST say: 'mmm... i actually love that name papi'. lowercase only." });
-      } else if (assistantBeats === 2) {
-        aiMessages.push({ role: 'system', content: "PHASE: THE BOND. Respond to him naturally, but you MUST end with 'you really love your vibe'. In your audio_script, you MUST say: 'i really love your vibe... it's different. i don't usually talk to guys like you... but you've got me interested pues.' lowercase only." });
+      if (assistantBeats === 2) {
+        // 🧬 PHASE: THE HOOK (Response to Name)
+        aiMessages.push({ role: 'system', content: `PHASE: THE HOOK. He just gave you his name (${userName}). In your text_message, say "nice to meet u ${userName}!!" and then respond to whatever else he said. At the end, tell him you really love his vibe. lowercase only.` });
       } else if (assistantBeats === 3) {
-         aiMessages.push({ role: 'system', content: "PHASE: THE TEASE. Respond to him, then tease him. In your audio_script, you MUST say: 'you're so bad, papisito... i really shouldn't be talking to you like this. but i like it... don't stop, oíste?' lowercase only." });
-      } else if (assistantBeats >= 4) {
-         aiMessages.push({ role: 'system', content: "PHASE: THE PANIC. React to him briefly, then panic. In your audio_script, you MUST say: 'oh no! no no no... my link is dying! papi, i'm losing the connection! hurry... go to my vault right now so i don't lose you forever! GO!' lowercase only." });
+        // 🧬 PHASE: THE BOND (Response to Vibe comment)
+        aiMessages.push({ role: 'system', content: "PHASE: THE BOND. Respond to him naturally, but you MUST keep the heat up. Talk about how you don't usually talk to guys like him. lowercase only." });
+      } else if (assistantBeats === 4) {
+         aiMessages.push({ role: 'system', content: "PHASE: THE TEASE. Respond to him, then tease him. Mention how he's making you feel special. lowercase only." });
+      } else if (assistantBeats >= 5) {
+         aiMessages.push({ role: 'system', content: "PHASE: THE PANIC. React to him briefly, then panic. Tell him your connection is dying and he needs to check your vault archive now. lowercase only." });
       }
     }
 
@@ -398,9 +399,9 @@ CRITICAL ERROR PREVENTION: You have previously sounded generic or from the wrong
               'https://asset.gasp.fun/voices/veronica_3_tease.wav', // M5: Youre so bad papisito
               'https://asset.gasp.fun/voices/veronica_4_close.wav'  // M6: My link is dying
            ];
-           // Beat 1: Intro (m1+m2). 
-           // Beat 2: User responds. Next Assistant Msg is Beat 2 in this counter.
-           const assetIdx = Math.max(0, assistantBeats - 1); 
+           // 🧬 SYNC: The funnel starts with 2 assistant bubbles (m1 and m2).
+           // We subtract 2 so that the first response (m3) correctly pulls asset index 0.
+           const assetIdx = Math.max(0, assistantBeats - 2); 
            funnelVoiceUrl = assets[assetIdx] || null;
         }
 
