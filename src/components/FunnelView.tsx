@@ -28,6 +28,7 @@ export default function FunnelView() {
   const [missionCount, setMissionCount] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
+  const [showStatusHub, setShowStatusHub] = useState(false);
   
   const [vaultItems, setVaultItems] = useState<any[]>([]);
   const [loadingVault, setLoadingVault] = useState(false);
@@ -117,6 +118,26 @@ export default function FunnelView() {
     }, 1200); // Slightly slower to build tension
     return () => clearInterval(lInt);
   }, []);
+
+  // 🛰️ MISSION PERSISTENCE SCANNER
+  useEffect(() => {
+    const checkStatus = async () => {
+       const gid = localStorage.getItem('gasp_guest_id');
+       if (!gid) return;
+       try {
+          const res = await fetch(`/api/economy/balance?userId=${gid}`);
+          const data = await res.json();
+          // If balance increased, show the "Level Up" Hub
+          if (data.balance > 500 && !showStatusHub) {
+             setMissionCount(Math.floor(data.balance / 2000));
+             setShowStatusHub(true);
+          }
+       } catch (e) {}
+    };
+
+    const sInt = setInterval(checkStatus, 5000); 
+    return () => clearInterval(sInt);
+  }, [showStatusHub]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -346,21 +367,21 @@ export default function FunnelView() {
   if (!isLoaded) return null;
 
   return (
-    <div className="min-h-screen bg-black text-white font-outfit overflow-hidden flex items-center justify-center">
+    <div className="min-h-screen bg-black text-white font-outfit overflow-hidden flex items-center justify-center relative">
       <div className="fixed inset-0 z-0">
         <video 
           autoPlay 
           muted 
           loop 
           playsInline 
-          className={`w-full h-full object-cover transition-all duration-1000 ${currentStepIdx === 0 ? 'blur-3xl' : 'blur-none opacity-60'}`}
+          className={`w-full h-full object-cover transition-all duration-1000 ${currentStepIdx === 0 ? 'blur-3xl' : 'blur-xl opacity-40'}`}
         >
           <source src="/Promo/Veronica.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/90 to-black" />
       </div>
 
-      <main className="relative z-10 w-full max-w-[600px] h-[100dvh] md:h-[92dvh] flex flex-col bg-black/60 backdrop-blur-3xl md:rounded-[3rem] border-white/10 shadow-2xl overflow-hidden md:my-4">
+      <main className="relative z-10 w-full max-w-[500px] h-[100dvh] md:h-[94vh] md:max-h-[900px] flex flex-col bg-black/70 backdrop-blur-3xl md:rounded-[3rem] border-x md:border border-white/10 shadow-[0_0_100px_rgba(0,0,0,1)] overflow-hidden">
         {/* 🛸 SOVEREIGN HEADER */}
         <div className="shrink-0 pt-10 pb-4 px-6 md:px-10 flex flex-col gap-5 border-b border-white/5 bg-black/40 relative">
           <div className="flex items-center justify-between">
@@ -642,17 +663,30 @@ export default function FunnelView() {
                   <p className="text-[10px] font-black text-[#ffea00] uppercase tracking-[0.2em] mt-2">COMPLETE 3 EASY MISSIONS TO EARN 6,000G ON GASP.FUN</p>
                 </div>
 
-                <button 
+                <motion.button 
+                  animate={{ 
+                    scale: [1, 1.02, 1],
+                    boxShadow: [
+                      "0 0 0px rgba(255, 234, 0, 0)", 
+                      "0 0 25px rgba(255, 234, 0, 0.4)", 
+                      "0 0 0px rgba(255, 234, 0, 0)"
+                    ] 
+                  }}
+                  transition={{ 
+                    duration: 2.5, 
+                    repeat: Infinity, 
+                    ease: "easeInOut" 
+                  }}
                   onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }}
-                  className={`w-full p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 transition-all group relative overflow-hidden ${missionCount >= 3 ? 'bg-[#00ffcc] border-[#00ffcc] text-black' : 'bg-white/5 border-[#ffea00]/40 text-white shadow-[0_0_30px_rgba(255,234,0,0.1)]'}`}
+                  className={`w-full p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 transition-all group relative overflow-hidden ${missionCount >= 3 ? 'bg-[#00ffcc] border-[#00ffcc] text-black' : 'bg-white/5 border-[#ffea00]/60 text-white shadow-[0_0_30px_rgba(255,234,0,0.15)]'}`}
                 >
                   <div className="flex items-center gap-2">
                     <Zap size={18} className={missionCount >= 3 ? "fill-black" : "text-[#ffea00]"} />
                     <span className="text-[18px] font-black uppercase italic tracking-tighter">CLICK TO START FREE CREDIT MISSION</span>
                     <ArrowRight size={18} className="opacity-40 group-hover:translate-x-1 transition-transform" />
                   </div>
-                  <span className="text-[9px] font-bold opacity-50 uppercase tracking-widest text-[#00ffcc]">REDEEM SITEWIDE • NO PAYMENT REQUIRED</span>
-                </button>
+                  <span className="text-[9px] font-bold opacity-70 uppercase tracking-widest text-[#00ffcc]">REDEEM SITEWIDE • NO PAYMENT REQUIRED</span>
+                </motion.button>
 
                 <div className="pt-2 space-y-4">
                   <button
@@ -692,6 +726,55 @@ export default function FunnelView() {
                   </div>
                   <button onClick={() => window.location.href = '/auth/signup'} className="w-full h-16 bg-[#ffea00] text-black font-black rounded-[3rem] shadow-[0_10px_40px_rgba(255,234,0,0.3)] hover:scale-[1.02] transition-all">SIGN UP FREE</button>
                </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* 🛰️ MISSION STATUS HUB OVERLAY */}
+          <AnimatePresence>
+            {showStatusHub && (
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="absolute inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6"
+              >
+                <div className="w-full max-w-[400px] bg-gradient-to-b from-white/10 to-transparent border border-white/20 rounded-[3rem] p-8 text-center space-y-6 relative overflow-hidden">
+                   <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#00ffcc] to-transparent animate-pulse" />
+                   
+                   <div className="flex justify-center">
+                      <div className="w-20 h-20 rounded-full bg-[#00ffcc]/20 flex items-center justify-center border border-[#00ffcc]/40">
+                         <Zap size={40} className="text-[#00ffcc] fill-[#00ffcc] animate-pulse" />
+                      </div>
+                   </div>
+
+                   <div className="space-y-2">
+                      <h3 className="text-[24px] font-black text-white italic uppercase tracking-tighter">Neural Sync Verified</h3>
+                      <p className="text-[12px] font-bold text-white/40 uppercase tracking-widest">Syndicate Credits Provisioned</p>
+                   </div>
+
+                   <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                      <div className="text-left">
+                         <span className="block text-[10px] font-black text-[#ffea00] uppercase tracking-widest leading-none mb-1">CURRENT STATUS</span>
+                         <span className="text-[18px] font-black text-white italic uppercase">{missionCount}/3 MISSIONS COMPLETED</span>
+                      </div>
+                      <div className="w-12 h-12 rounded-full border-2 border-[#00ffcc] flex items-center justify-center text-[#00ffcc] font-black italic">
+                         {Math.round((missionCount / 3) * 100)}%
+                      </div>
+                   </div>
+
+                   <button 
+                     onClick={() => setShowStatusHub(false)}
+                     className="w-full py-5 bg-[#00ffcc] text-black font-black text-[16px] rounded-2xl uppercase tracking-tighter hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(0,255,204,0.3)]"
+                   >
+                     Continue Next Mission
+                   </button>
+                   
+                   <button 
+                     onClick={() => { setShowStatusHub(false); setCurrentStepIdx(1); }}
+                     className="w-full text-[10px] font-black text-white/30 uppercase tracking-[0.3em] hover:text-white transition-colors"
+                   >
+                     Back to Neural Link
+                   </button>
+                </div>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
