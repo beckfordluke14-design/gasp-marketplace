@@ -70,10 +70,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 setBountyAlert({ amount: bonusAmount, active: true });
                 setTimeout(() => setBountyAlert(prev => ({ ...prev, active: false })), 5000);
 
-                const fresh = await fetch(`/api/economy/balance?userId=${userId}`).then(r => r.json());
-                if (fresh.success) {
-                  setProfile((prev: any) => prev ? { ...prev, credit_balance: fresh.balance } : prev);
-                }
+                // 🏦 INSTANT TRUST: Set balance directly from the claim result
+                const newBalance = claimData.balance || bonusAmount;
+                setProfile((prev: any) => prev ? { ...prev, credit_balance: newBalance } : prev);
               }
           }).catch(() => {});
         }

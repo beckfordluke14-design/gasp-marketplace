@@ -197,14 +197,14 @@ ${typingDirective}
 
     let orResult: any;
     try {
-        const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        const orResponse = await fetch('https://api.x.ai/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+                'Authorization': `Bearer ${process.env.XAI_API_KEY || process.env.OPENROUTER_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'x-ai/grok-2-mini', // 🧬 ECONOMY STABLE (Cheapest & Fastest)
+                model: 'grok-2-mini', 
                 messages: [
                     { role: 'system', content: brainPrompt },
                     ...messages.slice(-10).filter((m: any) => m.role !== 'system')
@@ -215,10 +215,10 @@ ${typingDirective}
         orResult = await orResponse.json();
         
         if (!orResult.choices?.[0]) {
-           throw new Error('Primary Brain Offline');
+           throw new Error('Direct xAI Offline');
         }
     } catch (e) {
-        console.warn('[Neural Fallback Triggered]: Primary model failed. Routing to Grok-2 core.');
+        console.warn('[xAI Direct Fail]: Attempting OpenRouter Fallback.');
         const fbResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -226,7 +226,7 @@ ${typingDirective}
                 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'x-ai/grok-2', // 🛡️ GROK STABLE FALLBACK
+                model: 'x-ai/grok-2-mini', 
                 messages: [
                     { role: 'system', content: brainPrompt },
                     ...messages.slice(-10).filter((m: any) => m.role !== 'system')
@@ -289,6 +289,18 @@ ${typingDirective}
 
   } catch (e: any) {
     console.error('[Main Chat Error]:', e);
-    return new Response(e.message, { status: 500 });
+    
+    // 🛡️ RECOVERY STREAM: Silent Fallback to prevent dead-UI
+    const encoder = new TextEncoder();
+    const fallbackText = "hold on... i'm having a little trouble with my connection 🫦 one sec while i refresh!!";
+    
+    const readable = new ReadableStream({
+      async start(controller) {
+        controller.enqueue(encoder.encode(`0:${JSON.stringify(fallbackText)}\n`));
+        controller.close();
+      }
+    });
+
+    return new Response(readable, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   }
 }

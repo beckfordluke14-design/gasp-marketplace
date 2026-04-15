@@ -55,25 +55,26 @@ Respond in JSON: { "text_message": "..." }
 
     let orResult: any;
     try {
-        const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        const orResponse = await fetch('https://api.x.ai/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+                'Authorization': `Bearer ${process.env.XAI_API_KEY || process.env.OPENROUTER_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'x-ai/grok-2-mini', // 🧬 ECONOMY STABLE (Cheapest & Fastest)
+                model: 'grok-2-mini', 
                 messages: [
                     { role: 'system', content: brainPrompt },
                     ...messages.slice(-10)
                 ],
+                stream: false, // xAI supports standard completions
                 response_format: { type: "json_object" }
             })
         });
         orResult = await orResponse.json();
-        if (!orResult.choices?.[0]) throw new Error('Primary Brain Offline');
+        if (!orResult.choices?.[0]) throw new Error('Direct xAI Offline');
     } catch (e) {
-        console.warn('[Funnel Fallback Triggered]: Primary model failed. Routing to Grok-2 core.');
+        console.warn('[xAI Direct Fail]: Attempting OpenRouter Fallback.');
         const fbResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -81,7 +82,7 @@ Respond in JSON: { "text_message": "..." }
                 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'x-ai/grok-2', // 🛡️ GROK STABLE FALLBACK
+                model: 'x-ai/grok-2-mini', 
                 messages: [
                     { role: 'system', content: brainPrompt },
                     ...messages.slice(-10)
@@ -140,6 +141,20 @@ Respond in JSON: { "text_message": "..." }
 
   } catch (err: any) {
     console.error('[Funnel API Error]:', err);
-    return new Response(err.message, { status: 500 });
+    
+    // 🛡️ RECOVERY STREAM: Send a persona-consistent fallback instead of a dead 500
+    const encoder = new TextEncoder();
+    const streamB_Text = "hey amor... i'm having a hard time connecting 😭 give me just a second to find a better signal!!";
+    
+    const readable = new ReadableStream({
+      async start(controller) {
+        controller.enqueue(encoder.encode(`0:${JSON.stringify(streamB_Text)}\n`));
+        controller.close();
+      }
+    });
+
+    return new Response(readable, {
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+    });
   }
 }
