@@ -13,26 +13,27 @@ export async function GET(req: Request) {
   }
   
   // 🧬 SLUG STRIP: Handle Funnel-specific suffixes (e.g. -locked)
-  // 🧬 SMART ID MAPPING
-  const baseId = personaIdRaw.toLowerCase().replace('-locked', '');
-  const shortId = baseId.split('-')[0]; // e.g. "veronica"
+  // 🧬 UNIVERSAL ID RESOLVE (V8.0)
+  const rawId = personaIdRaw.toLowerCase();
+  const baseId = rawId.replace('-locked', '');
+  const shortId = baseId.split('-')[0];
 
   try {
-    // 🛡️ TEASER ENGINE: Fetch posts matching either the full slug or the short name
+    // 🛡️ TEASER ENGINE: Precision & Fallback Search
     const queryText = `
       SELECT 
         p.*,
         EXISTS (
           SELECT 1 FROM user_vault_unlocks u 
-          WHERE u.post_id = p.id AND u.user_id = $3
+          WHERE u.post_id = p.id AND u.user_id = $4
         ) as is_unlocked
       FROM posts p
-      WHERE (p.persona_id = $1 OR p.persona_id = $2) 
+      WHERE (LOWER(p.persona_id) = $1 OR LOWER(p.persona_id) = $2 OR LOWER(p.persona_id) = $3) 
         AND p.is_vault = TRUE
       ORDER BY p.created_at DESC
     `;
 
-    const { rows: items } = await db.query(queryText, [baseId, shortId, userId || 'GUEST_0']);
+    const { rows: items } = await db.query(queryText, [rawId, baseId, shortId, userId || 'GUEST_0']);
 
     return NextResponse.json({ 
         success: true, 
