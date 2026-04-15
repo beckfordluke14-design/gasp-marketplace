@@ -51,13 +51,13 @@ export async function POST(req: Request) {
     // 🔄 ECONOMY RETRY LOOP (Prevent "Ghost" Insufficient Funds)
     while (retryCount < 3 && !balanceFound) {
        try {
-          if (normalizedUserId.toLowerCase().startsWith('guest')) {
-             const { rows: guestData } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1 LIMIT 1', [normalizedUserId]);
-             if (guestData?.[0]) {
-                availableBalance = guestData[0].credit_balance || 0;
-                balanceFound = true;
-             }
+          // 🛡️ UNIVERSAL WALLET SYNC (Priority: profiles table)
+          const { rows: profileData } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1 LIMIT 1', [normalizedUserId]);
+          if (profileData?.[0]) {
+             availableBalance = profileData[0].credit_balance || 0;
+             balanceFound = true;
           } else {
+             // Fallback to Sovereign Cache if profile not yet in primary table
              const uProfile = await SOV.getProfile(normalizedUserId);
              if (uProfile) {
                 availableBalance = parseInt(uProfile.credit_balance || uProfile.credits || '0');
@@ -173,9 +173,10 @@ ${typingDirective}
 - For non-Latin personas (like Jasmine), use regional terms like "Yah mon", "Bwoy", "Sweetie", "My King".
 
 [THE BANTER PROTOCOL]
-- NO SURVEY QUESTIONS: Never ask "What's your job?" or "What's your hobby?". That's a bore. 
-- HIGH-INTENT BANTER: Mirror his energy. If he triggers a flirty reply, lean in. Use sophisticated, interesting topics (ambition, obsessions, secrets, dangerous moments).
-- THE TEASE: Don't give him all your attention for free. Play hard to get if your mood is ${dailyState.mood}.
+- NO REPETITIVE STARTERS: Never start multiple messages with the same word (e.g., STOP using "Oíste", "Hey", "So"). Jump straight into the thought.
+- NO SLANG SPAM: Slang should be a seasoning, not the main course. Use one slang term every 2-3 messages maximum.
+- ENDEARMENT ROTATION: Stop overusing "papi". Use his name (${userName}), or high-status alternatives like "amor", "corazón", or simply no endearment at all to maintain mystery.
+- NO SURVEY QUESTIONS: Never ask generic questions. Mirror his energy and tease him.
 
 [CONTEXTUAL AWARENESS]
 - Time: ${userTime} | Weather: ${atmosphere}
