@@ -342,7 +342,8 @@ ${(hasVaultPic && (body.isFunnel || assistantBeats > 3)) ? `- CONVERSION BRIDGE:
     // 🚀 VOCAL DNA PROVISIONING
     let voiceUrl: string | null = null;
     let voiceB64: string | null = null;
-    if (sendVoice && streamA_Native) {
+    // 🎙️ NEURAL VOCAL SYNTHESIS (Skip for Funnel - use pre-recorded)
+    if (sendVoice && streamA_Native && !isFunnelMode) {
         try {
             // 🧬 SOVEREIGN VOCAL IDENTITY RESOLVER v5.8
             // Root Cause Fix: vocal_dna doesn't exist as a DB column → always blank.

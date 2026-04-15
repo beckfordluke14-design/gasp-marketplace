@@ -226,7 +226,7 @@ export default function FunnelView() {
           action: 'log-funnel-lead',
           payload: {
             guestId: gid,
-            firstMessage: inputValue,
+            firstMessage: userMsg.content,
             source: attribution.source || 'direct',
             campaign: attribution.campaign || 'organic',
             creative: attribution.creative || 'none',
@@ -248,7 +248,7 @@ export default function FunnelView() {
 
       try {
         console.log('[Funnel] Fetching neural response for messages:', messages.length);
-        const res = await fetch('/api/chat', {
+        const res = await fetch('/api/chat/funnel', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           signal: controller.signal,
