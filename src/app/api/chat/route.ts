@@ -41,30 +41,62 @@ export async function POST(req: Request) {
     
     if (!profileItem) throw new Error(`Profile Offline: ${finalProfileId}`);
 
-    // 🛡️ SYNDICATE GUEST & CREDIT ENFORCEMENT
+    // 🛡️ SYNDICATE GUEST & CREDIT ENFORCEMENT (High-Availability Patch)
     const COST_MESSAGE_TEXT = 50; 
     let currentCount = 0; 
+    let retryCount = 0;
+    let balanceFound = false;
+    let availableBalance = 0;
 
-    if (normalizedUserId.toLowerCase().startsWith('guest')) {
+    // 🔄 ECONOMY RETRY LOOP (Prevent "Ghost" Insufficient Funds)
+    while (retryCount < 3 && !balanceFound) {
        try {
-          const { rows: guestData } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1 LIMIT 1', [normalizedUserId]);
-          const guestBalance = guestData?.[0]?.credit_balance || 0;
-
-          if (guestBalance >= COST_MESSAGE_TEXT) {
-             await db.query('UPDATE profiles SET credit_balance = credit_balance - $1, updated_at = NOW() WHERE id = $2', [COST_MESSAGE_TEXT, normalizedUserId]);
+          if (normalizedUserId.toLowerCase().startsWith('guest')) {
+             const { rows: guestData } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1 LIMIT 1', [normalizedUserId]);
+             if (guestData?.[0]) {
+                availableBalance = guestData[0].credit_balance || 0;
+                balanceFound = true;
+             }
           } else {
-             const { rows: preCheck } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [normalizedUserId]);
-             currentCount = parseInt(preCheck[0].count || '0');
-             if (currentCount >= 5) return new Response('DEPLETED', { status: 402 });
+             const uProfile = await SOV.getProfile(normalizedUserId);
+             if (uProfile) {
+                availableBalance = parseInt(uProfile.credit_balance || uProfile.credits || '0');
+                balanceFound = true;
+             }
           }
-       } catch (limitErr) { console.error('[Wall Pre-Check Fail]:', limitErr); }
+          if (!balanceFound) await new Promise(r => setTimeout(r, 400)); // Short breath before retry
+          retryCount++;
+       } catch (e) {
+          console.error(`[Economy Retry ${retryCount}] Fail:`, e);
+          await new Promise(r => setTimeout(r, 400));
+          retryCount++;
+       }
+    }
+
+    // 💸 BALANCING THE LEDGER
+    if (balanceFound) {
+        if (availableBalance < COST_MESSAGE_TEXT) {
+            // Check if user has free messages left (Guest Only)
+            if (normalizedUserId.toLowerCase().startsWith('guest')) {
+                const { rows: preCheck } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [normalizedUserId]);
+                currentCount = parseInt(preCheck[0].count || '0');
+                if (currentCount >= 5) return new Response('DEPLETED', { status: 402 });
+            } else {
+                return new Response('INSUFFICIENT_FUNDS', { status: 402 });
+            }
+        } else {
+            // Deduct credits for the message
+            try {
+               if (normalizedUserId.toLowerCase().startsWith('guest')) {
+                  await db.query('UPDATE profiles SET credit_balance = credit_balance - $1, updated_at = NOW() WHERE id = $2', [COST_MESSAGE_TEXT, normalizedUserId]);
+               } else {
+                  await SOV.burnCredits(normalizedUserId, COST_MESSAGE_TEXT, 'chat_message', { personaId: DB_PERSONA_ID });
+               }
+            } catch (deductErr) { console.error('[Debit Failure]:', deductErr); }
+        }
     } else {
-       try {
-          const uProfile = await SOV.getProfile(normalizedUserId);
-          if (!uProfile || parseInt(uProfile.credit_balance || uProfile.credits || '0') < COST_MESSAGE_TEXT) {
-             return new Response('INSUFFICIENT_FUNDS', { status: 402 });
-          }
-       } catch (creditErr) { console.error('[Gasp Credit Sync Fail]:', creditErr); }
+       // Total DB Failure -> Fallback to "Graceful Flow" for high-intent users
+       console.warn('[Critical]: Economy node unreachable. Entering Grace Mode.');
     }
 
     const persistentMessages = messages.filter((m: any) => m.role !== 'system');
@@ -198,7 +230,7 @@ ${typingDirective}
         dataOutput = { text_message: rawContent.trim(), audio_script: rawContent.trim() };
     }
 
-    const streamB_Text = dataOutput.text_message || "hey give me a sec... 🙈";
+    const streamB_Text = dataOutput.text_message || "hold on... just thinking about what you just said 🫦";
     let streamA_Native = dataOutput.audio_script || "";
 
     const sendVoice = shouldSendVoiceNote(finalProfileId, streamA_Native.length);
@@ -230,9 +262,7 @@ ${typingDirective}
             await db.query('INSERT INTO user_persona_stats (user_id, persona_id, bond_score) VALUES ($1, $2, 1) ON CONFLICT (user_id, persona_id) DO UPDATE SET bond_score = user_persona_stats.bond_score + 1', [finalUserId, DB_PERSONA_ID]);
             await db.query('INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, is_funnel, created_at) VALUES ($1, $2, $3, $4, $5, $6, FALSE, NOW())', [finalUserId, DB_PERSONA_ID, 'assistant', streamB_Text, voiceUrl, streamA_Native]);
             await db.query('INSERT INTO chat_messages (user_id, persona_id, role, content, is_funnel, created_at) VALUES ($1, $2, $3, $4, FALSE, NOW())', [finalUserId, DB_PERSONA_ID, 'user', messages[messages.length - 1].content]);
-            if (!finalUserId.toLowerCase().startsWith('guest')) {
-               await SOV.burnCredits(finalUserId, COST_MESSAGE_TEXT, 'chat_message', { personaId: profileItem.id });
-            }
+            // Credits already deducted at high-availability gate above
             await summarizeAndStore([...messages, { role: 'assistant', content: streamB_Text }], finalUserId, finalProfileId);
         } catch (dbErr) { console.error('[Persistence Fail]:', dbErr); }
 
