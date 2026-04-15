@@ -121,8 +121,8 @@ export default function ChatDrawer({
     }
   };
 
-  const sendMessage = useCallback(async (text: string) => {
-    if (!text.trim() || isLoading) return;
+  const sendMessage = useCallback(async (text: string, isNudge: boolean = false) => {
+    if (!text.trim() || (isLoading && !isNudge)) return;
     const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     const speedMult = personaState?.responseSpeedMultiplier || (0.8 + Math.random() * 1.5);
     const COST_MESSAGE_TEXT = 50;
@@ -135,8 +135,10 @@ export default function ChatDrawer({
        return;
     }
 
-    const userMsg = { id: Date.now().toString(), role: 'user', content: text };
-    setMessages(prev => [...prev, userMsg]);
+    if (!isNudge) {
+      const userMsg = { id: Date.now().toString(), role: 'user', content: text };
+      setMessages(prev => [...prev, userMsg]);
+    }
     setInput('');
     setIsLoading(true);
     setIsTyping(false);
@@ -149,12 +151,16 @@ export default function ChatDrawer({
       setIsTyping(true);
       const startTypingDelay = (1000 + Math.random() * 2000) / speedMult;
       await wait(startTypingDelay);
+    const msgPayload = isNudge 
+      ? [...messages, { role: 'user', content: text }]
+      : [...messages, { id: Date.now().toString(), role: 'user', content: text }];
 
+    try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages, userMsg],
+          messages: msgPayload,
           userId: idToUse,
           personaId: profileId,
           userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -283,6 +289,22 @@ export default function ChatDrawer({
              });
              const fJson = await fRes.json();
              if (fJson.success) setIsFollowing(fJson.isFollowing);
+           }
+           
+           // 🧬 GHOST RE-ENGAGEMENT: If last message was from user and was more than 2 hours ago, force a nudge.
+           if (result.data.messages?.length > 0) {
+              const lastMsgs = result.data.messages;
+              const last = lastMsgs[lastMsgs.length - 1];
+              if (last.role === 'user') {
+                 const lastDate = new Date(last.created_at).getTime();
+                 const diffHours = (Date.now() - lastDate) / (1000 * 60 * 60);
+                 if (diffHours > 2) {
+                    console.log('📡 [Ghost Protocol] User inactive for 2h+. Triggering nudge...');
+                    setTimeout(() => {
+                       sendMessage(`[NUDGE]: (I've been waiting for hours. State your current mood: ${getPersonaDailyState(profileId).mood}. Mention how you are bored/lonely/hungry and ask where he went.)`, true);
+                    }, 4000);
+                 }
+              }
            }
         }
       } catch (e) {
