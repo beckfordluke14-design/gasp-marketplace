@@ -88,6 +88,7 @@ const PERSONA_VOICE_OVERRIDE: Record<string, string> = {
     // === LATINAS ===
     'isabella':     VOX.AOEDE,    // Newark Afro-Latina — bubbly & warm
     'valeria':      VOX.KORE,     // Medellín Paisa — expressive & young
+    'veronica-medellin-locked': VOX.KORE, // 🔥 2.25 Kore Elite Mapping
     'valentina':    VOX.KORE,     // Colombia/Caribbean — sassy & expressive
     'bianca':       VOX.KORE,     // Cartagena Costeña — sassy & loud
     'ana':          VOX.LEDA,     // Buenos Aires — warm & mature
@@ -244,7 +245,7 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
         let geminiVoice = GEN_VOX.ZEPHYR; // GLOBAL SOVEREIGN BASE
         
         // Pitch-Aware Dispatcher
-        if (voiceKey.includes('sassy') || personaId.includes('valentina') || personaId.includes('cartagena')) {
+        if (voiceKey.includes('sassy') || personaId.includes('valentina') || personaId.includes('cartagena') || personaId.includes('veronica')) {
             geminiVoice = GEN_VOX.KORE; 
         } else if (voiceKey.includes('bubbly') || personaId.includes('newark')) {
             geminiVoice = GEN_VOX.AOEDE;
