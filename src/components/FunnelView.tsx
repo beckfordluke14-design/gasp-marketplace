@@ -266,15 +266,16 @@ export default function FunnelView() {
     e.preventDefault();
     if (!inputValue.trim() || currentStepIdx !== 1) return;
     const userMsg = { id: Date.now().toString(), role: 'user', content: inputValue };
-    setMessages(prev => [...prev, userMsg]);
+    const newHistory = [...messages, userMsg];
+    setMessages(newHistory);
     setInputValue('');
     setTimeout(() => {
        setIsTyping(true);
-       executeNeuralResponse(userMsg);
+       executeNeuralResponse(userMsg, newHistory);
     }, 1200);
   };
 
-  const executeNeuralResponse = (userMsg: any) => {
+  const executeNeuralResponse = (userMsg: any, currentHistory: any[]) => {
     if (messages.length === 1) {
       const gid = localStorage.getItem('gasp_guest_id') || 'ANON';
       const attribution = JSON.parse(localStorage.getItem('gasp_attribution') || '{}');
@@ -313,10 +314,10 @@ export default function FunnelView() {
           headers: { 'Content-Type': 'application/json' },
           signal: controller.signal,
           body: JSON.stringify({
-            messages: [
-               ...(messages || []).map(m => ({ role: m.role || 'user', content: m.content || '' })),
-               { role: 'user', content: userMsg?.content || '' }
-            ],
+            messages: (currentHistory || []).map(m => ({ 
+              role: m.role || 'user', 
+              content: m.content || '' 
+            })),
             userId: typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : 'ANON',
             personaId: 'veronica-medellin-locked',
             isFunnel: true,

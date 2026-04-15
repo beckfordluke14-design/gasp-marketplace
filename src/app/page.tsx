@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, MessageSquare, Loader2, ArrowRight } from 'lucide-react';
 import GlobalFeed from '@/components/GlobalFeed';
@@ -25,6 +25,8 @@ import { Star } from 'lucide-react';
 import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
 
 function MarketplaceContent() {
+  const router = useRouter();
+  const { authenticated, profile } = useUser();
   const [mounted, setMounted] = useState(false);
   const [dbProfiles, setDbProfiles] = useState<any[]>([]);
   const [openChatIds, setOpenChatIds] = useState<string[]>([]);
@@ -283,7 +285,6 @@ function MarketplaceContent() {
     setMinimizedIds(prev => prev.filter(mid => mid !== id));
   };
 
-  const { profile } = useUser();
   const idToUse = profile?.id || guestId || '';
 
   const sortedProfiles = useMemo(() => {

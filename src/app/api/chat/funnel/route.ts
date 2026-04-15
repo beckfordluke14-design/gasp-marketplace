@@ -70,6 +70,10 @@ Respond in JSON: { "text_message": "..." }
     });
 
     const orResult = await orResponse.json();
+    if (orResult.error) {
+       console.error('[OpenRouter Error]:', orResult.error);
+       throw new Error('Brain disconnect');
+    }
     const rawContent = orResult.choices?.[0]?.message?.content || "";
     let streamB_Text = "hey... give me a sec 🙈";
     try {
