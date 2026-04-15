@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     const GUEST_LIMIT = isFunnel ? 10 : 5; 
     const COST_MESSAGE_TEXT = 50; 
 
-    if (normalizedUserId.startsWith('guest-')) {
+    if (normalizedUserId.toLowerCase().startsWith('guest-') || normalizedUserId.toLowerCase().startsWith('guest_')) {
        try {
           // 🏮 CHECK AQUIRED CREDITS FIRST: If a guest did a mission, they are VIP
           const { rows: guestData } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1 LIMIT 1', [normalizedUserId]);

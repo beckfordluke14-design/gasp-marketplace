@@ -126,6 +126,25 @@ export default function FunnelView() {
     }
   }, [currentStepIdx]);
 
+  // 🧬 FUNNEL ORCHESTRATOR: Watch for the final neural heartbeat to trigger the conversion wall
+  useEffect(() => {
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.media_url?.includes('veronica_4_close.wav') && !hasIntercepted.current && !isRecording) {
+      hasIntercepted.current = true;
+      // Drop the visual tease right after she sends the panic voice note
+      setTimeout(() => {
+         setIsTyping(true);
+         setTimeout(() => {
+            setMessages(prev => [...prev, { id: 'tease_' + Date.now(), role: 'assistant', content: 'tease_module', isTease: true }]);
+            setIsTyping(false);
+            // Move to the final security wall
+            setTimeout(() => { setCurrentStepIdx(2); }, 5000);
+         }, 1500);
+      }, 4000); 
+    }
+  }, [messages, isRecording]);
+
+
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || currentStepIdx !== 1) return;
@@ -171,31 +190,8 @@ export default function FunnelView() {
       }).catch(() => {});
     }
     
-    // 🛡️ CONVERSION GATE: Pivot after 5 message beats
-    const totalMsgCount = messages.length;
-    if (totalMsgCount >= 5 && !hasIntercepted.current) {
-      hasIntercepted.current = true;
-      setTimeout(() => {
-        setMessages(prev => [...prev, { id: 'int_1_' + Date.now(), role: 'assistant', content: `hold on... my session just got flagged 😳` }]);
-        setIsTyping(true);
-        setTimeout(() => {
-          setMessages(prev => [...prev, { id: 'int_2_' + Date.now(), role: 'assistant', content: `ugh it says i can't send you anything private until u verify first... there's a 100% free option tho just do it real quick papi pls! 🙏🌶️` }]);
-          setIsTyping(true);
-          setTimeout(() => {
-            setMessages(prev => [...prev, { id: 'pre_tease_' + Date.now(), role: 'assistant', content: `ok sending u a lil preview... and trust me the vault is WAY spicier than this 😏🍑` }]);
-            setIsTyping(false);
-            setTimeout(() => {
-              setIsTyping(true);
-              setTimeout(() => {
-                setMessages(prev => [...prev, { id: 'tease_' + Date.now(), role: 'assistant', content: 'tease_module', isTease: true }]);
-                setTimeout(() => { setCurrentStepIdx(2); setIsTyping(false); }, 6000);
-              }, 1200);
-            }, 800);
-          }, 1800);
-        }, 1500);
-      }, 800);
-      return;
-    }
+    // The AI Engine now handles the conversation dynamically.
+    // Transition to the wall is handled by the useEffect watching for the final voice note.
 
     (async () => {
       const controller = new AbortController();
