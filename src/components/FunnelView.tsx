@@ -390,6 +390,14 @@ export default function FunnelView() {
         }
       } catch (err: any) {
         setIsTyping(false);
+        // 🚀 AUTO-RESUME: Silently retry the last user message after 4s
+        // Prevents the funnel from going dead without the user double-texting
+        const lastUserMsg = [...(messages || [])].reverse().find((m: any) => m.role === 'user');
+        if (lastUserMsg) {
+          setTimeout(() => {
+            executeNeuralResponse(lastUserMsg, messages);
+          }, 4000);
+        }
       } finally {
         setIsTyping(false);
       }

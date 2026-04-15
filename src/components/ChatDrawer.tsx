@@ -244,7 +244,14 @@ export default function ChatDrawer({
       }
     } catch (err: any) {
       console.error('[Terminal Error]:', err);
-      setMessages(prev => [...prev, { id: 'err-' + Date.now(), role: 'assistant', content: 'hold on okay , give me a sec' }]);
+      // 🚀 AUTO-RESUME: Find the last unanswered user message and retry silently
+      // This prevents the user from having to double-text to wake the persona back up
+      const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user');
+      if (lastUserMsg) {
+        setTimeout(() => {
+          sendMessage(lastUserMsg.content);
+        }, 4000);
+      }
     } finally {
       setIsLoading(false);
       setIsTyping(false);
