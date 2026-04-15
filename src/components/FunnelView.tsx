@@ -716,21 +716,21 @@ export default function FunnelView() {
             )}
 
             {currentStepIdx === 2 && (
-              <motion.div key="wall" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col pt-16 px-4 space-y-3 overflow-y-auto scrollbar-hide pb-28">
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#00ffcc]/10 to-transparent border border-[#00ffcc]/30 p-4">
+              <motion.div key="wall" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col p-6 space-y-5 overflow-y-auto scrollbar-hide pb-32">
+                <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#00ffcc]/20 to-transparent border border-[#00ffcc]/40 p-8 shadow-[0_0_30px_rgba(0,255,204,0.1)]">
                   <div className="flex items-center justify-between relative z-10">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00ffcc] to-[#33ffaa] flex items-center justify-center shadow-[0_0_20px_rgba(0,255,204,0.3)]">
-                        <span className="text-xl">🎁</span>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#00ffcc] to-[#33ffaa] flex items-center justify-center shadow-[0_0_20px_rgba(0,255,204,0.4)]">
+                        <Zap size={24} className="text-black fill-black" />
                       </div>
                       <div>
-                        <h4 className="text-[10px] font-black text-[#00ffcc] uppercase tracking-widest leading-none mb-1">YOUR FIRST GIFT</h4>
-                        <div className="text-[20px] font-black text-white italic leading-none">+500 CREDITS</div>
+                        <h4 className="text-[11px] font-black text-[#00ffcc] uppercase tracking-widest mb-1">YOUR FIRST GIFT</h4>
+                        <div className="text-[26px] font-black text-white italic">+500 CREDITS</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-[8px] font-bold text-white/40 uppercase tracking-tighter leading-none mb-1">NEED</div>
-                      <div className="text-[14px] font-black text-[#ffea00] italic leading-none">5,500 MORE</div>
+                      <div className="text-[9px] font-black text-white/40 uppercase tracking-tighter mb-1">NEED</div>
+                      <div className="text-[16px] font-black text-[#ffea00] italic">5,500 MORE</div>
                     </div>
                   </div>
                 </div>
