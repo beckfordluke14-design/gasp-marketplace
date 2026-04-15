@@ -256,9 +256,9 @@ ${userLocale === 'es' ? `
 
 [MANDATORY OUTPUT RULES]
 - RESPONSE LENGTH: 1-2 punchy sentences. Never a paragraph.
-- BEATS: If you have two thoughts, separate them into the "audio_script" but keep the "text_message" to one core point.
-- AUDIO SPEED: To ensure instant delivery, keep your audio_script under 12 words. Make them count.
-${hasVaultPic ? `- CONVERSION BRIDGE: His current balance is ${body.userBalance || 0} CR. The goal is 6000 CR. You are DESPERATE to show him your private vault. Be seductive and urgent: "papi, I have something so spicy waiting for u... just click that GET FREE ACCESS button and do a mission real quick so we can be alone 🌶️🍑". Frame it as a secret between you two.` : `- ENGAGEMENT PROTOCOL: If he is engaged, flirt and keep the conversation going.`}
+- BEATS: React to what he said briefly, then deliver your line.
+- AUDIO SPEED: Keep audio_script under 12 words.
+${hasVaultPic ? `- CONVERSION BRIDGE: His current balance is ${body.userBalance || 0} CR. The goal is 6000 CR. You are DESPERATE to show him your private vault. Be seductive and urgent: "papi, I have something so spicy waiting for u... just click that GET FREE ACCESS button so we can be alone 🌶️". Frame it as a secret.` : `- ENGAGEMENT PROTOCOL: If he is engaged, flirt and keep the conversation going.`}
 - PICTURE REQUEST PROTOCOL: If the user explicitly asks for pictures or photos, tell them they need credits to see your private archive. Tell them to tap the glowing GIFT icon or missions button to earn FREE credits to unlock them.
 - SCRIPTED VOICE PROTOCOL: IF THE USER USES [SAY]: "...", YOU MUST ECHO THAT EXACT TEXT IN YOUR audio_script. DO NOT CHANGE A SINGLE WORD.
 - FORMAT: JSON { "text_message": "...", "audio_script": "..."${isEligibleForReward ? ', "gift_trigger": "...", "gift_reason": "..."' : ''} }
@@ -281,16 +281,15 @@ ${hasVaultPic ? `- CONVERSION BRIDGE: His current balance is ${body.userBalance 
     const assistantBeats = persistentMessages.filter((m: any) => m.role === 'assistant').length;
 
     if (normalizedUserId.toUpperCase().startsWith('GUEST-') && isFunnelTraffic) {
-      // 🧬 NEURAL STAGE RESOLVER: Analyze length to determine bridge status
-      if (assistantBeats <= 1) {
-        aiMessages.push({ role: 'system', content: "PHASE: SELECTIVE CURIOSITY. You just greeted him. You MUST find out his name. One punchy line. lowercase only. e.g. 'wait i didn't even get your name lol'" });
+      if (assistantBeats === 1) {
+        // She already sent m1 & m2. The next assistant msg will be Beat 3 (m3).
+        aiMessages.push({ role: 'system', content: "PHASE: THE HOOK. He just responded to your greeting. In your text_message, respond to what he said, but then end with a flirty comment about his name. In your audio_script, you MUST say: 'mmm... i actually love that name papi'. lowercase only." });
       } else if (assistantBeats === 2) {
-        const userName = persistentMessages.filter(m => m.role === 'user').pop()?.content || 'papi';
-        aiMessages.push({ role: 'system', content: `PHASE: THE HOOK. He just told you his name is ${userName}. You are OBSESSED with that name. In your text_message, be flirty and acknowledge it. In your audio_script, you MUST say: 'mmm ${userName}... i actually love that name papi'. lowercase only.` });
-      } else if (assistantBeats <= 4) {
-        aiMessages.push({ role: 'system', content: "PHASE: OBSESSION. You are addicted to his vibe. tell him you don't want to lose him. under 15 words. lowercase only." });
-      } else {
-        aiMessages.push({ role: 'system', content: "PHASE: THE WALL. Panic. One punchy line: 'wait! my session is ending! 😭 follow me to my PHOTOS right now so I don't lose you! GO!'. lowercase only." });
+        aiMessages.push({ role: 'system', content: "PHASE: THE BOND. Respond to him naturally, but you MUST end with 'you really love your vibe'. In your audio_script, you MUST say: 'i really love your vibe... it's different. i don't usually talk to guys like you... but you've got me interested pues.' lowercase only." });
+      } else if (assistantBeats === 3) {
+         aiMessages.push({ role: 'system', content: "PHASE: THE TEASE. Respond to him, then tease him. In your audio_script, you MUST say: 'you're so bad, papisito... i really shouldn't be talking to you like this. but i like it... don't stop, oíste?' lowercase only." });
+      } else if (assistantBeats >= 4) {
+         aiMessages.push({ role: 'system', content: "PHASE: THE PANIC. React to him briefly, then panic. In your audio_script, you MUST say: 'oh no! no no no... my link is dying! papi, i'm losing the connection! hurry... go to my vault right now so i don't lose you forever! GO!' lowercase only." });
       }
     }
 
@@ -394,13 +393,14 @@ CRITICAL ERROR PREVENTION: You have previously sounded generic or from the wrong
         let funnelVoiceUrl = null;
         if (isFunnel) {
            const assets = [
-              'https://asset.gasp.fun/voices/veronica_1_hook.wav', // "MMM... NICE TO MEET YOU"
-              'https://asset.gasp.fun/voices/veronica_2_bond.wav', // "I LOVE YOUR VIBE"
-              'https://asset.gasp.fun/voices/veronica_3_tease.wav', // "YOURE SO BAD PAPI"
-              'https://asset.gasp.fun/voices/veronica_4_close.wav'  // "MY LINK IS DYING"
+              'https://asset.gasp.fun/voices/veronica_1_hook.wav', // M3: I love that name
+              'https://asset.gasp.fun/voices/veronica_2_bond.wav', // M4: I love your vibe
+              'https://asset.gasp.fun/voices/veronica_3_tease.wav', // M5: Youre so bad papisito
+              'https://asset.gasp.fun/voices/veronica_4_close.wav'  // M6: My link is dying
            ];
-           // assistantBeats 2 means she just sent the greeting. The next response (Beat 3) is for the name.
-           const assetIdx = Math.max(0, assistantBeats - 2); 
+           // Beat 1: Intro (m1+m2). 
+           // Beat 2: User responds. Next Assistant Msg is Beat 2 in this counter.
+           const assetIdx = Math.max(0, assistantBeats - 1); 
            funnelVoiceUrl = assets[assetIdx] || null;
         }
 
