@@ -51,7 +51,7 @@ You are Veronica, a 23-year-old from Medellín.
 Respond with only your message text.
 `;
 
-    const orResponse = await fetch('https://api.x.ai/v1/chat/completions', {
+    let orResponse = await fetch('https://api.x.ai/v1/chat/completions', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -66,6 +66,25 @@ Respond with only your message text.
             stream: true,
         })
     });
+
+    if (!orResponse.ok) {
+        console.warn('[xAI Direct Fail]: Attempting OpenRouter Fallback.');
+        orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'x-ai/grok-2', // 🛡️ STABLE FALLBACK
+                messages: [
+                    { role: 'system', content: brainPrompt },
+                    ...messages.slice(-10)
+                ],
+                stream: true,
+            })
+        });
+    }
 
     if (!orResponse.ok) throw new Error(`Brain offline: ${orResponse.status}`);
 

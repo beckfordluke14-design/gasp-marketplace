@@ -203,6 +203,7 @@ export default function ChatDrawer({
                  const finalDelay = baseDelay / (activeConfig.delayMultiplier * speedMult);
                  await wait(finalDelay);
               }
+            } catch (err) {}
           } else if (line.startsWith('d:')) {
             try {
               const event = JSON.parse(line.slice(2));
@@ -224,10 +225,9 @@ export default function ChatDrawer({
                  }
               }
               if (event?.type === 'balance_refresh') {
-                 // 🏦 INSTANT WALLET SYNC
                  window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
               }
-            } catch {}
+            } catch (err) {}
           } else if (line.startsWith('0:')) {
             try { 
               const text = JSON.parse(line.slice(2)); 
@@ -238,7 +238,7 @@ export default function ChatDrawer({
                 }
                 return [...prev, { id: 'ai-' + Date.now(), role: 'assistant', content: text, audio_script: (isVoiceDetected || (activeConfig as any).isVoice) ? '...' : null }];
               });
-            } catch {}
+            } catch (err) {}
           }
         }
       }
