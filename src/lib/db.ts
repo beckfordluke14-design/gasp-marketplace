@@ -13,9 +13,10 @@ const getPool = () => {
     const pool = new Pool({
         connectionString,
         ssl: { rejectUnauthorized: false },
-        max: 10,           // 🛡️ Optimized for SIAT High-Parallelism
-        idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 5000,
+        max: 30,           // 🚀 BUMPED: Supports 30 simultaneous high-speed intel streams
+        idleTimeoutMillis: 10000,
+        connectionTimeoutMillis: 2000, // ⚡ FAST-FAIL: Triggers our internal retry loop quicker
+        application_name: 'GASP_IMMORTAL_V6'
     });
 
     globalForPool.pool = pool;
