@@ -62,7 +62,7 @@ Respond in JSON: { "text_message": "..." }
                 'Authorization': `Bearer ${process.env.XAI_API_KEY || process.env.OPENROUTER_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'grok-2-mini', 
+                model: 'grok-3-mini', 
                 messages: [
                     { role: 'system', content: brainPrompt },
                     ...messages.slice(-10)
