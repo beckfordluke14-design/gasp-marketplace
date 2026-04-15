@@ -1,6 +1,4 @@
-import { initialProfiles } from '@/lib/profiles';
 import { db } from '@/lib/db';
-import * as SOV from '@/lib/sovereign';
 import { retrieveMemories, getEmbedding } from '@/lib/memory';
 
 export const dynamic = 'force-dynamic';
@@ -50,87 +48,80 @@ You are Veronica, a 23-year-old from Medellín.
       "The Closer. Tell him your connection/link is dying fast and he MUST check your private vault archive right now before he loses u. Be urgent and breathless."
     }
 
-Respond in JSON: { "text_message": "..." }
+Respond with only your message text.
 `;
 
-    let orResult: any;
-    try {
-        const orResponse = await fetch('https://api.x.ai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.XAI_API_KEY || process.env.OPENROUTER_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'grok-3-mini', 
-                messages: [
-                    { role: 'system', content: brainPrompt },
-                    ...messages.slice(-10)
-                ],
-                stream: false, // xAI supports standard completions
-                response_format: { type: "json_object" }
-            })
-        });
-        orResult = await orResponse.json();
-        if (!orResult.choices?.[0]) throw new Error('Direct xAI Offline');
-    } catch (e) {
-        console.warn('[xAI Direct Fail]: Attempting OpenRouter Fallback.');
-        const fbResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'x-ai/grok-2-mini', 
-                messages: [
-                    { role: 'system', content: brainPrompt },
-                    ...messages.slice(-10)
-                ],
-                response_format: { type: "json_object" }
-            })
-        });
-        orResult = await fbResponse.json();
-    }
+    const orResponse = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.XAI_API_KEY || process.env.OPENROUTER_API_KEY}`
+        },
+        body: JSON.stringify({
+            model: 'grok-3-mini', 
+            messages: [
+                { role: 'system', content: brainPrompt },
+                ...messages.slice(-10)
+            ],
+            stream: true,
+        })
+    });
 
-    if (orResult.error) {
-       console.error('[OpenRouter Error]:', orResult.error);
-       throw new Error('Brain disconnect');
-    }
-    const rawContent = orResult.choices?.[0]?.message?.content || "";
-    let streamB_Text = "hey... give me a sec 🙈";
-    try {
-        const parsed = JSON.parse(rawContent);
-        streamB_Text = parsed.text_message || streamB_Text;
-    } catch(e) {
-        streamB_Text = rawContent.trim() || streamB_Text;
-    }
-
-    // 🚀 CHAT PERSISTENCE
-    try {
-        await db.query(
-            'INSERT INTO chat_messages (user_id, persona_id, role, content, is_funnel, created_at) VALUES ($1, $2, $3, $4, TRUE, NOW())',
-            [normalizedUserId, 'veronica-medellin-locked', 'assistant', streamB_Text]
-        );
-        await db.query(
-            'INSERT INTO chat_messages (user_id, persona_id, role, content, is_funnel, created_at) VALUES ($1, $2, $3, $4, TRUE, NOW())',
-            [normalizedUserId, 'veronica-medellin-locked', 'user', messages[messages.length - 1].content]
-        );
-    } catch (dbErr) { console.error('[Funnel DB Fail]:', dbErr); }
+    if (!orResponse.ok) throw new Error(`Brain offline: ${orResponse.status}`);
 
     const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+    const reader = orResponse.body?.getReader();
+
     const readable = new ReadableStream({
       async start(controller) {
-        // Text message
-        controller.enqueue(encoder.encode(`0:${JSON.stringify(streamB_Text)}\n`));
-        
-        // Voice message (Pre-recorded)
-        const assetIdx = Math.max(0, assistantBeats - 2);
-        const voiceUrl = VERONICA_ASSETS[assetIdx] || null;
+        let fullContent = "";
+        let buffer = "";
+
+        // 🚀 PERSIST USER MESSAGE IMMEDIATELY
+        try {
+            await db.query(
+                'INSERT INTO chat_messages (user_id, persona_id, role, content, is_funnel, created_at) VALUES ($1, $2, $3, $4, TRUE, NOW())',
+                [normalizedUserId, 'veronica-medellin-locked', 'user', messages[messages.length - 1].content]
+            );
+        } catch (e) {}
+
+        while (true) {
+            const { done, value } = await reader!.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+                const cleanLine = line.replace(/^data: /, '').trim();
+                if (!cleanLine || cleanLine === '[DONE]') continue;
+
+                try {
+                    const json = JSON.parse(cleanLine);
+                    const delta = json.choices[0]?.delta?.content || "";
+                    if (delta) {
+                        fullContent += delta;
+                        controller.enqueue(encoder.encode(`0:${JSON.stringify(fullContent)}\n`));
+                    }
+                } catch (e) {}
+            }
+        }
+
+        // 🎙️ ATTACH VOICE ASSET & PERSIST ASSISTANT REPLY
+        const voiceUrl = VERONICA_ASSETS[Math.min(assistantBeats, VERONICA_ASSETS.length - 1)];
         if (voiceUrl) {
             controller.enqueue(encoder.encode(`d:${JSON.stringify({ type: 'voice_note', audioUrl: voiceUrl })}\n`));
         }
-        
+
+        try {
+            await db.query(
+                'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, is_funnel, created_at) VALUES ($1, $2, $3, $4, $5, TRUE, NOW())',
+                [normalizedUserId, 'veronica-medellin-locked', 'assistant', fullContent, voiceUrl]
+            );
+        } catch (e) {}
+
         controller.close();
       }
     });
@@ -140,21 +131,13 @@ Respond in JSON: { "text_message": "..." }
     });
 
   } catch (err: any) {
-    console.error('[Funnel API Error]:', err);
-    
-    // 🛡️ RECOVERY STREAM: Send a persona-consistent fallback instead of a dead 500
+    console.error('[Funnel Flush Error]:', err);
     const encoder = new TextEncoder();
-    const streamB_Text = "hey amor... i'm having a hard time connecting 😭 give me just a second to find a better signal!!";
-    
-    const readable = new ReadableStream({
-      async start(controller) {
-        controller.enqueue(encoder.encode(`0:${JSON.stringify(streamB_Text)}\n`));
+    return new Response(new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode(`0:${JSON.stringify("hey... u there? my connection is acting crazy 😭")}\n`));
         controller.close();
       }
-    });
-
-    return new Response(readable, {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-    });
+    }), { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   }
 }

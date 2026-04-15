@@ -349,10 +349,9 @@ export default function FunnelView() {
 
             for (const line of lines) {
               if (line.startsWith('0:')) {
-                setIsTyping(false);
                 try { 
-                  const textContent = line.substring(2);
-                  if (!textContent.trim()) continue;
+                  const textContent = line.substring(2).trim();
+                  if (!textContent) continue;
                   const text = JSON.parse(textContent); 
                   setMessages(prev => {
                     const last = prev[prev.length - 1];
