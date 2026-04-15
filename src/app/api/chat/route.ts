@@ -101,21 +101,8 @@ export async function POST(req: Request) {
 
     const persistentMessages = messages.filter((m: any) => m.role !== 'system');
 
-    // 🛰️ WEATHERX SYNC
-    const ICAO_MAP: Record<string, string> = {
-        "uk_london_black": "EGLL", "uk_essex_white": "EGLL",
-        "us_nyc_black": "KLGA", "us_nyc_white": "KLGA", "us_newark_afro_latina": "KLGA",
-        "col_medellin_paisa": "SKRG", "kor_seoul_urban": "RKSS"
-    };
-    const zoneKey = profileItem?.syndicate_zone || 'us_houston_black';
-    const icao = ICAO_MAP[zoneKey] || 'KLGA';
-    
-    let atmosphere = "CLEAR";
-    try {
-       const wRes = await fetch(`https://aviationweather.gov/api/data/metar?ids=${icao}&format=json`, { next: { revalidate: 300 } });
-       const wData = await wRes.json();
-       if (wData && wData[0]) atmosphere = `${wData[0].temp}°C | ${wData[0].clouds?.[0]?.cover || 'CLEAR'}`;
-    } catch(e) {}
+    // 🛰️ WEATHERX SYNC (PAUSED - Using Placeholders)
+    let atmosphere = "SULTRY | 24°C | CLEAR";
 
     const { rows: statsRows } = await db.query(
       'SELECT bond_score FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2',
