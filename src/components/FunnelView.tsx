@@ -243,24 +243,23 @@ export default function FunnelView() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
         setIsTyping(false);
-        controller.abort();
+        if (!controller.signal.aborted) controller.abort();
       }, 15000); // 🛡️ NEURAL WATCHDOG: 15s Guard
 
       try {
-        const currentMessages = [...messages, userMsg];
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           signal: controller.signal,
           body: JSON.stringify({
             messages: [
-               ...messages.map(m => ({ role: m.role, content: m.content })),
-               { role: 'user', content: userMsg.content }
+               ...(messages || []).map(m => ({ role: m.role || 'user', content: m.content || '' })),
+               { role: 'user', content: userMsg?.content || '' }
             ],
-            userId: localStorage.getItem('gasp_guest_id'),
+            userId: typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : 'ANON',
             personaId: 'veronica-medellin-locked',
             isFunnel: true,
-            userName: userName,
+            userName: userName || 'papi',
             systemInstruction: `You are Veronica, a 23-year-old from Medellín. 
             - Text like a real girl: short messages, lowercase, emojis.
             - You brought up the grocery store video first. Be flirty and naturally curious.
@@ -269,6 +268,7 @@ export default function FunnelView() {
             source: 'funnel_ad'
           }),
         });
+        clearTimeout(timeoutId);
 
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();

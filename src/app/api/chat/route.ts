@@ -280,10 +280,11 @@ ${hasVaultPic ? `- CONVERSION BRIDGE: His current balance is ${body.userBalance 
     const isFunnelTraffic = body.isFunnel === true;
     const assistantBeats = persistentMessages.filter((m: any) => m.role === 'assistant').length;
 
-    if (normalizedUserId.toUpperCase().startsWith('GUEST-') && isFunnelTraffic) {
+    if (isFunnel && normalizedUserId.toUpperCase().startsWith('GUEST-')) {
+      const displayUserName = userName || 'papi';
       if (assistantBeats === 2) {
         // 🧬 PHASE: THE HOOK (Response to Name)
-        aiMessages.push({ role: 'system', content: `PHASE: THE HOOK. He just gave you his name (${userName}). In your text_message, say "nice to meet u ${userName}!!" and then respond to whatever else he said. At the end, tell him you really love his vibe. lowercase only.` });
+        aiMessages.push({ role: 'system', content: `PHASE: THE HOOK. He just gave you his name (${displayUserName}). In your text_message, say "nice to meet u ${displayUserName}!!" and then respond to whatever else he said. At the end, tell him you really love his vibe. lowercase only.` });
       } else if (assistantBeats === 3) {
         // 🧬 PHASE: THE BOND (Response to Vibe comment)
         aiMessages.push({ role: 'system', content: "PHASE: THE BOND. Respond to him naturally, but you MUST keep the heat up. Talk about how you don't usually talk to guys like him. lowercase only." });
