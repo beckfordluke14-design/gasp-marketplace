@@ -273,19 +273,23 @@ export default function FunnelView() {
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();
         let fullText = '';
+        let lineBuffer = '';
         if (reader) {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
             
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split('\n');
+            lineBuffer += decoder.decode(value, { stream: true });
+            const lines = lineBuffer.split('\n');
+            lineBuffer = lines.pop() || ''; // keep incomplete last line in buffer
+
             for (const line of lines) {
               if (line.startsWith('0:')) {
                 setIsTyping(false); // 🧬 TEXT ARRIVED: Safe to stop typing
                 clearTimeout(timeoutId);
                 try { 
                   const text = JSON.parse(line.substring(2)); 
+                  if (!text) continue;
                   setMessages(prev => {
                     const last = prev[prev.length - 1];
                     if (last?.role === 'assistant' && !last.isTease) {

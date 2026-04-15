@@ -128,8 +128,9 @@ export default function ChatDrawer({
     const COST_MESSAGE_TEXT = 50;
     const balance = userProfile?.credit_balance ?? 0;
     
-    // 🛡️ INTERACTIVE PAYWALL: Only trigger if fully loaded and balance is actually low
-    if (dbLoaded && balance < COST_MESSAGE_TEXT) {
+    // 🛡️ CREDIT WALL: Only trigger if profile is FULLY LOADED and balance is CONFIRMED low.
+    // Do NOT fire if userProfile is null (still loading) — that's a false positive.
+    if (dbLoaded && userProfile !== null && userProfile !== undefined && balance < COST_MESSAGE_TEXT) {
        setShowInsufficientFunds(true);
        return;
     }

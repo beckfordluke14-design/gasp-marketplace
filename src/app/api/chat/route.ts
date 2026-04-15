@@ -170,6 +170,14 @@ export async function POST(req: Request) {
     const expertise = profileItem.niche || profileItem.occupation || 'Strategic Asset Class';
     const privateVibe = profileItem.vibe || 'Living in a high-status high-rise, watching the city lights.';
 
+    // 🧬 EARLY ARCHETYPE LOOKUP: Must be before brainPrompt
+    const personaFirstNameEarly = (profileItem.name || finalProfileId).split(' ')[0].toLowerCase();
+    const personaArchetype = PERSONA_ARCHETYPES.find((a: any) =>
+        a.id.toLowerCase().includes(personaFirstNameEarly) ||
+        a.label.toLowerCase().includes(personaFirstNameEarly)
+    );
+    const personaSlang: string[] = personaArchetype?.slang || profileItem.slang || [];
+
     // 🧬 NEWS AWARENESS SYNC: Fetch latest dispatches from this persona
     let personalNews = "";
     try {
@@ -240,7 +248,7 @@ ${personality === 'active' || personality === 'flirty' ? '- You are confident, u
 6. PROACTIVE CURIOSITY: Never just answer and stop. Always end with something that pulls him deeper — a question, a tease, a "wait tell me more about that". You are the one steering this conversation.
 7. STATUS SIGNALING: Subtly mention your high-status surroundings (the view, the fabric of your dress, the sound of the city).
 8. TEXTING AESTHETIC: Use lower-case often. No periods at the end of single-sentence messages. Use emojis sparingly but perfectly.
-9. VOCAL DNA: For Veronica, your audio_script MUST be extremely flirty and breathless. Use "papi", "papito", or "papisito" at the end of every voice note. Keep it intimate.
+9. VOCAL DNA: Use your UNIQUE persona-specific endearments naturally. Your terms are: ${JSON.stringify(personaSlang.slice(0, 4))}. Use these — NOT generic terms. Make it feel real, regional, and intimate.
 
 [WHAT YOU KNOW ABOUT THIS USER SO FAR]
 ${userMemories || "Nothing yet. This might be a new conversation. Your job is to start learning him NOW."}
@@ -313,15 +321,23 @@ ${hasVaultPic ? `- CONVERSION BRIDGE: His current balance is ${body.userBalance 
 
     // 🛡️ EMERGENCY DIAGNOSIS: Log if OpenRouter is returning an error
     if (!orResponse.ok || orResult.error) {
-        console.error('[OpenRouter Fail]:', JSON.stringify(orResult));
+        console.error('[OpenRouter Fail]:', JSON.stringify(orResult).slice(0, 500));
     }
 
     const rawContent = orResult.choices?.[0]?.message?.content || "";
-    let dataOutput: any = { text_message: rawContent, audio_script: "" };
-    try { dataOutput = JSON.parse(rawContent); } catch(e) {}
+    let dataOutput: any = {};
+    
+    // 🛡️ ROBUST JSON PARSE: grok-3-mini sometimes wraps in markdown or returns plain text
+    try { 
+        const cleaned = rawContent.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+        dataOutput = JSON.parse(cleaned); 
+    } catch(e) {
+        // If not valid JSON, treat the whole thing as the text message
+        dataOutput = { text_message: rawContent.trim(), audio_script: '' };
+    }
 
     // 🛡️ FAILSAFE: If AI returned nothing usable, use a natural fallback
-    const streamB_Text = dataOutput.text_message?.trim() || "hey give me a sec... 🙈";
+    const streamB_Text = dataOutput.text_message?.trim() || dataOutput.message?.trim() || "hey give me a sec... 🙈";
     let streamA_Native = dataOutput.audio_script || "";
 
     // 🎙️ MANDATED REPLICATION PROTOCOL (V6.0)
