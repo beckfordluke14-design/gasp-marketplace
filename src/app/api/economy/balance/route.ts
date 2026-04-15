@@ -61,13 +61,13 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true, balance: 250 });
         }
 
-        // 🏦 STARTER CLAIM (1,000 CR - For actual Registered Users)
+        // 🏦 STARTER CLAIM (1,250 CR - For actual Registered Users)
         if (action === 'starter_claim') {
             await db.query(`
-                INSERT INTO profiles (id, credit_balance) VALUES ($1, 1000) 
-                ON CONFLICT (id) DO UPDATE SET credit_balance = GREATEST(profiles.credit_balance, 1000)
+                INSERT INTO profiles (id, credit_balance) VALUES ($1, 1250) 
+                ON CONFLICT (id) DO UPDATE SET credit_balance = GREATEST(profiles.credit_balance, 1250)
             `, [userId]);
-            return NextResponse.json({ success: true, balance: 1000 });
+            return NextResponse.json({ success: true, balance: 1250 });
         }
 
         // 🧬 IDENTITY HANDOFF: Migrate Guest Credits to Member ID

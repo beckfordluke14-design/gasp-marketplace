@@ -56,7 +56,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         if (isNewUser && !data.is_admin && !data.is_initialized) {
           const isActuallyGuest = userId.startsWith('guest-');
           const claimAction = isActuallyGuest ? 'guest_genesis' : 'starter_claim';
-          const bonusAmount = isActuallyGuest ? 250 : 1000;
+          const bonusAmount = isActuallyGuest ? 250 : 1250;
 
           fetch('/api/economy/balance', {
               method: 'POST',

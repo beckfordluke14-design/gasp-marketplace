@@ -83,7 +83,7 @@ function LoginForm() {
                   {/* 🧧 CONVERSION HOOK: Show the gift BEFORE the action */}
                    <div className="flex items-center gap-2 px-4 py-3 bg-white/[0.03] border border-[#ff00ff]/40 rounded-full ring-1 ring-white/5 shadow-[0_0_30px_rgba(255,0,255,0.2)] mb-2 animate-bounce">
                       <span className="text-[10px]">🌶️</span>
-                      <span className="text-[9px] uppercase font-black tracking-[0.2em] text-[#ff00ff]">Bonus Enabled: 1,500 BP Credits</span>
+                      <span className="text-[9px] uppercase font-black tracking-[0.2em] text-[#ff00ff]">Bonus Enabled: 1,250 BP Credits</span>
                    </div>
 
                   {/* 🛡️ Primary Neural Entry: Email (TOP PRIORITY) */}

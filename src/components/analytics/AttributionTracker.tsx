@@ -15,7 +15,7 @@ export default function AttributionTracker() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const utmSource = searchParams.get('utm_source');
+    const utmSource = searchParams.get('utm_source') || searchParams.get('source') || searchParams.get('src');
     const utmMedium = searchParams.get('utm_medium');
     const utmCampaign = searchParams.get('utm_campaign');
     const tsClickId = searchParams.get('ts_clickid'); // Special capture for Traffic Stars if used
