@@ -221,28 +221,40 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                 <div className="h-[1px] flex-1 bg-[#00f0ff]/10" />
                              </div>
 
-                             {initialPackage ? (
-                                <div className="p-8 rounded-[3rem] bg-[#ffea00]/5 border border-[#ffea00]/20 text-center space-y-2">
-                                    <h3 className="text-3xl font-black italic uppercase text-white">{selectedPkg.credits.toLocaleString()} Credits</h3>
-                                    <p className="text-2xl font-black text-white/40">${selectedPkg.price}</p>
-                                </div>
-                             ) : (
-                                <div className="grid grid-cols-2 gap-3">
-                                    {packages.map((pkg) => (
-                                        <button key={pkg.id} onClick={() => setSelectedPkgId(pkg.id)} className={`relative p-5 rounded-[2rem] border transition-all duration-300 flex items-center justify-between group ${selectedPkgId === pkg.id ? 'bg-[#ff00ff]/5 border-[#ff00ff]/40 scale-[1.02]' : 'bg-black/40 border-white/5'}`}>
-                                            <div className="flex flex-col gap-1 text-left">
-                                                <span className="text-[8px] font-black uppercase tracking-widest text-white/40 italic">{pkg.label}</span>
-                                                <span className="text-2xl font-black text-white italic tracking-tighter">{(pkg.credits).toLocaleString()}</span>
-                                                <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-tighter">+{(pkg.credits).toLocaleString()} $GASPai</span>
-                                                <span className="text-[6px] font-bold text-[#ff00ff]/60 uppercase tracking-widest">WORKS FOR 100s OF GIRLS</span>
+                             {/* 📊 THE MASTER PACKAGE GRID (All Views) */}
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                 {CREDIT_PACKAGES.map((pkg) => (
+                                     <button 
+                                         key={pkg.id} 
+                                         onClick={() => setSelectedPkgId(pkg.id)} 
+                                         className={`relative p-6 rounded-[2.5rem] border transition-all duration-300 flex items-center justify-between group ${selectedPkgId === pkg.id ? 'bg-[#ffea00]/10 border-[#ffea00] scale-[1.02] shadow-[0_10px_40px_rgba(255,234,0,0.1)]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}
+                                     >
+                                         <div className="flex flex-col gap-1 text-left relative z-10">
+                                             <span className={`text-[8px] font-black uppercase tracking-widest italic transition-colors ${selectedPkgId === pkg.id ? 'text-[#ffea00]' : 'text-white/30'}`}>{pkg.label}</span>
+                                             <span className="text-2xl font-black text-white italic tracking-tighter">{(pkg.credits).toLocaleString()} <span className="text-[10px] uppercase font-bold not-italic opacity-40">Credits</span></span>
+                                             <div className="flex items-center gap-2 mt-1">
+                                                <span className="text-[7px] font-black text-[#00f0ff] uppercase tracking-tighter tracking-widest">+Gift Access</span>
+                                                <div className="w-1 h-1 rounded-full bg-white/20" />
+                                                <span className="text-[7px] font-black text-[#ff00ff] uppercase tracking-tighter tracking-widest">Vault Pass</span>
+                                             </div>
+                                         </div>
+                                         <div className="flex flex-col items-end relative z-10">
+                                             <span className={`text-2xl font-black italic leading-none transition-all ${selectedPkgId === pkg.id ? 'text-[#ffea00]' : 'text-white'}`}>${pkg.price.toFixed(0)}</span>
+                                             {selectedPkgId === pkg.id && (
+                                                <div className="absolute -top-1 -right-1">
+                                                   <Check size={12} className="text-[#ffea00]" />
+                                                </div>
+                                             )}
+                                         </div>
+                                         
+                                         {pkg.label === 'MOST POPULAR' && (
+                                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#ffea00] px-3 py-1 rounded-full shadow-lg">
+                                               <span className="text-[7px] font-black text-black uppercase tracking-widest italic">BEST VALUE</span>
                                             </div>
-                                            <div className="flex flex-col items-end">
-                                                <span className="text-xl font-black text-white italic leading-none">${pkg.price.toFixed(0)}</span>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                             )}
+                                         )}
+                                     </button>
+                                 ))}
+                             </div>
 
                              {/* 🍼 STEP 2: GATEWAY */}
                              <div className="flex items-center gap-2 mb-2 px-4 text-left">
