@@ -235,7 +235,7 @@ ${typingDirective}
                 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'x-ai/grok-2-mini', 
+                model: 'x-ai/grok-3-mini', // 🛡️ VERIFIED FALLBACK
                 messages: [
                     { role: 'system', content: brainPrompt },
                     ...messages.slice(-10).filter((m: any) => m.role !== 'system')
