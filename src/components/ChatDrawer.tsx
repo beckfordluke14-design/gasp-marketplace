@@ -151,11 +151,10 @@ export default function ChatDrawer({
       setIsTyping(true);
       const startTypingDelay = (1000 + Math.random() * 2000) / speedMult;
       await wait(startTypingDelay);
-    const msgPayload = isNudge 
-      ? [...messages, { role: 'user', content: text }]
-      : [...messages, { id: Date.now().toString(), role: 'user', content: text }];
+      const msgPayload = isNudge 
+        ? [...messages, { role: 'user', content: text }]
+        : [...messages, { id: Date.now().toString(), role: 'user', content: text }];
 
-    try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
