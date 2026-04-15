@@ -11,11 +11,11 @@ import FunnelView from '@/components/FunnelView';
 export default function FunnelPage() {
   if (typeof window !== 'undefined') {
     const urlParams = new URLSearchParams(window.location.search);
-    const source = urlParams.get('utm_source') || urlParams.get('source');
+    const source = urlParams.get('utm_source') || urlParams.get('source') || urlParams.get('src');
+    const hasBypass = urlParams.has('bypass') || window.location.hash.includes('bypass');
     
-    // 🛡️ GHOST GATE: Only allow traffic from known "Hot" sources
-    // If an auditor visits /funnel directly, they get kicked to the safe home page.
-    if (!source && !window.location.hash.includes('bypass')) {
+    // 🛡️ GHOST GATE: Redirect organic non-intent traffic to safe site
+    if (!source && !hasBypass) {
       window.location.href = '/';
       return null;
     }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, MessageSquare, Loader2 } from 'lucide-react';
+import { Zap, MessageSquare, Loader2, ArrowRight } from 'lucide-react';
 import GlobalFeed from '@/components/GlobalFeed';
 import WeatherFeed from '@/components/WeatherFeed';
 import NewsFeed from '@/components/NewsFeed';
@@ -572,6 +572,35 @@ function MarketplaceContent() {
              isOpen={openChatIds.length > 0}
              onClose={() => setOpenChatIds([])}
           />
+
+          {/* 🛰️ NEURAL MISSION RADAR (Homepage Pull-in for Guests) */}
+          <AnimatePresence>
+            {!authenticated && mounted && (
+              <motion.div 
+                initial={{ x: 100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 100, opacity: 0 }}
+                className="fixed bottom-24 right-6 z-[45] max-w-[280px] bg-black/80 backdrop-blur-3xl border border-[#ffea00]/30 rounded-[2rem] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] group cursor-pointer"
+                onClick={() => router.push('/funnel?src=home_radar')}
+              >
+                 <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden border border-[#ffea00]/40 shrink-0">
+                       <img src="/Promo/PromoPic1.png" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Hot" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                       <div className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-pulse" />
+                          <span className="text-[8px] font-black text-[#ffea00] uppercase tracking-widest italic">MISSION RADAR ONLINE</span>
+                       </div>
+                       <p className="text-[11px] font-black text-white leading-tight uppercase italic">VERONICA SENT A GIFT (+500 CR)</p>
+                       <div className="mt-1 text-[8px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-2 group-hover:text-white transition-colors">
+                          START MISSION <ArrowRight size={10} />
+                       </div>
+                    </div>
+                 </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* 💰 GLOBAL GUEST CREDIT FLASH */}
           <AnimatePresence>

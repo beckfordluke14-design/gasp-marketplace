@@ -91,12 +91,22 @@ export default function FunnelView() {
 
   useEffect(() => {
     const fetchVault = async () => {
-      setLoadingVault(true);
-      try {
-        const res = await fetch(`/api/vault/teasers?personaId=veronica-medellin-locked&userId=${localStorage.getItem('gasp_guest_id')}`);
-        const data = await res.json();
-        if (data.success) setVaultItems(data.items || []);
-      } catch (err) { console.error(err); } finally { setLoadingVault(false); }
+       setLoadingVault(true);
+       try {
+          const res = await fetch(`/api/vault/teasers?id=veronica-medellin-locked&userId=${localStorage.getItem('gasp_guest_id')}`);
+          const data = await res.json();
+          if (data.success && data.items) {
+             // 🧬 HARD DEDUPLICATION: Ensure unique Content URLs only
+             const uniqueItems = Array.from(
+               new Map(data.items.map((item: any) => [item.content_url, item])).values()
+             );
+             setVaultItems(uniqueItems);
+          }
+       } catch (e) {
+          console.error('[Vault] Teaser Sync Error:', e);
+       } finally { 
+          setLoadingVault(false); 
+       }
     };
     fetchVault();
   }, []);
