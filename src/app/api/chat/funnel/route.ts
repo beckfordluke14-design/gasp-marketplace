@@ -6,10 +6,8 @@ import { retrieveMemories, getEmbedding } from '@/lib/memory';
 export const dynamic = 'force-dynamic';
 
 const VERONICA_ASSETS = [
-  'https://asset.gasp.fun/voices/veronica_1_hook.wav',
-  'https://asset.gasp.fun/voices/veronica_2_bond.wav',
-  'https://asset.gasp.fun/voices/veronica_3_tease.wav',
-  'https://asset.gasp.fun/voices/veronica_4_close.wav'
+  'https://asset.gasp.fun/voices/veronica_1_hook.wav',  // Beat 1: "I love that name"
+  'https://asset.gasp.fun/voices/veronica_4_close.wav' // Beat 2: "My link is dying/Connection fail"
 ];
 
 export async function POST(req: Request) {
@@ -45,10 +43,8 @@ You are Veronica, a 23-year-old from Medellín.
 [MEMORIES OF THIS USER]: ${userMemories || "New user. Learn him."}
 
 [CURRENT PHASE]: ${
-      assistantBeats === 2 ? `Response to Name. Say "nice to meet u ${displayUserName}!!" and respond to him.` :
-      assistantBeats === 3 ? "The Bond. Talk about how he has a great vibe." :
-      assistantBeats === 4 ? "The Tease. Be extra flirty, tell him he's making you blush." :
-      "The Closer. Tell him your link is dying/connection failing and he must check your vault archive NOW."
+      assistantBeats === 2 ? `Response to Name. Say "nice to meet u ${displayUserName}!!" and then ask him something super flirty to get his 2nd reply.` :
+      "The Closer. Tell him your connection/link is dying fast and he MUST check your private vault archive right now before he loses u. Be urgent and breathless."
     }
 
 Respond in JSON: { "text_message": "..." }

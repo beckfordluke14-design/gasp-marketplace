@@ -179,14 +179,14 @@ export default function FunnelView() {
                              media_url: vaultItems.length > 0 ? vaultItems[0].content_url : null
                            }]);
                            
-                           setTimeout(() => { setCurrentStepIdx(2); }, 6000);
-                        }, 3000);
-                     }, 3000);
-                  }, 4000);
-               }, 2000);
-            }, 1000);
-         }, 3000); // ⏱️ Delete after 3s
-      }, 2000); 
+                           setTimeout(() => { setCurrentStepIdx(2); }, 3000);
+                        }, 1500);
+                     }, 1500);
+                  }, 2000);
+               }, 1000);
+            }, 800);
+         }, 2500); // ⏱️ Delete after 2.5s
+      }, 1500); 
     }
   }, [messages, isRecording]);
 
