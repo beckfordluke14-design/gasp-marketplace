@@ -155,8 +155,9 @@ export default function FunnelView() {
       }).catch(() => {});
     }
     
-    // 🛡️ CONVERSION GATE: After 5 messages, pivot aggressively to the paywall
-    if (messages.length === 5 && !hasIntercepted.current) {
+    // 🛡️ CONVERSION GATE: Pivot after 5 message beats
+    const totalMsgCount = messages.length;
+    if (totalMsgCount >= 5 && !hasIntercepted.current) {
       hasIntercepted.current = true;
       setTimeout(() => {
         setMessages(prev => [...prev, { id: 'int_1_' + Date.now(), role: 'assistant', content: `hold on... my session just got flagged 😳` }]);
@@ -181,26 +182,32 @@ export default function FunnelView() {
     }
 
     (async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        setIsTyping(false);
+        controller.abort();
+      }, 15000); // 🛡️ NEURAL WATCHDOG: 15s Guard
+
       try {
+        const currentMessages = [...messages, userMsg];
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
-            messages: [...messages, userMsg],
+            messages: currentMessages,
             userId: localStorage.getItem('gasp_guest_id'),
             personaId: 'veronica-medellin-locked',
             isFunnel: true,
-            systemInstruction: `You are Veronica, a 23-year-old from Medellín. You posted a viral grocery store video and this guy found you through it. You're genuinely flattered and interested in him.
-            Rules:
-            - Text like a real girl: short messages, lowercase, emojis. NOT a bot.
-            - You brought up the grocery store video first. Be a little embarrassed but also flattered he found you.
-            - Be curious about HIM. If you don't know his name yet, ask it. Ask where he's from, what he's into.
-            - Flirt naturally — playful teasing, not explicit. You're interested but making him work a little.
-            - Do NOT mention credits, vaults, or unlocking. That happens automatically.
-            - Keep each reply SHORT — 1-2 sentences max. Real girls don't write paragraphs.`,
+            systemInstruction: `You are Veronica, a 23-year-old from Medellín. 
+            - Text like a real girl: short messages, lowercase, emojis.
+            - You brought up the grocery store video first. Be flirty and naturally curious.
+            - If you don't know his name yet, ask it. 
+            - Call him "papi" naturally in your text.`,
             source: 'funnel_ad'
           }),
         });
+        clearTimeout(timeoutId);
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();
         let fullText = '';
@@ -216,9 +223,9 @@ export default function FunnelView() {
                   const text = JSON.parse(line.substring(2)); 
                   setMessages(prev => {
                     const last = prev[prev.length - 1];
-                    const assistantMsgCount = prev.filter(m => m.role === 'assistant').length;
+                    // 🧬 ASSET ORCHESTRATION: Count only active chat responses, skip initial greetings
+                    const responseIdx = prev.filter(m => m.role === 'assistant' && !m.content.includes('grocery store')).length;
                     
-                    // 🧬 UNIVERSAL SEDUCTION LOOP: High-fidelity "Golden Assets" that always tie in
                     const GoldenAssets = [
                       'https://asset.gasp.fun/voices/veronica_1_hook.wav', // "mmm wow papi..." (KORE)
                       'https://asset.gasp.fun/voices/veronica_2_bond.wav', // "i love your vibe..." (KORE)
@@ -226,7 +233,7 @@ export default function FunnelView() {
                       'https://asset.gasp.fun/voices/veronica_4_close.wav'  // "wait my link is dying! follow me!" (KORE)
                     ];
 
-                    const staticVoice = GoldenAssets[assistantMsgCount] || null;
+                    const staticVoice = GoldenAssets[responseIdx] || null;
 
                     if (last?.role === 'assistant' && !last.isTease) {
                       return [...prev.slice(0, -1), { 
@@ -267,7 +274,12 @@ export default function FunnelView() {
             }
           }
         }
-      } catch (err) { console.error(err); } finally { setIsTyping(false); }
+      } catch (err: any) {
+        if (err.name === 'AbortError') { console.warn('[Funnel] Stream Timed Out (15s Neural Watchdog)'); }
+        setIsTyping(false);
+      } finally {
+        setIsTyping(false);
+      }
     })();
   };
 
