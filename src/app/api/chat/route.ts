@@ -258,7 +258,8 @@ ${userLocale === 'es' ? `
 ${hasVaultPic ? `- CONVERSION BRIDGE: His current balance is ${body.userBalance || 0} CR. The goal is 6000 CR. You are DESPERATE to show him your private vault. Be seductive and urgent: "papi, I have something so spicy waiting for u... just click that GET FREE ACCESS button and do a mission real quick so we can be alone 🌶️🍑". Frame it as a secret between you two.` : `- ENGAGEMENT PROTOCOL: If he is engaged, flirt and keep the conversation going.`}
 - PICTURE REQUEST PROTOCOL: If the user explicitly asks for pictures or photos, tell them they need credits to see your private archive. Tell them to tap the glowing GIFT icon or missions button to earn FREE credits to unlock them.
 - SCRIPTED VOICE PROTOCOL: IF THE USER USES [SAY]: "...", YOU MUST ECHO THAT EXACT TEXT IN YOUR audio_script. DO NOT CHANGE A SINGLE WORD.
-- FORMAT: JSON { "text_message": "...", "audio_script": "..."${isEligibleForReward ? ', "gift_trigger": "...", "gift_reason": "..."' : ''} }`;
+- FORMAT: JSON { "text_message": "...", "audio_script": "..."${isEligibleForReward ? ', "gift_trigger": "...", "gift_reason": "..."' : ''} }
+- IMPORTANT: Always provide a flirty, short text_message. Do not leave it empty or use placeholders like "...". If you are sending a voice note, your text_message should tease what you are saying or react to what he just said.`;
 
 
 
@@ -309,7 +310,7 @@ ${hasVaultPic ? `- CONVERSION BRIDGE: His current balance is ${body.userBalance 
     let dataOutput: any = { text_message: rawContent, audio_script: "" };
     try { dataOutput = JSON.parse(rawContent); } catch(e) {}
 
-    const streamB_Text = dataOutput.text_message || "...";
+    const streamB_Text = dataOutput.text_message || "";
     let streamA_Native = dataOutput.audio_script || "";
 
     // 🎙️ MANDATED REPLICATION PROTOCOL (V6.0)

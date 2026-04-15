@@ -25,6 +25,8 @@ export default function FunnelView() {
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [selectedPkgId, setSelectedPkgId] = useState('tier_session');
+  const [missionCount, setMissionCount] = useState(0);
+  const [showProgress, setShowProgress] = useState(false);
   
   const [vaultItems, setVaultItems] = useState<any[]>([]);
   const [loadingVault, setLoadingVault] = useState(false);
@@ -130,16 +132,45 @@ export default function FunnelView() {
     const lastMsg = messages[messages.length - 1];
     if (lastMsg?.media_url?.includes('veronica_4_close.wav') && !hasIntercepted.current && !isRecording) {
       hasIntercepted.current = true;
-      // Drop the visual tease right after she sends the panic voice note
+      
+      // 🥒 STAGE 1: The "Accidental" Leak (Blurred Vault Tease)
       setTimeout(() => {
-         setIsTyping(true);
+         setMessages(prev => [...prev, { 
+           id: 'leak_' + Date.now(), 
+           role: 'assistant', 
+           content: 'oops... i was just sending this to a friend 😭', 
+           media_url: '/Promo/cucumber_tease.png',
+           media_type: 'image'
+         }]);
+         
+         // 🌡️ STAGE 2: The Pivot (Flirty Text)
          setTimeout(() => {
-            setMessages(prev => [...prev, { id: 'tease_' + Date.now(), role: 'assistant', content: 'tease_module', isTease: true }]);
-            setIsTyping(false);
-            // Move to the final security wall
-            setTimeout(() => { setCurrentStepIdx(2); }, 5000);
-         }, 1500);
-      }, 4000); 
+            setIsTyping(true);
+            setTimeout(() => {
+               setMessages(prev => [...prev, { 
+                 id: 'pivot_' + Date.now(), 
+                 role: 'assistant', 
+                 content: 'actually... since u saw that... i have way better ones in my private vault if u want the link? 🌶️' 
+               }]);
+               setIsTyping(false);
+
+               // 🍑 STAGE 3: The High-Value Tease (Real Blurred Vault Asset)
+               setTimeout(() => {
+                  setMessages(prev => [...prev, { 
+                    id: 'tease_' + Date.now(), 
+                    role: 'assistant', 
+                    content: 'tease_module', 
+                    isTease: true,
+                    // Pass the real asset URL if we have one
+                    media_url: vaultItems.length > 0 ? vaultItems[0].content_url : null
+                  }]);
+                  
+                  // Final move to the wall
+                  setTimeout(() => { setCurrentStepIdx(2); }, 6000);
+               }, 3000);
+            }, 2000);
+         }, 3000);
+      }, 2000); 
     }
   }, [messages, isRecording]);
 
@@ -395,8 +426,12 @@ export default function FunnelView() {
                              <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-widest">Incoming Private Preview...</span>
                            </div>
                            <div className="aspect-[4/5] rounded-2xl bg-white/10 overflow-hidden relative group">
-                              <img src="/Promo/cucumber_tease.png" className="w-full h-full object-cover blur-[18px] scale-110" alt="Special Tease" />
-                              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
+                              <img 
+                                src={m.media_url ? proxyImg(m.media_url) : (vaultItems[0]?.content_url ? proxyImg(vaultItems[0].content_url) : "/Promo/PromoPic1.png")} 
+                                className="w-full h-full object-cover blur-[22px] scale-110" 
+                                alt="Special Tease" 
+                              />
+                              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md">
                                  <Lock size={32} className="text-[#ffea00] mb-3 animate-pulse" />
                                  <span className="text-[14px] font-black text-white italic lowercase">media intercepted</span>
                                  <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-2">{profile.name} ACCESS ONLY</span>
@@ -405,16 +440,22 @@ export default function FunnelView() {
                         </div>
                       ) : (
                          <div className={`flex flex-col gap-2 w-full ${m.role === 'assistant' ? 'items-start' : 'items-end'}`}>
-                            {m.content && (
-                              <div className={`max-w-[85%] px-6 py-4 rounded-[2rem] text-[16px] leading-relaxed relative ${m.role === 'assistant' ? 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none font-medium' : 'bg-[#ffea00] text-black font-black rounded-tr-none shadow-[0_10px_30px_rgba(255,234,0,0.2)]'}`}>
-                                {m.content}
-                              </div>
-                            )}
-                            {m.media_url && (
-                               <div className="w-full max-w-[90%]">
-                                  <VoiceNoteBubble audioUrl={m.media_url} profileImage={profile.image} profileName={profile.name} translation={m.audio_translation} isUnlocked={true} isEnglish={true} onUnlockTranslation={async () => true} />
+                             {m.content && m.content !== '...' && m.content !== '' && (
+                               <div className={`max-w-[85%] px-6 py-4 rounded-[2rem] text-[16px] leading-relaxed relative ${m.role === 'assistant' ? 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none font-medium' : 'bg-[#ffea00] text-black font-black rounded-tr-none shadow-[0_10px_30px_rgba(255,234,0,0.2)]'}`}>
+                                 {m.content}
                                </div>
-                            )}
+                             )}
+                             {m.media_url && (
+                                <div className="w-full max-w-[90%]">
+                                   {m.media_type === 'image' ? (
+                                     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative aspect-[4/5] bg-white/5">
+                                        <img src={m.media_url} className="w-full h-full object-cover" alt="Media" />
+                                     </motion.div>
+                                   ) : (
+                                     <VoiceNoteBubble audioUrl={m.media_url} profileImage={profile.image} profileName={profile.name} translation={m.audio_translation} isUnlocked={true} isEnglish={true} onUnlockTranslation={async () => true} />
+                                   )}
+                                </div>
+                             )}
                          </div>
                       )}
                     </motion.div>
@@ -539,48 +580,108 @@ export default function FunnelView() {
 
                   {/* 📊 REWARD MATRIX: SHOWING POTENTIAL */}
                   <div className="space-y-4 pt-4">
-                     <div className="flex items-center gap-2 mb-2 px-2 text-left">
+                     <div className="flex items-center justify-between mb-2 px-2">
                         <span className="text-[8px] font-black text-[#00f0ff] tracking-[0.4em] uppercase italic">REWARD INFUSION MATRIX</span>
-                        <div className="h-[1px] flex-1 bg-[#00f0ff]/10" />
+                        {missionCount > 0 && (
+                          <span className="text-[10px] font-black text-[#ffea00] animate-pulse">
+                             PROGRESS: {missionCount}/3 MISSIONS
+                          </span>
+                        )}
                      </div>
                      
                      <div className="grid grid-cols-1 gap-3">
                         {/* BASIC TASK */}
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between group hover:border-[#ffea00]/30 transition-all">
+                        <button 
+                          onClick={() => {
+                            const tid = localStorage.getItem('gasp_guest_id') || 'G';
+                            window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank');
+                            setMissionCount(prev => Math.min(3, prev + 1));
+                          }}
+                          className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between group hover:border-[#ffea00]/30 transition-all text-left"
+                        >
                            <div className="flex flex-col">
                               <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-widest">Entry Verification</span>
                               <span className="text-lg font-black text-white italic">2,500 - 5,000 Credits</span>
                            </div>
-                           <div className="px-3 py-1 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-lg text-[#ffea00] text-[10px] font-black uppercase tracking-widest">Low Effort</div>
-                        </div>
+                           <div className="px-3 py-1 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-lg text-[#ffea00] text-[10px] font-black uppercase tracking-widest">
+                             {missionCount >= 1 ? 'COMPLETED' : 'START'}
+                           </div>
+                        </button>
 
                         {/* ADVANCED TASK */}
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/20 flex items-center justify-between group hover:border-[#00f0ff]/30 transition-all scale-[1.02] shadow-[0_0_30px_rgba(0,240,255,0.05)] border-l-[#00f0ff] border-l-2">
+                        <button 
+                          onClick={() => {
+                            const tid = localStorage.getItem('gasp_guest_id') || 'G';
+                            window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank');
+                            setMissionCount(prev => Math.min(3, prev + 1));
+                          }}
+                          className="p-4 rounded-2xl bg-white/5 border border-white/20 flex items-center justify-between group hover:border-[#00f0ff]/30 transition-all scale-[1.02] shadow-[0_0_30px_rgba(0,240,255,0.05)] border-l-[#00f0ff] border-l-2 text-left"
+                        >
                            <div className="flex flex-col">
                               <span className="text-[10px] font-black text-[#00f0ff] uppercase tracking-widest">High-Intent Survey</span>
                               <span className="text-lg font-black text-white italic">12,000 - 25,000 Credits</span>
                            </div>
-                           <div className="px-3 py-1 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-lg text-[#00f0ff] text-[10px] font-black uppercase tracking-widest">Popular</div>
-                        </div>
+                           <div className="px-3 py-1 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-lg text-[#00f0ff] text-[10px] font-black uppercase tracking-widest">
+                             {missionCount >= 2 ? 'COMPLETED' : 'POPULAR'}
+                           </div>
+                        </button>
 
                         {/* INSTITUTIONAL TASK */}
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between group hover:border-[#ff00ff]/30 transition-all">
+                        <button 
+                          onClick={() => {
+                            const tid = localStorage.getItem('gasp_guest_id') || 'G';
+                            window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank');
+                            setMissionCount(prev => Math.min(3, prev + 1));
+                          }}
+                          className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between group hover:border-[#ff00ff]/30 transition-all text-left"
+                        >
                            <div className="flex flex-col">
                               <span className="text-[10px] font-black text-[#ff00ff] uppercase tracking-widest">System Optimization</span>
                               <span className="text-lg font-black text-white italic">50,000+ Credits</span>
                            </div>
-                           <div className="px-3 py-1 bg-[#ff00ff]/10 border border-[#ff00ff]/30 rounded-lg text-[#ff00ff] text-[10px] font-black uppercase tracking-widest">Elite Reward</div>
+                           <div className="px-3 py-1 bg-[#ff00ff]/10 border border-[#ff00ff]/30 rounded-lg text-[#ff00ff] text-[10px] font-black uppercase tracking-widest">
+                             {missionCount >= 3 ? 'COMPLETED' : 'ELITE'}
+                           </div>
+                        </button>
+                     </div>
+
+                     {/* Progress Status */}
+                     <div className="bg-black/40 border border-white/5 p-4 rounded-2xl">
+                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2">
+                           <span className="text-white/40">Unlock Progress</span>
+                           <span className={missionCount >= 3 ? 'text-[#00ffcc]' : 'text-[#ffea00]'}>{missionCount}/3 Missions Done</span>
                         </div>
+                        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                           <motion.div 
+                             initial={{ width: 0 }}
+                             animate={{ width: `${(missionCount / 3) * 100}%` }}
+                             className="h-full bg-gradient-to-r from-[#ffea00] to-[#00f0ff]"
+                           />
+                        </div>
+                        <p className="text-[9px] text-white/30 text-center mt-3 uppercase tracking-tighter">
+                          {missionCount < 3 ? `Complete ${3 - missionCount} more missions to unlock your credits permanently` : 'All missions complete! Tap below to verify your signal.'}
+                        </p>
                      </div>
                   </div>
                 </div>
 
                 {/* ⚡️ ACTION AREA */}
-                <div className="fixed bottom-0 left-0 right-0 p-6 md:p-8 bg-gradient-to-t from-black via-black/95 to-transparent flex flex-col items-center gap-4 z-[600]">
-                   <button onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }} className="w-full max-w-[500px] h-16 md:h-20 bg-[#ffea00] rounded-[3rem] text-black text-[18px] md:text-[22px] font-black uppercase tracking-widest flex items-center justify-center gap-5 shadow-[0_20px_60px_rgba(255,234,0,0.4)] hover:scale-[1.02] active:scale-95 transition-all group shrink-0 relative overflow-hidden">
+                <div className="shrink-0 p-6 md:p-10 bg-black/80 border-t border-white/5 backdrop-blur-xl flex flex-col items-center gap-4 relative">
+                   <button 
+                     onClick={() => { 
+                       const tid = localStorage.getItem('gasp_guest_id') || 'G'; 
+                       window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); 
+                       setMissionCount(prev => Math.min(3, prev + 1));
+                     }} 
+                     className={`w-full max-w-[500px] h-16 md:h-20 rounded-[3rem] text-black text-[18px] md:text-[22px] font-black uppercase tracking-widest flex items-center justify-center gap-5 shadow-2xl hover:scale-[1.02] active:scale-95 transition-all group shrink-0 relative overflow-hidden ${missionCount >= 3 ? 'bg-[#00ffcc] shadow-[0_20px_60px_rgba(0,255,204,0.4)]' : 'bg-[#ffea00] shadow-[0_20px_60px_rgba(255,234,0,0.4)]'}`}
+                   >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
                       <Zap size={24} className="fill-black" />
-                      <span className="italic">START FREE MISSION ⚡️</span>
+                      <span className="italic">
+                        {missionCount === 0 ? 'START FIRST MISSION' : 
+                         missionCount < 3 ? `START MISSION ${missionCount + 1}/3` : 
+                         'MISSIONS COMPLETE ✅'}
+                      </span>
                       <ArrowRight size={24} className="group-hover:translate-x-2 transition-all opacity-40" />
                    </button>
                    
@@ -588,16 +689,21 @@ export default function FunnelView() {
                       <div className="grid grid-cols-2 gap-3 w-full max-w-[500px]">
                         <button
                           onClick={async () => {
+                            if (missionCount >= 3) {
+                              setCurrentStepIdx(3);
+                              return;
+                            }
                             const gid = localStorage.getItem('gasp_guest_id') || '';
                             const res = await fetch(`/api/economy/balance?userId=${gid}`);
                             const data = await res.json();
                             if (data.success && data.balance >= 6000) {
                               setCurrentStepIdx(3);
                             } else {
-                              alert(`Insufficient Signal: ${data.balance || 0} / 6,000 CR. Complete a task and try again!`);
+                              const remaining = Math.max(1, 3 - missionCount);
+                              alert(`Insufficient Signal Strength. Complete ${remaining} more missions and try again!`);
                             }
                           }}
-                          className="flex-1 py-4 border-2 border-white/10 rounded-2xl text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-2 italic"
+                          className={`flex-1 py-4 border-2 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-2 italic ${missionCount >= 3 ? 'border-[#00ffcc] text-[#00ffcc]' : 'border-white/10 text-white'}`}
                         >
                           <Shield size={14} /> VERIFY SIGNAL
                         </button>
@@ -609,9 +715,11 @@ export default function FunnelView() {
                       
                       <div className="flex items-center justify-center gap-3 opacity-30 mt-1">
                         <div className="flex gap-1">
-                          <span className="w-1 h-1 rounded-full bg-[#00f0ff] animate-ping" />
+                          <span className={`w-1 h-1 rounded-full animate-ping ${missionCount >= 3 ? 'bg-[#00ffcc]' : 'bg-[#00f0ff]'}`} />
                         </div>
-                        <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#00f0ff] italic">SCANNING INBOUND...</span>
+                        <span className={`text-[8px] font-black uppercase tracking-[0.4em] italic ${missionCount >= 3 ? 'text-[#00ffcc]' : 'text-[#00f0ff]'}`}>
+                          {missionCount >= 3 ? 'IDENTITY VERIFIED - READY' : 'SCANNING INBOUND SIGNALS...'}
+                        </span>
                       </div>
                    </div>
                 </div>
