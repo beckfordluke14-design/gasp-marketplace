@@ -34,12 +34,11 @@ export default function FunnelView() {
   const [timeLeft, setTimeLeft] = useState(599); // 9 minutes 59 seconds
 
   useEffect(() => {
-    if (currentStepIdx !== 2) return;
     const interval = setInterval(() => {
        setTimeLeft(prev => prev > 0 ? prev - 1 : 0);
     }, 1000);
     return () => clearInterval(interval);
-  }, [currentStepIdx]);
+  }, []);
   
   const formatTimeInfo = (seconds: number) => {
      const m = Math.floor(seconds / 60);
@@ -350,7 +349,9 @@ export default function FunnelView() {
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">NEURAL LINK ESTABLISHED</span>
-              <span className="text-[20px] font-black text-[#ffea00] italic leading-none tracking-tighter">09:53:57</span>
+              <span className="text-[20px] font-black text-[#ffea00] italic leading-none tracking-tighter w-20">
+                {formatTimeInfo(timeLeft)}
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex items-center gap-2">
@@ -366,7 +367,7 @@ export default function FunnelView() {
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full border-2 border-[#ff00ff]/40 p-0.5 shadow-[0_0_20px_rgba(255,0,255,0.2)]">
                 <div className="w-full h-full rounded-full overflow-hidden border border-white/20">
-                  <img src="/Promo/PromoPic1.png" className="w-full h-full object-cover" alt="Veronica" />
+                  <img src="/Promo/PromoPic1.png" className="w-full h-full object-cover object-top" alt="Veronica" />
                 </div>
               </div>
               <div className="flex flex-col">
