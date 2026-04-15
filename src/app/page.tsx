@@ -3,26 +3,31 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, MessageSquare, Loader2, ArrowRight, X } from 'lucide-react';
-import GlobalFeed from '@/components/GlobalFeed';
-import WeatherFeed from '@/components/WeatherFeed';
-import NewsFeed from '@/components/NewsFeed';
-import RightSidebar from '@/components/RightSidebar';
-import StoriesRow from '@/components/StoriesRow';
+import { Zap, MessageSquare, Loader2, ArrowRight, X, Star } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+// 🚀 EAGER: Shell components — must show instantly
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import ProtocolOverview from '@/components/ProtocolOverview';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { useUser } from '@/components/providers/UserProvider';
 import { initialProfiles, proxyImg } from '@/lib/profiles';
 import { trackEvent } from '@/lib/telemetry';
-import TopUpDrawer from '@/components/economy/TopUpDrawer';
-import ChatDrawer from '@/components/ChatDrawer';
-import { useUser } from '@/components/providers/UserProvider';
-import NeuralPulseTerminal from '@/components/NeuralPulseTerminal';
-import FloatingChatTerminal from '@/components/FloatingChatTerminal';
-import VaultMainGrid from '@/components/VaultMainGrid';
-import { Star } from 'lucide-react';
 import { SYNDICATE_CONFIG } from '@/lib/economy/monetizationConfig';
+
+// 💤 LAZY: Heavy content components — deferred until needed
+const GlobalFeed = dynamic(() => import('@/components/GlobalFeed'), { ssr: false, loading: () => <div className="animate-pulse h-96 bg-white/5 rounded-3xl m-6" /> });
+const WeatherFeed = dynamic(() => import('@/components/WeatherFeed'), { ssr: false, loading: () => <div className="animate-pulse h-96 bg-white/5 rounded-3xl m-6" /> });
+const NewsFeed = dynamic(() => import('@/components/NewsFeed'), { ssr: false, loading: () => <div className="animate-pulse h-96 bg-white/5 rounded-3xl m-6" /> });
+const RightSidebar = dynamic(() => import('@/components/RightSidebar'), { ssr: false });
+const ProtocolOverview = dynamic(() => import('@/components/ProtocolOverview'), { ssr: false });
+const VaultMainGrid = dynamic(() => import('@/components/VaultMainGrid'), { ssr: false });
+const NeuralPulseTerminal = dynamic(() => import('@/components/NeuralPulseTerminal'), { ssr: false });
+const FloatingChatTerminal = dynamic(() => import('@/components/FloatingChatTerminal'), { ssr: false });
+
+// 💤 LAZY: Only loads when user opens a chat or the top-up drawer
+const ChatDrawer = dynamic(() => import('@/components/ChatDrawer'), { ssr: false, loading: () => <div className="w-full h-full bg-black animate-pulse" /> });
+const TopUpDrawer = dynamic(() => import('@/components/economy/TopUpDrawer'), { ssr: false });
 
 function MarketplaceContent() {
   const router = useRouter();

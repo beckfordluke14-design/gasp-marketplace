@@ -1,7 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    unoptimized: true,
+    // ✅ ENABLED: Auto-serve WebP/AVIF, huge bandwidth saving
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 86400, // Cache 24hrs on CDN
+    remotePatterns: [
+      { protocol: 'https', hostname: '**' },
+    ],
   },
   typescript: {
     ignoreBuildErrors: true,
@@ -10,6 +15,10 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
+  // 🚀 Reduce JS bundle by treeshaking large packages
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'framer-motion'],
+  },
   logging: {
     fetches: {
       fullUrl: true,

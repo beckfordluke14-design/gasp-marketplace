@@ -140,7 +140,7 @@ export default function Sidebar({ selectedProfileId, onSelectProfile, unreadCoun
 
   useEffect(() => {
     fetchPoints();
-    const interval = setInterval(fetchPoints, 10000); // High-Velocity Sync (10s)
+    const interval = setInterval(fetchPoints, 60000); // 60s — event-driven for instant updates
     window.addEventListener('gasp_points_update', fetchPoints);
     return () => {
       clearInterval(interval);

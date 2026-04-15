@@ -123,7 +123,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
        // 🛰️ HIGH-VELOCITY BALANCE SYNC: Instant Revenue Capture
        const interval = setInterval(() => {
           fetchProfile(activeUserId, user);
-       }, 10000); // 10s Polling during launch window
+       }, 60000); // 60s Polling — real-time updates via gasp_balance_refresh events
        
        return () => clearInterval(interval);
     } else {
