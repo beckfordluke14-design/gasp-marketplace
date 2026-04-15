@@ -116,10 +116,9 @@ export default function FunnelView() {
                   id: 'm2',
                   role: 'assistant',
                   content: `I can't believe people actually find me on here lol. what's your name? 🙈🍑`,
-                  media_url: 'https://asset.gasp.fun/voices/veronica_1_hook.wav', // 🎙️ THE HOOK
-                  type: 'voice'
+                  type: 'text'
                 }]);
-             }, 4000); // 🧬 Simulate 4s recording
+             }, 3000); // 🧬 Simulate 3s typing/presence
           }, 800);
         }, 1400);
       }, 1000);
@@ -404,14 +403,19 @@ export default function FunnelView() {
                               </div>
                            </div>
                         </div>
-                      ) : m.type === 'voice' && m.media_url ? (
-                         <div className="w-full max-w-[90%]">
-                            <VoiceNoteBubble audioUrl={m.media_url} profileImage={profile.image} profileName={profile.name} translation={m.audio_translation} isUnlocked={true} isEnglish={true} onUnlockTranslation={async () => true} />
-                         </div>
                       ) : (
-                        <div className={`max-w-[85%] px-6 py-4 rounded-[2rem] text-[16px] leading-relaxed relative ${m.role === 'assistant' ? 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none font-medium' : 'bg-[#ffea00] text-black font-black rounded-tr-none shadow-[0_10px_30px_rgba(255,234,0,0.2)]'}`}>
-                          {m.content}
-                        </div>
+                         <div className={`flex flex-col gap-2 w-full ${m.role === 'assistant' ? 'items-start' : 'items-end'}`}>
+                            {m.content && (
+                              <div className={`max-w-[85%] px-6 py-4 rounded-[2rem] text-[16px] leading-relaxed relative ${m.role === 'assistant' ? 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none font-medium' : 'bg-[#ffea00] text-black font-black rounded-tr-none shadow-[0_10px_30px_rgba(255,234,0,0.2)]'}`}>
+                                {m.content}
+                              </div>
+                            )}
+                            {m.media_url && (
+                               <div className="w-full max-w-[90%]">
+                                  <VoiceNoteBubble audioUrl={m.media_url} profileImage={profile.image} profileName={profile.name} translation={m.audio_translation} isUnlocked={true} isEnglish={true} onUnlockTranslation={async () => true} />
+                               </div>
+                            )}
+                         </div>
                       )}
                     </motion.div>
                   ))}
