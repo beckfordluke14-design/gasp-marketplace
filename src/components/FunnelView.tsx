@@ -742,27 +742,27 @@ export default function FunnelView() {
 
                 <motion.button 
                   animate={{ 
-                    scale: [1, 1.02, 1],
+                    scale: [1, 1.05, 1],
                     boxShadow: [
-                      "0 0 0px rgba(255, 234, 0, 0)", 
-                      "0 0 25px rgba(255, 234, 0, 0.4)", 
-                      "0 0 0px rgba(255, 234, 0, 0)"
+                      "0 0 20px rgba(0, 255, 204, 0.2)",
+                      "0 0 50px rgba(0, 255, 204, 0.6)",
+                      "0 0 20px rgba(0, 255, 204, 0.2)"
                     ] 
                   }}
                   transition={{ 
-                    duration: 2.5, 
+                    duration: 1.5, 
                     repeat: Infinity, 
                     ease: "easeInOut" 
                   }}
                   onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }}
-                  className={`w-full p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 transition-all group relative overflow-hidden ${missionCount >= 3 ? 'bg-[#00ffcc] border-[#00ffcc] text-black' : 'bg-white/5 border-[#ffea00]/60 text-white shadow-[0_0_30px_rgba(255,234,0,0.15)]'}`}
+                  className="w-full p-6 rounded-[2.5rem] border-4 border-[#00ffcc] bg-[#00ffcc] text-black flex flex-col items-center justify-center gap-1 transition-all group relative overflow-hidden shadow-[0_0_40px_rgba(0,255,204,0.3)] hover:scale-[1.02] active:scale-95"
                 >
-                  <div className="flex items-center gap-2">
-                    <Zap size={18} className={missionCount >= 3 ? "fill-black" : "text-[#ffea00]"} />
-                    <span className="text-[18px] font-black uppercase italic tracking-tighter">CLICK TO START FREE CREDIT MISSION</span>
-                    <ArrowRight size={18} className="opacity-40 group-hover:translate-x-1 transition-transform" />
+                  <div className="flex items-center gap-3">
+                    <Zap size={24} className="fill-black" />
+                    <span className="text-[22px] font-black uppercase italic tracking-tighter leading-none">CLICK HERE: CLAIM 6,000 FREE G-CREDITS NOW</span>
+                    <ArrowRight size={24} className="opacity-40 group-hover:translate-x-1 transition-transform" />
                   </div>
-                  <span className="text-[9px] font-bold opacity-70 uppercase tracking-widest text-[#00ffcc]">REDEEM SITEWIDE • NO PAYMENT REQUIRED</span>
+                  <span className="text-[10px] font-black opacity-60 uppercase tracking-widest">VERIFIED • REDEEM SITEWIDE • NO PAYMENT REQUIRED</span>
                 </motion.button>
 
                 <div className="pt-2 space-y-4">
