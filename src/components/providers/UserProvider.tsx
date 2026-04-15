@@ -52,8 +52,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             nickname: data.nickname || privyUser?.google?.name?.split(' ')[0] || privyUser?.email?.address?.split('@')[0] || 'Syndicate Member'
         });
 
-        // 🧬 TIERED GENESIS PROTOCOL
-        if (isNewUser && !data.is_admin) {
+        // 🧬 TIERED GENESIS PROTOCOL: Only trigger for brand new identities
+        if (isNewUser && !data.is_admin && !data.is_initialized) {
           const isActuallyGuest = userId.startsWith('guest-');
           const claimAction = isActuallyGuest ? 'guest_genesis' : 'starter_claim';
           const bonusAmount = isActuallyGuest ? 250 : 1000;
@@ -64,7 +64,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               body: JSON.stringify({ userId, action: claimAction })
           }).then(r => r.json()).then(async claimData => {
               if (claimData.success) {
-                console.log(`🏦 [Genesis] ${bonusAmount} CR Bonus Provisioned for ${isActuallyGuest ? 'Guest' : 'Member'}.`);
+                console.log(`🏦 [Genesis] ${bonusAmount} CR Bonus Provisioned.`);
                 
                 // ⚡️ TRIGGER VISUAL FLASH
                 setBountyAlert({ amount: bonusAmount, active: true });
@@ -79,7 +79,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         }
     } catch (e) {
         console.error('[UserProvider] Balance Sync Failed:', e);
-        // Still set a minimal profile so the user is not stuck on a loading screen
         setProfile({ id: userId, credit_balance: 0, is_admin: false, nickname: 'Syndicate Member' });
     }
 
@@ -120,7 +119,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     if (activeUserId) {
        // Identity Handshake
-       fetchProfile(activeUserId, user);
+       fetchProfile(activeUserId, user, true);
 
        // 🛰️ HIGH-VELOCITY BALANCE SYNC: Instant Revenue Capture
        const interval = setInterval(() => {

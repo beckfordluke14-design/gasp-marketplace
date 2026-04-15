@@ -85,8 +85,8 @@ export async function POST(req: Request) {
     const userContent = persistentMessages[persistentMessages.length - 1]?.content || '...';
     try {
         await db.query(
-            'INSERT INTO chat_messages (user_id, persona_id, role, content, created_at) VALUES ($1, $2, $3, $4, NOW())',
-            [normalizedUserId, DB_PERSONA_ID, 'user', userContent]
+            'INSERT INTO chat_messages (user_id, persona_id, role, content, is_funnel, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
+            [normalizedUserId, DB_PERSONA_ID, 'user', userContent, isFunnel]
         );
     } catch (saveErr) { console.error('[Gasp Atomic Save Fail]:', saveErr); }
 

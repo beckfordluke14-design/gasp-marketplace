@@ -353,7 +353,11 @@ export default function FunnelView() {
             {currentStepIdx === 0 && (
               <motion.div key="init" className="flex-1 flex flex-col items-center justify-center p-8 space-y-4">
                  <Loader2 className="text-[#ff00ff] animate-spin" size={40} />
-                 <div className="font-mono text-[9px] text-white/20 space-y-1">{terminalLogs.map((log, i) => <div key={i}            {activeTab === 'NEURAL_LINK' && currentStepIdx === 1 && (
+                 <div className="font-mono text-[9px] text-white/20 space-y-1">{terminalLogs.map((log, i) => <div key={i}>{log}</div>)}</div>
+              </motion.div>
+            )}
+
+            {activeTab === 'NEURAL_LINK' && currentStepIdx === 1 && (
               <motion.div 
                 key="chat" 
                 initial={{ opacity: 0, x: 20 }} 

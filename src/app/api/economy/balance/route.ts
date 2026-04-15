@@ -22,7 +22,8 @@ export async function GET(req: Request) {
          success: true, 
          balance: profiles[0].credit_balance || 0,
          is_admin: profiles[0].is_admin || isSovereignAdmin,
-         nickname: profiles[0].nickname || null
+         nickname: profiles[0].nickname || null,
+         is_initialized: true
        });
     }
     
@@ -31,7 +32,7 @@ export async function GET(req: Request) {
       success: true, 
       balance: 0,
       is_guest: true,
-      needs_initialization: true
+      is_initialized: false
     });
 
   } catch (error: any) {
@@ -50,10 +51,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true, balance: updated[0].credit_balance });
         }
 
-        // 🧬 GUEST GENESIS (350 CR)
+        // 🧬 GUEST GENESIS (250 CR)
         if (action === 'guest_genesis') {
-            await db.query(`INSERT INTO profiles (id, credit_balance) VALUES ($1, 350) ON CONFLICT (id) DO NOTHING`, [userId]);
-            return NextResponse.json({ success: true, balance: 350 });
+            await db.query(`INSERT INTO profiles (id, credit_balance) VALUES ($1, 250) ON CONFLICT (id) DO NOTHING`, [userId]);
+            return NextResponse.json({ success: true, balance: 250 });
         }
 
         // 🏦 STARTER CLAIM (1,000 CR - For actual Registered Users)

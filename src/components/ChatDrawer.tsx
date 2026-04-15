@@ -90,12 +90,8 @@ export default function ChatDrawer({
 
   const sendGift = async (emoji: string, cost: number) => {
     if (isProcessing) return;
-    const balance = userProfile?.credit_balance || 0;
-    if (idToUse.startsWith('guest-') && balance < cost) {
-       setShowInsufficientFunds(true);
-       return;
-    }
-    if (balance < cost) {
+    const balance = userProfile?.credit_balance ?? 0;
+    if (balance < cost && dbLoaded) {
        setShowInsufficientFunds(true);
        return;
     }
@@ -130,10 +126,10 @@ export default function ChatDrawer({
     const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     const speedMult = personaState?.responseSpeedMultiplier || (0.8 + Math.random() * 1.5);
     const COST_MESSAGE_TEXT = 50;
-    const balance = userProfile?.credit_balance || 0;
+    const balance = userProfile?.credit_balance ?? 0;
     
-    // 🛡️ INTERACTIVE PAYWALL: Instead of disabling, we trigger the CTA on attempt
-    if (balance < COST_MESSAGE_TEXT || isDepleted) {
+    // 🛡️ INTERACTIVE PAYWALL: Only trigger if fully loaded and balance is actually low
+    if (dbLoaded && balance < COST_MESSAGE_TEXT) {
        setShowInsufficientFunds(true);
        return;
     }
@@ -656,9 +652,14 @@ export default function ChatDrawer({
                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full left-6 right-6 mb-6 z-50 bg-[#111] border border-white/10 rounded-[2rem] p-6 shadow-2xl">
                       <div className="grid grid-cols-5 gap-3">
                          {[ { e: '☕', c: 500 }, { e: '🍹', c: 1500 }, { e: '🍽️', c: 7000 }, { e: '🍾', c: 25000 }, { e: '✈️', c: 100000 } ].map(g => (
-                            <button key={g.e} onClick={() => sendGift(g.e, g.c)} className="flex flex-col items-center gap-2 py-4 px-1 bg-black/40 border border-white/5 rounded-2xl hover:border-[#ff00ff]/50">
+                            <button 
+                                key={g.e} 
+                                onClick={(e) => { e.stopPropagation(); sendGift(g.e, g.c); }} 
+                                disabled={isProcessing}
+                                className="flex flex-col items-center gap-2 py-4 px-1 bg-black/60 border border-white/5 rounded-2xl hover:border-[#ff00ff]/50 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                             >
                                <span className="text-2xl">{g.e}</span>
-                               <span className="text-[7.5px] font-black text-white px-2 py-0.5 bg-white/5 rounded-full">{g.c.toLocaleString()}</span>
+                               <span className="text-[7.5px] font-black text-white px-2 py-0.5 bg-white/10 rounded-full">{g.c.toLocaleString()}</span>
                             </button>
                          ))}
                       </div>
