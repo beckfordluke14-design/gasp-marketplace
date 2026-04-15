@@ -247,6 +247,7 @@ export default function FunnelView() {
       }, 15000); // 🛡️ NEURAL WATCHDOG: 15s Guard
 
       try {
+        console.log('[Funnel] Fetching neural response for messages:', messages.length);
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -263,6 +264,12 @@ export default function FunnelView() {
             source: 'funnel_ad'
           }),
         });
+        if (!res.ok) {
+           const errText = await res.text();
+           console.error('[Funnel] API Error:', res.status, errText);
+           setIsTyping(false);
+           return;
+        }
         clearTimeout(timeoutId);
 
         const reader = res.body?.getReader();
@@ -283,7 +290,10 @@ export default function FunnelView() {
                 setIsTyping(false); // 🧬 TEXT ARRIVED: Safe to stop typing
                 clearTimeout(timeoutId);
                 try { 
-                  const text = JSON.parse(line.substring(2)); 
+                  const textContent = line.substring(2);
+                  if (!textContent.trim()) continue;
+                  const text = JSON.parse(textContent); 
+                  console.log('[Funnel] Text Arrived:', text);
                   if (!text) continue;
                   setMessages(prev => {
                     const last = prev[prev.length - 1];
@@ -300,7 +310,9 @@ export default function FunnelView() {
                       type: 'text'
                     }];
                   });
-                } catch (e) {}
+                } catch (e) {
+                  console.error('[Funnel] Text Parse Error:', e, line);
+                }
               } else if (line.startsWith('d:')) {
                 try {
                   const data = JSON.parse(line.substring(2));

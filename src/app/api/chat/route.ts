@@ -23,17 +23,17 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { messages, userId, personaId, profileId, userTimezone, locale, userName, data: requestData } = body;
     
-    const finalUserId = userId || requestData?.userId;
+    // 🧬 INITIALIZATION GATE
+    const finalUserId = userId || requestData?.userId || 'ANON';
     const finalProfileId = profileId || personaId || requestData?.profileId || requestData?.personaId;
     const userLocale = locale || requestData?.locale || 'en';
-    const isFunnel = body.isFunnel === true;
+    const isFunnelMode = body.isFunnel === true;
+    const normalizedUserId = finalUserId.trim();
     
     // 🧬 IDENTITY BRIDGE: Hard-map funnel IDs to production DB IDs immediately
     const DB_PERSONA_ID = finalProfileId === 'veronica_medellin' ? 'veronica-medellin-locked' : finalProfileId;
 
     if (!finalUserId || !finalProfileId) return new Response('Missing ID context', { status: 400 });
-
-    let currentCount = 0; 
 
     const dbProfile = await SOV.getPersona(DB_PERSONA_ID) as any;
     const profileItem = dbProfile || 
@@ -43,9 +43,9 @@ export async function POST(req: Request) {
     if (!profileItem) throw new Error(`Profile Offline: ${finalProfileId}`);
 
     // 🛡️ SYNDICATE GUEST & CREDIT ENFORCEMENT (V8.0 - MISSION AWARE)
-    const normalizedUserId = (finalUserId || '').trim();
-    const GUEST_LIMIT = isFunnel ? 10 : 5; 
+    const GUEST_LIMIT = isFunnelMode ? 10 : 5; 
     const COST_MESSAGE_TEXT = 50; 
+    let currentCount = 0; 
 
     if (normalizedUserId.toLowerCase().startsWith('guest-') || normalizedUserId.toLowerCase().startsWith('guest_')) {
        try {
@@ -57,17 +57,12 @@ export async function POST(req: Request) {
              await db.query('UPDATE profiles SET credit_balance = credit_balance - $1, updated_at = NOW() WHERE id = $2', [COST_MESSAGE_TEXT, normalizedUserId]);
           } else {
              // 🚀 FUNNEL BYPASS: If this is an ad funnel, we don't hard-block by message count.
-             // We let the frontend "Action Wall" handle the closure based on the narrative.
-             if (isFunnel) {
-               console.log(`📡 [Funnel Flow] Guest ${normalizedUserId} in narrative bridge. No hard limit.`);
+             if (isFunnelMode) {
+                console.log(`📡 [Funnel Flow] Guest ${normalizedUserId} in narrative bridge. No hard limit.`);
              } else {
-               const { rows: preCheck } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [normalizedUserId]);
-               currentCount = parseInt(preCheck[0].count || '0');
-               
-               if (currentCount >= GUEST_LIMIT) {
-                  console.log(`🛑 [Neural Wall] Guest ${normalizedUserId} hard-blocked at ${currentCount} msgs (Standard Guest).`);
-                  return new Response('DEPLETED', { status: 402 });
-               }
+                const { rows: preCheck } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [normalizedUserId]);
+                currentCount = parseInt(preCheck[0].count || '0');
+                if (currentCount >= GUEST_LIMIT) return new Response('DEPLETED', { status: 402 });
              }
           }
        } catch (limitErr) { console.error('[Wall Pre-Check Fail]:', limitErr); }
@@ -81,17 +76,11 @@ export async function POST(req: Request) {
        } catch (creditErr) { console.error('[Gasp Credit Sync Fail]:', creditErr); }
     }
 
-    // 🧪 CLEAN HISTORY: Filter out internal system instructions before persistence or response
+    // 🧪 CLEAN HISTORY: Filter out internal system instructions
     const persistentMessages = messages.filter((m: any) => m.role !== 'system');
 
     // 🧬 ATOMIC PERSISTENCE: Save only user/assistant messages
-    const userContent = persistentMessages[persistentMessages.length - 1]?.content || '...';
-    try {
-        await db.query(
-            'INSERT INTO chat_messages (user_id, persona_id, role, content, is_funnel, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
-            [normalizedUserId, DB_PERSONA_ID, 'user', userContent, isFunnel]
-        );
-    } catch (saveErr) { console.error('[Gasp Atomic Save Fail]:', saveErr); }
+    // (Consolidated into the stream loop below to prevent double-entries)
 
     // 🛰️ WEATHERX SYNC: Mapping Persona Zone to ICAO Sector
     const ICAO_MAP: Record<string, string> = {
@@ -283,12 +272,11 @@ ${(hasVaultPic && (body.isFunnel || assistantBeats > 3)) ? `- CONVERSION BRIDGE:
         ...messages.slice(-10).filter((m: any) => m.role !== 'system')
     ];
 
-    // 🚀 STAGE-AWARE SEDUCTION: High-Heat Funnel Logic (ONLY for isFunnel traffic)
+    // 🚀 STAGE-AWARE SEDUCTION: High-Heat Funnel Logic (ONLY for isFunnelMode traffic)
     // 🧬 NEURAL CORRECTION: Use the actual message history length to determine the stage
-    const isFunnelTraffic = body.isFunnel === true;
     const assistantBeats = persistentMessages.filter((m: any) => m.role === 'assistant').length;
 
-    if (isFunnel && normalizedUserId.toUpperCase().startsWith('GUEST-')) {
+    if (isFunnelMode && (normalizedUserId.toUpperCase().startsWith('GUEST-') || normalizedUserId.toUpperCase().startsWith('GUEST_'))) {
       const displayUserName = userName || 'papi';
       if (assistantBeats === 2) {
         // 🧬 PHASE: THE HOOK (Response to Name)
@@ -297,9 +285,9 @@ ${(hasVaultPic && (body.isFunnel || assistantBeats > 3)) ? `- CONVERSION BRIDGE:
         // 🧬 PHASE: THE BOND (Response to Vibe comment)
         aiMessages.push({ role: 'system', content: "PHASE: THE BOND. Respond to him naturally, but you MUST keep the heat up. Talk about how you don't usually talk to guys like him. lowercase only." });
       } else if (assistantBeats === 4) {
-         aiMessages.push({ role: 'system', content: "PHASE: THE TEASE. Respond to him, then tease him. Mention how he's making you feel special. lowercase only." });
+        aiMessages.push({ role: 'system', content: "PHASE: THE TEASE. Respond to him, then tease him. Mention how he's making you feel special. lowercase only." });
       } else if (assistantBeats >= 5) {
-         aiMessages.push({ role: 'system', content: "PHASE: THE PANIC. React to him briefly, then panic. Tell him your connection is dying and he needs to check your vault archive now. lowercase only." });
+        aiMessages.push({ role: 'system', content: "PHASE: THE PANIC. React to him briefly, then panic. Tell him your connection is dying and he needs to check your vault archive now. lowercase only." });
       }
     }
 
@@ -416,7 +404,7 @@ CRITICAL ERROR PREVENTION: You have previously sounded generic or from the wrong
 
         // 🎙️ NEURAL VOICE ORCHESTRATION (Funnel Only)
         let funnelVoiceUrl = null;
-        if (isFunnel) {
+        if (isFunnelMode) {
            const assets = [
               'https://asset.gasp.fun/voices/veronica_1_hook.wav', // M3: I love that name
               'https://asset.gasp.fun/voices/veronica_2_bond.wav', // M4: I love your vibe
@@ -455,19 +443,22 @@ CRITICAL ERROR PREVENTION: You have previously sounded generic or from the wrong
                 SET bond_score = user_persona_stats.bond_score + 1
              `, [finalUserId, DB_PERSONA_ID]);
 
+            // 🧬 ATOMIC PERSISTENCE: Save both user and assistant messages
             const queries = [
                 db.query(
                     'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, is_funnel, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())',
-                    [finalUserId, DB_PERSONA_ID, 'assistant', streamB_Text + (systemRewardMessage ? `\n\n🎁 *${systemRewardMessage}*` : ''), funnelVoiceUrl || voiceUrl, funnelVoiceUrl ? null : (voiceUrl ? streamA_Native : null), isFunnel]
+                    [finalUserId, DB_PERSONA_ID, 'assistant', streamB_Text + (systemRewardMessage ? `\n\n🎁 *${systemRewardMessage}*` : ''), funnelVoiceUrl || voiceUrl, funnelVoiceUrl ? null : (voiceUrl ? streamA_Native : null), isFunnelMode]
                 ),
                 db.query(
                    'INSERT INTO chat_messages (user_id, persona_id, role, content, is_funnel, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
-                   [finalUserId, DB_PERSONA_ID, 'user', messages[messages.length - 1].content, isFunnel]
+                   [finalUserId, DB_PERSONA_ID, 'user', messages[messages.length - 1].content, isFunnelMode]
                 )
             ];
+            await Promise.all(queries);
+
 
             // 💸 SOVEREIGN AUTO-BURN: Deduct 50 credits for the transmission
-            if (!finalUserId.startsWith('guest-')) {
+            if (!finalUserId.toLowerCase().startsWith('guest-')) {
                await SOV.burnCredits(finalUserId, COST_MESSAGE_TEXT, 'chat_message', { personaId: profileItem.id });
             }
 
