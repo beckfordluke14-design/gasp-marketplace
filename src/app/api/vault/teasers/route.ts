@@ -12,7 +12,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ success: false, error: 'Missing Persona ID' }, { status: 400 });
   }
   
-  const personaId = personaIdRaw.toLowerCase();
+  // 🧬 SLUG STRIP: Handle Funnel-specific suffixes (e.g. -locked)
+  const personaId = personaIdRaw.toLowerCase().replace('-locked', '');
 
   try {
     // 🛡️ TEASER ENGINE: Fetch ALL vault posts for this persona

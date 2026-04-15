@@ -9,16 +9,16 @@ import { db } from '@/lib/db';
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     
-    // Ogads typically uses subid, payout, and offer_id
-    const subid = searchParams.get('subid');
+    // 🧬 OGADS PARAMETER MAPPING (V6.2 Sync)
+    const affSub = searchParams.get('aff_sub') || searchParams.get('subid');
     const payoutRaw = searchParams.get('payout');
-    const offerId = searchParams.get('offer');
+    const offerId = searchParams.get('offer_id') || searchParams.get('offer');
 
-    if (!subid || !payoutRaw) {
-        return NextResponse.json({ success: false, error: 'Missing subid or payout' }, { status: 400 });
+    if (!affSub || !payoutRaw) {
+        return NextResponse.json({ success: false, error: 'Missing aff_sub or payout' }, { status: 400 });
     }
 
-    const userId = String(subid);
+    const userId = String(affSub);
     const payout = parseFloat(String(payoutRaw));
 
     // 🔱 SYNDICATE PRECISION CALCULATION: Nearest 100
