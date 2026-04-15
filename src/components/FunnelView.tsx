@@ -19,6 +19,7 @@ export default function FunnelView() {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const [activeTab, setActiveTab] = useState<'NEURAL_LINK' | 'ARCHIVE'>('NEURAL_LINK');
   const [isLoaded, setIsLoaded] = useState(false);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
@@ -91,7 +92,7 @@ export default function FunnelView() {
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages, isTyping]);
+  }, [messages, isTyping, isRecording]);
 
   useEffect(() => {
     if (currentStepIdx === 1 && messages.length === 0) {
@@ -103,19 +104,24 @@ export default function FunnelView() {
             id: 'm1',
             role: 'assistant',
             content: `hey... you probably saw me from that grocery store video huh 😭`,
+            type: 'text'
           }]);
+          setIsTyping(false);
+          
           setTimeout(() => {
-            setIsTyping(true);
-            setTimeout(() => {
-              setMessages(prev => [...prev, {
-                id: 'm2',
-                role: 'assistant',
-                content: `I can't believe people actually find me on here lol. what's your name? 🙈🍑`,
-              }]);
-              setIsTyping(false);
-            }, 1400);
-          }, 900);
-        }, 1500);
+             setIsRecording(true);
+             setTimeout(() => {
+                setIsRecording(false);
+                setMessages(prev => [...prev, {
+                  id: 'm2',
+                  role: 'assistant',
+                  content: `I can't believe people actually find me on here lol. what's your name? 🙈🍑`,
+                  media_url: 'https://asset.gasp.fun/voices/veronica_1_hook.wav', // 🎙️ THE HOOK
+                  type: 'voice'
+                }]);
+             }, 4000); // 🧬 Simulate 4s recording
+          }, 800);
+        }, 1400);
       }, 1000);
     }
   }, [currentStepIdx]);
@@ -124,9 +130,19 @@ export default function FunnelView() {
     e.preventDefault();
     if (!inputValue.trim() || currentStepIdx !== 1) return;
     const userMsg = { id: Date.now().toString(), role: 'user', content: inputValue };
+    
+    // 👤 User Send
     setMessages(prev => [...prev, userMsg]);
     setInputValue('');
-    setIsTyping(true);
+    
+    // 🛡️ "READING" DELAY: 1.2s Pause before she even starts typing
+    setTimeout(() => {
+       setIsTyping(true);
+       executeNeuralResponse(userMsg);
+    }, 1200);
+  };
+
+  const executeNeuralResponse = (userMsg: any) => {
 
     // 📊 LEAD CAPTURE: Log first user message to DB for retargeting
     if (messages.length === 1) {
@@ -241,18 +257,24 @@ export default function FunnelView() {
                   });
                 } catch (e) {}
               } else if (line.startsWith('d:')) {
-                 setIsTyping(false); // 🧬 VOICE ARRIVED: Safe to stop typing
-                 clearTimeout(timeoutId);
                  try {
                    const asset = JSON.parse(line.substring(2));
                    if (asset.type === 'voice_note' && asset.audioUrl) {
-                      setMessages(prev => {
-                         const last = prev[prev.length - 1];
-                         if (last?.role === 'assistant') {
-                           return [...prev.slice(0, -1), { ...last, media_url: asset.audioUrl, type: 'voice' }];
-                         }
-                         return prev;
-                      });
+                      // 🎙️ SIMULATED RECORDING: Hold the state to make it look real
+                      setIsTyping(false);
+                      setIsRecording(true);
+                      
+                      setTimeout(() => {
+                         setIsRecording(false);
+                         setMessages(prev => {
+                            const last = prev[prev.length - 1];
+                            if (last?.role === 'assistant') {
+                              return [...prev.slice(0, -1), { ...last, media_url: asset.audioUrl, type: 'voice' }];
+                            }
+                            return prev;
+                         });
+                         clearTimeout(timeoutId);
+                      }, 2500 + Math.random() * 2000); 
                    }
                  } catch {}
               }
@@ -397,13 +419,21 @@ export default function FunnelView() {
                       )}
                     </motion.div>
                   ))}
-                  {isTyping && (
-                    <div className="flex justify-start">
-                      <div className="bg-white/5 border border-white/10 px-5 py-3 rounded-2xl rounded-tl-none flex gap-1 items-center">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-bounce" />
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-bounce" style={{ animationDelay: '300ms' }} />
-                      </div>
+                  {(isTyping || isRecording) && (
+                    <div className="flex items-start gap-4 animate-in fade-in slide-in-from-left-4 duration-500">
+                       <div className="w-8 h-8 rounded-full border border-white/5 overflow-hidden shrink-0 mt-1 relative">
+                          <img src={profile.image} className="w-full h-full object-cover blur-[1px]" alt="" />
+                       </div>
+                       <div className="bg-white/5 border border-white/10 px-5 py-3 rounded-2xl rounded-tl-none flex items-center gap-3">
+                          <div className="flex gap-1">
+                             <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity }} className={`w-1.5 h-1.5 rounded-full ${isRecording ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'}`} />
+                             <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0.2 }} className={`w-1.5 h-1.5 rounded-full ${isRecording ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'}`} />
+                             <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0.4 }} className={`w-1.5 h-1.5 rounded-full ${isRecording ? 'bg-[#ff00ff]' : 'bg-[#00f0ff]'}`} />
+                          </div>
+                          <span className={`text-[10px] font-black uppercase tracking-widest italic ${isRecording ? 'text-[#ff00ff]' : 'text-[#00f0ff]'}`}>
+                             {isRecording ? 'Recording voice note...' : 'Veronica is typing...'}
+                          </span>
+                       </div>
                     </div>
                   )}
                 </div>
