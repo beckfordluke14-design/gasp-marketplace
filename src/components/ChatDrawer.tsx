@@ -203,6 +203,9 @@ export default function ChatDrawer({
                  const finalDelay = baseDelay / (activeConfig.delayMultiplier * speedMult);
                  await wait(finalDelay);
               }
+          } else if (line.startsWith('d:')) {
+            try {
+              const event = JSON.parse(line.slice(2));
               if (event?.type === 'voice_note') {
                  isVoiceDetected = true;
                  if (event.audioUrl) {
@@ -219,6 +222,10 @@ export default function ChatDrawer({
                         return prev;
                     });
                  }
+              }
+              if (event?.type === 'balance_refresh') {
+                 // 🏦 INSTANT WALLET SYNC
+                 window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
               }
             } catch {}
           } else if (line.startsWith('0:')) {

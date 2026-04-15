@@ -286,7 +286,13 @@ ${typingDirective}
             await db.query('INSERT INTO user_persona_stats (user_id, persona_id, bond_score) VALUES ($1, $2, 1) ON CONFLICT (user_id, persona_id) DO UPDATE SET bond_score = user_persona_stats.bond_score + 1', [finalUserId, DB_PERSONA_ID]);
             await db.query('INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, is_funnel, created_at) VALUES ($1, $2, $3, $4, $5, $6, FALSE, NOW())', [finalUserId, DB_PERSONA_ID, 'assistant', streamB_Text, voiceUrl, streamA_Native]);
             await db.query('INSERT INTO chat_messages (user_id, persona_id, role, content, is_funnel, created_at) VALUES ($1, $2, $3, $4, FALSE, NOW())', [finalUserId, DB_PERSONA_ID, 'user', messages[messages.length - 1].content]);
-            // Credits already deducted at high-availability gate above
+            
+            // 🛰️ LIVE BALANCE SYNC: Fetch and deliver updated liquidity
+            const { rows: balanceSync } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1 LIMIT 1', [finalUserId]);
+            if (balanceSync.length > 0) {
+               controller.enqueue(encoder.encode(`d:${JSON.stringify({ type: 'balance_refresh', balance: balanceSync[0].credit_balance })}\n`));
+            }
+            
             await summarizeAndStore([...messages, { role: 'assistant', content: streamB_Text }], finalUserId, finalProfileId);
         } catch (dbErr) { console.error('[Persistence Fail]:', dbErr); }
 

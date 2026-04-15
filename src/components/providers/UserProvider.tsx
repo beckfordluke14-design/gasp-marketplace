@@ -138,6 +138,29 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     if (!activeUserId) return;
     
+    // 🧬 IDENTITY HANDOFF: When a user authenticates, migrate their guest credits once
+    if (authenticated && user?.id) {
+       const storedGuestId = typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : null;
+       const handoffKey = `gasp_handoff_${user.id}`;
+       const alreadyHandedOff = typeof window !== 'undefined' ? localStorage.getItem(handoffKey) : null;
+
+       if (storedGuestId && !alreadyHandedOff) {
+          console.log('🧬 [Identity Handoff] Migrating credits from Guest to Member...');
+          fetch('/api/economy/balance', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({ userId: user.id, action: 'link_guest', guestId: storedGuestId })
+          }).then(r => r.json()).then(data => {
+             if (data.success && data.migrated > 0) {
+                console.log(`🏦 [Handoff] ${data.migrated} CR Successfully Migrated.`);
+                localStorage.setItem(handoffKey, 'true');
+                // Force instant display update
+                window.dispatchEvent(new CustomEvent('gasp_balance_refresh'));
+             }
+          }).catch(e => console.error('[Handoff Error]:', e));
+       }
+    }
+    
     // 🛰️ EVENT-DRIVEN SYNC: Refresh balance on manual triggers
     const handleRefresh = async () => {
        fetchProfile(activeUserId, user);

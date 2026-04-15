@@ -70,7 +70,34 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true, balance: 1000 });
         }
 
-        return NextResponse.json({ success: false, error: 'Invalid Action' }, { status: 400 });
+        // 🧬 IDENTITY HANDOFF: Migrate Guest Credits to Member ID
+        if (action === 'link_guest') {
+            const { guestId } = await req.json();
+            if (!guestId) return NextResponse.json({ success: false, error: 'Guest ID required' });
+
+            // Fetch total credits from guest
+            const { rows: guestData } = await db.query('SELECT credit_balance FROM profiles WHERE id = $1', [guestId]);
+            const gBalance = guestData[0]?.credit_balance || 0;
+
+            if (gBalance > 0) {
+                // Merge into the member ID (Privy)
+                await db.query(`
+                    INSERT INTO profiles (id, credit_balance) VALUES ($1, ${gBalance})
+                    ON CONFLICT (id) DO UPDATE SET credit_balance = profiles.credit_balance + EXCLUDED.credit_balance
+                `, [userId]);
+
+                // 📸 MIGRATE UNLOCKS: Ensure they keep what they paid for
+                await db.query('UPDATE user_media_unlocks SET user_id = $1 WHERE user_id = $2', [userId, guestId]);
+
+                // 💬 MIGRATE CHAT: Ensure the AI remembers them
+                await db.query('UPDATE chat_messages SET user_id = $1 WHERE user_id = $2', [userId, guestId]);
+                await db.query('UPDATE user_persona_stats SET user_id = $1 WHERE user_id = $2', [userId, guestId]);
+
+                // Wipe guest to prevent double-claiming
+                await db.query('UPDATE profiles SET credit_balance = 0 WHERE id = $1', [guestId]);
+            }
+            return NextResponse.json({ success: true, migrated: gBalance });
+        }
     } catch (e: any) {
         return NextResponse.json({ success: false, error: e.message }, { status: 500 });
     }
