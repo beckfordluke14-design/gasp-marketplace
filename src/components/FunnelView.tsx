@@ -353,11 +353,7 @@ export default function FunnelView() {
             {currentStepIdx === 0 && (
               <motion.div key="init" className="flex-1 flex flex-col items-center justify-center p-8 space-y-4">
                  <Loader2 className="text-[#ff00ff] animate-spin" size={40} />
-                 <div className="font-mono text-[9px] text-white/20 space-y-1">{terminalLogs.map((log, i) => <div key={i}>{log}</div>)}</div>
-              </motion.div>
-            )}
-
-            {currentStepIdx === 1 && (
+                 <div className="font-mono text-[9px] text-white/20 space-y-1">{terminalLogs.map((log, i) => <div key={i}            {activeTab === 'NEURAL_LINK' && currentStepIdx === 1 && (
               <motion.div 
                 key="chat" 
                 initial={{ opacity: 0, x: 20 }} 
@@ -370,7 +366,7 @@ export default function FunnelView() {
                   ref={scrollRef}
                   className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide pb-24"
                 >
-                  {/* 🖼️ INITIAL GALLERY BLOCK: PROMO ASSETS */}
+                  {/* ... existing gallery and messages logic ... */}
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="aspect-[3/5] rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
                       <img src="/Promo/PromoPic1.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Promo" />
@@ -383,12 +379,7 @@ export default function FunnelView() {
                   </div>
 
                   {messages.map((m) => (
-                    <motion.div 
-                      key={m.id}
-                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      className={`flex ${m.role === 'assistant' ? 'justify-start' : 'justify-end'}`}
-                    >
+                    <motion.div key={m.id} initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} className={`flex ${m.role === 'assistant' ? 'justify-start' : 'justify-end'}`}>
                       {m.isTease ? (
                         <div className="w-full max-w-[85%] bg-white/5 border border-[#ffea00]/30 rounded-3xl p-4 space-y-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                            <div className="flex items-center gap-3 mb-2">
@@ -408,37 +399,23 @@ export default function FunnelView() {
                         </div>
                       ) : m.type === 'voice' && m.media_url ? (
                          <div className="w-full max-w-[90%]">
-                            <VoiceNoteBubble 
-                               audioUrl={m.media_url} 
-                               profileImage={profile.image}
-                               profileName={profile.name}
-                               translation={m.audio_translation}
-                               isUnlocked={true}
-                               isEnglish={true}
-                               onUnlockTranslation={async () => true}
-                            />
+                            <VoiceNoteBubble audioUrl={m.media_url} profileImage={profile.image} profileName={profile.name} translation={m.audio_translation} isUnlocked={true} isEnglish={true} onUnlockTranslation={async () => true} />
                          </div>
                       ) : (
-                        <div className={`max-w-[85%] px-6 py-4 rounded-[2rem] text-[16px] leading-relaxed relative ${
-                          m.role === 'assistant' 
-                            ? 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none font-medium' 
-                            : 'bg-[#ffea00] text-black font-black rounded-tr-none shadow-[0_10px_30px_rgba(255,234,0,0.2)]'
-                        }`}>
+                        <div className={`max-w-[85%] px-6 py-4 rounded-[2rem] text-[16px] leading-relaxed relative ${m.role === 'assistant' ? 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none font-medium' : 'bg-[#ffea00] text-black font-black rounded-tr-none shadow-[0_10px_30px_rgba(255,234,0,0.2)]'}`}>
                           {m.content}
-                          {m.role === 'assistant' && <div className="absolute -left-1 top-0 w-4 h-4 bg-white/5 rounded-full blur-xl" />}
                         </div>
                       )}
                     </motion.div>
                   ))}
-                  
                   {isTyping && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+                    <div className="flex justify-start">
                       <div className="bg-white/5 border border-white/10 px-5 py-3 rounded-2xl rounded-tl-none flex gap-1 items-center">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-bounce" />
                         <span className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-bounce" style={{ animationDelay: '150ms' }} />
                         <span className="w-1.5 h-1.5 rounded-full bg-[#ffea00] animate-bounce" style={{ animationDelay: '300ms' }} />
                       </div>
-                    </motion.div>
+                    </div>
                   )}
                 </div>
 
@@ -447,12 +424,7 @@ export default function FunnelView() {
                   <form onSubmit={handleSendMessage} className="relative group max-w-[500px] mx-auto">
                     <div className="absolute -inset-1 bg-gradient-to-r from-[#ff00ff]/20 to-[#00f0ff]/20 rounded-[2rem] blur opacity-30 group-focus-within:opacity-100 transition duration-1000"></div>
                     <div className="relative flex items-center gap-3 bg-[#1a1a1a] p-2 rounded-[2.5rem] border border-white/10 backdrop-blur-3xl shadow-2xl">
-                      <input 
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Type your reply..."
-                        className="flex-1 bg-transparent border-none px-6 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:ring-0 font-bold"
-                      />
+                      <input value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Type your reply..." className="flex-1 bg-transparent border-none px-6 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:ring-0 font-bold" />
                       <button type="submit" className="w-12 h-12 bg-[#ff00ff] rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-105 active:scale-95 transition-all outline-none">
                         <Send size={18} />
                       </button>
@@ -460,6 +432,39 @@ export default function FunnelView() {
                   </form>
                 </div>
               </motion.div>
+            )}
+
+            {activeTab === 'ARCHIVE' && currentStepIdx === 1 && (
+               <motion.div 
+                 key="archive-grid" 
+                 initial={{ opacity: 0, scale: 0.95 }} 
+                 animate={{ opacity: 1, scale: 1 }}
+                 exit={{ opacity: 0, scale: 0.95 }}
+                 className="flex-1 overflow-y-auto p-6 scrollbar-hide pb-32"
+               >
+                  <div className="grid grid-cols-2 gap-3">
+                    {[1,2,3,4,5,6].map((i) => (
+                      <div key={i} className="aspect-[3/4] rounded-3xl bg-white/5 border border-white/10 overflow-hidden relative group">
+                        <img src={`/Promo/PromoPic${(i%3)+1}.${i%2===0?'webp':'png'}`} className="w-full h-full object-cover blur-2xl opacity-40" alt="Locked" />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-4 text-center">
+                           <Lock size={20} className="text-[#ffea00] mb-2" />
+                           <span className="text-[10px] font-black text-white uppercase tracking-tighter">unlocked via</span>
+                           <span className="text-[14px] font-black text-[#ffea00] italic">Verification</span>
+                           <button 
+                             onClick={() => setCurrentStepIdx(2)}
+                             className="mt-4 px-4 py-2 bg-[#ffea00] text-black text-[9px] font-black rounded-full uppercase tracking-widest shadow-[0_5px_15px_rgba(255,234,0,0.3)] active:scale-95 transition-all"
+                           >
+                              Start Mission
+                           </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-8 p-6 rounded-3xl bg-[#ff00ff]/5 border border-[#ff00ff]/20 text-center">
+                    <p className="text-[11px] font-black text-[#ff00ff] uppercase tracking-[0.2em] mb-2">Notice</p>
+                    <p className="text-[13px] text-white/50 leading-relaxed italic">"help me out papi... verify u aren't a bot so my archive doesn't get shut down 😭🙏"</p>
+                  </div>
+               </motion.div>
             )}
 
             {currentStepIdx === 2 && (

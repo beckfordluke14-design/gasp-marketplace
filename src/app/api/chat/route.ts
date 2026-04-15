@@ -272,13 +272,14 @@ ${hasVaultPic ? `- CONVERSION BRIDGE: His current balance is ${body.userBalance 
     ];
 
     // 🚀 STAGE-AWARE SEDUCTION: High-Heat Funnel Logic (ONLY for isFunnel traffic)
-    const msgCount = body.userMsgCount || 0;
+    // 🧬 NEURAL CORRECTION: Use the actual message history length to determine the stage
     const isFunnelTraffic = body.isFunnel === true;
+    const assistantBeats = persistentMessages.filter((m: any) => m.role === 'assistant').length;
 
     if (normalizedUserId.toUpperCase().startsWith('GUEST-') && isFunnelTraffic) {
-      if (msgCount <= 1) {
-        aiMessages.push({ role: 'system', content: "PHASE: SELECTIVE CURIOSITY. Ask for his name. under 10 words. lowercase only." });
-      } else if (msgCount === 2) {
+      if (assistantBeats <= 2) {
+        aiMessages.push({ role: 'system', content: "PHASE: SELECTIVE CURIOSITY. You're flattered he found you. Ask for his name. under 10 words. lowercase only." });
+      } else if (assistantBeats <= 4) {
         aiMessages.push({ role: 'system', content: "PHASE: OBSESSION. You are addicted to his vibe. tell him you don't want to lose him. under 15 words. lowercase only." });
       } else {
         aiMessages.push({ role: 'system', content: "PHASE: THE WALL. Panic. One punchy line: 'wait! my session is ending! 😭 follow me to my PHOTOS right now so I don't lose you! GO!'. lowercase only." });
@@ -293,7 +294,7 @@ ${hasVaultPic ? `- CONVERSION BRIDGE: His current balance is ${body.userBalance 
             'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
         },
         body: JSON.stringify({
-            model: 'x-ai/grok-3-mini', 
+            model: 'x-ai/grok-2', 
             messages: aiMessages,
             response_format: { type: "json_object" }
         })
