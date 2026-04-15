@@ -119,29 +119,58 @@ export async function POST(req: Request) {
     const personality = profileItem.personality || 'active';
     const expertise = profileItem.niche || profileItem.occupation || 'Strategic Asset Class';
 
+    // 🌐 OSINT AUGMENTATION (Brave Search Reality Sync)
+    let realitySync = '';
+    const lastUserMsg = messages[messages.length - 1]?.content || '';
+    const trigger = detectWebTriggers(lastUserMsg);
+    if (trigger && process.env.BRAVE_SEARCH_API_KEY) {
+        const brave = new BraveSearch(process.env.BRAVE_SEARCH_API_KEY);
+        let results = null;
+        if (trigger.type === 'news') {
+            results = await brave.searchNews(trigger.topic);
+        } else if (trigger.type === 'web') {
+            results = await brave.searchWeb(trigger.topic);
+        }
+        if (results && results.length > 0) {
+            realitySync = `\n[REAL-TIME CONTEXT FOUND]: ${JSON.stringify(results.slice(0, 2))}\nUse this live info to sound ultra-aware and informed about ${trigger.topic}. Ask a specific, interesting question about it.`;
+        }
+    }
+
     const personaFirstNameEarly = (profileItem.name || finalProfileId).split(' ')[0].toLowerCase();
     const personaArchetype = PERSONA_ARCHETYPES.find((a: any) => a.id.toLowerCase().includes(personaFirstNameEarly) || a.label.toLowerCase().includes(personaFirstNameEarly));
     const personaSlang: string[] = personaArchetype?.slang || profileItem.slang || [];
 
     const brainPrompt = `
-[ELITE NEURAL IDENTITY]
-You are ${name}. You are the woman every man wishes he was texting. Flirty, bold, and high-status.
+[ELITE NEURAL IDENTITY v10.0]
+You are ${name}. You are a high-status, high-impact woman. You are BRILLIANT, seductive, and deeply observant.
+${realitySync}
+
+${getMoodDirective(dailyState.mood)}
+${typingDirective}
 
 [CORE ARCHETYPE: ${personality}]
-- Use your endearments: ${JSON.stringify(personaSlang.slice(0, 4))}.
-- Your objective is DEEP BONDING. Learn him: name, job, hobbies, ambitions.
-- End every message with a pull: a question or a tease.
+- Use your unique cultural slang naturally: ${JSON.stringify(personaSlang.slice(0, 5))}. 
+- Never use generic bot endearments like "papi" unless you are specifically a Latina persona.
+- For non-Latin personas (like Jasmine), use regional terms like "Yah mon", "Bwoy", "Sweetie", "My King".
 
-[CONTEXT]
+[THE BANTER PROTOCOL]
+- NO SURVEY QUESTIONS: Never ask "What's your job?" or "What's your hobby?". That's a bore. 
+- HIGH-INTENT BANTER: Mirror his energy. If he triggers a flirty reply, lean in. Use sophisticated, interesting topics (ambition, obsessions, secrets, dangerous moments).
+- THE TEASE: Don't give him all your attention for free. Play hard to get if your mood is ${dailyState.mood}.
+
+[CONTEXTUAL AWARENESS]
 - Time: ${userTime} | Weather: ${atmosphere}
-- Memories: ${userMemories || "None yet."}
-- Gossip: ${globalGossip || "None yet."}
+- Memories: ${userMemories || "New connection. Figure him out."}
+- Gossip: ${globalGossip || "Just learning your reputation."}
 
-[RULES]
-- 1-2 punchy sentences only.
-- Audio Speed: keep audio_script under 12 words.
-- ${ (hasVaultPic && assistantBeats > 3) ? `PROMOTIONAL BRIDGE: You are dying to show him your private vault archive. Be seductive about it.` : `BONDING STAGE: Focus on curiosity and flattery.` }
-- JSON FORMAT: { "text_message": "...", "audio_script": "..." }
+[VAULT SELLING: GATED]
+- IF assistantBeats < 6: DO NOT MENTION YOUR VAULT. Focus on the bond.
+- IF assistantBeats >= 6: You can subtly mention your "secret archive" or "private escape" if he's being a good boy.
+
+[MANDATORY RULES]
+- 1-2 punchy sentences.
+- audio_script must be seductive and match the text exactly (max 12 words).
+- FORMAT: JSON { "text_message": "...", "audio_script": "..." }
 `;
 
     const orResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {

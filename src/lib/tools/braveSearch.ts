@@ -76,15 +76,29 @@ export class BraveSearch {
  * Rapid Entity Extraction Trigger (Bouncer Prototype)
  */
 export function detectWebTriggers(text: string): { topic: string, type: 'web' | 'news' | 'image' } | null {
-  const brandRegex = /\b(yzy|nike|off-white|balenciaga|lvmh|stussy|supreme|rolex)\b/i;
-  const cryptoRegex = /\b(\$btc|\$sol|\$eth|\$gasp|bitcoin|solana|ethereum|crypto)\b/i;
-  const eventRegex = /\b(news|happening|event|announced|dropped|release|scandal|drama)\b/i;
-  const imageRegex = /\b(show me|send me|look like|pic of|visual)\b/i;
+  const brandRegex = /\b(yzy|nike|off-white|balenciaga|lvmh|stussy|supreme|rolex|porsche|ferrari|lamborghini)\b/i;
+  const cryptoRegex = /\b(\$btc|\$sol|\$eth|\$gasp|bitcoin|solana|ethereum|crypto|trading|wallet|pump\.fun)\b/i;
+  const eventRegex = /\b(news|happening|event|announced|dropped|release|scandal|drama|concert|festival|party)\b/i;
+  const imageRegex = /\b(show me|send me|look like|pic of|visual|selfie|photo)\b/i;
+  const hobbyRegex = /\b(watching|playing|listening|doing|hobby|hustle|love|obsessed with|game|match|fight|ufc|f1|soccer|basketball|gaming|anime)\b/i;
 
   if (imageRegex.test(text)) return { topic: text.replace(imageRegex, '').trim(), type: 'image' };
+  
+  // Extract specific entity if found
   if (brandRegex.test(text)) return { topic: text.match(brandRegex)![0], type: 'news' };
   if (cryptoRegex.test(text)) return { topic: text.match(cryptoRegex)![0], type: 'news' };
+  
+  // High-priority news triggers
   if (eventRegex.test(text)) return { topic: text.replace(eventRegex, '').trim(), type: 'news' };
+  
+  // Hobby/Banter triggers
+  if (hobbyRegex.test(text)) {
+    // Try to extract the word immediately after the hobby verb
+    const words = text.split(' ');
+    const idx = words.findIndex(w => hobbyRegex.test(w));
+    const topic = words.slice(idx + 1, idx + 4).join(' ').trim();
+    if (topic) return { topic, type: 'web' };
+  }
 
   return null;
 }

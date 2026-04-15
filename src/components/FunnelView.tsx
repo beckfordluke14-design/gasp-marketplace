@@ -27,6 +27,7 @@ export default function FunnelView() {
   const [selectedPkgId, setSelectedPkgId] = useState('tier_session');
   const [missionCount, setMissionCount] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
   
   const [vaultItems, setVaultItems] = useState<any[]>([]);
   const [loadingVault, setLoadingVault] = useState(false);
@@ -45,6 +46,23 @@ export default function FunnelView() {
      const s = seconds % 60;
      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
+
+  // 📈 LIVE FOMO TICKER SAMPLES
+  const [fomoIndex, setFomoIndex] = useState(0);
+  const fomoMessages = [
+    'User_9389 just claimed 6,000 Credits ⚡️',
+    'AnonBoi38 just redeemed his Reward 🎁',
+    'LuckieLuke just entered the Private Vault 🌶️',
+    'GaspFan_22 just completed Mission 3/3 🔥',
+    'ZestyGyal just unlocked Sitewide access 💎'
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFomoIndex(prev => (prev + 1) % fomoMessages.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
 
   const searchParams = useSearchParams();
   const hasIntercepted = useRef(false);
@@ -100,7 +118,6 @@ export default function FunnelView() {
       setTimeout(() => {
         setIsTyping(true);
         setTimeout(() => {
-          // 🎬 VERONICA OPENS — she's the one who put out the video, she notices HIM
           setMessages([{
             id: 'm1',
             role: 'assistant',
@@ -119,20 +136,18 @@ export default function FunnelView() {
                   content: `I can't believe people actually find me on here lol. what's your name? 🙈`,
                   type: 'text'
                 }]);
-             }, 3000); // 🧬 Simulate 3s typing
+             }, 3000); 
           }, 800);
         }, 1400);
       }, 1000);
     }
   }, [currentStepIdx]);
 
-  // 🧬 FUNNEL ORCHESTRATOR: Watch for the final neural heartbeat to trigger the conversion wall
   useEffect(() => {
     const lastMsg = messages[messages.length - 1];
     if (lastMsg?.media_url?.includes('veronica_4_close.wav') && !hasIntercepted.current && !isRecording) {
       hasIntercepted.current = true;
       
-      // 🥒 STAGE 1: The "Accidental" Leak (Cucumber)
       setTimeout(() => {
          const leakId = 'leak_' + Date.now();
          setMessages(prev => [...prev, { 
@@ -143,11 +158,9 @@ export default function FunnelView() {
            media_type: 'image'
          }]);
          
-         // 🎭 STAGE 2: THE "UNSEND" (Psychological Trap)
          setTimeout(() => {
             setMessages(prev => prev.map(m => m.id === leakId ? { ...m, isUnsent: true, content: 'Message unsent', media_url: null } : m));
             
-            // 🌡️ STAGE 3: The Fluster
             setTimeout(() => {
                setIsTyping(true);
                setTimeout(() => {
@@ -158,7 +171,6 @@ export default function FunnelView() {
                   }]);
                   setIsTyping(false);
 
-                  // 🌡️ STAGE 4: The Pivot
                   setTimeout(() => {
                      setIsTyping(true);
                      setTimeout(() => {
@@ -169,7 +181,6 @@ export default function FunnelView() {
                         }]);
                         setIsTyping(false);
 
-                        // 🍑 STAGE 5: The High-Value Tease
                         setTimeout(() => {
                            setMessages(prev => [...prev, { 
                              id: 'tease_' + Date.now(), 
@@ -179,29 +190,23 @@ export default function FunnelView() {
                              media_url: vaultItems.length > 0 ? vaultItems[0].content_url : null
                            }]);
                            
-                           // 🛡️ FULL RESONANCE GUARD: 10s total for final transition
                            setTimeout(() => { setCurrentStepIdx(2); }, 10000);
                         }, 3000);
                      }, 3000);
                   }, 4000);
                }, 2000);
             }, 1500);
-         }, 4000); // ⏱️ Give them 4s to see the leak image
-      }, 5000); // ⏱️ Wait 5s for her closer voice note to play
+         }, 4000); 
+      }, 5000); 
     }
   }, [messages, isRecording]);
-
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || currentStepIdx !== 1) return;
     const userMsg = { id: Date.now().toString(), role: 'user', content: inputValue };
-    
-    // 👤 User Send
     setMessages(prev => [...prev, userMsg]);
     setInputValue('');
-    
-    // 🛡️ "READING" DELAY: 1.2s Pause before she even starts typing
     setTimeout(() => {
        setIsTyping(true);
        executeNeuralResponse(userMsg);
@@ -209,8 +214,6 @@ export default function FunnelView() {
   };
 
   const executeNeuralResponse = (userMsg: any) => {
-
-    // 📊 LEAD CAPTURE: Log first user message to DB for retargeting
     if (messages.length === 1) {
       const gid = localStorage.getItem('gasp_guest_id') || 'ANON';
       const attribution = JSON.parse(localStorage.getItem('gasp_attribution') || '{}');
@@ -219,7 +222,6 @@ export default function FunnelView() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: gid, action: 'guest_genesis' })
       }).catch(() => {});
-      // Log lead event silently
       fetch('/api/rpc/db', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -236,19 +238,15 @@ export default function FunnelView() {
         })
       }).catch(() => {});
     }
-    
-    // The AI Engine now handles the conversation dynamically.
-    // Transition to the wall is handled by the useEffect watching for the final voice note.
 
     (async () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
         setIsTyping(false);
         if (!controller.signal.aborted) controller.abort();
-      }, 15000); // 🛡️ NEURAL WATCHDOG: 15s Guard
+      }, 15000);
 
       try {
-        console.log('[Funnel] Fetching neural response for messages:', messages.length);
         const res = await fetch('/api/chat/funnel', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -261,13 +259,16 @@ export default function FunnelView() {
             userId: typeof window !== 'undefined' ? localStorage.getItem('gasp_guest_id') : 'ANON',
             personaId: 'veronica-medellin-locked',
             isFunnel: true,
-            userName: userMsg?.content || 'papi',
+            userName: userName || userMsg?.content || 'sweetheart',
             source: 'funnel_ad'
           }),
         });
+
+        // 🧠 IDENTITY SYNC: If this was the response to "whats your name?", save it
+        if (!userName && messages.length <= 2) {
+            setUserName(userMsg.content);
+        }
         if (!res.ok) {
-           const errText = await res.text();
-           console.error('[Funnel] API Error:', res.status, errText);
            setIsTyping(false);
            return;
         }
@@ -275,50 +276,34 @@ export default function FunnelView() {
 
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();
-        let fullText = '';
         let lineBuffer = '';
         if (reader) {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            
             lineBuffer += decoder.decode(value, { stream: true });
             const lines = lineBuffer.split('\n');
-            lineBuffer = lines.pop() || ''; // keep incomplete last line in buffer
+            lineBuffer = lines.pop() || '';
 
             for (const line of lines) {
               if (line.startsWith('0:')) {
-                setIsTyping(false); // 🧬 TEXT ARRIVED: Safe to stop typing
-                clearTimeout(timeoutId);
+                setIsTyping(false);
                 try { 
                   const textContent = line.substring(2);
                   if (!textContent.trim()) continue;
                   const text = JSON.parse(textContent); 
-                  console.log('[Funnel] Text Arrived:', text);
-                  if (!text) continue;
                   setMessages(prev => {
                     const last = prev[prev.length - 1];
                     if (last?.role === 'assistant' && !last.isTease) {
-                      return [...prev.slice(0, -1), { 
-                        ...last, 
-                        content: text
-                      }];
+                      return [...prev.slice(0, -1), { ...last, content: text }];
                     }
-                    return [...prev, { 
-                      id: 'v-' + Date.now(), 
-                      role: 'assistant', 
-                      content: text,
-                      type: 'text'
-                    }];
+                    return [...prev, { id: 'v-' + Date.now(), role: 'assistant', content: text, type: 'text' }];
                   });
-                } catch (e) {
-                  console.error('[Funnel] Text Parse Error:', e, line);
-                }
+                } catch (e) {}
               } else if (line.startsWith('d:')) {
                 try {
                   const data = JSON.parse(line.substring(2));
                   if (data.type === 'voice_note' && data.audioUrl) {
-                     // 🎙️ THE "STICKY" SYNC: Let the text breathe for 1.2s first
                      setTimeout(() => {
                         setIsRecording(true);
                         setTimeout(() => {
@@ -326,11 +311,7 @@ export default function FunnelView() {
                            setMessages(prev => {
                               const last = prev[prev.length - 1];
                               if (last?.role === 'assistant') {
-                                return [...prev.slice(0, -1), { 
-                                  ...last, 
-                                  media_url: data.audioUrl, 
-                                  type: 'voice' 
-                                }];
+                                return [...prev.slice(0, -1), { ...last, media_url: data.audioUrl, type: 'voice' }];
                               }
                               return prev;
                            });
@@ -343,7 +324,6 @@ export default function FunnelView() {
           }
         }
       } catch (err: any) {
-        if (err.name === 'AbortError') { console.warn('[Funnel] Stream Timed Out (15s Neural Watchdog)'); }
         setIsTyping(false);
       } finally {
         setIsTyping(false);
@@ -363,7 +343,7 @@ export default function FunnelView() {
       </div>
 
       <main className="relative z-10 w-full max-w-[600px] h-[100dvh] md:h-[92dvh] flex flex-col bg-black/60 backdrop-blur-3xl md:rounded-[3rem] border-white/10 shadow-2xl overflow-hidden md:my-4">
-        {/* 🛸 SOVEREIGN HEADER: ASSET 01 */}
+        {/* 🛸 SOVEREIGN HEADER */}
         <div className="shrink-0 pt-10 pb-4 px-6 md:px-10 flex flex-col gap-5 border-b border-white/5 bg-black/40 relative">
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
@@ -377,7 +357,17 @@ export default function FunnelView() {
                 <div className="w-1.5 h-1.5 rounded-full bg-[#00ffcc] animate-pulse" />
                 <span className="text-[9px] font-black text-white tracking-[0.1em]">14 Online</span>
               </div>
-              <span className="text-[9px] font-black text-[#ff00ff] uppercase tracking-[0.2em]">SOVEREIGN SESSION ACTIVE</span>
+              <AnimatePresence mode="wait">
+                <motion.span 
+                  key={fomoIndex}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-[9px] font-black text-[#ff00ff] uppercase tracking-[0.2em]"
+                >
+                  {fomoMessages[fomoIndex]}
+                </motion.span>
+              </AnimatePresence>
             </div>
           </div>
 
@@ -423,15 +413,6 @@ export default function FunnelView() {
 
         <div className="flex-1 flex flex-col overflow-hidden relative">
           <AnimatePresence mode="wait">
-            {currentStepIdx === 2 && <motion.div key="glitch" initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 0], x: [0, -10, 10, 0] }} className="absolute inset-0 z-[500] bg-[#ff00ff]/10 mix-blend-overlay pointer-events-none" />}
-            
-            {currentStepIdx === 0 && (
-              <motion.div key="init" className="flex-1 flex flex-col items-center justify-center p-8 space-y-4">
-                 <Loader2 className="text-[#ff00ff] animate-spin" size={40} />
-                 <div className="font-mono text-[9px] text-white/20 space-y-1">{terminalLogs.map((log, i) => <div key={i}>{log}</div>)}</div>
-              </motion.div>
-            )}
-
             {activeTab === 'NEURAL_LINK' && currentStepIdx === 1 && (
               <motion.div 
                 key="chat" 
@@ -445,7 +426,6 @@ export default function FunnelView() {
                   ref={scrollRef}
                   className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide pb-24"
                 >
-                  {/* ... existing gallery and messages logic ... */}
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="aspect-[3/5] rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
                       <img src="/Promo/PromoPic1.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Promo" />
@@ -482,7 +462,7 @@ export default function FunnelView() {
                         </div>
                       ) : (
                          <div className={`flex flex-col gap-2 w-full ${m.role === 'assistant' ? 'items-start' : 'items-end'}`}>
-                             {m.content && m.content !== '...' && m.content !== '' && (
+                             {m.content && (
                                <div className={`max-w-[85%] px-6 py-4 rounded-[2rem] text-[16px] leading-relaxed relative ${m.role === 'assistant' ? 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none font-medium' : 'bg-[#ffea00] text-black font-black rounded-tr-none shadow-[0_10px_30px_rgba(255,234,0,0.2)]'} ${m.isUnsent ? 'opacity-30 italic font-normal text-[12px] py-2 px-4' : ''}`}>
                                  {m.content}
                                </div>
@@ -521,10 +501,8 @@ export default function FunnelView() {
                   )}
                 </div>
 
-                {/* ⌨️ INPUT AREA (SIMPLIFIED & HIGH-CONVERSION) */}
+                {/* ⌨️ INPUT AREA */}
                 <div className="px-6 py-6 bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-4">
-                  
-                  {/* 🎁 FAST-TRACK SHORTCUT */}
                   <div className="flex items-center justify-center gap-3">
                     <button 
                       onClick={() => setCurrentStepIdx(2)}
@@ -541,7 +519,6 @@ export default function FunnelView() {
                        <span className="text-[10px] font-black uppercase tracking-widest italic tracking-tighter italic">BUY INSTANT</span>
                     </button>
                   </div>
-
                   <form onSubmit={handleSendMessage} className="relative group max-w-[500px] mx-auto w-full">
                     <div className="relative flex items-center gap-3 bg-[#131313] p-1.5 rounded-[3rem] border border-white/10 backdrop-blur-3xl">
                       <input value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Type a flirty reply..." className="flex-1 bg-transparent border-none px-6 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:ring-0 font-bold" />
@@ -555,54 +532,24 @@ export default function FunnelView() {
             )}
 
             {activeTab === 'ARCHIVE' && currentStepIdx === 1 && (
-               <motion.div 
-                 key="archive-grid" 
-                 initial={{ opacity: 0, scale: 0.95 }} 
-                 animate={{ opacity: 1, scale: 1 }}
-                 exit={{ opacity: 0, scale: 0.95 }}
-                 className="flex-1 overflow-y-auto p-6 scrollbar-hide pb-32"
-               >
+               <motion.div key="archive" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 overflow-y-auto p-6 scrollbar-hide pb-32">
                   <div className="grid grid-cols-2 gap-3">
                     {vaultItems.length > 0 ? vaultItems.map((item) => (
                       <div key={item.id} className="aspect-[3/4] rounded-3xl bg-white/5 border border-white/10 overflow-hidden relative group">
                         <img src={item.content_url} className="w-full h-full object-cover blur-2xl opacity-40" alt="Locked" />
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-4 text-center">
                            <Lock size={20} className="text-[#ffea00] mb-2" />
-                           <span className="text-[10px] font-black text-white uppercase tracking-tighter">unlocked via</span>
-                           <span className="text-[14px] font-black text-[#ffea00] italic">Verification</span>
-                           <button 
-                             onClick={() => setCurrentStepIdx(2)}
-                             className="mt-4 px-4 py-2 bg-[#ffea00] text-black text-[9px] font-black rounded-full uppercase tracking-widest shadow-[0_5px_15px_rgba(255,234,0,0.3)] active:scale-95 transition-all"
-                           >
-                              Start Mission
-                           </button>
+                           <span className="text-[10px] font-black text-white uppercase tracking-tighter italic">Unlocked with 6,000 Credits</span>
+                           <button onClick={() => setCurrentStepIdx(2)} className="mt-4 px-4 py-2 bg-[#ffea00] text-black text-[9px] font-black rounded-full uppercase">Start Mission</button>
                         </div>
                       </div>
-                    )) : (
-                      // 🧬 FALLBACK: Match parity with main site (exactly 3 items)
-                      [1,2,3].map((n) => (
-                        <div key={n} className="aspect-[3/4] rounded-3xl bg-white/5 border border-white/10 flex flex-col items-center justify-center p-4 text-center opacity-20">
-                           <Lock size={16} className="text-white/20 mb-2" />
-                           <span className="text-[9px] font-black text-white/40 uppercase tracking-tighter italic">Vault Locked</span>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  <div className="mt-8 p-6 rounded-3xl bg-[#ff00ff]/5 border border-[#ff00ff]/20 text-center">
-                    <p className="text-[11px] font-black text-[#ff00ff] uppercase tracking-[0.2em] mb-2">Notice</p>
-                    <p className="text-[13px] text-white/50 leading-relaxed italic">"help me out papi... verify u aren't a bot so my archive doesn't get shut down 😭🙏"</p>
+                    )) : [1,2,3].map(n => <div key={n} className="aspect-[3/4] rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center opacity-20"><Lock size={16} /></div>)}
                   </div>
                </motion.div>
             )}
 
             {currentStepIdx === 2 && (
-              <motion.div 
-                key="wall" 
-                initial={{ opacity: 0, scale: 0.95 }} 
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex-1 flex flex-col p-4 space-y-3 overflow-y-auto scrollbar-hide pb-20"
-              >
-                {/* 🎁 REWARD BANNER (Compact) */}
+              <motion.div key="wall" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col p-4 space-y-3 overflow-y-auto scrollbar-hide pb-20">
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#00ffcc]/10 to-transparent border border-[#00ffcc]/30 p-4">
                   <div className="flex items-center justify-between relative z-10">
                     <div className="flex items-center gap-3">
@@ -621,98 +568,60 @@ export default function FunnelView() {
                   </div>
                 </div>
 
-                {/* 🔒 STATUS HEADER (Dense) */}
                 <div className="text-center py-2">
-                  <h2 className="text-[28px] font-black text-white uppercase italic tracking-tighter leading-none flex items-center justify-center gap-2">
-                    VAULT IS LOCKED <span className="text-2xl">🔒</span>
-                  </h2>
-                  <p className="text-[10px] font-black text-[#ffea00] uppercase tracking-[0.2em] mt-2">COMPLETE 3 EASY TASKS TO UNLOCK MY PHOTOS</p>
+                  <h2 className="text-[26px] font-black text-white uppercase italic tracking-tighter leading-none flex items-center justify-center gap-2">CLAIM SITEWIDE CREDITS <span className="text-2xl">⚡️</span></h2>
+                  <p className="text-[10px] font-black text-[#ffea00] uppercase tracking-[0.2em] mt-2">COMPLETE 3 EASY MISSIONS TO EARN 6,000G ON GASP.FUN</p>
                 </div>
 
-                {/* 📋 THE SMART LINK BUTTON (The "Action") */}
                 <button 
-                  onClick={() => { 
-                    const tid = localStorage.getItem('gasp_guest_id') || 'G'; 
-                    window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); 
-                  }}
-                  className={`w-full p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 transition-all group relative overflow-hidden ${missionCount >= 3 ? 'bg-[#00ffcc] border-[#00ffcc] text-black shadow-[0_0_40px_rgba(0,255,204,0.3)]' : 'bg-white/5 border-[#ffea00]/40 text-white shadow-[0_0_30px_rgba(255,234,0,0.1)]'}`}
+                  onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }}
+                  className={`w-full p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 transition-all group relative overflow-hidden ${missionCount >= 3 ? 'bg-[#00ffcc] border-[#00ffcc] text-black' : 'bg-white/5 border-[#ffea00]/40 text-white shadow-[0_0_30px_rgba(255,234,0,0.1)]'}`}
                 >
                   <div className="flex items-center gap-2">
                     <Zap size={18} className={missionCount >= 3 ? "fill-black" : "text-[#ffea00]"} />
-                    <span className="text-[16px] font-black uppercase italic tracking-widest">
-                      {missionCount >= 3 ? "GO TO VAULT" : `START TASK ${missionCount + 1}/3`}
-                    </span>
+                    <span className="text-[16px] font-black uppercase italic tracking-widest">{missionCount >= 3 ? "CLAIM MY REWARD" : `START MISSION ${missionCount + 1}/3`}</span>
                     <ArrowRight size={18} className="opacity-40 group-hover:translate-x-1 transition-transform" />
                   </div>
-                  <span className="text-[9px] font-bold opacity-50 uppercase tracking-widest">NO PAYMENT REQUIRED • 100% FREE</span>
+                  <span className="text-[9px] font-bold opacity-50 uppercase tracking-widest text-[#00ffcc]">REDEEM SITEWIDE • NO PAYMENT REQUIRED</span>
                 </button>
 
-                {/* 🛡️ SECONDARY CTAs (Huddled together) */}
                 <div className="pt-2 space-y-4">
                   <button
                     onClick={async () => {
                       const gid = localStorage.getItem('gasp_guest_id') || '';
                       const res = await fetch(`/api/economy/balance?userId=${gid}`);
                       const data = await res.json();
-                      if (data.success && data.balance >= 6000) {
-                        setCurrentStepIdx(3);
-                      } else {
-                        alert(`Not enough credits yet! Complete tasks above or buy instant access below.`);
-                      }
+                      if (data.success && data.balance >= 6000) setCurrentStepIdx(3);
+                      else alert(`Not enough credits yet! Complete the 3 missions above to claim your 6,000G reward.`);
                     }}
                     className="w-full py-4 border border-white/10 rounded-2xl text-[12px] font-black text-white/50 uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
                   >
-                    <Shield size={14} /> VERIFY & UNLOCK VAULT
+                    <Shield size={14} /> VERIFY & CLAIM CREDITS
                   </button>
 
                   <div className="text-center space-y-4">
-                    <button 
-                      onClick={() => setIsTopUpOpen(true)}
-                      className="group inline-block"
-                    >
-                      <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] group-hover:text-[#ffea00] transition-colors border-b border-white/10 pb-1">
-                        TOO SLOW? BUY CREDITS INSTANTLY — $19.99
-                      </span>
+                    <button onClick={() => setIsTopUpOpen(true)} className="group inline-block">
+                      <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] group-hover:text-[#ffea00] transition-colors border-b border-white/10 pb-1">OR BUY GASP CREDITS INSTANTLY — $19.99</span>
                     </button>
-                    
                     <div className="flex items-center justify-center gap-3 opacity-10 pt-2">
-                      <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white">SOVEREIGN UPLINK SECURE</span>
+                      <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white">GASP.FUN ECOSYSTEM SECURE</span>
                     </div>
                   </div>
                 </div>
               </motion.div>
             )}
-            
 
             {currentStepIdx === 3 && (
-               <motion.div key="s" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="absolute inset-0 bg-black flex flex-col items-center justify-center p-10 text-center gap-6">
+               <motion.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="absolute inset-0 bg-black flex flex-col items-center justify-center p-10 text-center gap-6">
                   <div className="w-20 h-20 rounded-full bg-[#ffea00]/10 border-2 border-[#ffea00]/40 flex items-center justify-center shadow-[0_0_40px_rgba(255,234,0,0.2)]">
                     <CheckCircle2 size={40} className="text-[#ffea00]" />
                   </div>
-                  <div>
-                    <h2 className="text-3xl font-black italic uppercase leading-tight">Credits Unlocked! 🎉</h2>
-                    <p className="text-white/50 text-[12px] mt-2 font-bold uppercase tracking-wider">Your access has been verified</p>
-                  </div>
-
-                  {/* ⚠️ SIGNUP URGENCY HOOK */}
+                  <h2 className="text-3xl font-black italic uppercase leading-tight">Credits Claimed! 🎉</h2>
                   <div className="w-full p-5 bg-[#ff0000]/10 border border-[#ff0000]/30 rounded-3xl text-left">
                     <p className="text-[11px] font-black text-[#ff4444] uppercase tracking-wider mb-1">⚠️ Your credits will expire</p>
-                    <p className="text-[13px] text-white/80 leading-relaxed">Guest credits are temporary. <span className="text-white font-black">Create a free account</span> to save them permanently and keep chatting with Veronica.</p>
+                    <p className="text-[13px] text-white/80 leading-relaxed">Guest credits are temporary. <span className="text-white font-black">Create a free account</span> to save them permanently.</p>
                   </div>
-
-                  <button
-                    onClick={() => window.location.href = '/auth/signup?source=funnel_completion&ref=veronica'}
-                    className="w-full h-16 bg-[#ffea00] rounded-[3rem] text-black text-[16px] font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-[0_10px_40px_rgba(255,234,0,0.3)] hover:scale-[1.02] active:scale-95 transition-all"
-                  >
-                    <User size={20} className="fill-black" /> Save My Credits — Sign Up Free
-                  </button>
-
-                  <button
-                    onClick={() => window.location.href = '/?profile=veronica-medellin-locked'}
-                    className="text-[11px] font-black text-white/30 uppercase tracking-widest hover:text-white transition-colors"
-                  >
-                    skip for now — continue as guest
-                  </button>
+                  <button onClick={() => window.location.href = '/auth/signup'} className="w-full h-16 bg-[#ffea00] text-black font-black rounded-[3rem] shadow-[0_10px_40px_rgba(255,234,0,0.3)] hover:scale-[1.02] transition-all">SIGN UP FREE</button>
                </motion.div>
             )}
           </AnimatePresence>
