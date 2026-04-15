@@ -716,7 +716,7 @@ export default function FunnelView() {
             )}
 
             {currentStepIdx === 2 && (
-              <motion.div key="wall" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col p-6 space-y-5 overflow-y-auto scrollbar-hide pb-32">
+              <motion.div key="wall" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 p-6 px-4 space-y-8 overflow-y-auto scrollbar-hide pb-32">
                 <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#00ffcc]/20 to-transparent border border-[#00ffcc]/40 p-8 shadow-[0_0_30px_rgba(0,255,204,0.1)]">
                   <div className="flex items-center justify-between relative z-10">
                     <div className="flex items-center gap-4">
@@ -755,14 +755,14 @@ export default function FunnelView() {
                     ease: "easeInOut" 
                   }}
                   onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }}
-                  className="w-full p-6 rounded-[2.5rem] border-4 border-[#00ffcc] bg-[#00ffcc] text-black flex flex-col items-center justify-center gap-1 transition-all group relative overflow-hidden shadow-[0_0_40px_rgba(0,255,204,0.3)] hover:scale-[1.02] active:scale-95"
+                  className="w-full p-5 md:p-6 rounded-[2rem] border-4 border-[#00ffcc] bg-[#00ffcc] text-black flex flex-col items-center justify-center gap-2 transition-all group relative overflow-hidden shadow-[0_0_40px_rgba(0,255,204,0.3)] hover:scale-[1.02] active:scale-95"
                 >
-                  <div className="flex items-center gap-3">
-                    <Zap size={24} className="fill-black" />
-                    <span className="text-[22px] font-black uppercase italic tracking-tighter leading-none">CLICK HERE: CLAIM 6,000 FREE G-CREDITS NOW</span>
-                    <ArrowRight size={24} className="opacity-40 group-hover:translate-x-1 transition-transform" />
+                  <div className="flex justify-center items-center gap-2 md:gap-3 w-full">
+                    <Zap size={22} className="fill-black shrink-0 hidden sm:block" />
+                    <span className="text-[17px] sm:text-[20px] md:text-[22px] font-black uppercase italic tracking-tighter leading-tight text-center">CLICK HERE: CLAIM 6,000 FREE G-CREDITS NOW</span>
+                    <ArrowRight size={22} className="opacity-40 group-hover:translate-x-1 transition-transform shrink-0" />
                   </div>
-                  <span className="text-[10px] font-black opacity-60 uppercase tracking-widest">VERIFIED • REDEEM SITEWIDE • NO PAYMENT REQUIRED</span>
+                  <span className="text-[9px] font-black opacity-70 uppercase tracking-widest text-center">VERIFIED • REDEEM SITEWIDE • NO PAYMENT REQUIRED</span>
                 </motion.button>
 
                 <div className="pt-2 space-y-4">
