@@ -110,16 +110,16 @@ export default function FunnelView() {
           setIsTyping(false);
           
           setTimeout(() => {
-             setIsRecording(true);
+             setIsTyping(true);
              setTimeout(() => {
-                setIsRecording(false);
+                setIsTyping(false);
                 setMessages(prev => [...prev, {
                   id: 'm2',
                   role: 'assistant',
                   content: `I can't believe people actually find me on here lol. what's your name? 🙈`,
                   type: 'text'
                 }]);
-             }, 3000); // 🧬 Simulate 3s typing/presence
+             }, 3000); // 🧬 Simulate 3s typing
           }, 800);
         }, 1400);
       }, 1000);
@@ -299,26 +299,29 @@ export default function FunnelView() {
                   });
                 } catch (e) {}
               } else if (line.startsWith('d:')) {
-                 try {
-                   const asset = JSON.parse(line.substring(2));
-                   if (asset.type === 'voice_note' && asset.audioUrl) {
-                      // 🎙️ SIMULATED RECORDING: Hold the state to make it look real
-                      setIsTyping(false);
-                      setIsRecording(true);
-                      
-                      setTimeout(() => {
-                         setIsRecording(false);
-                         setMessages(prev => {
-                            const last = prev[prev.length - 1];
-                            if (last?.role === 'assistant') {
-                              return [...prev.slice(0, -1), { ...last, media_url: asset.audioUrl, type: 'voice' }];
-                            }
-                            return prev;
-                         });
-                         clearTimeout(timeoutId);
-                      }, 2500 + Math.random() * 2000); 
-                   }
-                 } catch {}
+                try {
+                  const data = JSON.parse(line.substring(2));
+                  if (data.type === 'voice_note' && data.audioUrl) {
+                     // 🎙️ THE "STICKY" SYNC: Let the text breathe for 1.2s first
+                     setTimeout(() => {
+                        setIsRecording(true);
+                        setTimeout(() => {
+                           setIsRecording(false);
+                           setMessages(prev => {
+                              const last = prev[prev.length - 1];
+                              if (last?.role === 'assistant') {
+                                return [...prev.slice(0, -1), { 
+                                  ...last, 
+                                  media_url: data.audioUrl, 
+                                  type: 'voice' 
+                                }];
+                              }
+                              return prev;
+                           });
+                        }, 3200); 
+                     }, 1200);
+                  }
+                } catch (e) {}
               }
             }
           }
@@ -544,9 +547,9 @@ export default function FunnelView() {
                  className="flex-1 overflow-y-auto p-6 scrollbar-hide pb-32"
                >
                   <div className="grid grid-cols-2 gap-3">
-                    {[1,2,3,4,5,6].map((i) => (
-                      <div key={i} className="aspect-[3/4] rounded-3xl bg-white/5 border border-white/10 overflow-hidden relative group">
-                        <img src={`/Promo/PromoPic${(i%3)+1}.${i%2===0?'webp':'png'}`} className="w-full h-full object-cover blur-2xl opacity-40" alt="Locked" />
+                    {vaultItems.length > 0 ? vaultItems.map((item) => (
+                      <div key={item.id} className="aspect-[3/4] rounded-3xl bg-white/5 border border-white/10 overflow-hidden relative group">
+                        <img src={item.content_url} className="w-full h-full object-cover blur-2xl opacity-40" alt="Locked" />
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-4 text-center">
                            <Lock size={20} className="text-[#ffea00] mb-2" />
                            <span className="text-[10px] font-black text-white uppercase tracking-tighter">unlocked via</span>
@@ -559,7 +562,15 @@ export default function FunnelView() {
                            </button>
                         </div>
                       </div>
-                    ))}
+                    )) : (
+                      // 🧬 FALLBACK: Match parity with main site (exactly 3 items)
+                      [1,2,3].map((n) => (
+                        <div key={n} className="aspect-[3/4] rounded-3xl bg-white/5 border border-white/10 flex flex-col items-center justify-center p-4 text-center opacity-20">
+                           <Lock size={16} className="text-white/20 mb-2" />
+                           <span className="text-[9px] font-black text-white/40 uppercase tracking-tighter italic">Vault Locked</span>
+                        </div>
+                      ))
+                    )}
                   </div>
                   <div className="mt-8 p-6 rounded-3xl bg-[#ff00ff]/5 border border-[#ff00ff]/20 text-center">
                     <p className="text-[11px] font-black text-[#ff00ff] uppercase tracking-[0.2em] mb-2">Notice</p>
