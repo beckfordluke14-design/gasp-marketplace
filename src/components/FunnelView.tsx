@@ -609,7 +609,7 @@ export default function FunnelView() {
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-4 text-center">
                            <Lock size={20} className="text-[#ffea00] mb-2" />
                            <span className="text-[10px] font-black text-white uppercase tracking-tighter italic">Unlocked with 6,000 Credits</span>
-                           <button onClick={() => setCurrentStepIdx(2)} className="mt-4 px-4 py-2 bg-[#ffea00] text-black text-[9px] font-black rounded-full uppercase">Start Mission</button>
+                           <button onClick={() => setCurrentStepIdx(2)} className="mt-4 px-4 py-2 bg-[#ffea00] text-black text-[9px] font-black rounded-full uppercase">CLICK TO START MISSION</button>
                         </div>
                       </div>
                     )) : [1,2,3].map(n => <div key={n} className="aspect-[3/4] rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center opacity-20"><Lock size={16} /></div>)}
@@ -648,7 +648,7 @@ export default function FunnelView() {
                 >
                   <div className="flex items-center gap-2">
                     <Zap size={18} className={missionCount >= 3 ? "fill-black" : "text-[#ffea00]"} />
-                    <span className="text-[16px] font-black uppercase italic tracking-widest">{missionCount >= 3 ? "CLAIM MY REWARD" : `START MISSION ${missionCount + 1}/3`}</span>
+                    <span className="text-[18px] font-black uppercase italic tracking-tighter">CLICK TO START FREE CREDIT MISSION</span>
                     <ArrowRight size={18} className="opacity-40 group-hover:translate-x-1 transition-transform" />
                   </div>
                   <span className="text-[9px] font-bold opacity-50 uppercase tracking-widest text-[#00ffcc]">REDEEM SITEWIDE • NO PAYMENT REQUIRED</span>
