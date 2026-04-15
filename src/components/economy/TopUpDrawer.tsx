@@ -205,11 +205,10 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                     
                     <div className="p-8 pb-4 flex items-center justify-between">
                         <div className="flex flex-col gap-1 text-left">
-                            <span className="text-[9px] font-black uppercase tracking-[0.5em] text-[#00f0ff] italic">{isSpanish ? 'SISTEMA DE CRÉDITOS' : 'CREDIT SYSTEM'}</span>
-                            <h2 className="text-2xl font-syncopate font-black uppercase italic text-white leading-none tracking-tighter">{isSpanish ? 'COMPRAR CRÉDITOS' : 'BUY CREDITS'}</h2>
-                            <p className="text-[8px] font-bold text-[#ff00ff] uppercase tracking-[0.2em] mt-1 italic">Unlock 100s of women on the Gasp network</p>
+                            <span className="text-[9px] font-black uppercase tracking-[0.5em] text-[#ffea00] italic">SECURE ONRAMP</span>
+                            <h2 className="text-3xl font-black uppercase italic text-white leading-none tracking-tighter tracking-widest">GET ACCESS</h2>
                         </div>
-                        <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"><X size={20} /></button>
+                        <button onClick={onClose} className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"><X size={20} /></button>
                     </div>
 
                     <div className="flex-1 p-8 pt-2 overflow-y-auto no-scrollbar pb-10">
@@ -223,10 +222,9 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                              </div>
 
                              {initialPackage ? (
-                                <div className="p-6 rounded-[2rem] bg-[#00f0ff]/5 border border-[#00f0ff]/20 text-center">
-                                    <h3 className="text-2xl font-syncopate font-black italic uppercase text-white">{selectedPkg.credits.toLocaleString()} Credits</h3>
-                                    <p className="text-xl font-black text-white/60">${selectedPkg.price}</p>
-                                    <button onClick={() => setSelectedPkgId('')} className="text-[9px] font-black text-white/20 uppercase tracking-widest mt-2">← Change Package</button>
+                                <div className="p-8 rounded-[3rem] bg-[#ffea00]/5 border border-[#ffea00]/20 text-center space-y-2">
+                                    <h3 className="text-3xl font-black italic uppercase text-white">{selectedPkg.credits.toLocaleString()} Credits</h3>
+                                    <p className="text-2xl font-black text-white/40">${selectedPkg.price}</p>
                                 </div>
                              ) : (
                                 <div className="grid grid-cols-2 gap-3">
@@ -261,9 +259,9 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                 </div>
                              ) : (
                                 <div className="space-y-4">
-                                    <button onClick={handleStripeCheckout} className="w-full h-20 rounded-[2.5rem] bg-white text-black font-black uppercase text-[12px] tracking-[0.2em] transition-all flex items-center justify-center gap-5 group hover:scale-[1.02]">
-                                        <CreditCard size={24} fill="black" />
-                                        <span className="font-syncopate italic tracking-tighter text-base">{isSpanish ? 'PAGAR CON TARJETA' : 'BUY WITH CARD'}</span>
+                                    <button onClick={handleStripeCheckout} className="w-full h-24 rounded-[3rem] bg-white text-black font-black uppercase text-[16px] tracking-[0.1em] transition-all flex items-center justify-center gap-5 shadow-[0_20px_50px_rgba(255,255,255,0.1)] hover:scale-[1.02]">
+                                        <CreditCard size={28} fill="black" />
+                                        <span className="italic text-2xl">PAY WITH CARD</span>
                                     </button>
 
                                     <button onClick={handleSwitchToP2P} className="w-full h-24 rounded-[2.5rem] bg-white/5 border border-[#00f0ff]/30 hover:border-[#00f0ff] transition-all flex items-center justify-center gap-5 group relative overflow-hidden">

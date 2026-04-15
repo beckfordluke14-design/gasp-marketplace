@@ -360,9 +360,14 @@ export default function FunnelView() {
                 <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">MEDELLÍN</span>
               </div>
             </div>
-            <div className="flex items-center gap-4 text-white/40">
-              <Mic size={18} />
-              <HeartPulse size={18} />
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setIsTopUpOpen(true)}
+                className="px-4 py-2 bg-[#ffea00] rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(255,234,0,0.3)] hover:scale-105 transition-all"
+              >
+                <Zap size={14} className="fill-black text-black" />
+                <span className="text-[10px] font-black text-black uppercase tracking-widest leading-none">TOP UP</span>
+              </button>
             </div>
           </div>
 
@@ -534,8 +539,8 @@ export default function FunnelView() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex-1 flex flex-col overflow-hidden"
               >
-                <div className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-hide pb-40">
-                  {/* 🎁 GIFT BANNER */}
+                <div className="flex-1 overflow-y-auto p-8 space-y-10 scrollbar-hide pb-40">
+                  {/* 🎁 THE "GIFT" ANCHOR */}
                   <div className="bg-[#00ffcc]/10 border border-[#00ffcc]/30 rounded-[2rem] p-6 flex items-center justify-between overflow-hidden relative shadow-[0_0_40px_rgba(0,255,204,0.15)]">
                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00ffcc]/10 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
                      <div className="flex items-center gap-5 relative z-10">
@@ -543,184 +548,106 @@ export default function FunnelView() {
                            <span className="text-[#00ffcc] text-2xl">🎁</span>
                         </div>
                         <div className="flex flex-col text-left">
-                           <span className="text-[11px] font-black text-[#00ffcc] uppercase tracking-widest leading-none mb-1">{profile.name} SENT A GIFT</span>
-                           <span className="text-[22px] font-black text-white italic leading-none">+500 CR</span>
+                           <span className="text-[11px] font-black text-[#00ffcc] uppercase tracking-widest leading-none mb-1">YOUR FIRST GIFT</span>
+                           <span className="text-[22px] font-black text-white italic leading-none">+500 CREDITS</span>
                         </div>
                      </div>
                      <div className="flex flex-col items-end relative z-10">
-                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">REMAINING</span>
-                        <span className="text-[16px] font-black text-[#ffea00] italic leading-none">5,500 CR</span>
+                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">NEED</span>
+                        <span className="text-[16px] font-black text-[#ffea00] italic leading-none">5,500 MORE</span>
                      </div>
                   </div>
 
+                  {/* 🚨 THE CLEAR STATUS */}
                   <div className="text-center space-y-3">
-                    <h2 className="text-3xl font-black italic uppercase tracking-tighter leading-none">Security Intercept ⚠️</h2>
-                    <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em]">Identity Verification Required</p>
+                    <h2 className="text-4xl font-black italic uppercase tracking-tighter leading-none text-white">VAULT IS LOCKED 🔒</h2>
+                    <p className="text-[#ffea00] text-[12px] font-black uppercase tracking-[0.2em]">Complete 3 Easy Tasks to Unlock My Photos</p>
                   </div>
 
-                  {/* 🍼 THE STEPS */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div className="p-6 border border-[#ffea00]/30 bg-[#ffea00]/5 rounded-3xl flex items-center gap-6 relative overflow-hidden group">
-                        <div className="absolute inset-y-0 left-0 w-1 bg-[#ffea00]" />
-                        <span className="text-4xl font-black text-[#ffea00]/20 italic group-hover:text-[#ffea00]/40 transition-colors">01</span>
-                        <div className="flex flex-col">
-                           <span className="text-[14px] font-black text-white uppercase italic">TAP REWARD SELECTION</span>
-                           <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-1">Authorized Neural Link Gateway</span>
-                        </div>
-                        <Zap size={18} className="ml-auto text-[#ffea00] animate-pulse" />
-                     </div>
-                     <div className="p-6 border border-white/10 bg-white/5 rounded-3xl flex items-center gap-6">
-                        <span className="text-4xl font-black text-white/10 italic">02</span>
-                        <div className="flex flex-col">
-                           <span className="text-[14px] font-black text-white uppercase italic">COMPLETE DATA TASK</span>
-                           <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-1">Verification Signal Required</span>
-                        </div>
-                     </div>
-                  </div>
+                  {/* 📊 THE MASTER PROGRESS HUB */}
+                  <div className="space-y-6">
+                    <div className="bg-white/5 border border-white/10 p-8 rounded-[3rem] text-center space-y-6 relative overflow-hidden">
+                       <div className="absolute top-0 right-0 p-4">
+                          <Activity size={16} className="text-[#00f0ff] animate-pulse" />
+                       </div>
+                       
+                       <div className="space-y-2">
+                          <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">PROGRESS TO UNLOCK</div>
+                          <div className="text-5xl font-black text-white italic">{Math.floor((missionCount / 3) * 100)}%</div>
+                       </div>
 
-                  {/* 📊 REWARD MATRIX: SHOWING POTENTIAL */}
-                  <div className="space-y-4 pt-4">
-                     <div className="flex items-center justify-between mb-2 px-2">
-                        <span className="text-[8px] font-black text-[#00f0ff] tracking-[0.4em] uppercase italic">REWARD INFUSION MATRIX</span>
-                        {missionCount > 0 && (
-                          <span className="text-[10px] font-black text-[#ffea00] animate-pulse">
-                             PROGRESS: {missionCount}/3 MISSIONS
-                          </span>
-                        )}
-                     </div>
-                     
-                     <div className="grid grid-cols-1 gap-3">
-                        {/* BASIC TASK */}
-                        <button 
-                          onClick={() => {
-                            const tid = localStorage.getItem('gasp_guest_id') || 'G';
-                            window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank');
-                            setMissionCount(prev => Math.min(3, prev + 1));
-                          }}
-                          className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between group hover:border-[#ffea00]/30 transition-all text-left"
-                        >
-                           <div className="flex flex-col">
-                              <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-widest">Entry Verification</span>
-                              <span className="text-lg font-black text-white italic">2,500 - 5,000 Credits</span>
-                           </div>
-                           <div className="px-3 py-1 bg-[#ffea00]/10 border border-[#ffea00]/30 rounded-lg text-[#ffea00] text-[10px] font-black uppercase tracking-widest">
-                             {missionCount >= 1 ? 'COMPLETED' : 'START'}
-                           </div>
-                        </button>
+                       {/* THE PROGRESS BAR */}
+                       <div className="h-4 bg-white/5 rounded-full overflow-hidden border border-white/10 p-0.5">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.max(5, (missionCount / 3) * 100)}%` }}
+                            className="h-full bg-gradient-to-r from-[#ffea00] via-[#00ffcc] to-[#ff00ff] rounded-full shadow-[0_0_20px_rgba(0,255,204,0.5)]"
+                          />
+                       </div>
 
-                        {/* ADVANCED TASK */}
-                        <button 
-                          onClick={() => {
-                            const tid = localStorage.getItem('gasp_guest_id') || 'G';
-                            window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank');
-                            setMissionCount(prev => Math.min(3, prev + 1));
-                          }}
-                          className="p-4 rounded-2xl bg-white/5 border border-white/20 flex items-center justify-between group hover:border-[#00f0ff]/30 transition-all scale-[1.02] shadow-[0_0_30px_rgba(0,240,255,0.05)] border-l-[#00f0ff] border-l-2 text-left"
-                        >
-                           <div className="flex flex-col">
-                              <span className="text-[10px] font-black text-[#00f0ff] uppercase tracking-widest">High-Intent Survey</span>
-                              <span className="text-lg font-black text-white italic">12,000 - 25,000 Credits</span>
-                           </div>
-                           <div className="px-3 py-1 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-lg text-[#00f0ff] text-[10px] font-black uppercase tracking-widest">
-                             {missionCount >= 2 ? 'COMPLETED' : 'POPULAR'}
-                           </div>
-                        </button>
+                       <p className="text-[11px] text-white/50 font-bold italic leading-relaxed">
+                         {missionCount === 0 ? "You're only 3 quick tasks away from getting my private archive papi... just tap below!" : 
+                          missionCount < 3 ? `Finish the next ${3 - missionCount} tasks to see everything... I waiting for u 💋` : 
+                          "Everything is ready! Tap VERIFY below to see your photos! 🔥"}
+                       </p>
+                    </div>
 
-                        {/* INSTITUTIONAL TASK */}
-                        <button 
-                          onClick={() => {
-                            const tid = localStorage.getItem('gasp_guest_id') || 'G';
-                            window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank');
-                            setMissionCount(prev => Math.min(3, prev + 1));
-                          }}
-                          className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between group hover:border-[#ff00ff]/30 transition-all text-left"
-                        >
-                           <div className="flex flex-col">
-                              <span className="text-[10px] font-black text-[#ff00ff] uppercase tracking-widest">System Optimization</span>
-                              <span className="text-lg font-black text-white italic">50,000+ Credits</span>
-                           </div>
-                           <div className="px-3 py-1 bg-[#ff00ff]/10 border border-[#ff00ff]/30 rounded-lg text-[#ff00ff] text-[10px] font-black uppercase tracking-widest">
-                             {missionCount >= 3 ? 'COMPLETED' : 'ELITE'}
-                           </div>
-                        </button>
-                     </div>
-
-                     {/* Progress Status */}
-                     <div className="bg-black/40 border border-white/5 p-4 rounded-2xl">
-                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2">
-                           <span className="text-white/40">Unlock Progress</span>
-                           <span className={missionCount >= 3 ? 'text-[#00ffcc]' : 'text-[#ffea00]'}>{missionCount}/3 Missions Done</span>
-                        </div>
-                        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                           <motion.div 
-                             initial={{ width: 0 }}
-                             animate={{ width: `${(missionCount / 3) * 100}%` }}
-                             className="h-full bg-gradient-to-r from-[#ffea00] to-[#00f0ff]"
-                           />
-                        </div>
-                        <p className="text-[9px] text-white/30 text-center mt-3 uppercase tracking-tighter">
-                          {missionCount < 3 ? `Complete ${3 - missionCount} more missions to unlock your credits permanently` : 'All missions complete! Tap below to verify your signal.'}
-                        </p>
-                     </div>
+                    {/* ⚡️ THE ONE TRUE PATH (BIG BUTTON) */}
+                    <button 
+                      onClick={() => { 
+                        const tid = localStorage.getItem('gasp_guest_id') || 'G'; 
+                        window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); 
+                        // Note: Real verification happens via the Verify button polling the DB
+                      }} 
+                      className={`w-full h-24 rounded-[3rem] text-black text-[22px] font-black uppercase tracking-widest flex flex-col items-center justify-center shadow-2xl hover:scale-[1.02] active:scale-95 transition-all group relative overflow-hidden ${missionCount >= 3 ? 'bg-[#00ffcc] shadow-[0_20px_60px_rgba(0,255,204,0.4)]' : 'bg-[#ffea00] shadow-[0_20px_60px_rgba(255,234,0,0.4)]'}`}
+                    >
+                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                       <div className="flex items-center gap-3">
+                          <Zap size={24} className="fill-black" />
+                          <span className="italic">{missionCount >= 3 ? "SYSTEM READY" : `GET FREE CREDITS — TASK ${missionCount + 1}/3`}</span>
+                          <ArrowRight size={24} className="group-hover:translate-x-2 transition-all opacity-40" />
+                       </div>
+                       <span className="text-[9px] font-black opacity-40 uppercase tracking-widest mt-1">NO PAYMENT REQUIRED • 100% FREE</span>
+                    </button>
                   </div>
                 </div>
 
-                {/* ⚡️ ACTION AREA */}
-                <div className="shrink-0 p-6 md:p-10 bg-black/80 border-t border-white/5 backdrop-blur-xl flex flex-col items-center gap-4 relative">
-                   <button 
-                     onClick={() => { 
-                       const tid = localStorage.getItem('gasp_guest_id') || 'G'; 
-                       window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); 
-                       setMissionCount(prev => Math.min(3, prev + 1));
-                     }} 
-                     className={`w-full max-w-[500px] h-16 md:h-20 rounded-[3rem] text-black text-[18px] md:text-[22px] font-black uppercase tracking-widest flex items-center justify-center gap-5 shadow-2xl hover:scale-[1.02] active:scale-95 transition-all group shrink-0 relative overflow-hidden ${missionCount >= 3 ? 'bg-[#00ffcc] shadow-[0_20px_60px_rgba(0,255,204,0.4)]' : 'bg-[#ffea00] shadow-[0_20px_60px_rgba(255,234,0,0.4)]'}`}
-                   >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-                      <Zap size={24} className="fill-black" />
-                      <span className="italic">
-                        {missionCount === 0 ? 'START FIRST MISSION' : 
-                         missionCount < 3 ? `START MISSION ${missionCount + 1}/3` : 
-                         'MISSIONS COMPLETE ✅'}
-                      </span>
-                      <ArrowRight size={24} className="group-hover:translate-x-2 transition-all opacity-40" />
-                   </button>
-                   
-                   <div className="flex flex-col w-full items-center gap-3">
-                      <div className="grid grid-cols-2 gap-3 w-full max-w-[500px]">
-                        <button
-                          onClick={async () => {
-                            if (missionCount >= 3) {
-                              setCurrentStepIdx(3);
-                              return;
-                            }
-                            const gid = localStorage.getItem('gasp_guest_id') || '';
-                            const res = await fetch(`/api/economy/balance?userId=${gid}`);
-                            const data = await res.json();
-                            if (data.success && data.balance >= 6000) {
-                              setCurrentStepIdx(3);
-                            } else {
-                              const remaining = Math.max(1, 3 - missionCount);
-                              alert(`Insufficient Signal Strength. Complete ${remaining} more missions and try again!`);
-                            }
-                          }}
-                          className={`flex-1 py-4 border-2 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-2 italic ${missionCount >= 3 ? 'border-[#00ffcc] text-[#00ffcc]' : 'border-white/10 text-white'}`}
-                        >
-                          <Shield size={14} /> VERIFY SIGNAL
-                        </button>
-                        
-                        <button onClick={() => setIsTopUpOpen(true)} className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl text-white/40 text-[10px] font-black uppercase tracking-widest hover:text-white transition-all flex items-center justify-center gap-2 italic">
-                          <CreditCard size={14} /> BUY INSTANT
-                        </button>
-                      </div>
+                {/* 🛡️ THE FINAL ACTIONS */}
+                <div className="shrink-0 p-8 bg-black/80 border-t border-white/5 backdrop-blur-xl flex flex-col items-center gap-6 relative">
+                   <div className="grid grid-cols-1 gap-4 w-full max-w-[500px]">
+                      <button
+                        onClick={async () => {
+                          const gid = localStorage.getItem('gasp_guest_id') || '';
+                          const res = await fetch(`/api/economy/balance?userId=${gid}`);
+                          const data = await res.json();
+                          if (data.success && data.balance >= 6000) {
+                            setCurrentStepIdx(3);
+                          } else {
+                            alert(`Insufficient Credits! You need 6,000 to unlock Veronica. Keep earning by tapping the yellow button above!`);
+                          }
+                        }}
+                        className={`w-full py-6 border-2 rounded-[2.5rem] text-[14px] font-black uppercase tracking-[0.2em] hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-3 italic ${missionCount >= 3 ? 'border-[#00ffcc] text-[#00ffcc] shadow-[0_0_30px_rgba(0,255,204,0.2)]' : 'border-white/10 text-white/40'}`}
+                      >
+                        <Shield size={18} /> VERIFY & UNLOCK VAULT
+                      </button>
                       
-                      <div className="flex items-center justify-center gap-3 opacity-30 mt-1">
-                        <div className="flex gap-1">
-                          <span className={`w-1 h-1 rounded-full animate-ping ${missionCount >= 3 ? 'bg-[#00ffcc]' : 'bg-[#00f0ff]'}`} />
-                        </div>
-                        <span className={`text-[8px] font-black uppercase tracking-[0.4em] italic ${missionCount >= 3 ? 'text-[#00ffcc]' : 'text-[#00f0ff]'}`}>
-                          {missionCount >= 3 ? 'IDENTITY VERIFIED - READY' : 'SCANNING INBOUND SIGNALS...'}
-                        </span>
+                      <div className="text-center">
+                         <button 
+                           onClick={() => setIsTopUpOpen(true)} 
+                           className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] hover:text-[#ffea00] transition-colors decoration-[#ffea00]/30 underline underline-offset-8 decoration-2"
+                         >
+                           Too slow? Buy Credits Instantly — $19.99
+                         </button>
                       </div>
+                   </div>
+                   
+                   <div className="flex items-center gap-3 opacity-20">
+                      <div className="flex gap-1">
+                        <span className="w-1 h-1 rounded-full bg-[#00ffcc] animate-ping" />
+                      </div>
+                      <span className="text-[8px] font-black uppercase tracking-[0.5em] italic text-white">
+                        SOVEREIGN UPLINK SECURE
+                      </span>
                    </div>
                 </div>
               </motion.div>
