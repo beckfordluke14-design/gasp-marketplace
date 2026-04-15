@@ -164,9 +164,11 @@ export default function FunnelView() {
            role: 'assistant', 
            content: 'oops... i was just sending this to a friend 😭', 
            media_url: '/Promo/cucumber_tease.png',
-           media_type: 'image'
+           media_type: 'image',
+           isUnsent: false
          }]);
          
+         // ⏳ 4.5s Gaze Window
          setTimeout(() => {
             setMessages(prev => prev.map(m => m.id === leakId ? { ...m, isUnsent: true, content: 'Message unsent', media_url: null } : m));
             
@@ -196,16 +198,17 @@ export default function FunnelView() {
                              role: 'assistant', 
                              content: 'tease_module', 
                              isTease: true,
-                             media_url: vaultItems.length > 0 ? vaultItems[0].content_url : null
+                             media_url: vaultItems[0]?.content_url || null
                            }]);
                            
-                           setTimeout(() => { setCurrentStepIdx(2); }, 10000);
-                        }, 3000);
+                           // 🛑 FINAL BRIDGE TO CTA
+                           setTimeout(() => { setCurrentStepIdx(2); }, 12000);
+                        }, 2500);
                      }, 3000);
                   }, 4000);
                }, 2000);
             }, 1500);
-         }, 4000); 
+         }, 4500); 
       }, 5000); 
     }
   }, [messages, isRecording]);
