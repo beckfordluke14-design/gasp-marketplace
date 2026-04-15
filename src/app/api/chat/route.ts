@@ -76,27 +76,36 @@ export async function POST(req: Request) {
     // 💸 BALANCING THE LEDGER
     if (balanceFound) {
         if (availableBalance < COST_MESSAGE_TEXT) {
-            // Check if user has free messages left (Guest Only)
+            // 🧬 GUEST FREE-TIER PROTOCOL
             if (normalizedUserId.toLowerCase().startsWith('guest')) {
                 const { rows: preCheck } = await db.query('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [normalizedUserId]);
                 currentCount = parseInt(preCheck[0].count || '0');
-                if (currentCount >= 5) return new Response('DEPLETED', { status: 402 });
+                
+                // Allow up to 5 free messages per guest node before enforcing credit balance
+                if (currentCount >= 5 && availableBalance < COST_MESSAGE_TEXT) {
+                    return new Response('INSUFFICIENT_FUNDS', { status: 402 });
+                }
             } else {
                 return new Response('INSUFFICIENT_FUNDS', { status: 402 });
             }
-        } else {
-            // Deduct credits for the message
-            try {
-               if (normalizedUserId.toLowerCase().startsWith('guest')) {
-                  await db.query('UPDATE profiles SET credit_balance = credit_balance - $1, updated_at = NOW() WHERE id = $2', [COST_MESSAGE_TEXT, normalizedUserId]);
-               } else {
-                  await SOV.burnCredits(normalizedUserId, COST_MESSAGE_TEXT, 'chat_message', { personaId: DB_PERSONA_ID });
-               }
-            } catch (deductErr) { console.error('[Debit Failure]:', deductErr); }
+        } 
+        
+        // 🧪 TICKET TO RIDE: Deduct credits (Safe-Mode)
+        try {
+            if (availableBalance >= COST_MESSAGE_TEXT) {
+                if (normalizedUserId.toLowerCase().startsWith('guest')) {
+                    await db.query('UPDATE profiles SET credit_balance = credit_balance - $1, updated_at = NOW() WHERE id = $2', [COST_MESSAGE_TEXT, normalizedUserId]);
+                } else {
+                    await SOV.burnCredits(normalizedUserId, COST_MESSAGE_TEXT, 'chat_message', { personaId: DB_PERSONA_ID });
+                }
+            }
+        } catch (deductErr) { 
+            console.error('[Economy Sync Lag]: Proceeding with Grace Chat.'); 
         }
     } else {
-       // Total DB Failure -> Fallback to "Graceful Flow" for high-intent users
-       console.warn('[Critical]: Economy node unreachable. Entering Grace Mode.');
+       // 🛡️ CRITICAL FALLBACK (The Shield): If DB is totally unreachable, DO NOT block the user.
+       // It is better to give a free message than to lose a high-intent conversion.
+       console.warn('[Critical]: Economy node unreachable. Entering Conversion Grace Mode.');
     }
 
     const persistentMessages = messages.filter((m: any) => m.role !== 'system');
