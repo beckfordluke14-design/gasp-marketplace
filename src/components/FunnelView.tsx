@@ -251,7 +251,7 @@ export default function FunnelView() {
                            setTimeout(() => { 
                              setCurrentStepIdx(2); 
                              localStorage.setItem('gasp_funnel_step', '2');
-                           }, 12000);
+                           }, 7000);
                         }, 2500);
                      }, 3000);
                   }, 4000);
@@ -581,23 +581,29 @@ export default function FunnelView() {
                   {messages.map((m) => (
                     <motion.div key={m.id} initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} className={`flex ${m.role === 'assistant' ? 'justify-start' : 'justify-end'}`}>
                       {m.isTease ? (
-                        <div className="w-full max-w-[85%] bg-white/5 border border-[#ffea00]/30 rounded-3xl p-4 space-y-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                        <div 
+                          onClick={() => {
+                            setCurrentStepIdx(2);
+                            localStorage.setItem('gasp_funnel_step', '2');
+                          }}
+                          className="w-full max-w-[85%] bg-white/5 border border-[#ffea00]/30 rounded-3xl p-4 space-y-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] cursor-pointer hover:bg-white/[0.07] transition-all group"
+                        >
                            <div className="flex items-center gap-3 mb-2">
-                             <div className="w-8 h-8 rounded-full bg-[#ffea00]/20 flex items-center justify-center">
+                             <div className="w-8 h-8 rounded-full bg-[#ffea00]/20 flex items-center justify-center group-hover:bg-[#ffea00]/40 transition-colors">
                                <Sparkles size={16} className="text-[#ffea00]" />
                              </div>
                              <span className="text-[10px] font-black text-[#ffea00] uppercase tracking-widest">Incoming Private Preview...</span>
                            </div>
-                           <div className="aspect-[4/5] rounded-2xl bg-white/10 overflow-hidden relative group">
+                           <div className="aspect-[4/5] rounded-2xl bg-white/10 overflow-hidden relative">
                               <img 
                                 src={m.media_url ? proxyImg(m.media_url) : (vaultItems[0]?.content_url ? proxyImg(vaultItems[0].content_url) : "/Promo/PromoPic1.png")} 
-                                className="w-full h-full object-cover blur-[22px] scale-110" 
+                                className="w-full h-full object-cover blur-[22px] scale-110 group-hover:scale-105 transition-transform duration-[2s]" 
                                 alt="Special Tease" 
                               />
                               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md">
-                                 <Lock size={32} className="text-[#ffea00] mb-3 animate-pulse" />
-                                 <span className="text-[14px] font-black text-white italic lowercase">media intercepted</span>
-                                 <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-2">{profile.name} ACCESS ONLY</span>
+                                 <Lock size={32} className="text-[#ffea00] mb-3 animate-pulse group-hover:scale-110 transition-transform" />
+                                 <span className="text-[14px] font-black text-white italic lowercase">view full archive</span>
+                                 <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-2 px-4 shadow-xl">CLICK TO UNLOCK ACCESS</span>
                               </div>
                            </div>
                         </div>
@@ -615,7 +621,15 @@ export default function FunnelView() {
                                         <img src={m.media_url} className="w-full h-full object-cover" alt="Media" />
                                      </motion.div>
                                    ) : (
-                                     <VoiceNoteBubble audioUrl={m.media_url} profileImage={profile.image} profileName={profile.name} translation={m.audio_translation} isUnlocked={true} isEnglish={true} onUnlockTranslation={async () => true} />
+                                     <VoiceNoteBubble 
+                                       audioUrl={m.media_url} 
+                                       profileImage="/Promo/Veronica_Profile.png" 
+                                       profileName="Veronica" 
+                                       translation={m.audio_translation} 
+                                       isUnlocked={true} 
+                                       isEnglish={true} 
+                                       onUnlockTranslation={async () => true} 
+                                     />
                                    )}
                                 </div>
                              )}
