@@ -341,22 +341,14 @@ export async function generatePersonaVoice(personaId: string, rawText: string, l
                 .save(outputPath);
         });
 
-        // 🛡️ SOVEREIGN STORAGE
-        const storageDir = path.join(process.cwd(), 'public', 'storage', 'voices');
-        if (!fs.existsSync(storageDir)) {
-           fs.mkdirSync(storageDir, { recursive: true });
-        }
+        // 🛡️ SOVEREIGN R2 UPLOAD (V4.8)
+        // We push to R2 so the CDN at asset.gasp.fun can serve it immediately.
+        const { uploadSovereignAsset } = await import('./r2Client');
+        const fileName = `v3_${personaId}_${Date.now()}${fileExt}`;
+        const publicUrl = await uploadSovereignAsset(finalBuffer, fileName, geminiResult.mimeType);
 
-        const fileName = `v3_${personaId}_${Date.now()}${fileExt}`; // V3 for Chirp/Gemini 2.5
-        const localFilePath = path.join(storageDir, fileName);
+        console.log(`✅ [VoiceFactory] SOVEREIGN GEN-V4 (Gemini 2.5) render generated and vaulted: ${publicUrl}`);
         
-        fs.writeFileSync(localFilePath, finalBuffer);
-
-        const isDev = process.env.NODE_ENV === 'development';
-        const baseUrl = isDev ? 'http://localhost:3000' : 'https://asset.gasp.fun';
-        const publicUrl = `${baseUrl}/storage/voices/${fileName}`;
-
-        console.log(`✅ [VoiceFactory] SOVEREIGN GEN-V4 (Gemini 2.5) render generated: ${publicUrl}`);
         return {
             success: true,
             audioUrl: publicUrl,
