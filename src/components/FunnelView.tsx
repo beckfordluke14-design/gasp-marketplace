@@ -716,7 +716,7 @@ export default function FunnelView() {
             )}
 
             {currentStepIdx === 2 && (
-              <motion.div key="wall" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col p-4 space-y-3 overflow-y-auto scrollbar-hide pb-20">
+              <motion.div key="wall" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col pt-16 px-4 space-y-3 overflow-y-auto scrollbar-hide pb-28">
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#00ffcc]/10 to-transparent border border-[#00ffcc]/30 p-4">
                   <div className="flex items-center justify-between relative z-10">
                     <div className="flex items-center gap-3">
