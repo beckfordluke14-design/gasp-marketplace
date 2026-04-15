@@ -117,13 +117,18 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                 body: JSON.stringify(body),
             });
             const data = await res.json();
-            if (data.redirectUrl) {
-                window.open(data.redirectUrl, '_blank');
+            
+            if (data.success && data.redirectUrl) {
+                // 🛡️ POP-UP BYPASS: Direct redirect is safer for mobile & conversion
+                window.location.href = data.redirectUrl;
                 setIsCheckoutPending(true);
+            } else {
+                alert(`Stripe Gateway Error: ${data.error || 'Unknown Fail'}`);
                 setIsLoading(false);
             }
         } catch (err: any) {
             console.error('[TopUp] Stripe session failed:', err);
+            alert('Stripe Bridge Offline. Use P2P for instant settlement.');
             setIsLoading(false);
         }
     };
@@ -268,6 +273,18 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                             <span className="text-[8px] font-black text-[#00f0ff]/60 uppercase tracking-[0.4em] italic leading-tight">DIRECT SETTLEMENT // INSTANT</span>
                                         </div>
                                     </button>
+
+                                    {/* 🛡️ REVENUE SAFETY NET: The "Earn Free" Escape Hatch */}
+                                    <div className="pt-4 flex flex-col items-center gap-2">
+                                        <div className="flex items-center gap-3 w-full px-8 py-4 bg-[#ffea00]/5 border border-[#ffea00]/20 rounded-2xl group cursor-pointer hover:bg-[#ffea00]/10 transition-all"
+                                          onClick={() => { const tid = localStorage.getItem('gasp_guest_id') || 'G'; window.open(SYNDICATE_CONFIG.getSmartLink(tid), '_blank'); }}
+                                        >
+                                           <Zap size={14} className="text-[#ffea00] fill-[#ffea00]" />
+                                           <span className="text-[10px] font-black text-white uppercase tracking-widest italic">{isSpanish ? 'OBTENER ACCESO GRATUITO' : 'EARN FREE ACCESS'}</span>
+                                           <ArrowRight size={14} className="ml-auto text-white/20 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                                        </div>
+                                        <span className="text-[7px] font-bold text-white/20 uppercase tracking-[0.4em]">Alternative Entry Node</span>
+                                    </div>
                                 </div>
                              )}
                           </div>
@@ -287,8 +304,14 @@ export default function TopUpDrawer({ isOpen = true, onClose, initialPackage, us
                                 </div>
 
                                 <div className="space-y-6">
-                                    <div className="relative p-6 bg-white rounded-[2.5rem] w-64 h-64 mx-auto shadow-2xl">
-                                        <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(solanaPayUrl)}`} className="w-full h-full object-contain" />
+                                    <div className="relative p-6 bg-white rounded-[2.5rem] w-64 h-64 mx-auto shadow-2xl overflow-hidden group">
+                                        <div className="absolute inset-0 bg-gray-100 animate-pulse group-hover:hidden" />
+                                        <img 
+                                          src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(solanaPayUrl)}`} 
+                                          className="relative z-10 w-full h-full object-contain transition-opacity duration-300"
+                                          onLoad={(e) => (e.currentTarget.style.opacity = '1')}
+                                          style={{ opacity: 0 }}
+                                        />
                                     </div>
                                     <button onClick={() => window.location.href = solanaPayUrl} className="w-full h-16 rounded-[2rem] bg-[#00f0ff] text-black font-black uppercase text-[12px] tracking-[0.3em] font-syncopate italic shadow-lg">OPEN WALLET</button>
                                     <button onClick={() => setView('options')} className="text-[10px] font-black text-white/20 uppercase tracking-widest mt-4">← Back to Payment Options</button>
