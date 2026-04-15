@@ -70,12 +70,14 @@ export async function POST(req: Request) {
         // 🧬 IDENTITY SYNC: Sanitize and bridge IDs
         const pid = (personaId || '').toLowerCase();
         const safePid = pid === 'veronica_medellin' ? 'veronica-medellin-locked' : pid;
+        // 🧬 ROOT MAPPING: Map locked funnel IDs BACK to their root profile to fetch Admin Vault assets
+        const rootPid = pid === 'veronica-medellin-locked' ? 'veronica_medellin' : pid;
 
         const [messages, unlocks, vault, galleryPosts, relationships, stats, msgCountRows] = await Promise.all([
             safeQuery('SELECT * FROM chat_messages WHERE user_id = $1 AND persona_id = $2 ORDER BY created_at ASC', [userId, safePid]),
             safeQuery('SELECT post_id as item_id FROM user_vault_unlocks WHERE user_id = $1', [userId]),
-            safeQuery('SELECT * FROM persona_vault WHERE persona_id = $1 ORDER BY created_at DESC', [pid]),
-            safeQuery('SELECT * FROM posts WHERE persona_id = $1 AND is_vault = true ORDER BY created_at DESC', [pid]),
+            safeQuery('SELECT * FROM persona_vault WHERE persona_id = $1 ORDER BY created_at DESC', [rootPid]),
+            safeQuery('SELECT * FROM posts WHERE persona_id = $1 AND is_vault = true ORDER BY created_at DESC', [rootPid]),
             safeQuery('SELECT * FROM user_relationships WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, safePid]),
             safeQuery('SELECT bond_score FROM user_persona_stats WHERE user_id = $1 AND persona_id = $2 LIMIT 1', [userId, safePid]),
             safeQuery('SELECT COUNT(*) as count FROM chat_messages WHERE user_id = $1 AND role = \'user\'', [userId])
