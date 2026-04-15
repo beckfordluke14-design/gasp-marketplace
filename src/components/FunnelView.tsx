@@ -207,7 +207,7 @@ export default function FunnelView() {
             source: 'funnel_ad'
           }),
         });
-        clearTimeout(timeoutId);
+
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();
         let fullText = '';
@@ -215,61 +215,46 @@ export default function FunnelView() {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
+            
             const chunk = decoder.decode(value, { stream: true });
             const lines = chunk.split('\n');
             for (const line of lines) {
               if (line.startsWith('0:')) {
+                setIsTyping(false); // 🧬 TEXT ARRIVED: Safe to stop typing
+                clearTimeout(timeoutId);
                 try { 
                   const text = JSON.parse(line.substring(2)); 
                   setMessages(prev => {
                     const last = prev[prev.length - 1];
-                    // 🧬 ASSET ORCHESTRATION: Count only active chat responses, skip initial greetings
-                    const responseIdx = prev.filter(m => m.role === 'assistant' && !m.content.includes('grocery store')).length;
-                    
-                    const GoldenAssets = [
-                      'https://asset.gasp.fun/voices/veronica_1_hook.wav', // "mmm wow papi..." (KORE)
-                      'https://asset.gasp.fun/voices/veronica_2_bond.wav', // "i love your vibe..." (KORE)
-                      'https://asset.gasp.fun/voices/veronica_3_tease.wav', // "youre so bad papi..." (KORE)
-                      'https://asset.gasp.fun/voices/veronica_4_close.wav'  // "wait my link is dying! follow me!" (KORE)
-                    ];
-
-                    const staticVoice = GoldenAssets[responseIdx] || null;
-
                     if (last?.role === 'assistant' && !last.isTease) {
                       return [...prev.slice(0, -1), { 
                         ...last, 
-                        content: text, 
-                        media_url: staticVoice || last.media_url,
-                        type: staticVoice ? 'voice' : last.type
+                        content: text
                       }];
                     }
                     return [...prev, { 
                       id: 'v-' + Date.now(), 
                       role: 'assistant', 
                       content: text,
-                      media_url: staticVoice,
-                      type: staticVoice ? 'voice' : 'text'
+                      type: 'text'
                     }];
                   });
                 } catch (e) {}
-              } else if (line.startsWith('2:')) {
-                try {
-                  const event = JSON.parse(line.substring(2));
-                  if (event?.type === 'voice_note' && event.audioUrl) {
-                    setMessages(prev => {
-                      const last = prev[prev.length - 1];
-                      if (last?.role === 'assistant') {
-                        return [...prev.slice(0, -1), { 
-                          ...last, 
-                          media_url: event.audioUrl, 
-                          type: 'voice',
-                          audio_translation: event.audio_translation || null 
-                        }];
-                      }
-                      return prev;
-                    });
-                  }
-                } catch (e) {}
+              } else if (line.startsWith('d:')) {
+                 setIsTyping(false); // 🧬 VOICE ARRIVED: Safe to stop typing
+                 clearTimeout(timeoutId);
+                 try {
+                   const asset = JSON.parse(line.substring(2));
+                   if (asset.type === 'voice_note' && asset.audioUrl) {
+                      setMessages(prev => {
+                         const last = prev[prev.length - 1];
+                         if (last?.role === 'assistant') {
+                           return [...prev.slice(0, -1), { ...last, media_url: asset.audioUrl, type: 'voice' }];
+                         }
+                         return prev;
+                      });
+                   }
+                 } catch {}
               }
             }
           }

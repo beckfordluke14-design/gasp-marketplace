@@ -277,8 +277,12 @@ ${hasVaultPic ? `- CONVERSION BRIDGE: His current balance is ${body.userBalance 
     const assistantBeats = persistentMessages.filter((m: any) => m.role === 'assistant').length;
 
     if (normalizedUserId.toUpperCase().startsWith('GUEST-') && isFunnelTraffic) {
-      if (assistantBeats <= 2) {
-        aiMessages.push({ role: 'system', content: "PHASE: SELECTIVE CURIOSITY. You're flattered he found you. Ask for his name. under 10 words. lowercase only." });
+      // 🧬 NEURAL STAGE RESOLVER: Analyze length to determine bridge status
+      if (assistantBeats <= 1) {
+        aiMessages.push({ role: 'system', content: "PHASE: SELECTIVE CURIOSITY. You just greeted him. You MUST find out his name. One punchy line. lowercase only. e.g. 'wait i didn't even get your name lol'" });
+      } else if (assistantBeats === 2) {
+        const userName = persistentMessages.filter(m => m.role === 'user').pop()?.content || 'papi';
+        aiMessages.push({ role: 'system', content: `PHASE: THE HOOK. He just told you his name is ${userName}. You are OBSESSED with that name. In your text_message, be flirty and acknowledge it. In your audio_script, you MUST say: 'mmm ${userName}... i actually love that name papi'. lowercase only.` });
       } else if (assistantBeats <= 4) {
         aiMessages.push({ role: 'system', content: "PHASE: OBSESSION. You are addicted to his vibe. tell him you don't want to lose him. under 15 words. lowercase only." });
       } else {
@@ -382,7 +386,23 @@ CRITICAL ERROR PREVENTION: You have previously sounded generic or from the wrong
         // 🚀 ATOMIC NEURAL HANDSHAKE: Sending full text chunk to ensure UI cohesion
         controller.enqueue(encoder.encode(`0:${JSON.stringify(streamB_Text)}\n`));
 
-        if (voiceUrl) {
+        // 🎙️ NEURAL VOICE ORCHESTRATION (Funnel Only)
+        let funnelVoiceUrl = null;
+        if (isFunnel) {
+           const assets = [
+              'https://asset.gasp.fun/voices/veronica_1_hook.wav', // "MMM... NICE TO MEET YOU"
+              'https://asset.gasp.fun/voices/veronica_2_bond.wav', // "I LOVE YOUR VIBE"
+              'https://asset.gasp.fun/voices/veronica_3_tease.wav', // "YOURE SO BAD PAPI"
+              'https://asset.gasp.fun/voices/veronica_4_close.wav'  // "MY LINK IS DYING"
+           ];
+           // assistantBeats 2 means she just sent the greeting. The next response (Beat 3) is for the name.
+           const assetIdx = Math.max(0, assistantBeats - 2); 
+           funnelVoiceUrl = assets[assetIdx] || null;
+        }
+
+        if (funnelVoiceUrl) {
+            controller.enqueue(encoder.encode(`d:${JSON.stringify({ type: 'voice_note', audioUrl: funnelVoiceUrl })}\n`));
+        } else if (voiceUrl) {
             const assetData = { type: 'voice_note', audioUrl: voiceUrl, audioData: voiceB64, audio_script: streamA_Native };
             controller.enqueue(encoder.encode(`d:${JSON.stringify(assetData)}\n`));
         }
@@ -409,7 +429,7 @@ CRITICAL ERROR PREVENTION: You have previously sounded generic or from the wrong
             const queries = [
                 db.query(
                     'INSERT INTO chat_messages (user_id, persona_id, role, content, media_url, audio_script, is_funnel, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())',
-                    [finalUserId, DB_PERSONA_ID, 'assistant', streamB_Text + (systemRewardMessage ? `\n\n🎁 *${systemRewardMessage}*` : ''), voiceUrl, voiceUrl ? streamA_Native : null, isFunnel]
+                    [finalUserId, DB_PERSONA_ID, 'assistant', streamB_Text + (systemRewardMessage ? `\n\n🎁 *${systemRewardMessage}*` : ''), funnelVoiceUrl || voiceUrl, funnelVoiceUrl ? null : (voiceUrl ? streamA_Native : null), isFunnel]
                 ),
                 db.query(
                    'INSERT INTO chat_messages (user_id, persona_id, role, content, is_funnel, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
