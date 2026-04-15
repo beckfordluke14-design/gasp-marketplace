@@ -179,14 +179,15 @@ export default function FunnelView() {
                              media_url: vaultItems.length > 0 ? vaultItems[0].content_url : null
                            }]);
                            
-                           setTimeout(() => { setCurrentStepIdx(2); }, 3000);
-                        }, 1500);
-                     }, 1500);
-                  }, 2000);
-               }, 1000);
-            }, 800);
-         }, 2500); // ⏱️ Delete after 2.5s
-      }, 1500); 
+                           // 🛡️ FULL RESONANCE GUARD: 10s total for final transition
+                           setTimeout(() => { setCurrentStepIdx(2); }, 10000);
+                        }, 3000);
+                     }, 3000);
+                  }, 4000);
+               }, 2000);
+            }, 1500);
+         }, 4000); // ⏱️ Give them 4s to see the leak image
+      }, 5000); // ⏱️ Wait 5s for her closer voice note to play
     }
   }, [messages, isRecording]);
 
